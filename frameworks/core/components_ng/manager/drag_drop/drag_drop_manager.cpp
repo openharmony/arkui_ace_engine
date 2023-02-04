@@ -269,6 +269,7 @@ void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const 
 void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode)
 {
     preGridTargetFrameNode_ = frameNode;
+    draggedGridFrameNode_ = frameNode;
 }
 
 void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType)
@@ -292,20 +293,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     }
 
     if (dragFrameNode == preGridTargetFrameNode_) {
-        int32_t insertIndex = -1;
-        auto gridEventHub = dragFrameNode->GetEventHub<GridEventHub>();
-        if (gridEventHub) {
-            auto itemFrameNode = gridEventHub->FindGridItemByPosition(globalX, globalY);
-            if (!itemFrameNode && gridEventHub->CheckPostionInGrid(globalX, globalY)) {
-                insertIndex = gridEventHub->GetFrameNodeChildSize();
-            } else {
-                insertIndex = gridEventHub->GetGridItemIndex(itemFrameNode);
-            }
-        }
-        auto listEventHub = dragFrameNode->GetEventHub<ListEventHub>();
-        if (listEventHub) {
-            insertIndex = listEventHub->GetListItemIndexByPosition(globalX, globalY);
-        }
+        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
         FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, draggedIndex, insertIndex);
         return;
     }
@@ -328,54 +316,42 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
-    if (dragType == DragType::LIST) {
-        CHECK_NULL_VOID(dragFrameNode);
-        auto eventHub = dragFrameNode->GetEventHub<ListEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        int32_t insertIndex = eventHub->GetListItemIndexByPosition(globalX, globalY);
-        eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, true);
-        preGridTargetFrameNode_ = nullptr;
-        return;
-    }
-
-    // dragType == DragType::GRID
     if (!dragFrameNode) {
         // drag on one grid and drop on other area
-        if (preGridTargetFrameNode_) {
-            auto eventHub = preGridTargetFrameNode_->GetEventHub<GridEventHub>();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
+        if (draggedGridFrameNode_) {
+            if (dragType == DragType::GRID) {
+                auto eventHub = draggedGridFrameNode_->GetEventHub<GridEventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
+            } else {
+                auto eventHub = draggedGridFrameNode_->GetEventHub<ListEventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
+            }
         }
     } else {
-        auto eventHub = dragFrameNode->GetEventHub<GridEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
-        int32_t insertIndex = -1;
-        if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
-            insertIndex = eventHub->GetFrameNodeChildSize();
-        } else {
-            insertIndex = eventHub->GetGridItemIndex(itemFrameNode);
-        }
+        int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
         // drag and drop on the same grid
-        if (dragFrameNode == preGridTargetFrameNode_) {
-            eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, true);
+        if (dragFrameNode == draggedGridFrameNode_) {
+            FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::DROP, draggedIndex, insertIndex);
         } else {
             // drag and drop on different grid
-            eventHub->FireOnItemDrop(itemDragInfo, -1, insertIndex, true);
-            if (preGridTargetFrameNode_) {
-                auto preEventHub = preGridTargetFrameNode_->GetEventHub<GridEventHub>();
-                CHECK_NULL_VOID(preEventHub);
-                preEventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, true);
+            FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::DROP, -1, insertIndex);
+            if (draggedGridFrameNode_) {
+                FireOnItemDragEvent(
+                    draggedGridFrameNode_, dragType, itemDragInfo, DragEventType::DROP, draggedIndex, -1);
             }
         }
     }
 
     preGridTargetFrameNode_ = nullptr;
+    draggedGridFrameNode_ = nullptr;
 }
 
 void DragDropManager::onItemDragCancel()
 {
     preGridTargetFrameNode_ = nullptr;
+    draggedGridFrameNode_ = nullptr;
 }
 
 void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
@@ -420,6 +396,27 @@ void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, Dr
                 break;
         }
     }
+}
+
+int32_t DragDropManager::GetItemIndex(
+    const RefPtr<FrameNode>& frameNode, DragType dragType, float globalX, float globalY)
+{
+    CHECK_NULL_RETURN(frameNode, -1);
+    if (dragType == DragType::GRID) {
+        auto eventHub = frameNode->GetEventHub<GridEventHub>();
+        CHECK_NULL_RETURN(eventHub, -1);
+        auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
+        if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
+            return eventHub->GetFrameNodeChildSize();
+        } else {
+            return eventHub->GetGridItemIndex(itemFrameNode);
+        }
+    } else if (dragType == DragType::LIST) {
+        auto eventHub = frameNode->GetEventHub<ListEventHub>();
+        CHECK_NULL_RETURN(eventHub, -1);
+        return eventHub->GetListItemIndexByPosition(globalX, globalY);
+    }
+    return -1;
 }
 
 void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
