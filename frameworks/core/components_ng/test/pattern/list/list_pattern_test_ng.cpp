@@ -47,7 +47,7 @@ constexpr int32_t LANES_VALUE = 3;
 constexpr int32_t LANES_CONSTRAINT_CASE1_VALUE = 1;
 constexpr int32_t LANES_CONSTRAINT_CASE2_VALUE = 2;
 constexpr int32_t JUMP_INDEX = 5;
-constexpr int32_t JUMP_INDEX_SPECIAL_CASE1 = -1;
+constexpr int32_t JUMP_INDEX_SPECIAL_CASE1 = -2;
 constexpr int32_t JUMP_INDEX_SPECIAL_CASE2 = 100;
 constexpr float LIST_ITEM_WIDTH = 10.0f;
 constexpr float LIST_ITEM_HEIGHT = 30.0f;
@@ -2572,15 +2572,15 @@ HWTEST_F(ListPatternTestNg, ListPatternTest014, TestSize.Level1)
     
     /**
      * @tc.steps: step2. call function
-     * @tc.steps: case1: index < 0
+     * @tc.steps: case1: index == -1
      * @tc.expected: step2. equal.
      */
     listPattern->ScrollToIndex(-1);
-    EXPECT_NE(listPattern->jumpIndex_, -1);
+    EXPECT_EQ(listPattern->jumpIndex_, -1);
     
     /**
      * @tc.steps: step2. call function
-     * @tc.steps: case2: 0 < index < max
+     * @tc.steps: case2: index >= 0
      * @tc.expected: step2. equal.
      */
     listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
@@ -2588,13 +2588,13 @@ HWTEST_F(ListPatternTestNg, ListPatternTest014, TestSize.Level1)
     EXPECT_EQ(listPattern->jumpIndex_, 1);
     
     /**
-     * @tc.steps: step2. call function
-     * @tc.steps: case3: index > max
-     * @tc.expected: step2. equal.
+     * @tc.steps: step3. call function
+     * @tc.steps: case3: index < -2
+     * @tc.expected: step3. equal.
      */
     listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
-    listPattern->ScrollToIndex(LIST_ITEM_NUMBER + 1);
-    EXPECT_NE(listPattern->jumpIndex_, LIST_ITEM_NUMBER + 1);
+    listPattern->ScrollToIndex(-2);
+    EXPECT_NE(listPattern->jumpIndex_, -2);
 }
 
 /**
@@ -2630,7 +2630,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest015, TestSize.Level1)
      */
     listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
     listPattern->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_EQ(listPattern->jumpIndex_, LIST_ITEM_NUMBER);
+    EXPECT_EQ(listPattern->jumpIndex_, -1);
 
     /**
      * @tc.steps: step2. call function
@@ -2639,7 +2639,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest015, TestSize.Level1)
      */
     listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
     listPattern->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT);
-    EXPECT_EQ(listPattern->jumpIndex_, LIST_ITEM_NUMBER);
+    EXPECT_EQ(listPattern->jumpIndex_, -1);
 }
 
 /**
