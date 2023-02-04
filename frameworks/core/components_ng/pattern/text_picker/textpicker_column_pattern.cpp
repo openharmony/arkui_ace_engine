@@ -523,7 +523,6 @@ bool TextPickerColumnPattern::InnerHandleScroll(bool isDown)
     }
     SetCurrentIndex(currentIndex);
     FlushCurrentOptions();
-    isIndexChanged_ = true;
     return true;
 }
 
