@@ -13,18 +13,26 @@
  * limitations under the License.
  */
 
+#include <optional>
 #include <string>
 
+#include "interfaces/napi/kits/utils/napi_utils.h"
+#include "js_native_api.h"
+#include "js_native_api_types.h"
 #include "napi/native_api.h"
 #include "napi/native_engine/native_value.h"
 #include "napi/native_node_api.h"
-#include "interfaces/napi/kits/utils/napi_utils.h"
+
+#include "base/geometry/dimension.h"
+#include "base/geometry/size.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "frameworks/base/utils/measure_util.h"
 
 namespace OHOS::Ace::Napi {
-static int32_t HandleFontStyle(napi_value fontStyleNApi, napi_env env)
+static int32_t HandleIntStyle(napi_value fontStyleNApi, napi_env env)
 {
     size_t ret = 0;
     int32_t fontStyleInt = 0;
@@ -57,41 +65,6 @@ static int32_t HandleFontStyle(napi_value fontStyleNApi, napi_env env)
         return fontStyleInt;
     }
     return fontStyleInt;
-}
-
-static double HandleDoubleType(napi_value ParameterNApi, napi_env env)
-{
-    size_t ret = 0;
-    double Parameter = 0.0;
-    std::string ParameterStr;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, ParameterNApi, &valueType);
-    if (valueType == napi_number) {
-        napi_get_value_double(env, ParameterNApi, &Parameter);
-    } else if (valueType == napi_string) {
-        size_t ParameterLen = GetParamLen(ParameterNApi) + 1;
-        std::unique_ptr<char[]> ParameterTemp = std::make_unique<char[]>(ParameterLen);
-        napi_get_value_string_utf8(env, ParameterNApi, ParameterTemp.get(), ParameterLen, &ret);
-        ParameterStr = ParameterTemp.get();
-        Parameter = StringUtils::StringToDouble(ParameterStr);
-    } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (!ParseResourceParam(env, ParameterNApi, id, type, params)) {
-            LOGE("can not parse resource info from inout params.");
-            return Parameter;
-        }
-        if (!ParseString(id, type, params, ParameterStr)) {
-            LOGE("can not get message from resource manager.");
-            return Parameter;
-        }
-        Parameter = StringUtils::StringToDouble(ParameterStr);
-    } else {
-        LOGE("The parameter type is incorrect.");
-        return Parameter;
-    }
-    return Parameter;
 }
 
 static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
@@ -128,6 +101,43 @@ static std::string HandleStringType(napi_value ParameterNApi, napi_env env)
     return ParameterStr;
 }
 
+static std::optional<Dimension> HandleDimensionType(napi_value ParameterNApi, napi_env env)
+{
+    size_t ret = 0;
+    std::string ParameterStr;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, ParameterNApi, &valueType);
+    Dimension Parameter;
+    if (valueType == napi_number) {
+        double ParameterValue;
+        napi_get_value_double(env, ParameterNApi, &ParameterValue);
+        Parameter.SetValue(ParameterValue);
+        Parameter.SetUnit(DimensionUnit::VP);
+    } else if (valueType == napi_string) {
+        size_t ParameterLen = GetParamLen(ParameterNApi) + 1;
+        std::unique_ptr<char[]> ParameterTemp = std::make_unique<char[]>(ParameterLen);
+        napi_get_value_string_utf8(env, ParameterNApi, ParameterTemp.get(), ParameterLen, &ret);
+        ParameterStr = ParameterTemp.get();
+        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        if (!ParseResourceParam(env, ParameterNApi, id, type, params)) {
+            LOGE("can not parse resource info from inout params.");
+            return std::nullopt;
+        }
+        if (!ParseString(id, type, params, ParameterStr)) {
+            LOGE("can not get message from resource manager.");
+            return std::nullopt;
+        }
+        Parameter = StringUtils::StringToDimensionWithUnit(ParameterStr, DimensionUnit::VP);
+    } else {
+        return std::nullopt;
+    }
+    return Parameter;
+}
+
 static napi_value JSMeasureText(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
@@ -156,9 +166,9 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     } else {
         return nullptr;
     }
-    double fontSizeNum = HandleDoubleType(fontSizeNApi, env);
-    double letterSpace = HandleDoubleType(letterSpacingNApi, env);
-    int32_t fontStyle = HandleFontStyle(fontStyleNApi, env);
+    std::optional<Dimension> fontSizeNum = HandleDimensionType(fontSizeNApi, env);
+    std::optional<Dimension> letterSpace = HandleDimensionType(letterSpacingNApi, env);
+    int32_t fontStyle = HandleIntStyle(fontStyleNApi, env);
     std::string textContent = HandleStringType(textContentNApi, env);
     std::string fontWeight = HandleStringType(fontWeightNApi, env);
     std::string fontFamily = HandleStringType(fontFamilyNApi, env);
@@ -178,10 +188,106 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value result = nullptr;
+    napi_value argv = nullptr;
+    napi_value thisvar = nullptr;
+    void* data = nullptr;
+    napi_get_cb_info(env, info, &argc, &argv, &thisvar, &data);
+
+    napi_value textContentNApi = nullptr;
+    napi_value constraintWidthNApi = nullptr;
+    napi_value fontSizeNApi = nullptr;
+    napi_value fontStyleNApi = nullptr;
+    napi_value fontWeightNApi = nullptr;
+    napi_value fontFamilyNApi = nullptr;
+    napi_value letterSpacingNApi = nullptr;
+    napi_value textAlignNApi = nullptr;
+    napi_value textOverFlowNApi = nullptr;
+    napi_value maxLinesNApi = nullptr;
+    napi_value lineHeightNApi = nullptr;
+    napi_value baselineOffsetNApi = nullptr;
+    napi_value textCaseNApi = nullptr;
+
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    MeasureContext context;
+    if (valueType == napi_object) {
+        napi_get_named_property(env, argv, "textContent", &textContentNApi);
+        napi_get_named_property(env, argv, "constraintWidth", &constraintWidthNApi);
+        napi_get_named_property(env, argv, "fontSize", &fontSizeNApi);
+        napi_get_named_property(env, argv, "fontStyle", &fontStyleNApi);
+        napi_get_named_property(env, argv, "fontWeight", &fontWeightNApi);
+        napi_get_named_property(env, argv, "fontFamily", &fontFamilyNApi);
+        napi_get_named_property(env, argv, "letterSpacing", &letterSpacingNApi);
+        napi_get_named_property(env, argv, "textAlign", &textAlignNApi);
+        napi_get_named_property(env, argv, "overflow", &textOverFlowNApi);
+        napi_get_named_property(env, argv, "maxLines", &maxLinesNApi);
+        napi_get_named_property(env, argv, "lineHeight", &lineHeightNApi);
+        napi_get_named_property(env, argv, "baselineOffset", &baselineOffsetNApi);
+        napi_get_named_property(env, argv, "textCase", &textCaseNApi);
+    } else {
+        return nullptr;
+    }
+    std::optional<Dimension> fontSizeNum = HandleDimensionType(fontSizeNApi, env);
+    std::optional<Dimension> letterSpace = HandleDimensionType(letterSpacingNApi, env);
+    std::optional<Dimension> constraintWidth = HandleDimensionType(constraintWidthNApi, env);
+    std::optional<Dimension> lineHeight = HandleDimensionType(lineHeightNApi, env);
+    std::optional<Dimension> baselineOffset = HandleDimensionType(baselineOffsetNApi, env);
+    int32_t fontStyle = HandleIntStyle(fontStyleNApi, env);
+    int32_t textAlign = HandleIntStyle(textAlignNApi, env);
+    int32_t textOverFlow = HandleIntStyle(textOverFlowNApi, env);
+    int32_t maxlines = HandleIntStyle(maxLinesNApi, env);
+    int32_t textCase = HandleIntStyle(textCaseNApi, env);
+    std::string textContent = HandleStringType(textContentNApi, env);
+    std::string fontWeight = HandleStringType(fontWeightNApi, env);
+    std::string fontFamily = HandleStringType(fontFamilyNApi, env);
+    context.textContent = textContent;
+    context.constraintWidth = constraintWidth;
+    context.fontSize = fontSizeNum;
+    context.fontStyle = fontStyle;
+    context.fontWeight = fontWeight;
+    context.fontFamily = fontFamily;
+    context.letterSpacing = letterSpace;
+    context.textAlign = static_cast<TextAlign>(textAlign);
+    context.textOverlayFlow = static_cast<TextOverflow>(textOverFlow);
+    context.maxlines = maxlines;
+    context.lineHeight = lineHeight;
+    context.baselineOffset = baselineOffset;
+    context.textCase = static_cast<TextCase>(textCase);
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        return nullptr;
+    }
+    Size textSize = delegate->MeasureTextSize(context);
+
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return result;
+    }
+
+    napi_value resultArray[2] = { 0 };
+    napi_create_double(env, textSize.Width(), &resultArray[0]);
+    napi_create_double(env, textSize.Height(), &resultArray[1]);
+
+    napi_create_object(env, &result);
+    napi_set_named_property(env, result, "width", resultArray[0]);
+    napi_set_named_property(env, result, "height", resultArray[1]);
+
+    napi_value newResult = nullptr;
+    napi_escape_handle(env, scope, result, &newResult);
+    napi_close_escapable_handle_scope(env, scope);
+    return result;
+}
+
 static napi_value MeasureExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor measureDesc[] = {
         DECLARE_NAPI_FUNCTION("measureText", JSMeasureText),
+        DECLARE_NAPI_FUNCTION("measureTextSize", JSMeasureTextSize),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(measureDesc) / sizeof(measureDesc[0]), measureDesc));
     return exports;
@@ -202,4 +308,3 @@ extern "C" __attribute__((constructor)) void MeasureRegister()
     napi_module_register(&measureModule);
 }
 } // namespace OHOS::Ace::Napi
-

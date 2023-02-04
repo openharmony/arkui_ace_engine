@@ -1330,6 +1330,11 @@ double FrontendDelegateDeclarative::MeasureText(const MeasureContext& context)
     return MeasureUtil::MeasureText(context);
 }
 
+Size FrontendDelegateDeclarative::MeasureTextSize(const MeasureContext& context)
+{
+    return MeasureUtil::MeasureTextSize(context);
+}
+
 void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateDeclarative ShowToast.");

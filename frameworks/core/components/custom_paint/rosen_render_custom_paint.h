@@ -53,6 +53,7 @@ public:
     void FillText(const Offset& offset, const std::string& text, double x, double y) override;
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
     static double MeasureTextInner(const MeasureContext& context);
+    static Size MeasureTextSizeInner(const MeasureContext& context);
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;
