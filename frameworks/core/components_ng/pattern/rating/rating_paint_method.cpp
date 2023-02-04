@@ -18,11 +18,10 @@
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-constexpr Dimension PRESS_BORDER_RADIUS = 4.0_vp;
-constexpr uint32_t PRESS_COLOR = 0x19000000;
 constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
 
 CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -43,24 +42,25 @@ CanvasDrawFunction RatingPaintMethod::GetContentDrawFunction(PaintWrapper* paint
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_RETURN(ratingTheme, nullptr);
-
+    Color bgColor = isHover_ ? ratingTheme->GetHoverColor() : ratingTheme->GetPressColor();
     auto ratingRenderProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());
     const double drawScore = ratingRenderProperty->GetRatingScoreValue();
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(ratingTheme->GetStepSize());
     const int32_t touchStar = ratingRenderProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER);
     return [foregroundImagePainter, secondaryImagePainter, backgroundPainter, drawScore, stepSize, touchStar,
-               starNum = starNum_, offset, config = singleStarImagePaintConfig_](RSCanvas& canvas) {
+               starNum = starNum_, offset, config = singleStarImagePaintConfig_, bgColor,
+               pressBorderRadius = ratingTheme->GetFocusBorderRadius()](RSCanvas& canvas) {
         // step1: check if touch down any stars.
         const float singleStarWidth = config.dstRect_.Width();
         const float singleStarHeight = config.dstRect_.Height();
         if (touchStar >= 0 && touchStar <= starNum) {
-            RSBrush rsBrush(PRESS_COLOR);
+            RSBrush rsBrush(ToRSColor(bgColor));
             rsBrush.SetAntiAlias(true);
             const RSRect rsRect(offset.GetX() + singleStarWidth * static_cast<float>(touchStar), offset.GetY(),
                 offset.GetX() + singleStarWidth * static_cast<float>((touchStar + 1)),
                 offset.GetY() + singleStarHeight);
-            const RSRoundRect rsRoundRect(rsRect, static_cast<float>(PRESS_BORDER_RADIUS.ConvertToPx()),
-                static_cast<float>(PRESS_BORDER_RADIUS.ConvertToPx()));
+            const RSRoundRect rsRoundRect(rsRect, static_cast<float>(pressBorderRadius.ConvertToPx()),
+                static_cast<float>(pressBorderRadius.ConvertToPx()));
             canvas.Save();
             canvas.ClipRoundRect(rsRoundRect, RSClipOp::INTERSECT);
             canvas.DrawBackground(rsBrush);
