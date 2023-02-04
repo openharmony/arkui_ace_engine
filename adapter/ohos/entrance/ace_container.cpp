@@ -206,45 +206,43 @@ void AceContainer::InitializeFrontend()
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
-        if (!isSubContainer_) {
-            if (isCardContainer_) {
-                LOGI("Init Form Frontend");
-                frontend_ = AceType::MakeRefPtr<FormFrontendDeclarative>();
-                auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
-                auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
-                RefPtr<Framework::JsEngine> jsEngine;
-                if (GetSettings().usingSharedRuntime) {
-                    jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-                } else {
-                    jsEngine = loader.CreateJsEngine(instanceId_);
-                }
-                jsEngine->AddExtraNativeObject("ability", aceAbility.get());
-                EngineHelper::AddEngine(instanceId_, jsEngine);
-                cardFrontend->SetJsEngine(jsEngine);
-                cardFrontend->SetPageProfile(pageProfile_);
-                cardFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
-                cardFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
-                // Card front
-                cardFrontend->SetRunningCardId(0); // ArkTsCard TODO: nodeId, Host->FMS->FRS->innersdk
-                cardFrontend->SetCardFrontend(true);
+        if (isCardContainer_) {
+            LOGI("Init Form Frontend");
+            frontend_ = AceType::MakeRefPtr<FormFrontendDeclarative>();
+            auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
+            RefPtr<Framework::JsEngine> jsEngine;
+            if (GetSettings().usingSharedRuntime) {
+                jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
             } else {
-                frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
-                auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-                auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
-                RefPtr<Framework::JsEngine> jsEngine;
-                if (GetSettings().usingSharedRuntime) {
-                    jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-                    LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
-                } else {
-                    jsEngine = loader.CreateJsEngine(instanceId_);
-                }
-                jsEngine->AddExtraNativeObject("ability", aceAbility.get());
-                EngineHelper::AddEngine(instanceId_, jsEngine);
-                declarativeFrontend->SetJsEngine(jsEngine);
-                declarativeFrontend->SetPageProfile(pageProfile_);
-                declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
-                declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+                jsEngine = loader.CreateJsEngine(instanceId_);
             }
+            jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+            EngineHelper::AddEngine(instanceId_, jsEngine);
+            cardFrontend->SetJsEngine(jsEngine);
+            cardFrontend->SetPageProfile(pageProfile_);
+            cardFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+            cardFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+            // Card front
+            cardFrontend->SetRunningCardId(0); // ArkTsCard TODO: nodeId, Host->FMS->FRS->innersdk
+            cardFrontend->SetCardFrontend(true);
+        } else if (!isSubContainer_) {
+            frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
+            auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary());
+            RefPtr<Framework::JsEngine> jsEngine;
+            if (GetSettings().usingSharedRuntime) {
+                jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+                LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
+            } else {
+                jsEngine = loader.CreateJsEngine(instanceId_);
+            }
+            jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+            EngineHelper::AddEngine(instanceId_, jsEngine);
+            declarativeFrontend->SetJsEngine(jsEngine);
+            declarativeFrontend->SetPageProfile(pageProfile_);
+            declarativeFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+            declarativeFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
         } else {
             frontend_ = OHOS::Ace::Platform::AceContainer::GetContainer(parentId_)->GetFrontend();
             return;

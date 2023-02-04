@@ -38,6 +38,9 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
         if (uri.compare(0, 1, "/") == 0) {
             return uri.substr(1) + suffix;
         }
+        if (uri.compare(0, 2, "./") == 0) {
+            return uri.substr(2) + suffix;
+        }
     }
 
     LOGE("can't find this page %{private}s path", uri.c_str());

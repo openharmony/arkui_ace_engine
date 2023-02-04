@@ -63,15 +63,13 @@ namespace OHOS::Ace {
 
 class ACE_EXPORT UIContent {
 public:
-    static std::shared_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime,
+    static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime,
                                              bool isCard);
     static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
     static void ShowDumpHelp(std::vector<std::string>& info);
 
     virtual ~UIContent() = default;
-
-    virtual void SetIsCard(bool isCard) {}
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
@@ -120,8 +118,8 @@ public:
     }
 
     virtual void ProcessFormUpdate(const std::string& data) = 0;
-    virtual void SetFormWidth(float width) = 0;
-    virtual void SetFormHeight(float height) = 0;
+    virtual void SetFormWidth(const float width) = 0;
+    virtual void SetFormHeight(const float height) = 0;
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
 

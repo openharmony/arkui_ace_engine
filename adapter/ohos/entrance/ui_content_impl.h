@@ -45,11 +45,6 @@ public:
         DestroyCallback();
     }
 
-    void SetIsCard(bool isCard) override
-    {
-        isCard_ = isCard;
-    }
-
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
     void Foreground() override;

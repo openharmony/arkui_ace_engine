@@ -16,9 +16,15 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
 
+#include "form_renderer.h"
+
+#include "ability_context.h"
+#include "js_runtime.h"
+#include "runtime.h"
+#include "ui_content.h"
+
 #include "form_renderer_delegate_interface.h"
 #include "form_renderer_dispatcher_impl.h"
-#include "ui_content.h"
 
 namespace OHOS {
 namespace Ace {
@@ -28,8 +34,14 @@ namespace Ace {
  */
 class FormRenderer {
 public:
-    FormRenderer() = default;
+    FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+                 const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
     ~FormRenderer() = default;
+
+    void AddForm(const std::string& formUrl, const std::string& formdata);
+    void UpdateForm(const std::string& formdata);
+
+    void Destroy();
     /**
      * @brief OnActionEvent.
      * @param action The action.
@@ -37,9 +49,13 @@ public:
     int32_t OnActionEvent(const std::string& action);
 
 private:
+    std::string formUrl_;
+    std::string formData_;
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
+    std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     std::shared_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
     std::shared_ptr<IFormRendererDelegate> formRendererDelegate_;
-    std::shared_ptr<UIContent> uIContent_;
+    std::unique_ptr<UIContent> uiContent_;
 };
 }  // namespace Ace
 }  // namespace OHOS
