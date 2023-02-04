@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 
 #include <algorithm>
+#include <cstdint>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -265,8 +266,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     // Layout items behind current item.
-    OffsetF preOffset = (axis == Axis::HORIZONTAL ? OffsetF(-itemSpace + currentOffset_, 0)
-                                                  : OffsetF(0, -itemSpace + currentOffset_));
+    OffsetF preOffset =
+        (axis == Axis::HORIZONTAL ? OffsetF(-itemSpace + currentOffset_, 0) : OffsetF(0, -itemSpace + currentOffset_));
     for (const auto& index : preItems) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {
@@ -281,8 +282,7 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     // Layout items after current item.
-    OffsetF nextOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0)
-                                                   : OffsetF(0, currentOffset_));
+    OffsetF nextOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0) : OffsetF(0, currentOffset_));
     for (const auto& index : nextItems) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!wrapper) {
@@ -313,24 +313,40 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     // Adjust offset when looped.
-    if (!isLoop_) {
+    if (!isLoop_ || (totalCount_ <= displayCount)) {
         return;
     }
-    if (currentIndex_ == 0 && GreatNotEqual(currentOffset_, 0.0)) {
-        auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_ - 1);
-        if (lastWrapper) {
-            auto geometryNode = lastWrapper->GetGeometryNode();
-            auto frameSize = geometryNode->GetMarginFrameSize();
-            preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
-            geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
-            lastWrapper->Layout();
+    LOGD("current index is %{public}d, and current offset is %{public}f", currentIndex_, currentOffset_);
+    if (currentIndex_ <= (displayCount_ - 1) && GreatOrEqual(currentOffset_, 0.0)) {
+        for (int32_t index = 0; index < displayCount_; ++index) {
+            if ((totalCount_ - index - 1) == currentIndex_) {
+                break;
+            }
+            auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_ - index - 1);
+            if (lastWrapper) {
+                auto geometryNode = lastWrapper->GetGeometryNode();
+                auto frameSize = geometryNode->GetMarginFrameSize();
+                preOffset -=
+                    (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
+                geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
+                lastWrapper->Layout();
+                preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
+            }
         }
-    } else if (currentIndex_ == totalCount_ - 1 && LessNotEqual(currentOffset_, 0.0)) {
-        auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-        if (firstWrapper) {
-            auto geometryNode = firstWrapper->GetGeometryNode();
-            geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
-            firstWrapper->Layout();
+    } else if (currentIndex_ >= (totalCount_ - displayCount_) && LessOrEqual(currentOffset_, 0.0)) {
+        for (int32_t index = 0; index < displayCount_; ++index) {
+            if (index == currentIndex_) {
+                break;
+            }
+            auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (firstWrapper) {
+                auto geometryNode = firstWrapper->GetGeometryNode();
+                auto frameSize = geometryNode->GetMarginFrameSize();
+                geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
+                firstWrapper->Layout();
+                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width() + itemSpace, 0)
+                                                        : OffsetF(0, frameSize.Height() + itemSpace));
+            }
         }
     }
 }
