@@ -578,12 +578,14 @@ void VideoPattern::AddPreviewNodeIfNeeded()
         }
     }
 
+    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     if (!isExist) {
         auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
         auto posterNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(posterNode);
         auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();
         posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+        posterLayoutProperty->UpdateImageFit(imageFit);
         host->AddChild(posterNode);
         posterNode->MarkModifyDone();
     }
