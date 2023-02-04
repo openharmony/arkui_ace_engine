@@ -50,7 +50,9 @@ void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, co
     // Init button default style
     buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
     renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
+    if (buttonLayoutProperty->HasLabel()) {
+        buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
+    }
 }
 
 void ButtonPattern::InitButtonLabel()
