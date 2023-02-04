@@ -27,6 +27,7 @@
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/memory/referenced.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
@@ -444,6 +445,7 @@ void TextFieldPattern::UpdateCaretOffsetByEvent()
     if (textEditingValue_.caretPosition == 0) {
         caretRect_.SetLeft(textRect_.GetX());
         caretRect_.SetTop(textRect_.GetY());
+        UpdateSelection(0, 0);
         return;
     }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
@@ -740,7 +742,7 @@ bool TextFieldPattern::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetric
     }
 
     char16_t prevChar = 0;
-    if (static_cast<size_t>(extent) <= text.length()) {
+    if (static_cast<size_t>(extent) <= textEditingValue_.GetWideText().length()) {
         prevChar = text[std::max(0, extent - 1)];
     }
 
@@ -767,7 +769,7 @@ bool TextFieldPattern::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetric
 
     const auto& textBox = *boxes.begin();
     // Caret is within width of the downstream glyphs.
-    if (prevChar == NEWLINE_CODE) {
+    if (newLineInserted_) {
         result.offset.SetX(MakeEmptyOffset().GetX());
         result.offset.SetY(textBox.rect_.GetBottom() + GetPaddingTop());
         result.height = textBox.rect_.GetHeight();
@@ -1055,9 +1057,9 @@ void TextFieldPattern::HandleOnRedoAction()
 void TextFieldPattern::HandleOnSelectAll()
 {
     LOGI("TextFieldPattern::HandleOnSelectAll");
-    auto textSize = GetEditingValue().GetWideText().length();
-    UpdateSelection(0, static_cast<int32_t>(textSize));
-    textEditingValue_.caretPosition = static_cast<int32_t>(textEditingValue_.text.length());
+    auto textSize = static_cast<int32_t>(GetEditingValue().GetWideText().length());
+    UpdateSelection(0, textSize);
+    textEditingValue_.caretPosition = textSize;
     selectionMode_ = SelectionMode::SELECT_ALL;
     caretUpdateType_ = CaretUpdateType::EVENT;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1124,6 +1126,7 @@ void TextFieldPattern::HandleOnPaste()
             return;
         }
         auto value = textfield->GetEditingValue();
+        auto valueLength = textfield->GetEditingValue().GetWideText().length();
         int32_t start = 0;
         int32_t end = 0;
         if (textfield->InSelectMode()) {
@@ -1133,13 +1136,15 @@ void TextFieldPattern::HandleOnPaste()
             start = value.caretPosition;
             end = value.caretPosition;
         }
-        auto pasteData = data;
-        if (data.length() + value.text.length() > textfield->GetMaxLength()) {
-            pasteData = data.substr(0, textfield->GetMaxLength() - value.text.length());
+        std::wstring pasteData;
+        if (data.length() + valueLength > textfield->GetMaxLength()) {
+            pasteData = StringUtils::ToWstring(data).substr(0, textfield->GetMaxLength() - valueLength);
+        } else {
+            pasteData = StringUtils::ToWstring(data);
         }
-        value.text = value.GetValueBeforePosition(start) + pasteData + value.GetValueAfterPosition(end);
-        textfield->UpdateEditingValue(
-            value.text, start + static_cast<int32_t>(StringUtils::Str8ToStr16(data).length()));
+        value.text =
+            value.GetValueBeforePosition(start) + StringUtils::ToString(pasteData) + value.GetValueAfterPosition(end);
+        textfield->UpdateEditingValue(value.text, start + static_cast<int32_t>(StringUtils::ToWstring(data).length()));
         LOGI("Paste value %{private}s", value.text.c_str());
         textfield->UpdateSelection(start, start);
         textfield->SetEditingValueToProperty(value.text);
@@ -1750,7 +1755,7 @@ void TextFieldPattern::InitEditingValueText(std::string content)
 
 void TextFieldPattern::InitCaretPosition(std::string content)
 {
-    textEditingValue_.caretPosition = static_cast<int32_t>(content.length());
+    textEditingValue_.caretPosition = static_cast<int32_t>(StringUtils::ToWstring(content).length());
 }
 
 void TextFieldPattern::InitMouseEvent()
@@ -2114,8 +2119,9 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         textEditingValue_.text =
             textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
     }
-
-    textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(insertValue.length()));
+    newLineInserted_ = false;
+    textEditingValue_.CursorMoveToPosition(
+        caretStart + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
     SetEditingValueToProperty(textEditingValue_.text);
     operationRecords_.emplace_back(textEditingValue_);
     caretUpdateType_ = CaretUpdateType::INPUT;
@@ -2370,6 +2376,7 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (IsTextArea()) {
         if (GetInputFilter() != "\n") {
             InsertValue("\n");
+            newLineInserted_ = true;
         }
         return;
     }
