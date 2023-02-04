@@ -59,6 +59,7 @@ void MenuPattern::OnModifyDone()
     borderRadius.SetRadius(theme->GetPopupRRectSize());
     renderContext->UpdateBorderRadius(borderRadius);
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    renderContext->SetClipToBounds(true);
 }
 
 // close menu on touch up
