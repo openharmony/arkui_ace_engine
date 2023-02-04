@@ -143,6 +143,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         ScopedViewStackProcessor builderViewStackProcessor;
         tabBarParam.ExecuteBuilder();
         auto builderNode = ViewStackProcessor::GetInstance()->Finish();
+        if (static_cast<int32_t>(columnNode->GetChildren().size()) != 0) {
+            columnNode->Clean();
+        }
         builderNode->MountToParent(columnNode);
         tabBarNode->ReplaceChild(tabsNode->GetBuilderByContentId(tabContentId, columnNode), columnNode);
         tabBarPattern->AddTabBarItemType(tabContentId, true);
