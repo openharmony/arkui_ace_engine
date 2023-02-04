@@ -25,10 +25,10 @@ class ACE_EXPORT RatingPaintMethod : public NodePaintMethod {
 public:
     RatingPaintMethod(const RefPtr<CanvasImage>& foregroundImageCanvas, const RefPtr<CanvasImage>& secondaryImageCanvas,
         const RefPtr<CanvasImage>& backgroundImageCanvas, const ImagePaintConfig& singleStarImagePaintConfig,
-        int32_t starNum)
+        int32_t starNum, bool isHover)
         : foregroundImageCanvas_(foregroundImageCanvas), secondaryImageCanvas_(secondaryImageCanvas),
           backgroundImageCanvas_(backgroundImageCanvas), singleStarImagePaintConfig_(singleStarImagePaintConfig),
-          starNum_(starNum)
+          starNum_(starNum), isHover_(isHover)
     {}
     ~RatingPaintMethod() override = default;
 
@@ -41,10 +41,10 @@ private:
 
     ImagePaintConfig singleStarImagePaintConfig_;
     int32_t starNum_ = 0;
+    bool isHover_;
 
     ACE_DISALLOW_COPY_AND_MOVE(RatingPaintMethod);
 };
 
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RATING_RATING_PAINT_METHOD_H
