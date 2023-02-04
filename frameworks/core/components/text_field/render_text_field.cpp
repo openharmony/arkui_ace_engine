@@ -34,6 +34,7 @@
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
+#include "core/common/ime/text_input_type.h"
 #include "core/common/text_field_manager.h"
 #include "core/components/stack/stack_element.h"
 #include "core/components/text/text_utils.h"
@@ -66,6 +67,8 @@ constexpr double FIFTY_PERCENT = 0.5;
 constexpr Dimension OFFSET_FOCUS = 4.0_vp;
 constexpr Dimension DEFLATE_RADIUS_FOCUS = 3.0_vp;
 
+const std::string DIGIT_BLACK_LIST = "[^\\d.\\-e]+";
+const std::string PHONE_BLACK_LIST = "[^\\d\\-\\+\\*\\#]+";
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "[\\w.]";
@@ -80,6 +83,7 @@ const std::string NEW_LINE = "\n";
 #define KEY_META_OR_CTRL_RIGHT KeyCode::KEY_CTRL_RIGHT
 #endif
 
+#if !defined(PREVIEW)
 void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
 {
     int32_t valuePtr = 0;
@@ -101,16 +105,17 @@ void RemoveErrorTextFromValue(const std::string& value, const std::string& error
     }
     result += value.substr(valuePtr);
 }
+#endif
 
-void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue)
+void GetKeyboardFilter(TextInputType keyboard, std::string& keyboardFilterValue, bool useBlackList)
 {
     switch (keyboard) {
         case TextInputType::NUMBER: {
-            keyboardFilterValue = DIGIT_WHITE_LIST;
+            keyboardFilterValue = useBlackList ? DIGIT_BLACK_LIST : DIGIT_WHITE_LIST;
             break;
         }
         case TextInputType::PHONE: {
-            keyboardFilterValue = PHONE_WHITE_LIST;
+            keyboardFilterValue = useBlackList ? PHONE_BLACK_LIST : PHONE_WHITE_LIST;
             break;
         }
         case TextInputType::EMAIL_ADDRESS: {
@@ -446,8 +451,7 @@ void RenderTextField::UpdateCaretInfoToController()
 #if defined(ENABLE_STANDARD_INPUT)
     auto globalOffset = GetGlobalOffset();
     auto windowOffset = context->GetDisplayWindowRectInfo().GetOffset();
-    MiscServices::CursorInfo cursorInfo {
-        .left = caretRect_.Left() + globalOffset.GetX() + windowOffset.GetX(),
+    MiscServices::CursorInfo cursorInfo { .left = caretRect_.Left() + globalOffset.GetX() + windowOffset.GetX(),
         .top = caretRect_.Top() + globalOffset.GetY() + windowOffset.GetY(),
         .width = caretRect_.Width(),
         .height = caretRect_.Height() };
@@ -1538,16 +1542,58 @@ bool RenderTextField::FilterWithRegex(std::string& valueToUpdate, const std::str
     if (!needToEscape) {
         escapeFilter = filter;
     }
-    std::regex filterRegex(escapeFilter);
-    auto errorText = std::regex_replace(valueToUpdate, filterRegex, "");
-    if (!errorText.empty()) {
-        std::string result;
-        RemoveErrorTextFromValue(valueToUpdate, errorText, result);
-        valueToUpdate = result;
-        if (onError_) {
-            onError_(errorText);
+#if defined(PREVIEW)
+    if (keyboard_ == TextInputType::EMAIL_ADDRESS) {
+        std::string tmpValue;
+        std::string errorText;
+        std::string checkedList = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_@.";
+        for (auto value : valueToUpdate) {
+            if (checkedList.find(value) != std::string::npos) {
+                tmpValue += value;
+            } else {
+                errorText += value;
+            }
         }
-        return true;
+        valueToUpdate = tmpValue;
+        if (!errorText.empty()) {
+            if (onError_) {
+                onError_(errorText);
+            }
+            return true;
+        }
+        return false;
+    }
+#else
+    // Specialized processed for Email because of regex.
+    if (keyboard_ == TextInputType::EMAIL_ADDRESS || keyboard_ == TextInputType::URL) {
+        std::regex filterRegex(escapeFilter);
+        auto errorText = regex_replace(valueToUpdate, filterRegex, "");
+        if (!errorText.empty()) {
+            std::string result;
+            RemoveErrorTextFromValue(valueToUpdate, errorText, result);
+            valueToUpdate = result;
+            if (onError_) {
+                onError_(errorText);
+            }
+            return true;
+        }
+    }
+#endif
+    if (keyboard_ == TextInputType::NUMBER || keyboard_ == TextInputType::PHONE) {
+        GetKeyboardFilter(keyboard_, escapeFilter, true);
+        std::wregex filterRegex(StringUtils::ToWstring(escapeFilter));
+        std::wstring wValueToUpdate = StringUtils::ToWstring(valueToUpdate);
+        auto manipulateText = std::regex_replace(wValueToUpdate, filterRegex, L"");
+        if (manipulateText.length() != wValueToUpdate.length()) {
+            valueToUpdate = StringUtils::ToString(manipulateText);
+            if (onError_) {
+                GetKeyboardFilter(keyboard_, escapeFilter, false);
+                std::regex filterRegex(escapeFilter);
+                auto errorText = regex_replace(valueToUpdate, filterRegex, "");
+                onError_(errorText);
+            }
+            return true;
+        }
     }
     return false;
 }
@@ -1561,7 +1607,7 @@ void RenderTextField::EditingValueFilter(TextEditingValue& valueToUpdate)
 void RenderTextField::KeyboardEditingValueFilter(TextEditingValue& valueToUpdate)
 {
     std::string keyboardFilterValue;
-    GetKeyboardFilter(keyboard_, keyboardFilterValue);
+    GetKeyboardFilter(keyboard_, keyboardFilterValue, false);
     if (keyboardFilterValue.empty()) {
         return;
     }
@@ -1599,7 +1645,7 @@ void RenderTextField::KeyboardEditingValueFilter(TextEditingValue& valueToUpdate
         if (!textChanged) {
             return;
         }
-        valueToUpdate.text = strBeforeSelection + strBeforeSelection + strBeforeSelection;
+        valueToUpdate.text = strBeforeSelection + strInSelection + strAfterSelection;
         if (valueToUpdate.selection.baseOffset > valueToUpdate.selection.extentOffset) {
             valueToUpdate.selection.Update(static_cast<int32_t>(strBeforeSelection.length() + strInSelection.length()),
                 static_cast<int32_t>(strBeforeSelection.length()));
@@ -1619,7 +1665,7 @@ void RenderTextField::UpdateInsertText(std::string insertValue)
 bool RenderTextField::NeedToFilter()
 {
     std::string keyboardFilterValue;
-    GetKeyboardFilter(keyboard_, keyboardFilterValue);
+    GetKeyboardFilter(keyboard_, keyboardFilterValue, false);
     return !keyboardFilterValue.empty() || !inputFilter_.empty();
 }
 
@@ -1652,6 +1698,10 @@ void RenderTextField::UpdateEditingValue(const std::shared_ptr<TextEditingValue>
     ContainerScope scope(instanceId_);
     if (!value) {
         LOGE("the value is nullptr");
+        return;
+    }
+    if (static_cast<uint32_t>(value->GetWideText().length()) > maxLength_) {
+        LOGW("Max length reached");
         return;
     }
 
