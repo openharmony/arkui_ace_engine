@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/animation/animator.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,7 +48,6 @@ void PagePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
-    host->GetRenderContext()->UpdateBackgroundColor(PipelineContext::GetCurrentContext()->GetAppBgColor());
 }
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
@@ -71,7 +71,45 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
-    return renderContext->TriggerPageTransition(type, onFinish);
+    auto effect = FindPageTransitionEffect(type);
+    pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
+    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        if (sharedFinish == pattern->pageTransitionFinish_) {
+            // ensure this is exactly the finish callback saved in pagePattern,
+            // otherwise means new pageTransition started
+            pattern->FirePageTransitionFinish();
+        }
+    };
+    if (effect && effect->GetUserCallback()) {
+        if (!controller_) {
+            controller_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+        }
+        if (!controller_->IsStopped()) {
+            controller_->Finish();
+        }
+        controller_->ClearInterpolators();
+        RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
+                                  ? RouteType::POP
+                                  : RouteType::PUSH;
+        auto floatAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(0.0f, 1.0f, effect->GetCurve());
+        floatAnimation->AddListener(
+            [routeType, handler = effect->GetUserCallback(), weak = WeakClaim(this)](const float& progress) {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                handler(routeType, progress);
+            });
+        if (effect->GetDelay() >= 0) {
+            controller_->SetStartDelay(effect->GetDelay());
+        }
+        controller_->SetDuration(effect->GetDuration());
+        controller_->AddInterpolator(floatAnimation);
+        controller_->AddStopListener(wrappedOnFinish);
+        controller_->Forward();
+        return renderContext->TriggerPageTransition(type, nullptr);
+    }
+    return renderContext->TriggerPageTransition(type, wrappedOnFinish);
 }
 
 void PagePattern::ProcessHideState()
@@ -142,33 +180,29 @@ void PagePattern::ReloadPage()
 RefPtr<PageTransitionEffect> PagePattern::FindPageTransitionEffect(PageTransitionType type)
 {
     RefPtr<PageTransitionEffect> result;
-    while (!pageTransitionEffects_.empty()) {
-        auto effect = pageTransitionEffects_.top();
+    for (auto iter = pageTransitionEffects_.rbegin(); iter != pageTransitionEffects_.rend(); ++iter) {
+        auto effect = *iter;
         if (effect->CanFit(type)) {
             result = effect;
             break;
         }
-        pageTransitionEffects_.pop();
     }
-    ClearPageTransitionEffect();
     return result;
 }
 
 void PagePattern::ClearPageTransitionEffect()
 {
-    while (!pageTransitionEffects_.empty()) {
-        pageTransitionEffects_.pop();
-    }
+    pageTransitionEffects_.clear();
 }
 
 RefPtr<PageTransitionEffect> PagePattern::GetTopTransition() const
 {
-    return pageTransitionEffects_.empty() ? nullptr : pageTransitionEffects_.top();
+    return pageTransitionEffects_.empty() ? nullptr : pageTransitionEffects_.back();
 }
 
 void PagePattern::AddPageTransition(const RefPtr<PageTransitionEffect>& effect)
 {
-    pageTransitionEffects_.emplace(effect);
+    pageTransitionEffects_.emplace_back(effect);
 }
 
 void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Framework::AnimatorInfo>& animatorInfo)
@@ -196,6 +230,26 @@ void PagePattern::SetFirstBuildCallback(std::function<void()>&& buildCallback)
     } else if (buildCallback) {
         buildCallback();
     }
+}
+
+void PagePattern::FirePageTransitionFinish()
+{
+    if (pageTransitionFinish_) {
+        auto onFinish = *pageTransitionFinish_;
+        pageTransitionFinish_ = nullptr;
+        if (onFinish) {
+            onFinish();
+        }
+    }
+}
+
+void PagePattern::StopPageTransition()
+{
+    if (controller_ && !controller_->IsStopped()) {
+        controller_->Finish();
+        return;
+    }
+    FirePageTransitionFinish();
 }
 
 } // namespace OHOS::Ace::NG
