@@ -110,6 +110,7 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
         yearColumnNode->MountToParent(stackYearNode);
         auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackYearNode->MountToParent(dateNode);
     }
     if (!hasMonthNode) {
@@ -120,6 +121,7 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
         monthColumnNode->MountToParent(stackMonthNode);
         auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMonthNode->MountToParent(dateNode);
     }
     if (!hasDayNode) {
@@ -130,6 +132,7 @@ void DatePickerModelNG::CreateDatePicker(RefPtr<PickerTheme> pickerTheme)
         dayColumnNode->MountToParent(stackDayNode);
         auto layoutProperty = stackDayNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackDayNode->MountToParent(dateNode);
     }
     stack->Push(dateNode);

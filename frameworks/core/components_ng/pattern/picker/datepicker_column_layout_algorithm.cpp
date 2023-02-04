@@ -38,16 +38,12 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
-    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
-    CHECK_NULL_VOID(stackNode);
-    auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
-    CHECK_NULL_VOID(pickerNode);
-    auto layoutConstraint = stackNode->GetLayoutProperty()->GetLayoutConstraint();
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
     auto width = layoutConstraint->parentIdealSize.Width();
-    auto children = pickerNode->GetChildren();
     float pickerWidth = 0.0f;
     if (width.has_value()) {
-        pickerWidth = width.value() / static_cast<float>(children.size());
+        pickerWidth = width.value();
     } else {
         pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
     }
