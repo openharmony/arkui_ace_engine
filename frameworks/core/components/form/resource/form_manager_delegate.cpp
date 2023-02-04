@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <iomanip>
+#include <memory>
 #include <sstream>
 
 #include "base/log/log.h"
@@ -137,9 +138,11 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
-    auto surfaceServiceClient = FormSurfaceServiceClient::GetInstance();
+    if (renderDelegate_ == nullptr) {
+        renderDelegate_ = std::make_shared<FormRendererDelegateImpl>();
+    }
     // 在OHOS::AppExecFwk::Constants中加类似参数
-    wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", surfaceServiceClient->AsObject());
+    wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", renderDelegate_->AsObject());
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -163,7 +166,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         formSurfaceCallbackClient_ = std::make_shared<FormSurfaceCallbackClient>();
     }
     formSurfaceCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
-    surfaceServiceClient->AddForm(formSurfaceCallbackClient_, formJsInfo.formId);
+    renderDelegate_->RegisterSurfaceCreateCallback(formSurfaceCallbackClient_, formJsInfo.formId);
 
     runningCardId_ = formJsInfo.formId;
     if (info.id == formJsInfo.formId) {

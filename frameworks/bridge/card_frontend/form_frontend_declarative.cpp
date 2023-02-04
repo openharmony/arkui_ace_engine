@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 
 namespace OHOS::Ace {
 namespace {
-const char MANIFEST_JSON[] = "manifest.json";
 const char FILE_TYPE_BIN[] = ".abc";
 } // namespace
 
@@ -45,19 +44,6 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
 
     LOGE("can't find this page %{private}s path", uri.c_str());
     return "";
-}
-
-void FormFrontendDeclarative::ParseManifest() const
-{
-    std::call_once(onceFlag_, [this]() {
-        std::string jsonContent;
-        if (!Framework::GetAssetContentImpl(assetManager_, MANIFEST_JSON, jsonContent)) {
-            LOGE("Kee FormFrontendDeclarative::ParseManifest RunPage parse manifest.json failed");
-            EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
-            return;
-        }
-        manifestParser_->Parse(jsonContent);
-    });
 }
 
 void FormFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, const std::string& params)
@@ -90,7 +76,7 @@ void FormFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, co
 
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)
 {
-    LOGI("Kee FormFrontendDeclarative::UpdateData dataList = %{public}s", dataList.c_str());
+    LOGI("FormFrontendDeclarative::UpdateData dataList = %{public}s", dataList.c_str());
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this), dataList] {

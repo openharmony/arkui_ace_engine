@@ -14,6 +14,8 @@
  */
 
 #include "form_renderer.h"
+#include "form_constants.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace Ace {
@@ -29,35 +31,35 @@ FormRenderer::FormRenderer(
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
 }
 
-void FormRenderer::AddForm(const std::string& formUrl, const std::string& formData)
+void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    if (formUrl.empty()) {
-        return;
-    }
-    formUrl_ = formUrl;
-    formData_ = formData;
-
     if (uiContent_) {
-        uiContent_->Initialize(nullptr, formUrl_, nullptr);
+        auto width = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 100.0f);
+        auto height = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 100.0f);
+        uiContent_->SetFormWidth(width);
+        uiContent_->SetFormHeight(height);
+        uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
 
-        uiContent_->Foreground();
         auto rsSurfaceNode = uiContent_->GetCardRootNode();
         if (rsSurfaceNode == nullptr) {
             return;
         }
-        // should set size
-        // rsSurfaceNode->SetBounds(0.0f, 0.0f, uiContent->GetFormWidth(), uiContent->GetFormHeight());
-        // uiContent->SetActionEventHandler(actionEventHandler);
+        rsSurfaceNode->SetBounds(0.0f, 0.0f, width, height);
+
+        sptr<IRemoteObject> proxy = want.GetRemoteObject("ohos.extra.param.key.process_on_add_surface");
+        sptr<IFormRendererDelegate> formRendererDelegate = iface_cast<IFormRendererDelegate>(proxy);
+        if (formRendererDelegate == nullptr) {
+            return;
+        }
+        formRendererDelegate_ = formRendererDelegate;
+        formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, want);
+        uiContent_->Foreground();
     }
 }
 
-void FormRenderer::UpdateForm(const std::string& formData)
+void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    if (formData.empty() || (formData_ == formData)) {
-        return;
-    }
-    formData_ = formData;
-    uiContent_->ProcessFormUpdate(formData);
+    uiContent_->ProcessFormUpdate(formJsInfo.formData);
 }
 
 void FormRenderer::Destroy() {}

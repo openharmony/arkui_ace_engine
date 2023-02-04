@@ -19,16 +19,18 @@
 #include "form_renderer_delegate_interface.h"
 #include "iremote_proxy.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRendererDelegateProxy
  * FormRendererDelegateProxy is used to access form renderer delegate.
  */
-class FormRendererDelegateProxy : public IRemoteProxy<IFormRendererDelegate> {
+class ACE_EXPORT FormRendererDelegateProxy : public IRemoteProxy<IFormRendererDelegate> {
 public:
     explicit FormRendererDelegateProxy(const sptr<IRemoteObject>& impl);
-    virtual ~FormRendererDelegateProxy() = default;
+     ~FormRendererDelegateProxy() override = default;
 
     int32_t OnSurfaceCreate(
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
@@ -38,8 +40,8 @@ public:
     int32_t OnActionEvent(const std::string& action) override;
 
 private:
-    template<typename T>
-    int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
+    // template<typename T>
+    // int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
     static bool WriteInterfaceToken(MessageParcel &data);
 
     static inline BrokerDelegator<FormRendererDelegateProxy> delegator_;

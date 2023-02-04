@@ -18,7 +18,7 @@
 
 #include <mutex>
 
-#include "form_surface_callback_interface.h"
+#include "form_surface_callback_interface_old.h"
 #include "form_surface_stub.h"
 #include "iremote_object.h"
 #include "form_surface_interface.h"
@@ -38,7 +38,7 @@ public:
     int32_t ProcessAddSurface(const AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode) override;
     int32_t OnActionEvent(const std::string& action) override;
-    void AddForm(std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId);
+    void AddForm(std::shared_ptr<FormSurfaceCallbackInterfaceOld> formCallback, int64_t formId);
 
     void SetActionEventHandler(std::function<void(const std::string& action)>&& listener)
     {
@@ -49,7 +49,7 @@ private:
     static std::mutex mutex_;
     mutable std::mutex callbackMutex_;
     static std::shared_ptr<FormSurfaceServiceClient> instance_;
-    std::map<int64_t, std::set<std::shared_ptr<FormSurfaceCallbackInterface>>> formCallbackMap_;
+    std::map<int64_t, std::set<std::shared_ptr<FormSurfaceCallbackInterfaceOld>>> formCallbackMap_;
     std::function<void(const std::string& action)> actionEventHandler_;
 };
 } // namespace OHOS::Ace

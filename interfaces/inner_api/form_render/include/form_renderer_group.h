@@ -27,7 +27,20 @@ class Context;
 class Runtime;
 }
 
+namespace AAFwk {
+class Want;
+}
+
+namespace AppExecFwk {
+struct FormJsInfo;
+}
+
 namespace Ace {
+
+#ifndef ACE_EXPORT
+#define ACE_EXPORT __attribute__((visibility("default")))
+#endif
+
 class FormRenderer;
 
 /**
@@ -36,7 +49,7 @@ class FormRenderer;
  * Provider:FormRendererGroup:runtime = 1:1:1
  * FormRendererGroup:FormRenderer = 1:compId
  */
-class FormRendererGroup {
+class ACE_EXPORT FormRendererGroup {
 public:    
     static std::unique_ptr<FormRendererGroup> Create(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
                                                      const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
@@ -45,8 +58,8 @@ public:
                       const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
     ~FormRendererGroup() = default;
 
-    void AddForm(const std::string& compId, const std::string& formUrl, const std::string& formdata);
-    void UpdateForm(const std::string& compId, const std::string& formdata);
+    void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void DeleteForm(const std::string& compId);
 
 private:

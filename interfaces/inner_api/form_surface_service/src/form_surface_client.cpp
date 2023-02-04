@@ -58,7 +58,7 @@ int32_t FormSurfaceServiceClient::ProcessAddSurface(const AAFwk::Want& want,
     return ERR_NONE;
 }
 
-void FormSurfaceServiceClient::AddForm(std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId)
+void FormSurfaceServiceClient::AddForm(std::shared_ptr<FormSurfaceCallbackInterfaceOld> formCallback, int64_t formId)
 {
     HILOG_INFO("%{public}s called.", __func__);
     if (formId <= 0 || formCallback == nullptr) {
@@ -68,7 +68,7 @@ void FormSurfaceServiceClient::AddForm(std::shared_ptr<FormSurfaceCallbackInterf
     std::lock_guard<std::mutex> lock(callbackMutex_);
     auto iter = formCallbackMap_.find(formId);
     if (iter == formCallbackMap_.end()) {
-        std::set<std::shared_ptr<FormSurfaceCallbackInterface>> callbacks;
+        std::set<std::shared_ptr<FormSurfaceCallbackInterfaceOld>> callbacks;
         callbacks.emplace(formCallback);
         formCallbackMap_.emplace(formId, callbacks);
     } else {

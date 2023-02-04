@@ -18,13 +18,15 @@
 
 #include "form_renderer_dispatcher_stub.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRendererDispatcher
  * FormRendererDispatcher interface is used to form renderer dispatcher.
  */
-class FormRendererDispatcherImpl : public FormRendererDispatcherStub {
+class ACE_EXPORT FormRendererDispatcherImpl : public FormRendererDispatcherStub {
 public:
     FormRendererDispatcherImpl() = default;
     ~FormRendererDispatcherImpl() override = default;

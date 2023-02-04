@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,6 @@ public:
     void SetLoadCardCallBack(WeakPtr<PipelineBase> outSidePipelineContext)
     {
         const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
-            LOGE("Kee loadCallback");
             auto context = outSidePipelineContext.Upgrade();
             if (!context) {
                 LOGE("Load card callback failed, host pipeline nullptr");
@@ -69,13 +68,11 @@ public:
             if (!jsEngine) {
                 return false;
             }
-            LOGE("Kee loadCallback jsEngine->LoadCard");
             return jsEngine->LoadCard(url, cardId);
         };
 
         auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
         if (delegate) {
-            LOGE("Kee FormFrontendDeclarative::SetLoadCardCallBack delegate->SetLoadCardCallBack");
             delegate->SetLoadCardCallBack(loadCallback);
         }
     }
@@ -117,8 +114,6 @@ public:
         taskExecutor_ = taskExecutor;
     }
 
-    void ParseManifest() const;
-
     ColorMode colorMode_ = ColorMode::LIGHT;
     bool foregroundFrontend_ = false;
     double density_ = 1.0;
@@ -126,16 +121,13 @@ public:
 
     Framework::PipelineContextHolder holder_;
     RefPtr<AssetManager> assetManager_;
-    RefPtr<Framework::ManifestParser> manifestParser_;
 
     mutable std::once_flag onceFlag_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AceEventHandler> eventHandler_;
-    Framework::PageIdPool pageIdPool_;
     std::string formSrc_;
     WindowConfig cardWindowConfig_;
     uint64_t cardId_ = 0; // cardId != formId, cardId is the nodeId of component.
-
 };
 } // namespace OHOS::Ace
 

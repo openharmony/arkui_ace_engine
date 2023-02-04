@@ -14,7 +14,7 @@
  */
 
 #include "form_renderer_group.h"
-
+#include "form_js_info.h"
 #include "form_renderer.h"
 
 namespace OHOS {
@@ -31,20 +31,25 @@ FormRendererGroup::FormRendererGroup(
     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
     : context_(context), runtime_(runtime) {}
 
-void FormRendererGroup::AddForm(const std::string& compId, const std::string& formUrl, const std::string& formdata)
+void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     auto formRenderer = std::make_shared<FormRenderer>(context_, runtime_);
-    rendererMap_.try_emplace(compId, formRenderer);
-}
-
-void FormRendererGroup::UpdateForm(const std::string& compId, const std::string& formdata)
-{
-    auto iter = rendererMap_.find(compId);
-    if (iter == rendererMap_.end()) {
+    if (!formRenderer) {
         return;
     }
-    auto renderer = iter->second;
-    renderer->UpdateForm(formdata);
+    auto compId = want.GetStringParam("ohos.extra.param.key.form_comp_id");
+    rendererMap_.try_emplace(compId, formRenderer);
+    formRenderer->AddForm(want, formJsInfo);
+}
+
+void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    auto iter = rendererMap_.begin();
+    while (iter!= rendererMap_.end()) {  
+        auto renderer = iter->second;
+        renderer->UpdateForm(formJsInfo);
+        iter++;
+    }
 }
 
 void FormRendererGroup::DeleteForm(const std::string& compId)

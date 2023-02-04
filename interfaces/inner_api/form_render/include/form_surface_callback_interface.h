@@ -12,16 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_ACE_FORM_SURFACE_CALLBACK_INTERFACE_H
-#define OHOS_ACE_FORM_SURFACE_CALLBACK_INTERFACE_H
+#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_SURFACE_CALLBACK_INTERFACE_H
+#define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_SURFACE_CALLBACK_INTERFACE_H
 
+#include "base/utils/macros.h"
 #include "form_js_info.h"
 #include "ui/rs_surface_node.h"
 #include "want.h"
 
 namespace OHOS {
 namespace Ace {
-class FormSurfaceCallbackInterface {
+class ACE_EXPORT FormSurfaceCallbackInterface {
 public:
     /**
      * @brief Update form.
@@ -35,4 +36,4 @@ public:
 };
 } // namespace Ace
 } // namespace OHOS
-#endif // OHOS_ACE_FORM_SURFACE_CALLBACK_INTERFACE_H
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_SURFACE_CALLBACK_INTERFACE_H

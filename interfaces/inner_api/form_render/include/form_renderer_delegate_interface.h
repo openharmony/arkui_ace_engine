@@ -23,13 +23,15 @@
 #include "ui/rs_surface_node.h"
 #include "want.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRendererDelegate
  * FormRendererDelegate interface is used to form renderer delegate.
  */
-class IFormRendererDelegate : public OHOS::IRemoteBroker {
+class ACE_EXPORT IFormRendererDelegate : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.FormRendererDelegate")
 

@@ -19,13 +19,15 @@
 #include "form_renderer_dispatcher_interface.h"
 #include "iremote_proxy.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRendererDispatcherProxy
  * FormRendererDispatcherProxy is used to access form render dispatcher.
  */
-class FormRendererDispatcherProxy : public IRemoteProxy<IFormRendererDispatcher> {
+class ACE_EXPORT FormRendererDispatcherProxy : public IRemoteProxy<IFormRendererDispatcher> {
 public:
     explicit FormRendererDispatcherProxy(const sptr<IRemoteObject>& impl);
     virtual ~FormRendererDispatcherProxy() = default;

@@ -23,6 +23,27 @@ int32_t FormRendererDelegateImpl::OnSurfaceCreate(
     const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
     const AAFwk::Want& want)
 {
+    HILOG_DEBUG("%{public}s called.", __func__);
+    if (!surfaceNode) {
+        HILOG_ERROR("surface is invalid");
+        return ERR_NULL_OBJECT;
+    }
+    int64_t formId = formJsInfo.formId;
+    if (formId < 0) {
+        HILOG_ERROR("%{public}s error, the passed form id can't be negative.", __func__);
+        return ERR_INVALID_DATA;
+    }
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    auto iter = formCallbackMap_.find(formId);
+    if (iter == formCallbackMap_.end()) {
+        HILOG_ERROR("%{public}s error, not find formId:%{public}s.", __func__, std::to_string(formId).c_str());
+        return ERR_INVALID_DATA;
+    }
+    for (const auto& callback : iter->second) {
+        HILOG_INFO("%{public}s, formId: %{public}" PRId64 ", jspath: %{public}s, data: %{public}s", __func__, formId,
+            formJsInfo.jsFormCodePath.c_str(), formJsInfo.formData.c_str());
+        callback->ProcessAddFormSurface(formJsInfo, surfaceNode, want);
+    }
     return ERR_OK;
 }
 
@@ -30,5 +51,25 @@ int32_t FormRendererDelegateImpl::OnActionEvent(const std::string& action)
 {
     return ERR_OK;
 }
+
+void FormRendererDelegateImpl::RegisterSurfaceCreateCallback(
+    std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId)
+{
+    HILOG_INFO("%{public}s called.", __func__);
+    if (formId <= 0 || formCallback == nullptr) {
+        HILOG_ERROR("%{public}s error, invalid formId or formCallback.", __func__);
+        return;
+    }
+    std::lock_guard<std::mutex> lock(callbackMutex_);
+    auto iter = formCallbackMap_.find(formId);
+    if (iter == formCallbackMap_.end()) {
+        std::set<std::shared_ptr<FormSurfaceCallbackInterface>> callbacks;
+        callbacks.emplace(formCallback);
+        formCallbackMap_.emplace(formId, callbacks);
+    } else {
+        iter->second.emplace(formCallback);
+    }
+}
+
 } // namespace Ace
 } // namespace OHOS

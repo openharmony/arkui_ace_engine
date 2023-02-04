@@ -19,6 +19,7 @@
 #include "form_renderer.h"
 
 #include "ability_context.h"
+#include "form_js_info.h"
 #include "js_runtime.h"
 #include "runtime.h"
 #include "ui_content.h"
@@ -38,8 +39,8 @@ public:
                  const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
     ~FormRenderer() = default;
 
-    void AddForm(const std::string& formUrl, const std::string& formdata);
-    void UpdateForm(const std::string& formdata);
+    void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     void Destroy();
     /**
@@ -49,12 +50,10 @@ public:
     int32_t OnActionEvent(const std::string& action);
 
 private:
-    std::string formUrl_;
-    std::string formData_;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     std::shared_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
-    std::shared_ptr<IFormRendererDelegate> formRendererDelegate_;
+    sptr<IFormRendererDelegate> formRendererDelegate_;
     std::unique_ptr<UIContent> uiContent_;
 };
 }  // namespace Ace

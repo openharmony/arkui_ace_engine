@@ -21,13 +21,15 @@
 
 #include "pointer_event.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class IFormRendererDispatcher
  * IFormRendererDispatcher interface is used to form render dispatcher.
  */
-class IFormRendererDispatcher : public OHOS::IRemoteBroker {
+class ACE_EXPORT IFormRendererDispatcher : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.FormRendererDispatcher")
 

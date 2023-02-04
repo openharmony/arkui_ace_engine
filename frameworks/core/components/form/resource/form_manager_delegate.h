@@ -19,6 +19,7 @@
 #include <list>
 
 #include "arkui_render_interface.h"
+#include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_manager_resource.h"
 #include "core/components/form/resource/form_request_data.h"
@@ -119,6 +120,7 @@ private:
     std::shared_ptr<FormCallbackClient> formCallbackClient_;
     std::shared_ptr<FormUtils> formUtils_;
     std::shared_ptr<FormSurfaceCallbackClient> formSurfaceCallbackClient_;
+    std::shared_ptr<FormRendererDelegateImpl> renderDelegate_;
 #endif
 };
 
