@@ -113,7 +113,10 @@ public:
     }
     void SetCurrentIndex(uint32_t value)
     {
-        currentIndex_ = value;
+        if (value != currentIndex_) {
+            isIndexChanged_ = true;
+            currentIndex_ = value;
+        }
     }
 
     uint32_t GetOptionCount() const
