@@ -1881,11 +1881,6 @@ void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height
 
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
 {
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (imeAttached_) {
-        return false;
-    }
-#endif
     auto host = GetHost();
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
