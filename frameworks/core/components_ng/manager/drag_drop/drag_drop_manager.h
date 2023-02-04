@@ -80,6 +80,7 @@ private:
     void FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
         const OHOS::Ace::ItemDragInfo& itemDragInfo, DragEventType type,
         int32_t draggedIndex, int32_t insertIndex = 0);
+    int32_t GetItemIndex(const RefPtr<FrameNode>& frameNode, DragType dragType, float globalX, float globalY);
     void CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height);
     RefPtr<FrameNode> CreateDragRootNode(const RefPtr<UINode>& customNode);
 
@@ -89,6 +90,7 @@ private:
     RefPtr<DragWindow> dragWindow_;
     RefPtr<FrameNode> draggedFrameNode_;
     RefPtr<FrameNode> preTargetFrameNode_;
+    RefPtr<FrameNode> draggedGridFrameNode_;
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> dragWindowRootNode_;
     RefPtr<Clipboard> clipboard_;
