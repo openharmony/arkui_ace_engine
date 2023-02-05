@@ -12,31 +12,52 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
-import(
-    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+import("//foundation/arkui/ace_engine/ace_unittest.gni")
 
-ohos_unittest("image_provider_test") {
-  module_out_path = "$test_output_path/common"
+ohos_unittest("image_provider_test_ng") {
+  module_out_path = "$image_test_output_path/"
 
-  sources = [ "image_provider_test.cpp" ]
+  sources = [
+    # code
+    "$ace_root/frameworks/core/components_ng/image_provider/animated_image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_data.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_loading_context.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_provider.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/image_state_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/pixel_map_image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/static_image_object.cpp",
+    "$ace_root/frameworks/core/components_ng/image_provider/svg_image_object.cpp",
 
-  deps = [
-    "$ace_root/build:ace_ohos_unittest_base",
-    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-    "//third_party/googletest:gmock_main",
+    # mock
+    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_flutter_image_provider.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loader.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_utils.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_skia_image_data.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animated_image.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_pixmap_image.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_skia_canvas_image.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_svg_canvas_image.cpp",
+
+    # test
+    "image_provider_test_ng.cpp",
   ]
 
-  configs = [
-    "$ace_root:ace_test_coverage_config",
-    "$ace_root:ace_test_config",
-    "$ace_root:ace_config",
-    "//commonlibrary/c_utils/base:utils_config",
+  sources += test_pattern_sources
+  deps = test_pattern_deps
+  configs = test_configs
+
+  deps += [
+    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
   ]
 }
 
 group("image_provider_unittest") {
   testonly = true
-  deps = [ ":image_provider_test" ]
+  deps = [ ":image_provider_test_ng" ]
 }

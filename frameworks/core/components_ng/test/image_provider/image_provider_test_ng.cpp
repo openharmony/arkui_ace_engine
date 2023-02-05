@@ -17,6 +17,7 @@
 #define protected public
 #define private public
 
+#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/image_utils.h"
 
@@ -24,7 +25,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class ImageProviderTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -33,9 +33,7 @@ public:
     void TearDown();
 };
 
-void ImageProviderTestNg::SetUpTestCase()
-{
-}
+void ImageProviderTestNg::SetUpTestCase() {}
 
 void ImageProviderTestNg::TearDownTestCase() {}
 
@@ -45,12 +43,17 @@ void ImageProviderTestNg::TearDown() {}
 
 /**
  * @tc.name: ImageProviderTestNg001
- * @tc.desc: Test ImageProvider WrapTaskAndPostTo with null std::function
+ * @tc.desc: Test ImageProvider CreateImageObj failure
  * @tc.type: FUNC
  */
 HWTEST_F(ImageProviderTestNg, ImageProviderTestNg001, TestSize.Level1)
 {
-    ImageUtils::PostToBg(nullptr);
+    auto src = ImageSourceInfo("file://data/data/com.example.test/res/exampleAlt.jpg");
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr));
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
+    ctx->LoadImageData();
+    EXPECT_EQ(ctx->syncLoad_, false);
+    EXPECT_EQ(ctx->imageObj_, nullptr);
+    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::LOAD_FAIL);
 }
-
 } // namespace OHOS::Ace::NG
