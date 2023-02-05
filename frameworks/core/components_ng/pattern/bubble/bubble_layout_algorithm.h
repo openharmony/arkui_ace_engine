@@ -128,6 +128,7 @@ private:
     Placement arrowPlacement_ = Placement::BOTTOM;
     Placement placement_ = Placement::BOTTOM;
     Dimension targetSpace_;
+    Dimension borderRadius_;
 
     bool showBottomArrow_ = false;
     bool showTopArrow_ = false;
