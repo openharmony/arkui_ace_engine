@@ -37,7 +37,7 @@ public:
     static RefPtr<SvgDom> CreateSvgDom(SkStream& svgStream, const std::optional<Color>& color);
 
     void SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx);
-    void SetAnimationCallback(std::function<void()>&& funcAnimateFlush) override;
+    void SetAnimationCallback(std::function<void()>&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr) override;
     void ControlAnimation(bool play) override;
 
     bool ParseSvg(SkStream& svgStream);
