@@ -21,7 +21,6 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -29,8 +28,12 @@ namespace OHOS::Ace::NG {
 void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    verInterval_ = VERTICAL_INTERVAL_PHONE.ConvertToPx();
-    horInterval_ = HORIZONTAL_INTERVAL_PHONE.ConvertToPx();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
+                   static_cast<float>(theme->GetOutPadding().ConvertToPx());
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
@@ -47,15 +50,10 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     text->Measure(childConstraint);
 
     // set self size based on TextNode size;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto minOptionHeight = theme->GetOptionMinHeight().ConvertToPx();
+    auto minOptionHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
 
     auto textSize = text->GetGeometryNode()->GetFrameSize();
-    SizeF size(
-        textSize.Width() + horInterval_ * 2.0, std::max((textSize.Height() + verInterval_ * 2.0), minOptionHeight));
+    SizeF size(textSize.Width() + horInterval_ * 2.0, std::max(textSize.Height(), minOptionHeight));
     LOGD("option frame size set to %{public}f x %{public}f", size.Width(), size.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
@@ -63,8 +61,12 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto optionSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto optionHeight = optionSize.Height();
+
     auto text = layoutWrapper->GetOrCreateChildByIndex(0);
-    text->GetGeometryNode()->SetMarginFrameOffset(OffsetF(horInterval_, verInterval_));
+    text->GetGeometryNode()->SetMarginFrameOffset(
+        OffsetF(horInterval_, (optionHeight - text->GetGeometryNode()->GetFrameSize().Height()) / 2.0));
     text->Layout();
 }
 

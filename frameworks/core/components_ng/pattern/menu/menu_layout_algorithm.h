@@ -52,6 +52,8 @@ private:
     // current page offset relative to window.
     OffsetF pageOffset_;
 
+    float outPadding_ = 0.0f;
+
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

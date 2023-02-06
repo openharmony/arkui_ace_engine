@@ -19,15 +19,18 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    verInterval_ = VERTICAL_INTERVAL_PHONE.ConvertToPx();
-    horInterval_ = MENU_ITEM_GROUP_PADDING.ConvertToPx();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    verInterval_ = static_cast<float>(VERTICAL_INTERVAL.ConvertToPx());
+    horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx());
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
@@ -44,11 +47,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(rightRow);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto minItemHeight = theme->GetOptionMinHeight().ConvertToPx();
+    auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
 
     SizeF size;
     if (!layoutConstraint->selfIdealSize.Width().has_value()) {
@@ -59,10 +58,15 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
         auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
         auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
-        size = SizeF(leftRowSize.Width() + rightRowSize.Width() + horInterval_ * 2.0 + MENU_ITEM_PADDING.ConvertToPx(),
-            minItemHeight);
+        auto childHeight = std::max(leftRowSize.Height(), rightRowSize.Height());
+        size = SizeF(leftRowSize.Width() + rightRowSize.Width() + horInterval_ * 2.0 +
+                         static_cast<float>(theme->GetIconContentPadding().ConvertToPx()),
+            std::max(childHeight, minItemHeight));
     } else {
-        size = SizeF(layoutConstraint->selfIdealSize.Width().value(), minItemHeight);
+        auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
+        auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
+        auto childHeight = std::max(leftRowSize.Height(), rightRowSize.Height());
+        size = SizeF(layoutConstraint->selfIdealSize.Width().value(), std::max(childHeight, minItemHeight));
     }
 
     LOGD("menuItem frame size set to %{public}f x %{public}f", size.Width(), size.Height());
@@ -72,17 +76,22 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void MenuItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto itemSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto itemHeight = itemSize.Height();
+
     auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(leftRow);
-    leftRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(horInterval_, verInterval_));
+    auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
+    leftRow->GetGeometryNode()->SetMarginFrameOffset(OffsetF(horInterval_, (itemHeight - leftRowSize.Height()) / 2.0));
     leftRow->Layout();
 
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
     CHECK_NULL_VOID(rightRow);
+    auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
     rightRow->GetGeometryNode()->SetMarginFrameOffset(
         OffsetF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width() - horInterval_ -
                     rightRow->GetGeometryNode()->GetFrameSize().Width(),
-            verInterval_));
+            (itemHeight - rightRowSize.Height()) / 2.0));
     rightRow->Layout();
 }
 } // namespace OHOS::Ace::NG

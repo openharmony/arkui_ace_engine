@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_WRAPPER_PATTERN_H
 
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
@@ -69,10 +72,37 @@ public:
         return isHided_;
     }
 
+    bool IsContextMenu() const
+    {
+        auto menu = GetMenu();
+        CHECK_NULL_RETURN(menu, false);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, false);
+        return menuPattern->IsContextMenu();
+    }
+
+    bool IsSelectMenu() const
+    {
+        auto menu = GetMenu();
+        CHECK_NULL_RETURN(menu, false);
+        auto menuPattern = menu->GetPattern<MenuPattern>();
+        CHECK_NULL_RETURN(menuPattern, false);
+        return menuPattern->IsSelectMenu();
+    }
+
 private:
     void OnModifyDone() override;
 
     void HideMenu(const RefPtr<FrameNode>& menu);
+
+    RefPtr<FrameNode> GetMenu() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto menu = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(menu, nullptr);
+        return menu;
+    }
 
     RefPtr<TouchEventImpl> onTouch_;
     // menuId in OverlayManager's map

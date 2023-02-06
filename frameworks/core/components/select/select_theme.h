@@ -23,6 +23,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace {
 
@@ -30,7 +31,8 @@ constexpr double SELECT_OPTION_LEFT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_TOP_LENGTH = 15.0;
 constexpr double SELECT_OPTION_RIGHT_LENGTH = 16.0;
 constexpr double SELECT_OPTION_BOTTOM_LENGTH = 15.0;
-constexpr Dimension OPTION_MIN_HEIGHT = 48.0_vp;
+constexpr Dimension VERTICAL_INTERVAL = 14.4_vp;
+
 /**
  * SelectTheme defines color and styles of SelectComponent. SelectTheme should be build
  * using SelectTheme::Builder.
@@ -90,7 +92,6 @@ public:
             theme->optionPadding_ = Edge(SELECT_OPTION_LEFT_LENGTH, SELECT_OPTION_TOP_LENGTH,
                 SELECT_OPTION_RIGHT_LENGTH, SELECT_OPTION_BOTTOM_LENGTH, DimensionUnit::VP);
             theme->optionInterval_ = theme->isTV_ ? Dimension(6.0, DimensionUnit::VP) : 0.0_vp;
-            theme->optionMinHeight_ = OPTION_MIN_HEIGHT;
             theme->tvFocusTextColor_ = Color(0xE6000000);
             theme->tvNormalBackColor_ = Color(0x33FFFFFF);
             theme->tvBackColor_ = (theme->isTV_ ? Color(0x99000000) : Color::TRANSPARENT);
@@ -118,16 +119,61 @@ public:
                 LOGE("Pattern of select is null, please check!");
                 return;
             }
+            const double defaultTextColorAlpha = 0.9;
+            const double defaultDisabledColorAlpha = 0.4;
+            const double defaultSecondaryColorAlpha = 0.6;
+            const double defaultTertiaryColorAlpha = 0.6;
 
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, theme->fontSize_);
-            theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_);
+            theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
+            theme->fontColor_ =
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("menu_text_primary_alpha", defaultTextColorAlpha));
+            theme->disabledFontColor_ = theme->fontColor_.BlendOpacity(
+                pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha));
+            theme->secondaryFontColor_ =
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("menu_text_secondary_alpha", defaultSecondaryColorAlpha));
+            theme->menuFontColor_ =
+                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuFontColor_)
+                    .BlendOpacity(pattern->GetAttr<double>("menu_text_primary_alpha", defaultTextColorAlpha));
+            theme->disabledMenuFontColor_ = theme->menuFontColor_.BlendOpacity(
+                pattern->GetAttr<double>("menu_text_tertiary_alpha", defaultTertiaryColorAlpha));
             theme->clickedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_CLICKED, theme->clickedColor_);
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, theme->selectedColor_);
-            theme->selectedColorText_ = pattern->GetAttr<Color>(
-                PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
+            theme->selectedColorText_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
             theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
+            theme->disabledBackgroundColor_ = theme->disabledBackgroundColor_.BlendOpacity(
+                pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha));
             theme->lineColor_ = pattern->GetAttr<Color>("line_color", theme->lineColor_);
+            theme->spinnerColor_ = pattern->GetAttr<Color>("select_icon_color", theme->spinnerColor_);
+            theme->disabledSpinnerColor_ = theme->spinnerColor_.BlendOpacity(
+                pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha));
+            theme->selectBorderRadius_ = pattern->GetAttr<Dimension>("border_radius", theme->selectBorderRadius_);
+            theme->menuBorderRadius_ = pattern->GetAttr<Dimension>("menu_border_radius", theme->menuBorderRadius_);
+            theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("inner_border_radius", theme->innerBorderRadius_);
+            theme->menuIconPadding_ = pattern->GetAttr<Dimension>("menu_icon_padding", theme->menuIconPadding_);
+            theme->iconContentPadding_ =
+                pattern->GetAttr<Dimension>("icon_content_padding", theme->iconContentPadding_);
+            theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", theme->menuIconColor_);
+            theme->dividerPaddingVertical_ =
+                pattern->GetAttr<Dimension>("divider_padding_vertical", theme->dividerPaddingVertical_);
+            theme->optionMinHeight_ = pattern->GetAttr<Dimension>("option_min_height", theme->optionMinHeight_);
+            theme->selectMenuPadding_ = pattern->GetAttr<Dimension>("select_menu_padding", theme->selectMenuPadding_);
+            theme->outPadding_ = pattern->GetAttr<Dimension>("out_padding", theme->outPadding_);
+            theme->contentSpinnerPadding_ =
+                pattern->GetAttr<Dimension>("content_spinner_padding", theme->contentSpinnerPadding_);
+            theme->menuAnimationOffset_ =
+                pattern->GetAttr<Dimension>("menu_animation_offset", theme->menuAnimationOffset_);
+            theme->spinnerWidth_ = pattern->GetAttr<Dimension>("spinner_width", theme->spinnerWidth_);
+            theme->spinnerHeight_ = pattern->GetAttr<Dimension>("spinner_height", theme->spinnerHeight_);
+            theme->defaultDividerWidth_ =
+                pattern->GetAttr<Dimension>("default_divider_width", theme->defaultDividerWidth_);
+            theme->selectMinWidth_ = pattern->GetAttr<Dimension>("select_min_width", theme->selectMinWidth_);
+            theme->selectMinHeight_ = pattern->GetAttr<Dimension>("select_min_height", theme->selectMinHeight_);
+            theme->iconSideLength_ = pattern->GetAttr<Dimension>("icon_side_length", theme->iconSideLength_);
+            theme->contentMargin_ = pattern->GetAttr<Dimension>("content_margin", theme->contentMargin_);
         }
     };
 
@@ -142,6 +188,8 @@ public:
         theme->fontSize_ = fontSize_;
         theme->fontFamily_ = fontFamily_;
         theme->fontColor_ = fontColor_;
+        theme->disabledFontColor_ = disabledFontColor_;
+        theme->secondaryFontColor_ = secondaryFontColor_;
         theme->fontWeight_ = fontWeight_;
         theme->textDecoration_ = textDecoration_;
         theme->rrectSize_ = rrectSize_;
@@ -175,11 +223,36 @@ public:
         theme->normalDisableColor_ = normalDisableColor_;
         theme->focusedTextDisableColor_ = focusedTextDisableColor_;
         theme->normalTextDisableColor_ = normalTextDisableColor_;
+        theme->spinnerColor_ = spinnerColor_;
+        theme->disabledSpinnerColor_ = disabledSpinnerColor_;
         theme->backgroundColor_ = backgroundColor_;
+        theme->disabledBackgroundColor_ = disabledBackgroundColor_;
         theme->hoverColor_ = hoverColor_;
         theme->selectedColorText_ = selectedColorText_;
         theme->lineColor_ = lineColor_;
         theme->optionTextStyle_ = optionTextStyle_;
+        theme->selectBorderRadius_ = selectBorderRadius_;
+        theme->menuBorderRadius_ = menuBorderRadius_;
+        theme->innerBorderRadius_ = innerBorderRadius_;
+        theme->menuFontSize_ = menuFontSize_;
+        theme->menuFontColor_ = menuFontColor_;
+        theme->disabledMenuFontColor_ = disabledMenuFontColor_;
+        theme->menuIconPadding_ = menuIconPadding_;
+        theme->iconContentPadding_ = iconContentPadding_;
+        theme->dividerPaddingVertical_ = dividerPaddingVertical_;
+        theme->menuIconColor_ = menuIconColor_;
+        theme->optionMinHeight_ = optionMinHeight_;
+        theme->selectMenuPadding_ = selectMenuPadding_;
+        theme->outPadding_ = outPadding_;
+        theme->contentSpinnerPadding_ = contentSpinnerPadding_;
+        theme->menuAnimationOffset_ = menuAnimationOffset_;
+        theme->spinnerWidth_ = spinnerWidth_;
+        theme->spinnerHeight_ = spinnerHeight_;
+        theme->defaultDividerWidth_ = defaultDividerWidth_;
+        theme->selectMinWidth_ = selectMinWidth_;
+        theme->selectMinHeight_ = selectMinHeight_;
+        theme->iconSideLength_ = iconSideLength_;
+        theme->contentMargin_ = contentMargin_;
         return theme;
     }
 
@@ -196,6 +269,11 @@ public:
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
+    }
+
+    const Color& GetDisabledBackgroundColor() const
+    {
+        return disabledBackgroundColor_;
     }
 
     const Color& GetDisabledColor() const
@@ -242,6 +320,16 @@ public:
     void SetFontColor(const Color& value)
     {
         fontColor_ = value;
+    }
+
+    const Color& GetDisabledFontColor() const
+    {
+        return disabledFontColor_;
+    }
+
+    const Color& GetSecondaryFontColor() const
+    {
+        return secondaryFontColor_;
     }
 
     const std::string& GetFontFamily() const
@@ -508,6 +596,21 @@ public:
         return normalTextDisableColor_;
     }
 
+    const Color& GetSpinnerColor() const
+    {
+        return spinnerColor_;
+    }
+
+    const Color& GetDisabledSpinnerColor() const
+    {
+        return disabledSpinnerColor_;
+    }
+
+    const Color& GetMenuIconColor() const
+    {
+        return menuIconColor_;
+    }
+
     const Color& GetLineColor() const
     {
         return lineColor_;
@@ -518,19 +621,127 @@ public:
         return optionTextStyle_;
     }
 
+    const Dimension& GetSelectBorderRadius() const
+    {
+        return selectBorderRadius_;
+    }
+
+    const Dimension& GetMenuBorderRadius() const
+    {
+        return menuBorderRadius_;
+    }
+
+    const Dimension& GetInnerBorderRadius() const
+    {
+        return innerBorderRadius_;
+    }
+
+    const Dimension& GetMenuFontSize() const
+    {
+        return menuFontSize_;
+    }
+
+    const Color& GetMenuFontColor() const
+    {
+        return menuFontColor_;
+    }
+
+    const Color& GetDisabledMenuFontColor() const
+    {
+        return disabledMenuFontColor_;
+    }
+
+    const Dimension& GetMenuIconPadding() const
+    {
+        return menuIconPadding_;
+    }
+
+    const Dimension& GetIconContentPadding() const
+    {
+        return iconContentPadding_;
+    }
+
+    const Dimension& GetDividerPaddingVertical() const
+    {
+        return dividerPaddingVertical_;
+    }
+
+    const Dimension& GetSelectMenuPadding() const
+    {
+        return selectMenuPadding_;
+    }
+
+    const Dimension& GetOutPadding() const
+    {
+        return outPadding_;
+    }
+
+    const Dimension& GetContentSpinnerPadding() const
+    {
+        return contentSpinnerPadding_;
+    }
+
+    const Dimension& GetMenuAnimationOffset() const
+    {
+        return menuAnimationOffset_;
+    }
+
+    const Dimension& GetSpinnerWidth() const
+    {
+        return spinnerWidth_;
+    }
+
+    const Dimension& GetSpinnerHeight() const
+    {
+        return spinnerHeight_;
+    }
+
+    const Dimension& GetDefaultDividerWidth() const
+    {
+        return defaultDividerWidth_;
+    }
+
+    const Dimension& GetSelectMinWidth() const
+    {
+        return selectMinWidth_;
+    }
+
+    const Dimension& GetSelectMinHeight() const
+    {
+        return selectMinHeight_;
+    }
+
+    const Dimension& GetIconSideLength() const
+    {
+        return iconSideLength_;
+    }
+
+    const Dimension& GetContentMargin() const
+    {
+        return contentMargin_;
+    }
+
 private:
     Color disabledColor_;
     Color clickedColor_;
     Color selectedColor_;
 
     Color backgroundColor_ = Color::WHITE;
+    Color disabledBackgroundColor_;
     Color hoverColor_ = Color(0x0c000000);
     Color selectedColorText_ = Color(0xff0a59f7);
     Color lineColor_ = Color(0x33000000);
+    Color spinnerColor_ = Color(0xE5182431);
+    Color disabledSpinnerColor_;
+    Color menuIconColor_ = Color(0x99182431);
+    Color menuFontColor_;
+    Color disabledMenuFontColor_;
 
     bool allowScale_ = true;
     Dimension fontSize_;
     Color fontColor_;
+    Color disabledFontColor_;
+    Color secondaryFontColor_;
     std::string fontFamily_;
     FontWeight fontWeight_ { FontWeight::NORMAL };
     TextDecoration textDecoration_ { TextDecoration::NONE };
@@ -554,6 +765,27 @@ private:
     Dimension contentSpacing_;
     Dimension optionInterval_;
     Dimension optionMinHeight_;
+
+    Dimension selectBorderRadius_;
+    Dimension menuBorderRadius_;
+    Dimension innerBorderRadius_;
+    Dimension menuFontSize_;
+    Dimension menuIconPadding_;
+    Dimension iconContentPadding_;
+    Dimension dividerPaddingVertical_;
+
+    Dimension selectMenuPadding_;
+    Dimension outPadding_;
+    Dimension contentSpinnerPadding_;
+    Dimension menuAnimationOffset_;
+    Dimension spinnerWidth_;
+    Dimension spinnerHeight_;
+    Dimension defaultDividerWidth_;
+
+    Dimension selectMinWidth_;
+    Dimension selectMinHeight_;
+    Dimension iconSideLength_;
+    Dimension contentMargin_;
 
     Color tvFocusTextColor_;
     Color tvNormalBackColor_;

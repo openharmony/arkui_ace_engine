@@ -32,7 +32,6 @@ public:
 
 private:
     float horInterval_ = 0.0f;
-    float verInterval_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionLayoutAlgorithm);
 };

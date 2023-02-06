@@ -21,8 +21,10 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -39,6 +41,19 @@ void MenuItemPattern::OnModifyDone()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);
+
+    auto eventHub = host->GetEventHub<MenuItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->IsEnabled()) {
+        CHECK_NULL_VOID(content_);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        auto contentProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(contentProperty);
+        contentProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+    }
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
@@ -204,10 +219,6 @@ void MenuItemPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 void MenuItemPattern::OnPress(const TouchEventInfo& info)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto touchType = info.GetTouches().front().GetTouchType();
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -217,21 +228,15 @@ void MenuItemPattern::OnPress(const TouchEventInfo& info)
     if (touchType == TouchType::DOWN) {
         // change background color, update press status
         auto clickedColor = theme->GetClickedColor();
-        renderContext->UpdateBackgroundColor(clickedColor);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        UpdateBackgroundColor(clickedColor);
     } else if (touchType == TouchType::UP) {
         auto bgColor = theme->GetBackgroundColor();
-        renderContext->UpdateBackgroundColor(bgColor);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        UpdateBackgroundColor(bgColor);
     }
 }
 
 void MenuItemPattern::OnHover(bool isHover)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -239,14 +244,12 @@ void MenuItemPattern::OnHover(bool isHover)
 
     if (isHover || isSubMenuShowed_) {
         auto hoverColor = theme->GetHoverColor();
-        renderContext->UpdateBackgroundColor(hoverColor);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        UpdateBackgroundColor(hoverColor);
 
         ShowSubMenu();
     } else {
         auto bgColor = theme->GetBackgroundColor();
-        renderContext->UpdateBackgroundColor(bgColor);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        UpdateBackgroundColor(bgColor);
     }
 }
 
@@ -321,5 +324,15 @@ bool MenuItemPattern::IsInHoverRegions(double x, double y)
         }
     }
     return false;
+}
+
+void MenuItemPattern::UpdateBackgroundColor(const Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(color);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG
