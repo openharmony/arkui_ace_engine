@@ -132,47 +132,4 @@ RefPtr<RenderSingleChildScroll> ScrollComposedElement::GetRenderSingleChildScrol
     return nullptr;
 }
 
-void ScrollComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto scrollElement = GetContentElement<ScrollElement>(ScrollElement::TypeId());
-    if (!scrollElement) {
-        LOGE("get GetScrollElement failed");
-        return;
-    }
-    slot = DEFAULT_ELEMENT_SLOT;
-    scrollElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    scrollElement->MarkDirty();
-}
-
-void ScrollComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto scrollElement = GetContentElement<ScrollElement>(ScrollElement::TypeId());
-    if (!scrollElement) {
-        LOGE("get GetScrollElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(scrollElement, slot);
-    if (!child) {
-        LOGE("scrollElement get GetChildBySlot failed");
-        return;
-    }
-    scrollElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    scrollElement->MarkDirty();
-}
-
-void ScrollComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto scrollElement = GetContentElement<ScrollElement>(ScrollElement::TypeId());
-    if (!scrollElement) {
-        LOGE("get GetScrollElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(scrollElement, slot);
-    if (!child) {
-        LOGE("scrollElement get GetChildBySlot failed");
-        return;
-    }
-    scrollElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    scrollElement->MarkDirty();
-}
 } // namespace OHOS::Ace::V2

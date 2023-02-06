@@ -242,39 +242,4 @@ std::string GridComposedElement::DisplayModeToString(DisplayMode displayMode) co
     return "BarState.Off";
 }
 
-void GridComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto gridLayoutElement = GetContentElement<GridLayoutElement>(GridLayoutElement::TypeId());
-    if (!gridLayoutElement) {
-        LOGE("get GridLayoutElement failed");
-        return;
-    }
-    gridLayoutElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    gridLayoutElement->MarkDirty();
-}
-
-void GridComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto gridLayoutElement = GetContentElement<GridLayoutElement>(GridLayoutElement::TypeId());
-    if (!gridLayoutElement) {
-        LOGE("get GridLayoutElement failed");
-        return;
-    }
-    auto child = gridLayoutElement->GetChildBySlot(slot);
-    gridLayoutElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    gridLayoutElement->MarkDirty();
-}
-
-void GridComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto gridLayoutElement = GetContentElement<GridLayoutElement>(GridLayoutElement::TypeId());
-    if (!gridLayoutElement) {
-        LOGE("get GridLayoutElement failed");
-        return;
-    }
-    auto child = gridLayoutElement->GetChildBySlot(slot);
-    gridLayoutElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    gridLayoutElement->MarkDirty();
-}
-
 } // namespace OHOS::Ace::V2

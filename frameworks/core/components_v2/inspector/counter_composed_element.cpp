@@ -16,7 +16,6 @@
 #include "core/components_v2/inspector/counter_composed_element.h"
 
 #include "base/log/dump_log.h"
-#include "core/components/counter/counter_element.h"
 #include "core/components/counter/render_counter.h"
 
 namespace OHOS::Ace::V2 {
@@ -44,58 +43,5 @@ std::string CounterComposedElement::GetHeight() const
         return "";
     }
     return component->GetHeight().ToString();
-}
-
-void CounterComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto counterElement = GetContentElement<CounterElement>(CounterElement::TypeId());
-    if (!counterElement) {
-        LOGE("get GetCounterElement failed");
-        return;
-    }
-    counterElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    counterElement->MarkDirty();
-}
-
-void CounterComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto counterElement = GetContentElement<CounterElement>(CounterElement::TypeId());
-    if (!counterElement) {
-        LOGE("get GetCounterElement failed");
-        return;
-    }
-    auto element = GetInspectorComposedElementParent(counterElement);
-    if (!element) {
-        LOGE("counterElement get GetInspectorComposedElementParent failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(element, slot);
-    if (!child) {
-        LOGE("get GetElementChildBySlot failed");
-        return;
-    }
-    element->UpdateChildWithSlot(child, newComponent, slot, slot);
-    element->MarkDirty();
-}
-
-void CounterComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto counterElement = GetContentElement<CounterElement>(CounterElement::TypeId());
-    if (!counterElement) {
-        LOGE("get GetCounterElement failed");
-        return;
-    }
-    auto element = GetInspectorComposedElementParent(counterElement);
-    if (!element) {
-        LOGE("counterElement get GetInspectorComposedElementParent failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(element, slot);
-    if (!child) {
-        LOGE("get GetElementChildBySlot failed");
-        return;
-    }
-    element->UpdateChildWithSlot(child, nullptr, slot, slot);
-    element->MarkDirty();
 }
 }

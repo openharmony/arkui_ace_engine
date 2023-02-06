@@ -87,39 +87,4 @@ RefPtr<TabContentItemElement> TabContentComposedElement::GetTabContentItemElemen
     return nullptr;
 }
 
-void TabContentComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto tabContentElement = GetContentElement<TabContentItemElement>(TabContentItemElement::TypeId());
-    if (!tabContentElement) {
-        LOGE("get GetTabContentElement failed");
-        return;
-    }
-    tabContentElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    tabContentElement->MarkDirty();
-}
-
-void TabContentComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto tabContentElement = GetContentElement<TabContentItemElement>(TabContentItemElement::TypeId());
-    if (!tabContentElement) {
-        LOGE("get GetTabContentElement failed");
-        return;
-    }
-    auto child = tabContentElement->GetChildBySlot(slot);
-    tabContentElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    tabContentElement->MarkDirty();
-}
-
-void TabContentComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto tabContentElement = GetContentElement<TabContentItemElement>(TabContentItemElement::TypeId());
-    if (!tabContentElement) {
-        LOGE("get GetTabContentElement failed");
-        return;
-    }
-    auto child = tabContentElement->GetChildBySlot(slot);
-    tabContentElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    tabContentElement->MarkDirty();
-}
-
 } // namespace OHOS::Ace::V2

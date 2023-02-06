@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_COLUMN_SPLIT_COMPOSED_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_COLUMN_SPLIT_COMPOSED_ELEMENT_H
 
+#include "core/components/split_container/column_split_element.h"
 #include "core/components/split_container/render_column_split.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/base/composed_element.h"
@@ -39,11 +40,13 @@ public:
         return InspectorComposedElement::TypeId();
     }
 
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<ColumnSplitElement>(ColumnSplitElement::TypeId());
+    }
+
 private:
     RefPtr<RenderColumnSplit> GetRenderColumnSplit() const;
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
 };
 
 } // namespace OHOS::Ace::V2
