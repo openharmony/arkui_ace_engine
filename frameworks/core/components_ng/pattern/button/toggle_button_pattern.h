@@ -41,7 +41,7 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
-        return MakeRefPtr<ToggleButtonEventHub>();
+        return MakeRefPtr<ButtonEventHub>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -50,11 +50,25 @@ public:
     }
 
 private:
+    void OnAttachToFrameNode() override;
+    void InitParameters();
     void OnModifyDone() override;
+    void HandleEnabled();
+    void InitClickEvent();
     void OnClick();
+    void InitButtonAndText();
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;
+    Color checkedColor_;
+    Color unCheckedColor_;
+    float disabledAlpha_ { 1.0f };
+    Dimension textMargin_;
+    Dimension buttonMargin_;
+    Dimension buttonHeight_;
+    Dimension buttonRadius_;
+    Dimension textFontSize_;
+    Color textColor_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ToggleButtonPattern);
 };

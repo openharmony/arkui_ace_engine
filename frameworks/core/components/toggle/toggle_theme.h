@@ -75,6 +75,12 @@ public:
                 .BlendOpacity(togglePattern->GetAttr<double>("bg_color_checked_alpha", 0.0));
             theme->textStyle_.SetTextColor(togglePattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
             theme->pressedBlendColor_ = togglePattern->GetAttr<Color>("bg_color_pressed_blend", Color());
+            theme->textMargin_ = togglePattern->GetAttr<Dimension>("text_margin", Dimension());
+            theme->buttonMargin_ = togglePattern->GetAttr<Dimension>("button_margin", Dimension());
+            theme->buttonHeight_ = togglePattern->GetAttr<Dimension>("button_height", Dimension());
+            theme->buttonRadius_ = togglePattern->GetAttr<Dimension>("button_radius", Dimension());
+            theme->textFontSize_ = togglePattern->GetAttr<Dimension>("text_font_size", Dimension());
+            theme->textColor_ = togglePattern->GetAttr<Color>("text_color", Color());
         }
     };
 
@@ -115,6 +121,37 @@ public:
         return disabledAlpha_;
     }
 
+    const Dimension& GetTextMargin() const
+    {
+        return textMargin_;
+    }
+
+    const Dimension& GetButtonMargin() const
+    {
+        return buttonMargin_;
+    }
+
+    const Dimension& GetButtonHeight() const
+    {
+        return buttonHeight_;
+    }
+
+    const Dimension& GetButtonRadius() const
+    {
+        return buttonRadius_;
+    }
+
+    const Dimension& GetTextFontSize() const
+    {
+        return textFontSize_;
+    }
+
+    const Color& GetTextColor() const
+    {
+        return textColor_;
+    }
+
+
 protected:
     ToggleTheme() = default;
 
@@ -126,6 +163,12 @@ private:
     Dimension height_;
     Edge padding_;
     double disabledAlpha_ { 1.0 };
+    Dimension textMargin_;
+    Dimension buttonMargin_;
+    Dimension buttonHeight_;
+    Dimension buttonRadius_;
+    Dimension textFontSize_;
+    Color textColor_;
 };
 
 } // namespace OHOS::Ace

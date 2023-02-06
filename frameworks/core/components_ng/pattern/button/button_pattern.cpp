@@ -98,14 +98,20 @@ void ButtonPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     InitButtonLabel();
     HandleEnabled();
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
+    InitTouchEvent();
+}
+
+void ButtonPattern::InitTouchEvent()
+{
     if (touchListener_) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
-        CHECK_NULL_VOID(buttonPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             buttonPattern->OnTouchDown();
         }
@@ -124,7 +130,6 @@ void ButtonPattern::OnTouchDown()
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-
     if (buttonEventHub->GetStateEffect()) {
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
