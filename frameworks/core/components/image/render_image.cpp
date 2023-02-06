@@ -105,6 +105,8 @@ void RenderImage::Update(const RefPtr<Component>& component)
     auto inComingSrc = image->GetSrc();
     ImageSourceInfo inComingSource(
         inComingSrc,
+        image->GetBundleName(),
+        image->GetModuleName(),
         image->GetImageSourceSize().first,
         image->GetImageSourceSize().second,
         inComingSrc.empty() ? image->GetResourceId() : InternalResource::ResourceId::NO_ID,

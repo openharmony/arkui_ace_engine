@@ -110,10 +110,35 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     }
 }
 
-ImageSourceInfo::ImageSourceInfo(std::string imageSrc, Dimension width, Dimension height,
+ImageSourceInfo::ImageSourceInfo(const std::string& imageSrc, Dimension width, Dimension height,
     InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
     : src_(std::move(imageSrc)), sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
       isSvg_(IsSVGSource(src_, resourceId_)), isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
+{
+    // count how many source set.
+    int32_t count = 0;
+    if (!src_.empty()) {
+        ++count;
+    }
+    if (resourceId_ != InternalResource::ResourceId::NO_ID) {
+        ++count;
+    }
+    if (pixmap != nullptr) {
+        ++count;
+    }
+    if (count > 1) {
+        LOGW("multi image source set, only one will be load.");
+    }
+    GenerateCacheKey();
+}
+
+// add constructor method for decompressed hap
+ImageSourceInfo::ImageSourceInfo(const std::string& imageSrc, const std::string& bundleName,
+    const std::string& moduleName, Dimension width, Dimension height, InternalResource::ResourceId resourceId,
+    const RefPtr<PixelMap>& pixmap)
+    : src_(std::move(imageSrc)), bundleName_(bundleName), moduleName_(moduleName), sourceWidth_(width),
+      sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap), isSvg_(IsSVGSource(src_, resourceId_)),
+      isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
 {
     // count how many source set.
     int32_t count = 0;
@@ -148,7 +173,7 @@ SrcType ImageSourceInfo::ResolveSrcType() const
 
 void ImageSourceInfo::GenerateCacheKey()
 {
-    auto name = ToString() + AceApplicationInfo::GetInstance().GetAbilityName();
+    auto name = ToString() + AceApplicationInfo::GetInstance().GetAbilityName() + bundleName_ + moduleName_;
     cacheKey_ = std::to_string(std::hash<std::string> {}(name)) + std::to_string(static_cast<int32_t>(resourceId_));
 }
 
@@ -215,6 +240,16 @@ void ImageSourceInfo::SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Co
     pixmap_ = pixmap;
 }
 
+void ImageSourceInfo::SetBundleName(const std::string& bundleName)
+{
+    bundleName_ = bundleName;
+}
+
+void ImageSourceInfo::SetModuleName(const std::string& moduleName)
+{
+    moduleName_ = moduleName;
+}
+
 bool ImageSourceInfo::IsInternalResource() const
 {
     return src_.empty() && resourceId_ != InternalResource::ResourceId::NO_ID && !pixmap_;
@@ -239,6 +274,16 @@ bool ImageSourceInfo::IsSvg() const
 bool ImageSourceInfo::IsPixmap() const
 {
     return pixmap_ != nullptr || SrcType::DATA_ABILITY_DECODED == srcType_;
+}
+
+const std::string& ImageSourceInfo::GetBundleName() const
+{
+    return bundleName_;
+}
+
+const std::string& ImageSourceInfo::GetModuleName() const
+{
+    return moduleName_;
 }
 
 SrcType ImageSourceInfo::GetSrcType() const

@@ -28,8 +28,13 @@
 namespace OHOS::Ace {
 class ImageSourceInfo {
 public:
-    explicit ImageSourceInfo(std::string imageSrc, Dimension width = Dimension(-1),
+    explicit ImageSourceInfo(const std::string& imageSrc, Dimension width = Dimension(-1),
         Dimension height = Dimension(-1), InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
+        const RefPtr<PixelMap>& pixmap = nullptr);
+    // add constructor method for decompressed hap
+    ImageSourceInfo(const std::string& imageSrc, const std::string& bundleName, const std::string& moduleName,
+        Dimension width = Dimension(-1), Dimension height = Dimension(-1),
+        InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr);
     explicit ImageSourceInfo(const RefPtr<PixelMap>& pixmap)
         : ImageSourceInfo("", Dimension(-1), Dimension(-1), InternalResource::ResourceId::NO_ID, pixmap)
@@ -54,6 +59,8 @@ public:
     void SetPixMap(const RefPtr<PixelMap>& pixmap, std::optional<Color> fillColor = std::nullopt);
     void SetDimension(Dimension width, Dimension Height);
     void SetFillColor(const Color& color);
+    void SetBundleName(const std::string& bundleName);
+    void SetModuleName(const std::string& moduleName);
     void Reset();
 
     // interfaces to get infomation from [ImageSourceInfo]
@@ -63,6 +70,8 @@ public:
     bool IsSvg() const;
     bool IsPixmap() const;
     bool IsSourceDimensionValid() const;
+    const std::string& GetBundleName() const;
+    const std::string& GetModuleName() const;
     std::string ToString() const;
     InternalResource::ResourceId GetResourceId() const;
     SrcType GetSrcType() const;
@@ -83,6 +92,9 @@ private:
 
     std::string src_;
     std::string cacheKey_;
+    // Interim programme
+    std::string bundleName_;
+    std::string moduleName_;
     Dimension sourceWidth_ = Dimension(-1);
     Dimension sourceHeight_ = Dimension(-1);
     InternalResource::ResourceId resourceId_ = InternalResource::ResourceId::NO_ID;
