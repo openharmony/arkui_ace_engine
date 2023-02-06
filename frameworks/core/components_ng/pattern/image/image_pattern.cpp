@@ -406,10 +406,21 @@ void ImagePattern::EnableDrag()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetContentSize();
-    auto dragStart = [image = image_, ctx = loadingCtx_, size](const RefPtr<OHOS::Ace::DragEvent>& /*event*/,
+    auto dragStart = [imageWk = WeakClaim(RawPtr(image_)), ctxWk = WeakClaim(RawPtr(loadingCtx_)), size](
+                         const RefPtr<OHOS::Ace::DragEvent>& /*event*/,
                          const std::string& /*extraParams*/) -> DragDropInfo {
         DragDropInfo info;
+        auto image = imageWk.Upgrade();
+        auto ctx = ctxWk.Upgrade();
+        CHECK_NULL_RETURN(image && ctx, info);
+
         info.extraInfo = "image drag";
+        info.pixelMap = image->GetPixelMap();
+        if (info.pixelMap) {
+            LOGI("using pixmap onDrag");
+            return info;
+        }
+
         auto node = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         auto pattern = node->GetPattern<ImagePattern>();
