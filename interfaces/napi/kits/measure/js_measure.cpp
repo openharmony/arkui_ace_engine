@@ -175,7 +175,7 @@ static napi_value JSMeasureText(napi_env env, napi_callback_info info)
     MeasureContext context;
     context.textContent = textContent;
     context.fontSize = fontSizeNum;
-    context.fontStyle = fontStyle;
+    context.fontStyle = static_cast<FontStyle>(fontStyle);
     context.fontWeight = fontWeight;
     context.fontFamily = fontFamily;
     context.letterSpacing = letterSpace;
@@ -247,7 +247,7 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     context.textContent = textContent;
     context.constraintWidth = constraintWidth;
     context.fontSize = fontSizeNum;
-    context.fontStyle = fontStyle;
+    context.fontStyle = static_cast<FontStyle>(fontStyle);
     context.fontWeight = fontWeight;
     context.fontFamily = fontFamily;
     context.letterSpacing = letterSpace;
