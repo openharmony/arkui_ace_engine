@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "base/geometry/size.h"
+#include "base/log/log.h"
 #include "base/utils/utils.h"
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/declaration/common/declaration.h"
@@ -68,6 +69,7 @@ public:
 
     void SetSrc(const std::string& src)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetWebSrc(src);
     }
 
@@ -78,6 +80,7 @@ public:
 
     void SetData(const std::string& data)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetWebData(data);
     }
 
@@ -88,6 +91,7 @@ public:
 
     void SetPageStartedEventId(const EventMarker& pageStartedEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetPageStartedEventId(pageStartedEventId);
     }
 
@@ -98,6 +102,7 @@ public:
 
     void SetPageFinishedEventId(const EventMarker& pageFinishedEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetPageFinishedEventId(pageFinishedEventId);
     }
 
@@ -123,6 +128,7 @@ public:
 
     void SetTitleReceiveEventId(const EventMarker& titleReceiveEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetTitleReceiveEventId(titleReceiveEventId);
     }
 
@@ -133,6 +139,7 @@ public:
 
     void SetOnFullScreenExitEventId(const EventMarker& fullScreenExitEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetOnFullScreenExitEventId(fullScreenExitEventId);
     }
 
@@ -143,6 +150,7 @@ public:
 
     void SetGeolocationHideEventId(const EventMarker& geolocationHideEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetGeolocationHideEventId(geolocationHideEventId);
     }
 
@@ -153,6 +161,7 @@ public:
 
     void SetGeolocationShowEventId(const EventMarker& geolocationShowEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetGeolocationShowEventId(geolocationShowEventId);
     }
 
@@ -163,6 +172,7 @@ public:
 
     void SetRequestFocusEventId(const EventMarker& requestFocusEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetRequestFocusEventId(requestFocusEventId);
     }
 
@@ -173,6 +183,7 @@ public:
 
     void SetDownloadStartEventId(const EventMarker& downloadStartEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetDownloadStartEventId(downloadStartEventId);
     }
 
@@ -183,6 +194,7 @@ public:
 
     void SetPageErrorEventId(const EventMarker& pageErrorEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetPageErrorEventId(pageErrorEventId);
     }
 
@@ -193,6 +205,7 @@ public:
 
     void SetHttpErrorEventId(const EventMarker& httpErrorEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetHttpErrorEventId(httpErrorEventId);
     }
 
@@ -203,6 +216,7 @@ public:
 
     void SetMessageEventId(const EventMarker& messageEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetMessageEventId(messageEventId);
     }
 
@@ -213,6 +227,7 @@ public:
 
     void SetRenderExitedId(const EventMarker& renderExitedId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetRenderExitedId(renderExitedId);
     }
 
@@ -223,6 +238,7 @@ public:
 
     void SetRefreshAccessedHistoryId(const EventMarker& refreshAccessedHistoryId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetRefreshAccessedHistoryId(refreshAccessedHistoryId);
     }
 
@@ -233,6 +249,7 @@ public:
 
     void SetResourceLoadId(const EventMarker& resourceLoadId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetResourceLoadId(resourceLoadId);
     }
 
@@ -243,6 +260,7 @@ public:
 
     void SetScaleChangeId(const EventMarker& scaleChangeId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetScaleChangeId(scaleChangeId);
     }
 
@@ -253,6 +271,7 @@ public:
 
     void SetScrollId(const EventMarker& scrollId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetScrollId(scrollId);
     }
 
@@ -263,6 +282,7 @@ public:
 
     void SetPermissionRequestEventId(const EventMarker& permissionRequestEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetPermissionRequestEventId(permissionRequestEventId);
     }
 
@@ -289,6 +309,7 @@ public:
 
     void SetWindowExitEventId(const EventMarker& windowExitEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetWindowExitEventId(windowExitEventId);
     }
 
@@ -761,6 +782,7 @@ public:
 
     void SetSearchResultReceiveEventId(const EventMarker& searchResultReceiveEventId)
     {
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetSearchResultReceiveEventId(searchResultReceiveEventId);
     }
 

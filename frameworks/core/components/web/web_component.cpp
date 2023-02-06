@@ -20,7 +20,6 @@
 
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
-#include "base/log/log.h"
 #include "core/components/web/render_web.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_element.h"
