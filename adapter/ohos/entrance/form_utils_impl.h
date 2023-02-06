@@ -29,6 +29,9 @@ public:
 
     int32_t RouterEvent(int64_t formId, const std::string& action, int32_t contianerId,
         const std::string& defualtbundleName) override;
+
+    int32_t BackgroundEvent(int64_t formId, const std::string& action, int32_t contianerId,
+        const std::string& defualtbundleName) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_FORM_UTILS_IMPL_H

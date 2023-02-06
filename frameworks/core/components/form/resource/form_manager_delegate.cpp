@@ -343,7 +343,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     }
 
     auto type = actionType->GetString();
-    if (type != "router" && type != "message") {
+    if (type != "router" && type != "message" && type != "background") {
         LOGE("undefined event type");
         return;
     }
@@ -354,13 +354,26 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
         if (!ParseAction(action, want)) {
             LOGE("Failed to parse want");
         } else {
-            auto contianerId = Container::CurrentId();
-            if (!formUtils_) {
-                LOGE("Failed to get formUtils");
-                return;
-            }
-            formUtils_->RouterEvent(runningCardId_, action, contianerId, wantCache_.GetElement().GetBundleName());
+            CHECK_NULL_VOID(formUtils_);
+            auto context = context_.Upgrade();
+            CHECK_NULL_VOID(context);
+            auto instantId = context->GetInstanceId();
+            formUtils_->RouterEvent(
+                runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
         }
+        return;
+    } else if (type == "background") {
+        AAFwk::Want want;
+        if (!ParseAction(action, want)) {
+            LOGE("Failed to parse want");
+        } else {
+            CHECK_NULL_VOID(formUtils_);
+            auto context = context_.Upgrade();
+            CHECK_NULL_VOID(context);
+            auto instantId = context->GetInstanceId();
+            formUtils_->BackgroundEvent(
+                runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
+            }
         return;
     }
 
