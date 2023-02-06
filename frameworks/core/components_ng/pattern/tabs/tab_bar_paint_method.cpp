@@ -22,13 +22,14 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-void PaintIndicator(RSCanvas& canvas, RectF indicator)
+void PaintIndicator(RSCanvas& canvas, RectF indicator, float currentIndicatorOffset)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
     indicator.SetHeight(tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
+    indicator.SetLeft(currentIndicatorOffset);
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(tabTheme->GetActiveIndicatorColor()));
@@ -45,8 +46,8 @@ CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
     if (!paintProperty->GetIndicator()) {
         return nullptr;
     }
-    auto paintFunc = [indicator = paintProperty->GetIndicatorValue()](
-                         RSCanvas& canvas) { PaintIndicator(canvas, indicator); };
+    auto paintFunc = [indicator = paintProperty->GetIndicatorValue(), currentIndicatorOffset = currentIndicatorOffset_](
+                         RSCanvas& canvas) { PaintIndicator(canvas, indicator, currentIndicatorOffset); };
 
     return paintFunc;
 }

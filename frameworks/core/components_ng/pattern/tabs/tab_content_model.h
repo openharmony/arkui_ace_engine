@@ -35,6 +35,7 @@ public:
     virtual void Pop() = 0;
     virtual void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         std::function<void()>&& builder, bool useContentOnly) = 0;
+    virtual void SetTabBarStyle(TabBarStyle tabBarStyle) = 0;
 
 private:
     static std::unique_ptr<TabContentModel> instance_;
