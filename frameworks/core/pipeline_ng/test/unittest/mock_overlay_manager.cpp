@@ -12,10 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
-
-#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -31,6 +30,8 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo) {}
 
+void OverlayManager::HideAllPopups() {}
+
 bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset)
 {
     return true;
@@ -42,6 +43,8 @@ void OverlayManager::ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPt
 void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu) {}
 
 void OverlayManager::HideMenu(int32_t targetId) {}
+
+void OverlayManager::HideAllMenus() {}
 
 void OverlayManager::DeleteMenu(int32_t targetId) {}
 
