@@ -114,6 +114,7 @@ void DatePickerView::CreateDatePicker()
         yearColumnNode->MountToParent(stackYearNode);
         auto layoutProperty = stackYearNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackYearNode->MountToParent(dateNode);
     }
     if (!hasMonthNode) {
@@ -124,6 +125,7 @@ void DatePickerView::CreateDatePicker()
         monthColumnNode->MountToParent(stackMonthNode);
         auto layoutProperty = stackMonthNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackMonthNode->MountToParent(dateNode);
     }
     if (!hasDayNode) {
@@ -134,6 +136,7 @@ void DatePickerView::CreateDatePicker()
         dayColumnNode->MountToParent(stackDayNode);
         auto layoutProperty = stackDayNode->GetLayoutProperty<LayoutProperty>();
         layoutProperty->UpdateAlignment(Alignment::CENTER);
+        layoutProperty->UpdateLayoutWeight(1);
         stackDayNode->MountToParent(dateNode);
     }
     stack->Push(dateNode);
