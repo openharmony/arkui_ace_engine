@@ -230,7 +230,7 @@ public:
     }
 
 protected:
-    bool isCardfront_ = false;
+    bool isFormRender_ = false;
     RefPtr<Framework::FrontendDelegateDeclarative> delegate_;
 
 private:

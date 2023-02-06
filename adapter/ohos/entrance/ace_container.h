@@ -270,9 +270,9 @@ public:
         return isSubContainer_;
     }
 
-    bool IsCardContainer() const
+    bool IsFormRender() const
     {
-        return isCardContainer_;
+        return isFormRender_;
     }
 
     void* GetSharedRuntime() override
@@ -358,9 +358,9 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsCardContainer(bool isCardContainer)
+    void SetIsFormRender(bool isCardContainer)
     {
-        isCardContainer_ = isCardContainer;
+        isFormRender_ = isCardContainer;
     }
 
     void InitializeSubContainer(int32_t parentContainerId);
@@ -434,7 +434,7 @@ private:
     sptr<IRemoteObject> token_;
 
     bool isSubContainer_ = false;
-    bool isCardContainer_ = false;
+    bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
 

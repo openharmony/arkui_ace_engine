@@ -26,18 +26,18 @@
 #include "frameworks/core/common/frontend.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
+#include "core/common/form_manager.h"
+#include "core/components/form/resource/form_utils.h"
+
 #include "form_callback_client.h"
-#include "form_surface_callback_client.h"
 #include "form_host_client.h"
 #include "form_js_info.h"
 #include "form_mgr.h"
-#include "core/common/form_manager.h"
-#include "core/components/form/resource/form_utils.h"
+#include "form_surface_callback_client.h"
 #include "pointer_event.h"
 #endif
 
 namespace OHOS::Ace {
-
 namespace {
 
 constexpr char FORM_EVENT_ON_ACQUIRE_FORM[] = "onAcquireForm";
@@ -150,8 +150,8 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         return;
     }
     LOGI("Add form success formId:%{public}s", std::to_string(formJsInfo.formId).c_str());
-    LOGI("Add form success type:%{public}d", (int)formJsInfo.type);
-    LOGI("Add form success uiSyntax:%{public}d", (int)formJsInfo.uiSyntax);
+    LOGI("Add form success type:%{public}d", static_cast<int>(formJsInfo.type));
+    LOGI("Add form success uiSyntax:%{public}d", static_cast<int>(formJsInfo.uiSyntax));
 
     if (formCallbackClient_ == nullptr) {
         formCallbackClient_ = std::make_shared<FormCallbackClient>();
@@ -189,29 +189,29 @@ void FormManagerDelegate::ProcessAddFormSurface(
     const AAFwk::Want& want)
 {
     if (!rsSurfaceNode) {
-        LOGE("---- etsCardTest ProcessAddFormSurface rsSurfaceNode is null");
+        LOGE("Form ProcessAddFormSurface rsSurfaceNode is null");
         return;
     }
-    LOGI("Kee ---- etsCardTest ProcessAddFormSurface formId=%{public}lld, surfaceNodeId=%{public}llu ----",
-        static_cast<long long>(formInfo.formId), static_cast<unsigned long long>(rsSurfaceNode->GetId()));
+    LOGI("Form ProcessAddFormSurface formId=%{public}s", std::to_string(formInfo.formId).c_str());
 
     if (onFormSurfaceNodeCallback_) {
         onFormSurfaceNodeCallback_(rsSurfaceNode);
     } else {
-        LOGE("Kee FormManagerDelegate::ProcessAddFormSurface onFormSurfaceNodeCallback_ = nullptr");
+        LOGE("Form ProcessAddFormSurface onFormSurfaceNodeCallback = nullptr");
     }
 
     if (formRendererDispatcher_) {
+        LOGW("Get formRendererDispatcher already exist.");
         return;
     }
 
     sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
     formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
     if (formRendererDispatcher_ == nullptr) {
-        LOGE("get formRendererDispatcher failed.");
+        LOGE("Get formRendererDispatcher failed.");
         return;
     }
-    LOGE("Get success, formRendererDispatcher.");
+    LOGI("Get success, formRendererDispatcher.");
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
@@ -351,7 +351,7 @@ void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback
 void FormManagerDelegate::AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback)
 {
     if (!callback || state_ == State::RELEASED) {
-        LOGE("Kee callback is null or has released");
+        LOGE("callback is null or has released");
         return;
     }
     onFormSurfaceNodeCallback_ = callback;

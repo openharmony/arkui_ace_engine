@@ -126,10 +126,10 @@ private:
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
     
     // ArkTS Form
-    bool isCard_ = false;
-    std::string bundleName_ = "";
-    float formWidth_;
-    float formHeight_;
+    bool isFormRender_ = false;
+    std::string bundleName_;
+    float formWidth_ = 0.0;
+    float formHeight_ = 0.0;
 };
 
 } // namespace OHOS::Ace

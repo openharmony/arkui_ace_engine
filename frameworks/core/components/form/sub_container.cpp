@@ -156,7 +156,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
 
     if (uiSyntax == FrontendType::ETS_CARD) {
         // ArkTSCard: 确认Acquired事件时序
-        LOGI("Kee Run Card in FRS");
+        LOGI("Run Card in FRS");
         uiSyntax_ = FrontendType::ETS_CARD;
         return;
     }
@@ -218,7 +218,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     UpdateRootElementSize();
     pipelineContext_->SetIsJsCard(true); // JSCard & eTSCard both use this flag
     if (cardType_ == FrontendType::ETS_CARD) {
-        pipelineContext_->SetIsEtsCard(true); // only eTSCard use this flag
+        pipelineContext_->SetIsFormRender(true); // only eTSCard use this flag
     }
 
     ResourceInfo cardResourceInfo;

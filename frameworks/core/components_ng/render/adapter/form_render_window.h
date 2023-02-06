@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,10 @@
 
 #include <memory>
 
+#ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "vsync_receiver.h"
+#endif
 
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
@@ -28,9 +30,7 @@
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT FormRenderWindow : public Window {
-
 public:
     using OnVsyncCallback = std::function<void(int64_t, void*)>;
     explicit FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id);
@@ -41,6 +41,7 @@ public:
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
+#ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
     {
         return rsUIDirector_;
@@ -50,6 +51,7 @@ public:
     {
         return rsSurfaceNode_;
     }
+#endif
 
     void SetFormRSSurfaceNode(void* surfaceNode) override;
     void OnShow() override;
@@ -57,13 +59,15 @@ public:
     void FlushTasks() override;
 
 private:
+    WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
+    int32_t id_ = 0;
+#ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;
     Rosen::VSyncReceiver::FrameCallback frameCallback_;
     OnVsyncCallback onVsyncCallback_;
-    WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
-    int32_t id_ = 0;
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode_;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(FormRenderWindow);
 };
 } // namespace OHOS::Ace

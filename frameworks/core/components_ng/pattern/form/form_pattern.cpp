@@ -214,6 +214,7 @@ void FormPattern::InitFormManagerDelegate()
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
         [weak = WeakClaim(this), instanceID](const std::shared_ptr<Rosen::RSSurfaceNode>& node) {
+            LOGI("Form surface node callback");
             ContainerScope scope(instanceID);
             CHECK_NULL_VOID(node);
             node->CreateNodeInRenderThread();

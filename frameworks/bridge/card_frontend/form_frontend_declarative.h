@@ -99,14 +99,14 @@ public:
         cardId_ = cardId;
     }
 
-    void SetCardFrontend(bool isCardfront)
+    void SetIsFormRender(bool isCardfront)
     {
-        isCardfront_ = isCardfront;
+        isFormRender_ = isCardfront;
     }
 
-    bool IsCardFrontend()
+    bool IsFormRender()
     {
-        return isCardfront_;
+        return isFormRender_;
     }
 
     void SetTaskExecutor(RefPtr<TaskExecutor> taskExecutor)

@@ -50,6 +50,7 @@
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -57,7 +58,6 @@
 #include "core/common/form_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
-#include "bridge/card_frontend/form_frontend_declarative.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -236,35 +236,20 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
-                             void* runtime, bool isCard) : runtime_(runtime), isCard_(isCard)
+                             void* runtime, bool isCard) : runtime_(runtime), isFormRender_(isCard)
 {
-    LOGE("Kee UIContentImpl::UIContentImpl Card 1, runtime = %{public}p.", runtime);
     CHECK_NULL_VOID(context);
-    LOGE("Kee UIContentImpl::UIContentImpl Card 2");
+    bundleName_ = context->GetBundleName();
     const auto& obj = context->GetBindingObject();
-    if (!obj) {
-        bundleName_ = context->GetBundleName();
-        LOGE("Kee UIContentImpl::UIContentImpl Card 3, bundleName_ is %{public}s", bundleName_.c_str());
-        return;
-    }
-    LOGE("Kee UIContentImpl::UIContentImpl Card 4");
+    CHECK_NULL_VOID(obj);
     auto ref = obj->Get<NativeReference>();
-    if (ref == nullptr) {
-        LOGE("ref is nullptr");
-    }
-    LOGE("Kee UIContentImpl::UIContentImpl Card 5");
+    CHECK_NULL_VOID(ref);
     auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
-    if (object == nullptr) {
-        LOGE("object is nullptr");
-    }
-    LOGE("Kee UIContentImpl::UIContentImpl Card 6");
+    CHECK_NULL_VOID(object);
     auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
-    if (weak == nullptr) {
-        LOGE("weak is nullptr");
-    }
-    LOGE("Kee UIContentImpl::UIContentImpl Card 7");
+    CHECK_NULL_VOID(weak);
     context_ = *weak;
-    LOGE("Kee UIContentImpl::UIContentImpl Card successfully.");
+    LOGI("Create form UIContentImpl successfully.");
 }
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
@@ -309,7 +294,7 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     }
 
     // ArkTSCard need no window : 梳理所有需要window和不需要window的场景
-    if (isCard_ && !window) {
+    if (isFormRender_ && !window) {
         LOGI("CommonInitializeCard url = %{public}s", url.c_str());
         CommonInitializeCard(window, url, storage);
     }
@@ -341,11 +326,10 @@ std::string UIContentImpl::GetContentInfo() const
 }
 
 // ArkTSCard start
-// ArkTSCard start
 void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
                                          const std::string& contentInfo, NativeValue* storage)
 {
-    LOGI("Kee Initialize CommonInitializeCard start.");
+    LOGI("Initialize CommonInitializeCard start.");
     ACE_FUNCTION_TRACE();
     window_ = window;
     startUrl_ = contentInfo;
@@ -363,7 +347,7 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
 
     auto context = context_.lock();
     static std::once_flag onceFlag;
-    if (!isCard_) {
+    if (!isFormRender_) {
         std::call_once(onceFlag, [&context]() {
             LOGI("Initialize for current process.");
             SetHwIcuDirectory();
@@ -381,12 +365,12 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
 
     bool useNewPipe = true;
 #ifdef ENABLE_ROSEN_BACKEND
-    if (isCard_ && !window && !useNewPipe) {
+    if (isFormRender_ && !window && !useNewPipe) {
         useNewPipe = true;
     }
 
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
-    if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe && isCard_) {
+    if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe && isFormRender_) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
         if (rsUiDirector) {
             rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
@@ -465,9 +449,9 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
     std::string moduleHapPath = info != nullptr ? info->hapPath : "";
     std::string resPath;
     std::string pageProfile;
-    LOGI("Kee Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
-    if (isCard_) {
-        LOGI("Kee Initialize UIContent isCard_ assetProvider");
+    LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
+    if (isFormRender_) {
+        LOGI("Initialize UIContent form assetProvider");
         std::vector<std::string> basePaths;
         basePaths.push_back("assets/js/entry/");
         basePaths.emplace_back("assets/js/share/");
@@ -476,7 +460,7 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
         basePaths.emplace_back("ets/");
         auto assetProvider = CreateAssetProvider("/data/bundles/" + bundleName_ + "/entry.hap", basePaths);
         if (assetProvider) {
-            LOGE("Kee push card asset provider to queue.");
+            LOGE("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
         }
     } else {
@@ -636,8 +620,8 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
             false, false, useNewPipe);
 
     CHECK_NULL_VOID(container);
-    container->SetIsCardContainer(isCard_);
-    container->SetIsFRSCardContainer(isCard_);
+    container->SetIsFormRender(isFormRender_);
+    container->SetIsFRSCardContainer(isFormRender_);
     if (window_) {
         container->SetWindowName(window_->GetWindowName());
         container->SetWindowId(window_->GetWindowId());
@@ -660,7 +644,6 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
         container->GetSettings().SetUsingSharedRuntime(false);
     }
     container->SetPageProfile(pageProfile);
-    LOGE("Kee UIContentImpl::CommonInitialize container->Initialize");
     container->Initialize();
     ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
@@ -674,16 +657,16 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
     aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
-    if (isCard_) {
+    if (isFormRender_) {
         resPath = "/data/bundles/" + bundleName_ + "/entry";
         hapPath = "/data/bundles/" + bundleName_ + "/entry.hap";
     }
-    LOGI("Kee CommonInitializeCard resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());
+    LOGI("CommonInitializeCard resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
     container->SetAssetManager(flutterAssetManager);
-    if (!isCard_) {
+    if (!isFormRender_) {
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
     // for atomic service
@@ -721,11 +704,9 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
         window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     }
 
-    LOGE("Kee CommonInitialize usePlatformAsUIThread = %{public}d", container->GetSettings().usePlatformAsUIThread);
-
     // create ace_view
     Platform::FlutterAceView* flutterAceView = nullptr;
-    if (isCard_) {
+    if (isFormRender_) {
         flutterAceView =
             Platform::FlutterAceView::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
         Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
@@ -759,9 +740,8 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
         // set view
         Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_, callback);
     } else {
-        LOGE("Kee Platform::AceContainer::SetViewNew");
-        if (isCard_) {
-            LOGE("Kee Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f",
+        if (isFormRender_) {
+            LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f",
                 formWidth_, formHeight_);
             Platform::AceContainer::SetViewNew(flutterAceView, density, formWidth_, formHeight_, window_);
         } else {
@@ -775,7 +755,7 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
         Focus();
     }
 
-    if (isCard_) {
+    if (isFormRender_) {
         Platform::FlutterAceView::SurfaceChanged(
             flutterAceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
     } else {
@@ -789,7 +769,7 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
             pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
         }
     }
-    if (runtime_ && !isCard_) { // ArkTSCard not support inherit local strorage from context
+    if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
             container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
@@ -1523,15 +1503,11 @@ void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pix
 
 void UIContentImpl::ProcessFormUpdate(const std::string& data)
 {
-    LOGE("Kee UIContentImpl::ProcessFormUpdate 1 data = %{public}s", data.c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    LOGE("Kee UIContentImpl::ProcessFormUpdate 2 data = %{public}s", data.c_str());
     auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
     CHECK_NULL_VOID(frontend);
-    LOGE("Kee UIContentImpl::ProcessFormUpdate 3 data = %{public}s", data.c_str());
     frontend->UpdateData(data);
-    LOGE("Kee UIContentImpl::ProcessFormUpdate 4 data = %{public}s", data.c_str());
 }
 
 void UIContentImpl::SetActionEventHandler(

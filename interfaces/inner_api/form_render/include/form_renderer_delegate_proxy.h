@@ -30,7 +30,7 @@ namespace Ace {
 class ACE_EXPORT FormRendererDelegateProxy : public IRemoteProxy<IFormRendererDelegate> {
 public:
     explicit FormRendererDelegateProxy(const sptr<IRemoteObject>& impl);
-     ~FormRendererDelegateProxy() override = default;
+    ~FormRendererDelegateProxy() override = default;
 
     int32_t OnSurfaceCreate(
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
@@ -42,8 +42,6 @@ public:
     int32_t OnError(const std::string& param) override;
 
 private:
-    // template<typename T>
-    // int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);
     static bool WriteInterfaceToken(MessageParcel &data);
 
     static inline BrokerDelegator<FormRendererDelegateProxy> delegator_;

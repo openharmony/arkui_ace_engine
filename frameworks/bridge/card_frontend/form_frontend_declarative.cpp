@@ -34,11 +34,11 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
     }
     // the case uri is starts with "/" and "/" is the mainPage
     if (uri.size() != 0) {
-        if (uri.compare(0, 1, "/") == 0) {
-            return uri.substr(1) + suffix;
+        if (uri.compare(0, 1, "/") == 0) { // 1: length of '/'
+            return uri.substr(1) + suffix; // 1: length of '/'
         }
-        if (uri.compare(0, 2, "./") == 0) {
-            return uri.substr(2) + suffix;
+        if (uri.compare(0, 2, "./") == 0) { // 2: length of './'
+            return uri.substr(2) + suffix; // 2: length of './'
         }
     }
 
@@ -48,15 +48,14 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
 
 void FormFrontendDeclarative::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
-    LOGI("Kee FormFrontendDeclarative::RunPage url = %{public}s", url.c_str());
+    LOGI("FormFrontendDeclarative::RunPage url = %{public}s", url.c_str());
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);
-
     if (urlPath.empty()) {
         LOGE("fail to eTS Card run page due to path url is empty");
         EventReport::SendFormException(FormExcepType::RUN_PAGE_ERR);
         return;
     }
-    LOGI("Kee FormFrontendDeclarative::RunPage urlPath = %{public}s", urlPath.c_str());
+    LOGI("FormFrontendDeclarative::RunPage urlPath = %{public}s", urlPath.c_str());
     if (delegate_) {
         auto container = Container::Current();
         if (!container) {

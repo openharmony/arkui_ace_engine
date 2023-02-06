@@ -458,23 +458,24 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
     };
 
-    if (isCardfront_) {
-        LOGE("Kee DeclarativeFrontend::InitializeFrontendDelegate new Card delegate_");
+    if (isFormRender_) {
+        LOGI("Init Form Delegate");
         delegate_ = AceType::MakeRefPtr<Framework::FormFrontendDelegateDeclarative>(taskExecutor, loadCallback,
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
             timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback,
             onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
             onRestoreAbilityStateCallBack, onNewWantCallBack,
-            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, 
+            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack,
             onRemoteTerminatedCallBack, onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
     } else {
         delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateDeclarative>(taskExecutor, loadCallback,
             setPluginMessageTransferCallback, asyncEventCallback, syncEventCallback, updatePageCallback,
             resetStagingPageCallback, destroyPageCallback, destroyApplicationCallback, updateApplicationStateCallback,
-            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback, onWindowDisplayModeChangedCallBack,
-            onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack, onRestoreAbilityStateCallBack, onNewWantCallBack,
-            onMemoryLevelCallBack, onStartContinuationCallBack, onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
+            timerCallback, mediaQueryCallback, requestAnimationCallback, jsCallback,
+            onWindowDisplayModeChangedCallBack, onConfigurationUpdatedCallBack, onSaveAbilityStateCallBack,
+            onRestoreAbilityStateCallBack, onNewWantCallBack, onMemoryLevelCallBack, onStartContinuationCallBack,
+            onCompleteContinuationCallBack, onRemoteTerminatedCallBack,
             onSaveDataCallBack, onRestoreDataCallBack, externalEventCallback);
     }
 
@@ -518,8 +519,7 @@ void DeclarativeFrontend::RunPage(int32_t pageId, const std::string& url, const 
     }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarative.
     if (delegate_) {
-        if (isCardfront_) {
-            LOGI("Kee DeclarativeFrontend::RunCard delegate_");
+        if (isFormRender_) {
             auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
             delegate->RunCard(url, params, pageProfile_, 0);
         } else {

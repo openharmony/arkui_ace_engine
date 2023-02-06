@@ -45,7 +45,7 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
 void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     auto iter = rendererMap_.begin();
-    while (iter!= rendererMap_.end()) {  
+    while (iter!= rendererMap_.end()) {
         auto renderer = iter->second;
         renderer->UpdateForm(formJsInfo);
         iter++;
@@ -59,7 +59,7 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
         return;
     }
     auto renderer = iter->second;
-    // should release the occupancy of resources of the context, runtime and uicontent 
+    // should release the occupancy of resources of the context, runtime and ui content
     renderer->Destroy();
     rendererMap_.erase(iter);
 }

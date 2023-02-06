@@ -113,7 +113,7 @@ public:
 
     // ArkTS Form
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetCardRootNode()
-    { 
+    {
         return nullptr;
     }
 

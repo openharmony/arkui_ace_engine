@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,22 +22,28 @@
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
-#include "transaction/rs_interfaces.h"
+
+#ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "transaction/rs_interfaces.h"
+#endif
 
 namespace {
+#ifdef ENABLE_ROSEN_BACKEND
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 
 float GetDisplayRefreshRate()
 {
     return 60.0f;
 }
+#endif
 } // namespace
 
 namespace OHOS::Ace {
 FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : taskExecutor_(taskExecutor), id_(id)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     ContainerScope scope(id);
     auto container = Container::Current();
     LOGI("FormRenderWindow::FormRenderWindow container = %{public}p", AceType::RawPtr(container));
@@ -45,7 +51,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         receiver_ = rsClient.CreateVSyncReceiver("Form");
         if (receiver_ == nullptr) {
-            LOGE("Kee Create VSync receiver failed.");
+            LOGE("Form Create VSync receiver failed.");
             return;
         }
         receiver_->Init();
@@ -98,16 +104,23 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     });
+#else
+    taskExecutor_ = nullptr;
+    id_ = 0;
+#endif
 }
 
 void FormRenderWindow::RequestFrame()
 {
+#ifdef ENABLE_ROSEN_BACKEND
     receiver_->RequestNextVSync(frameCallback_);
+#endif
 }
 
 void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 {
     CHECK_NULL_VOID(root);
+#ifdef ENABLE_ROSEN_BACKEND
     auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(root->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
     if (rosenRenderContext->GetRSNode()) {
@@ -119,33 +132,42 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
     rsUIDirector_->SendMessages();
+#endif
 }
 
 void FormRenderWindow::SetFormRSSurfaceNode(void* surfaceNode)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     if (!surfaceNode) {
         LOGE("FormRenderWindow SetFormRSSurfaceNode surfaceNode is null !!!");
         return;
     }
     std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
     rsSurfaceNode.reset(static_cast<Rosen::RSSurfaceNode*>(surfaceNode));
+#endif
 }
 
 void FormRenderWindow::OnShow()
 {
+#ifdef ENABLE_ROSEN_BACKEND
     Window::OnShow();
     rsUIDirector_->GoForeground();
+#endif
 }
 
 void FormRenderWindow::OnHide()
 {
+#ifdef ENABLE_ROSEN_BACKEND
     Window::OnHide();
     rsUIDirector_->GoBackground();
     rsUIDirector_->SendMessages();
+#endif
 }
 
 void FormRenderWindow::FlushTasks()
 {
+#ifdef ENABLE_ROSEN_BACKEND
     rsUIDirector_->SendMessages();
+#endif
 }
 } // namespace OHOS::Ace

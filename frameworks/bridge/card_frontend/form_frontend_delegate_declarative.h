@@ -86,7 +86,7 @@ public:
     void LoadResourceConfiguration(std::map<std::string, std::string>& mediaResourceFileMap,
                                     std::unique_ptr<JsonValue>& currentResourceData) override
     {
-        LOGE("Kee FormFrontendDelegateDeclarative LoadResourceConfiguration");
+        LOGI("FormFrontendDelegateDeclarative LoadResourceConfiguration");
     }
     void UpdatePageData(const std::string& dataList)
     {

@@ -47,10 +47,10 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
     OHOS::MMI::PointerEvent::PointerItem item;
-    item.SetWindowX((int32_t)(point.x - offsetF.GetX()));
-    item.SetWindowY((int32_t)(point.y - offsetF.GetY()));
-    item.SetDisplayX((int32_t)point.screenX);
-    item.SetDisplayY((int32_t)point.screenY);
+    item.SetWindowX(static_cast<int32_t>(point.x - offsetF.GetX()));
+    item.SetWindowY(static_cast<int32_t>(point.y - offsetF.GetY()));
+    item.SetDisplayX(static_cast<int32_t>(point.screenX));
+    item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);
     pointerEvent->AddPointerItem(item);
 
@@ -91,7 +91,6 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
 
     // Send TouchEvent Info to FormRenderService when Provider is ArkTS Card.
     if (subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
-        LOGE("Kee TouchTest In FRS");
         DispatchPointerEvent(touchRestrict.touchEvent);
         auto callback = [weak = WeakClaim(this)] (const TouchEvent& point) {
             auto formNode = weak.Upgrade();
@@ -101,13 +100,12 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
         context->AddEtsCardTouchEventCallback(callback);
         return HitTestResult::BUBBLING;
     }
-    LOGE("Kee TouchTest In HOST");
     auto subContext = DynamicCast<OHOS::Ace::PipelineBase>(subContainer->GetPipelineContext());
     CHECK_NULL_RETURN(subContext, HitTestResult::BUBBLING);
     subContext->SetPluginEventOffset(Offset(selfGlobalOffset.GetX(), selfGlobalOffset.GetY()));
     context->SetTouchPipeline(WeakPtr<PipelineBase>(subContext));
 
-    return HitTestResult::BUBBLING;
+    return HitTestResult::STOP_BUBBLING;
 }
 
 void FormNode::DispatchPointerEvent(const TouchEvent& point) const

@@ -990,35 +990,35 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
 
-    LOGE("Kee JsiDeclarativeEngine::ExecuteCardAbc fileName = %{public}s", fileName.c_str());
+    LOGI("JsiDeclarativeEngine::ExecuteCardAbc fileName = %{public}s", fileName.c_str());
     CardScope cardScope(cardId);
     std::string abcPath;
     std::vector<uint8_t> content;
     if (container->IsFRSCardContainer()) {
-        LOGE("Kee ExecuteCardAbc In FRS");
+        LOGI("ExecuteCardAbc In FRS");
         auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_RETURN(frontEnd, false);
         auto delegate = frontEnd->GetDelegate();
         CHECK_NULL_RETURN(delegate, false);
         if (!delegate->GetAssetContent(fileName, content)) {
-            LOGE("Kee EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
             return false;
         }
         abcPath = delegate->GetAssetPath(fileName).append(fileName);
     } else {
-        LOGE("Kee ExecuteCardAbc In HOST");
+        LOGI("ExecuteCardAbc In HOST");
         auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_RETURN(frontEnd, false);
         auto delegate = frontEnd->GetDelegate();
         CHECK_NULL_RETURN(delegate, false);
         if (!delegate->GetAssetContent(fileName, content)) {
-            LOGE("Kee EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
             return false;
         }
         abcPath = delegate->GetAssetPath(fileName).append(fileName);
     }
 
-    LOGE("Kee JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
+    LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
         LOGE("ExecuteCardAbc EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;

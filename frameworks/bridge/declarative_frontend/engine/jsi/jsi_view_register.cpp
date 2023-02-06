@@ -277,14 +277,14 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
         if (container->IsFRSCardContainer()) {
-            LOGE("Kee JSPostCardAction FRS");
+            LOGE("Form PostCardAction in FRS");
             auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
             CHECK_NULL_RETURN(frontEnd, panda::JSValueRef::Undefined(vm));
             auto delegate = frontEnd->GetDelegate();
             CHECK_NULL_RETURN(delegate, panda::JSValueRef::Undefined(vm));
             delegate->FireCardAction(action);
         } else {
-            LOGE("Kee JSPostCardAction HOST");
+            LOGE("Form PostCardAction in HOST");
             auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
             CHECK_NULL_RETURN(frontEnd, panda::JSValueRef::Undefined(vm));
             auto delegate = frontEnd->GetDelegate();
@@ -298,7 +298,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
 
 panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGE("Kee Load eTS Card start");
+    LOGI("Load eTS Card start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {

@@ -26,8 +26,8 @@ constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_for
 }
 FormRenderer::FormRenderer(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
-    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime) :
-    context_(context), runtime_(runtime)
+    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
+    : context_(context), runtime_(runtime)
 {
     if (!context_ || !runtime_) {
         return;

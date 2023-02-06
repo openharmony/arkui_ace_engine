@@ -206,7 +206,7 @@ void AceContainer::InitializeFrontend()
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
-        if (isCardContainer_) {
+        if (isFormRender_) {
             LOGI("Init Form Frontend");
             frontend_ = AceType::MakeRefPtr<FormFrontendDeclarative>();
             auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
@@ -224,8 +224,8 @@ void AceContainer::InitializeFrontend()
             cardFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
             cardFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
             // Card front
-            cardFrontend->SetRunningCardId(0); // ArkTsCard TODO: nodeId, Host->FMS->FRS->innersdk
-            cardFrontend->SetCardFrontend(true);
+            cardFrontend->SetRunningCardId(0); // ArkTsCard : nodeId, Host->FMS->FRS->innersdk
+            cardFrontend->SetIsFormRender(true);
         } else if (!isSubContainer_) {
             frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
@@ -731,17 +731,14 @@ void AceContainer::SetViewNew(
     CHECK_NULL_VOID(taskExecutor);
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
-	// ArkTSCard
     std::unique_ptr<Window> window;
-    if (container->isCardContainer_) {
+    if (container->isFormRender_) {
         auto formRenderWindow = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
         container->formSurfaceNode_ = formRenderWindow->GetRSSurfaceNode();
         window = std::move(formRenderWindow);
-        window->SetIsEtsCard(container->isCardContainer_);
         container->AttachView(std::move(window), view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
-        window->SetIsEtsCard(container->isCardContainer_);
         container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
 #endif
@@ -1053,9 +1050,8 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
 
-    // ArkTSCard
-    if (isCardContainer_) {
-        pipelineContext_->SetIsEtsCard(isCardContainer_);
+    if (isFormRender_) {
+        pipelineContext_->SetIsFormRender(isFormRender_);
         auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
         if (cardFrontend) {
             cardFrontend->SetTaskExecutor(taskExecutor_);

@@ -21,7 +21,6 @@
 #include <string>
 
 namespace OHOS {
-
 namespace AbilityRuntime {
 class Context;
 class Runtime;
@@ -36,7 +35,6 @@ struct FormJsInfo;
 }
 
 namespace Ace {
-
 #ifndef ACE_EXPORT
 #define ACE_EXPORT __attribute__((visibility("default")))
 #endif
@@ -50,7 +48,7 @@ class FormRenderer;
  * FormRendererGroup:FormRenderer = 1:compId
  */
 class ACE_EXPORT FormRendererGroup {
-public:    
+public:
     static std::unique_ptr<FormRendererGroup> Create(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
                                                      const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
 
