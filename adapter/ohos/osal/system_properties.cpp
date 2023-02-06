@@ -187,6 +187,11 @@ int SystemProperties::GetArkProperties()
     return system::GetIntParameter<int>("persist.ark.properties", -1);
 }
 
+std::string SystemProperties::GetArkBundleName()
+{
+    return system::GetParameter("persist.ark.arkbundlename", "");
+}
+
 size_t SystemProperties::GetGcThreadNum()
 {
     size_t defaultGcThreadNums = 7;
