@@ -782,10 +782,7 @@ public:
 
     void SetSearchResultReceiveEventId(const EventMarker& searchResultReceiveEventId)
     {
-        if (!declaration_) {
-            LOGE("declaration_ is null");
-            return;
-        }
+        CHECK_NULL_VOID(declaration_);
         declaration_->SetSearchResultReceiveEventId(searchResultReceiveEventId);
     }
 
