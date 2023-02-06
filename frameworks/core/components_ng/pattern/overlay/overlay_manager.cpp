@@ -46,6 +46,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -194,8 +195,10 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     AnimationUtils::Animate(
         option,
         [context]() {
-            context->UpdateOpacity(1.0);
-            context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            if (context) {
+                context->UpdateOpacity(1.0);
+                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            }
         },
         option.GetOnFinishEvent());
 }
@@ -302,44 +305,53 @@ void OverlayManager::ShowToast(
     AnimationUtils::Animate(
         option,
         [ctx]() {
-            ctx->UpdateOpacity(1.0);
-            ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            if (ctx) {
+                ctx->UpdateOpacity(1.0);
+                ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            }
         },
         option.GetOnFinishEvent());
 }
 
 void OverlayManager::PopToast(int32_t toastId)
 {
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    option.SetCurve(curve);
+    option.SetDuration(TOAST_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    // OnFinishEvent should be executed in UI thread.
+    option.SetOnFinishEvent([weak = WeakClaim(this), toastId] {
+        auto context = PipelineContext::GetCurrentContext();
+        context->GetTaskExecutor()->PostTask(
+            [weak, toastId]() {
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID_NOLOG(overlayManager);
+                auto toastIter = overlayManager->toastMap_.find(toastId);
+                if (toastIter == overlayManager->toastMap_.end()) {
+                    LOGI("No toast under pop");
+                    return;
+                }
+                auto toastUnderPop = toastIter->second.Upgrade();
+                CHECK_NULL_VOID_NOLOG(toastUnderPop);
+                LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID_NOLOG(context);
+                auto rootNode = context->GetRootElement();
+                CHECK_NULL_VOID_NOLOG(rootNode);
+                rootNode->RemoveChild(toastUnderPop);
+                overlayManager->toastMap_.erase(toastId);
+                rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            },
+            TaskExecutor::TaskType::UI);
+    });
     auto toastIter = toastMap_.find(toastId);
     if (toastIter == toastMap_.end()) {
         LOGI("No toast under pop");
         return;
     }
     auto toastUnderPop = toastIter->second.Upgrade();
-    AnimationOption option;
-    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    option.SetCurve(curve);
-    option.SetDuration(TOAST_ANIMATION_DURATION);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), toastId] {
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(overlayManager);
-        auto toastIter = overlayManager->toastMap_.find(toastId);
-        if (toastIter == overlayManager->toastMap_.end()) {
-            LOGI("No toast under pop");
-            return;
-        }
-        auto toastUnderPop = toastIter->second.Upgrade();
-        CHECK_NULL_VOID_NOLOG(toastUnderPop);
-        LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
-        auto rootNode = context->GetRootElement();
-        CHECK_NULL_VOID_NOLOG(rootNode);
-        rootNode->RemoveChild(toastUnderPop);
-        overlayManager->toastMap_.erase(toastId);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    });
+    CHECK_NULL_VOID_NOLOG(toastUnderPop);
     auto ctx = toastUnderPop->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     ctx->UpdateOpacity(1.0);
@@ -347,8 +359,10 @@ void OverlayManager::PopToast(int32_t toastId)
     AnimationUtils::Animate(
         option,
         [ctx]() {
-            ctx->UpdateOpacity(0.0);
-            ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
+            if (ctx) {
+                ctx->UpdateOpacity(0.0);
+                ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
+            }
         },
         option.GetOnFinishEvent());
     // start animation immediately

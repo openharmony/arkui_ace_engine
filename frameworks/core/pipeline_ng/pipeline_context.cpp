@@ -601,6 +601,7 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
+
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         LOGI("Exit full screen: back press accepted");
@@ -614,7 +615,13 @@ bool PipelineContext::OnBackPressed()
     }
 
     // if has popup, back press would hide popup and not trigger page back
-    if (overlayManager_->RemoveOverlay()) {
+    auto hasOverlay = false;
+    taskExecutor_->PostSyncTask([weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), &hasOverlay]() {
+        auto overlay = weakOverlay.Upgrade();
+        CHECK_NULL_VOID_NOLOG(overlay);
+        hasOverlay = overlay->RemoveOverlay();
+    }, TaskExecutor::TaskType::UI);
+    if (hasOverlay) {
         LOGI("popup hidden: back press accepted");
         return true;
     }
