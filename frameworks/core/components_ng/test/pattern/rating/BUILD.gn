@@ -95,6 +95,7 @@ ohos_unittest("rating_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/gesture/recognizers/mock_sequenced_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/image/mock_icon_theme.cpp",

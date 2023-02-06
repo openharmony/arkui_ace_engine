@@ -59,6 +59,7 @@ public:
     TestingBrush() = default;
     ~TestingBrush() = default;
     explicit TestingBrush(int rgba) noexcept {};
+    explicit TestingBrush(TestingColor color) {}
 
     virtual void SetAntiAlias(bool alias) {}
     virtual void SetWidth(float width) {}
