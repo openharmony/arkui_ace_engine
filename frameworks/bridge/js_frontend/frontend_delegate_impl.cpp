@@ -1305,11 +1305,7 @@ void FrontendDelegateImpl::PushPageTransitionListener(
     const TransitionEvent& event, const RefPtr<JsAcePage>& page)
 {
     if (event == TransitionEvent::PUSH_END) {
-        if (isMainPage_) {
-            isMainPage_ = false;
-        } else {
-            OnPageShow();
-        }
+        OnPageShow();
     }
 }
 
