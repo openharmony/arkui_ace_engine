@@ -88,15 +88,6 @@
                       ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render"
-                },
-                {
-                    "header": {
-                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/form_surface_service/include",
-                        "header_files": [
-                            "form_surface_interface.h"
-                        ]
-                    },
-                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/form_surface_service:form_surface_service"
                 }
             ],
             "test": [

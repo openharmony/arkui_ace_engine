@@ -33,7 +33,6 @@
 #include "form_mgr.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_utils.h"
-#include "form_surface_client.h"
 #include "pointer_event.h"
 #endif
 
@@ -138,10 +137,8 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
-    if (renderDelegate_ == nullptr) {
-        renderDelegate_ = std::make_shared<FormRendererDelegateImpl>();
-    }
     // 在OHOS::AppExecFwk::Constants中加类似参数
+    CHECK_NULL_VOID(renderDelegate_);
     wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", renderDelegate_->AsObject());
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
@@ -400,6 +397,7 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
 
 void FormManagerDelegate::RegisterRenderDelegateEvent()
 {
+    CHECK_NULL_VOID(renderDelegate_);
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);

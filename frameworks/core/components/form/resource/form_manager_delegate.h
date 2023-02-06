@@ -65,7 +65,9 @@ public:
     ~FormManagerDelegate() override;
     explicit FormManagerDelegate(const WeakPtr<PipelineBase>& context)
         : FormManagerResource("formAdaptor", context), state_(State::WAITINGFORSIZE)
-    {}
+    {
+        renderDelegate_ = std::make_shared<FormRendererDelegateImpl>();
+    }
 
     void AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
     void ReleasePlatformResource();

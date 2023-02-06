@@ -41,11 +41,9 @@ build_component("form") {
     include_dirs = [
       "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
       "//foundation/arkui/ace_engine/interfaces/inner_api/form_render/include",
-      "//foundation/arkui/ace_engine/interfaces/inner_api/form_surface_service/include",
     ]
     deps = [
       "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render",
-      "//foundation/arkui/ace_engine/interfaces/inner_api/form_surface_service:form_surface_service",
       "//foundation/graphic/graphic_2d:libsurface",
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
