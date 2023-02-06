@@ -42,9 +42,10 @@ public:
         return StackElement::TypeId();
     }
 
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<StackElement>(StackElement::TypeId());
+    }
 private:
     RefPtr<RenderStack> GetRenderStack() const;
 };

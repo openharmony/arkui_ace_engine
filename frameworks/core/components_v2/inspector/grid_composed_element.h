@@ -55,12 +55,13 @@ public:
         return GridLayoutElement::TypeId();
     }
 
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<GridLayoutElement>(GridLayoutElement::TypeId());
+    }
+
 private:
     std::string DisplayModeToString(DisplayMode displayMode) const;
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
-
 };
 
 } // namespace OHOS::Ace::V2

@@ -87,43 +87,4 @@ RefPtr<HyperlinkComponent> HyperlinkComposedElement::GetHyperlinkComponent() con
     return nullptr;
 }
 
-void HyperlinkComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto hyperlinkElement = GetContentElement<HyperlinkElement>(HyperlinkElement::TypeId());
-    if (!hyperlinkElement) {
-        LOGE("get HyperlinkElement failed");
-        return;
-    }
-    hyperlinkElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    hyperlinkElement->MarkDirty();
-}
-
-void HyperlinkComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto hyperlinkElement = GetContentElement<HyperlinkElement>(HyperlinkElement::TypeId());
-    if (!hyperlinkElement) {
-        LOGE("get HyperlinkElement failed");
-        return;
-    }
-    auto child = hyperlinkElement->GetChildBySlot(slot);
-    if (!child) {
-        LOGE("hyperlinkElement get GetChildBySlot failed");
-        return;
-    }
-    hyperlinkElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    hyperlinkElement->MarkDirty();
-}
-
-void HyperlinkComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto hyperlinkElement = GetContentElement<HyperlinkElement>(HyperlinkElement::TypeId());
-    if (!hyperlinkElement) {
-        LOGE("get HyperlinkElement failed");
-        return;
-    }
-    auto child = hyperlinkElement->GetChildBySlot(slot);
-    hyperlinkElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    hyperlinkElement->MarkDirty();
-}
-
 } // namespace OHOS::Ace::V2

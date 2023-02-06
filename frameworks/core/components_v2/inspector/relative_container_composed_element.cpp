@@ -50,39 +50,4 @@ RefPtr<RenderRelativeContainer> RelativeContainerComposedElement::GetRenderRelat
     }
     return nullptr;
 }
-
-void RelativeContainerComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto RelativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!RelativeContainerElement) {
-        LOGE("get GetRelativeContainerElement failed");
-        return;
-    }
-    RelativeContainerElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    RelativeContainerElement->MarkDirty();
-}
-
-void RelativeContainerComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto RelativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!RelativeContainerElement) {
-        LOGE("get GetRelativeContainerElement failed");
-        return;
-    }
-    auto child = RelativeContainerElement->GetChildBySlot(slot);
-    RelativeContainerElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    RelativeContainerElement->MarkDirty();
-}
-
-void RelativeContainerComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto RelativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!RelativeContainerElement) {
-        LOGE("get GetRelativeContainerElement failed");
-        return;
-    }
-    auto child = RelativeContainerElement->GetChildBySlot(slot);
-    RelativeContainerElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    RelativeContainerElement->MarkDirty();
-}
 } // namespace OHOS::Ace::V2

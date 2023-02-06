@@ -223,38 +223,4 @@ std::string TextComposedElement::ConvertFontFamily(const std::vector<std::string
     return result;
 }
 
-void TextComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto textElement = GetContentElement<TextElement>(TextElement::TypeId());
-    if (!textElement) {
-        LOGE("get GetTextElement failed");
-        return;
-    }
-    textElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    textElement->MarkDirty();
-}
-
-void TextComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto textElement = GetContentElement<TextElement>(TextElement::TypeId());
-    if (!textElement) {
-        LOGE("get GetTextElement failed");
-        return;
-    }
-    auto child = textElement->GetChildBySlot(slot);
-    textElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    textElement->MarkDirty();
-}
-
-void TextComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto textElement = GetContentElement<TextElement>(TextElement::TypeId());
-    if (!textElement) {
-        LOGE("get GetTextElement failed");
-        return;
-    }
-    textElement->UpdateChildWithSlot(nullptr, nullptr, slot, slot);
-    textElement->MarkDirty();
-}
-
 } // namespace OHOS::Ace::V2

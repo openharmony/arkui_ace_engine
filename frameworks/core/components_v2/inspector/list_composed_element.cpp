@@ -259,45 +259,11 @@ std::string ListComposedElement::GetScrollBar() const
     return "BarState.Off";
 }
 
-void ListComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+RefPtr<Element> ListComposedElement::GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const
 {
-    auto listElement = GetContentElement<ListElement>(ListElement::TypeId());
-    if (!listElement) {
-        LOGE("get GetListElement failed");
-        return;
-    }
-    listElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    listElement->MarkDirty();
-}
-
-void ListComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto listElement = GetContentElement<ListElement>(ListElement::TypeId());
-    if (!listElement) {
-        LOGE("get GetListElement failed");
-        return;
-    }
-    auto child = listElement->GetListItemBySlot(slot);
-    if (!child) {
-        return;
-    }
-    listElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    listElement->MarkDirty();
-}
-
-void ListComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto listElement = GetContentElement<ListElement>(ListElement::TypeId());
-    if (!listElement) {
-        LOGE("get GetListElement failed");
-        return;
-    }
-    auto child = listElement->GetListItemBySlot(slot);
-    if (!child) {
-        return;
-    }
-    listElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    listElement->MarkDirty();
+    auto listElement = AceType::DynamicCast<ListElement>(element);
+    CHECK_NULL_RETURN(listElement, nullptr);
+    return listElement->GetListItemBySlot(slot);
 }
 
 } // namespace OHOS::Ace::V2
