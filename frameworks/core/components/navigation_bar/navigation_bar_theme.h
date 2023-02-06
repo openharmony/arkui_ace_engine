@@ -69,7 +69,7 @@ public:
             if (!themeStyle) {
                 return theme;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("navigation_pattern", nullptr);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_NAVIGATION_BAR, nullptr);
             if (pattern) {
                 theme->titleColor_ = pattern->GetAttr<Color>("title_color", Color::WHITE);
                 theme->titleFontSize_  = pattern->GetAttr<Dimension>("title_text_font_size", 0.0_vp);
@@ -85,6 +85,7 @@ public:
                 theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("title_right_spacing", 0.0_vp);
                 theme->defaultPaddingStart_ = pattern->GetAttr<Dimension>("back_button_left_spacing", 0.0_vp);
                 theme->backButtonIconColor_ = pattern->GetAttr<Color>("back_button_icon_color", Color::WHITE);
+                theme->alphaDisabled_ = pattern->GetAttr<double>("button_alpha_disabled", 0.0);
             }
             return theme;
         }
@@ -201,6 +202,11 @@ public:
         return backButtonIconColor_;
     }
 
+    double GetAlphaDisabled() const
+    {
+        return alphaDisabled_;
+    }
+
 protected:
     NavigationBarTheme() = default;
 
@@ -231,6 +237,7 @@ private:
     Dimension titleMinPadding_;
     uint32_t mostMenuItemCountInBar_ = 0;
     Color backButtonIconColor_;
+    double alphaDisabled_ = 0.0;
 };
 
 } // namespace OHOS::Ace
