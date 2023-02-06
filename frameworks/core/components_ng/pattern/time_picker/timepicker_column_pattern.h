@@ -166,6 +166,16 @@ public:
     {
         return tossAnimationController_;
     }
+      
+    void SetLocalDownDistance(float value)
+    {
+        localDownDistance_ = value;
+    }
+
+    float GetLocalDownDistance() const
+    {
+        return localDownDistance_;
+    }
 
     void UpdateToss(double offsetY);
 
@@ -201,6 +211,7 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
 
+    float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
     RefPtr<TouchEventImpl> touchListener_;
