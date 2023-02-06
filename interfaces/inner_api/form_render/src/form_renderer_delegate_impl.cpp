@@ -59,6 +59,18 @@ int32_t FormRendererDelegateImpl::OnActionEvent(const std::string& action)
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateImpl::OnError(const std::string& param)
+{
+    HILOG_INFO("OnError %{public}s", param.c_str());
+    if (!errorEventHandler_) {
+        HILOG_ERROR("errorEventHandler_ is null,  %{public}s", param.c_str());
+        return ERR_INVALID_DATA;
+    }
+
+    errorEventHandler_(param);
+    return ERR_OK;
+}
+
 void FormRendererDelegateImpl::RegisterSurfaceCreateCallback(
     std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId)
 {
@@ -79,9 +91,15 @@ void FormRendererDelegateImpl::RegisterSurfaceCreateCallback(
 }
 
 void FormRendererDelegateImpl::SetActionEventHandler(
-    std::function<void(const std::string& action)>&& listener)
+    std::function<void(const std::string&)>&& listener)
 {
     actionEventHandler_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetErrorEventHandler(
+    std::function<void(const std::string&)>&& listener)
+{
+    errorEventHandler_ = std::move(listener);
 }
 } // namespace Ace
 } // namespace OHOS

@@ -406,6 +406,13 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnActionEvent(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
+
+    auto&& onErrorEventHandler = [weak = WeakClaim(this)](const std::string& param) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnFormError(param);
+    };
+    renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)

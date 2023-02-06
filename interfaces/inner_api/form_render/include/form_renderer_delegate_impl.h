@@ -49,6 +49,11 @@ public:
      */
     int32_t OnActionEvent(const std::string& action) override;
     /**
+     * @brief OnError.
+     * @param param The param.
+     */
+    int32_t OnError(const std::string& param) override;
+    /**
      * @brief RegisterSurfaceCreateCallback.
      * @param formCallback The formCallback.
      * @param formId The formId.
@@ -56,12 +61,14 @@ public:
     void RegisterSurfaceCreateCallback(
         std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId);
 
-    void SetActionEventHandler(std::function<void(const std::string& action)>&& listener);
+    void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
+    void SetErrorEventHandler(std::function<void(const std::string&)>&& listener);
 
 private:
     mutable std::mutex callbackMutex_;
     std::map<int64_t, std::set<std::shared_ptr<FormSurfaceCallbackInterface>>> formCallbackMap_;
-    std::function<void(const std::string& action)> actionEventHandler_;
+    std::function<void(const std::string&)> actionEventHandler_;
+    std::function<void(const std::string&)> errorEventHandler_;
 };
 }  // namespace Ace
 }  // namespace OHOS

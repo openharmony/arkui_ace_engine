@@ -47,6 +47,7 @@ public:
 private:
     int32_t HandleOnSurfaceCreate(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnActionEvent(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnError(MessageParcel &data, MessageParcel &reply);
 
     using FormRendererDelegateFunc =
         int32_t (FormRendererDelegateStub::*)(MessageParcel &data, MessageParcel &reply);

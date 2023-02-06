@@ -39,6 +39,8 @@ public:
 
     int32_t OnActionEvent(const std::string& action) override;
 
+    int32_t OnError(const std::string& param) override;
+
 private:
     // template<typename T>
     // int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

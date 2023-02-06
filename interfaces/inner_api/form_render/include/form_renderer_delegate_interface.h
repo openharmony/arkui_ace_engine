@@ -52,10 +52,16 @@ public:
      * @param action The action.
      */
     virtual int32_t OnActionEvent(const std::string& action) = 0;
+    /**
+     * @brief OnError.
+     * @param action The action.
+     */
+    virtual int32_t OnError(const std::string& param) = 0;
 
     enum Message : uint32_t {
         ON_SURFACE_CREATE = 1,
         ON_ACTION_CREATE,
+        ON_ERROR,
     };
 };
 }  // namespace Ace

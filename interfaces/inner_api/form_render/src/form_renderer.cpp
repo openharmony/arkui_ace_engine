@@ -34,11 +34,16 @@ FormRenderer::FormRenderer(
     }
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_.get())).GetNativeEngine();
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
+    formRendererDispatcherImpl_ = std::make_unique<FormRendererDispatcherImpl>(uiContent_);
+    InitUiContent();
+}
+
+void FormRenderer::InitUiContent()
+{
     auto actionEventHandler = [&](const std::string& action) {
         OnActionEvent(action);
     };
     uiContent_->SetActionEventHandler(actionEventHandler);
-    formRendererDispatcherImpl_ = std::make_unique<FormRendererDispatcherImpl>(uiContent_);
 }
 
 void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -88,6 +93,16 @@ void FormRenderer::OnActionEvent(const std::string& action)
     }
 
     formRendererDelegate_->OnActionEvent(action);
+}
+
+void FormRenderer::OnError(const std::string& param)
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("formRendererDelegate is null!");
+        return;
+    }
+
+    formRendererDelegate_->OnError(param);
 }
 }  // namespace Ace
 }  // namespace OHOS

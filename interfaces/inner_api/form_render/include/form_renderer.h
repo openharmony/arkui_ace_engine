@@ -43,8 +43,11 @@ public:
 
     void Destroy();
     void OnActionEvent(const std::string& action);
+    void OnError(const std::string& param);
 
 private:
+    void InitUiContent();
+
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     std::unique_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
