@@ -229,7 +229,7 @@ double RenderFlex::GetStretchCrossLimit() const
 {
     Size maxLayoutParam = GetLayoutParam().GetMaxSize();
     double crossAxisLimit = 0.0;
-    if (!stretchToParent_ && (crossAxisAlign_ != FlexAlign::STRETCH || crossAxisSize_ == CrossAxisSize::MIN)) {
+    if (!stretchToParent_) {
         crossAxisLimit = crossSize_;
     } else if (!isCrossInfinite_ || !useViewPort_) {
         crossAxisLimit = (direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE)
