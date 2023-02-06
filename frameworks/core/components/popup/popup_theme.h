@@ -204,6 +204,11 @@ public:
         return buttonMiniMumWidth;
     }
 
+    const Dimension& GetBubbleMiniMumHeight() const
+    {
+        return bubbleMiniMumHeight_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -230,6 +235,7 @@ private:
     Dimension littlePadding_ = 4.0_vp;
     Dimension focusPaintWidth_ = 2.0_vp;
     Dimension buttonMiniMumWidth = 72.0_vp;
+    Dimension bubbleMiniMumHeight_ = 48.0_vp;
 };
 
 } // namespace OHOS::Ace

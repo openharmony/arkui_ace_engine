@@ -133,6 +133,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         textPadding.top = CalcLength(padding.Top());
         textPadding.bottom = CalcLength(padding.Bottom());
         layoutProps->UpdatePadding(textPadding);
+        layoutProps->UpdateAlignment(Alignment::CENTER);
+        auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
+        layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
         textNode->MarkModifyDone();
         child = textNode;
     }
