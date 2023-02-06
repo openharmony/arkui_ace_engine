@@ -396,6 +396,7 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged)
     for (auto& iter : childrenNode) {
         auto childNode = AceType::DynamicCast<FrameNode>(iter);
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         auto childRenderContext = childNode->GetRenderContext();
         if (index == childHoverIndex_ || index == childPressIndex_) {
             auto radiusSize = indexerTheme->GetHoverRadiusSize();
