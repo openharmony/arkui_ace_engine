@@ -404,6 +404,7 @@ bool RenderBubble::PopBubble()
         if (node) {
             auto children = node->GetChildList();
             for (auto& child : children) {
+                child->SetVisible(false);
                 child->ClearRect();
             }
         }
