@@ -71,8 +71,8 @@ void JSCheckboxGroup::Create(const JSCallbackInfo& info)
         if (groupName->IsString()) {
             auto checkboxGroupName = groupName->ToString();
             checkboxComponent->SetGroupName(checkboxGroupName);
-            auto checkboxGroupmap = ViewStackProcessor::GetInstance()->GetCheckboxGroupCompnent();
-            checkboxGroupmap->emplace(checkboxGroupName, checkboxComponent);
+            auto& checkboxGroupmap = CheckboxComponent::GetCheckboxGroupComponent();
+            checkboxGroupmap.emplace(checkboxGroupName, checkboxComponent);
             auto& ungroupedCheckboxs = CheckboxComponent::GetUngroupedCheckboxs();
             auto item = ungroupedCheckboxs.find(checkboxGroupName);
             if (item != ungroupedCheckboxs.end()) {
