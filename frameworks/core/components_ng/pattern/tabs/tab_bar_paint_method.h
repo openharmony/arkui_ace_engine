@@ -24,9 +24,13 @@ class TabBarPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TabBarPaintMethod, NodePaintMethod)
 
 public:
+    explicit TabBarPaintMethod(float currentIndicatorOffset) : currentIndicatorOffset_(currentIndicatorOffset) {}
     ~TabBarPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+
+private:
+    float currentIndicatorOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

@@ -564,6 +564,12 @@ inline constexpr uint32_t STATE_WAITING = 1 << 4;
 inline constexpr uint32_t STATE_HOVERED = 1 << 5;
 inline constexpr uint32_t STATE_ACTIVE = 1 << 6;
 
+enum class TabBarStyle {
+    NOSTYLE = 0,
+    SUBTABBATSTYLE,
+    BOTTOMTABBATSTYLE,
+};
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H
