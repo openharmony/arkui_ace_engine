@@ -885,7 +885,9 @@ static napi_value RouterExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getState", JSRouterGetState),
         DECLARE_NAPI_FUNCTION("enableAlertBeforeBackPage", JSRouterEnableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("enableBackPageAlert", JSRouterEnableAlertBeforeBackPage),
+        DECLARE_NAPI_FUNCTION("showAlertBeforeBackPage", JSRouterEnableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("disableAlertBeforeBackPage", JSRouterDisableAlertBeforeBackPage),
+        DECLARE_NAPI_FUNCTION("hideAlertBeforeBackPage", JSRouterDisableAlertBeforeBackPage),
         DECLARE_NAPI_FUNCTION("getParams", JSRouterGetParams),
         DECLARE_NAPI_PROPERTY("RouterMode", routerMode),
     };
