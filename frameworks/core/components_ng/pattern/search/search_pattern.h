@@ -100,7 +100,8 @@ private:
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void OnTouchDown();
     void OnTouchUp();
-    void HandleMouseEvent(bool isHover);
+    void HandleHoverEvent(bool isHover);
+    void HandleMouseEvent(MouseInfo& info);
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
     std::string searchButton_;
     SizeF searchSize_;
@@ -116,9 +117,14 @@ private:
     FocusChoice focusChoice_ = FocusChoice::SEARCH;
 
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> searchButtonMouseEvent_;
     RefPtr<InputEvent> cancelButtonMouseEvent_;
+
+    bool isHover_ = false;
+    bool isTouch_ = false;
+    bool isMouseInCancelButton_ = false;
 };
 
 } // namespace OHOS::Ace::NG
