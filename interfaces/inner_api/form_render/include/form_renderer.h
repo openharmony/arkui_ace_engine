@@ -31,7 +31,6 @@ namespace OHOS {
 namespace Ace {
 /**
  * @class FormRenderer
- * FormRenderer interface is used to form renderer.
  */
 class FormRenderer {
 public:
@@ -43,18 +42,14 @@ public:
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     void Destroy();
-    /**
-     * @brief OnActionEvent.
-     * @param action The action.
-     */
-    int32_t OnActionEvent(const std::string& action);
+    void OnActionEvent(const std::string& action);
 
 private:
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
-    std::shared_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
+    std::unique_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
     sptr<IFormRendererDelegate> formRendererDelegate_;
-    std::unique_ptr<UIContent> uiContent_;
+    std::shared_ptr<UIContent> uiContent_;
 };
 }  // namespace Ace
 }  // namespace OHOS

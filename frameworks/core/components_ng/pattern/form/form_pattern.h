@@ -57,8 +57,8 @@ public:
 
     const RefPtr<SubContainer>& GetSubContainer() const;
 
-    void DispatchFormEvent(
-        int64_t formId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    void DispatchPointerEvent(
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
 
     RefPtr<RenderContext> GetExternalRenderContext()
     {

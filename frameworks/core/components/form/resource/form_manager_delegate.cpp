@@ -46,7 +46,7 @@ constexpr char FORM_EVENT_ON_UPDATE_FORM[] = "onUpdateForm";
 constexpr char FORM_EVENT_ON_ERROR[] = "onFormError";
 constexpr char FORM_ADAPTOR_RESOURCE_NAME[] = "formAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
-constexpr char ARK_RENDER_REMOTE_OBJ[] = "ohos.extra.param.key.process_on_ark_render";
+constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 
 } // namespace
 
@@ -204,21 +204,17 @@ void FormManagerDelegate::ProcessAddFormSurface(
         LOGE("Kee FormManagerDelegate::ProcessAddFormSurface onFormSurfaceNodeCallback_ = nullptr");
     }
 
-    if (remoteArkUIRender_) {
-        LOGE("djc-- remoteArkUIRender_ already is not null addr: %{public}p.",
-            remoteArkUIRender_->AsObject().GetRefPtr());
-        return;
-    }
-    sptr<IRemoteObject> proxy = want.GetRemoteObject(ARK_RENDER_REMOTE_OBJ);
-
-    LOGE("djc--, remoteArkUIRender addr: %{public}p.  %{public}d ", proxy.GetRefPtr(), proxy == nullptr);
-    remoteArkUIRender_ = iface_cast<IArkUIRender>(proxy);
-    if (remoteArkUIRender_ == nullptr) {
-        LOGE("get remoteArkUIRender failed.");
+    if (formRendererDispatcher_) {
         return;
     }
 
-    LOGE("Get success, remoteArkUIRender_ addr: %{public}p.", remoteArkUIRender_->AsObject().GetRefPtr());
+    sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_DISPATCHER);
+    formRendererDispatcher_ = iface_cast<IFormRendererDispatcher>(proxy);
+    if (formRendererDispatcher_ == nullptr) {
+        LOGE("get formRendererDispatcher failed.");
+        return;
+    }
+    LOGE("Get success, formRendererDispatcher.");
 }
 
 std::string FormManagerDelegate::ConvertRequestInfo(const RequestFormInfo& info) const
@@ -402,21 +398,14 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
     return true;
 }
 
-void FormManagerDelegate::RegisterEventCallback()
+void FormManagerDelegate::RegisterRenderDelegateEvent()
 {
-    LOGI("RegisterEventCallback SetActionEventHandler");
-    auto surfaceServiceClient = FormSurfaceServiceClient::GetInstance();
-    if (!surfaceServiceClient) {
-        LOGE("surfaceServiceClient is null");
-        return;
-    }
-
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);
         formManagerDelegate->OnActionEvent(action);
     };
-    surfaceServiceClient->SetActionEventHandler(std::move(actionEventHandler));
+    renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -481,16 +470,15 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 #endif
 }
 
-void FormManagerDelegate::DispatchFormEvent(
-    int64_t formId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void FormManagerDelegate::DispatchPointerEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
-    if (remoteArkUIRender_ == nullptr) {
-        LOGI("DispatchFormEvent: is null");
+    if (formRendererDispatcher_ == nullptr) {
+        LOGI("DispatchPointerEvent: is null");
         return;
     }
 
-    LOGI("DispatchFormEvent: formId: %{public}" PRId64, formId);
-    remoteArkUIRender_->DispatchFormEvent(formId, pointerEvent);
+    formRendererDispatcher_->DispatchPointerEvent(pointerEvent);
 }
 
 void FormManagerDelegate::OnFormAcquired(const std::string& param)

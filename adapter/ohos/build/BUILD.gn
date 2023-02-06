@@ -21,7 +21,6 @@ group("ace_packages") {
   # core library for Ability Cross-platform Environment(ACE) JS
   deps += [
     "$ace_root/build:libace",
-    "$ace_root/frameworks/core/components/form:ark_render",
     "$ace_root/interfaces/inner_api:innerkits_target",
     "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     "$ace_root/interfaces/napi/kits:napi_group",

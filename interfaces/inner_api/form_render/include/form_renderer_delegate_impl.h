@@ -53,11 +53,15 @@ public:
      * @param formCallback The formCallback.
      * @param formId The formId.
      */
-    void RegisterSurfaceCreateCallback(std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId);
+    void RegisterSurfaceCreateCallback(
+        std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId);
+
+    void SetActionEventHandler(std::function<void(const std::string& action)>&& listener);
 
 private:
     mutable std::mutex callbackMutex_;
     std::map<int64_t, std::set<std::shared_ptr<FormSurfaceCallbackInterface>>> formCallbackMap_;
+    std::function<void(const std::string& action)> actionEventHandler_;
 };
 }  // namespace Ace
 }  // namespace OHOS

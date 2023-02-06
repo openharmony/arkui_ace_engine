@@ -97,17 +97,6 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/form_surface_service:form_surface_service"
-                },
-                {
-                    "header": {
-                        "header_base": "//foundation/arkui/ace_engine/frameworks/core/components/form/resource",
-                        "header_files": [
-                            "arkui_render_interface.h",
-                            "arkui_render_proxy.h",
-                            "arkui_render_stub.h"
-                        ]
-                    },
-                    "name": "//foundation/arkui/ace_engine/frameworks/core/components/form:ark_render"
                 }
             ],
             "test": [

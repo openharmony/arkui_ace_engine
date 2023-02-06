@@ -49,6 +49,13 @@ int32_t FormRendererDelegateImpl::OnSurfaceCreate(
 
 int32_t FormRendererDelegateImpl::OnActionEvent(const std::string& action)
 {
+    HILOG_INFO("OnActionEvent %{public}s", action.c_str());
+    if (!actionEventHandler_) {
+        HILOG_ERROR("actionEventHandler_ is null,  %{public}s", action.c_str());
+        return ERR_INVALID_DATA;
+    }
+
+    actionEventHandler_(action);
     return ERR_OK;
 }
 
@@ -71,5 +78,10 @@ void FormRendererDelegateImpl::RegisterSurfaceCreateCallback(
     }
 }
 
+void FormRendererDelegateImpl::SetActionEventHandler(
+    std::function<void(const std::string& action)>&& listener)
+{
+    actionEventHandler_ = std::move(listener);
+}
 } // namespace Ace
 } // namespace OHOS

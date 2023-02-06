@@ -18,8 +18,8 @@
 
 #include <list>
 
-#include "arkui_render_interface.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
+#include "interfaces/inner_api/form_render/include/form_renderer_dispatcher_interface.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_manager_resource.h"
 #include "core/components/form/resource/form_request_data.h"
@@ -77,9 +77,9 @@ public:
     void AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback);
 
     void OnActionEvent(const std::string& action);
-    void DispatchFormEvent(
-        int64_t formId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-    void RegisterEventCallback();
+    void DispatchPointerEvent(
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void RegisterRenderDelegateEvent();
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -112,7 +112,6 @@ private:
     OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;
 
     State state_ { State::WAITINGFORSIZE };
-    sptr<IArkUIRender> remoteArkUIRender_;
 #ifdef OHOS_STANDARD_SYSTEM
     int64_t runningCardId_ = -1;
     AAFwk::Want wantCache_;
@@ -121,6 +120,7 @@ private:
     std::shared_ptr<FormUtils> formUtils_;
     std::shared_ptr<FormSurfaceCallbackClient> formSurfaceCallbackClient_;
     std::shared_ptr<FormRendererDelegateImpl> renderDelegate_;
+    sptr<IFormRendererDispatcher> formRendererDispatcher_;
 #endif
 };
 

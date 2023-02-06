@@ -18,8 +18,19 @@
 
 namespace OHOS {
 namespace Ace {
+FormRendererDispatcherImpl::FormRendererDispatcherImpl(const std::shared_ptr<UIContent> uiContent)
+    : uiContent_(uiContent) {}
+
 void FormRendererDispatcherImpl::DispatchPointerEvent(
     const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
-{}
+{
+    auto uiContent = uiContent_.lock();
+    if (uiContent) {
+        HILOG_ERROR("uiContent is nullptr");
+        return;
+    }
+
+    uiContent->ProcessPointerEvent(pointerEvent);
+}
 } // namespace Ace
 } // namespace OHOS

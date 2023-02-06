@@ -127,7 +127,7 @@ void FormPattern::InitFormManagerDelegate()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
-    formManagerBridge_->RegisterEventCallback();
+    formManagerBridge_->RegisterRenderDelegateEvent();
     auto formUtils = FormManager::GetInstance().GetFormUtils();
     if (formUtils) {
         formManagerBridge_->SetFormUtils(formUtils);
@@ -415,16 +415,15 @@ const RefPtr<SubContainer>& FormPattern::GetSubContainer() const
     return subContainer_;
 }
 
-void FormPattern::DispatchFormEvent(
-    int64_t formId, const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+void FormPattern::DispatchPointerEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
     if (!pointerEvent || !formManagerBridge_) {
         LOGE("Func: %{public}s, pointerEvent or formManagerBridge is null", __func__);
         return;
     }
 
-    LOGE("DispatchFormEvent formId: %{public}" PRId64, formId);
     ShowPointEvent(pointerEvent);
-    formManagerBridge_->DispatchFormEvent(formId, pointerEvent);
+    formManagerBridge_->DispatchPointerEvent(pointerEvent);
 }
 } // namespace OHOS::Ace::NG
