@@ -110,8 +110,7 @@ void StepperPattern::CreateLeftButtonNode()
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetRenderContext()->UpdateBorderRadius(
-        { stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius() });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     // Create rowNode
@@ -131,7 +130,7 @@ void StepperPattern::CreateLeftButtonNode()
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_BACK_ARROW);
-    imageSourceInfo.SetFillColor(stepperTheme->GetArrowColor());
+    imageSourceInfo.SetFillColor(stepperTheme->GetArrowColor().BlendOpacity(stepperTheme->GetDefaultAlpha()));
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
         static_cast<float>(stepperTheme->GetArrowHeight().ConvertToPx()));
@@ -143,12 +142,14 @@ void StepperPattern::CreateLeftButtonNode()
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(stepperTheme->GetTextStyle().GetTextColor());
+    auto textColor = stepperTheme->GetTextStyle().GetTextColor().BlendOpacity(stepperTheme->GetDefaultAlpha());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMinFontSize(stepperTheme->GetMinFontSize());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMaxFontSize(
         stepperTheme->GetTextStyle().GetFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->MountToParent(rowNode);
@@ -232,8 +233,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetRenderContext()->UpdateBorderRadius(
-        { stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius() });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     // Create rowNode
@@ -252,13 +252,15 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
     auto textColor = stepperTheme->GetTextStyle().GetTextColor();
-    textColor = isDisabled ? textColor.BlendOpacity(stepperTheme->GetDisabledAlpha()) : textColor;
+    textColor = isDisabled ? textColor.BlendOpacity(stepperTheme->GetDisabledAlpha())
+                           : textColor.BlendOpacity(stepperTheme->GetDefaultAlpha());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMinFontSize(stepperTheme->GetMinFontSize());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMaxFontSize(
         stepperTheme->GetTextStyle().GetFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->MountToParent(rowNode);
@@ -272,7 +274,8 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::STEPPER_NEXT_ARROW);
     auto imageColor = stepperTheme->GetArrowColor();
-    imageColor = isDisabled ? imageColor.BlendOpacity(stepperTheme->GetDisabledAlpha()) : imageColor;
+    imageColor = isDisabled ? imageColor.BlendOpacity(stepperTheme->GetDisabledAlpha())
+                            : imageColor.BlendOpacity(stepperTheme->GetDefaultAlpha());
     imageSourceInfo.SetFillColor(imageColor);
     imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
     SizeF sourceSize(static_cast<float>(stepperTheme->GetArrowWidth().ConvertToPx()),
@@ -304,12 +307,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonNode->GetLayoutProperty()->UpdateBorderWidth({ stepperTheme->GetControlMargin(),
-        stepperTheme->GetControlMargin(), stepperTheme->GetControlMargin(), stepperTheme->GetControlMargin() });
-    buttonNode->GetRenderContext()->UpdateBorderRadius(
-        { stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius(), stepperTheme->GetRadius() });
-    buttonNode->GetRenderContext()->UpdateBorderColor(
-        { Color::TRANSPARENT, Color::TRANSPARENT, Color::TRANSPARENT, Color::TRANSPARENT });
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
     // Create textNode
@@ -318,7 +316,9 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(stepperTheme->GetTextStyle().GetTextColor());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
+    auto textColor = stepperTheme->GetTextStyle().GetTextColor().BlendOpacity(stepperTheme->GetDefaultAlpha());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     textNode->MountToParent(buttonNode);
