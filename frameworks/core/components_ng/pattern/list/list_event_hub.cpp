@@ -116,9 +116,9 @@ int32_t ListEventHub::GetListItemIndexByPosition(float x, float y)
     CHECK_NULL_RETURN(listNode, 0);
     auto geometryNode = listNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0);
-    auto globalOffset = listNode->GetOffsetRelativeToWindow();
-    float offsetX = x - globalOffset.GetX();
-    float offsetY = y - globalOffset.GetY();
+    auto listNodeFrameOffset = geometryNode->GetMarginFrameOffset();
+    float offsetX = x - listNodeFrameOffset.GetX();
+    float offsetY = y - listNodeFrameOffset.GetY();
     float mainOffset = GetDirection() == Axis::VERTICAL ? offsetY : offsetX;
     
     auto listPattern = listNode->GetPattern<ListPattern>();
