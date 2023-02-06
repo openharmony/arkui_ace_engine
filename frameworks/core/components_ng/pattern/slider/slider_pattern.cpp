@@ -360,13 +360,15 @@ void SliderPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 {
     UpdateCircleCenterOffset();
+    auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     auto focusDistance = theme->GetFocusSideDistance();
     auto focusRadius = blockDiameter_ * HALF + static_cast<float>(focusDistance.ConvertToPx());
-    paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius, circleCenter_.GetY() - focusRadius, focusRadius / HALF,
-        focusRadius / HALF));
+    paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
+        circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
     paintRect.SetCornerRadius(focusRadius);
 }
+
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto frameSize = GetHostFrameSize();
