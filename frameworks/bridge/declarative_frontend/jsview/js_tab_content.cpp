@@ -97,8 +97,57 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
                 tabBarBuilderFunc->ExecuteJS();
             }
         };
+        TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(std::nullopt, std::nullopt, std::move(tabBarBuilderFunc), false);
         return;
+    }
+    JSRef<JSVal> typeParam = paramObject->GetProperty("type");
+    if (typeParam->IsString()) {
+        auto type = typeParam->ToString();
+        if (type == "SubTabBarStyle") {
+            JSRef<JSVal> contentParam = paramObject->GetProperty("content");
+            auto isContentEmpty = contentParam->IsEmpty() || contentParam->IsUndefined() || contentParam->IsNull();
+            if (isContentEmpty) {
+                LOGE("The content param is empty");
+                return;
+            }
+            std::optional<std::string> contentOpt = std::nullopt;
+            std::string content;
+            if (ParseJsString(contentParam, content)) {
+                contentOpt = content;
+            }
+            TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+            TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, nullptr, false);
+            return;
+        }
+        if (type == "BottomTabBarStyle") {
+            JSRef<JSVal> textParam = paramObject->GetProperty("text");
+            auto isTextEmpty = textParam->IsEmpty() || textParam->IsUndefined() || textParam->IsNull();
+            std::optional<std::string> textOpt = std::nullopt;
+            if (isTextEmpty) {
+                LOGE("The text param is empty");
+                return;
+            }
+            std::string text;
+            if (ParseJsString(textParam, text)) {
+                textOpt = text;
+            }
+
+            JSRef<JSVal> iconParam = paramObject->GetProperty("icon");
+            auto isIconEmpty = iconParam->IsEmpty() || iconParam->IsUndefined() || iconParam->IsNull();
+            std::optional<std::string> iconOpt = std::nullopt;
+            if (isIconEmpty) {
+                LOGE("The icon param is empty");
+                return;
+            }
+            std::string icon;
+            if (ParseJsMedia(iconParam, icon)) {
+                iconOpt = icon;
+            }
+            TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+            TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, nullptr, false);
+            return;
+        }
     }
 
     JSRef<JSVal> textParam = paramObject->GetProperty("text");
@@ -120,6 +169,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
             iconOpt = icon;
         }
     }
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, nullptr, false);
 }
 

@@ -79,10 +79,27 @@ public:
         }
     }
 
+    void SetTabBarStyle(TabBarStyle tabBarStyle)
+    {
+        tabBarStyle_ = tabBarStyle;
+    }
+
+    TabBarStyle GetTabBarStyle() const
+    {
+        return tabBarStyle_;
+    }
+
 private:
     std::string text_;
     std::string icon_;
     TabBarBuilderFunc builder_;
+    TabBarStyle tabBarStyle_;
+};
+
+enum class AnimationType {
+    PRESS = 0,
+    HOVER,
+    HOVERTOPRESS,
 };
 
 class TabBarPattern : public Pattern {
@@ -109,6 +126,7 @@ public:
         layoutAlgorithm->SetCurrentOffset(currentOffset_);
         layoutAlgorithm->SetIndicator(indicator_);
         layoutAlgorithm->SetIsBuilder(IsContainsBuilder());
+        layoutAlgorithm->SetTabBarStyle(tabBarStyle_);
         return layoutAlgorithm;
     }
 
@@ -119,7 +137,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TabBarPaintMethod>();
+        return MakeRefPtr<TabBarPaintMethod>(currentIndicatorOffset_);
     }
 
     FocusPattern GetFocusPattern() const override
@@ -174,6 +192,11 @@ public:
         return touching_;
     }
 
+    void SetTabBarStyle(TabBarStyle tabBarStyle)
+    {
+        tabBarStyle_ = tabBarStyle;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -198,7 +221,10 @@ private:
     void HandleTouchUp(int32_t index);
     int32_t CalculateSelectedIndex(const Offset& info);
 
-    void PlayPressAnimation(int32_t index, float endOpacityRatio);
+    void PlayPressAnimation(int32_t index, const Color& pressColor, AnimationType animationType);
+    void PlayTranslateAnimation(float startPos, float endPos);
+    void StopTranslateAnimation();
+    void UpdateIndicatorCurrentOffset(float offset);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
@@ -223,9 +249,11 @@ private:
 
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
-    float hoverOpacity_ = 0.0;
     std::optional<int32_t> touchingIndex_;
     std::optional<int32_t> hoverIndex_;
+    TabBarStyle tabBarStyle_;
+    RefPtr<Animator> controller_;
+    float currentIndicatorOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

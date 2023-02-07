@@ -1000,3 +1000,18 @@ var ContextMenuEditStateFlags;
   ContextMenuEditStateFlags[ContextMenuEditStateFlags["CAN_PASTE"] = 4] = "CAN_PASTE";
   ContextMenuEditStateFlags[ContextMenuEditStateFlags["CAN_SELECT_ALL"] = 8] = "CAN_SELECT_ALL";
 })(ContextMenuEditStateFlags || (ContextMenuEditStateFlags = {}));
+
+class SubTabBarStyle {
+  constructor(content) {
+    this.type = 'SubTabBarStyle';
+    this.content = content;
+  }
+}
+
+class BottomTabBarStyle {
+  constructor(icon, text) {
+    this.type = 'BottomTabBarStyle';
+    this.icon = icon;
+    this.text = text;
+  }
+}
