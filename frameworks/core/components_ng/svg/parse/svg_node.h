@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,6 +130,10 @@ protected:
     // create animation that changes an attribute
     template<typename T>
     void AnimateOnAttribute(const RefPtr<SvgAnimation>& animate, const T& originalValue);
+    // animate a transformation attribute
+    void AnimateTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
+    void AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
+    void AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double originalValue);
 
     // update svg attribute in animation
     template<typename T>
@@ -152,10 +156,11 @@ protected:
     std::string nodeId_;
     std::string text_;
 
+    std::map<std::string, std::vector<float>> transform_;
+
     std::string hrefClipPath_;
     std::string hrefMaskId_;
     std::string hrefFilterId_;
-    std::string transform_;
     uint8_t opacity_ = 0xFF;
 
     bool hrefFill_ = true;   // get fill attributes from reference

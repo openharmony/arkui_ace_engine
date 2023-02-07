@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -123,7 +123,7 @@ void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
     if (hrefRender_) {
         hrefClipPath_ = declaration_->GetClipPathHref();
         opacity_ = OpacityDoubleToUint8(declaration_->GetOpacity());
-        transform_ = declaration_->GetTransform();
+        transform_ = SvgTransform::CreateMap(declaration_->GetTransform());
         hrefMaskId_ = ParseIdFromUrl(declaration_->GetMaskId());
         hrefFilterId_ = ParseIdFromUrl(declaration_->GetFilterId());
     }
@@ -219,7 +219,7 @@ void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
-    auto transformInfo = SvgTransform::CreateTransformInfo(transform_);
+    auto transformInfo = SvgTransform::CreateInfoFromMap(transform_);
     if (transformInfo.hasRotateCenter) {
         transformInfo.matrix4 =
             RenderTransform::GetTransformByOffset(transformInfo.matrix4, transformInfo.rotateCenter);
@@ -308,6 +308,8 @@ void SvgNode::PrepareAnimation(const RefPtr<SvgAnimation>& animate)
     } else if (DOUBLE_GETTERS.find(attrName) != DOUBLE_GETTERS.end()) {
         double originalValue = DOUBLE_GETTERS.find(attrName)->second(declaration_);
         AnimateOnAttribute(animate, originalValue);
+    } else if (attrName.find(TRANSFORM) != std::string::npos) {
+        AnimateTransform(animate, 0.0f);
     } else {
         LOGW("animation attrName not valid: %s", attrName.c_str());
     }
@@ -365,6 +367,83 @@ template<>
 void SvgNode::UpdateAttr(const std::string& name, const double& val)
 {
     UpdateAttrHelper(name, std::to_string(val));
+}
+
+void SvgNode::AnimateTransform(const RefPtr<SvgAnimation>& animate, double originalValue)
+{
+    if (!animate->GetValues().empty()) {
+        AnimateFrameTransform(animate, originalValue);
+    } else {
+        AnimateValueTransform(animate, originalValue);
+    }
+}
+
+void SvgNode::AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double originalValue)
+{
+    std::vector<std::vector<float>> frames;
+    std::string type;
+    if (!animate->GetFrames(frames, type)) {
+        LOGE("invalid animate keys info of type %{public}s", type.c_str());
+        return;
+    }
+    if (frames.size() <= 1) {
+        LOGE("invalid frames numbers %{public}s", type.c_str());
+        return;
+    }
+
+    // set indices instead of frames
+    std::vector<std::string> indices;
+    uint32_t size = animate->GetValues().size();
+    for (uint32_t i = 0; i < size; i++) {
+        indices.emplace_back(std::to_string(i));
+    }
+    auto instance = AceType::MakeRefPtr<SvgAnimate>();
+    animate->Copy(instance);
+    instance->SetValues(indices);
+
+    std::function<void(double)> callback = [weak = WeakClaim(this), type, frames](double value) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        // use index and rate to locate frame and position
+        auto index = static_cast<uint32_t>(value);
+        double rate = value - index;
+        if (index >= frames.size() - 1) {
+            index = frames.size() - 2;
+            rate = 1.0;
+        }
+        if (!SvgTransform::SetProperty(type, frames[index], frames[index + 1], rate, self->transform_)) {
+            LOGE("set property failed: property %{public}s not in map", type.c_str());
+            return;
+        }
+        auto context = self->svgContext_.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->AnimateFlush();
+    };
+    animate->CreatePropertyAnimation(originalValue, std::move(callback));
+}
+
+void SvgNode::AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double originalValue)
+{
+    std::vector<float> fromVec;
+    std::vector<float> toVec;
+    std::string type;
+    if (!animate->GetValuesRange(fromVec, toVec, type)) {
+        LOGE("invalid animate info of type %{public}s", type.c_str());
+        return;
+    }
+
+    std::function<void(double)> callback = [weak = WeakClaim(this), type, fromVec, toVec](double value) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        if (!SvgTransform::SetProperty(type, fromVec, toVec, value, self->transform_)) {
+            LOGE("set property failed: property %{public}s not in map", type.c_str());
+            return;
+        }
+        auto context = self->svgContext_.Upgrade();
+        CHECK_NULL_VOID(context);
+        context->AnimateFlush();
+    };
+    animate->CreatePropertyAnimation(originalValue, std::move(callback));
 }
 
 } // namespace OHOS::Ace::NG
