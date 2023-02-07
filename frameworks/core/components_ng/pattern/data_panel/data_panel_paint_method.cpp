@@ -36,7 +36,6 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // TODO move to theme
-constexpr float START_COLOR_TRANSITION_EDGE = 30.0f;
 constexpr float FIXED_WIDTH = 1.0f;
 constexpr float HALF_CIRCLE = 180.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
@@ -97,19 +96,8 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     endCirclePaint.SetColor(arcData.endColor.ChangeAlpha(101).GetValue());
     endCirclePaint.SetFilter(filter);
 
-    if (progress < START_COLOR_TRANSITION_EDGE) {
-        startCirclePaint.SetColor(Color::LineColorTransition(arcData.endColor.ChangeAlpha(101),
-            arcData.startColor.ChangeAlpha(101), progress / START_COLOR_TRANSITION_EDGE)
-                                      .GetValue());
-        colors[0] = Color::LineColorTransition(arcData.endColor.ChangeAlpha(101), arcData.startColor.ChangeAlpha(101),
-            progress / START_COLOR_TRANSITION_EDGE)
-                        .GetValue();
-        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
-    } else {
-        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
-    }
+    gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
 
     canvas.Save();
     canvas.AttachBrush(startCirclePaint);
@@ -346,19 +334,8 @@ void DataPanelModifier::PaintProgress(
     endCirclePaint.SetAntiAlias(true);
     endCirclePaint.SetColor(arcData.endColor.GetValue());
 
-    if (progress < START_COLOR_TRANSITION_EDGE) {
-        startCirclePaint.SetColor(
-            Color::LineColorTransition(arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE)
-                .GetValue());
-        colors[0] =
-            Color::LineColorTransition(arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE)
-                .GetValue();
-        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
-    } else {
-        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
-    }
+    gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
 
     canvas.Save();
     canvas.AttachBrush(startCirclePaint);
