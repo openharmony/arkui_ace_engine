@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -184,11 +184,11 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg003, TestSize.Level1)
      * @tc.expected: step3. sliderSize is the same with expected value.
      */
     /**
-    //     corresponding ets code:
-    //          Row.Width(500).Height(500) {
-    //         Slider({ { value: 50, min: 0, max: 100 }}).width(50).height(50)
-    //     }
-    */
+     *     corresponding ets code:
+     *          Row.Width(500).Height(500) {
+     *         Slider({ { value: 50, min: 0, max: 100 }}).width(50).height(50)
+     *     }
+     */
     LayoutConstraintF layoutConstraintSizevalid;
     layoutConstraintSizevalid.maxSize = MAX_SIZE;
     layoutConstraintSizevalid.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
@@ -271,14 +271,14 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
      */
 
     /**
-    //     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
-    */
+     *     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     */
     bool first_case = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(first_case);
 
     /**
-    //     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
-    */
+     *     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     */
     bool second_case = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(second_case);
 
@@ -286,14 +286,14 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg005, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     /**
-    //     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
-    */
+     *     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     */
     bool third_case = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(third_case);
 
     /**
-    //     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
-    */
+     *     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+     */
     bool forth_case = sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(forth_case);
 }
