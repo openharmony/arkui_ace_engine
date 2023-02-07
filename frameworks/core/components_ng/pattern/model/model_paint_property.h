@@ -91,6 +91,13 @@ public:
         ResetFlagProperties();
     }
 
+    void ModelLightsAnimationUpdate(const std::vector<RefPtr<OHOS::Render3D::SVLight>>& lights)
+    {
+        propModelLights_ = lights;
+        UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+        UpdateNeedsLightsSetup(true);
+    }
+
     void OnModelSingleLightUpdate(const RefPtr<OHOS::Render3D::SVLight>& light)
     {
         propModelLights_.value().push_back(light);

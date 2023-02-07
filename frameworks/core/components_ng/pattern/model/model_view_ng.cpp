@@ -51,6 +51,13 @@ void ModelViewNG::Create(const std::string& src)
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelLights, {});
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelAnimations, {});
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelGeometries, {});
+
+    lightsIdx_ = 0;
+    if (lights_.empty()) {
+        isFirstLightsUpdate_ = true;
+    } else {
+        isFirstLightsUpdate_ = false;
+    }
 }
 
 void ModelViewNG::SetBackground(const std::string& value)
@@ -119,7 +126,30 @@ void ModelViewNG::SetCameraUp(Vec3 upVec)
 void ModelViewNG::AddLight(const RefPtr<OHOS::Render3D::SVLight>& light)
 {
     LOGD("MODEL_NG: light: @light");
-    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, light);
+    if (isFirstLightsUpdate_) {
+        // Set the animation callback.
+        RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        if (pipeline) {
+            light->SetContextAndCallback(pipeline,
+                std::bind(&ModelViewNG::PerformLightUpdate, this));
+        } else {
+            LOGE("ModelViewNG() pipeline context is null");
+        }
+        lights_.push_back(light);
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, light);
+    } else {
+        lightsIdx_++;
+        // Update the corresponding light proepties.
+        auto currentLight = lights_.at(lightsIdx_-1);
+        currentLight->SetLightType(light->GetLightType());
+        currentLight->SetIntensity(light->GetLightIntensity());
+        currentLight->SetColor(light->GetLightColor());
+        currentLight->SetLightShadow(light->GetLightShadow());
+        currentLight->SetPosition(light->GetPosition());
+        currentLight->SetRotation(light->GetRotation());
+        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleLight, currentLight);
+    }
 }
 
 void ModelViewNG::AddGeometry(const RefPtr<OHOS::Render3D::SVGeometry>& shape)
@@ -175,6 +205,23 @@ void ModelViewNG::PerformCameraUpdate()
     } else {
         LOGE("ModelPaintProperty is null");
     }
+}
+
+void ModelViewNG::PerformLightUpdate()
+{
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        LOGE("frameNode is null!");
+        return;
+    }
+
+    auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+    if (!paintProperty) {
+        LOGE("ModelPaintProperty is null");
+        return;
+    }
+    paintProperty->ModelLightsAnimationUpdate(lights_);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 } // namespace OHOS::Ace::NG
