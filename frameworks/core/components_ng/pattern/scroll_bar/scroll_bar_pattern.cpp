@@ -75,6 +75,7 @@ void ScrollBarPattern::OnModifyDone()
     scrollableEvent_->SetScrollPositionCallback(std::move(offsetTask));
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEndTask));
     gestureHub->AddScrollableEvent(scrollableEvent_);
+    scrollBarProxy_->StartScrollBarAnimator();
 }
 
 bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
