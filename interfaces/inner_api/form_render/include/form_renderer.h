@@ -16,30 +16,43 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
 
+#include "form_renderer.h"
+
+#include "ability_context.h"
+#include "form_js_info.h"
+#include "js_runtime.h"
+#include "runtime.h"
+#include "ui_content.h"
+
 #include "form_renderer_delegate_interface.h"
 #include "form_renderer_dispatcher_impl.h"
-#include "ui_content.h"
 
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRenderer
- * FormRenderer interface is used to form renderer.
  */
 class FormRenderer {
 public:
-    FormRenderer() = default;
+    FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+                 const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
     ~FormRenderer() = default;
-    /**
-     * @brief OnActionEvent.
-     * @param action The action.
-     */
-    int32_t OnActionEvent(const std::string& action);
+
+    void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+
+    void Destroy();
+    void OnActionEvent(const std::string& action);
+    void OnError(const std::string& param);
 
 private:
-    std::shared_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
-    std::shared_ptr<IFormRendererDelegate> formRendererDelegate_;
-    std::shared_ptr<UIContent> uIContent_;
+    void InitUiContent();
+
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
+    std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
+    std::unique_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
+    sptr<IFormRendererDelegate> formRendererDelegate_;
+    std::shared_ptr<UIContent> uiContent_;
 };
 }  // namespace Ace
 }  // namespace OHOS

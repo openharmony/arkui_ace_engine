@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,8 @@
 
 #include <list>
 
+#include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
+#include "interfaces/inner_api/form_render/include/form_renderer_dispatcher_interface.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_manager_resource.h"
 #include "core/components/form/resource/form_request_data.h"
@@ -25,6 +27,7 @@
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_js_info.h"
+#include "ui/rs_surface_node.h"
 #include "want.h"
 #include "want_params_wrapper.h"
 
@@ -33,6 +36,7 @@
 
 namespace OHOS::Ace {
 class FormCallbackClient;
+class FormSurfaceCallbackClient;
 class FormManagerDelegate : public FormManagerResource {
     DECLARE_ACE_TYPE(FormManagerDelegate, FormManagerResource);
 
@@ -42,11 +46,12 @@ public:
     using OnFormUpdateCallbackForJava = std::function<void(int64_t, const std::string&)>;
     using OnFormAcquiredCallback = std::function<void(int64_t, const std::string&, const std::string&,
         const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&,
-        const AppExecFwk::FormJsInfo&, const FrontendType& frontendType)>;
+        const AppExecFwk::FormJsInfo&, const FrontendType& frontendType, const FrontendType& uiSyntax)>;
     using OnFormUpdateCallback =
         std::function<void(int64_t, const std::string&, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&)>;
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
+    using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&)>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -60,7 +65,9 @@ public:
     ~FormManagerDelegate() override;
     explicit FormManagerDelegate(const WeakPtr<PipelineBase>& context)
         : FormManagerResource("formAdaptor", context), state_(State::WAITINGFORSIZE)
-    {}
+    {
+        renderDelegate_ = std::make_shared<FormRendererDelegateImpl>();
+    }
 
     void AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
     void ReleasePlatformResource();
@@ -69,13 +76,21 @@ public:
     void AddFormUpdateCallback(const OnFormUpdateCallback& callback);
     void AddFormErrorCallback(const OnFormErrorCallback& callback);
     void AddFormUninstallCallback(const OnFormUninstallCallback& callback);
+    void AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback);
 
     void OnActionEvent(const std::string& action);
+    void DispatchPointerEvent(
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void RegisterRenderDelegateEvent();
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
     void OnDeathReceived();
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
+    void ProcessAddFormSurface(
+        const AppExecFwk::FormJsInfo &formInfo,
+        const std::shared_ptr<Rosen::RSSurfaceNode> &rsSurfaceNode,
+        const AAFwk::Want& want);
 #endif
 
 private:
@@ -96,6 +111,7 @@ private:
     OnFormUpdateCallback onFormUpdateCallback_;
     OnFormErrorCallback onFormErrorCallback_;
     OnFormUninstallCallback onFormUninstallCallback_;
+    OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;
 
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM
@@ -104,6 +120,9 @@ private:
     bool hasCreated_ = false;
     std::shared_ptr<FormCallbackClient> formCallbackClient_;
     std::shared_ptr<FormUtils> formUtils_;
+    std::shared_ptr<FormSurfaceCallbackClient> formSurfaceCallbackClient_;
+    std::shared_ptr<FormRendererDelegateImpl> renderDelegate_;
+    sptr<IFormRendererDispatcher> formRendererDispatcher_;
 #endif
 };
 

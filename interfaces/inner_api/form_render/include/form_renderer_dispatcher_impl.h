@@ -18,15 +18,18 @@
 
 #include "form_renderer_dispatcher_stub.h"
 
+#include "base/utils/macros.h"
+#include "ui_content.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRendererDispatcher
  * FormRendererDispatcher interface is used to form renderer dispatcher.
  */
-class FormRendererDispatcherImpl : public FormRendererDispatcherStub {
+class ACE_EXPORT FormRendererDispatcherImpl : public FormRendererDispatcherStub {
 public:
-    FormRendererDispatcherImpl() = default;
+    explicit FormRendererDispatcherImpl(const std::shared_ptr<UIContent> uiContent);
     ~FormRendererDispatcherImpl() override = default;
     /**
      * @brief Dispatcher pointer event.
@@ -34,6 +37,8 @@ public:
      */
     void DispatchPointerEvent(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
+private:
+    std::weak_ptr<UIContent> uiContent_;
 };
 }  // namespace Ace
 }  // namespace OHOS

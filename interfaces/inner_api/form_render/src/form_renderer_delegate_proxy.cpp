@@ -68,7 +68,7 @@ int32_t FormRendererDelegateProxy::OnActionEvent(const std::string& action)
     }
 
     if (!data.WriteString(action)) {
-        HILOG_ERROR("register callback fail, want error");
+        HILOG_ERROR("register callback fail, action error");
         return ERR_INVALID_VALUE;
     }
 
@@ -76,6 +76,31 @@ int32_t FormRendererDelegateProxy::OnActionEvent(const std::string& action)
     MessageOption option;
     int32_t error = Remote()->SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ACTION_CREATE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("register callback fail, error: %d", error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t FormRendererDelegateProxy::OnError(const std::string& param)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteString(param)) {
+        HILOG_ERROR("register callback fail, param error");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("register callback fail, error: %d", error);
         return error;

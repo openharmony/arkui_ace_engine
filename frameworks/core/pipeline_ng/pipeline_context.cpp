@@ -173,7 +173,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
     FlushBuild();
-    if (isEtsCard_ && drawDelegate_) {
+    if (isFormRender_ && drawDelegate_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
@@ -258,7 +258,7 @@ void PipelineContext::FlushFocus()
         return;
     }
     if (!RequestDefaultFocus()) {
-        if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
+        if (rootNode_ && rootNode_->GetFocusHub() && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
             rootNode_->GetFocusHub()->RequestFocusImmediately();
         }
     }
@@ -325,7 +325,7 @@ void PipelineContext::SetupRootElement()
         rootNode_->AddChild(appBarNode ? appBarNode : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!IsJsCard()) {
+    if (!IsJsCard() && !isFormRender_) {
         auto rsWindow = static_cast<RosenWindow*>(GetWindow());
         if (rsWindow) {
             auto rsUIDirector = rsWindow->GetRsUIDirector();
@@ -708,6 +708,10 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
+    if (etsCardTouchEventCallback_) {
+        etsCardTouchEventCallback_(point);
+    }
+
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
@@ -722,6 +726,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
+        touchRestrict.touchEvent = point;
         eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
 
         for (const auto& weakContext : touchPluginPipelineContext_) {
@@ -769,6 +774,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
+        etsCardTouchEventCallback_ = nullptr;
     }
 
     hasIdleTasks_ = true;

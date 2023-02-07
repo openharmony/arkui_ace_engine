@@ -16,7 +16,12 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H
 
+#include <mutex>
+
+#include "form_surface_callback_interface.h"
 #include "form_renderer_delegate_stub.h"
+
+#include "base/utils/macros.h"
 
 namespace OHOS {
 namespace Ace {
@@ -24,7 +29,7 @@ namespace Ace {
  * @class FormRendererDelegate
  * FormRendererDelegate interface is used to form renderer delegate.
  */
-class FormRendererDelegateImpl : public FormRendererDelegateStub {
+class ACE_EXPORT FormRendererDelegateImpl : public FormRendererDelegateStub {
 public:
     FormRendererDelegateImpl() = default;
     ~FormRendererDelegateImpl() override = default;
@@ -43,6 +48,27 @@ public:
      * @param action The action.
      */
     int32_t OnActionEvent(const std::string& action) override;
+    /**
+     * @brief OnError.
+     * @param param The param.
+     */
+    int32_t OnError(const std::string& param) override;
+    /**
+     * @brief RegisterSurfaceCreateCallback.
+     * @param formCallback The formCallback.
+     * @param formId The formId.
+     */
+    void RegisterSurfaceCreateCallback(
+        std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId);
+
+    void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
+    void SetErrorEventHandler(std::function<void(const std::string&)>&& listener);
+
+private:
+    mutable std::mutex callbackMutex_;
+    std::map<int64_t, std::set<std::shared_ptr<FormSurfaceCallbackInterface>>> formCallbackMap_;
+    std::function<void(const std::string&)> actionEventHandler_;
+    std::function<void(const std::string&)> errorEventHandler_;
 };
 }  // namespace Ace
 }  // namespace OHOS

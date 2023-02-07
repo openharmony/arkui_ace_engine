@@ -98,6 +98,8 @@ public:
 
     virtual void SetDrawTextAsBitmap(bool useBitmap) {}
 
+    virtual void SetFormRSSurfaceNode(void* surfaceNode) {}
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

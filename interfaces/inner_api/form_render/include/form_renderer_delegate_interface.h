@@ -23,13 +23,15 @@
 #include "ui/rs_surface_node.h"
 #include "want.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRendererDelegate
  * FormRendererDelegate interface is used to form renderer delegate.
  */
-class IFormRendererDelegate : public OHOS::IRemoteBroker {
+class ACE_EXPORT IFormRendererDelegate : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.FormRendererDelegate")
 
@@ -50,10 +52,16 @@ public:
      * @param action The action.
      */
     virtual int32_t OnActionEvent(const std::string& action) = 0;
+    /**
+     * @brief OnError.
+     * @param action The action.
+     */
+    virtual int32_t OnError(const std::string& param) = 0;
 
     enum Message : uint32_t {
         ON_SURFACE_CREATE = 1,
         ON_ACTION_CREATE,
+        ON_ERROR,
     };
 };
 }  // namespace Ace

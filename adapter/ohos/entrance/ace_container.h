@@ -270,6 +270,11 @@ public:
         return isSubContainer_;
     }
 
+    bool IsFormRender() const
+    {
+        return isFormRender_;
+    }
+
     void* GetSharedRuntime() override
     {
         return sharedRuntime_;
@@ -323,6 +328,9 @@ public:
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
 
+    // ArkTsCard
+    static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
+
     void SetWindowName(const std::string& name)
     {
         windowName_ = name;
@@ -348,6 +356,11 @@ public:
     void SetIsSubContainer(bool isSubContainer)
     {
         isSubContainer_ = isSubContainer;
+    }
+
+    void SetIsFormRender(bool isCardContainer)
+    {
+        isFormRender_ = isCardContainer;
     }
 
     void InitializeSubContainer(int32_t parentContainerId);
@@ -378,6 +391,9 @@ public:
     {
         return webHapPath_;
     }
+
+    // ArkTSCard
+    std::shared_ptr<Rosen::RSSurfaceNode> formSurfaceNode_ = nullptr;
 
 private:
     void InitializeFrontend();
@@ -418,6 +434,7 @@ private:
     sptr<IRemoteObject> token_;
 
     bool isSubContainer_ = false;
+    bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
 

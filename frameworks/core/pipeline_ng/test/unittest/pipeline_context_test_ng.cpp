@@ -187,7 +187,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg002, TestSize.Level1)
      * @tc.expected: The drawDelegate_ is null.
      */
     context_->onShow_ = false;
-    context_->SetIsEtsCard(false);
+    context_->SetIsFormRender(false);
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     EXPECT_EQ(context_->drawDelegate_, nullptr);
 
@@ -231,7 +231,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
      */
     context_->onShow_ = true;
     context_->onFocus_ = false;
-    context_->SetIsEtsCard(true);
+    context_->SetIsFormRender(true);
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     EXPECT_EQ(context_->drawDelegate_, nullptr);
 

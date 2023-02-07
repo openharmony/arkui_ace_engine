@@ -14,16 +14,54 @@
  */
 
 #include "form_renderer_group.h"
+#include "form_js_info.h"
+#include "form_renderer.h"
 
 namespace OHOS {
 namespace Ace {
-void FormRendererGroup::AddForm()
+std::unique_ptr<FormRendererGroup> FormRendererGroup::Create(
+    const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
 {
-    rendererMap_.emplace("", nullptr);
+    return std::make_unique<FormRendererGroup>(context, runtime);
 }
 
-void FormRendererGroup::UpdateForm()
+FormRendererGroup::FormRendererGroup(
+    const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+    const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
+    : context_(context), runtime_(runtime) {}
+
+void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
+    auto formRenderer = std::make_shared<FormRenderer>(context_, runtime_);
+    if (!formRenderer) {
+        return;
+    }
+    auto compId = want.GetStringParam("ohos.extra.param.key.form_comp_id");
+    rendererMap_.try_emplace(compId, formRenderer);
+    formRenderer->AddForm(want, formJsInfo);
+}
+
+void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    auto iter = rendererMap_.begin();
+    while (iter!= rendererMap_.end()) {
+        auto renderer = iter->second;
+        renderer->UpdateForm(formJsInfo);
+        iter++;
+    }
+}
+
+void FormRendererGroup::DeleteForm(const std::string& compId)
+{
+    auto iter = rendererMap_.find(compId);
+    if (iter == rendererMap_.end()) {
+        return;
+    }
+    auto renderer = iter->second;
+    // should release the occupancy of resources of the context, runtime and ui content
+    renderer->Destroy();
+    rendererMap_.erase(iter);
 }
 }  // namespace Ace
 }  // namespace OHOS
