@@ -100,45 +100,11 @@ std::unique_ptr<JsonValue> ListItemGroupComposedElement::ToJsonObject() const
     return resultJson;
 }
 
-void ListItemGroupComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+RefPtr<Element> ListItemGroupComposedElement::GetElementChildBySlot(const RefPtr<Element>& element, int32_t& slot) const
 {
-    auto listItemGroupElement = GetContentElement<ListItemGroupElement>(ListItemGroupElement::TypeId());
-    if (!listItemGroupElement) {
-        LOGE("get GetListItemGroupElement failed");
-        return;
-    }
-    listItemGroupElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    listItemGroupElement->MarkDirty();
-}
-
-void ListItemGroupComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto listItemGroupElement = GetContentElement<ListItemGroupElement>(ListItemGroupElement::TypeId());
-    if (!listItemGroupElement) {
-        LOGE("get GetListItemGroupElement failed");
-        return;
-    }
-    auto child = listItemGroupElement->GetListItemBySlot(slot);
-    if (!child) {
-        return;
-    }
-    listItemGroupElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    listItemGroupElement->MarkDirty();
-}
-
-void ListItemGroupComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto listItemGroupElement = GetContentElement<ListItemGroupElement>(ListItemGroupElement::TypeId());
-    if (!listItemGroupElement) {
-        LOGE("get GetListItemGroupElement failed");
-        return;
-    }
-    auto child = listItemGroupElement->GetListItemBySlot(slot);
-    if (!child) {
-        return;
-    }
-    listItemGroupElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    listItemGroupElement->MarkDirty();
+    auto listItemGroupElement = AceType::DynamicCast<ListItemGroupElement>(element);
+    CHECK_NULL_RETURN(listItemGroupElement, nullptr);
+    return listItemGroupElement->GetListItemBySlot(slot);
 }
 
 } // namespace OHOS::Ace::V2
