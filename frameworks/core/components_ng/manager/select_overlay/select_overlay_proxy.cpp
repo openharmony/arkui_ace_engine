@@ -79,7 +79,7 @@ bool SelectOverlayProxy::IsClosed() const
     CHECK_NULL_RETURN(pipeline, true);
     auto manager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(manager, true);
-    return manager->HasSelectOverlay(selectOverlayId_);
+    return !manager->HasSelectOverlay(selectOverlayId_);
 }
 
 void SelectOverlayProxy::Close() const

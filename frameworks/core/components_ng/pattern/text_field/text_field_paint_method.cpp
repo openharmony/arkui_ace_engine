@@ -123,11 +123,16 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
         paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
         paintOffset.GetY() + paintWrapper->GetContentSize().Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    auto textBoxes = textFieldPattern->GetTextBoxes();
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
         case InputStyle::DEFAULT:
             // for default style, selection height is equal to the content height
-            canvas.DrawRect(RSRect(startOffset, textFieldPattern->GetCaretRect().GetY(), endOffset,
-                textFieldPattern->GetCaretRect().GetY() + textFieldPattern->GetCaretRect().Height()));
+            for (const auto& textBox : textBoxes) {
+                canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + paintWrapper->GetContentOffset().GetX(),
+                    paintWrapper->GetContentOffset().GetY() + textBox.rect_.GetTop(),
+                    +paintWrapper->GetContentOffset().GetX() + textBox.rect_.GetRight(),
+                    paintWrapper->GetContentOffset().GetY() + textBox.rect_.GetTop() + textBox.rect_.GetHeight()));
+            }
             break;
         case InputStyle::INLINE:
             // for inline style, selection height is equal to the frame height
