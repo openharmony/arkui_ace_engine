@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+enum class ComponentButtonType { POPUP, BUTTON };
 class ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
 
@@ -71,6 +72,16 @@ public:
         isSetClickedColor_ = true;
     }
 
+    void SetFocusBorderColor(const Color& color)
+    {
+        FocusBorderColor_ = color;
+    }
+
+    void setComponentButtonType(const ComponentButtonType& buttonType)
+    {
+        buttonType_ = buttonType;
+    }
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -83,9 +94,11 @@ protected:
 
 private:
     static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
-    
+
     Color backgroundColor_;
+    Color FocusBorderColor_;
     bool isSetClickedColor_ = false;
+    ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
 

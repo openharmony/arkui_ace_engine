@@ -45,8 +45,6 @@ constexpr Dimension GRID_SPACING_TOTAL = 232.0_vp;
 constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 6.0_vp;
 constexpr int32_t GRID_NUMBER_LANDSCAPE = 8;
 constexpr int32_t BUBBLR_GRID_MAX_LANDSCAPE = 6;
-constexpr Dimension BUBBLE_RADIUS = 16.0_vp;
-constexpr Dimension BUBBLE_SPACING = Dimension(8.0, DimensionUnit::VP);
 constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 
 } // namespace
@@ -54,6 +52,9 @@ constexpr Dimension BEZIER_WIDTH_HALF = 16.0_vp;
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(bubbleProp);
+    InitProps(bubbleProp);
     auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleLayoutProperty);
 
@@ -97,7 +98,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         float rootW = context->GetRootWidth();
         auto childHeight = child->GetGeometryNode()->GetMarginFrameSize().Height();
         auto childWidth = child->GetGeometryNode()->GetMarginFrameSize().Width();
-        float scaledBubbleSpacing = BUBBLE_SPACING.ConvertToPx() * 2.0;
+        auto scaledBubbleSpacing = scaledBubbleSpacing_ * 2;
         auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
         CHECK_NULL_VOID(targetNode);
         auto geometryNode = targetNode->GetGeometryNode();
@@ -137,7 +138,6 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto bubbleProp = DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleProp);
-    InitProps(bubbleProp);
     InitTargetSizeAndPosition(bubbleProp);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
@@ -158,33 +158,37 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
+    borderRadius_ = popupTheme->GetRadius().GetX();
     border_.SetBorderRadius(popupTheme->GetRadius());
     targetSpace_ = popupTheme->GetTargetSpace();
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
+    scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
+    arrowHeight_ = static_cast<float>(popupTheme->GetArrowHeight().ConvertToPx());
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
     InitArrowState(layoutProp);
-    float scaledBubbleSpacing = BUBBLE_SPACING.ConvertToPx();
+    auto scaledBubbleSpacing = scaledBubbleSpacing_;
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() + targetSize_.Height() + scaledBubbleSpacing);
     if (showBottomArrow_) {
-        bottomPosition += OffsetF(0.0, scaledBubbleSpacing);
+        bottomPosition += OffsetF(0.0, arrowHeight_);
     }
     OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() - childSize.Height() - scaledBubbleSpacing);
     if (showTopArrow_) {
-        topPosition += OffsetF(0.0, -scaledBubbleSpacing);
+        topPosition += OffsetF(0.0, -arrowHeight_);
     }
     OffsetF topArrowPosition;
     OffsetF bottomArrowPosition;
     InitArrowTopAndBottomPosition(topArrowPosition, bottomArrowPosition, topPosition, bottomPosition, childSize);
+
     OffsetF originOffset =
         GetPositionWithPlacement(childSize, topPosition, bottomPosition, topArrowPosition, bottomArrowPosition);
     OffsetF childPosition = originOffset;
@@ -243,24 +247,23 @@ void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosit
     topArrowPosition =
         topPosition + OffsetF(std::max(padding_.Left().ConvertToPx(), border_.TopLeftRadius().GetX().ConvertToPx()) +
                                   BEZIER_WIDTH_HALF.ConvertToPx(),
-                          childSize.Height() + BUBBLE_SPACING.ConvertToPx());
+                          childSize.Height() + arrowHeight_);
     bottomArrowPosition = bottomPosition + OffsetF(std::max(padding_.Left().ConvertToPx(),
                                                        border_.BottomLeftRadius().GetX().ConvertToPx()) +
-                                                       BEZIER_WIDTH_HALF.ConvertToPx(),
-                                               -BUBBLE_SPACING.ConvertToPx());
+                                                       BEZIER_WIDTH_HALF.ConvertToPx(), -arrowHeight_);
 }
 
 OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition,
     const OffsetF& bottomPosition, const OffsetF& topArrowPosition, const OffsetF& bottomArrowPosition)
 {
     OffsetF childPosition;
-    float bubbleSpacing = BUBBLE_SPACING.ConvertToPx();
+    float bubbleSpacing = scaledBubbleSpacing_;
     float marginRight = 0.0f;
     float marginBottom = 0.0f;
     float marginTop = 0.0f;
     float marginLeft = 0.0f;
     float arrowHalfWidth = ARROW_WIDTH.ConvertToPx() / 2.0;
-    float radius = BUBBLE_RADIUS.ConvertToPx();
+    float radius = borderRadius_.ConvertToPx();
     float targetSpace = targetSpace_.ConvertToPx();
     switch (placement_) {
         case Placement::TOP:
@@ -370,7 +373,7 @@ void BubbleLayoutAlgorithm::UpdateCustomChildPosition(const RefPtr<BubbleLayoutP
 {
     auto enableArrow = layoutProp->GetEnableArrow().value_or(true);
     double arrowWidth = ARROW_WIDTH.ConvertToPx();
-    double twoRadiusPx = BUBBLE_RADIUS.ConvertToPx() * 2.0;
+    double twoRadiusPx = borderRadius_.ConvertToPx() * 2.0;
     switch (arrowPlacement_) {
         case Placement::TOP:
             showCustomArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);

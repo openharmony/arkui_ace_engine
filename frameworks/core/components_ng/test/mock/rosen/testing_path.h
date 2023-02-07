@@ -49,6 +49,11 @@ public:
     virtual void Close() {}
     virtual void QuadTo(float ctrlPtX, float ctrlPtY, float endPtX, float endPtY) {}
     virtual void ArcTo(float rx, float ry, float angle, TestingPathDirection direction, float endX, float endY) {}
+    virtual void Offset(float dx, float dy) {}
+    virtual TestingRect GetBounds()
+    {
+        return TestingRect();
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_TESTING_PATH_H

@@ -27,7 +27,9 @@
 #include "core/components_ng/test/mock/rosen/testing_path_effect.h"
 #include "core/components_ng/test/mock/rosen/testing_pen.h"
 #include "core/components_ng/test/mock/rosen/testing_point.h"
+#include "core/components_ng/test/mock/rosen/testing_point3.h"
 #include "core/components_ng/test/mock/rosen/testing_shader_effect.h"
+#include "core/components_ng/test/mock/rosen/testing_shadowflags.h"
 
 namespace OHOS::Ace {
 using RSCanvas = Testing::TestingCanvas;
@@ -52,6 +54,8 @@ using RSCamera3D = Testing::TestingCamera;
 using RSMatrix = Testing::TestingMatrix;
 using RSClipOp = Testing::ClipOp;
 using RSPoint = Testing::TestingPoint;
+using RSPoint3 = Testing::TestingPoint3;
+using RSShadowFlags = Testing::TestingShadowFlags;
 using RSRect = Testing::TestingRect;
 using RSRoundRect = Testing::TestingRoundRect;
 using RSColorQuad = uint32_t;

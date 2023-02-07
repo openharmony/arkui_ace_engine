@@ -18,12 +18,14 @@
 
 #ifndef ACE_UNITTEST
 #include "draw/canvas.h"
+#include "draw/shadow.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "image/image.h"
 #include "rosen_text/ui/font_collection.h"
 #include "rosen_text/ui/typography.h"
 #include "rosen_text/ui/typography_create.h"
 #include "utils/camera3d.h"
+#include "utils/point3.h"
 #include "utils/scalar.h"
 
 namespace OHOS::Ace {
@@ -40,6 +42,8 @@ using RSRoundRect = Rosen::Drawing::RoundRect;
 using RSRRect = Rosen::Drawing::Rect;
 using RSPoint = Rosen::Drawing::PointF;
 using RSRPoint = Rosen::Drawing::Point;
+using RSPoint3 = Rosen::Drawing::Point3;
+using RSShadowFlags = Rosen::Drawing::ShadowFlags;
 using RSBlendMode = Rosen::Drawing::BlendMode;
 using RSSamplingOptions = Rosen::Drawing::SamplingOptions;
 using RSRoundRect = Rosen::Drawing::RoundRect;
