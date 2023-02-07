@@ -487,7 +487,7 @@ private:
     void OnTextAreaScroll(float dy);
     void InitMouseEvent();
     void OnHover(bool isHover);
-    void HandleMouseEvent(const MouseInfo& info);
+    void HandleMouseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
@@ -620,6 +620,7 @@ private:
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
+    bool newLineInserted_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
