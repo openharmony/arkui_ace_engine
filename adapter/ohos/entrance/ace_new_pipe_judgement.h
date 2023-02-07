@@ -25,6 +25,7 @@ enum class AceNewPipeEnabledType {
     ACE_NEW_PIPE_DISABLED = 0,
     ACE_NEW_PIPE_ENABLED_FOR_ALL,
     ACE_NEW_PIPE_PARTIALLY_ENABLED,
+    ACE_NEW_PIPE_DEFAULT,
 };
 
 class AceNewPipeJudgement final {
@@ -46,7 +47,7 @@ private:
     static std::ifstream& SafeGetLine(std::ifstream& configFile, std::string& line);
     static void InitAceNewPipeWithConfigFile();
 
-    static inline AceNewPipeEnabledType aceNewPipeEnabledType_ = AceNewPipeEnabledType::ACE_NEW_PIPE_DISABLED;
+    static inline AceNewPipeEnabledType aceNewPipeEnabledType_ = AceNewPipeEnabledType::ACE_NEW_PIPE_DEFAULT;
     static inline std::set<std::string> aceNewPipeEnabledList_ {};
     static inline bool InitedAceNewPipeConfig_ = false;
 };
