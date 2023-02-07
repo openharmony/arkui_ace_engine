@@ -27,7 +27,8 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
     return nullptr;
 }
 
-RefPtr<FrameNode> AppBarView::BuildShareButton(InternalResource::ResourceId icon, GestureEventFunc&& clickCallback)
+RefPtr<FrameNode> AppBarView::BuildIconButton(
+    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton)
 {
     return nullptr;
 }

@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -26,21 +28,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-const Dimension APP_BAR_HEIGHT = 56.0_vp;
-const Dimension SHARE_IMAGE_SIZE = 24.0_vp;
-const Dimension MARGIN_TEXT = -8.0_vp;
+const Dimension MARGIN_TEXT = 24.0_vp;
 const Dimension MARGIN_BUTTON = 12.0_vp;
-const Dimension DEFAULT_CORNER_RADIUS_S = 18.0_vp;
-const Dimension TITLE_FONT_SIZE = 20.0_fp;
-const Color COLOR_PRIMARY = Color(0xe5000000);
-const Color CLICK_EFFECT_COLOR = Color(0x19000000);
-const Color COLOR_APP_BAR_BG = Color(0xffffffff);
-const std::string BUNDLE_NAME = "com.ohos.hag.famanager";
-const std::string ABILITY_NAME = "FaPanelAbility";
-const std::string FA_BUNDLE_NAME = "com.js.timer1.hmservice";
-const std::string FA_ABILITY_NAME = "MainAbility";
-const std::string FA_MODULE_NAME = "entry";
-const std::string FA_HOST_PKG_NAME = "com.js.timer1.hmservice";
+const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
 
 } // namespace
 
@@ -48,8 +38,23 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
 {
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    column->AddChild(BuildBarTitle());
+    auto titleBar = BuildBarTitle();
+    column->AddChild(titleBar);
     column->AddChild(content);
+    auto stagePattern = content->GetPattern<StagePattern>();
+    if (stagePattern) {
+        stagePattern->SetOnRebuildFrameCallback([titleBar, content]() {
+            CHECK_NULL_VOID(titleBar);
+            CHECK_NULL_VOID(content);
+            auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+            CHECK_NULL_VOID(backButton);
+            if (content->GetChildren().size() > 1) {
+                backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
+                return;
+            }
+            backButton->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
+        });
+    }
     return column;
 }
 
@@ -59,21 +64,22 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto layoutProperty = appBarRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
     layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(APP_BAR_HEIGHT)));
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(appBarTheme->GetAppBarHeight())));
     layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     auto renderContext = appBarRow->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    renderContext->UpdateBackgroundColor(COLOR_APP_BAR_BG);
+    renderContext->UpdateBackgroundColor(appBarTheme->GetBgColor());
 
     // create title label
     auto titleLabel = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants = themeManager->GetThemeConstants();
@@ -81,68 +87,67 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
 
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
     textLayoutProperty->UpdateMaxLines(2);
-    textLayoutProperty->UpdateFontSize(TITLE_FONT_SIZE);
-    textLayoutProperty->UpdateTextColor(COLOR_PRIMARY);
-    textLayoutProperty->UpdateFontWeight(FontWeight::W500);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textLayoutProperty->UpdateFontSize(appBarTheme->GetFontSize());
+    textLayoutProperty->UpdateTextColor(appBarTheme->GetTextColor());
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     textLayoutProperty->UpdateLayoutWeight(1.0f);
 
     MarginProperty margin;
     margin.left = CalcLength(MARGIN_TEXT);
+    margin.right = CalcLength(MARGIN_TEXT);
     textLayoutProperty->UpdateMargin(margin);
 
-    appBarRow->AddChild(
-        BuildShareButton(InternalResource::ResourceId::APP_BAR_BACK_SVG, [pipeline](GestureEvent& info) {
+    appBarRow->AddChild(BuildIconButton(
+        InternalResource::ResourceId::APP_BAR_BACK_SVG,
+        [pipeline](GestureEvent& info) {
             if (pipeline) {
                 pipeline->CallRouterBackToPopPage();
             }
-        }));
+        }, true));
     appBarRow->AddChild(titleLabel);
-    appBarRow->AddChild(BuildShareButton(InternalResource::ResourceId::APP_BAR_FA_SVG, [pipeline](GestureEvent& info) {
-        if (pipeline) {
-            pipeline->FireSharePanelCallback(
-                FA_BUNDLE_NAME, FA_ABILITY_NAME, FA_MODULE_NAME, FA_HOST_PKG_NAME, BUNDLE_NAME, ABILITY_NAME);
-        }
-    }));
-
+    appBarRow->AddChild(BuildIconButton(
+        InternalResource::ResourceId::APP_BAR_FA_SVG,
+        [pipeline, appBarTheme](GestureEvent& info) {
+            if (pipeline && appBarTheme) {
+                pipeline->FireSharePanelCallback(appBarTheme->GetServiceBundleName(),
+                    appBarTheme->GetServiceAbilityName(), appBarTheme->GetServiceModuleName(),
+                    appBarTheme->GetServiceHostPkgName(), appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
+            }
+        }, false));
     return appBarRow;
 }
 
-RefPtr<FrameNode> AppBarView::BuildShareButton(InternalResource::ResourceId icon, GestureEventFunc&& clickCallback)
+RefPtr<FrameNode> AppBarView::BuildIconButton(
+    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton)
 {
     // button image icon
     ImageSourceInfo imageSourceInfo;
     auto imageIcon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    auto imageFocus = imageIcon->GetFocusHub();
-    if (imageFocus) {
-        imageFocus->SetFocusable(false);
-    }
+
     imageSourceInfo.SetResourceId(icon);
     auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
     imageLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(SHARE_IMAGE_SIZE), CalcLength(SHARE_IMAGE_SIZE)));
+        CalcSize(CalcLength(appBarTheme->GetIconSize()), CalcLength(appBarTheme->GetIconSize())));
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     imageIcon->MarkModifyDone();
 
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
-    auto buttonFocus = buttonNode->GetFocusHub();
-    if (buttonFocus) {
-        buttonFocus->SetFocusable(false);
-    }
+
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(DEFAULT_CORNER_RADIUS_S);
-    renderContext->UpdateBorderRadius(borderRadius);
-    renderContext->SetClipToBounds(true);
 
     auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
     CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->SetClickedColor(CLICK_EFFECT_COLOR);
+    buttonPattern->SetClickedColor(appBarTheme->GetClickEffectColor());
 
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);
@@ -152,11 +157,12 @@ RefPtr<FrameNode> AppBarView::BuildShareButton(InternalResource::ResourceId icon
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
     buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    buttonLayoutProperty->UpdateBorderRadius(appBarTheme->GetIconCornerRadius());
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(SHARE_IMAGE_SIZE * 2), CalcLength(SHARE_IMAGE_SIZE * 2)));
+        CalcSize(CalcLength(appBarTheme->GetIconSize() * 2), CalcLength(appBarTheme->GetIconSize() * 2)));
     MarginProperty margin;
-    margin.left = CalcLength(MARGIN_BUTTON);
-    margin.right = CalcLength(MARGIN_BUTTON);
+    margin.left = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
+    margin.right = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
     buttonLayoutProperty->UpdateMargin(margin);
     buttonNode->MarkModifyDone();
 
