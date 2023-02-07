@@ -88,10 +88,12 @@ void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float chi
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto padding = layoutProperty->CreatePaddingAndBorder();
 
-    auto frameSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
-    frameSize.SetHeight(childHeight + padding.Height());
-    frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
+    float useHeight = 0.0f;
+    useHeight = idealSize.Height().value_or(childHeight + padding.Height());
+    idealSize.SetHeight(useHeight);
+    idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 }
 
 /* Measure each child and return total height */
