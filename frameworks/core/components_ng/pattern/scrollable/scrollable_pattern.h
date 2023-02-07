@@ -96,6 +96,21 @@ public:
         return barOffset_;
     }
 
+    double GetScrollBarOutBoundaryExtent() const
+    {
+        return scrollBarOutBoundaryExtent_;
+    }
+
+    void SetScrollBarOutBoundaryExtent(double scrollBarOutBoundaryExtent)
+    {
+        scrollBarOutBoundaryExtent_ = scrollBarOutBoundaryExtent;
+    }
+
+    double GetMainSize(const SizeF& size) const
+    {
+        return axis_ == Axis::HORIZONTAL ? size.Width() : size.Height();
+    }
+
     void SetCoordinationEvent(RefPtr<ScrollableCoordinationEvent> coordinationEvent)
     {
         coordinationEvent_ = coordinationEvent;
@@ -133,6 +148,7 @@ private:
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;
     bool isReactInParentMovement_ = false;
+    double scrollBarOutBoundaryExtent_ = 0.0;
 };
 } // namespace OHOS::Ace::NG
 
