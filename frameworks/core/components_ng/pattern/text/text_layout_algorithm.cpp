@@ -117,9 +117,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
 
-    return SizeF(contentConstraint.selfIdealSize.Width() ? contentConstraint.selfIdealSize.Width().value()
-                                                         : paragraph_->GetMaxWidth(),
-        heightFinal);
+    return SizeF(paragraph_->GetMaxWidth(), heightFinal);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
