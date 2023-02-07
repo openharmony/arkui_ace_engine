@@ -358,11 +358,14 @@ void SearchPattern::InitTouchEvent()
     CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto searchPattern = weak.Upgrade();
-        CHECK_NULL_VOID(searchPattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+        auto touchType = info.GetTouches().front().GetTouchType();
+        auto touchLocalPosition = info.GetTouches().front().GetLocalLocation();
+        auto touchPoint = PointF(touchLocalPosition.GetX(), touchLocalPosition.GetY());
+        RectF rect(searchPattern->cancelButtonOffset_, searchPattern->cancelButtonSize_);
+        if (touchType == TouchType::DOWN && !rect.IsInRegion(touchPoint)) {
             searchPattern->OnTouchDown();
         }
-        if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+        if (touchType == TouchType::UP) {
             searchPattern->OnTouchUp();
         }
     };
@@ -379,14 +382,24 @@ void SearchPattern::InitMouseEvent()
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<SearchEventHub>();
     auto inputHub = eventHub->GetOrCreateInputEventHub();
-    auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->HandleMouseEvent(isHover);
+            pattern->HandleHoverEvent(isHover);
         }
     };
+
+    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleMouseEvent(info);
+        }
+    };
+
+    hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent_);
+    inputHub->AddOnHoverEvent(hoverEvent_);
+    inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
 void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId)
@@ -413,6 +426,8 @@ void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t
 
 void SearchPattern::OnTouchDown()
 {
+    isHover_ = false;
+    isTouch_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -427,6 +442,7 @@ void SearchPattern::OnTouchDown()
 
 void SearchPattern::OnTouchUp()
 {
+    isTouch_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -434,8 +450,28 @@ void SearchPattern::OnTouchUp()
     renderContext->ResetBlendBgColor();
 }
 
-void SearchPattern::HandleMouseEvent(bool isHover)
+void SearchPattern::HandleHoverEvent(bool isHover)
 {
+    isHover_ = isHover;
+    if (!isHover) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->ResetBlendBgColor();
+    }
+}
+
+void SearchPattern::HandleMouseEvent(MouseInfo& info)
+{
+    if (isTouch_) {
+        return;
+    }
+    const auto& mousePosition = info.GetLocalLocation();
+    PointF mousePoint(mousePosition.GetX(), mousePosition.GetY());
+    RectF rect(cancelButtonOffset_, cancelButtonSize_);
+    isMouseInCancelButton_ = rect.IsInRegion(mousePoint);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -445,7 +481,7 @@ void SearchPattern::HandleMouseEvent(bool isHover)
     auto theme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(theme);
     auto hoverColor = theme->GetHoverColor();
-    if (isHover) {
+    if (isHover_ && !isMouseInCancelButton_) {
         renderContext->BlendBgColor(hoverColor);
     } else {
         renderContext->ResetBlendBgColor();
