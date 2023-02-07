@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SVG_PARSE_SVG_CONTEXT_H
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <unordered_map>
 
@@ -25,6 +26,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/animation/animator.h"
+#include "core/components_ng/render/canvas_image.h"
 
 namespace OHOS::Ace::NG {
 using AttrMap = std::unordered_map<std::string, std::string>;
@@ -65,17 +67,9 @@ public:
 
     double NormalizeToPx(const Dimension& value);
 
-    void SetFuncAnimateFlush(FuncAnimateFlush&& funcAnimateFlush)
-    {
-        funcAnimateFlush_ = funcAnimateFlush;
-    }
+    void SetFuncAnimateFlush(FuncAnimateFlush&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr);
 
-    void AnimateFlush()
-    {
-        if (funcAnimateFlush_) {
-            funcAnimateFlush_();
-        }
-    }
+    void AnimateFlush();
 
     void SetRootViewBox(const Rect& viewBox)
     {
@@ -103,7 +97,8 @@ private:
     std::unordered_map<int32_t, WeakPtr<Animator>> animators_;
     ClassStyleMap styleMap_;
     FuncNormalizeToPx funcNormalizeToPx_ = nullptr;
-    FuncAnimateFlush funcAnimateFlush_ = nullptr;
+    // svg dom shared by multiple images
+    std::map<WeakPtr<CanvasImage>, FuncAnimateFlush> animateCallbacks_;
     Rect rootViewBox_;
     Size viewPort_;
 
