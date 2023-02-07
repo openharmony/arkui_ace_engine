@@ -37,6 +37,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
+#include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -153,6 +154,10 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::globalRuntime_;
 // for async task callback executed after this instance has been destroied.
 thread_local shared_ptr<JsRuntime> localRuntime;
 
+// ArkTsCard start
+thread_local bool isUnique_ = false;
+// ArkTsCard end
+
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
     CHECK_RUN_ON(JS);
@@ -188,6 +193,13 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         runtime_.reset(new ArkJSRuntime());
     }
 
+    // ArkTsCard start
+    if (isUnique_) {
+        runtime_ = localRuntime;
+    }
+    LOGE("isUnique_ = %{public}d, runtime_ = %{public}p", isUnique_, runtime_.get());
+    // ArkTsCard end
+
     if (runtime_ == nullptr) {
         LOGE("Js Engine cannot allocate JSI JSRuntime");
         EventReport::SendJsException(JsExcepType::JS_ENGINE_INIT_ERR);
@@ -218,16 +230,16 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
+    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin() || isUnique_) { // ArtTsCard
         InitGlobalObjectTemplate();
     }
 
     // no need to initialize functions on global when use shared runtime
-    if (usingSharedRuntime_ && isModuleInitialized_) {
+    if (usingSharedRuntime_ && isModuleInitialized_ && !isUnique_) { // ArtTsCard
         LOGI("InitJsEnv SharedRuntime has initialized, skip...");
     } else {
         InitGroupJsBridge();
-        if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
+        if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin() || isUnique_) { // ArtTsCard
             InitConsoleModule();
             InitAceModule();
             InitJsExportsUtilObject();
@@ -255,18 +267,20 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
-    uint8_t* codeStart;
-    int32_t codeLength;
-    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
-    if (!stateMgmtResult) {
-        LOGE("EvaluateJsCode stateMgmt failed");
-    }
-    bool jsEnumStyleResult = runtime_->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
-    if (!jsEnumStyleResult) {
-        LOGE("EvaluateJsCode jsEnumStyle failed");
+    if (isUnique_ == false) {
+        uint8_t* codeStart;
+        int32_t codeLength;
+        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+        bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
+        if (!stateMgmtResult) {
+            LOGE("EvaluateJsCode stateMgmt failed");
+        }
+        bool jsEnumStyleResult = runtime_->EvaluateJsCode(
+            (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+        if (!jsEnumStyleResult) {
+            LOGE("EvaluateJsCode jsEnumStyle failed");
+        }
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -381,7 +395,7 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
         global->SetProperty(runtime_, "console", consoleObj);
     }
 
-    if (isModulePreloaded_ && usingSharedRuntime_ && !IsPlugin()) {
+    if (isModulePreloaded_ && usingSharedRuntime_ && !IsPlugin() && !isUnique_) { // ArkTsCard
         LOGD("console module has already preloaded");
         return;
     }
@@ -971,40 +985,40 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();
-    if (!runtime) {
-        LOGE("ExecuteCardAbc failed, runtime is nullptr");
-        return false;
-    }
+    CHECK_NULL_RETURN(runtime, false);
 
     auto container = Container::Current();
-    if (!container) {
-        LOGE("ExecuteCardAbc failed, container is nullptr");
-        return false;
-    }
+    CHECK_NULL_RETURN(container, false);
 
-    auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
-    if (!frontEnd) {
-        LOGE("ExecuteCardAbc failed, frontEnd is nullptr");
-        return false;
-    }
-
-    auto delegate = frontEnd->GetDelegate();
-    if (!delegate) {
-        LOGE("ExecuteCardAbc failed, delegate is nullptr");
-        return false;
-    }
-
-    std::vector<uint8_t> content;
-    if (!delegate->GetAssetContent(fileName, content)) {
-        LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
-        return true;
-    }
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
-    const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
-#else
-    const std::string& abcPath = fileName;
-#endif
+    LOGI("JsiDeclarativeEngine::ExecuteCardAbc fileName = %{public}s", fileName.c_str());
     CardScope cardScope(cardId);
+    std::string abcPath;
+    std::vector<uint8_t> content;
+    if (container->IsFRSCardContainer()) {
+        LOGI("ExecuteCardAbc In FRS");
+        auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_RETURN(frontEnd, false);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_RETURN(delegate, false);
+        if (!delegate->GetAssetContent(fileName, content)) {
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            return false;
+        }
+        abcPath = delegate->GetAssetPath(fileName).append(fileName);
+    } else {
+        LOGI("ExecuteCardAbc In HOST");
+        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_RETURN(frontEnd, false);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_RETURN(delegate, false);
+        if (!delegate->GetAssetContent(fileName, content)) {
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            return false;
+        }
+        abcPath = delegate->GetAssetPath(fileName).append(fileName);
+    }
+
+    LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
         LOGE("ExecuteCardAbc EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
@@ -1752,4 +1766,85 @@ bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
     return CallAppFunc("onRestoreData", argv);
 }
 
+// ArkTsCard start
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
+{
+    JsiDeclarativeEngineInstance::PreloadAceModuleCard(runtime);
+}
+
+void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
+{
+    isUnique_ = true;
+    if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
+        LOGE("PreloadAceModule already preloaded");
+        return;
+    }
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
+
+    if (!sharedRuntime) {
+        LOGE("PreloadAceModule null runtime");
+        return;
+    }
+    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        LOGE("PreloadAceModule NativeDeclarativeEngine Initialize, vm is null");
+        return;
+    }
+    if (!arkRuntime->InitializeFromExistVM(vm)) {
+        LOGE("PreloadAceModule Ark Engine initialize runtime failed");
+        return;
+    }
+    LocalScope scope(vm);
+    globalRuntime_ = arkRuntime;
+    // preload js views
+    JsRegisterViews(JSNApi::GetGlobalObject(vm));
+    // preload aceConsole
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal();
+    shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
+    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "debug", arkRuntime->NewFunction(JsiBaseUtils::JsDebugLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "info", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
+    aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
+    global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+    // preload getContext
+    JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
+    // preload perfutil
+    shared_ptr<JsValue> perfObj = arkRuntime->NewObject();
+    perfObj->SetProperty(arkRuntime, "printlog", arkRuntime->NewFunction(JsPerfPrint));
+    perfObj->SetProperty(arkRuntime, "sleep", arkRuntime->NewFunction(JsPerfSleep));
+    perfObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsPerfBegin));
+    perfObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsPerfEnd));
+    global->SetProperty(arkRuntime, "perfutil", perfObj);
+    // preload exports and requireNative
+    shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
+    global->SetProperty(arkRuntime, "exports", exportsUtilObj);
+    global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
+
+    // preload js enums
+    bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+    if (!jsEnumStyleResult) {
+        LOGE("EvaluateJsCode jsEnumStyle failed");
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload state management
+    uint8_t* codeStart;
+    int32_t codeLength;
+    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+    bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
+    if (!evalResult) {
+        LOGE("PreloadAceModuleCard EvaluateJsCode stateMgmt failed");
+    }
+    isModulePreloaded_ = evalResult;
+
+    globalRuntime_ = nullptr;
+    localRuntime = arkRuntime;
+}
+// ArkTsCard end
 } // namespace OHOS::Ace::Framework

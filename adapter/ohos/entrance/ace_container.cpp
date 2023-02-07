@@ -38,6 +38,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
@@ -50,6 +51,7 @@
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -218,7 +220,27 @@ void AceContainer::InitializeFrontend()
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
     } else if (type_ == FrontendType::DECLARATIVE_JS) {
-        if (!isSubContainer_) {
+        if (isFormRender_) {
+            LOGI("Init Form Frontend");
+            frontend_ = AceType::MakeRefPtr<FormFrontendDeclarative>();
+            auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+            auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
+            RefPtr<Framework::JsEngine> jsEngine;
+            if (GetSettings().usingSharedRuntime) {
+                jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
+            } else {
+                jsEngine = loader.CreateJsEngine(instanceId_);
+            }
+            jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+            EngineHelper::AddEngine(instanceId_, jsEngine);
+            cardFrontend->SetJsEngine(jsEngine);
+            cardFrontend->SetPageProfile(pageProfile_);
+            cardFrontend->SetNeedDebugBreakPoint(AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint());
+            cardFrontend->SetDebugVersion(AceApplicationInfo::GetInstance().IsDebugVersion());
+            // Card front
+            cardFrontend->SetRunningCardId(0); // ArkTsCard : nodeId, Host->FMS->FRS->innersdk
+            cardFrontend->SetIsFormRender(true);
+        } else if (!isSubContainer_) {
             frontend_ = AceType::MakeRefPtr<DeclarativeFrontend>();
             auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
             auto& loader = Framework::JsEngineLoader::GetDeclarative(GetDeclarativeSharedLibrary(isArkApp_));
@@ -716,8 +738,16 @@ void AceContainer::SetViewNew(
     CHECK_NULL_VOID(taskExecutor);
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
-    container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
+    std::unique_ptr<Window> window;
+    if (container->isFormRender_) {
+        auto formRenderWindow = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        container->formSurfaceNode_ = formRenderWindow->GetRSSurfaceNode();
+        window = std::move(formRenderWindow);
+        container->AttachView(std::move(window), view, density, width, height, view->GetInstanceId(), nullptr);
+    } else {
+        window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+        container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
+    }
 }
 
 void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow)
@@ -957,6 +987,16 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
             std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
+
+    if (isFormRender_) {
+        pipelineContext_->SetIsFormRender(isFormRender_);
+        auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+        if (cardFrontend) {
+            cardFrontend->SetTaskExecutor(taskExecutor_);
+            cardFrontend->SetLoadCardCallBack(WeakPtr<PipelineBase>(pipelineContext_));
+        }
+    }
+
     pipelineContext_->SetRootSize(density, width, height);
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
@@ -1311,6 +1351,15 @@ sptr<IRemoteObject> AceContainer::GetToken()
     LOGE("fail to get Token");
     return nullptr;
 }
+
+// ArkTsCard start
+std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_RETURN_NOLOG(container, nullptr);
+    return container->formSurfaceNode_;
+}
+// ArkTsCard end
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
