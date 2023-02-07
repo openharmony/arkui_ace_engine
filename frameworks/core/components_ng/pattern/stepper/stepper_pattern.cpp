@@ -326,6 +326,8 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    textNode->GetLayoutProperty()->UpdateMargin(
+        { CalcLength(stepperTheme->GetControlPadding()), CalcLength(stepperTheme->GetControlPadding()) });
     textNode->MountToParent(buttonNode);
     textNode->MarkModifyDone();
 }
