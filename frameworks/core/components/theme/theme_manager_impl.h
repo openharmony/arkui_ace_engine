@@ -72,14 +72,16 @@ public:
      */
     Color GetBackgroundColor() const override;
 
-    void UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName) override
+    RefPtr<ThemeConstants> GetThemeConstants(
+        const std::string& bundleName, const std::string& moduleName) const override
     {
         themeConstants_->UpdateThemeConstants(bundleName, moduleName);
+        return themeConstants_;
     }
 
     RefPtr<ThemeConstants> GetThemeConstants() const override
     {
-        return themeConstants_;
+        return GetThemeConstants("", "");
     }
 
     /*

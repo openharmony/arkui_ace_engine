@@ -43,9 +43,10 @@ public:
 
     virtual void SetColorScheme(ColorScheme colorScheme) {}
 
-    virtual void UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName) = 0;
-
     virtual Color GetBackgroundColor() const = 0;
+
+    virtual RefPtr<ThemeConstants> GetThemeConstants(
+        const std::string& bundleName, const std::string& moduleName) const = 0;
 
     virtual RefPtr<ThemeConstants> GetThemeConstants() const = 0;
 

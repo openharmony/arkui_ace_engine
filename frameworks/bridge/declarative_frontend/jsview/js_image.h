@@ -59,10 +59,10 @@ public:
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
 
     static void SetBorder(const Border& border);
     static void SetAutoResize(bool autoResize);
-
 };
 
 class JSColorFilter : public AceType {
@@ -83,6 +83,7 @@ public:
     {
         return colorfiltermatrix_;
     }
+
 private:
     std::vector<float> colorfiltermatrix_;
 };

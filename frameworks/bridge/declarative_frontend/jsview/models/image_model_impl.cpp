@@ -118,9 +118,11 @@ void ImageModelImpl::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
     image->SetSvgAnimatorFinishEvent(onFinishEvent);
 }
 
-void ImageModelImpl::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void ImageModelImpl::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName)
 {
     RefPtr<ImageComponent> image = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
+    image->SetBundleInfo(bundleName, moduleName);
     ViewStackProcessor::GetInstance()->ClaimElementId(image);
     image->SetUseSkiaSvg(false);
     ViewStackProcessor::GetInstance()->Push(image);

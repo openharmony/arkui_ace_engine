@@ -4501,8 +4501,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
         CHECK_NULL_RETURN(cardPipelineContext, nullptr);
         auto cardThemeManager = cardPipelineContext->GetThemeManager();
         CHECK_NULL_RETURN(cardThemeManager, nullptr);
-        cardThemeManager->UpdateThemeConstants(bundleName, moduleName);
-        return cardThemeManager->GetThemeConstants();
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
     }
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -4522,8 +4521,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
             LOGE("pluginThemeManager is null!");
             return nullptr;
         }
-        pluginThemeManager->UpdateThemeConstants(bundleName, moduleName);
-        return pluginThemeManager->GetThemeConstants();
+        return pluginThemeManager->GetThemeConstants(bundleName, moduleName);
     }
 #endif
     auto container = Container::Current();
@@ -4532,8 +4530,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
-    themeManager->UpdateThemeConstants(bundleName, moduleName);
-    return themeManager->GetThemeConstants();
+    return themeManager->GetThemeConstants(bundleName, moduleName);
 }
 
 void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
