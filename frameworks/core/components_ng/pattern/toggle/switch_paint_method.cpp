@@ -75,10 +75,7 @@ void SwitchPaintMethod::PaintContent(
     hoverRadius_ =
         hoverRadius_ * height / (switchTheme->GetHeight() - switchTheme->GetHotZoneVerticalPadding() * 2).ConvertToPx();
     if (isTouch_) {
-        OffsetF touchBoardOffset;
-        touchBoardOffset.SetX(xOffset - (actualWidth_ - width) / 2.0);
-        touchBoardOffset.SetY(yOffset - (actualHeight_ - height) / 2.0);
-        DrawTouchBoard(canvas, touchBoardOffset);
+        // TODO: Touch effect
     }
     if (isHover_) {
         OffsetF hoverBoardOffset;
