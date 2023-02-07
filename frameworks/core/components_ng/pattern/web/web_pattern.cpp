@@ -1108,8 +1108,11 @@ bool WebPattern::IsTouchHandleShow(
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> handle)
 {
     CHECK_NULL_RETURN_NOLOG(handle, false);
-    if (handle->GetAlpha() > 0 &&
-        GreatOrEqual(handle->GetY(), static_cast<int32_t>(handle->GetEdgeHeight())) &&
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN_NOLOG(pipeline, false);
+    int y = static_cast<int32_t>(handle->GetY() / pipeline->GetDipScale());
+    int edgeHeight = static_cast<int32_t>(handle->GetEdgeHeight() / pipeline->GetDipScale()) - 1;
+    if (handle->GetAlpha() > 0 && y >= edgeHeight &&
         GreatNotEqual(GetHostFrameSize().value_or(SizeF()).Height(), handle->GetY())) {
         return true;
     }
