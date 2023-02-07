@@ -44,7 +44,9 @@
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/gestures/gesture_info.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -448,18 +450,16 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 
         JSRef<JSVal> actionValue = obj->GetProperty("action");
         if (actionValue->IsFunction()) {
-            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(actionValue));
             if (popupParam) {
-                auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
-                                         TouchEventInfo&) {
+                auto clickCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
+                                         GestureEvent& info) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("primaryButton.action");
-                    LOGI("Call primary touch");
-                    func->Execute();
+                    LOGI("Call primary click");
+                    func->Execute(info);
                 };
-                properties.touchFunc = touchCallback;
-            } else {
-                LOGI("Empty");
+                properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
             }
         }
         properties.showButton = true;
@@ -481,18 +481,16 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 
         JSRef<JSVal> actionValue = obj->GetProperty("action");
         if (actionValue->IsFunction()) {
-            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(actionValue));
             if (popupParam) {
-                auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
-                                         TouchEventInfo&) {
+                auto clickCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
+                                         GestureEvent& info) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("secondaryButton.action");
-                    LOGI("Call primary touch");
-                    func->Execute();
+                    ACE_SCORING_EVENT("primaryButton.action");
+                    LOGI("Call primary click");
+                    func->Execute(info);
                 };
-                properties.touchFunc = touchCallback;
-            } else {
-                LOGI("Empty.");
+                properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
             }
         }
         properties.showButton = true;
