@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -338,6 +339,13 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
     layoutProps->UpdateFlexGrow(1.0);
+    // set button default height
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(theme->GetHeight())));
+
     return buttonNode;
 }
 
