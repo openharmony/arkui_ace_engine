@@ -76,7 +76,9 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         CreateIdealSize(constraint.value(), axis, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
     if (!constraint->selfIdealSize.Width().has_value() && axis == Axis::VERTICAL) {
-        idealSize.SetWidth(static_cast<float>(tabTheme->GetTabBarDefaultWidth().ConvertToPx()));
+        idealSize.SetWidth(static_cast<float>(tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE
+                                                  ? tabTheme->GetTabBarDefaultWidth().ConvertToPx()
+                                                  : tabTheme->GetTabBarDefaultHeight().ConvertToPx()));
     }
     if (!constraint->selfIdealSize.Height().has_value() && axis == Axis::HORIZONTAL) {
         idealSize.SetHeight(static_cast<float>(tabTheme->GetTabBarDefaultHeight().ConvertToPx()));

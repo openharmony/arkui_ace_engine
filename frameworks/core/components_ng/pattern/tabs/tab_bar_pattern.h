@@ -197,6 +197,11 @@ public:
         tabBarStyle_ = tabBarStyle;
     }
 
+    TabBarStyle GetTabBarStyle() const
+    {
+        return tabBarStyle_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
