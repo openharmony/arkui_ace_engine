@@ -453,6 +453,9 @@ public:
     void OnInactive();
     void OnActive();
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    void OnSelectPopupMenu(
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);

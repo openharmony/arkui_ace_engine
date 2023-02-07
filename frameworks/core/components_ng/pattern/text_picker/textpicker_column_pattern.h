@@ -113,7 +113,10 @@ public:
     }
     void SetCurrentIndex(uint32_t value)
     {
-        currentIndex_ = value;
+        if (value != currentIndex_) {
+            isIndexChanged_ = true;
+            currentIndex_ = value;
+        }
     }
 
     uint32_t GetOptionCount() const
@@ -173,6 +176,16 @@ public:
     {
         EventCallback_ = value;
     }
+  
+    void SetLocalDownDistance(float value)
+    {
+        localDownDistance_ = value;
+    }
+
+    float GetLocalDownDistance() const
+    {
+        return localDownDistance_;
+    }
 
     void UpdateToss(double offsetY);
 
@@ -203,6 +216,7 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
 
+    float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
     EventCallback EventCallback_;

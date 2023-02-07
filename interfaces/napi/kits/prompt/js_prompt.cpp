@@ -45,6 +45,26 @@ napi_value GetReturnObject(napi_env env, std::string callbackString)
     return returnObj;
 }
 
+void GetNapiString(napi_env env, napi_value value, std::string& retStr)
+{
+    size_t ret = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    if (valueType == napi_string) {
+        size_t valueLen = GetParamLen(value) + 1;
+        std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(valueLen);
+        napi_get_value_string_utf8(env, value, titleChar.get(), valueLen, &ret);
+        retStr = titleChar.get();
+    } else if (valueType == napi_object) {
+        int32_t id = 0;
+        int32_t type = 0;
+        std::vector<std::string> params;
+        if (ParseResourceParam(env, value, id, type, params)) {
+            ParseString(id, type, params, retStr);
+        }
+    }
+}
+
 static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -198,6 +218,7 @@ struct PromptAsyncContext {
     napi_ref callbackRef = nullptr;
     int32_t callbackType = -1;
     int32_t successType = -1;
+    bool valid = true;
 };
 
 static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
@@ -213,10 +234,20 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
+    if (thisVar == nullptr) {
+        LOGE("%{public}s, This argument is nullptr.", __func__);
+        return nullptr;
+    }
+    napi_valuetype valueTypeOfThis = napi_undefined;
+    napi_typeof(env, thisVar, &valueTypeOfThis);
+    if (valueTypeOfThis == napi_undefined) {
+        LOGE("%{public}s, Wrong this value.", __func__);
+        return nullptr;
+    }
+
     auto asyncContext = new PromptAsyncContext();
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
-        size_t ret = 0;
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
         if (i == 0) {
@@ -230,34 +261,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
-            napi_typeof(env, asyncContext->titleNApi, &valueType);
-            if (valueType == napi_string) {
-                size_t titleLen = GetParamLen(asyncContext->titleNApi) + 1;
-                std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
-                napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
-                asyncContext->titleString = titleChar.get();
-            } else if (valueType == napi_object) {
-                int32_t id = 0;
-                int32_t type = 0;
-                std::vector<std::string> params;
-                if (ParseResourceParam(env, asyncContext->titleNApi, id, type, params)) {
-                    ParseString(id, type, params, asyncContext->titleString);
-                }
-            }
-            napi_typeof(env, asyncContext->messageNApi, &valueType);
-            if (valueType == napi_string) {
-                size_t messageLen = GetParamLen(asyncContext->messageNApi) + 1;
-                std::unique_ptr<char[]> messageChar = std::make_unique<char[]>(messageLen);
-                napi_get_value_string_utf8(env, asyncContext->messageNApi, messageChar.get(), messageLen, &ret);
-                asyncContext->messageString = messageChar.get();
-            } else if (valueType == napi_object) {
-                int32_t id = 0;
-                int32_t type = 0;
-                std::vector<std::string> params;
-                if (ParseResourceParam(env, asyncContext->messageNApi, id, type, params)) {
-                    ParseString(id, type, params, asyncContext->messageString);
-                }
-            }
+            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
+            GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -281,20 +286,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_get_named_property(env, buttonArray, "color", &colorNApi);
                     std::string textString;
                     std::string colorString;
-                    napi_typeof(env, textNApi, &valueType);
-                    if (valueType == napi_string) {
-                        size_t textLen = GetParamLen(textNApi) + 1;
-                        std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen);
-                        napi_get_value_string_utf8(env, textNApi, text.get(), textLen, &ret);
-                        textString = text.get();
-                    }
-                    napi_typeof(env, colorNApi, &valueType);
-                    if (valueType == napi_string) {
-                        size_t colorLen = GetParamLen(colorNApi) + 1;
-                        std::unique_ptr<char[]> color = std::make_unique<char[]>(colorLen);
-                        napi_get_value_string_utf8(env, colorNApi, color.get(), colorLen, &ret);
-                        colorString = color.get();
-                    }
+                    GetNapiString(env, textNApi, textString);
+                    GetNapiString(env, colorNApi, colorString);
                     ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
                     asyncContext->buttons.emplace_back(buttonInfo);
                 }
@@ -321,14 +314,19 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     asyncContext->callbacks.emplace("success");
     asyncContext->callbacks.emplace("cancel");
 
-    auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+    auto callBack = [asyncContext](int32_t callbackType, int32_t successType) {
         uv_loop_s* loop = nullptr;
         if (asyncContext == nullptr) {
             return;
         }
+        if (!asyncContext->valid) {
+            LOGE("%{public}s, module exported object is invalid.", __func__);
+            return;
+        }
+
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
-        napi_get_uv_event_loop(env, &loop);
+        napi_get_uv_event_loop(asyncContext->env, &loop);
         uv_work_t* work = new uv_work_t;
         work->data = (void*)asyncContext;
         int rev = uv_queue_work(
@@ -391,6 +389,13 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         }
     };
 
+    napi_wrap(env, thisVar, (void*)asyncContext, [](napi_env env, void* data, void* hint) {
+        PromptAsyncContext* cbInfo = (PromptAsyncContext*)data;
+        if (cbInfo != nullptr) {
+            cbInfo->valid = false;
+            delete cbInfo;
+        }
+    }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
@@ -472,6 +477,7 @@ struct ShowActionMenuAsyncContext {
     napi_ref callbackRef = nullptr;
     int32_t callbackType = -1;
     int32_t successType = -1;
+    bool valid = true;
 };
 
 static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
@@ -487,6 +493,17 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             env, "The number of parameters must be greater than or equal to 1.", Framework::ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
+    if (thisVar == nullptr) {
+        LOGE("%{public}s, This argument is nullptr.", __func__);
+        return nullptr;
+    }
+    napi_valuetype valueTypeOfThis = napi_undefined;
+    napi_typeof(env, thisVar, &valueTypeOfThis);
+    if (valueTypeOfThis == napi_undefined) {
+        LOGE("%{public}s, Wrong this value.", __func__);
+        return nullptr;
+    }
+
     auto asyncContext = new ShowActionMenuAsyncContext();
     asyncContext->env = env;
     for (size_t i = 0; i < argc; i++) {
@@ -502,20 +519,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
-            napi_typeof(env, asyncContext->titleNApi, &valueType);
-            if (valueType == napi_string) {
-                size_t titleLen = GetParamLen(asyncContext->titleNApi) + 1;
-                std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(titleLen);
-                napi_get_value_string_utf8(env, asyncContext->titleNApi, titleChar.get(), titleLen, &ret);
-                asyncContext->titleString = titleChar.get();
-            } else if (valueType == napi_object) {
-                int32_t id = 0;
-                int32_t type = 0;
-                std::vector<std::string> params;
-                if (ParseResourceParam(env, asyncContext->titleNApi, id, type, params)) {
-                    ParseString(id, type, params, asyncContext->titleString);
-                }
-            }
+            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -615,14 +619,19 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         napi_get_undefined(env, &result);
     }
 
-    auto callBack = [env, asyncContext](int32_t callbackType, int32_t successType) {
+    auto callBack = [asyncContext](int32_t callbackType, int32_t successType) {
         uv_loop_s* loop = nullptr;
         if (asyncContext == nullptr) {
             return;
         }
+        if (!asyncContext->valid) {
+            LOGE("%{public}s, module exported object is invalid.", __func__);
+            return;
+        }
+
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
-        napi_get_uv_event_loop(env, &loop);
+        napi_get_uv_event_loop(asyncContext->env, &loop);
         uv_work_t* work = new uv_work_t;
         work->data = (void*)asyncContext;
         int rev = uv_queue_work(
@@ -684,6 +693,13 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         }
     };
 
+    napi_wrap(env, thisVar, (void*)asyncContext, [](napi_env env, void* data, void* hint) {
+        ShowActionMenuAsyncContext* cbInfo = (ShowActionMenuAsyncContext*)data;
+        if (cbInfo != nullptr) {
+            cbInfo->valid = false;
+            delete cbInfo;
+        }
+    }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
         auto delegate = EngineHelper::GetCurrentDelegate();

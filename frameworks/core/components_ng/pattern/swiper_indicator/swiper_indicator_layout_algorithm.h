@@ -37,10 +37,22 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
+    void SetIsHoverOrPress(bool isHoverOrPress)
+    {
+        isHoverOrPress_ = isHoverOrPress;
+    }
+
+    void SetHoverPoint(const PointF& hoverPoint)
+    {
+        hoverPoint_ = hoverPoint;
+    }
+
 private:
     static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
     float indicatorWidth_ = 0.0f;
     float indicatorHeight_ = 0.0f;
+    bool isHoverOrPress_ = false;
+    PointF hoverPoint_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -33,6 +33,8 @@ namespace {
 // TODO::add to theme
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 
 } // namespace
 
@@ -66,18 +68,20 @@ void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         userSize = theme->GetSize().ConvertToPx();
     }
 
+    auto indicatorPadding = INDICATOR_PADDING_DEFAULT;
+    if (isHoverOrPress_) {
+        userSize *= INDICATOR_ZOOM_IN_SCALE;
+        indicatorPadding = INDICATOR_PADDING_HOVER;
+    }
+
     // Length of a selected indicator round rect.
     auto selectedSize = userSize * 2.0f;
 
     // The width and height of the entire indicator.
-    auto indicatorHeight = static_cast<float>(userSize + INDICATOR_PADDING_DEFAULT.ConvertToPx() * 2);
-    auto indicatorWidth = static_cast<float>((INDICATOR_PADDING_DEFAULT.ConvertToPx() * 2 +
-                                                 (userSize + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) +
-                                             selectedSize);
-
-    LOGI("Swiper Indicator userSize is %{public}f, selectedSize is %{public}f, indicatorHeight is %{public}f"
-         "indicatorWidth is %{public}f",
-        userSize, selectedSize, indicatorHeight, indicatorWidth);
+    auto indicatorHeight = static_cast<float>(userSize + indicatorPadding.ConvertToPx() * 2);
+    auto indicatorWidth = static_cast<float>(
+        (indicatorPadding.ConvertToPx() * 2 + (userSize + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) +
+        selectedSize);
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;

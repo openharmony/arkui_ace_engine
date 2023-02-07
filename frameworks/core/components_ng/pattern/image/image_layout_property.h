@@ -84,6 +84,9 @@ public:
                 auto num = src.find("resources");
                 src = src.substr(num);
             }
+            for (auto& character : src) {
+                character = tolower(character);
+            }
         }
         json->Put("src", src.c_str());
         ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);

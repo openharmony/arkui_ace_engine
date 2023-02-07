@@ -144,6 +144,10 @@ RefPtr<UINode> ViewStackProcessor::Finish()
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
     if (frameNode) {
         frameNode->MarkModifyDone();
+        auto renderContext = frameNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetNeedDebugBoundary(false);
+        }
     }
     // ForEach Partial Update Path.
     if (AceType::InstanceOf<ForEachNode>(element)) {

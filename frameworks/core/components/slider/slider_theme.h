@@ -38,11 +38,12 @@ public:
         ~Builder() = default;
 
         static constexpr Color BLOCK_COLOR_PRESSED = Color(0x19182431);
-        static constexpr Color BLOCK_OUTER_STROKE_EDGE_COLOR = Color(0x0A000000);
+        static constexpr Color BLOCK_OUTER_EDGE_COLOR = Color(0x0A000000);
         static constexpr Dimension BUBBLE_TO_CIRCLE_CENTER_DISTANCE = 20.0_vp;
         static constexpr Dimension MEASURE_CONTENT_DEFAULT_WIDTH = 40.0_vp;
         static constexpr Dimension OUTSET_HOT_BLOCK_SHADOW_WIDTH = 4.0_vp;
         static constexpr Dimension INSET_HOT_BLOCK_SHADOW_WIDTH = 6.0_vp;
+        static constexpr Dimension FOCUS_SIDE_DISTANCE = 2.0_vp;
 
         RefPtr<SliderTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -88,8 +89,8 @@ public:
                 theme->tipColor_ = pattern->GetAttr<Color>("tip_color", Color::RED);
                 theme->blockHoverColor_ = pattern->GetAttr<Color>("block_color_hovered", Color::RED);
                 theme->blockPressedColor_ = pattern->GetAttr<Color>("block_color_pressed", BLOCK_COLOR_PRESSED);
-                theme->blockOuterStrokeEdgeColor_ =
-                    pattern->GetAttr<Color>("block_outer_stroke_edge", BLOCK_OUTER_STROKE_EDGE_COLOR);
+                theme->blockOuterEdgeColor_ =
+                    pattern->GetAttr<Color>("block_outer_edge_color", BLOCK_OUTER_EDGE_COLOR);
                 theme->bubbleToCircleCenterDistance_ =
                     pattern->GetAttr<Dimension>("bubble_to_circle_center_distance", BUBBLE_TO_CIRCLE_CENTER_DISTANCE);
                 theme->measureContentDefaultWidth_ =
@@ -98,6 +99,8 @@ public:
                     pattern->GetAttr<Dimension>("outset_hot_block_shadow_width", OUTSET_HOT_BLOCK_SHADOW_WIDTH);
                 theme->insetHotBlockShadowWidth_ =
                     pattern->GetAttr<Dimension>("inset_hot_block_shadow_width", INSET_HOT_BLOCK_SHADOW_WIDTH);
+                theme->focusSideDistance_ =
+                    pattern->GetAttr<Dimension>("focus_side_distance", FOCUS_SIDE_DISTANCE);
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -186,9 +189,9 @@ public:
         return blockPressedColor_;
     }
 
-    Color GetBlockOuterStrokeEdgeColor() const
+    Color GetBlockOuterEdgeColor() const
     {
-        return blockOuterStrokeEdgeColor_;
+        return blockOuterEdgeColor_;
     }
 
     Color GetTipColor() const
@@ -216,6 +219,11 @@ public:
         return trackSelectedColor_;
     }
 
+    Dimension GetFocusSideDistance() const
+    {
+        return focusSideDistance_;
+    }
+
 protected:
     SliderTheme() = default;
 
@@ -241,12 +249,15 @@ private:
     Color blockColor_;
     Color blockHoverColor_;
     Color blockPressedColor_;
-    Color blockOuterStrokeEdgeColor_;
+    Color blockOuterEdgeColor_;
     Color tipColor_;
     Color tipTextColor_;
     Color markerColor_;
     Color trackBgColor_;
     Color trackSelectedColor_;
+
+    // others
+    Dimension focusSideDistance_;
 };
 
 } // namespace OHOS::Ace

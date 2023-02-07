@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -26,6 +27,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -84,7 +86,7 @@ private:
     {
         auto id = frameNode->GetId();
         auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-        CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID_NOLOG(pipeline);
         pipeline->RemoveWindowStateChangedCallback(id);
         pipeline->RemoveNodesToNotifyMemoryLevel(id);
     }
@@ -100,7 +102,7 @@ private:
         const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
-    void SetAnimationCallback();
+    void SetRedrawCallback();
 
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();

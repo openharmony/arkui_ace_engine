@@ -111,13 +111,17 @@ RefPtr<FrameNode> RefreshPattern::FindScrollableChild()
         auto size = frameNodeQueue.size();
         while (size > 0) {
             auto node = frameNodeQueue.front();
-            if (node && AceType::InstanceOf<ScrollablePattern>(node->GetPattern())) {
+            CHECK_NULL_RETURN(node, nullptr);
+            if (AceType::InstanceOf<ScrollablePattern>(node->GetPattern())) {
                 return node;
             }
             frameNodeQueue.pop();
             auto children = node->GetChildren();
             for (auto const& child : children) {
-                frameNodeQueue.push(DynamicCast<FrameNode>(child));
+                auto childNode = DynamicCast<FrameNode>(child);
+                if (childNode) {
+                    frameNodeQueue.push(childNode);
+                }
             }
             size--;
         }
@@ -154,7 +158,7 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
     if (!textChild_) {
         textChild_ = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(host->TotalChildCount() - 2));
     }
-    if (refreshRenderProperty->GetIsRefreshingValue()) {
+    if (refreshRenderProperty->GetIsRefreshingValue() && (refreshStatus_ != RefreshStatus::REFRESH)) {
         auto textChildLayoutProperty = textChild_->GetLayoutProperty<TextLayoutProperty>();
         if (textChildLayoutProperty->GetVisibilityValue() == VisibleType::INVISIBLE &&
             refreshLayoutProperty->GetIsShowLastTimeValue()) {

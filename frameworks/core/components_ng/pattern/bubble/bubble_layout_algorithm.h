@@ -128,10 +128,12 @@ private:
     Placement arrowPlacement_ = Placement::BOTTOM;
     Placement placement_ = Placement::BOTTOM;
     Dimension targetSpace_;
+    Dimension borderRadius_;
 
     bool showBottomArrow_ = false;
     bool showTopArrow_ = false;
     bool showCustomArrow_ = false;
+    float scaledBubbleSpacing_;
 
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);
 };

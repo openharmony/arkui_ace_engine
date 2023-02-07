@@ -172,39 +172,4 @@ std::string ButtonComposedElement::GetBorderRadius() const
     return "0";
 }
 
-void ButtonComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
-    if (!buttonElement) {
-        LOGE("get GetButtonElement failed");
-        return;
-    }
-    buttonElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    buttonElement->MarkDirty();
-}
-
-void ButtonComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
-    if (!buttonElement) {
-        LOGE("get GetButtonElement failed");
-        return;
-    }
-    auto child = buttonElement->GetChildBySlot(slot);
-    buttonElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    buttonElement->MarkDirty();
-}
-
-void ButtonComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto buttonElement = GetContentElement<ButtonElement>(ButtonElement::TypeId());
-    if (!buttonElement) {
-        LOGE("get GetButtonElement failed");
-        return;
-    }
-    auto child = buttonElement->GetChildBySlot(slot);
-    buttonElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    buttonElement->MarkDirty();
-}
-
 } // namespace OHOS::Ace::V2

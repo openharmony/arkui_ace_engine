@@ -27,12 +27,6 @@ namespace OHOS::Ace {
 
 namespace V2 {
 
-enum class ScrollState {
-    IDLE = 0,
-    SCROLL,
-    FLING,
-};
-
 enum class ListItemAlign {
     /*
      * display list item at start of cross axis.
@@ -90,8 +84,10 @@ struct ItemDivider final {
 };
 } // namespace V2
 
-using OnScrollEvent = std::function<void(Dimension, V2::ScrollState)>;
+using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
+using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
+using OnScrollStartEvent = std::function<void()>;
 using OnScrollStopEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t)>;
 using OnReachEvent = std::function<void()>;

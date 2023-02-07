@@ -66,7 +66,9 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<DatePickerPaintMethod>();
+        auto paintMethod = MakeRefPtr<DatePickerPaintMethod>();
+        paintMethod->SetEnabled(enabled_);
+        return paintMethod;
     }
 
     void SetChangeCallback(ColumnChangeCallback&& value);
@@ -87,7 +89,7 @@ public:
 
     void HandleSolarYearChange(bool isAdd, uint32_t index);
 
-    LunarDate GetCurrentLunarDate(uint32_t lunarYear);
+    LunarDate GetCurrentLunarDate(uint32_t lunarYear) const;
 
     void HandleSolarMonthChange(bool isAdd, uint32_t index);
 
@@ -101,11 +103,11 @@ public:
 
     void HandleSolarDayChange(bool isAdd, uint32_t index);
 
-    PickerDate GetCurrentDate();
+    PickerDate GetCurrentDate() const;
 
     void SetEventCallback(EventCallback&& value);
 
-    void FireChangeEvent(bool refresh);
+    void FireChangeEvent(bool refresh) const;
 
     void FlushColumn();
 
@@ -164,23 +166,23 @@ public:
         OnDialogChange_ = value;
     }
 
-    uint32_t GetOptionCount(RefPtr<FrameNode>& frameNode)
+    uint32_t GetOptionCount(RefPtr<FrameNode>& frmeNode)
     {
-        return options_[frameNode].size();
+        return options_[frmeNode].size();
     }
 
-    std::string GetOptionValue(RefPtr<FrameNode>& frameNode, uint32_t index)
+    std::string GetOptionValue(RefPtr<FrameNode>& frmeNode, uint32_t index)
     {
-        if (index >= options_[frameNode].size()) {
+        if (index >= GetOptionCount(frmeNode)) {
             LOGE("index out of range.");
-            return "";
+            return nullptr;
         }
-        return options_[frameNode][index];
+        return options_[frmeNode][index];
     }
 
-    const std::vector<std::string>& GetAllOptions(RefPtr<FrameNode>& frameNode)
+    const std::vector<std::string>& GetAllOptions(RefPtr<FrameNode>& frmeNode)
     {
-        return options_[frameNode];
+        return options_[frmeNode];
     }
 
     const std::map<RefPtr<FrameNode>, std::vector<std::string>>& GetOptions() const
@@ -232,7 +234,7 @@ public:
     void OnDataLinking(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
 
-    std::string GetSelectedObject(bool isColumnChange, int status = -1)
+    std::string GetSelectedObject(bool isColumnChange, int status = -1) const
     {
         auto date = selectedDate_;
         if (isColumnChange) {
@@ -251,7 +253,7 @@ public:
     void SetSelectDate(const PickerDate& value)
     {
         selectedDate_ = value;
-        AdjustSolarDate(selectedDate_, limitStartDate_, limitEndDate_);
+        AdjustSolarDate(selectedDate_, startDateSolar_, endDateSolar_);
         selectedLunar_ = SolarToLunar(selectedDate_);
     }
 

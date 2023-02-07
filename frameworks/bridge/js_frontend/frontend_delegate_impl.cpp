@@ -863,6 +863,13 @@ double FrontendDelegateImpl::MeasureText(const MeasureContext& context)
     return MeasureUtil::MeasureText(context);
 }
 
+Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
+{
+    LOGD("FrontendDelegateImpl MeasureTxtSize.");
+    return MeasureUtil::MeasureTextSize(context);
+}
+
+
 void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
     LOGD("FrontendDelegateImpl ShowToast.");
@@ -1304,7 +1311,11 @@ void FrontendDelegateImpl::PushPageTransitionListener(
     const TransitionEvent& event, const RefPtr<JsAcePage>& page)
 {
     if (event == TransitionEvent::PUSH_END) {
-        OnPageShow();
+        if (isMainPage_) {
+            isMainPage_ = false;
+        } else {
+            OnPageShow();
+        }
     }
 }
 
@@ -1522,6 +1533,19 @@ int32_t FrontendDelegateImpl::OnClearInvisiblePagesSuccess()
 
 void FrontendDelegateImpl::ClearInvisiblePages()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
+    // Execute invisible pages' OnJsEngineDestroy to release JsValue
+    for (auto pageRouteIter = pageRouteStack_.cbegin(); pageRouteIter != pageRouteStack_.cend() - 1; ++pageRouteIter) {
+        const auto& info = *pageRouteIter;
+        auto iter = pageMap_.find(info.pageId);
+        if (iter != pageMap_.end()) {
+            auto page = iter->second;
+            if (page) {
+                page->OnJsEngineDestroy();
+            }
+        }
+    }
+
     taskExecutor_->PostTask(
         [weak = AceType::WeakClaim(this)] {
             auto delegate = weak.Upgrade();

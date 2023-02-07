@@ -47,6 +47,7 @@ public:
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DRAG_BAR, nullptr);
             if (pattern) {
                 theme->dragBarColor_ = pattern->GetAttr<Color>("drag_bar_bg_color", Color::WHITE);
+                theme->panelBgColor_ = pattern->GetAttr<Color>("panel_bg_color", Color::WHITE);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -78,12 +79,18 @@ public:
         return dragBarColor_;
     }
 
+    const Color& GetPanelBgColor() const
+    {
+        return panelBgColor_;
+    }
+
 protected:
     DragBarTheme() = default;
 
 private:
     Color barColor_;
     Color dragBarColor_;
+    Color panelBgColor_;
 };
 
 } // namespace OHOS::Ace

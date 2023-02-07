@@ -14,18 +14,22 @@
  */
 
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
+#include <unicode/uchar.h>
 
 namespace OHOS::Ace::NG {
-bool TextLayoutadapter::IsLeftToRight(UChar32 charOfShowingText)
+bool TextLayoutadapter::IsLeftToRight(int32_t charOfShowingText)
 {
-    return u_charDirection(charOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT;
+    UChar32 uCharOfShowingText = charOfShowingText;
+    return u_charDirection(uCharOfShowingText) == UCharDirection::U_LEFT_TO_RIGHT;
 }
-bool TextLayoutadapter::IsRightToLeft(UChar32 charOfShowingText)
+bool TextLayoutadapter::IsRightToLeft(int32_t charOfShowingText)
 {
-    return u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT;
+    UChar32 uCharOfShowingText = charOfShowingText;
+    return u_charDirection(uCharOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT;
 }
-bool TextLayoutadapter::IsRightTOLeftArabic(UChar32 charOfShowingText)
+bool TextLayoutadapter::IsRightTOLeftArabic(int32_t charOfShowingText)
 {
-    return u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC;
+    UChar32 uCharOfShowingText = charOfShowingText;
+    return u_charDirection(uCharOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC;
 }
 } // namespace OHOS::Ace::NG

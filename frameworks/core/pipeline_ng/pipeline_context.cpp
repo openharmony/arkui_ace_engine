@@ -45,16 +45,14 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/layout_inspector.h"
-#include "core/common/manager_interface.h"
 #include "core/common/text_field_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
-#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -320,10 +318,11 @@ void PipelineContext::SetupRootElement()
 
     auto stageNode = FrameNode::CreateFrameNode(
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
+    auto appBarNode = installationFree_ ? AppBarView::Create(stageNode) : nullptr;
     if (windowModal_ == WindowModal::CONTAINER_MODAL) {
-        rootNode_->AddChild(ContainerModalView::Create(stageNode));
+        rootNode_->AddChild(ContainerModalView::Create(appBarNode ? appBarNode : stageNode));
     } else {
-        rootNode_->AddChild(stageNode);
+        rootNode_->AddChild(appBarNode ? appBarNode : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (!IsJsCard()) {
@@ -337,11 +336,24 @@ void PipelineContext::SetupRootElement()
     }
 #endif
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
-    overlayManager_ = MakeRefPtr<OverlayManager>(DynamicCast<FrameNode>(stageNode->GetParent()));
+    overlayManager_ = MakeRefPtr<OverlayManager>(
+        DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
+
+    OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
+                                              const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
+                                              const RectF& /* rect */, const OffsetF& /* origin */) {
+        auto overlay = weakOverlayManger.Upgrade();
+        CHECK_NULL_VOID(overlay);
+        overlay->HideAllMenus();
+        overlay->HideAllPopups();
+    };
+    rootNode_->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+    AddOnAreaChangeNode(rootNode_->GetId());
+
     LOGI("SetupRootElement success!");
 }
 
@@ -419,7 +431,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         TryCallNextFrameLayoutCallback();
         return;
     }
-
+    ExecuteSurfaceChangedCallbacks(width, height);
     // TODO: add adjust for textFieldManager when ime is show.
     taskExecutor_->PostTask(
         [weakFrontend = weakFrontend_, width, height]() {
@@ -437,6 +449,24 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
 #else
     SetRootRect(width, height, 0.0);
 #endif
+}
+
+void PipelineContext::ExecuteSurfaceChangedCallbacks(int32_t newWidth, int32_t newHeight)
+{
+    for (auto&& [id, callback] : surfaceChangedCallbackMap_) {
+        if (callback) {
+            callback(newWidth, newHeight, rootWidth_, rootHeight_);
+        }
+    }
+}
+
+void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
+{
+    for (auto&& [id, callback] : surfacePositionChangedCallbackMap_) {
+        if (callback) {
+            callback(posX, posY);
+        }
+    }
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -548,8 +578,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
     auto rootSize = rootNode_->GetGeometryNode()->GetFrameSize();
     float offsetFix = (rootSize.Height() - positionY) > 100.0 ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
                                                               : keyboardHeight;
-    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f", positionY,
-        (rootSize.Height() - keyboardHeight), offsetFix);
+    LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
+         "keyboardHeight %{public}f",
+        positionY, (rootSize.Height() - keyboardHeight), offsetFix, keyboardHeight);
     if (NearZero(keyboardHeight)) {
         SetRootRect(rootSize.Width(), rootSize.Height(), 0);
     } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
@@ -895,7 +926,17 @@ bool PipelineContext::RequestFocus(const std::string& targetNodeId)
     CHECK_NULL_RETURN(rootNode_, false);
     auto focusHub = rootNode_->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
-    return focusHub->RequestFocusImmediatelyById(targetNodeId);
+    auto currentFocusChecked = focusHub->RequestFocusImmediatelyById(targetNodeId);
+    if (!isSubPipeline_ || currentFocusChecked) {
+        LOGI("Request focus in current pipeline return is %{public}d", currentFocusChecked);
+        return currentFocusChecked;
+    }
+    LOGI("Request focus in parent pipeline");
+    auto parentPipelineBase = parentPipeline_.Upgrade();
+    CHECK_NULL_RETURN(parentPipelineBase, false);
+    auto parentPipelineContext = AceType::DynamicCast<NG::PipelineContext>(parentPipelineBase);
+    CHECK_NULL_RETURN(parentPipelineContext, false);
+    return parentPipelineContext->RequestFocus(targetNodeId);
 }
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node)
@@ -916,6 +957,9 @@ void PipelineContext::RootLostFocus(BlurReason reason) const
     auto focusHub = rootNode_->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->LostFocus(reason);
+    CHECK_NULL_VOID(overlayManager_);
+    overlayManager_->HideAllMenus();
+    overlayManager_->HideAllPopups();
 }
 
 MouseEvent ConvertAxisToMouse(const AxisEvent& event)
@@ -1060,7 +1104,7 @@ void PipelineContext::WindowFocus(bool isFocus)
     FlushWindowFocusChangedCallback(isFocus);
 }
 
-void PipelineContext::ShowContainerTitle(bool isShow)
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("ShowContainerTitle failed, Window modal is not container.");
@@ -1068,7 +1112,7 @@ void PipelineContext::ShowContainerTitle(bool isShow)
     }
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
     CHECK_NULL_VOID(containerNode);
-    containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow);
+    containerNode->GetPattern<ContainerModalPattern>()->ShowTitle(isShow, hasDeco);
 }
 
 void PipelineContext::SetContainerWindow(bool isShow)

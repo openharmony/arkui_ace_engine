@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include "base/geometry/size.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
@@ -113,6 +114,7 @@ public:
     // system.measure
     // ----------------
     virtual double MeasureText(const MeasureContext& context) = 0;
+    virtual Size MeasureTextSize(const MeasureContext& context) = 0;
 
     // ----------------
     // system.prompt

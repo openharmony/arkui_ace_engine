@@ -39,7 +39,7 @@ ohos_shared_library("ace_ndk") {
     "native_interface_xcomponent.cpp",
   ]
 
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
 
   cflags_cc = [ "-Wno-missing-braces" ]
 

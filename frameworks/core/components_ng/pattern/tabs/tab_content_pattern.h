@@ -39,6 +39,11 @@ public:
         return false;
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+    
     void BeforeCreateLayoutWrapper() override
     {
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {

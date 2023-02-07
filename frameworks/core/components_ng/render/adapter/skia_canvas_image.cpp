@@ -39,7 +39,25 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // green
     0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
+
+SkPixmap CloneSkPixmap(SkPixmap& srcPixmap)
+{
+    SkImageInfo dstImageInfo = SkImageInfo::Make(srcPixmap.info().width(), srcPixmap.info().height(),
+        SkColorType::kBGRA_8888_SkColorType, srcPixmap.alphaType());
+    auto dstPixels = std::make_unique<uint8_t[]>(srcPixmap.computeByteSize());
+    SkPixmap dstPixmap(dstImageInfo, dstPixels.release(), srcPixmap.rowBytes());
+
+    SkBitmap dstBitmap;
+    if (!dstBitmap.installPixels(dstPixmap)) {
+        return dstPixmap;
+    }
+    if (!dstBitmap.writePixels(srcPixmap, 0, 0)) {
+        return dstPixmap;
+    }
+    return dstPixmap;
+}
 } // namespace
+
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
 #ifdef NG_BUILD
@@ -133,6 +151,7 @@ int32_t SkiaCanvasImage::GetHeight() const
 void SkiaCanvasImage::AddFilter(SkPaint& paint)
 {
     auto config = GetPaintConfig();
+    paint.setFilterQuality(SkFilterQuality(config.imageInterpolation_));
     if (ImageRenderMode::TEMPLATE == config.renderMode_ || config.colorFilter_) {
         RSColorMatrix colorFilterMatrix;
         if (config.colorFilter_) {
@@ -143,13 +162,29 @@ void SkiaCanvasImage::AddFilter(SkPaint& paint)
     }
 }
 
+RefPtr<PixelMap> SkiaCanvasImage::GetPixelMap()
+{
+    CHECK_NULL_RETURN(GetCanvasImage(), nullptr);
+    auto rasterImage = GetCanvasImage()->makeRasterImage();
+    SkPixmap srcPixmap;
+    if (!rasterImage->peekPixels(&srcPixmap)) {
+        return nullptr;
+    }
+    SkPixmap newSrcPixmap = CloneSkPixmap(srcPixmap);
+    const auto *addr = newSrcPixmap.addr32();
+    auto width = static_cast<int32_t>(newSrcPixmap.width());
+    auto height = static_cast<int32_t>(newSrcPixmap.height());
+    int32_t length = width * height;
+    return PixelMap::ConvertSkImageToPixmap(addr, length, width, height);
+}
+
 void SkiaCanvasImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
     auto image = GetCanvasImage();
+    CHECK_NULL_VOID(image || GetCompressData());
     RSImage rsImage(&image);
     RSSamplingOptions options;
-
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     if (rsCanvas == nullptr) {
@@ -184,8 +219,15 @@ void SkiaCanvasImage::DrawToRSCanvas(
             SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
     }
     recordingCanvas->ClipAdaptiveRRect(radii);
-    Rosen::RsImageInfo rsImageInfo((int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii, 1.0,
-        GetUniqueID(), GetCompressWidth(), GetCompressHeight());
+    auto config = GetPaintConfig();
+    if (config.imageFit_ == ImageFit::TOP_LEFT) {
+        SkAutoCanvasRestore acr(recordingCanvas, true);
+        auto skSrcRect = SkRect::MakeXYWH(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetWidth(), srcRect.GetHeight());
+        auto skDstRect = SkRect::MakeXYWH(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetWidth(), dstRect.GetHeight());
+        recordingCanvas->concat(SkMatrix::MakeRectToRect(skSrcRect, skDstRect, SkMatrix::kFill_ScaleToFit));
+    }
+    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
+        GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
     recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
 #else

@@ -131,9 +131,9 @@ inline std::string GetAssetPathImpl(const RefPtr<AssetManager>& assetManager, co
 {
     if (!assetManager) {
         LOGE("AssetManager is null");
-        return "";
+        return {};
     }
-    return assetManager->GetAssetPath(url);
+    return assetManager->GetAssetPath(url, true);
 }
 
 inline std::unique_ptr<JsonValue> ParseFileData(const std::string& data)

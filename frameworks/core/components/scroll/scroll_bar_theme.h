@@ -71,6 +71,8 @@ public:
             }
             theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
                 Color::TRANSPARENT).BlendOpacity(0.4);
+            auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));
+            theme->padding_ = Edge(0.0, 0.0, padding.Value(), padding.Value(), padding.Unit());
         }
     };
 

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
 
+#include "base/utils/utils.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -38,14 +39,7 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childrenSize = children.size();
     auto layoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
-    if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
-        LOGW("Size is infinity.");
-        return;
-    }
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 
     auto textFirstLayoutConstraint = childLayoutConstraint;
     textFirstLayoutConstraint.maxSize = { Infinity<float>(), Infinity<float>() };
@@ -60,6 +54,10 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
     auto badgeCircleSize = badgeTheme->GetBadgeCircleSize();
+    auto badgeValue = layoutProperty->GetBadgeValue();
+    if (badgeValue.has_value() && badgeValue.value().empty()) {
+        badgeCircleSize = badgeTheme->GetLittleBadgeCircleSize();
+    }
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeCircleDiameter = circleSize.has_value() ? (circleSize->IsValid() ? circleSize->ConvertToPx() : 0)
                                                       : badgeCircleSize.ConvertToPx();
@@ -92,7 +90,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             badgeCircleRadius = badgeCircleDiameter / 2;
         }
     }
-
     textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
     auto textLayoutConstraint = textFirstLayoutConstraint;
     textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_PAINT_PROPERTY_H
 
 #include "core/components_ng/render/paint_property.h"
+#include "core/components_ng/pattern/model/model_property.h"
 
 #include "base/geometry/animatable_float.h"
 #include "base/geometry/vec3.h"
@@ -25,27 +26,6 @@
 #include "foundation/graphic/graphic_3d/3d_widget_adapter/include/data_type/light.h"
 
 namespace OHOS::Ace::NG {
-
-#define DEFINE_NEEDS_SETUP_FLAG_PROPERTY(name, defaultVal, changeFlag)  \
-public:                                                                 \
-    bool Needs##name##Setup() const                                     \
-    {                                                                   \
-        return needs##name##Setup_;                                     \
-    }                                                                   \
-    void UpdateNeeds##name##Setup(const bool value)                     \
-    {                                                                   \
-        needs##name##Setup_ = value;                                    \
-        if (value) {                                                    \
-            UpdatePropertyChangeFlag(changeFlag);                       \
-        }                                                               \
-    }                                                                   \
-    bool CloneNeeds##name##Setup() const                                \
-    {                                                                   \
-        return needs##name##Setup_;                                     \
-    }                                                                   \
-private:                                                                \
-    bool needs##name##Setup_ = defaultVal;
-
 
 class ModelPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ModelPaintProperty, PaintProperty)
@@ -135,15 +115,24 @@ public:
         UpdateNeedsGeometriesSetup(true);
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraPosition, OHOS::Ace::Vec3, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraDistance, OHOS::Ace::AnimatableFloat, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraIsAngular, bool, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraRotation, OHOS::Ace::Quaternion, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraLookAt, OHOS::Ace::Vec3, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraUp, OHOS::Ace::Vec3, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraZNear, float, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraZFar, float, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CameraFOV, float, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraPosition, OHOS::Ace::Vec3, Camera, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraDistance, OHOS::Ace::AnimatableFloat, Camera, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraIsAngular, bool, Camera, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraRotation, OHOS::Ace::Quaternion, Camera, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraLookAt, OHOS::Ace::Vec3, Camera, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraUp, OHOS::Ace::Vec3, Camera, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraZNear, float, Camera, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraZFar, float, Camera, PROPERTY_UPDATE_RENDER);
+    DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(
+        CameraFOV, float, Camera, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(
         ModelLights, std::vector<RefPtr<OHOS::Render3D::SVLight>>, PROPERTY_UPDATE_RENDER);

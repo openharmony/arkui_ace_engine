@@ -163,6 +163,11 @@ public:
         return true;
     }
 #endif
+
+// ArkTsCard start
+    static void PreloadAceModuleCard(void* runtime);
+// ArkTsCard end
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global

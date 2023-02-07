@@ -18,13 +18,13 @@
 
 #include <optional>
 
+#include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_paint_method.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -113,9 +113,14 @@ private:
 
     void RegisterOnTouch();
     void RegisterOnHover();
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+
     // change option paint props on press
     void OnPress(const TouchEventInfo& info);
     void OnHover(bool isHover);
+    bool OnKeyEvent(const KeyEvent& event);
+
+    void OnSelectProcess();
 
     std::optional<Color> bgColor_;
 
@@ -123,6 +128,7 @@ private:
     std::string iconSrc_;
     RefPtr<FrameNode> text_ = nullptr;
     RefPtr<TextTheme> textTheme_ = nullptr;
+    RefPtr<SelectTheme> selectTheme_ = nullptr;
     // this option node's index in the menu
     int index_ = -1;
 

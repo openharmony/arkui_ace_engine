@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -479,7 +480,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
     RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     RefPtr<GestureEventHub> gestureHub =
         AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    bubblePattern->InitTouchEvent(gestureHub);
+    bubblePattern->InitTouchEvent();
 
     // test HandleTouchEvent
     TouchEventInfo touchEventInfo = TouchEventInfo("touch");
@@ -507,7 +508,6 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
     popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
     popupParam->SetMessage(BUBBLE_MESSAGE);
     popupParam->SetArrowOffset(BUBBLE_PAINT_PROPERTY_ARROW_OFFSET);
-    popupParam->SetShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
     popupParam->SetEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_FALSE);
     popupParam->SetPlacement(Placement::BOTTOM_RIGHT);
     popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
@@ -519,6 +519,10 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     EXPECT_NE(targetNode, nullptr);
+    // set popupTheme and  buttonTheme to themeManager before using themeManager
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
     EXPECT_NE(popupNode, nullptr);
     auto firstTextNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
@@ -537,66 +541,10 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
 
 /**
  * @tc.name: BubblePatternTest008
- * @tc.desc: Test CreateBubbleNode with CombinedChild and Update..
- * @tc.type: FUNC
- */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest008, TestSize.Level1)
-{
-    // set value to popupParam
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
-    popupParam->SetMessage(BUBBLE_MESSAGE);
-    popupParam->SetShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
-    popupParam->SetEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
-    popupParam->SetPlacement(Placement::BOTTOM_RIGHT);
-    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
-    popupParam->SetHasAction(false);
-    ButtonProperties primaryProperties;
-    primaryProperties.showButton = true;
-    primaryProperties.value = BUBBLE_MESSAGE;
-    popupParam->SetPrimaryButtonProperties(primaryProperties);
-    ButtonProperties secondProperties;
-    secondProperties.showButton = true;
-    secondProperties.value = BUBBLE_NEW_MESSAGE;
-    popupParam->SetSecondaryButtonProperties(secondProperties);
-
-    // create bubbleNode
-    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    EXPECT_NE(targetNode, nullptr);
-
-    // set popupTheme and  buttonTheme to themeManager before using themeManager
-    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
-    EXPECT_CALL(*themeManagerOne, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<ButtonTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ButtonTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ButtonTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<ButtonTheme>()))
-        .WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
-
-    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
-    EXPECT_NE(popupNode, nullptr);
-    // update Property
-    primaryProperties.showButton = false;
-    popupParam->SetPrimaryButtonProperties(primaryProperties);
-    auto popupNodeTwo = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
-    EXPECT_NE(popupNodeTwo, nullptr);
-
-    primaryProperties.showButton = true;
-    secondProperties.showButton = false;
-    popupParam->SetPrimaryButtonProperties(primaryProperties);
-    popupParam->SetSecondaryButtonProperties(secondProperties);
-    auto popupNodeThree = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
-    EXPECT_NE(popupNodeThree, nullptr);
-}
-
-/**
- * @tc.name: BubblePatternTest009
  * @tc.desc: Test CreateCustomBubbleNode and Update.
  * @tc.type: FUNC
  */
-HWTEST_F(BubblePatternTestNg, BubblePatternTest009, TestSize.Level1)
+HWTEST_F(BubblePatternTestNg, BubblePatternTest008, TestSize.Level1)
 {
     // set value to popupParam
     auto popupParam = AceType::MakeRefPtr<PopupParam>();

@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/mousestyle/mouse_style.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_action.h"
@@ -60,8 +61,6 @@ constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
-enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
-
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
     ACTION_UNDO,
@@ -74,6 +73,26 @@ enum {
     ACTION_REPLACE,
     ACTION_ASSIST,
     ACTION_AUTOFILL,
+};
+
+struct CaretMetricsF {
+    void Reset()
+    {
+        offset.Reset();
+        height = 0.0;
+    }
+
+    OffsetF offset;
+    // When caret is close to different glyphs, the height will be different.
+    float height = 0.0;
+    std::string ToString() const
+    {
+        std::string result = "Offset: ";
+        result += offset.ToString();
+        result += ", height: ";
+        result += std::to_string(height);
+        return result;
+    }
 };
 
 class TextFieldPattern : public Pattern, public ValueChangeObserver {
@@ -118,10 +137,13 @@ public:
     void UpdateCaretPositionByPressOffset();
     void UpdateSelectionOffset();
 
-    OffsetF CalcCursorOffsetByPosition(int32_t position);
+    CaretMetricsF CalcCursorOffsetByPosition(int32_t position);
 
-    bool ComputeOffsetForCaretDownstream(
-        const TextEditingValueNG& TextEditingValueNG, int32_t extent, CaretMetrics& result);
+    bool ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result);
+
+    bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const;
+
+    OffsetF MakeEmptyOffset() const;
 
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
 
@@ -416,8 +438,35 @@ public:
     float GetIconHotZoneSize();
     float GetIconSize();
 
+    void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
+    void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
+
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
+
+    bool HasSurfacePositionChangedCallback()
+    {
+        return surfacePositionChangedCallbackId_.has_value();
+    }
+    void UpdateSurfacePositionChangedCallbackId(int32_t id)
+    {
+        surfacePositionChangedCallbackId_ = id;
+    }
+
+    void OnCursorMoveDone();
+    bool IsDisabled();
+
+    bool LastInputIsNewLine() const;
+
 private:
     void HandleBlurEvent();
+    bool HasFocus() const;
     void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
@@ -438,12 +487,14 @@ private:
     void OnTextAreaScroll(float dy);
     void InitMouseEvent();
     void OnHover(bool isHover);
-    void HandleMouseEvent(const MouseInfo& info);
+    void HandleMouseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
     void ShowSelectOverlay(const std::optional<RectF>& firstHandle, const std::optional<RectF>& secondHandle);
 
     void CursorMoveOnClick(const Offset& offset);
+    void UpdateCaretInfoToController() const;
 
+    void SetMouseStyle(MouseFormat format);
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
@@ -511,6 +562,7 @@ private:
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
     void ProcessPadding();
+    void SetDisabledStyle();
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -529,6 +581,8 @@ private:
     std::shared_ptr<RSParagraph> paragraph_;
     TextStyle lineHeightMeasureUtilTextStyle_;
     std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
+    TextStyle nextLineUtilTextStyle_;
+    std::shared_ptr<RSParagraph> nextLineUtilParagraph_;
 
     RefPtr<ImageLoadingContext> showPasswordImageLoadingCtx_;
     RefPtr<ImageLoadingContext> hidePasswordImageLoadingCtx_;
@@ -566,11 +620,15 @@ private:
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
+    bool newLineInserted_ = false;
+    std::optional<int32_t> surfaceChangedCallbackId_;
+    std::optional<int32_t> surfacePositionChangedCallbackId_;
 
     SelectionMode selectionMode_ = SelectionMode::NONE;
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
+    float placeholderParagraphHeight_ = 0.0f;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 

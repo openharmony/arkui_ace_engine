@@ -62,14 +62,11 @@ void IndexerPattern::OnModifyDone()
         itemCount_ = static_cast<int32_t>(arrayValue_.size());
     }
 
-    if (layoutProperty->GetSelected().has_value() &&
-        (selected_ != layoutProperty->GetSelected().value() || !initialized_)) {
-        auto propSelect = layoutProperty->GetSelected().value();
-        selected_ = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
-        ResetStatus();
-        ApplyIndexChanged(initialized_);
-        initialized_ = true;
-    }
+    auto propSelect = layoutProperty->GetSelected().value();
+    selected_ = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
+    ResetStatus();
+    ApplyIndexChanged(initialized_);
+    initialized_ = true;
 
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
@@ -399,6 +396,7 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged)
     for (auto& iter : childrenNode) {
         auto childNode = AceType::DynamicCast<FrameNode>(iter);
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+        nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         auto childRenderContext = childNode->GetRenderContext();
         if (index == childHoverIndex_ || index == childPressIndex_) {
             auto radiusSize = indexerTheme->GetHoverRadiusSize();

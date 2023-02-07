@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -33,8 +34,48 @@ void OptionPattern::OnModifyDone()
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
-    textTheme_ = PipelineContext::GetCurrentContext()->GetTheme<TextTheme>();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    RegisterOnKeyEvent(focusHub);
+
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    textTheme_ = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme_);
+    selectTheme_ = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme_);
+}
+
+void OptionPattern::OnSelectProcess()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<OptionEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto JsAction = hub->GetJsCallback();
+    if (JsAction) {
+        LOGI("Option's callback executing");
+        JsAction();
+    }
+    auto onSelect = hub->GetOnSelect();
+    if (onSelect) {
+        LOGI("selecting option %d", index_);
+        onSelect(index_);
+    }
+    // hide menu when option is clicked
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto targetId = menuPattern->GetTargetId();
+    overlayManager->HideMenu(targetId);
 }
 
 void OptionPattern::RegisterOnClick()
@@ -43,27 +84,10 @@ void OptionPattern::RegisterOnClick()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<OptionEventHub>();
 
-    auto event = [JsAction = hub->GetJsCallback(), onSelect = hub->GetOnSelect(), index = index_, option = host](
-                     GestureEvent& /*info*/) {
-        if (JsAction) {
-            LOGI("Option's callback executing");
-            JsAction();
-        }
-        if (onSelect) {
-            LOGI("selecting option %d", index);
-            onSelect(index);
-        }
-        // hide menu when option is clicked
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto menu = AceType::DynamicCast<FrameNode>(option->GetParent());
-        CHECK_NULL_VOID(menu);
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        auto targetId = menuPattern->GetTargetId();
-        overlayManager->HideMenu(targetId);
+    auto event = [weak = WeakClaim(this)](GestureEvent& /* info */) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->OnSelectProcess();
     };
     auto clickEvent = MakeRefPtr<ClickEvent>(std::move(event));
 
@@ -101,6 +125,28 @@ void OptionPattern::RegisterOnHover()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent);
+}
+
+void OptionPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool OptionPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_SPACE) {
+        OnSelectProcess();
+        return true;
+    }
+    return false;
 }
 
 void OptionPattern::OnPress(const TouchEventInfo& info)
@@ -256,7 +302,8 @@ Dimension OptionPattern::GetFontSize()
     CHECK_NULL_RETURN(text_, Dimension());
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, Dimension());
-    auto defaultSize = textTheme_->GetTextStyle().GetFontSize();
+    CHECK_NULL_RETURN(selectTheme_, Dimension());
+    auto defaultSize = selectTheme_->GetMenuFontSize();
     return props->GetFontSizeValue(defaultSize);
 }
 
@@ -292,7 +339,7 @@ Color OptionPattern::GetFontColor()
     CHECK_NULL_RETURN(text_, Color::TRANSPARENT);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, Color::TRANSPARENT);
-    auto defaultColor = textTheme_->GetTextStyle().GetTextColor();
+    auto defaultColor = selectTheme_->GetMenuFontColor();
     return props->GetTextColorValue(defaultColor);
 }
 

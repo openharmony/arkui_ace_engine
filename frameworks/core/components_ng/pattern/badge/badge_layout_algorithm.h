@@ -36,7 +36,7 @@ public:
 
 private:
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
-    
+
     ACE_DISALLOW_COPY_AND_MOVE(BadgeLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

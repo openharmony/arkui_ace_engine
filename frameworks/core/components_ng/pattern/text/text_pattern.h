@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -43,7 +44,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextPaintMethod>(paragraph_, baselineOffset_);
+        return MakeRefPtr<TextPaintMethod>(WeakClaim(this), paragraph_, baselineOffset_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -82,8 +83,17 @@ public:
 
     void DumpInfo() override;
 
+    TextSelector GetTextSelector() const
+    {
+        return textSelector_;
+    }
+
+    std::string GetTextForDisplay() const
+    {
+        return textForDisplay_;
+    }
+
 private:
-    void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -92,15 +102,35 @@ private:
     void HandleOnCopy();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
+    void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitMouseEvent();
+    void HandleMouseEvent(const MouseInfo& info);
+    void OnHandleTouchUp();
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClickEvent(GestureEvent& info);
 
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
+    void InitSelection(const Offset& pos);
+    void CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+
+    int32_t GetGraphemeClusterLength(int32_t extend) const;
+    OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
+    std::string GetSelectedText(int32_t start, int32_t end) const;
+    std::wstring GetWideText() const;
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
+    std::string textForDisplay_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
-
+    RefPtr<Clipboard> clipboard_;
+    CopyOptions copyOption_ = CopyOptions::None;
+    TextSelector textSelector_;
+    OffsetF contentOffset_;
+    RectF contentRect_;
     float baselineOffset_ = 0.0f;
+    bool clickEventInitialized_ = false;
+    bool mouseEventInitialized_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };

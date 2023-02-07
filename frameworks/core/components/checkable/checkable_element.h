@@ -36,6 +36,7 @@ public:
     void OnBlur() override;
     bool OnKeyEvent(const KeyEvent& keyEvent) override;
     void SetNewComponent(const RefPtr<Component>& newComponent) override;
+    void Deactivate() override;
 
     bool CanUpdate(const RefPtr<Component>& newComponent) override
     {

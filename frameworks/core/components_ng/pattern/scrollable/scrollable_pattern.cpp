@@ -50,8 +50,17 @@ const RefPtr<GestureEventHub>& ScrollablePattern::GetGestureHub()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(host, nullptr);
+    CHECK_NULL_RETURN(hub, nullptr);
     return hub->GetOrCreateGestureEventHub();
+}
+
+const RefPtr<InputEventHub>& ScrollablePattern::GetInputHub()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(host, nullptr);
+    return hub->GetOrCreateInputEventHub();
 }
 
 bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
@@ -66,9 +75,50 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
     return UpdateCurrentOffset(offset, source);
 }
 
-void ScrollablePattern::OnScrollEndCallback()
+bool ScrollablePattern::OnScrollPosition(double offset, int32_t source)
 {
-    SetScrollBarDriving(false);
+    if (coordinationEvent_ && isReactInParentMovement_) {
+        auto onScroll = coordinationEvent_->GetOnScroll();
+        if (onScroll) {
+            onScroll(offset);
+            return false;
+        }
+    }
+    auto isAtTop = (IsAtTop() && Positive(offset));
+    if (isAtTop && source == SCROLL_FROM_UPDATE && !isReactInParentMovement_ && (axis_ == Axis::VERTICAL)) {
+        isReactInParentMovement_ = true;
+        if (coordinationEvent_) {
+            auto onScrollStart = coordinationEvent_->GetOnScrollStartEvent();
+            if (onScrollStart) {
+                onScrollStart();
+            }
+        }
+    }
+    if (source == SCROLL_FROM_START) {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->StopScrollBarAnimator();
+        }
+    }
+    return true;
+}
+
+void ScrollablePattern::OnScrollEnd()
+{
+    if (coordinationEvent_ && isReactInParentMovement_) {
+        isReactInParentMovement_ = false;
+        auto onScrollEnd = coordinationEvent_->GetOnScrollEndEvent();
+        if (onScrollEnd) {
+            onScrollEnd();
+            return;
+        }
+    }
+    if (scrollBar_) {
+        scrollBar_->SetDriving(false);
+        scrollBar_->OnScrollEnd();
+    }
+    if (scrollBarProxy_) {
+        scrollBarProxy_->StartScrollBarAnimator();
+    }
 }
 
 void ScrollablePattern::AddScrollEvent()
@@ -82,23 +132,8 @@ void ScrollablePattern::AddScrollEvent()
     auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        if (pattern->coordinationEvent_ && pattern->isReactInParrentMovement_) {
-            auto onScroll = pattern->coordinationEvent_->GetOnScroll();
-            if (onScroll) {
-                onScroll(offset);
-                return false;
-            }
-        }
-        auto isAtTop = (pattern->IsAtTop() && Positive(offset));
-        if (isAtTop && source == SCROLL_FROM_UPDATE && !pattern->isReactInParrentMovement_ &&
-            (pattern->axis_ == Axis::VERTICAL)) {
-            pattern->isReactInParrentMovement_ = true;
-            if (pattern->coordinationEvent_) {
-                auto onScrollStart = pattern->coordinationEvent_->GetOnScrollStartEvent();
-                if (onScrollStart) {
-                    onScrollStart();
-                }
-            }
+        if (!pattern->OnScrollPosition(offset, source)) {
+            return false;
         }
         return pattern->OnScrollCallback(static_cast<float>(offset), source);
     };
@@ -106,14 +141,7 @@ void ScrollablePattern::AddScrollEvent()
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->coordinationEvent_ && pattern->isReactInParrentMovement_) {
-            pattern->isReactInParrentMovement_ = false;
-            auto onScrollEnd = pattern->coordinationEvent_->GetOnScrollEndEvent();
-            if (onScrollEnd) {
-                onScrollEnd();
-                return;
-            }
-        }
+        pattern->OnScrollEnd();
         pattern->OnScrollEndCallback();
     };
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEnd));
@@ -184,14 +212,18 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureHub = GetGestureHub();
+    auto inputHub = GetInputHub();
     CHECK_NULL_VOID(gestureHub);
+    CHECK_NULL_VOID(inputHub);
     scrollBar_->SetGestureEvent();
+    scrollBar_->SetMouseEvent();
     scrollBar_->SetMarkNeedRenderFunc([weak = AceType::WeakClaim(AceType::RawPtr(host))]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     });
     gestureHub->AddTouchEvent(scrollBar_->GetTouchEvent());
+    inputHub->AddOnMouseEvent(scrollBar_->GetMouseEvent());
 }
 
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
@@ -212,6 +244,9 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
         }
         RegisterScrollBarEventTask();
+        if (displayMode == DisplayMode::AUTO) {
+            scrollBar_->OnScrollEnd();
+        }
     } else if (scrollBar_->GetDisplayMode() != displayMode) {
         scrollBar_->SetDisplayMode(displayMode);
     } else {
@@ -249,7 +284,9 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
 {
     // inner scrollbar
     if (scrollBar_) {
-        scrollBar_->SetScrollable(IsScrollable());
+        auto mainSize = axis_ == Axis::VERTICAL ? viewPort.Height() : viewPort.Width();
+        bool scrollable = GreatNotEqual(estimatedHeight, mainSize);
+        scrollBar_->SetScrollable(IsScrollable() && scrollable);
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         scrollBar_->UpdateScrollBarRegion(Offset(), viewPort, scrollOffset, estimatedHeight);
         scrollBar_->MarkNeedRender();

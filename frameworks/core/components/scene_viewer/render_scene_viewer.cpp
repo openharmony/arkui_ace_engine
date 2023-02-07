@@ -74,7 +74,10 @@ void RenderSceneViewer::HandleEvent(const OHOS::Render3D::SceneViewerTouchEvent&
         case OHOS::Ace::TouchType::CANCEL:
             touchCount_--;
             break;
-        case OHOS::Ace::TouchType::UNKNOWN:
+        default:
+            LOGW("Unknown touch type.");
+            break;
+        default:
             break;
     }
 

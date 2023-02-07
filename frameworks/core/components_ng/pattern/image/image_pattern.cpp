@@ -84,11 +84,11 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return task;
 }
 
-void ImagePattern::SetAnimationCallback()
+void ImagePattern::SetRedrawCallback()
 {
     // set animation flush function for svg / gif
     CHECK_NULL_VOID_NOLOG(image_);
-    image_->SetAnimationCallback([weak = WeakClaim(RawPtr(GetHost()))] {
+    image_->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();
@@ -113,7 +113,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    SetAnimationCallback();
+    SetRedrawCallback();
 
     if (draggable_) {
         EnableDrag();
@@ -398,7 +398,7 @@ void ImagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToBounds(true);
+    host->GetRenderContext()->SetClipToBounds(false);
 }
 
 void ImagePattern::EnableDrag()
@@ -406,10 +406,21 @@ void ImagePattern::EnableDrag()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetContentSize();
-    auto dragStart = [image = image_, ctx = loadingCtx_, size](const RefPtr<OHOS::Ace::DragEvent>& /*event*/,
+    auto dragStart = [imageWk = WeakClaim(RawPtr(image_)), ctxWk = WeakClaim(RawPtr(loadingCtx_)), size](
+                         const RefPtr<OHOS::Ace::DragEvent>& /*event*/,
                          const std::string& /*extraParams*/) -> DragDropInfo {
         DragDropInfo info;
+        auto image = imageWk.Upgrade();
+        auto ctx = ctxWk.Upgrade();
+        CHECK_NULL_RETURN(image && ctx, info);
+
         info.extraInfo = "image drag";
+        info.pixelMap = image->GetPixelMap();
+        if (info.pixelMap) {
+            LOGI("using pixmap onDrag");
+            return info;
+        }
+
         auto node = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         auto pattern = node->GetPattern<ImagePattern>();

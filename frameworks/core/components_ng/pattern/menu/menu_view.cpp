@@ -102,6 +102,9 @@ RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32
         }
         optionNode->MountToParent(menuNode);
     }
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, nullptr);
+    menuPattern->SetIsSelectMenu(true);
     return wrapperNode;
 }
 

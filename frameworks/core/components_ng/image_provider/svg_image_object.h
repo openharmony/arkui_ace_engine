@@ -24,22 +24,23 @@ class SvgImageObject : public ImageObject {
     DECLARE_ACE_TYPE(SvgImageObject, ImageObject);
 
 public:
-    SvgImageObject(
-        const ImageSourceInfo& sourceInfo, const SizeF& imageSize, int32_t frameCount, const RefPtr<ImageData>& data)
-        : ImageObject(sourceInfo, imageSize, frameCount, data)
-    {}
+    SvgImageObject(const ImageSourceInfo& src, const SizeF& imageSize) : ImageObject(src, imageSize, nullptr) {}
     ~SvgImageObject() override = default;
 
-    static RefPtr<SvgImageObject> Create(
-        const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data);
+    static RefPtr<SvgImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
     const RefPtr<SvgDomBase>& GetSVGDom() const;
+
+    RefPtr<ImageObject> Clone() override
+    {
+        return Claim(this);
+    }
 
 private:
     void MakeCanvasImage(
         const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize, bool syncLoad) override;
 
     // return true if process is successful
-    bool MakeSvgDom(const std::optional<Color>& svgFillColor);
+    bool MakeSvgDom(const RefPtr<ImageData>& data, const std::optional<Color>& svgFillColor);
 
     RefPtr<SvgDomBase> svgDomBase_;
 

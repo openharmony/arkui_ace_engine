@@ -36,6 +36,9 @@
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
+using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
+    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
+    const std::string& abilityName)>;
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
@@ -165,6 +168,16 @@ public:
         windowModal_ = windowModal;
     }
 
+    void SetInstallationFree(bool installationFree)
+    {
+        installationFree_ = installationFree;
+    }
+
+    void SetSharePanelCallback(SharePanelCallback&& callback)
+    {
+        sharePanelCallback_ = std::move(callback);
+    }
+
     void SetColorScheme(ColorScheme colorScheme)
     {
         colorScheme_ = colorScheme;
@@ -206,7 +219,11 @@ public:
 
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
-    bool Dump(const std::vector<std::string>& params) override;
+    bool Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
+    bool DumpInfo(const std::vector<std::string>& params);
+
+    bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
 
@@ -409,6 +426,9 @@ private:
     mutable std::mutex cardTokensMutex_;
 
     std::string webHapPath_;
+
+    bool installationFree_ = false;
+    SharePanelCallback sharePanelCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

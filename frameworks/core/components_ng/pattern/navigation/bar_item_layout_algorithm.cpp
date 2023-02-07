@@ -66,20 +66,10 @@ float BarItemLayoutAlgorithm::LayoutIcon(LayoutWrapper* layoutWrapper, const Ref
     CHECK_NULL_RETURN(iconWrapper, 0.0f);
     auto geometryNode = iconWrapper->GetGeometryNode();
 
-    if (!hostNode->GetTextNode()) {
-        auto iconOffsetY = (menuHeight_ - iconSize_) / 2;
-        auto offset = OffsetF(0.0f, static_cast<float>(iconOffsetY.ConvertToPx()));
-        geometryNode->SetMarginFrameOffset(offset);
-        iconWrapper->Layout();
-        return static_cast<float>(iconOffsetY.ConvertToPx());
-    }
-
-    auto occupiedHeight = menuHeight_ - iconSize_ - TEXT_TOP_PADDING;
-    auto iconOffsetY = (static_cast<float>(occupiedHeight.ConvertToPx()) - textHeight) / 2;
-    auto offset = OffsetF(0.0f, iconOffsetY);
+    auto offset = OffsetF(0.0f, 0.0f);
     geometryNode->SetMarginFrameOffset(offset);
     iconWrapper->Layout();
-    return iconOffsetY;
+    return 0.0f;
 }
 
 void BarItemLayoutAlgorithm::LayoutText(LayoutWrapper* layoutWrapper, const RefPtr<BarItemNode>& hostNode,
@@ -110,8 +100,7 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     iconSize_ = theme->GetMenuIconSize();
-    menuHeight_ = theme->GetHeight();
-    auto size = SizeF(static_cast<float>(iconSize_.ConvertToPx()), static_cast<float>(menuHeight_.ConvertToPx()));
+    auto size = SizeF(static_cast<float>(iconSize_.ConvertToPx()), static_cast<float>(iconSize_.ConvertToPx()));
     MeasureIcon(layoutWrapper, hostNode, barItemLayoutProperty);
     MeasureText(layoutWrapper, hostNode, barItemLayoutProperty);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);

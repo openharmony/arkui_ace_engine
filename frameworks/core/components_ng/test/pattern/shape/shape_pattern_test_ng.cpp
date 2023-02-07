@@ -23,9 +23,9 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_pattern.h"
-#include "core/components_ng/pattern/shape/container_paint_property.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
@@ -102,7 +102,7 @@ HWTEST_F(ShapePatternTestNg, ContainerPaintProperty001, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     EXPECT_EQ(frameNode == nullptr, false);
     ViewStackProcessor::GetInstance()->Pop();
-    auto paintProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     EXPECT_EQ(paintProperty == nullptr, false);
     EXPECT_EQ(paintProperty->HasShapeViewBox(), true);
     EXPECT_EQ(paintProperty->GetShapeViewBoxValue().Left().ConvertToPx(), LEFT);
@@ -131,7 +131,7 @@ HWTEST_F(ShapePatternTestNg, ContainerPaintProperty002, TestSize.Level1)
     RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
     EXPECT_EQ(frameNode == nullptr, false);
-    auto paintProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
     EXPECT_EQ(paintProperty == nullptr, false);
     EXPECT_EQ(paintProperty->HasImageMesh(), true);
     EXPECT_EQ(paintProperty->GetImageMeshValue().GetColumn(), COLUMN);

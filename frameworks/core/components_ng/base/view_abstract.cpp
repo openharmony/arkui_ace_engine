@@ -84,6 +84,19 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
 }
 
+void ViewAbstract::ClearWidthOrHeight(bool isWidth)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ClearUserDefinedIdealSize(isWidth);
+}
+
 void ViewAbstract::SetMinWidth(const CalcLength& width)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -191,13 +204,21 @@ void ViewAbstract::SetBackgroundImagePosition(const BackgroundImagePosition& bgI
     ACE_UPDATE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition);
 }
 
-void ViewAbstract::SetBackgroundBlurStyle(const BlurStyle& bgBlurStyle)
+void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(BackgroundBlurStyle, bgBlurStyle);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateBackBlurStyle(bgBlurStyle);
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+    }
 }
 
 void ViewAbstract::SetLayoutWeight(int32_t value)
@@ -785,6 +806,7 @@ void ViewAbstract::BindPopup(
     // update PopupInfo props
     popupInfo.popupId = popupId;
     popupInfo.popupNode = popupNode;
+    popupInfo.isBlockEvent = param->IsBlockEvent();
     if (popupNode) {
         popupNode->MarkModifyDone();
     }
@@ -858,7 +880,15 @@ void ViewAbstract::SetBackdropBlur(const Dimension& radius)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(BackBlurRadius, radius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        target->UpdateBackBlurRadius(radius);
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(BlurStyleOption());
+        }
+    }
 }
 
 void ViewAbstract::SetFrontBlur(const Dimension& radius)

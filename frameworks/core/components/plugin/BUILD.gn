@@ -41,8 +41,6 @@ build_component("plugin") {
       "$ability_runtime_inner_api_path/ability_manager:ability_manager",
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
       "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
       "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
       "//foundation/window/window_manager/wm:libwm",
@@ -53,6 +51,7 @@ build_component("plugin") {
       "ability_base:want",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
+      "input:libmmi-client",
       "ipc:ipc_core",
     ]
 

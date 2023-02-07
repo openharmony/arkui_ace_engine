@@ -99,13 +99,6 @@ void TextModelNG::SetFontFamily(const std::vector<std::string>& value)
 void TextModelNG::SetTextAlign(Ace::TextAlign value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextAlign, value);
-    if (value == Ace::TextAlign::START) {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_LEFT);
-    } else if (value == Ace::TextAlign::END) {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER_RIGHT);
-    } else {
-        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::CENTER);
-    }
 }
 
 void TextModelNG::SetTextOverflow(Ace::TextOverflow value)
@@ -170,7 +163,7 @@ void TextModelNG::SetRemoteMessage(std::function<void()>&& event)
 
 void TextModelNG::SetCopyOption(CopyOptions copyOption)
 {
-    LOGE("no support CopyOption");
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)

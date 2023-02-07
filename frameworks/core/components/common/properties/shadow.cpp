@@ -15,7 +15,9 @@
 
 #include "core/components/common/properties/shadow.h"
 
+#include "base/utils/system_properties.h"
 #include "core/animation/evaluator.h"
+#include "core/components/common/properties/shadow_config.h"
 
 namespace OHOS::Ace {
 
@@ -29,4 +31,40 @@ Shadow Shadow::Blend(const Shadow& to, const Shadow& from, float progress)
     return Shadow(blurRadius, spreadRadius, offset, color);
 }
 
+Shadow Shadow::CreateShadow(ShadowStyle style)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (colorMode == ColorMode::DARK) {
+        switch (style) {
+            case ShadowStyle::OuterDefaultXS:
+                return ShadowConfig::DefaultShadowXSDark;
+            case ShadowStyle::OuterDefaultSM:
+                return ShadowConfig::DefaultShadowSDark;
+            case ShadowStyle::OuterDefaultMD:
+                return ShadowConfig::DefaultShadowMDark;
+            case ShadowStyle::OuterDefaultLG:
+                return ShadowConfig::DefaultShadowLDark;
+            case ShadowStyle::OuterFloatingSM:
+                return ShadowConfig::FloatingShadowSDark;
+            case ShadowStyle::OuterFloatingMD:
+                return ShadowConfig::FloatingShadowMDark;
+        }
+        return {};
+    }
+    switch (style) {
+        case ShadowStyle::OuterDefaultXS:
+            return ShadowConfig::DefaultShadowXS;
+        case ShadowStyle::OuterDefaultSM:
+            return ShadowConfig::DefaultShadowS;
+        case ShadowStyle::OuterDefaultMD:
+            return ShadowConfig::DefaultShadowM;
+        case ShadowStyle::OuterDefaultLG:
+            return ShadowConfig::DefaultShadowL;
+        case ShadowStyle::OuterFloatingSM:
+            return ShadowConfig::FloatingShadowS;
+        case ShadowStyle::OuterFloatingMD:
+            return ShadowConfig::FloatingShadowM;
+    }
+    return {};
+}
 } // namespace OHOS::Ace

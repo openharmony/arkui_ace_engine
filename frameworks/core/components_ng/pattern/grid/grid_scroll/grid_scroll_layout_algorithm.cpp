@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,8 +26,10 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 
 void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -52,6 +54,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Step2: Measure children that can be displayed in viewport of Grid
     float mainSize = GetMainAxisSize(idealSize, axis);
     float crossSize = GetCrossAxisSize(idealSize, axis);
+    UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
 
     // update cache info.
@@ -60,9 +63,43 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     AdaptToChildMainSize(layoutWrapper, gridLayoutProperty, mainSize, idealSize);
 }
 
+void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize)
+{
+    if (GreatOrEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
+        return;
+    }
+    // only need to offset vertical grid
+    if (gridLayoutInfo_.axis_ != Axis::VERTICAL) {
+        return;
+    }
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    // only when textField is onFocus
+    auto focused = textFieldManager->GetOnFocusTextField().Upgrade();
+    CHECK_NULL_VOID(focused);
+    auto position = textFieldManager->GetClickPosition().GetY();
+    auto grid = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(grid);
+    auto gridOffset = grid->GetTransformRelativeOffset();
+    auto offset = mainSize + gridOffset.GetY() - position;
+    if (LessOrEqual(offset, 0.0)) {
+        // negative offset to scroll down
+        auto lineHeight = gridLayoutInfo_.GetAverageLineHeight();
+        if (GreatNotEqual(lineHeight, 0)) {
+            offset = floor(offset / lineHeight) * lineHeight;
+        }
+        gridLayoutInfo_.currentOffset_ += offset;
+        LOGI("update offset on virtual keyboard height change, %{public}f", offset);
+    }
+}
+
 void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrapper,
     RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, const SizeF& idealSize)
 {
+    gridLayoutInfo_.lastMainSize_ = mainSize;
     // grid with columnsTemplate/rowsTemplate and maxCount
     if (!gridLayoutProperty->HasMaxCount()) {
         return;
@@ -90,6 +127,7 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
             gridMainSize = std::max(gridMainSize, gridLayoutProperty->GetLayoutConstraint()->minSize.Height());
             layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(idealSize.Width(), gridMainSize));
         }
+        gridLayoutInfo_.lastMainSize_ = gridMainSize;
         LOGI("gridMainSize:%{public}f", gridMainSize);
     }
 }
@@ -190,12 +228,15 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     itemsCrossPosition_.clear();
+    if (gridLayoutInfo_.gridMatrix_.empty()) {
+        layoutWrapper->RemoveAllChildInRenderTree();
+    }
     SkipForwardLines(mainSize, layoutWrapper);
     SkipBackwardLines(mainSize, layoutWrapper);
     if (layoutWrapper->GetHostNode()->GetChildrenUpdated() != -1) {
         gridLayoutInfo_.lineHeightMap_.clear();
         gridLayoutInfo_.gridMatrix_.clear();
-
+        layoutWrapper->RemoveAllChildInRenderTree();
         gridLayoutInfo_.endIndex_ = -1;
         gridLayoutInfo_.endMainLineIndex_ = 0;
         gridLayoutInfo_.reachEnd_ = false;
@@ -564,7 +605,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     // Erase records that are on bottom of viewport.
     // remove from rbegin or LazyLayoutWrapperBuilder will create item and then remove
     for (auto i = oldEnd; i > gridLayoutInfo_.endMainLineIndex_; --i) {
-        auto iter = gridLayoutInfo_.gridMatrix_.find(oldEnd);
+        auto iter = gridLayoutInfo_.gridMatrix_.find(i);
         if (iter != gridLayoutInfo_.gridMatrix_.end()) {
             for (auto item = iter->second.rbegin(); item != iter->second.rend(); ++item) {
                 layoutWrapper->RemoveChildInRenderTree(item->second);
@@ -615,6 +656,9 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
     if (!GreatOrEqual(-gridLayoutInfo_.currentOffset_, mainSize)) {
         return;
     }
+
+    // grid size change from big to small
+    gridLayoutInfo_.UpdateEndLine(mainSize, mainGap_);
 
     // skip lines in matrix
     while (GreatOrEqual(-gridLayoutInfo_.currentOffset_, mainSize)) {
@@ -733,14 +777,14 @@ void GridScrollLayoutAlgorithm::UpdateMatrixForDeletedItems(int32_t deletedLineC
     decltype(gridLayoutInfo_.lineHeightMap_) gridLineHeightMap(std::move(gridLayoutInfo_.lineHeightMap_));
     decltype(gridLayoutInfo_.gridMatrix_) gridMatrix(std::move(gridLayoutInfo_.gridMatrix_));
     for (const auto& item : gridMatrix) {
-        if (item.first == 0) {
+        if (item.first <= currentMainLineIndex_) {
             gridLayoutInfo_.gridMatrix_[item.first] = item.second;
         } else {
             gridLayoutInfo_.gridMatrix_[item.first - deletedLineCount] = item.second;
         }
     }
     for (const auto& item : gridLineHeightMap) {
-        if (item.first == 0) {
+        if (item.first <= currentMainLineIndex_) {
             gridLayoutInfo_.lineHeightMap_[item.first] = item.second;
         } else {
             gridLayoutInfo_.lineHeightMap_[item.first - deletedLineCount] = item.second;

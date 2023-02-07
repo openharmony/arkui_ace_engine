@@ -27,16 +27,8 @@
 #include "core/components_ng/image_provider/image_state_manager.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-enum class ImageObjectType {
-    UNKNOWN = -1,
-    STATIC_IMAGE_OBJECT,
-    PIXEL_MAP_IMAGE_OBJECT,
-    SVG_IMAGE_OBJECT,
-};
 
 using DataReadyNotifyTask = std::function<void(const ImageSourceInfo& src)>;
 using LoadSuccessNotifyTask = std::function<void(const ImageSourceInfo& src)>;
@@ -56,42 +48,6 @@ struct LoadNotifier {
 
 class ImageObject;
 
-class ImageEncodedInfo : public virtual AceType {
-    DECLARE_ACE_TYPE(ImageEncodedInfo, AceType);
-
-public:
-    ImageEncodedInfo(const SizeF& imageSize, int32_t frameCount) : imageSize_(imageSize), frameCount_(frameCount) {}
-    ~ImageEncodedInfo() override = default;
-
-    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfo(
-        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& imageSourceInfo, ImageObjectType imageObjectType);
-    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForStaticImage(const RefPtr<NG::ImageData>& data);
-    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForSvg(const RefPtr<NG::ImageData>& data);
-    static RefPtr<ImageEncodedInfo> CreateImageEncodedInfoForDecodedPixelMap(
-        const RefPtr<NG::ImageData>& data, const ImageSourceInfo& src);
-    const SizeF& GetImageSize() const
-    {
-        return imageSize_;
-    }
-    int32_t GetFrameCount() const
-    {
-        return frameCount_;
-    }
-    std::string ToString() const
-    {
-        return std::string("encoded info is: size = ")
-            .append(imageSize_.ToString())
-            .append(", frame count = ")
-            .append(std::to_string(frameCount_));
-    }
-
-private:
-    SizeF imageSize_;
-    int32_t frameCount_ = 1;
-
-    ACE_DISALLOW_COPY_AND_MOVE(ImageEncodedInfo);
-};
-
 struct RenderTaskHolder : public virtual AceType {
     DECLARE_ACE_TYPE(RenderTaskHolder, AceType);
 
@@ -108,7 +64,6 @@ class ImageProvider : public virtual AceType {
     DECLARE_ACE_TYPE(ImageProvider, AceType);
 
 public:
-    // returns index of callback in task map
     static void CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync);
 
     static void MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
@@ -122,15 +77,10 @@ public:
     // generate cache key for canvasImage, combining src and image size
     static std::string GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize);
 
+    // cancel a scheduled background task
     static void CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
 private:
-    // helper function to post task to [TaskType] thread
-    static void WrapTaskAndPostTo(
-        std::function<void()>&& task, TaskExecutor::TaskType taskType, const char* taskTypeName);
-    static void WrapTaskAndPostToUI(std::function<void()>&& task);
-    static void WrapTaskAndPostToBackground(std::function<void()>&& task);
-
     // create RenderTaskHolder for skiaGPUObject
     static RefPtr<RenderTaskHolder> CreateRenderTaskHolder();
 
@@ -138,7 +88,7 @@ private:
      * making sure the same task runs only once (CreateImageObject with same
      * [src], MakeCanvasImage with the same [imageObj] and [size]).
      *
-     *    @param key              task key, based on [src] + [sync] +? [size]
+     *    @param key              task key, based on [src] +? [size]
      *    @param ctx              ImageLoadingContext that initiates the task, to be stored in the amp
      *    @return                 true if task is new, false if task is already running
      */
@@ -154,16 +104,7 @@ private:
      */
     static bool PrepareImageData(const RefPtr<ImageObject>& imageObj);
 
-    /** Generate imageObject with src, encodedInfo, and data
-     *
-     *    @param src   contains image url / pixelMap / InternalResource Id
-     *    @param encodedInfo  contains image size and frame count
-     *    @param sync         runs on UI thread if true, passed to SVG image, used in ImageProvider::MakeSvgDom
-     */
-    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageEncodedInfo>& encodedInfo,
-        const RefPtr<ImageData>& data, ImageObjectType imageObjectType);
-
-    static ImageObjectType ParseImageObjectType(const RefPtr<NG::ImageData>& data, const ImageSourceInfo& src);
+    static RefPtr<ImageObject> BuildImageObject(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
 
     static void CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, const std::string& key);
 

@@ -53,7 +53,7 @@ BackgroundTaskExecutor& BackgroundTaskExecutor::GetInstance()
 BackgroundTaskExecutor::BackgroundTaskExecutor() : maxThreadNum_(MAX_BACKGROUND_THREADS)
 {
     FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-    if (ft != nullptr && ft->EnableFrameTrace(BG_THREAD_NAME)) {
+    if (ft != nullptr && ft->IsEnabled()) {
         LOGI("Use frame trace as bg threads pool.");
     } else {
         LOGI("Create ace bg threads pool.");
@@ -94,7 +94,7 @@ bool BackgroundTaskExecutor::PostTask(Task&& task, BgTaskPriority priority)
         return false;
     }
     FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-    if (ft != nullptr && ft->EnableFrameTrace(BG_THREAD_NAME)) {
+    if (ft != nullptr && ft->IsEnabled()) {
         switch (priority) {
             case BgTaskPriority::LOW:
                 ft->QuickExecute(std::move(task));
@@ -128,7 +128,7 @@ bool BackgroundTaskExecutor::PostTask(const Task& task, BgTaskPriority priority)
         return false;
     }
     FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
-    if (ft != nullptr && ft->EnableFrameTrace(BG_THREAD_NAME)) {
+    if (ft != nullptr && ft->IsEnabled()) {
         Task variableTask = task;
         switch (priority) {
             case BgTaskPriority::LOW:

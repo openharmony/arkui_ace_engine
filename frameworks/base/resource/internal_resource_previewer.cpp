@@ -312,6 +312,14 @@ extern uint8_t* _binary_ic_public_spinner_svg_end;
 extern uint8_t _binary_ic_public_input_search_svg_start[];
 extern uint8_t* _binary_ic_public_input_search_svg_end;
 
+// binary/app_bar_back.svg
+extern uint8_t _binary_app_bar_back_svg_start[];
+extern uint8_t* _binary_app_bar_back_svg_end;
+
+// binary/app_bar_fa.svg
+extern uint8_t _binary_app_bar_fa_svg_start[];
+extern uint8_t* _binary_app_bar_fa_svg_end;
+
 // binary/container_modal_window_close.png
 extern uint8_t _binary_container_modal_window_close_png_start[];
 extern uint8_t* _binary_container_modal_window_close_png_end;
@@ -531,6 +539,12 @@ const uint8_t* InternalResource::GetResource(const ResourceId id, size_t& size) 
             ResourceData(_binary_ic_public_input_search_svg_start,
                 static_cast<size_t>(
                     _binary_ic_public_input_search_svg_end - _binary_ic_public_input_search_svg_start)) },
+        { InternalResource::ResourceId::APP_BAR_BACK_SVG,
+            ResourceData(_binary_app_bar_back_svg_start,
+                static_cast<size_t>(_binary_app_bar_back_svg_end - _binary_app_bar_back_svg_start)) },
+        { InternalResource::ResourceId::APP_BAR_FA_SVG,
+            ResourceData(_binary_app_bar_fa_svg_start,
+                static_cast<size_t>(_binary_app_bar_fa_svg_end - _binary_app_bar_fa_svg_start)) },
         { InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE,
             ResourceData(_binary_container_modal_window_close_png_start,
                 static_cast<size_t>(

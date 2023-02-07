@@ -83,10 +83,18 @@ void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::
 
 void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInfo& info)
 {
+    HandleKeyboardStatus(info.GetKeyboardStatus());
     HandleFunctionKey(info.GetFunctionKey());
 }
 
-void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status) {}
+void OnTextChangedListenerImpl::HandleKeyboardStatus(MiscServices::KeyboardStatus status)
+{
+    LOGI("[OnTextChangedListenerImpl] HandleKeyboardStatus status: %{public}d", status);
+    if (status == MiscServices::KeyboardStatus::NONE) {
+        return;
+    }
+    SetKeyboardStatus(status == MiscServices::KeyboardStatus::SHOW);
+}
 
 void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey functionKey)
 {
@@ -114,7 +122,7 @@ void OnTextChangedListenerImpl::HandleFunctionKey(MiscServices::FunctionKey func
 
 void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
 {
-    LOGI("[OnTextChangedListenerImpl] move cursor %{public}d", static_cast<int32_t>(direction));
+    LOGI("[OnTextChangedListenerImpl] move cursor direction %{public}d", static_cast<int32_t>(direction));
     auto task = [textField = pattern_, direction] {
         auto client = textField.Upgrade();
         CHECK_NULL_VOID_NOLOG(client);

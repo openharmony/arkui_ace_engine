@@ -103,6 +103,11 @@ public:
         return badgeSize_;
     }
 
+    const Dimension& GetLittleBadgeCircleSize()
+    {
+        return littleBadgeSize_;
+    }
+
     int GetMaxCount() const
     {
         return maxCount_;
@@ -124,6 +129,7 @@ private:
     bool showMessage_;
     Dimension badgeFontSize_;
     Dimension badgeSize_ = 16.0_vp;
+    Dimension littleBadgeSize_ = 6.0_vp;
     Dimension numericalBadgePadding_ = 6.0_vp;
     int maxCount_ = 99;
 };

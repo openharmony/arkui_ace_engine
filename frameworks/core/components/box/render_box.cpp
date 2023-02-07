@@ -672,7 +672,6 @@ void RenderBox::OnPaintFinish()
     }
     auto viewScale = context->GetViewScale();
     if (NearZero(viewScale)) {
-        LOGE("Get viewScale is zero.");
         EventReport::SendRenderException(RenderExcepType::VIEW_SCALE_ERR);
         return;
     }

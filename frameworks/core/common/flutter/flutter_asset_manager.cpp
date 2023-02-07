@@ -36,10 +36,10 @@ RefPtr<Asset> FlutterAssetManager::GetAsset(const std::string& assetName)
     return nullptr;
 }
 
-std::string FlutterAssetManager::GetAssetPath(const std::string& assetName)
+std::string FlutterAssetManager::GetAssetPath(const std::string& assetName, bool isAddHapPath)
 {
     for (const auto& provider : providers_) {
-        std::string path = provider->GetAssetPath(assetName);
+        std::string path = provider->GetAssetPath(assetName, isAddHapPath);
         if (!path.empty()) {
             return path;
         }
@@ -52,6 +52,16 @@ void FlutterAssetManager::GetAssetList(const std::string& path, std::vector<std:
     for (const auto& provider : providers_) {
         provider->GetAssetList(path, assetList);
     }
+}
+
+bool FlutterAssetManager::GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const
+{
+    for (const auto& provider : providers_) {
+        if (provider->GetFileInfo(fileName, fileInfo)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace

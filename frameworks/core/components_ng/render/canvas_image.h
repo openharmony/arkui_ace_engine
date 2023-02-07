@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/decoration.h"
@@ -56,6 +57,12 @@ public:
     // DrawBitmapRect(Media::PixelMap* pixelMap, const Rect& dstRect, const Rect& srcRect, ...)
     // now we make [SkImage] from [PixelMap] and use [drawImageRect] to draw image
     static RefPtr<CanvasImage> Create(const RefPtr<PixelMap>& pixelMap);
+
+    virtual RefPtr<PixelMap> GetPixelMap()
+    {
+        return nullptr;
+    }
+
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
 
@@ -72,7 +79,7 @@ public:
         return *paintConfig_;
     }
 
-    virtual void SetAnimationCallback(std::function<void()>&& callback) {}
+    virtual void SetRedrawCallback(std::function<void()>&& callback) {}
 
     virtual void ControlAnimation(bool play) {}
 

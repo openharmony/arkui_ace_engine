@@ -71,6 +71,7 @@ public:
     void OnPaintFinish();
     void SetPaintFinishCallback(PaintFinishCallback callback);
     bool IsInitialized();
+    bool IsReady();
     bool NeedsRepaint();
     SkDrawable* GetDrawable(OffsetF offset);
     bool HandleTouchEvent(const TouchEventInfo& info);
@@ -79,6 +80,7 @@ private:
     uint32_t GetKey();
     void Initialize();
     void CreateTextureLayer(const EGLContext& eglContext);
+    void UpdateTextureLayer();
     void CreateSceneViewerAdapter(const EGLContext& eglContext);
     void UpdateSceneViewerAdapter(const SceneViewerAdapterProperties& properties);
     SceneViewerAdapterProperties ExtractLayoutProperties(const RefPtr<ModelLayoutProperty>& modelLayoutProperty);
@@ -97,7 +99,7 @@ private:
     SizeF size_ { 0.0f, 0.0f };
     PaintFinishCallback callback_ = nullptr;
     bool needsRepaint_ = false;
-    bool setupDone_ = false;
+    bool sceneIsSetUp_ = false;
 
     std::shared_ptr<OHOS::Render3D::SceneViewerAdapter> sceneViewerAdapter_;
     std::shared_ptr<OHOS::Render3D::TextureInfo> textureInfo_;

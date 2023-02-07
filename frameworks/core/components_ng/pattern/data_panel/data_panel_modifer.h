@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
@@ -28,6 +29,16 @@
 #include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr int32_t ANIMATION_DURATION = 1200;        // The circle animation duration is 1200ms
+constexpr int32_t ANIMATION_DELAY = 0;              // The circle animation delay is 0ms
+constexpr int32_t ANIMATION_TIMES = 1;              // The circle animation repeat times is 1
+constexpr float ANIMATION_START = 0.0f;             // The circle animation start from 0.0
+constexpr float ANIMATION_END = 1.0f;               // The circle animation end with 1.0
+constexpr float ANIMATION_CURVE_VELOCITY = 0.0f;    // The circle animation spring curve velocity is 0.0
+constexpr float ANIMATION_CURVE_MASS = 1.0f;        // The circle animation spring curve mass is 1.0
+constexpr float ANIMATION_CURVE_STIFFNESS = 110.0f; // The circle animation spring curve stiffness is 110.0
+constexpr float ANIMATION_CURVE_DAMPING = 17.0f;    // The circle animation spring curve damping is 17.0
 
 struct ArcData {
     Offset center;
@@ -72,17 +83,17 @@ public:
     void UpdateDate()
     {
         if (date_) {
-            float data = NearZero(date_->Get()) ? 1.0f : 0;
+            // When the date update, the animation will repeat once.
+            LOGI("Data panel animatableProperty is updating, the animation will start from 0.0 to 1.0.");
+            date_->Set(ANIMATION_START);
             AnimationOption option = AnimationOption();
-            RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
-            option.SetDuration(200);
-            option.SetDelay(0);
+            RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
+                ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
+            option.SetDuration(ANIMATION_DURATION);
+            option.SetDelay(ANIMATION_DELAY);
             option.SetCurve(curve);
-            option.SetIteration(1);
-            option.SetTempo(0.2f);
-            AnimationUtils::Animate(option, [&]() {
-                date_->Set(data);
-            });
+            option.SetIteration(ANIMATION_TIMES);
+            AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_END); });
         }
     }
 
@@ -117,7 +128,7 @@ private:
     std::vector<double> values_;
     double max_;
     size_t dataPanelType_;
-    bool effect_;
+    bool effect_ = true;
     OffsetF offset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(DataPanelModifier);

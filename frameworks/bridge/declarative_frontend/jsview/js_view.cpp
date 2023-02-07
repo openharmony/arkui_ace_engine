@@ -680,6 +680,7 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
         ACE_SCORING_EVENT("Component[" + viewId_ + "].AboutToBeDeleted");
         jsViewFunction_->ExecuteAboutToBeDeleted();
     }
+    pendingUpdateTasks_.clear();
     jsViewFunction_->Destroy();
     jsViewFunction_.Reset();
 

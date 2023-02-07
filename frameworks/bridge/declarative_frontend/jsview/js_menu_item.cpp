@@ -97,10 +97,18 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSMenuItem>::StaticMethod("create", &JSMenuItem::Create, opt);
 
+    JSClass<JSMenuItem>::StaticMethod("selected", &JSMenuItem::IsSelected, opt);
     JSClass<JSMenuItem>::StaticMethod("selectIcon", &JSMenuItem::SelectIcon, opt);
     JSClass<JSMenuItem>::StaticMethod("onChange", &JSMenuItem::OnChange, opt);
     JSClass<JSMenuItem>::Inherit<JSViewAbstract>();
     JSClass<JSMenuItem>::Bind(globalObj);
+}
+
+void JSMenuItem::IsSelected(bool isSelected)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::MenuItemView::SetSelected(isSelected);
+    }
 }
 
 void JSMenuItem::SelectIcon(bool isShow)

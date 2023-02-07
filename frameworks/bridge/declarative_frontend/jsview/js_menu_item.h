@@ -24,6 +24,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
+    static void IsSelected(bool isSelected);
     static void SelectIcon(bool isShow);
     static void OnChange(const JSCallbackInfo& info);
 };

@@ -42,6 +42,7 @@ const int32_t ANIMATION_ZERO_TO_OUTER = 200; // 200ms for animation that from ze
 const int32_t ANIMATION_OUTER_TO_ZERO = 150; // 150ms for animation that from outer to zero.
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const int32_t MIDDLE_CHILD_INDEX = 2;
+const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 100;
 } // namespace
 
@@ -107,12 +108,17 @@ void TimePickerColumnPattern::InitMouseAndPressEvent()
         CHECK_NULL_VOID(pattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->OnTouchDown();
+            pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
             pattern->OnTouchUp();
+            pattern->SetLocalDownDistance(0.0f);
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            pattern->OnTouchUp();
+            if (std::abs(info.GetTouches().front().GetLocalLocation().GetDistance() - pattern->GetLocalDownDistance()) >
+                MOVE_DISTANCE) {
+                pattern->OnTouchUp();
+            }
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));

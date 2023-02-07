@@ -81,7 +81,19 @@ public:
                 LOGW("find pattern of popup fail");
                 return;
             }
-            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
+            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
+            theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp);
+            theme->buttonFontSize_ = pattern->GetAttr<Dimension>(POPUP_BUTTON_TEXT_FONT_SIZE, 14.0_fp);
+            theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::WHITE);
+            theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
+            theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
+            theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
+            theme->radius_ = Radius(pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, 24.0_vp),
+                pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, 24.0_vp));
+            theme->padding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
+                pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
+                pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
+                pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp));
         }
     };
 
@@ -102,9 +114,44 @@ public:
         return backgroundColor_;
     }
 
+    const Color& GetButtonHoverColor() const
+    {
+        return buttonHoverColor_;
+    }
+
+    const Color& GetButtonBackgroundColor() const
+    {
+        return buttonBackgroundColor_;
+    }
+
+    const Color& GetButtonPressColor() const
+    {
+        return buttonPressColor_;
+    }
+
+    const Color& GetFocusColor() const
+    {
+        return focusColor_;
+    }
+
     const TextStyle& GetTextStyle() const
     {
         return textStyle_;
+    }
+
+    const Dimension& GetFontSize() const
+    {
+        return fontSize_;
+    }
+
+    const Dimension& GetButtonFontSize() const
+    {
+        return buttonFontSize_;
+    }
+
+    const Color& GetFontColor() const
+    {
+        return fontColor_;
     }
 
     const Radius& GetRadius() const
@@ -127,6 +174,41 @@ public:
         return targetSpace_;
     }
 
+    const Dimension& GetBubbleSpacing() const
+    {
+        return bubbleSpacing_;
+    }
+
+    const Dimension& GetButtonTextInsideMargin() const
+    {
+        return buttonTextInsideMargin_;
+    }
+
+    const Dimension& GetButtonSpacing() const
+    {
+        return buttonSpacing;
+    }
+
+    const Dimension& GetLittlePadding() const
+    {
+        return littlePadding_;
+    }
+
+    const Dimension& GetFocusPaintWidth() const
+    {
+        return focusPaintWidth_;
+    }
+
+    const Dimension& GetButtonMiniMumWidth() const
+    {
+        return buttonMiniMumWidth;
+    }
+
+    const Dimension& GetBubbleMiniMumHeight() const
+    {
+        return bubbleMiniMumHeight_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -134,11 +216,26 @@ private:
     Edge padding_;
     Color maskColor_;
     Color backgroundColor_;
+    Color buttonHoverColor_ = Color(0x0cffffff);
+    Color buttonBackgroundColor_ = Color::TRANSPARENT;
+    Color buttonPressColor_ = Color(0x1affffff);
+    Color focusColor_ = Color::WHITE;
+
     TextStyle textStyle_;
     Radius radius_;
     uint32_t showTime_ = 0;
     uint32_t hideTime_ = 0;
     Dimension targetSpace_;
+    Dimension fontSize_;
+    Dimension buttonFontSize_ = 14.0_fp;
+    Color fontColor_;
+    Dimension bubbleSpacing_ = 8.0_vp;
+    Dimension buttonTextInsideMargin_ = 8.0_vp;
+    Dimension buttonSpacing = 4.0_vp;
+    Dimension littlePadding_ = 4.0_vp;
+    Dimension focusPaintWidth_ = 2.0_vp;
+    Dimension buttonMiniMumWidth = 72.0_vp;
+    Dimension bubbleMiniMumHeight_ = 48.0_vp;
 };
 
 } // namespace OHOS::Ace

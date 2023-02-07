@@ -1,0 +1,58 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/arkui/ace_engine/ace_unittest.gni")
+
+ohos_unittest("form_pattern_test_ng") {
+  module_out_path = "$pattern_test_output_path/form"
+
+  sources = [
+    "$ace_root/frameworks/core/common/ace_engine.cpp",
+    "$ace_root/frameworks/core/common/container.cpp",
+    "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/common/form_manager.cpp",
+
+    #mock
+    "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_form_manager_delegate.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_sub_container.cpp",
+    "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+
+    #slef
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_view.cpp",
+    "form_pattern_test_ng.cpp",
+  ]
+
+  sources += test_pattern_sources
+  deps = test_pattern_deps
+  if (is_standard_system) {
+    external_deps = [
+      "ability_base:want",
+      "ability_runtime:app_manager",
+      "bundle_framework:appexecfwk_base",
+      "bundle_framework:appexecfwk_core",
+      "c_utils:utils",
+      "form_fwk:fmskit_native",
+      "form_fwk:form_manager",
+      "ipc:ipc_core",
+    ]
+  }
+  configs = test_configs
+  configs += [
+    "$ace_root/../../graphic/graphic_2d/rosen/modules/render_service_base:export_config",
+    "$ace_root/../../graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
+    "$ace_flutter_engine_root/skia:skia_config",
+  ]
+}

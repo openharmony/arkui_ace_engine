@@ -45,7 +45,6 @@ public:
     void DefusingBomb(int32_t instanceId);
     static AceEngine& Get();
     static void InitJsDumpHeadSignal();
-    void Dump(const std::vector<std::string>& params) const;
     void DumpJsHeap(bool isPrivate) const;
 
     void TriggerGarbageCollection();

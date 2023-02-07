@@ -13,46 +13,63 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/shape/shape_container_pattern.h"
+
 #include <algorithm>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/shape/shape_container_pattern.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 
 namespace OHOS::Ace::NG {
 bool ShapeContainerPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
 {
-    if (skipMeasure || dirty->SkipMeasureContent()) {
+    if (skipMeasure || dirty->SkipMeasureContent() || isShapeContainerInit_) {
         return false;
     }
-    ViewPortTansform();
+    ViewPortTransform();
     return true;
 }
 
-void ShapeContainerPattern::ViewPortTansform()
+void ShapeContainerPattern::ViewPortTransform()
 {
     auto curFrameNode = GetHost();
     auto renderContext = curFrameNode->GetRenderContext();
     auto geoNode = curFrameNode->GetGeometryNode();
     CHECK_NULL_VOID_NOLOG(geoNode);
-    SizeF sizeF = geoNode->GetContentSize();
-    auto containerPaintProperty = curFrameNode->GetPaintProperty<ContainerPaintProperty>();
-    if (containerPaintProperty->HasShapeViewBox() && containerPaintProperty->GetShapeViewBoxValue().IsValid()) {
-        double portWidth = containerPaintProperty->GetShapeViewBoxValue().Width().ConvertToPx();
-        double portHeight = containerPaintProperty->GetShapeViewBoxValue().Height().ConvertToPx();
-        double portLeft = containerPaintProperty->GetShapeViewBoxValue().Left().ConvertToPx();
-        double portTop = containerPaintProperty->GetShapeViewBoxValue().Top().ConvertToPx();
-        RectF rectF;
-        if (sizeF.IsNegative()) {
-            rectF = RectF(-1 * portLeft, -1 * portTop, sizeF.Width(), sizeF.Height());
-        } else {
-            rectF = RectF(-1 * portLeft, -1 * portTop, static_cast<float>(portWidth), static_cast<float>(portHeight));
+    auto contentSize = geoNode->GetContentSize();
+    auto paintProperty = curFrameNode->GetPaintProperty<ShapeContainerPaintProperty>();
+    if (paintProperty->HasShapeViewBox() && paintProperty->GetShapeViewBoxValue().IsValid()) {
+        double portWidth = paintProperty->GetShapeViewBoxValue().Width().ConvertToPx();
+        double portHeight = paintProperty->GetShapeViewBoxValue().Height().ConvertToPx();
+        double portLeft = paintProperty->GetShapeViewBoxValue().Left().ConvertToPx();
+        double portTop = paintProperty->GetShapeViewBoxValue().Top().ConvertToPx();
+        if (contentSize.IsPositive() && GreatNotEqual(portWidth, 0.0) && GreatNotEqual(portHeight, 0.0)) {
+            double scale = std::min(contentSize.Width() / portWidth, contentSize.Height() / portHeight);
+            double tx = contentSize.Width() * 0.5 - (portWidth * 0.5 + portLeft) * scale;
+            double ty = contentSize.Height() * 0.5 - (portHeight * 0.5 + portTop) * scale;
+            for (const auto& child : curFrameNode->GetChildren()) {
+                auto node = AceType::DynamicCast<FrameNode>(child);
+                CHECK_NULL_VOID(node);
+                auto context = node->GetRenderContext();
+                CHECK_NULL_VOID(context);
+                context->OnTransformCenterUpdate(DimensionOffset(Offset(0.0, 0.0)));
+                context->OnTransformTranslateUpdate({ tx, ty, 0 });
+                context->OnTransformScaleUpdate({ scale, scale });
+
+                if (context->HasOffset()) {
+                    auto currentOffset = context->GetOffset();
+                    auto newOffset = OffsetT(Dimension(currentOffset->GetX() * scale),
+                        Dimension(currentOffset->GetY() * scale));
+                    context->UpdateOffset(newOffset);
+                    context->OnOffsetUpdate(newOffset);
+                    node->MarkModifyDone();
+                }
+            }
         }
-        renderContext->OnTransformTranslateUpdate({ static_cast<float>(portLeft), static_cast<float>(portTop), 0 });
-        renderContext->ClipWithRect(rectF);
     }
+    isShapeContainerInit_ = true;
 }
 
 void ShapeContainerPattern::OnModifyDone()

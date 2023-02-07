@@ -20,15 +20,14 @@
 #include <string>
 #include <vector>
 
+#include "extractor.h"
+#include "flutter/fml/mapping.h"
+
 #include "base/resource/asset_manager.h"
 #include "base/utils/macros.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 
-#include "flutter/fml/mapping.h"
-#include "extractor.h"
-
 namespace OHOS::Ace {
-
 class ACE_EXPORT HapAssetProvider : public FlutterAssetProvider {
     DECLARE_ACE_TYPE(HapAssetProvider, FlutterAssetProvider);
 
@@ -42,9 +41,11 @@ public:
 
     bool IsValid() const override;
 
-    std::string GetAssetPath(const std::string& assetName) override;
+    std::string GetAssetPath(const std::string& assetName, bool isAddHapPath) override;
 
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) override;
+
+    bool GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const override;
 
 private:
     mutable std::mutex mutex_;
@@ -52,7 +53,5 @@ private:
     std::shared_ptr<AbilityBase::Extractor> runtimeExtractor_;
     std::vector<std::string> assetBasePaths_;
 };
-
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_HAP_ASSET_PROVIDER_H

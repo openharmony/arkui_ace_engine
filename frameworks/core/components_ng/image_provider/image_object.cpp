@@ -28,16 +28,6 @@ void ImageObject::SetImageSize(const SizeF& imageSize)
     imageSize_ = imageSize;
 }
 
-int32_t ImageObject::GetFrameCount() const
-{
-    return frameCount_;
-}
-
-bool ImageObject::IsSingleFrame() const
-{
-    return frameCount_ == 1;
-}
-
 const ImageSourceInfo& ImageObject::GetSourceInfo() const
 {
     return src_;

@@ -65,7 +65,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     bool NeedsRepaint();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void MarkDirtyNode();
+    void MarkDirtyNode(const PropertyChangeFlag flag);
 
     uint32_t key_ = -1;
 

@@ -77,6 +77,13 @@ public:
         unit_ = DimensionUnit::PX;
     }
 
+    void ResetInvalidValue()
+    {
+        if (std::isnan(value_)) {
+            Reset();
+        }
+    }
+
     constexpr double Value() const
     {
         return value_;

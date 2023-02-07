@@ -36,6 +36,7 @@ struct PopupInfo {
     RefPtr<FrameNode> popupNode;
     bool markNeedUpdate = false;
     bool isCurrentOnShow = false;
+    bool isBlockEvent = true;
     SizeF targetSize;
     OffsetF targetOffset;
 };
@@ -57,6 +58,7 @@ public:
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
+    void HideAllPopups();
 
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
@@ -70,6 +72,7 @@ public:
     void HideMenuInSubWindow(int32_t targetId);
     void HideMenuInSubWindow();
     void CleanMenuInSubWindow();
+    void HideAllMenus();
 
     void ShowToast(const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft);
 
@@ -109,10 +112,11 @@ private:
     void FocusDialog(const RefPtr<FrameNode>& dialogNode);
     void BlurDialog();
 
-    // helper functions to show/hide popups with animation
-    void Show(const RefPtr<FrameNode>& node);
-    void Pop(const RefPtr<FrameNode>& node);
-    void PopInSubwindow(const RefPtr<FrameNode>& node);
+    void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
+    void PopMenuAnimation(const RefPtr<FrameNode>& menu);
+
+    void OpenDialogAnimation(const RefPtr<FrameNode>& node);
+    void CloseDialogAnimation(const RefPtr<FrameNode>& node);
 
     // Key: target Id, Value: PopupInfo
     std::unordered_map<int32_t, NG::PopupInfo> popupMap_;

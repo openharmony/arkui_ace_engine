@@ -44,6 +44,8 @@ public:
 
     bool MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast = true, bool needTransition = true);
 
+    void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
+
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
     static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
 
@@ -52,8 +54,11 @@ public:
     void ReloadStage();
 
 private:
+    void StopPageTransition();
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;
+    WeakPtr<FrameNode> destPageNode_;
+    WeakPtr<FrameNode> srcPageNode_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

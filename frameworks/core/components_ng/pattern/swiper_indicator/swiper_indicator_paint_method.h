@@ -54,13 +54,38 @@ public:
         return axis_;
     }
 
+    void SetIsHover(bool isHover)
+    {
+        isHover_ = isHover;
+    }
+
+    void SetIsPressed(bool isPressed)
+    {
+        isPressed_ = isPressed;
+    }
+
+    void SetHoverPoint(const PointF& hoverPoint)
+    {
+        hoverPoint_ = hoverPoint;
+    }
+
 private:
     void PaintContent(RSCanvas& canvas, const RefPtr<SwiperIndicatorPaintProperty>& paintProperty, SizeF contentSize);
     void PaintMask(
         RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
+    bool IsIndicatorPointHovered(float x, float y, float radius);
+    bool HasIndicatorHovered(double userSize, float indicatorSize, double zoomInScale, double indicatorPaddingPX);
+    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const Color& color, double radius,
+        double zoomInScale, bool hasIndicatorHovered);
+    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const Color& color, double userSize,
+        double zoomInScale, bool hasIndicatorHovered);
+
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t itemCount_ = 0;
+    bool isHover_ = false;
+    bool isPressed_ = false;
+    PointF hoverPoint_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPaintMethod);
 };

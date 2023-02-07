@@ -19,7 +19,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll_bar/scroll_bar_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
@@ -93,46 +92,4 @@ RefPtr<RenderScrollBar> ScrollBarComposedElement::GetRenderScrollBar() const
     return nullptr;
 }
 
-void ScrollBarComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto scrollBarElement = GetContentElement<ScrollBarElement>(ScrollBarElement::TypeId());
-    if (!scrollBarElement) {
-        LOGE("get GetScrollBarElement failed");
-        return;
-    }
-    scrollBarElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    scrollBarElement->MarkDirty();
-}
-
-void ScrollBarComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto scrollBarElement = GetContentElement<ScrollBarElement>(ScrollBarElement::TypeId());
-    if (!scrollBarElement) {
-        LOGE("get GetScrollBarElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(scrollBarElement, slot);
-    if (!child) {
-        LOGE("scrollBarElement get GetChildBySlot failed");
-        return;
-    }
-    scrollBarElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    scrollBarElement->MarkDirty();
-}
-
-void ScrollBarComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto scrollBarElement = GetContentElement<ScrollBarElement>(ScrollBarElement::TypeId());
-    if (!scrollBarElement) {
-        LOGE("get GetScrollBarElement failed");
-        return;
-    }
-    auto child = GetElementChildBySlot(scrollBarElement, slot);
-    if (!child) {
-        LOGE("scrollBarElement get GetChildBySlot failed");
-        return;
-    }
-    scrollBarElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    scrollBarElement->MarkDirty();
-}
 } // namespace OHOS::Ace::V2

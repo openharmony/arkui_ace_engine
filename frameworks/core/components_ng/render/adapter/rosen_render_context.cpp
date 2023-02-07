@@ -35,13 +35,17 @@
 #include "base/utils/utils.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/container.h"
+#include "core/common/rosen/rosen_convert_helper.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/adapter/border_image_modifier.h"
+#include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
@@ -53,6 +57,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
+#include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
@@ -226,6 +231,32 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     if (propOverlay_) {
         PaintOverlayText();
     }
+
+    if (NeedDebugBoundary() && SystemProperties::GetDebugBoundaryEnabled()) {
+        PaintDebugBoundary();
+    }
+}
+
+void RosenRenderContext::PaintDebugBoundary()
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    auto paintTask = [contentSize = geometryNode->GetFrameSize(), frameSize = geometryNode->GetMarginFrameSize(),
+                         offset = geometryNode->GetMarginFrameOffset(),
+                         frameOffset = geometryNode->GetFrameOffset()](RSCanvas& rsCanvas) mutable {
+        DebugBoundaryPainter painter(contentSize, frameSize);
+        painter.SetFrameOffset(frameOffset);
+        painter.DrawDebugBoundaries(rsCanvas, offset);
+    };
+
+    if (!debugBoundaryModifier_) {
+        debugBoundaryModifier_ = std::make_shared<DebugBoundaryModifier>();
+        debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
+        rsNode_->AddModifier(debugBoundaryModifier_);
+    }
+    debugBoundaryModifier_->SetCustomData(true);
 }
 
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
@@ -330,16 +361,44 @@ void RosenRenderContext::OnBackgroundImagePositionUpdate(const BackgroundImagePo
     PaintBackground();
 }
 
-void RosenRenderContext::OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle)
+void RosenRenderContext::SetBackBlurFilter()
 {
-    CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    const auto& background = GetBackground();
+    CHECK_NULL_VOID(background);
+    const auto& blurStyle = background->propBlurStyleOption;
+    std::shared_ptr<Rosen::RSFilter> backFilter;
     auto dipScale_ = context->GetDipScale();
-    auto backFilter =
-        Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(bgBlurStyle), static_cast<float>(dipScale_));
-    CHECK_NULL_VOID(backFilter);
+    auto rosenBlurStyleValue =
+        blurStyle.has_value() ? GetRosenBlurStyleValue(blurStyle.value()) : MATERIAL_BLUR_STYLE::NO_MATERIAL;
+    if (rosenBlurStyleValue != MATERIAL_BLUR_STYLE::NO_MATERIAL) {
+        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(rosenBlurStyleValue),
+            static_cast<float>(dipScale_), static_cast<Rosen::BLUR_COLOR_MODE>(blurStyle->adaptiveColor));
+    } else {
+        const auto& radius = background->propBlurRadius;
+        if (radius.has_value() && radius->IsValid()) {
+            float radiusPx = context->NormalizeToPx(radius.value());
+            float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
+            backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+        }
+    }
     rsNode_->SetBackgroundFilter(backFilter);
+}
+
+void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
+{
+    const auto& groupProperty = GetOrCreateBackground();
+    if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
+        // Same with previous value.
+        // If colorMode is following system and has valid blurStyle, still needs updating
+        if (bgBlurStyle.blurStyle == BlurStyle::NO_MATERIAL || bgBlurStyle.colorMode != ThemeColorMode::SYSTEM) {
+            return;
+        }
+    } else {
+        groupProperty->propBlurStyleOption = bgBlurStyle;
+    }
+    isBackBlurChanged_ = true;
 }
 
 void RosenRenderContext::OnOpacityUpdate(double opacity)
@@ -366,7 +425,8 @@ void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
 void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
 {
     CHECK_NULL_VOID(rsNode_);
-    float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2));
+    // rsNode sets rotation on camera, need to switch degrees to negative values
+    float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2)) * -1;
     rsNode_->SetRotation(rotate.w * rotate.x / norm, rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
     RequestNextFrame();
 }
@@ -485,6 +545,19 @@ void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double 
         [rsNode = rsNode_, endAlpha = end]() {
             CHECK_NULL_VOID_NOLOG(rsNode);
             rsNode->SetAlpha(endAlpha);
+        },
+        option.GetOnFinishEvent());
+}
+
+void RosenRenderContext::ScaleAnimation(const AnimationOption& option, double begin, double end)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetScale(begin);
+    AnimationUtils::Animate(
+        option,
+        [rsNode = rsNode_, endScale = end]() {
+            CHECK_NULL_VOID_NOLOG(rsNode);
+            rsNode->SetScale(endScale);
         },
         option.GetOnFinishEvent());
 }
@@ -715,6 +788,10 @@ void RosenRenderContext::OnModifyDone()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(rsNode_);
+    if (isBackBlurChanged_) {
+        SetBackBlurFilter();
+        isBackBlurChanged_ = false;
+    }
     const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
     if (!size.IsPositive()) {
         LOGD("first modify, make change in SyncGeometryProperties");
@@ -895,7 +972,7 @@ void RosenRenderContext::PaintFocusState(
         // TODO: Add property data
         focusStateModifier_ = std::make_shared<FocusStateModifier>();
     }
-    focusStateModifier_->SetRoundRect(paintRect);
+    focusStateModifier_->SetRoundRect(paintRect, borderWidthPx);
     focusStateModifier_->SetPaintTask(std::move(paintTask));
     rsNode_->AddModifier(focusStateModifier_);
     RequestNextFrame();
@@ -1186,20 +1263,13 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
-    auto pipelineBase = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineBase);
-    std::shared_ptr<Rosen::RSFilter> backFilter = nullptr;
-    auto blurStyle = GetBackgroundBlurStyleValue(BlurStyle::NoMaterial);
-    if (blurStyle != BlurStyle::NoMaterial) {
-        backFilter = Rosen::RSFilter::CreateMaterialFilter(static_cast<int>(blurStyle), pipelineBase->GetDipScale());
-    } else if (radius.IsValid()) {
-        float radiusPx = pipelineBase->NormalizeToPx(radius);
-        float backblurRadius = SkiaDecorationPainter::ConvertRadiusToSigma(radiusPx);
-        backFilter = Rosen::RSFilter::CreateBlurFilter(backblurRadius, backblurRadius);
+    const auto& groupProperty = GetOrCreateBackground();
+    if (groupProperty->CheckBlurRadius(radius)) {
+        // Same with previous value
+        return;
     }
-    CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetBackgroundFilter(backFilter);
-    RequestNextFrame();
+    groupProperty->propBlurRadius = radius;
+    isBackBlurChanged_ = true;
 }
 
 void RosenRenderContext::OnFrontBlurRadiusUpdate(const Dimension& radius)
@@ -1498,49 +1568,52 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     RequestNextFrame();
 }
 
-std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTransitionType type)
+RefPtr<PageTransitionEffect> RosenRenderContext::GetDefaultPageTransition(PageTransitionType type)
 {
+    auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(type, PageTransitionOption());
+    resultEffect->SetScaleEffect(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct));
+    TranslateOptions translate;
     auto rect = GetPaintRectWithoutTransform();
-    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
     switch (type) {
         case PageTransitionType::ENTER_PUSH:
         case PageTransitionType::EXIT_POP:
-            effect->Translate({ rect.Width(), 0, 0 });
+            translate.x = Dimension(rect.Width());
             break;
         case PageTransitionType::ENTER_POP:
         case PageTransitionType::EXIT_PUSH:
-            effect->Translate({ -rect.Width(), 0, 0 });
+            translate.x = Dimension(-rect.Width());
             break;
         default:
             LOGI("unexpected transition type");
             break;
     }
-    return effect;
+    resultEffect->SetTranslateEffect(translate);
+    resultEffect->SetOpacityEffect(1);
+    return resultEffect;
 }
 
-std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetPageTransitionEffect(
-    const RefPtr<PageTransitionEffect>& transition)
+RefPtr<PageTransitionEffect> RosenRenderContext::GetPageTransitionEffect(const RefPtr<PageTransitionEffect>& transition)
 {
-    std::shared_ptr<Rosen::RSTransitionEffect> effect = Rosen::RSTransitionEffect::Create();
-    if (transition->GetScaleEffect().has_value()) {
-        const auto& scaleOptions = transition->GetScaleEffect();
-        effect->Scale({ scaleOptions->xScale, scaleOptions->yScale, scaleOptions->zScale });
-    }
+    auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(
+        transition->GetPageTransitionType(), transition->GetPageTransitionOption());
+    resultEffect->SetScaleEffect(
+        transition->GetScaleEffect().value_or(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct)));
+    TranslateOptions translate;
     // slide and translate, only one can be effective
     if (transition->GetSlideEffect().has_value()) {
         auto rect = GetPaintRectWithoutTransform();
         switch (transition->GetSlideEffect().value()) {
             case SlideEffect::LEFT:
-                effect->Translate({ -rect.Width(), 0, 0 });
+                translate.x = Dimension(-rect.Width());
                 break;
             case SlideEffect::RIGHT:
-                effect->Translate({ rect.Width(), 0, 0 });
+                translate.x = Dimension(rect.Width());
                 break;
             case SlideEffect::BOTTOM:
-                effect->Translate({ 0, rect.Height(), 0 });
+                translate.y = Dimension(rect.Height());
                 break;
             case SlideEffect::TOP:
-                effect->Translate({ 0, -rect.Height(), 0 });
+                translate.y = Dimension(-rect.Height());
                 break;
             default:
                 LOGW("unexpected slide effect");
@@ -1549,15 +1622,13 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetPageTransition
     } else if (transition->GetTranslateEffect().has_value()) {
         auto rect = GetPaintRectWithoutTransform();
         const auto& translateOptions = transition->GetTranslateEffect();
-        auto xTranslate = static_cast<float>(translateOptions->x.ConvertToPxWithSize(rect.Width()));
-        auto yTranslate = static_cast<float>(translateOptions->y.ConvertToPxWithSize(rect.Height()));
-        auto zTranslate = static_cast<float>(translateOptions->z.ConvertToPx());
-        effect->Translate({ xTranslate, yTranslate, zTranslate });
+        translate.x = Dimension(translateOptions->x.ConvertToPxWithSize(rect.Width()));
+        translate.y = Dimension(translateOptions->y.ConvertToPxWithSize(rect.Height()));
+        translate.z = Dimension(translateOptions->z.ConvertToPx());
     }
-    if (transition->GetOpacityEffect().has_value()) {
-        effect->Opacity(transition->GetOpacityEffect().value());
-    }
-    return effect;
+    resultEffect->SetTranslateEffect(translate);
+    resultEffect->SetOpacityEffect(transition->GetOpacityEffect().value_or(1));
+    return resultEffect;
 }
 
 bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
@@ -1577,17 +1648,10 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
     auto pattern = host->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto transition = pattern->FindPageTransitionEffect(type);
-    std::shared_ptr<Rosen::RSTransitionEffect> effect;
+    RefPtr<PageTransitionEffect> effect;
     AnimationOption option;
     if (transition) {
         effect = GetPageTransitionEffect(transition);
-        if (transition->GetScaleEffect().has_value()) {
-            const auto& scaleOptions = transition->GetScaleEffect();
-            auto rect = GetPaintRectWithoutTransform();
-            float xPivot = ConvertDimensionToScaleBySize(scaleOptions->centerX, rect.Width());
-            float yPivot = ConvertDimensionToScaleBySize(scaleOptions->centerY, rect.Height());
-            SetPivot(xPivot, yPivot);
-        }
         option.SetCurve(transition->GetCurve());
         option.SetDuration(transition->GetDuration());
         option.SetDelay(transition->GetDelay());
@@ -1597,9 +1661,29 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
         option.SetCurve(Curves::LINEAR);
         option.SetDuration(pageTransitionDuration);
     }
-    AnimationUtils::Animate(
-        option, [rsNode = rsNode_, effect, transitionIn]() { rsNode->NotifyTransition(effect, transitionIn); },
-        onFinish);
+    const auto& scaleOptions = effect->GetScaleEffect();
+    const auto& translateOptions = effect->GetTranslateEffect();
+    UpdateTransformCenter(DimensionOffset(scaleOptions->centerX, scaleOptions->centerY));
+
+    if (transitionIn) {
+        UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
+        UpdateTransformTranslate(Vector3F(translateOptions->x.Value(), translateOptions->y.Value(), 0.0f));
+        UpdateOpacity(effect->GetOpacityEffect().value());
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
+        UpdateTransformScale(VectorF(1.0f, 1.0f));
+        UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+        UpdateOpacity(1.0);
+        AnimationUtils::CloseImplicitAnimation();
+        return true;
+    }
+    UpdateTransformScale(VectorF(1.0f, 1.0f));
+    UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+    UpdateOpacity(1.0);
+    AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
+    UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
+    UpdateTransformTranslate(Vector3F(translateOptions->x.Value(), translateOptions->y.Value(), 0.0f));
+    UpdateOpacity(effect->GetOpacityEffect().value());
+    AnimationUtils::CloseImplicitAnimation();
     return true;
 }
 

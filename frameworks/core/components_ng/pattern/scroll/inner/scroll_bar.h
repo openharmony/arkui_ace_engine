@@ -24,6 +24,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
@@ -89,6 +90,7 @@ public:
         PositionMode positionMode = PositionMode::RIGHT);
     ~ScrollBar() override = default;
 
+    bool InBarTouchRegion(const Point& point) const;
     bool InBarRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
@@ -255,6 +257,9 @@ public:
     void SetDisplayMode(DisplayMode displayMode)
     {
         displayMode_ = displayMode;
+        if (displayMode_ == DisplayMode::AUTO) {
+            PlayBarEndAnimation();
+        }
     }
 
     void SetOutBoundary(double outBoundary)
@@ -282,6 +287,16 @@ public:
         return isPressed_;
     }
 
+    void SetHover(bool hover)
+    {
+        isHover_ = hover;
+    }
+
+    bool IsHover() const
+    {
+        return isHover_;
+    }
+
     void SetDriving(bool isDriving)
     {
         isDriving_ = isDriving;
@@ -290,6 +305,18 @@ public:
     bool IsDriving() const
     {
         return isDriving_;
+    }
+
+    uint8_t GetOpacity() const
+    {
+        return opacity_;
+    }
+
+    void OnScrollEnd()
+    {
+        if (displayMode_ == DisplayMode::AUTO) {
+            PlayBarEndAnimation();
+        }
     }
 
     void MarkNeedRender()
@@ -309,10 +336,17 @@ public:
         return touchEvent_;
     }
 
+    RefPtr<InputEvent> GetMouseEvent()
+    {
+        return mouseEvent_;
+    }
+
     void SetGestureEvent();
+    void SetMouseEvent();
     void FlushBarWidth();
     void PlayGrowAnimation();
     void PlayShrinkAnimation();
+    void PlayBarEndAnimation();
 
 protected:
     void InitTheme();
@@ -354,13 +388,17 @@ private:
 
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
+    bool isHover_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;
     Offset lastOffset_;
     double estimatedHeight_ = 0.0;
+    uint8_t opacity_ = UINT8_MAX;
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<InputEvent> mouseEvent_;
     RefPtr<Animator> touchAnimator_;
+    RefPtr<Animator> scrollEndAnimator_;
     std::function<void()> markNeedRenderFunc_;
 };
 

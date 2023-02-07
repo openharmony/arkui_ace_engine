@@ -32,6 +32,7 @@ void ModelViewNG::Create(const std::string& src)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::MODEL_ETS_TAG, nodeId, [&nodeId]() { return AceType::MakeRefPtr<ModelPattern>(nodeId); });
     stack->Push(frameNode);
+    ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, NeedsSceneSetup, false);
     ACE_UPDATE_LAYOUT_PROPERTY(ModelLayoutProperty, ModelSource, src);
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelLights, {});
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelAnimations, {});

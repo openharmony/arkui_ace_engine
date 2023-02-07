@@ -39,7 +39,11 @@ public:
 
     void Attach(const RefPtr<PipelineBase>& context)
     {
-        if (attached_ || !context) {
+        if (attached_) {
+            return;
+        }
+        if (!context) {
+            LOGE("Attach called, and context is null");
             return;
         }
 

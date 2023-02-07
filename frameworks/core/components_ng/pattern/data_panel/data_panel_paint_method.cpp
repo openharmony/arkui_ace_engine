@@ -36,13 +36,12 @@ namespace OHOS::Ace::NG {
 namespace {
 
 // TODO move to theme
-constexpr float START_COLOR_TRANSITION_EDGE = 30.0f;
 constexpr float FIXED_WIDTH = 1.0f;
 constexpr float HALF_CIRCLE = 180.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
 constexpr float DIAMETER_TO_THICKNESS_RATIO = 0.12;
-constexpr Color BACKGROUND_COLOR = Color(0x4C000000);
-constexpr float SHADOW_BLUR_RADIUS = 5.0f;
+constexpr Color BACKGROUND_COLOR = Color(0x08182431);
+constexpr float SHADOW_BLUR_OFFSET = 5.0f;
 
 } // namespace
 
@@ -54,7 +53,7 @@ DataPanelModifier::DataPanelModifier() : date_(AceType::MakeRefPtr<AnimatablePro
 void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, ArcData arcData) const
 {
     float thickness = arcData.thickness;
-    float radius = arcData.radius - SHADOW_BLUR_RADIUS;
+    float radius = arcData.radius;
     float progress = arcData.progress;
     if (GreatNotEqual(progress, 100.0f)) {
         progress = 100.0f;
@@ -65,7 +64,7 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     if (NearEqual(progress, 0.0f)) {
         return;
     }
-    Offset center = arcData.center;
+    Offset center = arcData.center + Offset(SHADOW_BLUR_OFFSET, SHADOW_BLUR_OFFSET);
     PointF centerPt = PointF(center.GetX(), center.GetY() - radius + thickness / 2);
 
     // for example whole circle is 100 which is divided into 100 piece 360 / 100 = 3.6
@@ -97,19 +96,8 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     endCirclePaint.SetColor(arcData.endColor.ChangeAlpha(101).GetValue());
     endCirclePaint.SetFilter(filter);
 
-    if (progress < START_COLOR_TRANSITION_EDGE) {
-        startCirclePaint.SetColor(Color::LineColorTransition(arcData.endColor.ChangeAlpha(101),
-            arcData.startColor.ChangeAlpha(101), progress / START_COLOR_TRANSITION_EDGE)
-                                      .GetValue());
-        colors[0] = Color::LineColorTransition(arcData.endColor.ChangeAlpha(101), arcData.startColor.ChangeAlpha(101),
-            progress / START_COLOR_TRANSITION_EDGE)
-                        .GetValue();
-        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
-    } else {
-        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
-    }
+    gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
 
     canvas.Save();
     canvas.AttachBrush(startCirclePaint);
@@ -144,12 +132,16 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
     canvas.Translate(offset.GetX(), offset.GetY());
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    ArcData arcData;
-    arcData.center = Offset(context.width / 2.0f, context.height / 2.0f);
-    arcData.radius = std::min(context.width, context.height) / 2.0f;
+
     auto theme = pipelineContext->GetTheme<DataPanelTheme>();
     auto colors = theme->GetColorsArray();
     auto defaultThickness = theme->GetThickness().ConvertToPx();
+    ArcData arcData;
+    arcData.center = Offset(context.width / 2.0f, context.height / 2.0f);
+
+    // Here radius will minus defaultThickness,when there will be new api to set padding, use the new padding.
+    arcData.radius = std::min(context.width, context.height) / 2.0f - defaultThickness;
+
     if (defaultThickness >= arcData.radius) {
         arcData.thickness = arcData.radius * DIAMETER_TO_THICKNESS_RATIO;
     } else {
@@ -342,19 +334,8 @@ void DataPanelModifier::PaintProgress(
     endCirclePaint.SetAntiAlias(true);
     endCirclePaint.SetColor(arcData.endColor.GetValue());
 
-    if (progress < START_COLOR_TRANSITION_EDGE) {
-        startCirclePaint.SetColor(
-            Color::LineColorTransition(arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE)
-                .GetValue());
-        colors[0] =
-            Color::LineColorTransition(arcData.endColor, arcData.startColor, progress / START_COLOR_TRANSITION_EDGE)
-                .GetValue();
-        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
-    } else {
-        gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-            ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
-    }
+    gradientPaint.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(center.GetX(), center.GetY())), colors, pos, RSTileMode::CLAMP, 0, drawAngle));
 
     canvas.Save();
     canvas.AttachBrush(startCirclePaint);

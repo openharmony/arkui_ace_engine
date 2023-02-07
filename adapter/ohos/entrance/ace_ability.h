@@ -48,7 +48,7 @@ public:
 
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
-    void OnModeChange(OHOS::Rosen::WindowMode mode) override;
+    void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
 
     // override Rosen::IInputEventConsumer virtual callback function
     bool OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) const override;
@@ -87,7 +87,7 @@ public:
 
     // handle window Rosen::IWindowChangeListener
     void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason);
-    void OnModeChange(OHOS::Rosen::WindowMode mode);
+    void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true);
 
     // handle window Rosen::IOccupiedAreaChangeListener
     void OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info);
@@ -113,6 +113,7 @@ private:
     std::string remotePageUrl_;
     std::string remoteData_;
     std::string pageUrl_;
+    bool isFirstActive_ = true;
 };
 
 } // namespace OHOS::Ace

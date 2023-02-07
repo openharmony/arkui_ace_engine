@@ -30,6 +30,10 @@ public:
     {
         return false;
     }
+    virtual bool IsEnabled()
+    {
+        return false;
+    }
 };
 }
 #endif

@@ -29,6 +29,9 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float HALF = 0.5;
+}
 
 void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -93,8 +96,19 @@ void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto left = padding.left.value_or(0.0f);
     auto top = padding.top.value_or(0.0f);
-    auto marginOffset = OffsetF(left, top);
 
+    auto indexerWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto indexerHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
+
+    auto firstChildWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(firstChildWrapper);
+    auto childWidth = firstChildWrapper->GetGeometryNode()->GetFrameSize().Width();
+    auto childHeight = firstChildWrapper->GetGeometryNode()->GetFrameSize().Height();
+    auto originMarginLeft = (indexerWidth - childWidth) * HALF;
+    auto adjustMarginLeft = left < originMarginLeft ? originMarginLeft : left;
+    auto originMarginTop = (indexerHeight - childHeight * itemCount_) * HALF;
+    auto adjustMarginTop = top < originMarginTop ? originMarginTop : top;
+    auto marginOffset = OffsetF(adjustMarginLeft, adjustMarginTop);
     for (int32_t index = 0; index < itemCount_; index++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         CHECK_NULL_VOID(childWrapper);

@@ -26,4 +26,8 @@ void SelectOverlayProxy::Close() const {}
 void SelectOverlayProxy::UpdateFirstSelectHandleInfo(const SelectHandleInfo& info) const {}
 
 void SelectOverlayProxy::UpdateSecondSelectHandleInfo(const SelectHandleInfo& info) const {}
+
+void SelectOverlayProxy::UpdateFirstAndSecondHandleInfo(
+    const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo) const
+{}
 } // namespace OHOS::Ace::NG

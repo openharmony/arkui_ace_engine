@@ -2392,6 +2392,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->RunJsProxyCallback();
             auto releaseSurfaceListenerImpl = std::make_shared<ReleaseSurfaceImpl>(Container::CurrentId());
             releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
+            delegate->nweb_->PutReleaseSurfaceCallback(releaseSurfaceListenerImpl);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -2678,7 +2679,6 @@ void WebDelegate::UpdateDarkModeAuto(RefPtr<WebDelegate> delegate,
         if (delegate->GetForceDarkMode()) {
             setting->PutForceDarkModeEnabled(true);
         }
-        return;
     }
     if (colorMode == "light") {
         setting->PutDarkSchemeEnabled(false);
@@ -4332,6 +4332,19 @@ bool WebDelegate::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS:
     auto renderWeb = renderWeb_.Upgrade();
     CHECK_NULL_RETURN(renderWeb, false);
     return renderWeb->OnCursorChange(type, info);
+}
+
+void WebDelegate::OnSelectPopupMenu(
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        // Not implement yet.
+        return;
+    }
+    auto renderWeb = renderWeb_.Upgrade();
+    CHECK_NULL_VOID(renderWeb);
+    return renderWeb->OnSelectPopupMenu(params, callback);
 }
 
 void WebDelegate::HandleDragEvent(int32_t x, int32_t y, const DragAction& dragAction)

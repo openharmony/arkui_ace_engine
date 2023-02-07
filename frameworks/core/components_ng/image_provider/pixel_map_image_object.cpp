@@ -34,16 +34,16 @@ void PixelMapImageObject::MakeCanvasImage(
     ctx->SuccessCallback(CanvasImage::Create(pixmap_));
 }
 
-RefPtr<PixelMapImageObject> PixelMapImageObject::Create(
-    const ImageSourceInfo& sourceInfo, const RefPtr<ImageEncodedInfo>& encodedInfo, const RefPtr<ImageData>& data)
+RefPtr<PixelMapImageObject> PixelMapImageObject::Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data)
 {
-    if (!data->HasPixelMapData()) {
-        LOGE("no decoded pixel map data when try make PixelMapImageObject, sourceInfo: %{public}s",
-            sourceInfo.ToString().c_str());
+    auto pixelMap = data->GetPixelMapData();
+    if (!pixelMap) {
+        LOGW("ImageData has no pixel map data when try CreateImageEncodedInfoForDecodedPixelMap, src: %{public}s",
+            src.ToString().c_str());
         return nullptr;
     }
     return AceType::MakeRefPtr<NG::PixelMapImageObject>(
-        data->GetPixelMapData(), sourceInfo, encodedInfo->GetImageSize());
+        pixelMap, src, SizeF(pixelMap->GetWidth(), pixelMap->GetHeight()));
 }
 
 } // namespace OHOS::Ace::NG

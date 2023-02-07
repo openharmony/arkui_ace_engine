@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
@@ -27,8 +28,10 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/option/option_component.h"
 #include "core/components/select/select_component.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/select/select_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {
 void JSSelect::Create(const JSCallbackInfo& info)
@@ -155,7 +158,9 @@ void JSSelect::JSBind(BindingTarget globalObj)
 void JSSelect::Selected(int value)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGI("set selected");
+        if (value <= 0) {
+            value = 0;
+        }
         NG::SelectView::SetSelected(value);
         return;
     }
@@ -299,7 +304,15 @@ void JSSelect::FontColor(const JSCallbackInfo& info)
 
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            textColor = theme->GetFontColor();
+        } else {
+            return;
+        }
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -326,7 +339,15 @@ void JSSelect::SelectedOptionBgColor(const JSCallbackInfo& info)
     }
     Color bgColor;
     if (!ParseJsColor(info[0], bgColor)) {
-        return;
+        if (info[0]->IsUndefined() || info[0]->IsNull()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            bgColor = theme->GetSelectedColor();
+        } else {
+            return;
+        }
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -671,6 +692,10 @@ void JSSelect::OnSelected(const JSCallbackInfo& info)
 
 void JSSelect::JsWidth(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsWidth(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -694,6 +719,10 @@ void JSSelect::Width(const JSRef<JSVal>& jsValue)
 
 void JSSelect::JsHeight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsHeight(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -796,6 +825,10 @@ void JSSelect::JsPadding(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingLeft(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -813,6 +846,10 @@ void JSSelect::SetPaddingLeft(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingTop(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -830,6 +867,10 @@ void JSSelect::SetPaddingTop(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingRight(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;
@@ -847,6 +888,10 @@ void JSSelect::SetPaddingRight(const JSCallbackInfo& info)
 
 void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::SetPaddingBottom(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 argument");
         return;

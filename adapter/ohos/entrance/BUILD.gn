@@ -81,9 +81,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_flutter_engine_root/skia:ace_skia_$platform",
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-client",
-      "//foundation/multimodalinput/input/frameworks/proxy:libmmi-common",
-      "//third_party/zlib:libz",
+      "//third_party/zlib:shared_libz",
     ]
 
     public_deps =
@@ -100,8 +98,9 @@ template("ace_ohos_standard_source_set") {
       "eventhandler:libeventhandler",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "input:libmmi-client",
       "ipc:ipc_core",
-      "ipc_js:rpc",
+      "ipc:ipc_napi_common",
       "preferences:native_preferences",
       "relational_store:native_dataability",
       "relational_store:native_rdb",

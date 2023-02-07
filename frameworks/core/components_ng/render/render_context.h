@@ -60,6 +60,12 @@ public:
     void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
 
+    virtual void SetNeedDebugBoundary(bool flag) {}
+    virtual bool NeedDebugBoundary() const
+    {
+        return false;
+    }
+
     virtual void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) {}
 
     virtual void FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw) {}
@@ -143,12 +149,17 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
+    virtual void UpdateBackBlurStyle(const BlurStyleOption& blurStyle) {}
 
     virtual void ClipWithRect(const RectF& rectF) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
+    virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
 
     virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+    virtual void OnTransformScaleUpdate(const VectorF& value) {}
+    virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
+    virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
 
     virtual RectF GetPaintRectWithTransform()
     {
@@ -197,6 +208,15 @@ public:
         return sharedTransitionOption_ != nullptr;
     }
 
+    std::optional<BlurStyleOption> GetBackBlurStyle() const
+    {
+        return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
+    }
+    std::optional<Dimension> GetBackBlurRadius() const
+    {
+        return GetBackground() ? GetBackground()->propBlurRadius : std::nullopt;
+    }
+
     virtual void PaintAccessibilityFocus() {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
@@ -221,7 +241,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundBlurStyle, BlurStyle);
 
     // BorderImage
     ACE_DEFINE_PROPERTY_GROUP(BdImage, BorderImageProperty);
@@ -301,7 +320,6 @@ protected:
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
-    virtual void OnBackgroundBlurStyleUpdate(const BlurStyle& bgBlurStyle) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}
@@ -316,12 +334,9 @@ protected:
     virtual void OnBorderStyleUpdate(const BorderStyleProperty& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
 
-    virtual void OnTransformScaleUpdate(const VectorF& value) {}
-    virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnTransformRotateUpdate(const Vector4F& value) {}
     virtual void OnTransformMatrixUpdate(const Matrix4& matrix) {}
 
-    virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnAnchorUpdate(const OffsetT<Dimension>& value) {}
 
     virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
@@ -350,6 +365,7 @@ protected:
 private:
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
+    bool needDebugBoundary_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };

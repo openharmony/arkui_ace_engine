@@ -334,7 +334,7 @@ public:
 
     void RefreshStageFocus();
 
-    void ShowContainerTitle(bool isShow) override;
+    void ShowContainerTitle(bool isShow, bool hasDeco = true) override;
 
     void BlurWindowWithDrag(bool isBlur);
 
@@ -773,16 +773,6 @@ public:
 
     std::string GetRestoreInfo(int32_t restoreId);
 
-    void SetIsSubPipeline(bool isSubPipeline)
-    {
-        isSubPipeline_ = isSubPipeline;
-    }
-
-    bool IsSubPipeline() const
-    {
-        return isSubPipeline_;
-    }
-
     bool GetIsDragStart() const
     {
         return isDragStart_;
@@ -819,11 +809,6 @@ public:
     void SetRootRect(double width, double height, double offset = 0.0) override
     {
         SetRootSizeWithWidthHeight(width, height, offset);
-    }
-
-    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
-    {
-        parentPipeline_ = pipeline;
     }
 
     void SetContainerWindow(bool isShow) override;
@@ -1034,9 +1019,6 @@ private:
 
     std::unordered_map<int32_t, WeakPtr<RenderElement>> storeNode_;
     std::unordered_map<int32_t, std::string> restoreNodeInfo_;
-
-    bool isSubPipeline_ = false;
-    WeakPtr<PipelineBase> parentPipeline_;
 
     std::unordered_map<ComposeId, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
 

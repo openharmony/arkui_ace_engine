@@ -24,8 +24,8 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/container_paint_property.h"
-#include "core/components_ng/pattern/shape/shape_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/shape_container_layout_algorithm.h"
+#include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_view_box.h"
 
 namespace OHOS::Ace::NG {
@@ -38,55 +38,17 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ShapeLayoutAlgorithm>();
+        return MakeRefPtr<ShapeContainerLayoutAlgorithm>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<ContainerPaintProperty>();
+        return MakeRefPtr<ShapeContainerPaintProperty>();
     }
 
     void OnModifyDone() override;
 
     void MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode);
-
-    bool NeedOverridePaintRect() override
-    {
-        auto frameNode = GetHost();
-        if (!frameNode) {
-            return false;
-        }
-        auto containerProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
-        if (!containerProperty) {
-            return false;
-        }
-        auto shapeViewBoxOpt = containerProperty->CloneShapeViewBox();
-        return (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid());
-    }
-
-    std::optional<RectF> GetOverridePaintRect() const override
-    {
-        auto frameNode = GetHost();
-        if (!frameNode) {
-            return std::nullopt;
-        }
-        auto containerProperty = frameNode->GetPaintProperty<ContainerPaintProperty>();
-        if (!containerProperty) {
-            return std::nullopt;
-        }
-        auto shapeViewBoxOpt = containerProperty->CloneShapeViewBox();
-        auto geoNode = frameNode->GetGeometryNode();
-        if (!geoNode) {
-            return std::nullopt;
-        }
-        OffsetF offsetF = geoNode->GetFrameOffset();
-        if (shapeViewBoxOpt.has_value() && shapeViewBoxOpt->IsValid()) {
-            double viewBoxWidth = shapeViewBoxOpt->Width().ConvertToPx();
-            double viewBoxHeight = shapeViewBoxOpt->Height().ConvertToPx();
-            return RectF(offsetF.GetX(), offsetF.GetY(), viewBoxWidth, viewBoxHeight);
-        }
-        return std::nullopt;
-    }
 
     bool IsAtomicNode() const override
     {
@@ -94,9 +56,11 @@ public:
     }
 
 private:
-    void ViewPortTansform();
+    void ViewPortTransform();
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
+    bool isShapeContainerInit_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(ShapeContainerPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -17,9 +17,8 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
-#include "core/components/divider/divider_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_theme.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/divider_painter.h"
 #include "core/components_ng/render/drawing.h"
@@ -50,21 +49,22 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     if (!needDivider || press || hover) {
         return;
     }
-
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
     auto optionSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto horInterval = HORIZONTAL_INTERVAL_PHONE.ConvertToPx();
+    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
+                       static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
 
     RSPath path;
     // draw divider above content, length = content width
-    path.AddRect(horInterval, 0, optionSize.Width() - horInterval, DEFAULT_STROKE_WIDTH);
+    path.AddRect(horInterval, 0, optionSize.Width() - horInterval,
+        static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx()));
     LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval);
 
     RSBrush brush;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<DividerTheme>();
-    CHECK_NULL_VOID(theme);
-    auto dividerColor = theme->GetColor();
+    auto dividerColor = selectTheme->GetLineColor();
     brush.SetColor(dividerColor.GetValue());
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);

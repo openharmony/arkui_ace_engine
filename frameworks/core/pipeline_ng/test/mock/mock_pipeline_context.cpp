@@ -94,7 +94,7 @@ void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::WindowFocus(bool isFocus) {}
 
-void PipelineContext::ShowContainerTitle(bool isShow) {}
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco) {}
 
 void PipelineContext::SetContainerWindow(bool isShow) {}
 
@@ -127,6 +127,8 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+
+void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload() {}
 

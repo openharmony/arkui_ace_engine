@@ -39,7 +39,22 @@ struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageRepeat, ImageRepeat);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImagePosition, BackgroundImagePosition);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundBlurStyle, BlurStyle);
+    bool CheckBlurStyleOption(const BlurStyleOption& option) const
+    {
+        if (!propBlurStyleOption.has_value()) {
+            return false;
+        }
+        return NearEqual(propBlurStyleOption.value(), option);
+    }
+    bool CheckBlurRadius(const Dimension& radius) const
+    {
+        if (!propBlurRadius.has_value()) {
+            return false;
+        }
+        return NearEqual(propBlurRadius.value(), radius);
+    }
+    std::optional<BlurStyleOption> propBlurStyleOption;
+    std::optional<Dimension> propBlurRadius;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 

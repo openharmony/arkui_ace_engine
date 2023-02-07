@@ -135,11 +135,11 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
         if (source == SCROLL_FROM_UPDATE) {
-            onScroll(offsetVP, V2::ScrollState::SCROLL);
+            onScroll(offsetVP, ScrollState::SCROLL);
         } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-            onScroll(offsetVP, V2::ScrollState::FLING);
+            onScroll(offsetVP, ScrollState::FLING);
         } else {
-            onScroll(offsetVP, V2::ScrollState::IDLE);
+            onScroll(offsetVP, ScrollState::IDLE);
         }
     }
 
@@ -303,7 +303,6 @@ void ListPattern::MarkDirtyNodeSelf()
 
 void ListPattern::OnScrollEndCallback()
 {
-    SetScrollBarDriving(false);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
 }
@@ -339,14 +338,23 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     return outOfStart || outOfEnd;
 }
 
+void ListPattern::FireOnScrollStart()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID_NOLOG(hub);
+    auto onScrollStart = hub->GetOnScrollStart();
+    CHECK_NULL_VOID_NOLOG(onScrollStart);
+    onScrollStart();
+}
+
 bool ListPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
+        FireOnScrollStart();
         ProcessDragStart(offset);
         return true;
-    }
-    if (NearZero(offset)) {
-        return false;
     }
     auto scrollBar = GetScrollBar();
     if (scrollBar && scrollBar->IsDriving()) {
@@ -365,9 +373,14 @@ void ListPattern::InitScrollableEvent()
     CHECK_NULL_VOID(host);
     auto listEventHub = host->GetEventHub<ListEventHub>();
     auto onScrollBegin = listEventHub->GetOnScrollBegin();
+    auto onScrollFrameBegin = listEventHub->GetOnScrollFrameBegin();
     auto scrollableEvent = GetScrollableEvent();
-    if (onScrollBegin && scrollableEvent) {
+    CHECK_NULL_VOID(scrollableEvent);
+    if (onScrollBegin) {
         scrollableEvent->SetScrollBeginCallback(std::move(onScrollBegin));
+    }
+    if (onScrollFrameBegin) {
+        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
     }
 }
 
@@ -416,8 +429,7 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
         return true;
     }
     if (event.IsDirectionalKey()) {
-        HandleDirectionKey(event.code);
-        return true;
+        return HandleDirectionKey(event.code);
     }
     return false;
 }
@@ -434,7 +446,7 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
         LOGD("Scroll to next index: %{public}d", scrollIndex_);
         // Need to update: current selection
         ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_TOP);
-        return true;
+        return false;
     }
     if ((GetAxis() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_DOWN) ||
         (GetAxis() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_RIGHT)) {
@@ -446,7 +458,7 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
         LOGD("Scroll to previous index: %{public}d", scrollIndex_);
         // Need to update: current selection
         ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
-        return true;
+        return false;
     }
     return false;
 }

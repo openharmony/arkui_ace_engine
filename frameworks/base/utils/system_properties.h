@@ -194,7 +194,10 @@ public:
         return isHookModeEnabled_;
     }
 
-    static bool GetDebugBoundaryEnabled();
+    static bool GetDebugBoundaryEnabled()
+    {
+        return debugBoundaryEnabled_;
+    }
 
     static bool GetTraceEnabled()
     {
@@ -278,6 +281,8 @@ public:
     }
 
     static int GetArkProperties();
+
+    static std::string GetArkBundleName();
 
     static size_t GetGcThreadNum();
 

@@ -19,7 +19,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/split_container/column_split_element.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::V2 {
@@ -60,41 +59,6 @@ RefPtr<RenderColumnSplit> ColumnSplitComposedElement::GetRenderColumnSplit() con
         return AceType::DynamicCast<RenderColumnSplit>(node);
     }
     return nullptr;
-}
-
-void ColumnSplitComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto columnSplitElement = GetContentElement<ColumnSplitElement>(ColumnSplitElement::TypeId());
-    if (!columnSplitElement) {
-        LOGE("get GetColumnSplitElement failed");
-        return;
-    }
-    columnSplitElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    columnSplitElement->MarkDirty();
-}
-
-void ColumnSplitComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto columnSplitElement = GetContentElement<ColumnSplitElement>(ColumnSplitElement::TypeId());
-    if (!columnSplitElement) {
-        LOGE("get GetColumnSplitElement failed");
-        return;
-    }
-    auto child = columnSplitElement->GetChildBySlot(slot);
-    columnSplitElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    columnSplitElement->MarkDirty();
-}
-
-void ColumnSplitComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto columnSplitElement = GetContentElement<ColumnSplitElement>(ColumnSplitElement::TypeId());
-    if (!columnSplitElement) {
-        LOGE("get GetColumnSplitElement failed");
-        return;
-    }
-    auto child = columnSplitElement->GetChildBySlot(slot);
-    columnSplitElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    columnSplitElement->MarkDirty();
 }
 
 } // namespace OHOS::Ace::V2

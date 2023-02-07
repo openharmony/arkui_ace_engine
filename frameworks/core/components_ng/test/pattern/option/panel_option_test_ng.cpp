@@ -57,8 +57,6 @@ HWTEST_F(PanelOptionTestNg, PanelOptionTestNg001, TestSize.Level1)
     OHOS::Ace::NG::OptionLayoutAlgorithm rosenOptionLayoutAlgorithm;
     rosenOptionLayoutAlgorithm.horInterval_ = 2.0;
     EXPECT_FLOAT_EQ(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
-    rosenOptionLayoutAlgorithm.verInterval_ = 2.0;
-    EXPECT_FLOAT_EQ(rosenOptionLayoutAlgorithm.verInterval_, 2.0);
     auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
     auto rosenRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::GeometryNode>();
     rosenRefPtr->margin_ = nullptr;

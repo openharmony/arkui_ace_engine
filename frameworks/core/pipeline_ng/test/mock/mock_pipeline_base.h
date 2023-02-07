@@ -55,7 +55,7 @@ public:
     MOCK_METHOD0(OnShow, void());
     MOCK_METHOD0(OnHide, void());
     MOCK_METHOD1(WindowFocus, void(bool isFocus));
-    MOCK_METHOD1(ShowContainerTitle, void(bool isShow));
+    MOCK_METHOD2(ShowContainerTitle, void(bool isShow, bool hasDeco));
     MOCK_METHOD3(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type));
     MOCK_METHOD2(OnSurfacePositionChanged, void(int32_t posX, int32_t posY));
     MOCK_METHOD1(OnSurfaceDensityChanged, void(double density));
@@ -89,6 +89,7 @@ public:
     MOCK_METHOD0(FlushPipelineImmediately, void());
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
+    MOCK_METHOD1(SetTouchPipeline, void(const WeakPtr<PipelineBase>& context));
 
     static RefPtr<MockPipelineBase> pipeline_;
 };

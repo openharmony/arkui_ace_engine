@@ -66,7 +66,7 @@ public:
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
-    void UpdateWindowMode(OHOS::Rosen::WindowMode mode) override;
+    void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
     // Window color

@@ -260,10 +260,11 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& dialogProp
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto contentProp = AceType::DynamicCast<TextLayoutProperty>(contentNode->GetLayoutProperty());
     CHECK_NULL_RETURN(contentProp, nullptr);
-    auto deviceType = SystemProperties::GetDeviceType();
-    if (deviceType == DeviceType::WATCH) {
-        // TODO: prefer size not completed.
+    // textAlign center if title doesn't exist; always align center on watch
+    if (dialogProperties.title.empty() || SystemProperties::GetDeviceType() == DeviceType::WATCH) {
         contentProp->UpdateTextAlign(TextAlign::CENTER);
+    } else {
+        contentProp->UpdateTextAlign(TextAlign::START);
     }
     contentProp->UpdateContent(dialogProperties.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
@@ -323,6 +324,11 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
 
     // to close dialog when clicked inside button rect
     BindCloseCallBack(hub, index);
+
+    // add scale animation
+    auto inputHub = buttonNode->GetOrCreateInputEventHub();
+    CHECK_NULL_RETURN(inputHub, nullptr);
+    inputHub->SetHoverAnimation(HoverEffectType::SCALE);
 
     // update background color
     auto renderContext = buttonNode->GetRenderContext();
