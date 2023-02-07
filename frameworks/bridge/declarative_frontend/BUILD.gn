@@ -106,6 +106,9 @@ template("declarative_js_engine") {
         defines += [ "_ARM64_" ]
       }
     }
+    if (current_os == "ohos" && current_cpu == "x86_64") {
+      defines += [ "SIMULATOR_64" ]
+    }
 
     deps = []
     configs = [ "$ace_root:ace_config" ]
@@ -443,6 +446,9 @@ template("declarative_js_engine_ng") {
       if (!is_mingw) {
         defines += [ "_ARM64_" ]
       }
+    }
+    if (current_os == "ohos" && current_cpu == "x86_64") {
+      defines += [ "SIMULATOR_64" ]
     }
 
     deps = []
