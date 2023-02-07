@@ -397,7 +397,7 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
         textLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
     }
     textLayoutProperty->UpdateTextColor(theme->GetTitleColor());
-    textLayoutProperty->UpdateFontWeight(FontWeight::BOLD);
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     if (!hasSubTitle) {
         textLayoutProperty->UpdateMaxLines(1);
     } else {
@@ -527,6 +527,18 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
+            auto eventHub = menuItemNode->GetOrCreateInputEventHub();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+
+            auto hub = menuItemNode->GetEventHub<EventHub>();
+            CHECK_NULL_VOID(hub);
+            if (!hub->IsEnabled()) {
+                auto backGroundColor = renderContext->GetBackgroundColor();
+                backGroundColor->BlendOpacity(theme->GetAlphaDisabled());
+                renderContext->UpdateBackgroundColor(backGroundColor.value());
+            }
+
             PaddingProperty padding;
             padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
             padding.right = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -574,6 +586,18 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
         auto renderContext = menuItemNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
+        auto eventHub = menuItemNode->GetOrCreateInputEventHub();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+
+        auto hub = menuItemNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(hub);
+        if (!hub->IsEnabled()) {
+            auto backGroundColor = renderContext->GetBackgroundColor();
+            backGroundColor->BlendOpacity(theme->GetAlphaDisabled());
+            renderContext->UpdateBackgroundColor(backGroundColor.value());
+        }
 
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -633,25 +657,18 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
     bool needAddBackButton = false;
     bool needRemoveBackButton = false;
 
-    auto titleNode = AceType::DynamicCast<FrameNode>(navBarNode->GetTitle());
-    CHECK_NULL_VOID(titleNode);
-    auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(titleLayoutProperty);
-    auto theme = NavigationGetTheme();
     do {
         // add back button if current mode is mini and one of the following condition:
         // first create or not first create but previous mode is not mini
         if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI &&
             mode == NavigationTitleMode::MINI) {
             needAddBackButton = true;
-            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
             break;
         }
         // remove back button if current mode is not mini and previous mode is mini
         if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI &&
             mode != NavigationTitleMode::MINI) {
             needRemoveBackButton = true;
-            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeBig());
             break;
         }
     } while (false);
@@ -679,6 +696,20 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 
+        auto eventHub = backButtonNode->GetOrCreateInputEventHub();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+
+        auto backButtonEventhub = backButtonNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(backButtonEventhub);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
+        if (!backButtonEventhub->IsEnabled()) {
+            auto backGroundColor = renderContext->GetBackgroundColor();
+            backGroundColor->BlendOpacity(theme->GetAlphaDisabled());
+            renderContext->UpdateBackgroundColor(backGroundColor.value());
+        }
+
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
         padding.right = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -689,8 +720,6 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
         auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(backButtonImageNode);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
         ImageSourceInfo imageSourceInfo;
         imageSourceInfo.SetResourceId(theme->GetBackResourceId());
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
