@@ -83,6 +83,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_VIDEO,
     THEME_PATTERN_ICON,
     THEME_PATTERN_INDEXER,
+    THEME_PATTERN_APP_BAR,
 };
 
 bool IsDirExist(const std::string& path)
