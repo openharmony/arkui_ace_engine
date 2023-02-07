@@ -182,12 +182,18 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
         auto horizontalPadding = tabContentPattern->GetIsLandscape() ? tabTheme->GetSubtabLandscapeHorizontalPadding()
-                                                              : tabTheme->GetSubTabHorizontalPadding();
+                                                                     : tabTheme->GetSubTabHorizontalPadding();
         layoutProperty->UpdatePadding({ CalcLength(horizontalPadding), CalcLength(horizontalPadding),
             CalcLength(tabTheme->GetSubTabTopPadding()), CalcLength(tabTheme->GetSubTabBottomPadding()) });
     } else if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
         layoutProperty->UpdatePadding({ CalcLength(tabTheme->GetBottomTabHorizontalPadding()),
             CalcLength(tabTheme->GetBottomTabHorizontalPadding()), {}, {} });
+    } else {
+        auto deviceType = SystemProperties::GetDeviceType();
+        auto tabBarItemPadding = deviceType == DeviceType::PHONE ? tabTheme->GetSubTabHorizontalPadding()
+                                                                 : tabTheme->GetSubtabLandscapeHorizontalPadding();
+        layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
+            CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding) });
     }
 
     if (static_cast<int32_t>(columnNode->GetChildren().size()) == 0) {
