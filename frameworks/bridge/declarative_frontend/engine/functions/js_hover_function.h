@@ -26,7 +26,10 @@ class JsHoverFunction : public JsFunction {
 public:
     explicit JsHoverFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsHoverFunction() override = default;
-
+    void Execute() override
+    {
+        ExecuteJS();
+    }
     void Execute(bool isHover);
 };
 

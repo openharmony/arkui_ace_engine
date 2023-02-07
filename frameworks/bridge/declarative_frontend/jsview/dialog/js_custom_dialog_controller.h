@@ -57,7 +57,7 @@ private:
     WeakPtr<NG::FrameNode> dialog_;
 
     DialogProperties dialogProperties_;
-    RefPtr<JsFunction> jsBuilderFunction_;
+    RefPtr<JsWeakFunction> jsBuilderFunction_;
     RefPtr<JsFunction> jsCancelFunction_;
     RefPtr<Component> customDialog_;
     RefPtr<DialogComponent> dialogComponent_;

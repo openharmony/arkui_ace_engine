@@ -28,7 +28,10 @@ public:
     explicit JsKeyFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsKeyFunction() override = default;
-
+    void Execute() override
+    {
+        ExecuteJS();
+    }
     void Execute(OHOS::Ace::KeyEventInfo& event);
 
     JSRef<JSVal> ExecuteWithValue(OHOS::Ace::KeyEventInfo& event);
