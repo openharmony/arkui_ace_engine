@@ -435,8 +435,6 @@ HWTEST_F(GridTestNg, GridTest004, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_ROW);
-    // auto barStateStr = layoutProperty->GetBarStateString();
-    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_OFF);
 
     /**
      * @tc.steps: step7. Get the pattern to call the related functions in the positionController.
@@ -553,8 +551,6 @@ HWTEST_F(GridTestNg, GridTest005, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_ROW_REVERSE);
-    // auto barStateStr = layoutProperty->GetBarStateString();
-    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_AUTO);
 }
 
 /**
@@ -633,8 +629,6 @@ HWTEST_F(GridTestNg, GridTest006, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_COLUMN);
-    // auto barStateStr = layoutProperty->GetBarStateString();
-    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_ON);
 }
 
 /**
@@ -713,8 +707,6 @@ HWTEST_F(GridTestNg, GridTest007, TestSize.Level1)
     EXPECT_NE(layoutProperty, nullptr);
     auto layoutDirectionStr = layoutProperty->GetLayoutDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_COLUMN_REVERSE);
-    // auto barStateStr = layoutProperty->GetBarStateString();
-    // EXPECT_EQ(barStateStr, GRID_SCROLL_BAR_OFF);
 
     /**
      * @tc.steps: step7. Get grid EventHub to call related function.
