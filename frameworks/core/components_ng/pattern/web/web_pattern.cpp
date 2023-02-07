@@ -27,6 +27,9 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include "core/components_ng/pattern/menu/menu_view.h"
+#include "core/components_ng/base/view_stack_processor.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
@@ -496,8 +499,10 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
-    delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
-    delegate_->OnBlur();
+    if (!selectPopupMenuShowing_) {
+        delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
+        delegate_->OnBlur();
+    }
     OnQuickMenuDismissed();
 }
 
@@ -1373,6 +1378,79 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::
         mouseStyle->SetPointerStyle(windowId, pointStyle);
     }
     return true;
+}
+
+void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+{
+    CHECK_NULL_VOID(params);
+    CHECK_NULL_VOID(callback);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    std::vector<SelectParam> selectParam;
+    for (auto& item : params->menuItems) {
+        selectParam.push_back({
+            item.label, ""
+        });
+    }
+    auto menu = MenuView::Create(selectParam, id);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto eventHub = host->GetEventHub<WebEventHub>();
+    auto destructor = [weak = WeakClaim(this), id]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        pattern->SetSelectPopupMenuShowing(false);
+        overlayManager->DeleteMenu(id);
+    };
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDisappear(destructor);
+
+    WebPattern::RegisterSelectPopupCallback(menu, callback);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->RegisterOnHideMenu([weak = WeakClaim(this), callback]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        callback->Cancel();
+        pattern->SetSelectPopupMenuShowing(false);
+    });
+    auto offset = GetSelectPopupPostion(params->bounds);
+    selectPopupMenuShowing_ = true;
+    overlayManager->ShowMenu(id, offset, menu);
+}
+
+void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
+    std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
+{
+    auto menuContainer = menu->GetChildAtIndex(0);
+    CHECK_NULL_VOID(menuContainer);
+    auto options = menuContainer->GetChildren();
+    for (auto&& option : options) {
+        auto selectCallback = [callback](int32_t index) {
+            std::vector<int32_t> indices { static_cast<int32_t>(index) };
+            callback->Continue(indices);
+        };
+        auto optionNode = AceType::DynamicCast<FrameNode>(option);
+        if (optionNode) {
+            auto hub = optionNode->GetEventHub<OptionEventHub>();
+            hub->SetOnSelect(std::move(selectCallback));
+            optionNode->MarkModifyDone();
+        }
+    }
+}
+
+OffsetF WebPattern::GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds)
+{
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    offset.AddX(bounds.x);
+    offset.AddY(bounds.y + bounds.height);
+    return offset;
 }
 
 void WebPattern::UpdateTouchHandleForOverlay()
