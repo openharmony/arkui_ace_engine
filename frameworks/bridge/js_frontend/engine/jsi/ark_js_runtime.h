@@ -57,6 +57,7 @@ using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
+    using ErrorEventHandler = std::function<void(const std::string&, const std::string&)>;
 #if !defined(WINDOWS_PLATFORM)
     bool StartDebugger(const char* libraryPath, EcmaVM* vm) const;
 #endif
@@ -98,6 +99,16 @@ public:
     void SetDebuggerPostTask(DebuggerPostTask&& task)
     {
         debuggerPostTask_ = std::move(task);
+    }
+
+    void SetErrorEventHandler(ErrorEventHandler&& errorCallback) override
+    {
+        errorCallback_ = std::move(errorCallback);
+    }
+
+    const ErrorEventHandler& GetErrorEventHandler()
+    {
+        return errorCallback_;
     }
 
 #if defined(PREVIEW)
@@ -178,6 +189,7 @@ private:
     bool usingExistVM_ = false;
     bool isDebugMode_ = true;
     DebuggerPostTask debuggerPostTask_;
+    ErrorEventHandler errorCallback_;
 #if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};

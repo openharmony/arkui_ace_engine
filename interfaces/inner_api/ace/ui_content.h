@@ -124,7 +124,9 @@ public:
     virtual float GetFormHeight() = 0;
 
     virtual void SetActionEventHandler(
-        std::function<void(const std::string& action)>&& actionCallback) = 0;
+        std::function<void(const std::string&)>&& actionCallback) = 0;
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 };
 
 } // namespace OHOS::Ace

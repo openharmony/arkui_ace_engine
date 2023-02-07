@@ -1750,6 +1750,20 @@ void JsiDeclarativeEngine::OnSaveData(std::string& data)
         data = object->GetJsonString(runtime);
     }
 }
+
+void JsiDeclarativeEngine::SetErrorEventHandler(
+    std::function<void(const std::string&, const std::string&)>&& errorCallback)
+{
+    LOGI("JsiDeclarativeEngine SetErrorEventHandler");
+    shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
+    if (!runtime) {
+        LOGE("SetErrorEventHandler failed, runtime is null.");
+        return;
+    }
+
+    runtime->SetErrorEventHandler(std::move(errorCallback));
+}
+
 bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
 {
     LOGI("JsiDeclarativeEngine OnRestoreData");

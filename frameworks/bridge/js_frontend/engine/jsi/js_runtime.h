@@ -75,6 +75,8 @@ public:
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 
     // Set c++ data to js environment.
     void SetEmbedderData(void *data)

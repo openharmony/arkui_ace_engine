@@ -32,7 +32,7 @@ namespace Ace {
 /**
  * @class FormRenderer
  */
-class FormRenderer {
+class FormRenderer : public std::enable_shared_from_this<FormRenderer> {
 public:
     FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
                  const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
@@ -43,7 +43,7 @@ public:
 
     void Destroy();
     void OnActionEvent(const std::string& action);
-    void OnError(const std::string& param);
+    void OnError(const std::string& code, const std::string& msg);
 
 private:
     void InitUiContent();
