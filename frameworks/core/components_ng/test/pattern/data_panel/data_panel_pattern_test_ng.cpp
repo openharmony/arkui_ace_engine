@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,18 +150,18 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelMeasureTest003, TestSize.Level1)
      * @tc.expected: step3. dataPanelSize is the same with expected value.
      */
     /**
-    //     corresponding ets code:
-    //         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }})
-    */
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }})
+     */
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = MAX_SIZE;
     auto dataPanelDefaultSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value();
     EXPECT_EQ(dataPanelDefaultSize, MAX_SIZE);
 
     /**
-    //     corresponding ets code:
-    //         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(50).height(50)
-    */
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(50).height(50)
+     */
     LayoutConstraintF layoutConstraintVaildSize;
     layoutConstraintVaildSize.maxSize = MAX_SIZE;
     layoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
@@ -181,9 +181,9 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelMeasureTest003, TestSize.Level1)
     EXPECT_EQ(dataPanelSize, SizeF(WIDTH.ConvertToPx(), MAX_HEIGHT));
 
     /**
-    //     corresponding ets code:
-    //         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).height(-100)
-    */
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).height(-100)
+     */
     LayoutConstraintF layoutConstraintHeightUnvalid;
     layoutConstraintHeightUnvalid.maxSize = MAX_SIZE;
     layoutConstraintHeightUnvalid.selfIdealSize.SetHeight(NEGATIVE_NUMBER);
@@ -191,9 +191,9 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelMeasureTest003, TestSize.Level1)
     EXPECT_EQ(dataPanelSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
 
     /**
-    //     corresponding ets code:
-    //         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(-100)
-    */
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }}).width(-100)
+     */
     LayoutConstraintF layoutConstraintWidthUnvalid;
     layoutConstraintWidthUnvalid.maxSize = MAX_SIZE;
     layoutConstraintWidthUnvalid.selfIdealSize.SetWidth(NEGATIVE_NUMBER);
@@ -316,9 +316,9 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPatternTest007, TestSize.Level1)
      * @tc.expected: step3. dataPanelSize is the same with expected value.
      */
     /**
-    //     corresponding ets code:
-    //         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }})
-    */
+     *     corresponding ets code:
+     *         DataPanel({ { values: this.values, max: 100, type: DataPanelType.Line }})
+     */
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = MAX_SIZE;
     auto dataPanelDefaultSize = dataPanelLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value();
@@ -368,14 +368,14 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest005, TestSize.Level1
      */
 
     /**
-    //     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
-    */
+     *     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     */
     bool first_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(first_case);
 
     /**
-    //     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
-    */
+     *     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     */
     bool second_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(second_case);
 
@@ -383,16 +383,15 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest005, TestSize.Level1
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     /**
-    //     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
-    */
+     *     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     */
     bool third_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(third_case);
 
     /**
-    //     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
-    */
+     *     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+     */
     bool forth_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);
 }
-
 } // namespace OHOS::Ace::NG
