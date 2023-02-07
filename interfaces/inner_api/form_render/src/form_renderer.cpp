@@ -35,7 +35,6 @@ FormRenderer::FormRenderer(
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_.get())).GetNativeEngine();
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
     formRendererDispatcherImpl_ = std::make_unique<FormRendererDispatcherImpl>(uiContent_);
-    InitUiContent();
 }
 
 void FormRenderer::InitUiContent()
@@ -58,6 +57,7 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     uiContent_->SetFormWidth(width);
     uiContent_->SetFormHeight(height);
     uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
+    InitUiContent();
 
     auto rsSurfaceNode = uiContent_->GetCardRootNode();
     if (rsSurfaceNode == nullptr) {

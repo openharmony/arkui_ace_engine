@@ -25,7 +25,7 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(
     const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     auto uiContent = uiContent_.lock();
-    if (uiContent) {
+    if (!uiContent) {
         HILOG_ERROR("uiContent is nullptr");
         return;
     }
