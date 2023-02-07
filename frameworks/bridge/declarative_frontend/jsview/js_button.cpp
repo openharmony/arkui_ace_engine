@@ -392,6 +392,10 @@ void JSButton::ResetButtonHeight()
 
 void JSButton::JsPadding(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsPadding(info);
+        return;
+    }
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
         LOGE("arg is not a string, number or object.");
         return;

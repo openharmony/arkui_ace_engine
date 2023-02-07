@@ -62,8 +62,9 @@ void ButtonPattern::InitButtonLabel()
         LOGI("No label, no need to initialize label.");
         return;
     }
-    if (!layoutProperty->GetCalcLayoutConstraint() ||
-        !layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height().has_value()) {
+    if ((!layoutProperty->GetCalcLayoutConstraint() ||
+            !layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height().has_value()) &&
+        (!layoutProperty->GetPaddingProperty())) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
