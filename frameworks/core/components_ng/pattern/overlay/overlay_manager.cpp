@@ -30,6 +30,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
@@ -385,13 +386,13 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     if (iter != rootChildren.end()) {
         // Pop popup
         CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
-        LOGI("begin pop");
+        LOGI("OverlayManager: popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
     } else {
         // Push popup
         CHECK_NULL_VOID_NOLOG(!popupInfo.isCurrentOnShow);
-        LOGI("begin push");
+        LOGI("OverlayManager: popup begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         auto hub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
         if (!popupInfo.isBlockEvent && hub) {
@@ -692,15 +693,30 @@ bool OverlayManager::RemoveOverlay()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
+    auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
         // stage node is at index 0, remove overlay at index 1
         auto overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(overlay, false);
         // close dialog with animation
-        auto dialogPattern = overlay->GetPattern<DialogPattern>();
-        if (dialogPattern) {
+        auto pattern = overlay->GetPattern();
+        if (AceType::DynamicCast<DialogPattern>(pattern)) {
             CloseDialog(overlay);
             return true;
+        } else if (AceType::DynamicCast<BubblePattern>(pattern)) {
+            auto popupNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildAtIndex(childrenSize - 1));
+            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+            for (const auto& popup : popupMap_) {
+                auto targetId = popup.first;
+                auto popupInfo = popup.second;
+                if (popupNode == popupInfo.popupNode) {
+                    popupMap_.erase(targetId);
+                    rootNode->RemoveChild(popupNode);
+                    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                    return true;
+                }
+            }
+            return false;
         }
         rootNode->RemoveChildAtIndex(1);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
