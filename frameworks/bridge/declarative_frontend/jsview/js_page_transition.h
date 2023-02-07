@@ -52,6 +52,8 @@ class JSPageTransitionEnter final : public JSPageTransition {
 
 public:
     static void Create(const JSCallbackInfo& info);
+    // for partial update
+    static void Pop() {};
 };
 
 class JSPageTransitionExit final : public JSPageTransition {
@@ -59,6 +61,7 @@ class JSPageTransitionExit final : public JSPageTransition {
 
 public:
     static void Create(const JSCallbackInfo& info);
+    static void Pop() {};
 };
 
 } // namespace OHOS::Ace::Framework

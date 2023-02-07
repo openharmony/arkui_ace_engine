@@ -57,6 +57,7 @@ void JSPageTransition::JSBind(BindingTarget globalObj)
     JSClass<JSPageTransitionEnter>::StaticMethod("scale", &JSPageTransition::Scale);
     JSClass<JSPageTransitionEnter>::StaticMethod("opacity", &JSPageTransition::Opacity);
     JSClass<JSPageTransitionEnter>::StaticMethod("onEnter", &JSPageTransition::JsHandlerOnEnter);
+    JSClass<JSPageTransitionEnter>::StaticMethod("pop", &JSPageTransitionEnter::Pop);
     JSClass<JSPageTransitionEnter>::Bind<>(globalObj);
 
     JSClass<JSPageTransitionExit>::Declare("PageTransitionExit");
@@ -66,6 +67,7 @@ void JSPageTransition::JSBind(BindingTarget globalObj)
     JSClass<JSPageTransitionExit>::StaticMethod("scale", &JSPageTransition::Scale);
     JSClass<JSPageTransitionExit>::StaticMethod("opacity", &JSPageTransition::Opacity);
     JSClass<JSPageTransitionExit>::StaticMethod("onExit", &JSPageTransition::JsHandlerOnExit);
+    JSClass<JSPageTransitionExit>::StaticMethod("pop", &JSPageTransitionExit::Pop);
     JSClass<JSPageTransitionExit>::Bind<>(globalObj);
 }
 
