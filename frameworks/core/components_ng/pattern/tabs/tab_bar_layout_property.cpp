@@ -17,6 +17,7 @@
 
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -38,8 +39,13 @@ RectF TabBarLayoutProperty::GetIndicatorRect(int32_t index)
 
     /* Set indicator at the bottom of columnNode's last child */
     auto childColumnRect = childColumn->GetGeometryNode()->GetFrameRect();
+    auto tabBarPattern = node->GetPattern<TabBarPattern>();
+    CHECK_NULL_RETURN(node, RectF());
     indicator.SetLeft(indicator.GetX() + childColumnRect.GetX());
-    indicator.SetTop(indicator.Bottom() + childColumnRect.GetY() + tabTheme->GetSubTabIndicatorGap().ConvertToPx());
+    indicator.SetTop(
+        tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE
+            ? (indicator.Bottom() + childColumnRect.GetY() + tabTheme->GetSubTabIndicatorGap().ConvertToPx())
+            : (indicator.Bottom() + childColumnRect.GetY()));
     return indicator;
 }
 
