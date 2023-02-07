@@ -270,11 +270,15 @@ void ScrollBar::SetMouseEvent()
             if (inRegion && !scrollBar->IsHover()) {
                 scrollBar->PlayGrowAnimation();
                 scrollBar->SetHover(true);
+                if (scrollBar->scrollEndAnimator_ && !scrollBar->scrollEndAnimator_->IsStopped()) {
+                    scrollBar->scrollEndAnimator_->Stop();
+                }
                 scrollBar->MarkNeedRender();
             }
             if (scrollBar->IsHover() && !inRegion) {
                 scrollBar->PlayShrinkAnimation();
                 scrollBar->SetHover(false);
+                scrollBar->PlayBarEndAnimation();
                 scrollBar->MarkNeedRender();
             }
         });
