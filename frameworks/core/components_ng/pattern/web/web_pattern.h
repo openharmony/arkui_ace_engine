@@ -233,6 +233,8 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, const OHOS::NWeb::NWebCursorInfo& info);
+    void OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
     void UpdateTouchHandleForOverlay();
     bool IsSelectOverlayDragging()
     {
@@ -243,6 +245,10 @@ public:
         selectOverlayDragging_ = selectOverlayDragging;
     }
     void UpdateLocale();
+    void SetSelectPopupMenuShowing(bool showing)
+    {
+        selectPopupMenuShowing_ = showing;
+    }
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -345,6 +351,9 @@ private:
     void CloseSelectOverlay();
     RectF ComputeTouchHandleRect(std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> touchHandle);
     std::optional<OffsetF> GetCoordinatePoint();
+    void RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
+        std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+    OffsetF GetSelectPopupPostion(const OHOS::NWeb::SelectMenuBound& bounds);
 
     struct TouchInfo {
         float x = -1.0f;
@@ -389,6 +398,7 @@ private:
     OffsetF webOffset_;
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
+    bool selectPopupMenuShowing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
