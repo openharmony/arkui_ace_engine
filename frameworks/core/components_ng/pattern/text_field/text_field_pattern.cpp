@@ -1714,7 +1714,6 @@ void TextFieldPattern::UpdateTextSelectorByHandleMove(
     if (isMovingBase) {
         textSelector_.baseOffset = position;
         textSelector_.selectionBaseOffset = offsetToParagraphBeginning;
-        UpdateSelection(textSelector_.baseOffset, textSelector_.destinationOffset);
         return;
     }
     textSelector_.destinationOffset = position;
