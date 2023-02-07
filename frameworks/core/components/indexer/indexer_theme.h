@@ -98,10 +98,6 @@ public:
     {
         return hoverTextSize_;
     }
-    const Color& GetHoverTextColor() const
-    {
-        return hoverTextColor_;
-    }
     const Dimension& GetHoverTextAlpha() const
     {
         return hoverTextAlpha_;
@@ -131,6 +127,7 @@ public:
         return popupTextStyle_;
     }
     static constexpr double SLIP_BACKGROUND_OPACITY = 0.05;
+    static constexpr double SLIP_PRESS_BACKGROUND_OPACITY = 0.1;
     static constexpr float TEXT_PADDING_LEFT = 12.0f;
     static constexpr float TEXT_PADDING_TOP = 6.0f;
 
@@ -149,7 +146,6 @@ protected:
     Dimension hoverBgAreaSize_;
     Color hoverBgAreaColor_;
     Dimension hoverTextSize_;
-    Color hoverTextColor_;
     Dimension hoverTextAlpha_;
     Color slipHoverBackgroundColor_;
     Color focusBgOutlineColor_;
@@ -191,8 +187,6 @@ private:
         theme->hoverBgAreaColor_ = indexerPattern->GetAttr<Color>("hover_bg_area_color", Color(HOVER_BG_AREA_COLOR));
         theme->hoverTextSize_ =
             indexerPattern->GetAttr<Dimension>("hover_text_size", Dimension(HOVER_TEXT_SIZE, DimensionUnit::FP));
-        theme->hoverTextColor_ =
-            indexerPattern->GetAttr<Color>("hover_text_color", Color::RED).ChangeOpacity(TEXT_COLOR_OPACITY);
         theme->hoverTextAlpha_ =
             indexerPattern->GetAttr<Dimension>("hover_text_alpha", Dimension(HOVER_TEXT_ALPHA, DimensionUnit::PX));
         theme->slipHoverBackgroundColor_ =
@@ -219,7 +213,7 @@ private:
             indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR)));
         theme->popupTextStyle_.SetFontWeight(FontWeight::MEDIUM);
     }
-    static constexpr uint32_t DEFAULT_TEXT_COLOR = 0x99000000;
+    static constexpr uint32_t DEFAULT_TEXT_COLOR = 0xff182431;
     static constexpr uint32_t SELECT_TEXT_COLOR = 0xff007dff;
     static constexpr uint32_t POPUP_TEXT_COLOR = 0xff007dff;
     static constexpr float POPUP_TEXT_SIZE = 24.0;
@@ -227,7 +221,7 @@ private:
     static constexpr uint32_t POPUP_BACKGROUND_COLOR = 0xffffffff;
     static constexpr uint32_t POPUP_SEPARATOR_COLOR = 0x33182431;
     static constexpr float POPUP_AREA_SIZE = 56.0f;
-    static constexpr float HOVER_RADIUS_SIZE = 6.0f;
+    static constexpr float HOVER_RADIUS_SIZE = 4.0f;
     static constexpr float HOVER_BG_AREA_SIZE = 16.0f;
     static constexpr uint32_t HOVER_BG_AREA_COLOR = 0x0c182431;
     static constexpr float HOVER_TEXT_SIZE = 12.0f;
