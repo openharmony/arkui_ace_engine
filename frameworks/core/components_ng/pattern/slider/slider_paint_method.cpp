@@ -216,7 +216,10 @@ SliderPaintMethod::CirclePenAndSize SliderPaintMethod::GetCirclePen(
     circlePenAndSize.radius = parameters_.blockDiameter * HALF * HALF;
 
     circlePenAndSize.shadowPen.SetAntiAlias(true);
-    Color shadowColor = theme->GetBlockOuterStrokeEdgeColor();
+    // The shadowColor is used to paint slider'block edge when hovered or pressed.
+    // Outer slider's block needs to be painted with 1vp width edge when not hovered or not pressed,
+    // which color is from theme's BlockOuterEdgeColor.
+    Color shadowColor = theme->GetBlockOuterEdgeColor();
     shadowColor = parameters_.mouseHoverFlag_ ? theme->GetBlockHoverColor() : shadowColor;
     shadowColor = parameters_.mousePressedFlag_ ? theme->GetBlockPressedColor() : shadowColor;
     circlePenAndSize.shadowPen.SetColor(ToRSColor(shadowColor));

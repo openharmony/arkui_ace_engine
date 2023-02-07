@@ -148,8 +148,8 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     singleStarImagePaintConfig_.srcRect_ = singleStarRect_;
     singleStarImagePaintConfig_.dstRect_ = singleStarDstRect_;
     singleStarImagePaintConfig_.imageFit_ = ImageFit::TOP_LEFT;
-    return MakeRefPtr<RatingPaintMethod>(
-        foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig_, starNum);
+    return MakeRefPtr<RatingPaintMethod>(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
+        singleStarImagePaintConfig_, starNum, isHover_);
 }
 
 bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
