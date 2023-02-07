@@ -114,6 +114,23 @@ public:
         taskExecutor_ = taskExecutor;
     }
 
+    void SetModuleName(const std::string& moduleName)
+    {
+        moduleName_ = moduleName;
+    }
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+    std::string GetModuleName() const
+    {
+        return moduleName_;
+    }
+    std::string GetBundleName() const
+    {
+        return bundleName_;
+    }
+
     ColorMode colorMode_ = ColorMode::LIGHT;
     bool foregroundFrontend_ = false;
     double density_ = 1.0;
@@ -128,6 +145,9 @@ public:
     std::string formSrc_;
     WindowConfig cardWindowConfig_;
     uint64_t cardId_ = 0; // cardId != formId, cardId is the nodeId of component.
+
+    std::string bundleName_;
+    std::string moduleName_;
 };
 } // namespace OHOS::Ace
 

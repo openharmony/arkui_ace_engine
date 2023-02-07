@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
 
-#include "form_renderer.h"
-
 #include "ability_context.h"
 #include "form_js_info.h"
 #include "js_runtime.h"
