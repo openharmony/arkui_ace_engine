@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -192,11 +192,11 @@ HWTEST_F(GaugePropertyTestNg, GaugeMeasureTest003, TestSize.Level1)
      * @tc.expected: step3. gaugeSize is the same with expected value.
      */
     /**
-    //     corresponding ets code:
-    //          Row.Width(500).Height(500) {
-    //         Gauge({ { value: 50, min: 0, max: 100 }}).width(50).height(50)
-    //     }
-    */
+     *     corresponding ets code:
+     *          Row.Width(500).Height(500) {
+     *         Gauge({ { value: 50, min: 0, max: 100 }}).width(50).height(50)
+     *     }
+     */
     LayoutConstraintF layoutConstraintSizevalid;
     layoutConstraintSizevalid.maxSize = MAX_SIZE;
     layoutConstraintSizevalid.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
@@ -208,11 +208,11 @@ HWTEST_F(GaugePropertyTestNg, GaugeMeasureTest003, TestSize.Level1)
     EXPECT_EQ(gaugeSize, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
 
     /**
-    //     corresponding ets code:
-    //     Row.Width(500).Height(500) {
-    //         Gauge({ { value: 50, min: 0, max: 100 }}).height(-10)
-    //     }
-    */
+     *     corresponding ets code:
+     *     Row.Width(500).Height(500) {
+     *         Gauge({ { value: 50, min: 0, max: 100 }}).height(-10)
+     *     }
+     */
     LayoutConstraintF layoutConstraintHeightUnvalid;
     layoutConstraintHeightUnvalid.maxSize = MAX_SIZE;
     layoutConstraintHeightUnvalid.selfIdealSize.SetHeight(NEGATIVE_NUMBER);
@@ -221,11 +221,11 @@ HWTEST_F(GaugePropertyTestNg, GaugeMeasureTest003, TestSize.Level1)
     EXPECT_EQ(gaugeSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
 
     /**
-    //     corresponding ets code:
-    //     Row.Width(500).Height(500) {
-    //         Gauge({ { value: 50, min: 0, max: 100 }}).width(-10)
-    //     }
-    */
+     *     corresponding ets code:
+     *     Row.Width(500).Height(500) {
+     *         Gauge({ { value: 50, min: 0, max: 100 }}).width(-10)
+     *     }
+     */
     LayoutConstraintF layoutConstraintWidthUnvalid;
     layoutConstraintWidthUnvalid.maxSize = MAX_SIZE;
     layoutConstraintWidthUnvalid.selfIdealSize.SetWidth(NEGATIVE_NUMBER);
@@ -234,11 +234,11 @@ HWTEST_F(GaugePropertyTestNg, GaugeMeasureTest003, TestSize.Level1)
     EXPECT_EQ(gaugeSize, SizeF(MAX_WIDTH, MAX_HEIGHT));
 
     /**
-    //     corresponding ets code:
-    //     Row.Width(500).Height(500) {
-    //         Gauge({ { value: 50, min: 0, max: 100 }}).width(50)
-    //     }
-    */
+     *     corresponding ets code:
+     *     Row.Width(500).Height(500) {
+     *         Gauge({ { value: 50, min: 0, max: 100 }}).width(50)
+     *     }
+     */
     LayoutConstraintF layoutConstraintWidth;
     layoutConstraintWidth.selfIdealSize.SetWidth(WIDTH.ConvertToPx());
     layoutConstraintWidth.maxSize = MAX_SIZE;
@@ -247,11 +247,11 @@ HWTEST_F(GaugePropertyTestNg, GaugeMeasureTest003, TestSize.Level1)
     EXPECT_EQ(gaugeSize, SizeF(WIDTH.ConvertToPx(), WIDTH.ConvertToPx()));
 
     /**
-    //     corresponding ets code:
-    //     Row.Width(500).Height(500) {
-    //         Gauge({ { value: 50, min: 0, max: 100 }}).height(50)
-    //     }
-    */
+     *     corresponding ets code:
+     *     Row.Width(500).Height(500) {
+     *         Gauge({ { value: 50, min: 0, max: 100 }}).height(50)
+     *     }
+     */
     LayoutConstraintF layoutConstraintHeight;
     layoutConstraintHeight.selfIdealSize.SetHeight(HEIGHT.ConvertToPx());
     layoutConstraintHeight.maxSize = MAX_SIZE;
@@ -260,11 +260,11 @@ HWTEST_F(GaugePropertyTestNg, GaugeMeasureTest003, TestSize.Level1)
     EXPECT_EQ(gaugeSize, SizeF(HEIGHT.ConvertToPx(), HEIGHT.ConvertToPx()));
 
     /**
-    //     corresponding ets code:
-    //     Row.Width(400).Height(500) {
-    //         Gauge({ { value: 50, min: 0, max: 100 }})
-    //     }
-    */
+     *     corresponding ets code:
+     *     Row.Width(400).Height(500) {
+     *         Gauge({ { value: 50, min: 0, max: 100 }})
+     *     }
+     */
     LayoutConstraintF layoutConstraintSmallWidth;
     layoutConstraintSmallWidth.maxSize = SizeF(SMALL_WIDTH, MAX_HEIGHT);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
@@ -272,11 +272,11 @@ HWTEST_F(GaugePropertyTestNg, GaugeMeasureTest003, TestSize.Level1)
     EXPECT_EQ(gaugeSize, SizeF(SMALL_WIDTH, SMALL_WIDTH));
 
     /**
-    //     corresponding ets code:
-    //     Row.Width(500).Height(400) {
-    //         Gauge({ { value: 50, min: 0, max: 100 }})
-    //     }
-    */
+     *    corresponding ets code:
+     *     Row.Width(500).Height(400) {
+     *         Gauge({ { value: 50, min: 0, max: 100 }})
+     *     }
+     */
     LayoutConstraintF layoutConstraintSmallHeight;
     layoutConstraintSmallWidth.maxSize = SizeF(MAX_WIDTH, SMALL_HEIGHT);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<ProgressTheme>()));
@@ -367,14 +367,14 @@ HWTEST_F(GaugePropertyTestNg, GaugePaintPropertyTest005, TestSize.Level1)
      */
 
     /**
-    //     case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
-    */
+     *      case 1: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     */
     bool first_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(first_case);
 
     /**
-    //     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
-    */
+     *     case 2: LayoutWrapper::SkipMeasureContent = true , skipMeasure = true;
+     */
     bool second_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(second_case);
 
@@ -382,14 +382,14 @@ HWTEST_F(GaugePropertyTestNg, GaugePaintPropertyTest005, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     /**
-    //     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
-    */
+     *     case 3: LayoutWrapper::SkipMeasureContent = false , skipMeasure = true;
+     */
     bool third_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(third_case);
 
     /**
-    //     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
-    */
+     *     case 4: LayoutWrapper::SkipMeasureContent = false , skipMeasure = false;
+     */
     bool forth_case = gaugePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);
 }
@@ -420,5 +420,4 @@ HWTEST_F(GaugePropertyTestNg, GaugeLayoutPropertyTest006, TestSize.Level1)
     dataPanelPattern->OnModifyDone();
     EXPECT_EQ(ALIGNMENT, layoutProperty->GetPositionProperty()->GetAlignmentValue());
 }
-
 } // namespace OHOS::Ace::NG

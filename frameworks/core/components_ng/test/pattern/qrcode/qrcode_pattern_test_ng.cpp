@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -205,14 +205,14 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest004, TestSize.Level1)
      */
 
     /**
-    //     case 1: LayoutWrapper::SkipMeasure = true , skipLayout = true;
-    */
+     *     case 1: LayoutWrapper::SkipMeasure = true , skipLayout = true;
+     */
     bool first_case = qrcodePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_FALSE(first_case);
 
     /**
-    //     case 2: LayoutWrapper::SkipMeasure = false , skipLayout = false;
-    */
+     *     case 2: LayoutWrapper::SkipMeasure = false , skipLayout = false;
+     */
     bool second_case = qrcodePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(second_case);
 
@@ -220,14 +220,14 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest004, TestSize.Level1)
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
 
     /**
-    //     case 3: LayoutWrapper::SkipMeasure = true , skipLayout = false;
-    */
+     *     case 3: LayoutWrapper::SkipMeasure = true , skipLayout = false;
+     */
     bool third_case = qrcodePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_TRUE(third_case);
 
     /**
-    //     case 4: LayoutWrapper::SkipMeasure = false , skipLayout = false;
-    */
+     *     case 4: LayoutWrapper::SkipMeasure = false , skipLayout = false;
+     */
     bool forth_case = qrcodePattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);
 }
