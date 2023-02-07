@@ -92,10 +92,10 @@ void SelectOverlayPaintMethod::PaintHandle(RSCanvas& canvas, const RectF& handle
     // 1.0 is avoid separation of handle circle and handle line.
     OffsetF startPoint(0.0, -handleRadius + 1.0f);
     // 1.0_dp is designed by UX, handle line is higher than height of select region.
-    OffsetF endPoint(0.0, -handleRadius - handleRect.Height() - (1.0_vp).ConvertToPx());
+    OffsetF endPoint(0.0, -handleRadius - handleRect.Height());
     if (handleOnTop) {
         startPoint.SetY(handleRadius - 1.0);
-        endPoint.SetY(handleRadius + handleRect.Height() + (1.0_vp).ConvertToPx());
+        endPoint.SetY(handleRadius + handleRect.Height());
     }
     canvas.DrawLine({ startPoint.GetX(), startPoint.GetY() }, { endPoint.GetX(), endPoint.GetY() });
     canvas.DetachPen();
