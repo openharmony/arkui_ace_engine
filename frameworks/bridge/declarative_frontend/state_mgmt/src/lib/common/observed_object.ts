@@ -281,13 +281,42 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * @returns deep copied object, optionally wrapped inside an ObservedObject
    */
   public static GetDeepCopyOfObject(obj: any): any {
+
+    function getProperties(o) {
+      var seenobj = new Set();
+      var seenprop = new Set();
+      function _proto(obj) {
+        return obj instanceof Object ?
+          Object.getPrototypeOf(obj) :
+          obj.constructor.prototype;
+      }
+
+      function _properties(obj) {
+        var ret = [];
+        if (obj === null || seenobj.has(obj)) { return ret; }
+        seenobj.add(obj);
+        if (obj instanceof Object) {
+          var ps = Object.getOwnPropertyNames(obj);
+          for (var i = 0; i < ps.length; ++i) {
+            if (!seenprop.has(ps[i])) {
+              ret.push(ps[i]);
+              seenprop.add(ps[i]);
+            }
+          }
+        }
+        return ret.concat(_properties(_proto(obj)));
+      }
+      return _properties(o);
+    }
+
     if (obj instanceof Array) {
       let copy = [];
       obj.forEach((item, index) => copy[index] = ObservedObject.GetDeepCopyOfObject(item));
       return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     } else if (typeof obj === "object") {
       let copy = {};
-      Object.keys(obj).forEach(k => copy[k] = ObservedObject.GetDeepCopyOfObject(obj[k]));
+      const properties = getProperties(obj);
+      properties.forEach(k => copy[k] = ObservedObject.GetDeepCopyOfObject(obj[k]));
       return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     }
 
