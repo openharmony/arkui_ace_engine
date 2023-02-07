@@ -30,7 +30,8 @@ public:
     MOCK_METHOD1(GetTheme, RefPtr<Theme>(ThemeType type));
     MOCK_CONST_METHOD0(GetBackgroundColor, Color());
     MOCK_CONST_METHOD0(GetThemeConstants, RefPtr<ThemeConstants>());
-    MOCK_METHOD2(UpdateThemeConstants, void(const std::string& bundleName, const std::string& moduleName));
+    MOCK_CONST_METHOD2(
+        GetThemeConstants, RefPtr<ThemeConstants>(const std::string& bundleName, const std::string& moduleName));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_THEME_MOCK_THEME_MANAGER_H

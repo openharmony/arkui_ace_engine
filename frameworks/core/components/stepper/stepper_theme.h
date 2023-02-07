@@ -88,6 +88,7 @@ public:
                     theme->progressColor_ = pattern->GetAttr<Color>("progress_color", Color::RED);
                     theme->disabledColor_ = pattern->GetAttr<Color>("button_bg_color_disabled", Color::RED);
                     theme->disabledAlpha_ = pattern->GetAttr<double>("button_bg_color_disabled_alpha", 0.0);
+                    theme->defaultAlpha_ = pattern->GetAttr<double>("attribute_alpha_content_primary", 0.9);
                 }
             }
             return theme;
@@ -201,6 +202,11 @@ public:
         return disabledAlpha_;
     }
 
+    double GetDefaultAlpha() const
+    {
+        return defaultAlpha_;
+    }
+
 protected:
     StepperTheme() = default;
 
@@ -226,6 +232,7 @@ private:
     Dimension focusBorderWidth_;
     Color mouseHoverColor_;
     double disabledAlpha_ = 0.4;
+    double defaultAlpha_ = 0.9;
 };
 
 } // namespace OHOS::Ace

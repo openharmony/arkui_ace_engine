@@ -133,6 +133,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         textPadding.top = CalcLength(padding.Top());
         textPadding.bottom = CalcLength(padding.Bottom());
         layoutProps->UpdatePadding(textPadding);
+        layoutProps->UpdateAlignment(Alignment::CENTER);
+        auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
+        layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
         textNode->MarkModifyDone();
         child = textNode;
     }
@@ -258,10 +261,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(const RefPtr<PopupParam>& para
     message->MountToParent(columnNode);
 
     auto buttonRow = BubbleView::CreateButtons(param, popupId, targetId);
-
-    PaddingProperty columnPadding;
-    columnPadding.top = CalcLength(padding.Top());
-    layoutProps->UpdatePadding(columnPadding);
     auto maxWidth = GetMaxWith();
     auto childLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
@@ -316,7 +315,7 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
     auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
     CHECK_NULL_RETURN(buttonPattern, nullptr);
-    // set button foucus color
+    // set button focus color
     buttonPattern->setComponentButtonType(ComponentButtonType::POPUP);
     buttonPattern->SetFocusBorderColor(focusColor);
     auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
@@ -328,21 +327,20 @@ RefPtr<FrameNode> BubbleView::CreateButton(
 
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
     auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateFontSize(popupTheme->GetButtonFontSize());
     auto buttonTextInsideMargin = popupTheme->GetButtonTextInsideMargin();
-    PaddingProperty textPadding;
-    textPadding.left = CalcLength(buttonTextInsideMargin);
-    textPadding.right = CalcLength(buttonTextInsideMargin);
     buttonTextNode->MountToParent(buttonNode);
 
     PaddingProperty buttonPadding;
     auto padding = buttonTheme->GetPadding();
-    buttonPadding.left = CalcLength(padding.Left());
-    buttonPadding.right = CalcLength(padding.Right());
-    buttonPadding.top = CalcLength(padding.Top());
-    buttonPadding.bottom = CalcLength(padding.Bottom());
+    buttonPadding.left = CalcLength(buttonTextInsideMargin);
+    buttonPadding.right = CalcLength(buttonTextInsideMargin);
     buttonProp->UpdatePadding(buttonPadding);
     buttonProp->UpdateType(ButtonType::CAPSULE);
     buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
+    buttonProp->UpdateAlignment(Alignment::CENTER);
+    auto buttonMiniMumWidth = popupTheme->GetButtonMiniMumWidth().ConvertToPx();
+    buttonProp->UpdateCalcMinSize(CalcSize(CalcLength(buttonMiniMumWidth), std::nullopt));
     auto renderContext = buttonNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);

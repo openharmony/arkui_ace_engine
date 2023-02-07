@@ -169,8 +169,12 @@ void JSImage::Create(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+    // Interim programme
+    std::string bundleName;
+    std::string moduleName;
     std::string src;
     auto noPixMap = ParseJsMedia(info[0], src);
+    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
 
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
@@ -178,8 +182,24 @@ void JSImage::Create(const JSCallbackInfo& info)
         pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
+    ImageModel::GetInstance()->Create(src, noPixMap, pixMap, bundleName, moduleName);
+}
 
-    ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
+// Interim programme
+void JSImage::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
+{
+    if (!jsValue->IsObject() || jsValue->IsString()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (!jsObj->IsUndefined()) {
+        JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
+        JSRef<JSVal> module = jsObj->GetProperty("moduleName");
+        if (bundle->IsString() && module->IsString()) {
+            bundleName = bundle->ToString();
+            moduleName = module->ToString();
+        }
+    }
 }
 
 void JSImage::JsBorder(const JSCallbackInfo& info)

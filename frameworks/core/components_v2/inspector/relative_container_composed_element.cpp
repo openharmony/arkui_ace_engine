@@ -70,41 +70,6 @@ RefPtr<RenderRelativeContainer> RelativeContainerComposedElement::GetRenderRelat
     return nullptr;
 }
 
-void RelativeContainerComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto relativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!relativeContainerElement) {
-        LOGE("Get relativeContainerElement failed");
-        return;
-    }
-    relativeContainerElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    relativeContainerElement->MarkDirty();
-}
-
-void RelativeContainerComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto relativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!relativeContainerElement) {
-        LOGE("Get relativeContainerElement failed");
-        return;
-    }
-    auto child = relativeContainerElement->GetChildBySlot(slot);
-    relativeContainerElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    relativeContainerElement->MarkDirty();
-}
-
-void RelativeContainerComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto relativeContainerElement = GetContentElement<RelativeContainerElement>(RelativeContainerElement::TypeId());
-    if (!relativeContainerElement) {
-        LOGE("Get relativeContainerElement failed");
-        return;
-    }
-    auto child = relativeContainerElement->GetChildBySlot(slot);
-    relativeContainerElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    relativeContainerElement->MarkDirty();
-}
-
 std::string RelativeContainerComposedElement::GetAlignDirectionStr(AlignDirection alignDirection) const
 {
     switch (alignDirection) {

@@ -77,6 +77,8 @@ void RenderSceneViewer::HandleEvent(const OHOS::Render3D::SceneViewerTouchEvent&
         default:
             LOGW("Unknown touch type.");
             break;
+        default:
+            break;
     }
 
     if (!isHandleCameraMove_) {

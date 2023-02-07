@@ -150,7 +150,7 @@ public:
 
     virtual void WindowFocus(bool isFocus) = 0;
 
-    virtual void ShowContainerTitle(bool isShow) = 0;
+    virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
 
     virtual void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
@@ -485,14 +485,14 @@ public:
         return isJsCard_;
     }
 
-    void SetIsEtsCard(bool isEtsCard)
+    void SetIsFormRender(bool isEtsCard)
     {
-        isEtsCard_ = isEtsCard;
+        isFormRender_ = isEtsCard;
     }
 
-    bool IsEtsCard() const
+    bool IsFormRender() const
     {
-        return isEtsCard_;
+        return isFormRender_;
     }
 
     // Get the dp scale which used to covert dp to logic px.
@@ -749,6 +749,11 @@ public:
         parentPipeline_ = pipeline;
     }
 
+    void AddEtsCardTouchEventCallback(const std::function<void(const TouchEvent&)>&& callback)
+    {
+        etsCardTouchEventCallback_ = std::move(callback);
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -776,7 +781,7 @@ protected:
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
-    bool isEtsCard_ = false;
+    bool isFormRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
     bool installationFree_ = false;
@@ -827,6 +832,7 @@ protected:
     WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
+    std::function<void(const TouchEvent&)> etsCardTouchEventCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;

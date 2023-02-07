@@ -139,7 +139,7 @@ public:
 
     void WindowFocus(bool isFocus) override;
 
-    void ShowContainerTitle(bool isShow) override;
+    void ShowContainerTitle(bool isShow, bool hasDeco = true) override;
 
     void SetAppBgColor(const Color& color) override;
 

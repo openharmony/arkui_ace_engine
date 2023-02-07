@@ -64,7 +64,7 @@ public:
 
     void InitContainerEvent();
 
-    void ShowTitle(bool isShow);
+    void ShowTitle(bool isShow, bool hasDeco = true);
 
     void SetAppTitle(const std::string& title);
 
@@ -88,6 +88,7 @@ private:
     float moveX_ = 0.0f;
     float moveY_ = 0.0f;
     bool isStartMove_ = false;
+    bool hasDeco_ = true;
 };
 
 } // namespace OHOS::Ace::NG

@@ -40,11 +40,14 @@ public:
     {
         return HyperlinkComposedElement::TypeId();
     }
+
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<HyperlinkElement>(HyperlinkElement::TypeId());
+    }
+
 private:
     RefPtr<HyperlinkComponent> GetHyperlinkComponent() const;
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
 };
 
 } // namespace OHOS::Ace::V2

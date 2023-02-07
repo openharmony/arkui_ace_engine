@@ -36,6 +36,7 @@ public:
     void Pop() override;
     void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         TabBarBuilderFunc&& builder, bool useContentOnly) override;
+    void SetTabBarStyle(TabBarStyle tabBarStyle) override;
     static void AddTabBarItem(
         const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
     static void RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode);

@@ -83,6 +83,7 @@ public:
             }
             theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp);
+            theme->buttonFontSize_ = pattern->GetAttr<Dimension>(POPUP_BUTTON_TEXT_FONT_SIZE, 14.0_fp);
             theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::WHITE);
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
@@ -143,6 +144,11 @@ public:
         return fontSize_;
     }
 
+    const Dimension& GetButtonFontSize() const
+    {
+        return buttonFontSize_;
+    }
+
     const Color& GetFontColor() const
     {
         return fontColor_;
@@ -193,6 +199,16 @@ public:
         return focusPaintWidth_;
     }
 
+    const Dimension& GetButtonMiniMumWidth() const
+    {
+        return buttonMiniMumWidth;
+    }
+
+    const Dimension& GetBubbleMiniMumHeight() const
+    {
+        return bubbleMiniMumHeight_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -211,12 +227,15 @@ private:
     uint32_t hideTime_ = 0;
     Dimension targetSpace_;
     Dimension fontSize_;
+    Dimension buttonFontSize_ = 14.0_fp;
     Color fontColor_;
     Dimension bubbleSpacing_ = 8.0_vp;
     Dimension buttonTextInsideMargin_ = 8.0_vp;
-    Dimension buttonSpacing = 8.0_vp;
+    Dimension buttonSpacing = 4.0_vp;
     Dimension littlePadding_ = 4.0_vp;
     Dimension focusPaintWidth_ = 2.0_vp;
+    Dimension buttonMiniMumWidth = 72.0_vp;
+    Dimension bubbleMiniMumHeight_ = 48.0_vp;
 };
 
 } // namespace OHOS::Ace

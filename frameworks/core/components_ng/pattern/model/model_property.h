@@ -37,6 +37,17 @@ public:                                                                 \
     }                                                                   \
 private:                                                                \
     bool needs##name##Setup_ = defaultVal;
+
+#define DEFINE_NEEDS_SETUP_FLAG_TRIGGER_PROPERTY(name, type, trigger, changeFlag)             \
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(name, type, changeFlag)         \
+public:                                                                                       \
+    void On##name##Update(const type& value)                                                  \
+    {                                                                                         \
+        do {                                                                                  \
+            LOGD("MODEL_NG On%sUpdate() -> update Needs%sSetup property.", #name, #trigger);  \
+            UpdateNeeds##trigger##Setup(true);                                                \
+        } while (false);                                                                      \
+    }
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_PROPERTY_H

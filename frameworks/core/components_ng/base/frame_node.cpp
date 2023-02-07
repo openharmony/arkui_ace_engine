@@ -611,6 +611,8 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
+    CHECK_NULL_RETURN_NOLOG(layoutProperty_, nullptr);
+    CHECK_NULL_RETURN_NOLOG(pattern_, nullptr);
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
         auto layoutWrapper =
             MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
@@ -906,7 +908,7 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentLocalPoint)
     auto paintRect = renderContext_->GetPaintRectWithTransform();
     auto responseRegionList = GetResponseRegionList(paintRect);
     auto localPoint = parentLocalPoint - paintRect.GetOffset();
-    if ((!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) && !IsResponseRegion()) {
+    if (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable()) {
         if (!pattern_->UsResRegion()) {
             LOGD("TouchTest: not use resRegion, point is out of region in %{public}s", GetTag().c_str());
             return true;
@@ -946,7 +948,14 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        if (IsOutOfTouchTestRegion(parentLocalPoint)) {
+        auto isOutOfRegion = false;
+        if (pattern_->NeedExternRegion()) {
+            isOutOfRegion = IsOutOfTouchTestRegion(parentLocalPoint);
+        } else {
+            isOutOfRegion = (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable())
+                && !IsResponseRegion();
+        }
+        if (isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
     }

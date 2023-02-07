@@ -94,7 +94,7 @@ void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 
 void PipelineContext::WindowFocus(bool isFocus) {}
 
-void PipelineContext::ShowContainerTitle(bool isShow) {}
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco) {}
 
 void PipelineContext::SetContainerWindow(bool isShow) {}
 

@@ -48,6 +48,11 @@ public:
         return false;
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+    
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ScrollLayoutProperty>();
@@ -176,6 +181,7 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
+    void FireOnScrollStart();
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;

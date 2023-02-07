@@ -351,6 +351,11 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     } else {
         dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
     }
+    if (!dragDropProxy_) {
+        LOGE("HandleOnDragStart: drag start error");
+        return;
+    }
+
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo, GetFrameNode());
 }

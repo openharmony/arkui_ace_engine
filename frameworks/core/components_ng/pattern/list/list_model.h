@@ -55,6 +55,7 @@ public:
     virtual void SetOnScroll(OnScrollEvent&& onScroll) = 0;
     virtual void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) = 0;
     virtual void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) = 0;
+    virtual void SetOnScrollStart(OnScrollStartEvent&& onScrollStart) = 0;
     virtual void SetOnScrollStop(OnScrollStopEvent&& onScrollStop) = 0;
     virtual void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex) = 0;
     virtual void SetOnReachStart(OnReachEvent&& onReachStart) = 0;

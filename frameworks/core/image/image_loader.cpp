@@ -487,7 +487,8 @@ sk_sp<SkData> ResourceImageLoader::LoadImageData(
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
-    auto themeConstants = themeManager->GetThemeConstants();
+    auto themeConstants =
+        themeManager->GetThemeConstants(imageSourceInfo.GetBundleName(), imageSourceInfo.GetModuleName());
     CHECK_NULL_RETURN(themeConstants, nullptr);
 
     std::unique_ptr<uint8_t[]> data;

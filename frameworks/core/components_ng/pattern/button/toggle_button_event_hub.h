@@ -19,13 +19,14 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 
 namespace OHOS::Ace::NG {
 
 using ChangeEvent = std::function<void(const bool)>;
 
-class ToggleButtonEventHub : public EventHub {
-    DECLARE_ACE_TYPE(ToggleButtonEventHub, EventHub)
+class ToggleButtonEventHub : public ButtonEventHub {
+    DECLARE_ACE_TYPE(ToggleButtonEventHub, ButtonEventHub)
 
 public:
     ToggleButtonEventHub() = default;

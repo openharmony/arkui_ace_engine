@@ -14,6 +14,7 @@
  */
 
 #include "flutter_render_image.h"
+#include "render_image.h"
 #include "rosen_render_image.h"
 
 namespace OHOS::Ace {

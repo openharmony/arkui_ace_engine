@@ -81,6 +81,10 @@ public:
                 theme->buttonFocusColor_ = pattern->GetAttr<Color>("button_bg_color_focused", Color::WHITE);
                 theme->buttonHoverColor_ = pattern->GetAttr<Color>("button_bg_color_hovered", Color::WHITE);
                 theme->buttonCornerRadius_  = pattern->GetAttr<Dimension>("button_corner_radius", 0.0_vp);
+                theme->maxPaddingStart_ = pattern->GetAttr<Dimension>("title_left_spacing", 0.0_vp);
+                theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("title_right_spacing", 0.0_vp);
+                theme->defaultPaddingStart_ = pattern->GetAttr<Dimension>("back_button_left_spacing", 0.0_vp);
+                theme->backButtonIconColor_ = pattern->GetAttr<Color>("back_button_icon_color", Color::WHITE);
             }
             return theme;
         }
@@ -192,6 +196,11 @@ public:
         return mostMenuItemCountInBar_;
     }
 
+    const Color& GetBackButtonIconColor() const
+    {
+        return backButtonIconColor_;
+    }
+
 protected:
     NavigationBarTheme() = default;
 
@@ -221,6 +230,7 @@ private:
     Dimension menuItemPadding_;
     Dimension titleMinPadding_;
     uint32_t mostMenuItemCountInBar_ = 0;
+    Color backButtonIconColor_;
 };
 
 } // namespace OHOS::Ace

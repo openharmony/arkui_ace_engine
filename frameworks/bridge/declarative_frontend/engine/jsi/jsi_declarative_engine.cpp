@@ -37,6 +37,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
+#include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -266,18 +267,20 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
-    uint8_t* codeStart;
-    int32_t codeLength;
-    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
-    if (!stateMgmtResult) {
-        LOGE("EvaluateJsCode stateMgmt failed");
-    }
-    bool jsEnumStyleResult = runtime_->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
-    if (!jsEnumStyleResult) {
-        LOGE("EvaluateJsCode jsEnumStyle failed");
+    if (isUnique_ == false) {
+        uint8_t* codeStart;
+        int32_t codeLength;
+        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+        bool stateMgmtResult = runtime_->EvaluateJsCode(codeStart, codeLength);
+        if (!stateMgmtResult) {
+            LOGE("EvaluateJsCode stateMgmt failed");
+        }
+        bool jsEnumStyleResult = runtime_->EvaluateJsCode(
+            (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+        if (!jsEnumStyleResult) {
+            LOGE("EvaluateJsCode jsEnumStyle failed");
+        }
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -982,40 +985,40 @@ bool JsiDeclarativeEngine::ExecuteAbc(const std::string& fileName)
 bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t cardId)
 {
     auto runtime = engineInstance_->GetJsRuntime();
-    if (!runtime) {
-        LOGE("ExecuteCardAbc failed, runtime is nullptr");
-        return false;
-    }
+    CHECK_NULL_RETURN(runtime, false);
 
     auto container = Container::Current();
-    if (!container) {
-        LOGE("ExecuteCardAbc failed, container is nullptr");
-        return false;
-    }
+    CHECK_NULL_RETURN(container, false);
 
-    auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
-    if (!frontEnd) {
-        LOGE("ExecuteCardAbc failed, frontEnd is nullptr");
-        return false;
-    }
-
-    auto delegate = frontEnd->GetDelegate();
-    if (!delegate) {
-        LOGE("ExecuteCardAbc failed, delegate is nullptr");
-        return false;
-    }
-
-    std::vector<uint8_t> content;
-    if (!delegate->GetAssetContent(fileName, content)) {
-        LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
-        return true;
-    }
-#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM)
-    const std::string abcPath = delegate->GetAssetPath(fileName).append(fileName);
-#else
-    const std::string& abcPath = fileName;
-#endif
+    LOGI("JsiDeclarativeEngine::ExecuteCardAbc fileName = %{public}s", fileName.c_str());
     CardScope cardScope(cardId);
+    std::string abcPath;
+    std::vector<uint8_t> content;
+    if (container->IsFRSCardContainer()) {
+        LOGI("ExecuteCardAbc In FRS");
+        auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_RETURN(frontEnd, false);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_RETURN(delegate, false);
+        if (!delegate->GetAssetContent(fileName, content)) {
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            return false;
+        }
+        abcPath = delegate->GetAssetPath(fileName).append(fileName);
+    } else {
+        LOGI("ExecuteCardAbc In HOST");
+        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_RETURN(frontEnd, false);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_RETURN(delegate, false);
+        if (!delegate->GetAssetContent(fileName, content)) {
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            return false;
+        }
+        abcPath = delegate->GetAssetPath(fileName).append(fileName);
+    }
+
+    LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
     if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
         LOGE("ExecuteCardAbc EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
         return false;
@@ -1823,26 +1826,24 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
 
     // preload js enums
-    if (isUnique_ == false) {
-        bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
-            (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
-        if (!jsEnumStyleResult) {
-            LOGE("EvaluateJsCode jsEnumStyle failed");
-            globalRuntime_ = nullptr;
-            return;
-        }
-
-        // preload state management
-        uint8_t* codeStart;
-        int32_t codeLength;
-        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-        bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
-        if (!evalResult) {
-            LOGE("PreloadAceModuleCard EvaluateJsCode stateMgmt failed");
-        }
-        isModulePreloaded_ = evalResult;
+    bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+    if (!jsEnumStyleResult) {
+        LOGE("EvaluateJsCode jsEnumStyle failed");
+        globalRuntime_ = nullptr;
+        return;
     }
+
+    // preload state management
+    uint8_t* codeStart;
+    int32_t codeLength;
+    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+    bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
+    if (!evalResult) {
+        LOGE("PreloadAceModuleCard EvaluateJsCode stateMgmt failed");
+    }
+    isModulePreloaded_ = evalResult;
 
     globalRuntime_ = nullptr;
     localRuntime = arkRuntime;

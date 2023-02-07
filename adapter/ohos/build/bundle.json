@@ -31,7 +31,6 @@
                 "ability_runtime",
                 "appexecfwk_standard",
                 "ipc",
-                "ipc_js",
                 "samgr",
                 "preferences",
                 "relational_store",
@@ -79,7 +78,16 @@
                       ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent"
-                  }
+                },
+                {
+                    "header": {
+                      "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/form_render/include",
+                      "header_files": [
+                          "form_renderer_group.h"
+                      ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render"
+                }
             ],
             "test": [
                 "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice/test:unittest",

@@ -121,4 +121,9 @@ RefPtr<Frontend> PipelineBase::GetFrontend() const
 }
 
 void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
+
+RefPtr<ImageCache> PipelineBase::GetImageCache() const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace

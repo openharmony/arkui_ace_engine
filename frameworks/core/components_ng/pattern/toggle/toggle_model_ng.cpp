@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
@@ -227,6 +228,7 @@ void ToggleModelNG::CreateButton(int32_t nodeId)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
     stack->Push(frameNode);
+    NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
 }
 
 void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index)

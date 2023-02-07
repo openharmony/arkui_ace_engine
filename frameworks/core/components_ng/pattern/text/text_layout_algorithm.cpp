@@ -96,10 +96,11 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
                 return std::nullopt;
             }
         }
+
         if (!contentConstraint.selfIdealSize.Width()) {
-            double paragraphNewWidth = paragraph_->GetMaxWidth();
-            paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
-            paragraphNewWidth = std::clamp(GetTextWidth(), 0.0f, contentConstraint.maxSize.Width());
+            float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
+            paragraphNewWidth =
+                std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
             if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
                 paragraph_->Layout(std::ceil(paragraphNewWidth));
             }
@@ -115,7 +116,10 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     }
     float heightFinal =
         std::min(static_cast<float>(height + std::fabs(baselineOffset)), contentConstraint.maxSize.Height());
-    return SizeF(paragraph_->GetMaxWidth(), heightFinal);
+
+    return SizeF(contentConstraint.selfIdealSize.Width() ? contentConstraint.selfIdealSize.Width().value()
+                                                         : paragraph_->GetMaxWidth(),
+        heightFinal);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -244,8 +248,7 @@ TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)
 float TextLayoutAlgorithm::GetTextWidth() const
 {
     CHECK_NULL_RETURN(paragraph_, 0.0);
-    // TODO: need check Line count
-    return paragraph_->GetMaxIntrinsicWidth();
+    return paragraph_->GetTextWidth();
 }
 
 const RefPtr<Paragraph>& TextLayoutAlgorithm::GetParagraph()

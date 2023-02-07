@@ -70,6 +70,8 @@ const std::string IMAGE_SRC_URL = "file://data/data/com.example.test/res/example
 const std::string ALT_SRC_URL = "file://data/data/com.example.test/res/exampleAlt.jpg";
 const std::string RESOURCE_URL = "resource:///ohos_test_image.svg";
 const std::string PNG_IMAGE = "/common/media/aaa.png";
+const std::string BUNDLE_NAME;
+const std::string MODULE_NAME;
 const std::string WEB_IMAGE =
     "https://img2.baidu.com/it/u=3999091694,1705560228&fm=253&fmt=auto&app=120&f=JPEG?w=1280&h=800";
 } // namespace
@@ -100,7 +102,7 @@ RefPtr<FrameNode> ImagePatternTestNg::CreateImageNode(
     const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;
-    image.Create(src, pixMap, pixMap);
+    image.Create(src, pixMap, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(alt);
     auto onError = [](const LoadImageFailEvent& info) {};
     image.SetOnError(std::move(onError));
@@ -114,7 +116,7 @@ RefPtr<FrameNode> ImagePatternTestNg::CreateImageNodeWithDefaultProp(
     const std::string& src, const std::string& alt, RefPtr<PixelMap> pixMap)
 {
     ImageModelNG image;
-    image.Create(src, pixMap, pixMap);
+    image.Create(src, pixMap, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(alt);
     image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
     image.SetImageFit(static_cast<int32_t>(IMAGE_FIT_DEFAULT));
@@ -135,7 +137,7 @@ RefPtr<FrameNode> ImagePatternTestNg::CreateSyncImageNode()
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(PNG_IMAGE, true, pixMap);
+    image.Create(PNG_IMAGE, true, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -146,7 +148,7 @@ RefPtr<FrameNode> ImagePatternTestNg::CreateSyncWebImageNode()
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(WEB_IMAGE, true, pixMap);
+    image.Create(WEB_IMAGE, true, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -576,7 +578,7 @@ HWTEST_F(ImagePatternTestNg, ImageCreator001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create("", false, pixMap);
+    image.Create("", false, pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
 }
@@ -590,7 +592,7 @@ HWTEST_F(ImagePatternTestNg, ImageCreator002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create("", false, pixMap);
+    image.Create("", false, pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::IMAGE_ETS_TAG);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -616,7 +618,7 @@ HWTEST_F(ImagePatternTestNg, ImageCreator003, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap);
+    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetImageFit(static_cast<int32_t>(IMAGE_FIT_DEFAULT));
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(SYNCMODE_DEFAULT);
@@ -665,7 +667,7 @@ HWTEST_F(ImagePatternTestNg, ImageEventTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap);
+    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
     LoadImageSuccessEvent curEvent(
         IMAGE_WIDTH_DEFAULT, IMAGE_HEIGHT_DEFAULT, IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, -1);
     auto onComplete = [&curEvent](const LoadImageSuccessEvent& info) { curEvent = info; };
@@ -693,7 +695,7 @@ HWTEST_F(ImagePatternTestNg, ImageEventTest002, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap);
+    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
     LoadImageFailEvent curEvent(IMAGE_COMPONENTWIDTH_DEFAULT, IMAGE_COMPONENTHEIGHT_DEFAULT, "");
     auto onError = [&curEvent](const LoadImageFailEvent& info) { curEvent = info; };
     image.SetOnError(std::move(onError));
@@ -717,7 +719,7 @@ HWTEST_F(ImagePatternTestNg, ImageSvgTest001, TestSize.Level1)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
-    image.Create(IMAGE_SRC_URL, false, pixMap);
+    image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_NE(frameNode, nullptr);
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();

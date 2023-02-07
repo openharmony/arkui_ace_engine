@@ -32,7 +32,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5;
-constexpr Dimension FOCUS_DISTANCE = 4.0_vp;
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
 } // namespace
@@ -361,30 +360,36 @@ void SliderPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 {
     UpdateCircleCenterOffset();
-    auto focusRadius = blockDiameter_ * HALF + static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
-    paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius, circleCenter_.GetY() - focusRadius, focusRadius / HALF,
-        focusRadius / HALF));
+    auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    auto focusDistance = theme->GetFocusSideDistance();
+    auto focusRadius = blockDiameter_ * HALF + static_cast<float>(focusDistance.ConvertToPx());
+    paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
+        circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
     paintRect.SetCornerRadius(focusRadius);
 }
+
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto frameSize = GetHostFrameSize();
     CHECK_NULL_VOID(frameSize);
+    auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    auto focusDistance = theme->GetFocusSideDistance();
     float offsetX = 0;
     float offsetY = 0;
     float width = frameSize->Width();
     float height = frameSize->Height();
-    float focusRadius = trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
+    float focusRadius = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     if (direction_ == Axis::HORIZONTAL) {
-        offsetX = borderBlank_ - trackThickness_ * HALF - static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
-        offsetY = (frameSize->Height() - trackThickness_) * HALF - static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
-        width = sliderLength_ + trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
-        height = trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
+        offsetX = borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetY = (frameSize->Height() - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        width = sliderLength_ + trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
+        height = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     } else {
-        offsetX = (frameSize->Width() - trackThickness_) * HALF - static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
-        offsetY = borderBlank_ - trackThickness_ * HALF - static_cast<float>(FOCUS_DISTANCE.ConvertToPx());
-        width = trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
-        height = sliderLength_ + trackThickness_ + static_cast<float>(FOCUS_DISTANCE.ConvertToPx()) / HALF;
+        offsetX = (frameSize->Width() - trackThickness_) * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        offsetY = borderBlank_ - trackThickness_ * HALF - static_cast<float>(focusDistance.ConvertToPx());
+        width = trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
+        height = sliderLength_ + trackThickness_ + static_cast<float>(focusDistance.ConvertToPx()) / HALF;
     }
     paintRect.SetRect(RectF(offsetX, offsetY, width, height));
     paintRect.SetCornerRadius(focusRadius);

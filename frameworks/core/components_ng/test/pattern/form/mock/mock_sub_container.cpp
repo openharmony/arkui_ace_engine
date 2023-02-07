@@ -28,7 +28,7 @@ void SubContainer::UpdateSurfaceSize() {}
 
 void SubContainer::RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
-    const FrontendType& cardType)
+    const FrontendType& cardType, const FrontendType& uiSyntax)
 {}
 
 void SubContainer::UpdateCard(

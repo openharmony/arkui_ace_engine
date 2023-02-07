@@ -225,7 +225,7 @@ void ScrollBar::SetGestureEvent()
         touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
-            if (info.GetTouches().empty()) {
+            if (info.GetTouches().empty() || scrollBar->IsHover()) {
                 return;
             }
             auto touch = info.GetTouches().front();
@@ -264,12 +264,14 @@ void ScrollBar::SetMouseEvent()
             CHECK_NULL_VOID_NOLOG(scrollBar);
             Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
             bool inRegion = scrollBar->InBarRegion(point);
-            if (inRegion && !scrollBar->isHover_) {
+            if (inRegion && !scrollBar->IsHover()) {
                 scrollBar->PlayGrowAnimation();
+                scrollBar->SetHover(true);
                 scrollBar->MarkNeedRender();
             }
-            if (scrollBar->isHover_ && !inRegion) {
+            if (scrollBar->IsHover() && !inRegion) {
                 scrollBar->PlayShrinkAnimation();
+                scrollBar->SetHover(false);
                 scrollBar->MarkNeedRender();
             }
         });
@@ -297,7 +299,6 @@ void ScrollBar::PlayGrowAnimation()
     touchAnimator_->AddInterpolator(animation);
     touchAnimator_->SetDuration(BAR_EXPAND_DURATION);
     touchAnimator_->Play();
-    isHover_ = true;
 }
 
 void ScrollBar::PlayShrinkAnimation()
@@ -321,7 +322,6 @@ void ScrollBar::PlayShrinkAnimation()
     touchAnimator_->AddInterpolator(animation);
     touchAnimator_->SetDuration(BAR_SHRINK_DURATION);
     touchAnimator_->Play();
-    isHover_ = false;
 }
 
 void ScrollBar::PlayBarEndAnimation()

@@ -64,7 +64,6 @@ class ImageProvider : public virtual AceType {
     DECLARE_ACE_TYPE(ImageProvider, AceType);
 
 public:
-    // returns index of callback in task map
     static void CreateImageObject(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctxWp, bool sync);
 
     static void MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
@@ -78,6 +77,7 @@ public:
     // generate cache key for canvasImage, combining src and image size
     static std::string GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize);
 
+    // cancel a scheduled background task
     static void CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
 private:
@@ -88,7 +88,7 @@ private:
      * making sure the same task runs only once (CreateImageObject with same
      * [src], MakeCanvasImage with the same [imageObj] and [size]).
      *
-     *    @param key              task key, based on [src] + [sync] +? [size]
+     *    @param key              task key, based on [src] +? [size]
      *    @param ctx              ImageLoadingContext that initiates the task, to be stored in the amp
      *    @return                 true if task is new, false if task is already running
      */

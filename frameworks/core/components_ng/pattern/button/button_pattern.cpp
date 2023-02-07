@@ -50,7 +50,6 @@ void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, co
     // Init button default style
     buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
     renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
 }
 
 void ButtonPattern::InitButtonLabel()
@@ -63,7 +62,14 @@ void ButtonPattern::InitButtonLabel()
         LOGI("No label, no need to initialize label.");
         return;
     }
-
+    if (!layoutProperty->GetCalcLayoutConstraint() ||
+        !layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height().has_value()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
+    }
     auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -96,14 +102,20 @@ void ButtonPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     InitButtonLabel();
     HandleEnabled();
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
+    InitTouchEvent();
+}
+
+void ButtonPattern::InitTouchEvent()
+{
     if (touchListener_) {
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
-        CHECK_NULL_VOID(buttonPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             buttonPattern->OnTouchDown();
         }
@@ -122,7 +134,6 @@ void ButtonPattern::OnTouchDown()
     CHECK_NULL_VOID(host);
     auto buttonEventHub = GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-
     if (buttonEventHub->GetStateEffect()) {
         const auto& renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
