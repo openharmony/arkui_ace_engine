@@ -57,8 +57,7 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    static RefPtr<PipelineContext> pipeline = AceType::MakeRefPtr<PipelineContext>();
-    return pipeline;
+    return AceType::MakeRefPtr<PipelineContext>();
 }
 
 // non-static method
