@@ -27,7 +27,8 @@ public:
 
 private:
     static RefPtr<FrameNode> BuildBarTitle();
-    static RefPtr<FrameNode> BuildShareButton(InternalResource::ResourceId icon, GestureEventFunc&& clickCallback);
+    static RefPtr<FrameNode> BuildIconButton(
+        InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton);
 };
 
 } // namespace OHOS::Ace::NG
