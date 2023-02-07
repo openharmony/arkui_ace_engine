@@ -91,14 +91,16 @@ public:
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
-
-private:
+    void InitTouchEvent();
     void OnTouchDown();
     void OnTouchUp();
     void HandleEnabled();
     void InitButtonLabel();
-    static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
     Color clickedColor_;
+
+private:
+    static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
+    
     Color backgroundColor_;
     Color FocusBorderColor_;
     bool isSetClickedColor_ = false;
