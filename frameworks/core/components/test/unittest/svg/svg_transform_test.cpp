@@ -167,7 +167,7 @@ HWTEST_F(TransformParseTest, SvgTransformParse005, TestSize.Level0)
         ASSERT_TRUE(CompareVectorFloat(iter->second, matrix));
     }
 
-    auto transformInfo = SvgTransform::CreateInfoFromMap(transform);
+    auto transformInfo = SvgTransform::CreateMatrix4(transform);
     ASSERT_TRUE(transformInfo.hasRotateCenter);
     ASSERT_EQ(transformInfo.rotateCenter, Offset(50.0f, 100.0f));
 }
