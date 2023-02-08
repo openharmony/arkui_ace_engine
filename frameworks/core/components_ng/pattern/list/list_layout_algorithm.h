@@ -193,8 +193,8 @@ protected:
         return index;
     }
 
-    void SetListItemGroupParam(
-        const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout) const;
+    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
+        const RefPtr<ListLayoutProperty>& layoutProperty) const;
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;

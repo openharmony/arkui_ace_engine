@@ -226,7 +226,8 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     ++currentIndex;
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
-        SetListItemGroupParam(wrapper, startPos, true);
+        auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -249,7 +250,8 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     --currentIndex;
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
-        SetListItemGroupParam(wrapper, endPos, false);
+        auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -448,8 +450,8 @@ float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float child
     }
 }
 
-void ListLayoutAlgorithm::SetListItemGroupParam(
-    const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout) const
+void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos,
+    bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty) const
 {
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
@@ -457,6 +459,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(
     CHECK_NULL_VOID(itemGroup);
     itemGroup->SetListMainSize(
         startMainPos_ - paddingBeforeContent_, endMainPos_ + paddingAfterContent_, referencePos, forwardLayout);
+    itemGroup->SetListLayoutProperty(layoutProperty);
 }
 
 void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)
