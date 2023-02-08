@@ -63,9 +63,7 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
         LOGE("nativeEngine is nullptr.");
         return nullptr;
     }
-#ifdef USE_V8_ENGINE
-    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
@@ -105,9 +103,7 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
         LOGE("nativeEngine is nullptr.");
         return nullptr;
     }
-#ifdef USE_V8_ENGINE
-    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
@@ -145,9 +141,7 @@ RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj)
     NativeEngine* nativeEngine = engine->GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, nullptr);
 
-#ifdef USE_V8_ENGINE
-    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;

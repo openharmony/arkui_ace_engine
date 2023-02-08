@@ -16,33 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_EXECUTION_SCOPE_DEFINES_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_EXECUTION_SCOPE_DEFINES_H
 
-#ifdef USE_V8_ENGINE
-#define CHECK_JAVASCRIPT_SCOPE_AND_RETURN
-    if (V8DeclarativeEngineInstance::GetV8Isolate() == nullptr) \
-        return;
-#define CHECK_JAVASCRIPT_SCOPE(exec, ...)                                                  \
-    if (V8DeclarativeEngineInstance::GetV8Isolate() == nullptr || exec.isolate == nullptr) \
-        return __VA_ARGS__;
-#define CHECK_JAVASCRIPT_SCOPE_AND_THREAD(exec, ...)                                                        \
-    if ((CheckThread(TaskExecutor::TaskType::JS) && V8DeclarativeEngineInstance::GetV8Isolate() == nullptr) \
-        || exec.isolate == nullptr)                                                                         \
-        return __VA_ARGS__;
-#define JAVASCRIPT_EXECUTION_SCOPE(exec)                                 \
-    v8::Isolate::Scope ___isolateScope___(exec.isolate);                 \
-    v8::HandleScope ___handleScope___(exec.isolate);                     \
-    v8::Local<v8::Context> __context__ = exec.context.Get(exec.isolate); \
-    v8::Context::Scope __contextScope__(__context__);
-#define JAVASCRIPT_EXECUTION_SCOPE_STATIC                                   \
-    v8::Isolate* __isolate__ = V8DeclarativeEngineInstance::GetV8Isolate(); \
-    v8::Isolate::Scope __isolateScope__(__isolate__);                       \
-    v8::HandleScope ___handleScope___(__isolate__);
-#define JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(exec, ...) \
-    CHECK_JAVASCRIPT_SCOPE(exec, __VA_ARGS__)            \
-    JAVASCRIPT_EXECUTION_SCOPE(exec)
-#define JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK_THREAD(exec, ...) \
-    CHECK_JAVASCRIPT_SCOPE_AND_THREAD(exec, __VA_ARGS__)        \
-    JAVASCRIPT_EXECUTION_SCOPE(exec)
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 #define JAVASCRIPT_EXECUTION_SCOPE(exec) \
     panda::LocalScope socpe(exec.vm_);
 #define JAVASCRIPT_EXECUTION_SCOPE_STATIC                                                                \
