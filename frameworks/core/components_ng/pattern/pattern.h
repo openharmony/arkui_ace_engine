@@ -54,11 +54,6 @@ public:
         return true;
     }
 
-    virtual bool NeedExternRegion()
-    {
-        return false;
-    }
-    
     virtual std::optional<std::string> GetSurfaceNodeName() const
     {
         return std::nullopt;

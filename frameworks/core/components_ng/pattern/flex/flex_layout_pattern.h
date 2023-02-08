@@ -51,11 +51,6 @@ public:
         return false;
     }
 
-    bool NeedExternRegion() override
-    {
-        return true;
-    }
-
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
