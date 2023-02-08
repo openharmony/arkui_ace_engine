@@ -59,6 +59,16 @@ void MountTitle(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(titleNode);
     auto titleLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(titleLayoutProperty);
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSize());
+        } else {
+            titleLayoutProperty->UpdateFontSize(theme->GetTitleFontSizeMin());
+        }
+    }
     titleNode->MarkModifyDone();
 }
 
