@@ -31,7 +31,10 @@ public:
     {
         LOGD("Destroy: JsAnimatorFunction");
     };
-
+    void Execute() override
+    {
+        ExecuteJS();
+    }
     void Execute(float progress);
 };
 

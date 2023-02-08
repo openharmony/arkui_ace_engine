@@ -32,7 +32,7 @@ public:
     {
         LOGD("Destroy: JsGestureFunction");
     };
-    void Execute();
+    void Execute() override;
     void Execute(const GestureEvent& info);
 
 private:
