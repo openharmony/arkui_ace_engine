@@ -84,7 +84,7 @@ int32_t FormRendererDelegateProxy::OnActionEvent(const std::string& action)
     return reply.ReadInt32();
 }
 
-int32_t FormRendererDelegateProxy::OnError(const std::string& param)
+int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::string& msg)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -92,8 +92,13 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& param)
         return ERR_INVALID_VALUE;
     }
 
-    if (!data.WriteString(param)) {
-        HILOG_ERROR("register callback fail, param error");
+    if (!data.WriteString(code)) {
+        HILOG_ERROR("register callback fail, code error");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteString(msg)) {
+        HILOG_ERROR("register callback fail, msg error");
         return ERR_INVALID_VALUE;
     }
 

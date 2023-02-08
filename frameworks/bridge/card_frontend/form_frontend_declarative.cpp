@@ -112,4 +112,15 @@ void FormFrontendDeclarative::OnMediaFeatureUpdate()
 {
     CHECK_RUN_ON(JS);
 }
+
+void FormFrontendDeclarative::SetErrorEventHandler(
+    std::function<void(const std::string&, const std::string&)>&& errorCallback)
+{
+    auto jsEngine = GetJsEngine();
+    if (!jsEngine) {
+        return;
+    }
+
+    return jsEngine->SetErrorEventHandler(std::move(errorCallback));
+}
 } // namespace OHOS::Ace

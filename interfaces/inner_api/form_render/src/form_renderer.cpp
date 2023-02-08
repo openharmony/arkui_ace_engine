@@ -39,10 +39,21 @@ FormRenderer::FormRenderer(
 
 void FormRenderer::InitUiContent()
 {
-    auto actionEventHandler = [&](const std::string& action) {
-        OnActionEvent(action);
+    auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
+        auto formRenderer = weak.lock();
+        if (formRenderer) {
+            formRenderer->OnActionEvent(action);
+        }
     };
     uiContent_->SetActionEventHandler(actionEventHandler);
+
+    auto errorEventHandler = [weak = weak_from_this()](const std::string& code, const std::string& msg) {
+        auto formRenderer = weak.lock();
+        if (formRenderer) {
+            formRenderer->OnError(code, msg);
+        }
+    };
+    uiContent_->SetErrorEventHandler(errorEventHandler);
 }
 
 void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -95,14 +106,14 @@ void FormRenderer::OnActionEvent(const std::string& action)
     formRendererDelegate_->OnActionEvent(action);
 }
 
-void FormRenderer::OnError(const std::string& param)
+void FormRenderer::OnError(const std::string& code, const std::string& msg)
 {
     if (!formRendererDelegate_) {
         HILOG_ERROR("formRendererDelegate is null!");
         return;
     }
 
-    formRendererDelegate_->OnError(param);
+    formRendererDelegate_->OnError(code, msg);
 }
 }  // namespace Ace
 }  // namespace OHOS
