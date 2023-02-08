@@ -831,6 +831,10 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 
 bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    if (isDumping_.test_and_set()) {
+        LOGI("another dump is still running");
+        return false;
+    }
     ContainerScope scope(instanceId_);
     auto result = false;
     if (!SystemProperties::GetDebugEnabled()) {
@@ -854,6 +858,7 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     if (!result) {
         DumpLog::ShowDumpHelp(info);
     }
+    isDumping_.clear();
     return true;
 }
 
