@@ -26,7 +26,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const char* const SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t SURFACE_QUEUE_SIZE = 5;
-constexpr int32_t EXT_SURFACE_DEFAULT_SIZE = 100;
+constexpr int32_t EXT_SURFACE_DEFAULT_SIZE = 1;
 } // namespace
 RosenRenderSurface::~RosenRenderSurface()
 {
