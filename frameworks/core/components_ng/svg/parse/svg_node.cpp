@@ -123,7 +123,7 @@ void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)
     if (hrefRender_) {
         hrefClipPath_ = declaration_->GetClipPathHref();
         opacity_ = OpacityDoubleToUint8(declaration_->GetOpacity());
-        transform_ = SvgTransform::CreateMap(declaration_->GetTransform());
+        transform_ = declaration_->GetTransform();
         hrefMaskId_ = ParseIdFromUrl(declaration_->GetMaskId());
         hrefFilterId_ = ParseIdFromUrl(declaration_->GetFilterId());
     }
@@ -154,7 +154,7 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     if (!hrefClipPath_.empty()) {
         OnClipPath(canvas, viewPort);
     }
-    if (!transform_.empty()) {
+    if (!transform_.empty() || !animateTransform_.empty()) {
         OnTransform(canvas, viewPort);
     }
     if (!hrefMaskId_.empty()) {
@@ -219,7 +219,8 @@ void SvgNode::OnMask(RSCanvas& canvas, const Size& viewPort)
 
 void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
-    auto transformInfo = SvgTransform::CreateInfoFromMap(transform_);
+    auto transformInfo = (animateTransform_.empty()) ? SvgTransform::CreateInfoFromString(transform_)
+                                                     : SvgTransform::CreateInfoFromMap(animateTransform_);
     if (transformInfo.hasRotateCenter) {
         transformInfo.matrix4 =
             RenderTransform::GetTransformByOffset(transformInfo.matrix4, transformInfo.rotateCenter);
@@ -411,7 +412,7 @@ void SvgNode::AnimateFrameTransform(const RefPtr<SvgAnimation>& animate, double 
             index = frames.size() - 2;
             rate = 1.0;
         }
-        if (!SvgTransform::SetProperty(type, frames[index], frames[index + 1], rate, self->transform_)) {
+        if (!SvgTransform::SetProperty(type, frames[index], frames[index + 1], rate, self->animateTransform_)) {
             LOGE("set property failed: property %{public}s not in map", type.c_str());
             return;
         }
@@ -435,7 +436,7 @@ void SvgNode::AnimateValueTransform(const RefPtr<SvgAnimation>& animate, double 
     std::function<void(double)> callback = [weak = WeakClaim(this), type, fromVec, toVec](double value) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
-        if (!SvgTransform::SetProperty(type, fromVec, toVec, value, self->transform_)) {
+        if (!SvgTransform::SetProperty(type, fromVec, toVec, value, self->animateTransform_)) {
             LOGE("set property failed: property %{public}s not in map", type.c_str());
             return;
         }
