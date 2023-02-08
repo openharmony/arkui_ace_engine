@@ -442,6 +442,7 @@ private:
     mutable std::once_flag onceFlag_;
 
     bool isPagePathInvalid_ = false;
+    bool isMainPage_ = true;
 };
 
 } // namespace OHOS::Ace::Framework
