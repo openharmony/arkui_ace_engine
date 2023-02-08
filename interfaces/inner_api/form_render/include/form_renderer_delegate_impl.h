@@ -18,7 +18,6 @@
 
 #include <mutex>
 
-#include "form_surface_callback_interface.h"
 #include "form_renderer_delegate_stub.h"
 
 #include "base/utils/macros.h"
@@ -53,20 +52,16 @@ public:
      * @param param The param.
      */
     int32_t OnError(const std::string& param) override;
-    /**
-     * @brief RegisterSurfaceCreateCallback.
-     * @param formCallback The formCallback.
-     * @param formId The formId.
-     */
-    void RegisterSurfaceCreateCallback(
-        std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId);
 
+    void SetSurfaceCreateEventHandler(std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
+            const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
     void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
     void SetErrorEventHandler(std::function<void(const std::string&)>&& listener);
 
 private:
-    mutable std::mutex callbackMutex_;
-    std::map<int64_t, std::set<std::shared_ptr<FormSurfaceCallbackInterface>>> formCallbackMap_;
+    std::function<void(
+        const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>
+        surfaceCreateEventHandler_;
     std::function<void(const std::string&)> actionEventHandler_;
     std::function<void(const std::string&)> errorEventHandler_;
 };
