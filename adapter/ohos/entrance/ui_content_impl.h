@@ -108,6 +108,8 @@ public:
 
     void SetActionEventHandler(
         std::function<void(const std::string& action)>&& actionCallback) override;
+    void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);

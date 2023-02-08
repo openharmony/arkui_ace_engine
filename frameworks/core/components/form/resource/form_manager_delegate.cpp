@@ -144,9 +144,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
         LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
-        if (onFormErrorCallback_) {
-            onFormErrorCallback_(std::to_string(ret), errorMsg);
-        }
+        OnFormError(std::to_string(ret), errorMsg);
         return;
     }
     LOGI("Add form success formId:%{public}s", std::to_string(formJsInfo.formId).c_str());
@@ -405,11 +403,12 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
 
-    auto&& onErrorEventHandler = [weak = WeakClaim(this)](const std::string& param) {
-        auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnFormError(param);
-    };
+    auto&& onErrorEventHandler =
+        [weak = WeakClaim(this)](const std::string& code, const std::string& msg) {
+            auto formManagerDelegate = weak.Upgrade();
+            CHECK_NULL_VOID(formManagerDelegate);
+            formManagerDelegate->OnFormError(code, msg);
+        };
     renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
 }
 
@@ -508,6 +507,13 @@ void FormManagerDelegate::OnFormError(const std::string& param)
     auto result = ParseMapFromString(param);
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
+    }
+}
+
+void FormManagerDelegate::OnFormError(const std::string& code, const std::string& msg)
+{
+    if (onFormErrorCallback_) {
+        onFormErrorCallback_(code, msg);
     }
 }
 

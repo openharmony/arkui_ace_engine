@@ -54,9 +54,10 @@ public:
     virtual int32_t OnActionEvent(const std::string& action) = 0;
     /**
      * @brief OnError.
-     * @param action The action.
+     * @param code The code.
+     * @param msg The msg.
      */
-    virtual int32_t OnError(const std::string& param) = 0;
+    virtual int32_t OnError(const std::string& code, const std::string& msg) = 0;
 
     enum Message : uint32_t {
         ON_SURFACE_CREATE = 1,

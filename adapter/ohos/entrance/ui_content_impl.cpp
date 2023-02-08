@@ -1520,4 +1520,15 @@ void UIContentImpl::SetActionEventHandler(
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetActionEventHandler(std::move(actionCallback));
 }
+
+void UIContentImpl::SetErrorEventHandler(
+    std::function<void(const std::string&, const std::string&)>&& errorCallback)
+{
+    CHECK_NULL_VOID(errorCallback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    return front->SetErrorEventHandler(std::move(errorCallback));
+}
 } // namespace OHOS::Ace

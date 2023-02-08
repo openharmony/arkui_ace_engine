@@ -91,8 +91,9 @@ int FormRendererDelegateStub::HandleOnActionEvent(MessageParcel &data, MessagePa
 
 int32_t FormRendererDelegateStub::HandleOnError(MessageParcel &data, MessageParcel &reply)
 {
-    std::string param = data.ReadString();
-    int32_t errCode = OnError(param);
+    std::string code = data.ReadString();
+    std::string msg = data.ReadString();
+    int32_t errCode = OnError(code, msg);
     reply.WriteInt32(errCode);
     return ERR_OK;
 }
