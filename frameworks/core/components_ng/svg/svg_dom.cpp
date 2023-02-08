@@ -248,10 +248,10 @@ void SvgDom::SetFuncNormalizeToPx(FuncNormalizeToPx&& funcNormalizeToPx)
     svgContext_->SetFuncNormalizeToPx(funcNormalizeToPx);
 }
 
-void SvgDom::SetAnimationCallback(FuncAnimateFlush&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr)
+void SvgDom::SetAnimationCallback(FuncAnimateFlush&& funcAnimateFlush)
 {
     CHECK_NULL_VOID_NOLOG(svgContext_);
-    svgContext_->SetFuncAnimateFlush(std::move(funcAnimateFlush), imagePtr);
+    svgContext_->SetFuncAnimateFlush(std::move(funcAnimateFlush));
 }
 
 void SvgDom::ControlAnimation(bool play)

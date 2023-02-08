@@ -15,7 +15,6 @@
 
 #include "core/components_ng/svg/svg_context.h"
 
-#include "core/common/thread_checker.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
@@ -76,26 +75,6 @@ void SvgContext::ControlAnimators(bool play)
             animator->Play();
         } else {
             animator->Pause();
-        }
-    }
-}
-
-void SvgContext::SetFuncAnimateFlush(FuncAnimateFlush&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr)
-{
-    CHECK_NULL_VOID(funcAnimateFlush);
-    animateCallbacks_[imagePtr] = funcAnimateFlush;
-}
-
-void SvgContext::AnimateFlush()
-{
-    CHECK_RUN_ON(UI);
-    CHECK_NULL_VOID(!animateCallbacks_.empty());
-    for (auto it = animateCallbacks_.begin(); it != animateCallbacks_.end();) {
-        if (it->first.Upgrade()) {
-            it->second();
-            ++it;
-        } else {
-            animateCallbacks_.erase(it++);
         }
     }
 }

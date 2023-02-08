@@ -38,7 +38,7 @@ void SvgCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, con
 
 void SvgCanvasImage::SetRedrawCallback(std::function<void()>&& callback)
 {
-    svgDom_->SetAnimationCallback(std::move(callback), WeakClaim(this));
+    svgDom_->SetAnimationCallback(std::move(callback));
 }
 
 void SvgCanvasImage::ControlAnimation(bool play)
