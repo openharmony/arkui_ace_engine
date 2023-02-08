@@ -356,8 +356,12 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
     rootWidth_ = width / viewScale_;
 }
 
-void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const
+void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    if (isDumping_.test_and_set()) {
+        LOGI("another dump is still running");
+        return;
+    }
     auto result = false;
     if (!SystemProperties::GetDebugEnabled()) {
         std::unique_ptr<std::ostream> ss = std::make_unique<std::ostringstream>();
@@ -380,6 +384,7 @@ void PipelineBase::DumpInfo(const std::vector<std::string>& params, std::vector<
     if (!result) {
         DumpLog::ShowDumpHelp(info);
     }
+    isDumping_.clear();
 }
 
 void PipelineBase::DumpFrontend() const

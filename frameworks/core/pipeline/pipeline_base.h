@@ -181,7 +181,7 @@ public:
     }
 
     // Called by AceAbility and UiContent.
-    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) const;
+    void DumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
 
     // Called by AceEngine.
     bool Dump(const std::vector<std::string>& params) const;
@@ -838,7 +838,7 @@ private:
     // OnRouterChangeCallback is function point, need to be initialized.
     OnRouterChangeCallback onRouterChangeCallback_ = nullptr;
     PostRTTaskCallback postRTTaskCallback_;
-
+    std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };
 
