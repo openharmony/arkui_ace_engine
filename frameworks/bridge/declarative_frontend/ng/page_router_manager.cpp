@@ -42,6 +42,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
+constexpr int32_t SUB_STR_LENGTH = 7;
 
 void ExitToDesktop()
 {
@@ -409,6 +410,41 @@ std::pair<int32_t, RefPtr<FrameNode>> PageRouterManager::FindPageInStack(const s
     return { std::distance(iter, pageRouterStack_.rend()) - 1, iter->Upgrade() };
 }
 
+void PageRouterManager::PushOhmUrl(const RouterPageInfo& target, const std::string& params, RouterMode mode,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
+        LOGE("router stack size is larger than max size 32.");
+        return;
+    }
+    std::string url = target.url;
+    std::string pagePath = url + ".js";
+    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
+    if (pagePath.empty()) {
+        LOGE("[Engine Log] this uri not support in route push.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
+        }
+        return;
+    }
+    if (errorCallback != nullptr) {
+        errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+    }
+
+    if (mode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(url);
+        if (pageInfo.second) {
+            // find page in stack, move postion and update params.
+            MovePageToFront(pageInfo.first, pageInfo.second, params, false);
+            return;
+        }
+    }
+
+    RouterPageInfo info { url };
+    info.path = pagePath;
+    LoadPage(GenerateNextPageId(), info, params);
+}
+
 void PageRouterManager::StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
@@ -416,6 +452,10 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     RouterOptScope scope(this);
     if (target.url.empty()) {
         LOGE("router.Push uri is empty");
+        return;
+    }
+    if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
+        PushOhmUrl(target, params, mode, errorCallback);
         return;
     }
     if (!manifestParser_) {
@@ -454,6 +494,39 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     LoadPage(GenerateNextPageId(), info, params);
 }
 
+void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target, const std::string& params, RouterMode mode,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
+{
+    std::string url = target.url;
+    std::string pagePath = url + ".js";
+    LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
+    if (pagePath.empty()) {
+        LOGE("[Engine Log] this uri not support in route push.");
+        if (errorCallback != nullptr) {
+            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
+        }
+        return;
+    }
+    if (errorCallback != nullptr) {
+        errorCallback("", Framework::ERROR_CODE_NO_ERROR);
+    }
+
+    PopPage("", false, false);
+
+    if (mode == RouterMode::SINGLE) {
+        auto pageInfo = FindPageInStack(url);
+        if (pageInfo.second) {
+            // find page in stack, move postion and update params.
+            MovePageToFront(pageInfo.first, pageInfo.second, params, false, true, false);
+            return;
+        }
+    }
+
+    RouterPageInfo info { url };
+    info.path = pagePath;
+    LoadPage(GenerateNextPageId(), info, params, false, false, false);
+}
+
 void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
@@ -461,6 +534,10 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
     RouterOptScope scope(this);
     if (target.url.empty()) {
         LOGE("router.Push uri is empty");
+        return;
+    }
+    if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
+        ReplaceOhmUrl(target, params, mode, errorCallback);
         return;
     }
     if (!manifestParser_) {
@@ -509,6 +586,25 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         }
         // TODO: restore page operation.
         PopPage(params, true, true);
+        return;
+    }
+
+    if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
+        std::string url = target.url;
+        std::string pagePath = target.url + ".js";
+        LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
+        if (pagePath.empty()) {
+            LOGE("[Engine Log] this uri not support in route push.");
+            return;
+        }
+        auto pageInfo = FindPageInStack(url);
+        if (pageInfo.second) {
+            // find page in stack, pop to specified index.
+            PopPageToIndex(pageInfo.first, params, true, true);
+            return;
+        }
+        LOGI("fail to find specified page to pop");
+        ExitToDesktop();
         return;
     }
 
