@@ -64,8 +64,8 @@ void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId)
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 {
     auto current = selectOverlayItem_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(current, true);
-    return current->GetId() != overlayId;
+    CHECK_NULL_RETURN_NOLOG(current, false);
+    return current->GetId() == overlayId;
 }
 
 RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t overlayId)
