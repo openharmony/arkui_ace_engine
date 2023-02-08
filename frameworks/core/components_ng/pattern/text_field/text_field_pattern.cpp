@@ -338,7 +338,7 @@ void TextFieldPattern::CreateSingleHandle()
 bool TextFieldPattern::UpdateCaretByPressOrLongPress()
 {
     if (CaretPositionCloseToTouchPosition() && !SelectOverlayIsOn() &&
-        caretUpdateType_ != CaretUpdateType::LONG_PRESSED) {
+        caretUpdateType_ != CaretUpdateType::LONG_PRESSED && !isMousePressed_) {
         isSingleHandle_ = true;
         CreateSingleHandle();
         return true;
@@ -940,6 +940,7 @@ void TextFieldPattern::HandleBlurEvent()
     selectionMode_ = SelectionMode::NONE;
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnEditChanged(false);
+    ResetBackgroundColor();
     CloseSelectOverlay();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1167,7 +1168,7 @@ void TextFieldPattern::HandleOnPaste()
 
         auto eventHub = textfield->GetHost()->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_VOID(eventHub);
-        eventHub->FireOnPaste(value.text);
+        eventHub->FireOnPaste(StringUtils::ToString(pasteData));
         textfield->FireEventHubOnChange(value.text);
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
@@ -1284,12 +1285,17 @@ void TextFieldPattern::HandleTouchUp()
         isMousePressed_ = false;
     }
     if (enableTouchAndHoverEffect_) {
-        auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
-        CHECK_NULL_VOID(textfieldPaintProperty);
-        auto renderContext = GetHost()->GetRenderContext();
-        renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        ResetBackgroundColor();
     }
+}
+
+void TextFieldPattern::ResetBackgroundColor()
+{
+    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textfieldPaintProperty);
+    auto renderContext = GetHost()->GetRenderContext();
+    renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
+    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::InitTouchEvent()
@@ -1512,7 +1518,11 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     lastTouchOffset_ = info.GetLocalLocation();
-    caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    if (isMousePressed_) {
+        caretUpdateType_ = CaretUpdateType::PRESSED;
+    } else {
+        caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    }
     selectionMode_ = SelectionMode::SELECT;
     isSingleHandle_ = false;
     LOGI("TextField %{public}d handle long press", GetHost()->GetId());
@@ -1568,6 +1578,7 @@ void TextFieldPattern::ProcessOverlay()
     LOGD("First handle %{public}s, second handle %{public}s", firstHandle.ToString().c_str(),
         secondHandle.ToString().c_str());
     ShowSelectOverlay(firstHandle, secondHandle);
+    ResetBackgroundColor();
     textBoxes_ = tmp;
 }
 

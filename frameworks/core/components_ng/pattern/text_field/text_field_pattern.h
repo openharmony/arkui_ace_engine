@@ -563,6 +563,7 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void ProcessPadding();
     void SetDisabledStyle();
+    void ResetBackgroundColor();
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
