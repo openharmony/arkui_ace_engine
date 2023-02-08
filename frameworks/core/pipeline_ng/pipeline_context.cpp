@@ -547,7 +547,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
     ScreenSystemManager::GetInstance().SetWindowInfo(rootWidth_, density_, dipScale_);
     ScreenSystemManager::GetInstance().OnSurfaceChanged(width);
     SizeF sizeF { static_cast<float>(width), static_cast<float>(height) };
-    if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF) {
+    if (rootNode_->GetGeometryNode()->GetFrameSize() != sizeF || rootNode_->IsLayoutDirtyMarked()) {
         CalcSize idealSize { CalcLength(width), CalcLength(height) };
         MeasureProperty layoutConstraint;
         layoutConstraint.selfIdealSize = idealSize;

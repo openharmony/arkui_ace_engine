@@ -305,6 +305,11 @@ public:
     
     bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
 
+    bool IsLayoutDirtyMarked() const
+    {
+        return isLayoutDirtyMarked_;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
