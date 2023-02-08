@@ -27,9 +27,7 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
-#ifdef USE_V8_ENGINE
-#include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
 

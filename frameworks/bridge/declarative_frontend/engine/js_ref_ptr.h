@@ -16,9 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_REF_PTR_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_REF_PTR_H
 
-#ifdef USE_V8_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_ref.h"
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_ref.h"
 #endif
 
@@ -81,17 +79,7 @@ private:
     ImplDetail object_;
 };
 
-#ifdef USE_V8_ENGINE
-template<typename T>
-using JSRef = V8Ref<T>;
-template<typename T>
-using JSWeak = V8Weak<T>;
-template<typename T>
-using JSRefPtr = JSRefPtrImpl<T, V8Ref<V8Object>>;
-template<typename T>
-using JSWeakPtr = JSRefPtrImpl<T, V8Weak<V8Object>>;
-
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 template<typename T>
 using JSRef = JsiRef<T>;
 template<typename T>

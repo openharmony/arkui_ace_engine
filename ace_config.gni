@@ -48,8 +48,6 @@ declare_args() {
   ace_engine_standard_fonts_enable = true
 }
 
-use_external_v8_snapshot = false
-use_shared_v8 = true
 enable_dump_drawcmd = false
 use_mingw_win = "${current_os}_${current_cpu}" == "mingw_x86_64"
 use_mac = "${current_os}_${current_cpu}" == "mac_x64" ||
@@ -80,7 +78,6 @@ ace_flutter_engine_root_new = "$flutter_root_new/engine/ace_shell"
 expat_root = "//third_party/expat"
 cjson_root = "//third_party/cJSON"
 jsoncpp_root = "//third_party/jsoncpp"
-v8_root = "//third_party/v8"
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
 ark_toolchain_path = "//arkcompiler/toolchain"

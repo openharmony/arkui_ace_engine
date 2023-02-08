@@ -111,7 +111,7 @@ void JSImage::SetBorder(const Border& border)
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
 {
-    LOGD("JSImage V8OnComplete");
+    LOGD("JSImage OnComplete");
     if (args[0]->IsFunction()) {
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
@@ -130,7 +130,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
 
 void JSImage::OnError(const JSCallbackInfo& args)
 {
-    LOGD("JSImage V8OnError");
+    LOGD("JSImage OnError");
     if (args[0]->IsFunction()) {
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
@@ -149,7 +149,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
 
 void JSImage::OnFinish(const JSCallbackInfo& info)
 {
-    LOGD("JSImage V8OnFinish");
+    LOGD("JSImage OnFinish");
     if (!info[0]->IsFunction()) {
         LOGE("info[0] is not a function.");
         return;
