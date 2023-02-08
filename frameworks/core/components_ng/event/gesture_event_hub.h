@@ -200,8 +200,8 @@ public:
 
     bool ActLongClick();
 
-    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false,
-                           bool isDisableMouseLeft = false, int32_t duration = 500)
+    void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
+        int32_t duration = 500)
     {
         if (!longPressEventActuator_) {
             longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
@@ -300,6 +300,18 @@ public:
     {
         responseRegion_.emplace_back(responseRect);
         isResponseRegion_ = true;
+    }
+
+    void RemoveLastResponseRect()
+    {
+        if (responseRegion_.empty()) {
+            isResponseRegion_ = false;
+            return;
+        }
+        responseRegion_.pop_back();
+        if (responseRegion_.empty()) {
+            isResponseRegion_ = false;
+        }
     }
 
     bool GetTouchable() const

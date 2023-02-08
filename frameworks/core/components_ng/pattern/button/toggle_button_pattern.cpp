@@ -186,14 +186,6 @@ void ToggleButtonPattern::InitButtonAndText()
     if (!layoutProperty->HasBorderRadius()) {
         layoutProperty->UpdateBorderRadius(buttonRadius_);
     }
-    if (!layoutProperty->GetMarginProperty()) {
-        MarginProperty margin;
-        margin.left = CalcLength(buttonMargin_.ConvertToPx());
-        margin.right = CalcLength(buttonMargin_.ConvertToPx());
-        margin.top = CalcLength(buttonMargin_.ConvertToPx());
-        margin.bottom = CalcLength(buttonMargin_.ConvertToPx());
-        layoutProperty->UpdateMargin(margin);
-    }
     if (!host->GetFirstChild()) {
         return;
     }
