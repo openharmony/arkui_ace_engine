@@ -73,6 +73,7 @@ public:
             if (pattern) {
                 theme->titleColor_ = pattern->GetAttr<Color>("title_color", Color::WHITE);
                 theme->titleFontSize_  = pattern->GetAttr<Dimension>("title_text_font_size", 0.0_vp);
+                theme->titleFontSizeMin_ = pattern->GetAttr<Dimension>("title_text_font_size_min", 0.0_vp);
                 theme->titleFontSizeBig_  = pattern->GetAttr<Dimension>("title_text_font_size_big", 0.0_vp);
                 theme->subTitleColor_ = pattern->GetAttr<Color>("sub_title_text_color", Color::WHITE);
                 theme->subTitleFontSize_  = pattern->GetAttr<Dimension>("sub_title_text_font_size", 0.0_vp);
@@ -110,6 +111,11 @@ public:
     const Dimension& GetTitleFontSize() const
     {
         return titleFontSize_;
+    }
+
+    const Dimension& GetTitleFontSizeMin() const
+    {
+        return titleFontSizeMin_;
     }
 
     const Dimension& GetSubTitleFontSize() const
@@ -215,6 +221,7 @@ private:
     Color subTitleColor_;
     Dimension titleFontSizeBig_;
     Dimension titleFontSize_;
+    Dimension titleFontSizeMin_;
     Dimension subTitleFontSize_;
     Dimension height_;
     Dimension heightEmphasize_;
