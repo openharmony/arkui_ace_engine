@@ -22,6 +22,7 @@
 #include <set>
 #include <unordered_map>
 
+#include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 
@@ -90,6 +91,16 @@ public:
 
     bool isEmpty();
 
+    void StartRecordFrameInfo(FrameInfo* info)
+    {
+        frameInfo_ = info;
+    }
+
+    void FinishRecordFrameInfo()
+    {
+        frameInfo_ = nullptr;
+    }
+
 private:
     template<typename T>
     struct NodeCompare {
@@ -119,6 +130,8 @@ private:
     std::list<PredictTask> predictTask_;
 
     uint32_t currentPageId_ = 0;
+
+    FrameInfo* frameInfo_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(UITaskScheduler);
 };

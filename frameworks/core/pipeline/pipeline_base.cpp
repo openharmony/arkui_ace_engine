@@ -505,6 +505,7 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+
     if (onVsyncProfiler_) {
         AceTracker::Start();
     }

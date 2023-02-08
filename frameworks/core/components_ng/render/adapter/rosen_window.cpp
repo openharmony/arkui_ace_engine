@@ -18,6 +18,7 @@
 #include "transaction/rs_interfaces.h"
 
 #include "base/thread/task_executor.h"
+#include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
@@ -82,6 +83,7 @@ void RosenWindow::RequestFrame()
     LOGD("request next vsync");
     if (rsWindow_) {
         rsWindow_->RequestVsync(vsyncCallback_);
+        lastRequestVsyncTime_ = GetSysTimestamp();
     }
     isRequestVsync_ = true;
     auto taskExecutor = taskExecutor_.Upgrade();
@@ -149,6 +151,11 @@ void RosenWindow::FlushTasks()
     CHECK_RUN_ON(UI);
     LOGD("Rosenwindow flush tasks");
     rsUIDirector_->SendMessages();
+}
+
+float RosenWindow::GetRefreshRate() const
+{
+    return GetDisplayRefreshRate();
 }
 
 } // namespace OHOS::Ace::NG

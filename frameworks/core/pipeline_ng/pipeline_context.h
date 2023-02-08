@@ -21,6 +21,7 @@
 #include <list>
 #include <utility>
 
+#include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
@@ -315,6 +316,10 @@ private:
 
     void FlushBuildFinishCallbacks();
 
+    void DumpPipelineInfo() const;
+
+    FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
@@ -373,6 +378,8 @@ private:
     bool isNeedShowFocus_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
+
+    std::list<FrameInfo> dumpFrameInfos_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

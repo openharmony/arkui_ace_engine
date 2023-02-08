@@ -36,10 +36,12 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
+#include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/animation/scheduler.h"
 #include "core/common/ace_application_info.h"
@@ -167,6 +169,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+    auto recvTime = GetSysTimestamp();
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
@@ -184,7 +187,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         LayoutInspector::SupportInspector();
 #endif
     }
+
+    taskScheduler_.StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_.FlushTask();
+    taskScheduler_.FinishRecordFrameInfo();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAninmation) {
         RequestFrame();
@@ -826,10 +832,51 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-velocityscale" && params.size() >= 2) {
     } else if (params[0] == "-scrollfriction" && params.size() >= 2) {
     } else if (params[0] == "-threadstuck" && params.size() >= 3) {
+    } else if (params[0] == "-pipeline") {
+        DumpPipelineInfo();
     } else {
         return false;
     }
+
     return true;
+}
+
+FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
+{
+    if (SystemProperties::GetDumpFrameCount() == 0) {
+        return nullptr;
+    }
+    if (dumpFrameInfos_.size() >= SystemProperties::GetDumpFrameCount()) {
+        dumpFrameInfos_.pop_front();
+    }
+
+    dumpFrameInfos_.push_back({ .frameRecvTime_ = recvTime, .frameTimeStamp_ = timeStamp });
+    return &dumpFrameInfos_.back();
+}
+
+void PipelineContext::DumpPipelineInfo() const
+{
+    DumpLog::GetInstance().Print("PipelineInfo:");
+    if (window_) {
+        DumpLog::GetInstance().Print(1, "DisplayRefreshRate: " + std::to_string(window_->GetRefreshRate()));
+        DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
+    }
+    if (!dumpFrameInfos_.empty()) {
+        DumpLog::GetInstance().Print("==================================FrameTask==================================");
+        for (const auto& info : dumpFrameInfos_) {
+            DumpLog::GetInstance().Print("Task: " + info.GetTimeInfo());
+            DumpLog::GetInstance().Print(1, "LayoutTask:");
+            for (const auto& layout : info.layoutInfos_) {
+                DumpLog::GetInstance().Print(2, layout.ToString());
+            }
+            DumpLog::GetInstance().Print(1, "RenderTask:");
+            for (const auto& layout : info.renderInfos_) {
+                DumpLog::GetInstance().Print(2, layout.ToString());
+            }
+            DumpLog::GetInstance().Print(
+                "==================================FrameTask==================================");
+        }
+    }
 }
 
 void PipelineContext::FlushTouchEvents()
@@ -920,8 +967,8 @@ bool PipelineContext::RequestDefaultFocus()
     }
     auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
     if (!defaultFocusNode) {
-        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.",
-            mainNode->GetTag().c_str(), mainNode->GetId());
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.", mainNode->GetTag().c_str(),
+            mainNode->GetId());
         return false;
     }
     if (!defaultFocusNode->IsFocusableWholePath()) {
