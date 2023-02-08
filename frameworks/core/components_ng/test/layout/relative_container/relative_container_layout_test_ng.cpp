@@ -116,18 +116,17 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest001, TestSize
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
     /**
-    //     corresponding ets code:
-    //         RelativeContainer() {
-    //             Button("Button 1")
-    //               .alignRules({
-    //                 left: { anchor: "__container__", align: HorizontalAlign.Center },
-    //                 right:{ anchor: "__container__", align: HorizontalAlign.End },
-    //                 top: { anchor: "__container__", align: VerticalAlign.Center },
-    //                 bottom: { anchor: "__container__", align: VerticalAlign.Bottom }
-    //               }).id("bt1").borderWidth(1).borderColor(Color.Black)
-    //         }.width(200).height(200)
-    //      .backgroundColor(Color.Orange)
-    //
+    corresponding ets code:
+        RelativeContainer() {
+            Button("Button 1")
+            .alignRules({
+                left: { anchor: "__container__", align: HorizontalAlign.Center },
+                right:{ anchor: "__container__", align: HorizontalAlign.End },
+                top: { anchor: "__container__", align: VerticalAlign.Center },
+                bottom: { anchor: "__container__", align: VerticalAlign.Bottom }
+            }).id("bt1").borderWidth(1).borderColor(Color.Black)
+        }.width(200).height(200)
+    .backgroundColor(Color.Orange)
     */
     auto firstFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -197,24 +196,24 @@ HWTEST_F(RelativeContainerLayoutTestNg, RelativeContainerLayoutTest002, TestSize
     childLayoutConstraint.maxSize = CONTAINER_SIZE;
     childLayoutConstraint.minSize = SizeF(0.0f, 0.0f);
     /**
-    //     corresponding ets code:
-    //         RelativeContainer() {
-    //             Button("Button 1")
-    //               .alignRules({
-    //                 left: { anchor: "__container__", align: HorizontalAlign.Start },
-    //                 right:{ anchor: "__container__", align: HorizontalAlign.Center },
-    //                 top: { anchor: "__container__", align: VerticalAlign.Top },
-    //                 bottom: { anchor: "__container__", align: VerticalAlign.Center }
-    //               }).id("bt1").borderWidth(1).borderColor(Color.Black)
-    //             Button("Button 2").width(100).height(50)
-    //               .alignRules({
-    //                 left: { anchor: "bt1", align: HorizontalAlign.End },
-    //                 right:{ anchor: "__container__", align: HorizontalAlign.End },
-    //                 top: { anchor: "bt1", align: VerticalAlign.Bottom },
-    //                 bottom: { anchor: "__container__", align: VerticalAlign.Bottom }
-    //               }).id("bt2").borderWidth(1).borderColor(Color.Black)
-    //         }.width(200).height(200)
-    //      .backgroundColor(Color.Orange)
+    corresponding ets code:
+        RelativeContainer() {
+            Button("Button 1")
+            .alignRules({
+                left: { anchor: "__container__", align: HorizontalAlign.Start },
+                right:{ anchor: "__container__", align: HorizontalAlign.Center },
+                top: { anchor: "__container__", align: VerticalAlign.Top },
+                bottom: { anchor: "__container__", align: VerticalAlign.Center }
+            }).id("bt1").borderWidth(1).borderColor(Color.Black)
+            Button("Button 2").width(100).height(50)
+            .alignRules({
+                left: { anchor: "bt1", align: HorizontalAlign.End },
+                right:{ anchor: "__container__", align: HorizontalAlign.End },
+                top: { anchor: "bt1", align: VerticalAlign.Bottom },
+                bottom: { anchor: "__container__", align: VerticalAlign.Bottom }
+            }).id("bt2").borderWidth(1).borderColor(Color.Black)
+        }.width(200).height(200)
+    .backgroundColor(Color.Orange)
     */
     auto firstFrameNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
     RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
