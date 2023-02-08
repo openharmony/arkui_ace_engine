@@ -23,7 +23,6 @@ namespace OHOS::Ace::NG {
 RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
     auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
-    layoutAlgorithm->SetListLayoutProperty(GetListLayoutProperty());
     layoutAlgorithm->SetItemsPosition(itemPosition_);
     return layoutAlgorithm;
 }
@@ -54,19 +53,5 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     CHECK_NULL_RETURN(host, false);
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
-}
-
-RefPtr<ListLayoutProperty> ListItemGroupPattern::GetListLayoutProperty()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto parent = host->GetParent();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-    while (parent && !frameNode) {
-        parent = parent->GetParent();
-        frameNode = AceType::DynamicCast<FrameNode>(parent);
-    }
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    return frameNode->GetLayoutProperty<ListLayoutProperty>();
 }
 } // namespace OHOS::Ace::NG
