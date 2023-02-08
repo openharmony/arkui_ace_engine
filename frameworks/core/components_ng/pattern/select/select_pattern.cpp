@@ -140,6 +140,7 @@ void SelectPattern::RegisterOnHover()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnHoverEvent(mouseEvent);
+    inputHub->SetHoverAnimation(HoverEffectType::BOARD);
 }
 
 // change background color when pressed
@@ -236,11 +237,16 @@ void SelectPattern::SetDisabledStyle()
 
     auto spinnerLayoutProperty = spinner_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(spinnerLayoutProperty);
-    ImageSourceInfo imageSourceInfo = spinnerLayoutProperty->GetImageSourceInfo().value();
+
+    ImageSourceInfo imageSourceInfo = spinnerLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER_DISABLE);
+    imageSourceInfo.SetSrc(iconPath);
     if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());
-        spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());    
     }
+    spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
     CHECK_NULL_VOID(spinnerRenderProperty);
     spinnerRenderProperty->UpdateSvgFillColor(theme->GetDisabledSpinnerColor());
