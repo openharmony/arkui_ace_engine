@@ -1736,9 +1736,6 @@ void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
 {
-    if (info[0]->IsUndefined()) {
-        return;
-    }
     if (info[0]->IsObject()) {
         std::optional<Dimension> left;
         std::optional<Dimension> right;
