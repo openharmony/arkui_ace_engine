@@ -30,6 +30,7 @@
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/geometry/rect.h"
 
 namespace OHOS::Ace::NG {
 class VideoPattern : public Pattern {
@@ -185,6 +186,8 @@ private:
     bool isPlaying_ = false;
     bool pastPlayingStatus_ = false;
     double progressRate_ = 1.0;
+
+    Rect lastBoundsRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
