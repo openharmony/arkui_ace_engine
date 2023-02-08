@@ -1331,4 +1331,10 @@ void FrameNode::AddHotZoneRect(const DimensionRect& hotZoneRect) const
     gestureHub->AddResponseRect(hotZoneRect);
 }
 
+void FrameNode::RemoveLastHotZoneRect() const
+{
+    auto gestureHub = GetOrCreateGestureEventHub();
+    gestureHub->RemoveLastResponseRect();
+}
+
 } // namespace OHOS::Ace::NG
