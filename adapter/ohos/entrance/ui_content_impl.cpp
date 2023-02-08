@@ -1469,9 +1469,6 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
 
 void UIContentImpl::NotifyMemoryLevel(int32_t level)
 {
-    // level = 0: MEMORY_LEVEL_MODERATE;
-    // level = 1: MEMORY_LEVEL_LOW;
-    // level = 2: MEMORY_LEVEL_CRITICAL;
     LOGI("Receive Memory level notification, level: %{public}d", level);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
