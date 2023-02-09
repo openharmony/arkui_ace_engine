@@ -96,7 +96,7 @@ void CheckBoxPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWra
     pen.SetWidth(borderWidth_);
     pen.SetAntiAlias(true);
     if (isTouch_) {
-        DrawTouchBoard(canvas, contentSize, paintOffset);
+        // TODO: Touch effect
     }
     if (isHover_) {
         DrawHoverBoard(canvas, contentSize, paintOffset);
