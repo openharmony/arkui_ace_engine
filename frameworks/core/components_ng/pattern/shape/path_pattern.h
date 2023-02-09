@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_PATH_PATTERN_H
 
+#include <string>
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
@@ -35,6 +36,11 @@ public:
     PathPattern() = default;
     ~PathPattern() override = default;
 
+    void OnModifyDone() override
+    {
+        SetClipBounds();
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         return MakeRefPtr<PathPaintMethod>(GetAncestorPaintProperty());
@@ -52,6 +58,22 @@ public:
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(PathPattern);
+    void SetClipBounds()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<PathPaintProperty>();
+        CHECK_NULL_VOID(host);
+        auto cmdStr = paintProperty->GetCommands().value_or("");
+        if (cmdStr != lastCommands_) {
+            lastCommands_ = cmdStr;
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->SetClipBoundsWithCommands(cmdStr);
+        }
+    }
+
+    std::string lastCommands_ = "";
 };
 } // namespace OHOS::Ace::NG
 
