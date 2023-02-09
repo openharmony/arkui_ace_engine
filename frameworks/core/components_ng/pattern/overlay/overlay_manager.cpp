@@ -605,6 +605,9 @@ void OverlayManager::HideMenu(int32_t targetId)
         return;
     }
     PopMenuAnimation(menuMap_[targetId]);
+    if (onHideMenuCallback_) {
+        onHideMenuCallback_();
+    }
     BlurDialog();
 }
 
