@@ -103,7 +103,7 @@ private:
     void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame
-    static void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme);
+    void UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode);
 
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
