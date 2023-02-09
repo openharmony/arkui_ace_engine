@@ -291,6 +291,7 @@ void OverlayManager::ShowToast(
     option.SetFillMode(FillMode::FORWARDS);
     option.SetOnFinishEvent([weak = WeakClaim(this), toastId, duration] {
         auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(context);
         context->GetTaskExecutor()->PostDelayedTask(
             [weak, toastId, duration] {
                 auto overlayManager = weak.Upgrade();
