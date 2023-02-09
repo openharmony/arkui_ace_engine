@@ -59,8 +59,33 @@ void CustomNode::Build()
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
-    Build();
-    UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+    if (!renderFunction_) {
+        Build();
+        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+        return;
+    }
+
+    parent->AppendChild(MakeRefPtr<LayoutWrapper>(
+        [weak = AceType::WeakClaim(this), forceMeasure, forceLayout](RefPtr<LayoutWrapper> layoutWrapper) {
+            auto customNode = weak.Upgrade();
+            CHECK_NULL_VOID(customNode);
+
+            customNode->Build();
+            if (customNode->GetChildren().empty()) {
+                return;
+            }
+            auto child = customNode->GetChildren().front();
+            while (!InstanceOf<FrameNode>(child)) {
+                auto children = child->GetChildren();
+                if (children.empty()) {
+                    return;
+                }
+                child = children.front();
+            }
+            auto frameChild = DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(frameChild);
+            frameChild->UpdateLayoutWrapper(layoutWrapper, forceMeasure, forceLayout);
+        }));
 }
 
 } // namespace OHOS::Ace::NG

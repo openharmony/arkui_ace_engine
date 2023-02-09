@@ -102,6 +102,9 @@ public:
 
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
+    RefPtr<LayoutWrapper> UpdateLayoutWrapper(
+        RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
+
     std::optional<UITask> CreateLayoutTask(bool forceUseMainThread = false);
 
     std::optional<UITask> CreateRenderTask(bool forceUseMainThread = false);
@@ -264,7 +267,7 @@ public:
     OffsetF GetTransformRelativeOffset() const;
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
-    
+
     void AdjustGridOffset();
 
     void SetActive(bool active) override;
@@ -303,7 +306,7 @@ public:
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
-    
+
     bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
 
     bool IsLayoutDirtyMarked() const
@@ -342,8 +345,7 @@ private:
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio);
-    void OnVisibleAreaChangeCallback(
-        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     struct ZIndexComparator {

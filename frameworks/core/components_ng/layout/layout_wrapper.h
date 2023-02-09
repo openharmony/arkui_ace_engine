@@ -42,6 +42,8 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 
+using LazyBuildFunction = std::function<void(RefPtr<LayoutWrapper>)>;
+
 class ACE_EXPORT LayoutWrapper : public AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
 public:
@@ -49,7 +51,18 @@ public:
         : hostNode_(std::move(hostNode)), geometryNode_(std::move(geometryNode)),
           layoutProperty_(std::move(layoutProperty))
     {}
+    LayoutWrapper(LazyBuildFunction&& fun)
+        : geometryNode_(MakeRefPtr<GeometryNode>()), layoutProperty_(MakeRefPtr<LayoutProperty>()),
+          lazyBuildFunction_(fun)
+    {}
     ~LayoutWrapper() override = default;
+
+    void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty)
+    {
+        hostNode_ = std::move(hostNode);
+        geometryNode_ = std::move(geometryNode);
+        layoutProperty_ = std::move(layoutProperty);
+    }
 
     void AppendChild(const RefPtr<LayoutWrapper>& child)
     {
@@ -215,6 +228,8 @@ public:
 
     void SetCacheCount(int32_t cacheCount = 0);
 
+    void BuildLazyItem();
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;
@@ -238,6 +253,8 @@ private:
     bool isRootNode_ = false;
     std::optional<bool> skipMeasureContent_;
     std::optional<bool> needForceMeasureAndLayout_;
+
+    LazyBuildFunction lazyBuildFunction_;
 
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;

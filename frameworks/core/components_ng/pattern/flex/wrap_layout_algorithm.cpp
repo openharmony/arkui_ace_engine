@@ -78,7 +78,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     contentList_.clear();
     std::list<RefPtr<LayoutWrapper>> currentMainAxisItemsList;
     for (auto& item : children) {
-        if (item->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
         item->Measure(childLayoutConstraint);
