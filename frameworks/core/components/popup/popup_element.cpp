@@ -82,11 +82,11 @@ bool PopupElement::ShowPopup()
     bubble->SetId(popup_->GetId());
     bubble->SetDisabledStatus(popup_->IsDisabledStatus());
     bubble->SetStateChangeEvent([weak = WeakClaim(this)](bool isVisible) {
-                auto popup = weak.Upgrade();
-                if (popup) {
-                    popup->OnStateChange(isVisible);
-                }
-            });
+        auto popup = weak.Upgrade();
+        if (popup) {
+            popup->OnStateChange(isVisible);
+        }
+    });
 
     auto stackElement = context->GetLastStack();
     if (!stackElement) {
@@ -106,6 +106,10 @@ bool PopupElement::ShowPopup()
         }
         node->SetZIndexToChild(stackElement->GetChildrenSize());
         manager->ClearNodeRectInfo(node, false);
+        auto children = node->GetChildList();
+        for (auto& child : children) {
+            child->SetVisible(true);
+        }
     }
 #endif
     return true;
@@ -123,22 +127,22 @@ bool PopupElement::CancelPopup(const ComposeId& id)
     if (context) {
         const auto& accessibilityManager = context->GetAccessibilityManager();
         if (accessibilityManager) {
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM)
             accessibilityManager->RemoveAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
-        }
-    }
-#if defined(WINDOWS_PLATFORM) || defined(MAC_PLATFORM)
-    if (context) {
-        auto manager = context->GetAccessibilityManager();
-        if (manager) {
-            auto node = manager->GetAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
+#else
+            auto node = accessibilityManager->GetAccessibilityNodeById(StringUtils::StringToInt(popup_->GetId()));
             if (!node) {
                 return true;
             }
             node->SetZIndexToChild(0);
-            manager->ClearNodeRectInfo(node, true);
+            accessibilityManager->ClearNodeRectInfo(node, true);
+            auto children = node->GetChildList();
+            for (auto& child : children) {
+                child->SetVisible(true);
+            }
+#endif
         }
     }
-#endif
     return true;
 }
 
