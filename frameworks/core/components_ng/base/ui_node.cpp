@@ -101,6 +101,18 @@ RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
     return nullptr;
 }
 
+int32_t UINode::GetChildIndex(const RefPtr<UINode>& child) const
+{
+    int32_t index = 0;
+    for (const auto& iter : children_) {
+        if (iter == child) {
+            return index;
+        }
+        index++;
+    }
+    return -1;
+}
+
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode)
 {
     if (!oldNode) {

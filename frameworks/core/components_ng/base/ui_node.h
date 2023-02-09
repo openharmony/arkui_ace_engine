@@ -64,6 +64,7 @@ public:
     void Clean();
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
+    int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     void AttachToMainTree();
     void DetachFromMainTree();
 
