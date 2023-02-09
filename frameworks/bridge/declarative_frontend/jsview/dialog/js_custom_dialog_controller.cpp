@@ -57,7 +57,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSVal> builderCallback = constructorArg->GetProperty("builder");
         if (!builderCallback->IsUndefined() && builderCallback->IsFunction()) {
             instance->jsBuilderFunction_ =
-                AceType::MakeRefPtr<JsWeakFunction>(ownerObj, JSRef<JSFunc>::Cast(builderCallback));
+                AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(builderCallback));
         } else {
             delete instance;
             instance = nullptr;
