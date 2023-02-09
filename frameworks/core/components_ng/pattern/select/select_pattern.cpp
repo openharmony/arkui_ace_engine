@@ -55,6 +55,7 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
 void SelectPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnPress();
     RegisterOnHover();
@@ -412,6 +413,7 @@ void SelectPattern::SetFontColor(const Color& color)
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateTextColor(color);
+    text_->GetRenderContext()->UpdateForegroundColor(color);
 }
 
 void SelectPattern::SetOptionBgColor(const Color& color)

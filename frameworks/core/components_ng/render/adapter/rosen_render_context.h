@@ -220,6 +220,9 @@ private:
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
 
+    void OnForegroundColorUpdate(const Color& value) override;
+    void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) override;
+
     void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) override;
     void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) override;
     void OnHasBorderImageSliceUpdate(bool tag) override {}

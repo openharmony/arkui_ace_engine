@@ -41,6 +41,7 @@ public:
 
     void OnModifyDone() override
     {
+        Pattern::OnModifyDone();
         if (isFirstCreate) {
             isFirstCreate = false;
         } else {

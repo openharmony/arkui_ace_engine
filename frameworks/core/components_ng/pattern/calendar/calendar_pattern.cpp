@@ -50,6 +50,7 @@ void CalendarPattern::SetCalendarControllerNg(const RefPtr<CalendarControllerNg>
 
 void CalendarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto swiperNode = host->GetChildren().front();

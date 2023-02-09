@@ -50,6 +50,7 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 
 void MenuWrapperPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();

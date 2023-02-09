@@ -58,6 +58,7 @@ public:
     void SetCopyOption(CopyOptions copyOption) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void ProcessDefaultPadding(PaddingProperty& paddings);
+    void SetForegroundColor(const Color& value) override;
 
 private:
     void AddDragFrameNodeToManager() const;

@@ -263,6 +263,8 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(BackgroundColor, Color);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Opacity, double);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColor, Color);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ForegroundColorStrategy, ForegroundColorStrategy);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -328,6 +330,9 @@ protected:
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
+
+    virtual void OnForegroundColorUpdate(const Color& value) {}
+    virtual void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}

@@ -92,6 +92,7 @@ void ImageAnimatorPattern::SetShowingIndex(int32_t index)
 
 void ImageAnimatorPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
         LOGE("image size is less than 0.");

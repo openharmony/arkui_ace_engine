@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 
 void BadgePattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {

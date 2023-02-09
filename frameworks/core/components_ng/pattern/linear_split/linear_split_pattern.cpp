@@ -287,6 +287,7 @@ void LinearSplitPattern::HandleMouseEvent(const Offset& globalLocation)
 
 void LinearSplitPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();

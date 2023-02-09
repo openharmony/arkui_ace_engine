@@ -1484,6 +1484,7 @@ void TextFieldPattern::StopTwinkling()
 
 void TextFieldPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -2428,7 +2429,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
     TextStyle textStyle;
     // use text or placeHolder value if exists, space otherwise
     if (!isPlaceholder) {
-        TextFieldLayoutAlgorithm::UpdateTextStyle(layoutProperty, textFieldTheme, textStyle, false);
+        TextFieldLayoutAlgorithm::UpdateTextStyle(GetHost(), layoutProperty, textFieldTheme, textStyle, false);
         textContent = "a";
     } else {
         TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(layoutProperty, textFieldTheme, textStyle, false);

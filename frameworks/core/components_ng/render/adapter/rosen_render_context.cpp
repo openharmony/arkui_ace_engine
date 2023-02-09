@@ -19,6 +19,7 @@
 #include <string>
 
 #include "include/utils/SkParsePath.h"
+#include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -266,6 +267,28 @@ void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBackgroundColor(value.GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetEnvForegroundColor(value.GetValue());
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value)
+{
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::ForegroundColorStrategyType rsStrategy = Rosen::ForegroundColorStrategyType::INVALID;
+    switch (value) {
+        case ForegroundColorStrategy::INVERT:
+            rsStrategy = Rosen::ForegroundColorStrategyType::INVERT_BACKGROUNDCOLOR;
+            break;
+        default:
+            break;
+    }
+    rsNode_->SetEnvForegroundColorStrategy(rsStrategy);
     RequestNextFrame();
 }
 

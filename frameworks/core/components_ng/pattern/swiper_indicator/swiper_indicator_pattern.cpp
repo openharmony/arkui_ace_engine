@@ -34,6 +34,7 @@ void SwiperIndicatorPattern::OnAttachToFrameNode()
 
 void SwiperIndicatorPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 

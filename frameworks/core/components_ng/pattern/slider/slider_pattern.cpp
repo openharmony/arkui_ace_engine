@@ -39,6 +39,7 @@ constexpr Dimension ARROW_HEIGHT = 8.0_vp;
 
 void SliderPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();

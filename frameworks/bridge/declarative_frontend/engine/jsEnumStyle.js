@@ -30,6 +30,11 @@ var Color;
   Color["Transparent"] = "#00000000";
 })(Color || (Color = {}));
 
+var ColoringStrategy;
+(function (ColoringStrategy){
+  ColoringStrategy["Invert"] = "Invert";
+})(ColoringStrategy || (ColoringStrategy = {}));
+
 var TextInputStyle;
 (function (TextInputStyle) {
   TextInputStyle["Default"] = "Default";

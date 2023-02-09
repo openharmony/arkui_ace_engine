@@ -103,7 +103,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
-        UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
+        UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
     } else {
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
@@ -239,8 +239,9 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-    const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled)
+void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+    TextStyle& textStyle, bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -258,8 +259,13 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<TextFieldLayoutPrope
     if (isDisabled) {
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
     } else {
-        textStyle.SetTextColor(
-            layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
+        auto renderContext = frameNode->GetRenderContext();
+        if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+            textStyle.SetTextColor(Color::FOREGROUND);
+        } else {
+            textStyle.SetTextColor(
+                layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
+        }
     }
     if (layoutProperty->GetMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetMaxLines().value());

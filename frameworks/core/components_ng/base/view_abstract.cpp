@@ -1183,4 +1183,22 @@ void ViewAbstract::SetSharedTransition(
     }
 }
 
+void ViewAbstract::SetForegroundColor(const Color& color)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+}
+
+void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
+}
+
 } // namespace OHOS::Ace::NG

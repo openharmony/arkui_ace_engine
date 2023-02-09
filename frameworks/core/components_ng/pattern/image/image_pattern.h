@@ -101,6 +101,8 @@ private:
     void SetRedrawCallback();
     void RegisterVisibleAreaChange();
 
+    void UpdateFillColorIfForegroundColor();
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     DataReadyNotifyTask CreateDataReadyCallback();

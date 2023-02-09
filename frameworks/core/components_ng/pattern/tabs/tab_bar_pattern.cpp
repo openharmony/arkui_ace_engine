@@ -363,6 +363,7 @@ void TabBarPattern::PaintFocusState()
 
 void TabBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();

@@ -187,6 +187,7 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 
 void NavBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountTitleBar(hostNode);

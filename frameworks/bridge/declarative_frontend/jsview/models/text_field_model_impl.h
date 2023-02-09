@@ -59,6 +59,7 @@ public:
     void SetCopyOption(CopyOptions copyOption) override;
     void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
     static void InitTextInputDefaultStyle();
+    void SetForegroundColor(const Color& value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

@@ -577,6 +577,7 @@ void RatingPattern::HandleMouseEvent(MouseInfo& info)
 
 void RatingPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     // Reset image state code.
     imageReadyStateCode_ = 0;
     imageSuccessStateCode_ = 0;

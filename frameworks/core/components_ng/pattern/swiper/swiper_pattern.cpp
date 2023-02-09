@@ -88,6 +88,7 @@ void SwiperPattern::OnIndexChange() const
 
 void SwiperPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
