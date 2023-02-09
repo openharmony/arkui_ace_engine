@@ -227,6 +227,7 @@ public:
 protected:
     RefPtr<AssetManager> assetManager_;
     bool disallowPopLastPage_ = false;
+    bool isFirstNotifyShow_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrontendDelegate);
 };
