@@ -238,20 +238,15 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
     // XTS inspector value
     title_ = dialogProperties.title;
 
-    // actionSheet title needs to align flex start
-    if (dialogProperties.type == DialogType::ACTION_SHEET || dialogProperties.type == DialogType::ALERT_DIALOG) {
-        auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(false));
-        CHECK_NULL_RETURN(row, nullptr);
-        auto rowProps = row->GetLayoutProperty<LinearLayoutProperty>();
-        CHECK_NULL_RETURN(rowProps, nullptr);
-        rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-        rowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        title->MountToParent(row);
-        return row;
-    }
-
-    return title;
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(row, nullptr);
+    auto rowProps = row->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(rowProps, nullptr);
+    rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    rowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    title->MountToParent(row);
+    return row;
 }
 
 RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& dialogProperties)
