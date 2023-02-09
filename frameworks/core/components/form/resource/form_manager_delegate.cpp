@@ -181,7 +181,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         formCallbackClient_ = std::make_shared<FormCallbackClient>();
     }
     formCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
-    clientInstance->AddForm(formCallbackClient_, formJsInfo.formId);
+    clientInstance->AddForm(formCallbackClient_, formJsInfo);
 
     if (formSurfaceCallbackClient_ == nullptr) {
         formSurfaceCallbackClient_ = std::make_shared<FormSurfaceCallbackClient>();

@@ -50,6 +50,14 @@ public:
         }
     }
 
+    void OnError(const int32_t errorCode, const std::string &errorMsg) override
+    {
+        auto delegate = delegate_.Upgrade();
+        if (delegate) {
+            delegate->OnFormError(std::to_string(errorCode), errorMsg);
+        }
+    }
+
     void SetFormManagerDelegate(WeakPtr<FormManagerDelegate> delegate)
     {
         delegate_ = delegate;
