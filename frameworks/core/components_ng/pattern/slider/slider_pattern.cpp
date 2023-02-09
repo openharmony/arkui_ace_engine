@@ -20,6 +20,7 @@
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/slider/slider_accessibility_property.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
@@ -362,7 +363,10 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
     UpdateCircleCenterOffset();
     auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
-    auto focusDistance = theme->GetFocusSideDistance();
+    auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    auto paintWidth = appTheme->GetFocusWidthVp();
+    auto focusSideDistance = theme->GetFocusSideDistance();
+    auto focusDistance = paintWidth * HALF + focusSideDistance;
     auto focusRadius = blockDiameter_ * HALF + static_cast<float>(focusDistance.ConvertToPx());
     paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
         circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
@@ -374,7 +378,10 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     auto frameSize = GetHostFrameSize();
     CHECK_NULL_VOID(frameSize);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
-    auto focusDistance = theme->GetFocusSideDistance();
+    auto focusSideDistance = theme->GetFocusSideDistance();
+    auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    auto paintWidth = appTheme->GetFocusWidthVp();
+    auto focusDistance = paintWidth * HALF + focusSideDistance;
     float offsetX = 0;
     float offsetY = 0;
     float width = frameSize->Width();

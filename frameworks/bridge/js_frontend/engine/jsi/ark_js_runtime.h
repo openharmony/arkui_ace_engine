@@ -57,6 +57,7 @@ using DebuggerPostTask = std::function<void(std::function<void()>&&)>;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class ArkJSRuntime final : public JsRuntime, public std::enable_shared_from_this<ArkJSRuntime> {
 public:
+    using ErrorEventHandler = std::function<void(const std::string&, const std::string&)>;
 #if !defined(WINDOWS_PLATFORM)
     bool StartDebugger(const char* libraryPath, EcmaVM* vm) const;
 #endif
@@ -68,6 +69,7 @@ public:
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
     bool EvaluateJsCode(
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) override;
+    bool ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath) override;
     bool ExecuteJsBin(const std::string& fileName) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
@@ -95,9 +97,39 @@ public:
         return vm_;
     }
 
+    void SetAssetPath(const std::string& assetPath)
+    {
+        panda::JSNApi::SetAssetPath(vm_, assetPath);
+    }
+
+    void SetBundleName(const std::string& bundleName)
+    {
+        panda::JSNApi::SetBundleName(vm_, bundleName);
+    }
+
+    void SetBundle(bool isBundle)
+    {
+        panda::JSNApi::SetBundle(vm_, isBundle);
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        panda::JSNApi::SetModuleName(vm_, moduleName);
+    }
+
     void SetDebuggerPostTask(DebuggerPostTask&& task)
     {
         debuggerPostTask_ = std::move(task);
+    }
+
+    void SetErrorEventHandler(ErrorEventHandler&& errorCallback) override
+    {
+        errorCallback_ = std::move(errorCallback);
+    }
+
+    const ErrorEventHandler& GetErrorEventHandler()
+    {
+        return errorCallback_;
     }
 
 #if defined(PREVIEW)
@@ -136,26 +168,6 @@ public:
         return undefined;
     }
 
-    void SetAssetPath(const std::string& assetPath)
-    {
-        panda::JSNApi::SetAssetPath(vm_, assetPath);
-    }
-
-    void SetBundleName(const std::string& bundleName)
-    {
-        panda::JSNApi::SetBundleName(vm_, bundleName);
-    }
-
-    void SetBundle(bool isBundle)
-    {
-        panda::JSNApi::SetBundle(vm_, isBundle);
-    }
-
-    void SetModuleName(const std::string& moduleName)
-    {
-        panda::JSNApi::SetModuleName(vm_, moduleName);
-    }
-
     bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
     void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
     {
@@ -178,6 +190,7 @@ private:
     bool usingExistVM_ = false;
     bool isDebugMode_ = true;
     DebuggerPostTask debuggerPostTask_;
+    ErrorEventHandler errorCallback_;
 #if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};

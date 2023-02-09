@@ -54,15 +54,15 @@ int32_t FormRendererDelegateImpl::OnActionEvent(const std::string& action)
     return ERR_OK;
 }
 
-int32_t FormRendererDelegateImpl::OnError(const std::string& param)
+int32_t FormRendererDelegateImpl::OnError(const std::string& code, const std::string& msg)
 {
-    HILOG_INFO("OnError %{public}s", param.c_str());
+    HILOG_INFO("OnError code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
     if (!errorEventHandler_) {
-        HILOG_ERROR("errorEventHandler_ is null,  %{public}s", param.c_str());
+        HILOG_ERROR("errorEventHandler_ is null");
         return ERR_INVALID_DATA;
     }
 
-    errorEventHandler_(param);
+    errorEventHandler_(code, msg);
     return ERR_OK;
 }
 
@@ -80,7 +80,7 @@ void FormRendererDelegateImpl::SetActionEventHandler(
 }
 
 void FormRendererDelegateImpl::SetErrorEventHandler(
-    std::function<void(const std::string&)>&& listener)
+    std::function<void(const std::string&, const std::string&)>&& listener)
 {
     errorEventHandler_ = std::move(listener);
 }

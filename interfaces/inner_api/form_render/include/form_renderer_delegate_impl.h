@@ -16,11 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H
 
-#include <mutex>
-
 #include "form_renderer_delegate_stub.h"
-
-#include "base/utils/macros.h"
 
 namespace OHOS {
 namespace Ace {
@@ -49,22 +45,23 @@ public:
     int32_t OnActionEvent(const std::string& action) override;
     /**
      * @brief OnError.
-     * @param param The param.
+     * @param code The code.
+     * @param msg The msg.
      */
-    int32_t OnError(const std::string& param) override;
+    int32_t OnError(const std::string& code, const std::string& msg) override;
 
     void SetSurfaceCreateEventHandler(std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
             const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
     void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
-    void SetErrorEventHandler(std::function<void(const std::string&)>&& listener);
+    void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& listener);
 
 private:
     std::function<void(
         const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>
         surfaceCreateEventHandler_;
     std::function<void(const std::string&)> actionEventHandler_;
-    std::function<void(const std::string&)> errorEventHandler_;
+    std::function<void(const std::string&, const std::string&)> errorEventHandler_;
 };
-}  // namespace Ace
-}  // namespace OHOS
+} // namespace Ace
+} // namespace OHOS
 #endif  // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H

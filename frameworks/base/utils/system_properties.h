@@ -331,6 +331,11 @@ public:
 
     static bool GetAllowWindowOpenMethodEnabled();
 
+    static uint32_t GetDumpFrameCount()
+    {
+        return dumpFrameCount_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -365,6 +370,7 @@ private:
     static int32_t astcMax_;
     static int32_t astcPsnr_;
     static bool extSurfaceEnabled_;
+    static uint32_t dumpFrameCount_;
 };
 
 } // namespace OHOS::Ace

@@ -744,6 +744,10 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
             LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f",
                 formWidth_, formHeight_);
             Platform::AceContainer::SetViewNew(flutterAceView, density, formWidth_, formHeight_, window_);
+            auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
+            CHECK_NULL_VOID(frontend);
+            frontend->SetBundleName(formBundleName_);
+            frontend->SetModuleName(formModuleName_);
         } else {
             Platform::AceContainer::SetViewNew(flutterAceView, density, 0, 0, window_);
         }
@@ -1469,9 +1473,6 @@ void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
 
 void UIContentImpl::NotifyMemoryLevel(int32_t level)
 {
-    // level = 0: MEMORY_LEVEL_MODERATE;
-    // level = 1: MEMORY_LEVEL_LOW;
-    // level = 2: MEMORY_LEVEL_CRITICAL;
     LOGI("Receive Memory level notification, level: %{public}d", level);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -1519,5 +1520,16 @@ void UIContentImpl::SetActionEventHandler(
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetActionEventHandler(std::move(actionCallback));
+}
+
+void UIContentImpl::SetErrorEventHandler(
+    std::function<void(const std::string&, const std::string&)>&& errorCallback)
+{
+    CHECK_NULL_VOID(errorCallback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    return front->SetErrorEventHandler(std::move(errorCallback));
 }
 } // namespace OHOS::Ace

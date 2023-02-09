@@ -80,11 +80,21 @@ RefPtr<FrameNode> CreateBarItemIconNode(const std::string& src)
     auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
-
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
-    info.SetFillColor(theme->GetMenuIconColor());
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_RETURN(navigationGroupNode, nullptr);
+    auto hub = navigationGroupNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(hub, nullptr);
+    if (!hub->IsEnabled()) {
+        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    } else {
+        info.SetFillColor(theme->GetMenuIconColor());
+    }
     imageLayoutProperty->UpdateImageSourceInfo(info);
+
     auto iconSize = theme->GetMenuIconSize();
     imageLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(iconSize), CalcLength(iconSize)));
     iconNode->MarkModifyDone();
@@ -118,13 +128,21 @@ void BuildMoreIemNode(const RefPtr<BarItemNode>& barItemNode)
     auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
 
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto hub = navigationGroupNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(hub);
     auto info = ImageSourceInfo("");
     info.SetResourceId(theme->GetMoreResourceId());
-    info.SetFillColor(theme->GetMenuIconColor());
+    if (!hub->IsEnabled()) {
+        info.SetFillColor(theme->GetMenuIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    } else {
+        info.SetFillColor(theme->GetMenuIconColor());
+    }
     imageLayoutProperty->UpdateImageSourceInfo(info);
 
     auto iconSize = theme->GetMenuIconSize();
@@ -531,14 +549,6 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
             CHECK_NULL_VOID(eventHub);
             eventHub->SetHoverAnimation(HoverEffectType::BOARD);
 
-            auto hub = menuItemNode->GetEventHub<EventHub>();
-            CHECK_NULL_VOID(hub);
-            if (!hub->IsEnabled()) {
-                auto backGroundColor = renderContext->GetBackgroundColor();
-                backGroundColor->BlendOpacity(theme->GetAlphaDisabled());
-                renderContext->UpdateBackgroundColor(backGroundColor.value());
-            }
-
             PaddingProperty padding;
             padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
             padding.right = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -590,14 +600,6 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
         auto eventHub = menuItemNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetHoverAnimation(HoverEffectType::BOARD);
-
-        auto hub = menuItemNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(hub);
-        if (!hub->IsEnabled()) {
-            auto backGroundColor = renderContext->GetBackgroundColor();
-            backGroundColor->BlendOpacity(theme->GetAlphaDisabled());
-            renderContext->UpdateBackgroundColor(backGroundColor.value());
-        }
 
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -700,16 +702,6 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
         CHECK_NULL_VOID(eventHub);
         eventHub->SetHoverAnimation(HoverEffectType::BOARD);
 
-        auto backButtonEventhub = backButtonNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(backButtonEventhub);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        if (!backButtonEventhub->IsEnabled()) {
-            auto backGroundColor = renderContext->GetBackgroundColor();
-            backGroundColor->BlendOpacity(theme->GetAlphaDisabled());
-            renderContext->UpdateBackgroundColor(backGroundColor.value());
-        }
-
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
         padding.right = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -720,11 +712,20 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
         auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(backButtonImageNode);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_VOID(theme);
         ImageSourceInfo imageSourceInfo;
         imageSourceInfo.SetResourceId(theme->GetBackResourceId());
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+
+        auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(navigationEventHub);
+        if (!navigationEventHub->IsEnabled()) {
+            imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+        } else {
+            imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+        }
         backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
@@ -865,8 +866,6 @@ void NavigationView::SetCustomToolBar(const RefPtr<UINode>& customToolBar)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto layoutProperty = navBarNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     if (navBarNode->GetPrevToolBarIsCustom().value_or(false)) {
         if (customToolBar->GetId() == navBarNode->GetToolBarNode()->GetId()) {
             navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::NONE);

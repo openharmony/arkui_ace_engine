@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_item_model_impl.h"
 #include "core/common/container.h"
@@ -221,7 +222,15 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
         itemInfo.node = node;
         return itemInfo;
     };
-    ListItemModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
+#ifdef NG_BUILD
+    ViewAbstractModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        ViewAbstractModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
+    } else {
+        ListItemModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
+    }
+#endif
 }
 
 void JSListItem::JSBind(BindingTarget globalObj)

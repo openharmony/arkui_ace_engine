@@ -166,6 +166,11 @@ void OnAnimationScaleChanged(const char *key, const char *value, void *context)
     animationScale_ = animationScale;
 }
 
+uint32_t GetSysDumpFrameCount()
+{
+    return system::GetUintParameter<uint32_t>("persist.ace.framedumpcount", 10);
+}
+
 } // namespace
 
 bool SystemProperties::IsSyscapExist(const char* cap)
@@ -284,6 +289,7 @@ bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
+uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 
 DeviceType SystemProperties::GetDeviceType()
 {

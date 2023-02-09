@@ -39,7 +39,7 @@ public:
 
     int32_t OnActionEvent(const std::string& action) override;
 
-    int32_t OnError(const std::string& param) override;
+    int32_t OnError(const std::string& code, const std::string& msg) override;
 
 private:
     static bool WriteInterfaceToken(MessageParcel &data);

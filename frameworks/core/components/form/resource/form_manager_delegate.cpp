@@ -32,6 +32,7 @@
 #include "form_callback_client.h"
 #include "form_host_client.h"
 #include "form_js_info.h"
+#include "form_info.h"
 #include "form_mgr.h"
 #include "pointer_event.h"
 #endif
@@ -135,22 +136,45 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (info.dimension != -1) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
+
+    std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
+    AppExecFwk::FormType uiSyntax = AppExecFwk::FormType::JS;
+    std::string bundleName(info.bundleName);
+    std::string moduleName(info.moduleName);
+    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFormsInfoByModule(bundleName,
+                                                                                moduleName,
+                                                                                formInfos);
+    if (result != 0) {
+        LOGW("Query form uiSyntax failed.");
+    } else {
+        auto iter = formInfos.begin();
+        while (iter != formInfos.end()) {
+            auto formInfo = *iter;
+            if (info.cardName == formInfo.name) {
+                LOGI("Query form uiSyntax: %{public}d", static_cast<int>(formJsInfo.uiSyntax));
+                uiSyntax = formInfo.uiSyntax;
+                break;
+            }
+            iter++;
+        }
+    }
+
+    if (uiSyntax == AppExecFwk::FormType::ETS) {
+        CHECK_NULL_VOID(renderDelegate_);
+        wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", renderDelegate_->AsObject());
+    }
+
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
-    // 在OHOS::AppExecFwk::Constants中加类似参数
-    CHECK_NULL_VOID(renderDelegate_);
-    wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", renderDelegate_->AsObject());
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
         LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
-        if (onFormErrorCallback_) {
-            onFormErrorCallback_(std::to_string(ret), errorMsg);
-        }
+        OnFormError(std::to_string(ret), errorMsg);
         return;
     }
-    LOGI("Add form success formId:%{public}s", std::to_string(formJsInfo.formId).c_str());
-    LOGI("Add form success type:%{public}d", static_cast<int>(formJsInfo.type));
-    LOGI("Add form success uiSyntax:%{public}d", static_cast<int>(formJsInfo.uiSyntax));
+    LOGI("Add form success formId: %{public}s", std::to_string(formJsInfo.formId).c_str());
+    LOGI("Add form success type: %{public}d", static_cast<int>(formJsInfo.type));
+    LOGI("Add form success uiSyntax: %{public}d", static_cast<int>(formJsInfo.uiSyntax));
 
     if (formCallbackClient_ == nullptr) {
         formCallbackClient_ = std::make_shared<FormCallbackClient>();
@@ -405,11 +429,12 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
 
-    auto&& onErrorEventHandler = [weak = WeakClaim(this)](const std::string& param) {
-        auto formManagerDelegate = weak.Upgrade();
-        CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnFormError(param);
-    };
+    auto&& onErrorEventHandler =
+        [weak = WeakClaim(this)](const std::string& code, const std::string& msg) {
+            auto formManagerDelegate = weak.Upgrade();
+            CHECK_NULL_VOID(formManagerDelegate);
+            formManagerDelegate->OnFormError(code, msg);
+        };
     renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
 }
 
@@ -508,6 +533,13 @@ void FormManagerDelegate::OnFormError(const std::string& param)
     auto result = ParseMapFromString(param);
     if (onFormErrorCallback_) {
         onFormErrorCallback_(result["code"], result["msg"]);
+    }
+}
+
+void FormManagerDelegate::OnFormError(const std::string& code, const std::string& msg)
+{
+    if (onFormErrorCallback_) {
+        onFormErrorCallback_(code, msg);
     }
 }
 

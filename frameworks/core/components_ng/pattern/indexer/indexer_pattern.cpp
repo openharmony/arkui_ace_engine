@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/animation/animator.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -49,7 +50,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
 void IndexerPattern::OnModifyDone()
 {
     auto host = GetHost();
@@ -145,8 +145,16 @@ void IndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void IndexerPattern::OnHover(bool isHover)
 {
+    if (isHover_ == isHover) {
+        return;
+    }
     isHover_ = isHover;
     isTouch_ = false;
+    if (isHover_) {
+        IndexerHoverInAnimation();
+    } else {
+        IndexerHoverOutAnimation();
+    }
     ApplyIndexChanged(false);
 }
 
@@ -211,6 +219,9 @@ void IndexerPattern::OnTouchDown(const TouchEventInfo& info)
 void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
 {
     childPressIndex_ = -1;
+    if (isHover_) {
+        IndexerPressOutAnimation();
+    }
     auto nextSelectIndex = GetSelectChildIndex(info.GetTouches().front().GetLocalLocation());
     auto refreshBubble = false;
     if (nextSelectIndex != selected_) {
@@ -218,7 +229,8 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
         refreshBubble = true;
         ResetStatus();
     }
-    ApplyIndexChanged(refreshBubble);
+    ApplyIndexChanged(refreshBubble, true);
+    OnSelect(refreshBubble);
 }
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)
@@ -235,6 +247,9 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
         return;
     }
     childPressIndex_ = nextSelectIndex;
+    if (isHover_ && childPressIndex_ >= 0) {
+        IndexerPressInAnimation();
+    }
     auto refreshBubble = false;
     if (selected_ != childPressIndex_) {
         selected_ = childPressIndex_;
@@ -353,7 +368,7 @@ void IndexerPattern::ResetStatus()
     childPressIndex_ = -1;
 }
 
-void IndexerPattern::OnSelectChanged()
+void IndexerPattern::OnSelect(bool changed)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -363,9 +378,25 @@ void IndexerPattern::OnSelectChanged()
     if (onSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
         onSelected(selected_);
     }
+    if (changed) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        animateSelected_ = selected_;
+        if (animateSelected_ >= 0) {
+            auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
+            CHECK_NULL_VOID(selectedFrameNode);
+            ItemSelectedInAnimation(selectedFrameNode);
+        }
+        if (lastSelected_ >= 0) {
+            auto lastFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(lastSelected_));
+            CHECK_NULL_VOID(lastFrameNode);
+            ItemSelectedOutAnimation(lastFrameNode);
+        }
+        lastSelected_ = selected_;
+    }
 }
 
-void IndexerPattern::ApplyIndexChanged(bool selectChanged)
+void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -385,12 +416,6 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged)
     auto paddingLeft = CalcLength(Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx());
     auto paddingTop = CalcLength(Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx());
     layoutProperty->UpdatePadding({ paddingLeft, paddingLeft, paddingTop, paddingTop });
-    if (isHover_) {
-        currentRenderContext->BlendBgColor(
-            indexerTheme->GetSlipHoverBackgroundColor().ChangeOpacity(IndexerTheme::SLIP_BACKGROUND_OPACITY));
-    } else {
-        currentRenderContext->ResetBlendBgColor();
-    }
     int32_t index = 0;
     auto childrenNode = host->GetChildren();
     for (auto& iter : childrenNode) {
@@ -401,23 +426,25 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged)
         if (index == childHoverIndex_ || index == childPressIndex_) {
             auto radiusSize = indexerTheme->GetHoverRadiusSize();
             childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
-            childRenderContext->BlendBgColor(indexerTheme->GetHoverBgAreaColor());
-            nodeLayoutProperty->UpdateTextColor(indexerTheme->GetHoverTextColor());
+            childRenderContext->UpdateBackgroundColor(indexerTheme->GetHoverBgAreaColor());
         } else if (index == childFocusIndex_ || index == selected_) {
             if (index == childFocusIndex_) {
                 auto borderWidth = indexerTheme->GetFocusBgOutlineSize();
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
                 auto borderColor = indexerTheme->GetFocusBgOutlineColor();
                 childRenderContext->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
+                childRenderContext->UpdateBackgroundColor(
+                    paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
             } else {
                 Dimension borderWidth;
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
+                if (!fromTouchUp || animateSelected_ == lastSelected_) {
+                    childRenderContext->UpdateBackgroundColor(indexerTheme->GetSeclectedBackgroundColor());
+                }
                 childRenderContext->ResetBlendBorderColor();
             }
             nodeLayoutProperty->UpdateTextColor(
                 layoutProperty->GetSelectedColor().value_or(indexerTheme->GetSelectedTextColor()));
-            childRenderContext->BlendBgColor(
-                paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
             auto radius = indexerTheme->GetHoverRadiusSize();
             childRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
             auto selectedFont = layoutProperty->GetSelectedFont().value_or(indexerTheme->GetSelectTextStyle());
@@ -429,11 +456,11 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged)
             index++;
             continue;
         } else {
-            childRenderContext->ResetBlendBgColor();
+            if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
+                childRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            }
             Dimension radiusZeroSize;
             childRenderContext->UpdateBorderRadius({ radiusZeroSize, radiusZeroSize, radiusZeroSize, radiusZeroSize });
-            nodeLayoutProperty->UpdateTextColor(
-                layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         }
         Dimension borderWidth;
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
@@ -442,15 +469,16 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged)
             layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontSize());
         nodeLayoutProperty->UpdateFontWeight(
             layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontWeight());
+        nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         childNode->MarkModifyDone();
         index++;
     }
     if (selectChanged) {
-        OnSelectChanged();
         ShowBubble();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
 void IndexerPattern::ShowBubble()
 {
     if (!NeedShowBubble()) {
@@ -470,7 +498,7 @@ void IndexerPattern::ShowBubble()
     overlayManager->ShowIndexerPopup(host->GetId(), customNode);
     removePopupNode_ = true;
     AddPopupTouchListener(customNode);
-    BeginBubbleAnimation(customNode);
+    StartBubbleAppearAnimation(customNode);
 }
 
 void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
@@ -490,8 +518,10 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
         indexerWidth = layoutConstraint->selfIdealSize.Width().value();
     }
     auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
-    auto userDefinePositionX = layoutProperty->GetPopupPositionX().value_or(NG::BUBBLE_POSITION_X);
-    auto userDefinePositionY = layoutProperty->GetPopupPositionY().value_or(NG::BUBBLE_POSITION_Y);
+    auto userDefinePositionX =
+        layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP).ConvertToPx());
+    auto userDefinePositionY =
+        layoutProperty->GetPopupPositionY().value_or(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP).ConvertToPx());
     auto zeroPositionX = host->GetOffsetRelativeToWindow().GetX() + indexerWidth / 2;
     auto zeroPosiitonY = host->GetOffsetRelativeToWindow().GetY();
     auto renderContext = customNode->GetRenderContext();
@@ -569,7 +599,7 @@ RefPtr<FrameNode> IndexerPattern::InitBubbleView()
         InitBubbleList(currentListData, listNode, indexerTheme);
     }
     auto divider = V2::ItemDivider();
-    divider.strokeWidth = Dimension(INDEXER_LIST_DIVIDER);
+    divider.strokeWidth = Dimension(INDEXER_LIST_DIVIDER, DimensionUnit::VP);
     divider.color = indexerTheme->GetPopupSeparateColor();
     listLayoutProperty->UpdateDivider(divider);
     listLayoutProperty->UpdateListDirection(Axis::VERTICAL);
@@ -619,7 +649,7 @@ void IndexerPattern::InitBubbleList(
     listRenderContext->SetClipToBounds(true);
 }
 
-void IndexerPattern::ChangeListItemsBgColor(int32_t clickIndex)
+void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -629,6 +659,10 @@ void IndexerPattern::ChangeListItemsBgColor(int32_t clickIndex)
     CHECK_NULL_VOID(overlayManager);
     auto popupNode = overlayManager->GetIndexerPopup(host->GetId());
     CHECK_NULL_VOID(popupNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
     auto listNode = popupNode->GetLastChild();
     auto currentIndex = 0;
     for (auto child : listNode->GetChildren()) {
@@ -640,6 +674,11 @@ void IndexerPattern::ChangeListItemsBgColor(int32_t clickIndex)
         } else {
             listItemContext->UpdateBackgroundColor(Color::TRANSPARENT);
         }
+        auto textNode = DynamicCast<FrameNode>(listItemNode->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupTextColor());
         listItemNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         currentIndex++;
     }
@@ -683,7 +722,7 @@ void IndexerPattern::OnListItemClick(int32_t index)
     if (onPopupSelected) {
         onPopupSelected(index);
     }
-    ChangeListItemsBgColor(index);
+    ChangeListItemsSelectedStyle(index);
 }
 
 void IndexerPattern::OnPopupTouchDown(const TouchEventInfo& info)
@@ -697,8 +736,7 @@ void IndexerPattern::OnPopupTouchDown(const TouchEventInfo& info)
     CHECK_NULL_VOID(overlayManager);
     auto popupNode = overlayManager->GetIndexerPopup(host->GetId());
     CHECK_NULL_VOID(popupNode);
-    auto popupRenderContext = popupNode->GetRenderContext();
-    popupRenderContext->UpdateOpacity(1.0);
+    StartBubbleAppearAnimation(popupNode);
 }
 
 bool IndexerPattern::NeedShowBubble()
@@ -758,31 +796,151 @@ void IndexerPattern::OnKeyEventDisapear()
     ApplyIndexChanged(false);
 }
 
-void IndexerPattern::BeginBubbleAnimation(RefPtr<FrameNode> animationNode)
+void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
+{
+    CHECK_NULL_VOID(itemNode);
+    auto rendercontext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(rendercontext);
+    AnimationOption option;
+    option.SetDuration(INDEXER_SELECT_DURATION);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId()]() {
+        ContainerScope scope(id);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        CHECK_NULL_VOID(indexerTheme);
+        rendercontext->UpdateBackgroundColor(indexerTheme->GetSeclectedBackgroundColor());
+    });
+}
+
+void IndexerPattern::ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode)
+{
+    CHECK_NULL_VOID(itemNode);
+    auto rendercontext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(rendercontext);
+    AnimationOption option;
+    option.SetDuration(INDEXER_SELECT_DURATION);
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId()]() {
+        ContainerScope scope(id);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        CHECK_NULL_VOID(indexerTheme);
+        rendercontext->UpdateBackgroundColor(Color::TRANSPARENT);
+    });
+}
+
+void IndexerPattern::IndexerHoverInAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    option.SetDuration(INDEXER_HOVER_IN_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+        ContainerScope scope(id);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        CHECK_NULL_VOID(indexerTheme);
+        renderContext->UpdateBackgroundColor(
+            indexerTheme->GetSlipHoverBackgroundColor().ChangeOpacity(IndexerTheme::SLIP_BACKGROUND_OPACITY));
+    });
+}
+
+void IndexerPattern::IndexerHoverOutAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    option.SetDuration(INDEXER_HOVER_OUT_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+        ContainerScope scope(id);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        CHECK_NULL_VOID(indexerTheme);
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    });
+}
+
+void IndexerPattern::IndexerPressInAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    option.SetDuration(INDEXER_PRESS_IN_DURATION);
+    option.SetCurve(Curves::SHARP);
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+        ContainerScope scope(id);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        CHECK_NULL_VOID(indexerTheme);
+        renderContext->UpdateBackgroundColor(
+            indexerTheme->GetSlipHoverBackgroundColor().ChangeOpacity(IndexerTheme::SLIP_PRESS_BACKGROUND_OPACITY));
+    });
+}
+
+void IndexerPattern::IndexerPressOutAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    option.SetDuration(INDEXER_PRESS_OUT_DURATION);
+    option.SetCurve(Curves::SHARP);
+    AnimationUtils::Animate(option, [renderContext, id = Container::CurrentId()]() {
+        ContainerScope scope(id);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        CHECK_NULL_VOID(indexerTheme);
+        renderContext->UpdateBackgroundColor(
+            indexerTheme->GetSlipHoverBackgroundColor().ChangeOpacity(IndexerTheme::SLIP_BACKGROUND_OPACITY));
+    });
+}
+
+void IndexerPattern::StartBubbleAppearAnimation(RefPtr<FrameNode> animationNode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(animationNode);
     auto renderContext = animationNode->GetRenderContext();
     AnimationOption animationOption;
-    animationOption.SetDuration(INDEXER_BUBBLE_ANIMATION_DURATION);
+    animationOption.SetDuration(INDEXER_BUBBLE_WAIT_DURATION);
     animationOption.SetCurve(Curves::DECELE);
     animationOption.SetOnFinishEvent([targetId = host->GetId(), popnodeId = animationNode->GetId(),
                                          id = Container::CurrentId(), weak = WeakClaim(this)] {
         ContainerScope scope(id);
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto popupNode = overlayManager->GetIndexerPopup(targetId);
-        CHECK_NULL_VOID(popupNode);
-        if (!indexerPattern->removePopupNode_ || popupNode->GetId() != popnodeId) {
-            return;
-        }
-        overlayManager->EraseIndexerPopup(targetId);
+        indexerPattern->RemoveBubbleNode(popnodeId, targetId);
     });
     renderContext->OpacityAnimation(animationOption, 1.0f, 0.0f);
+}
+
+void IndexerPattern::RemoveBubbleNode(int32_t popnodeId, int32_t targetId) const
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto popupNode = overlayManager->GetIndexerPopup(targetId);
+    CHECK_NULL_VOID(popupNode);
+    if (!removePopupNode_ || popupNode->GetId() != popnodeId) {
+        return;
+    }
+    overlayManager->EraseIndexerPopup(targetId);
 }
 } // namespace OHOS::Ace::NG

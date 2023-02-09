@@ -948,14 +948,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        auto isOutOfRegion = false;
-        if (pattern_->NeedExternRegion()) {
-            isOutOfRegion = IsOutOfTouchTestRegion(parentLocalPoint);
-        } else {
-            isOutOfRegion = (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable())
-                && !IsResponseRegion();
-        }
-        if (isOutOfRegion) {
+        if (IsOutOfTouchTestRegion(parentLocalPoint)) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
@@ -1329,6 +1322,12 @@ void FrameNode::AddHotZoneRect(const DimensionRect& hotZoneRect) const
 {
     auto gestureHub = GetOrCreateGestureEventHub();
     gestureHub->AddResponseRect(hotZoneRect);
+}
+
+void FrameNode::RemoveLastHotZoneRect() const
+{
+    auto gestureHub = GetOrCreateGestureEventHub();
+    gestureHub->RemoveLastResponseRect();
 }
 
 } // namespace OHOS::Ace::NG

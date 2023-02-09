@@ -1883,7 +1883,11 @@ void FrontendDelegateDeclarative::PushPageTransitionListener(
     if (event == TransitionEvent::PUSH_END) {
         OnPushPageSuccess(page, page->GetUrl());
         SetCurrentPage(page->GetPageId());
-        OnPageShow();
+        if (isMainPage_) {
+            isMainPage_ = false;
+        } else {
+            OnPageShow();
+        }
         OnMediaQueryUpdate();
         ProcessRouterTask();
     }

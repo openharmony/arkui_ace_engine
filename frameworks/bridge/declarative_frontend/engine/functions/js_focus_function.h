@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_FOCUS_FUNCTION_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_FOCUS_FUNCTION_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_FOCUS_FUNCTION_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_FOCUS_FUNCTION_H
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
@@ -28,9 +28,9 @@ public:
     ~JsFocusFunction() override = default;
 
     void Execute(int direction);
-    void Execute();
+    void Execute() override;
 };
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_V8_FUNCTION_V8_FOCUS_FUNCTION_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_FOCUS_FUNCTION_H

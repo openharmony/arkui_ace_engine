@@ -82,6 +82,7 @@ public:
     void DispatchPointerEvent(
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     void RegisterRenderDelegateEvent();
+    void OnFormError(const std::string& code, const std::string& msg);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);

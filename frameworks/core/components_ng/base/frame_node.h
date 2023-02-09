@@ -302,8 +302,14 @@ public:
     bool MarkRemoving() override;
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
+    void RemoveLastHotZoneRect() const;
     
     bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
+
+    bool IsLayoutDirtyMarked() const
+    {
+        return isLayoutDirtyMarked_;
+    }
 
 private:
     void MarkNeedRender(bool isRenderBoundary);

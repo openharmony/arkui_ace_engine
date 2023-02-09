@@ -19,31 +19,103 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
-#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #endif
 
 namespace OHOS::Ace::Framework {
 
-class ACE_EXPORT JsFunction : public virtual AceType {
-    DECLARE_ACE_TYPE(JsFunction, AceType);
+class ACE_EXPORT JsFunctionBase : public virtual AceType {
+    DECLARE_ACE_TYPE(JsFunctionBase, AceType);
+
+public:
+    virtual void Execute()
+    {
+        ExecuteJS();
+    }
+
+    void Execute(const JSRef<JSObject>& jsParamsObject);
+    void Execute(const std::vector<std::string>& keys, const std::string& param);
+    void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
+
+    virtual JSRef<JSVal> ExecuteJS(int argc)
+    {
+        return ExecuteJS(argc, nullptr);
+    }
+    virtual JSRef<JSVal> ExecuteJS(JSRef<JSVal>* argv)
+    {
+        return ExecuteJS(0, argv);
+    }
+    virtual JSRef<JSVal> ExecuteJS()
+    {
+        return ExecuteJS(0, nullptr);
+    }
+    // Empty realization in JsFunctionBase
+    virtual JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv)
+    {
+        JSRef<JSObject> eventInfo = JSRef<JSObject>::New();
+        return JSRef<JSVal>::Cast(eventInfo);
+    }
+
+protected:
+    JSWeak<JSVal> jsThis_;
+};
+
+class ACE_EXPORT JsFunction : public virtual JsFunctionBase {
+    DECLARE_ACE_TYPE(JsFunction, JsFunctionBase);
 
 public:
     explicit JsFunction(const JSRef<JSFunc>& jsFunction);
     JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
     ~JsFunction() override;
-    void Execute();
-    void Execute(const JSRef<JSObject>& jsParamsObject);
-    void Execute(const std::vector<std::string>& keys, const std::string& param);
-    void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
-    JSRef<JSVal> ExecuteJS(int argc = 0, JSRef<JSVal>* argv = nullptr);
+
+    JSRef<JSVal> ExecuteJS(int argc) override
+    {
+        return ExecuteJS(argc, nullptr);
+    }
+    JSRef<JSVal> ExecuteJS(JSRef<JSVal>* argv) override
+    {
+        return ExecuteJS(0, argv);
+    }
+    JSRef<JSVal> ExecuteJS() override
+    {
+        return ExecuteJS(0, nullptr);
+    }
+    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv) override;
 
 protected:
     JSRef<JSFunc> jsFunction_;
-    JSWeak<JSVal> jsThis_;
+};
+
+class ACE_EXPORT JsWeakFunction : public virtual JsFunctionBase {
+    DECLARE_ACE_TYPE(JsWeakFunction, JsFunctionBase);
+
+public:
+    explicit JsWeakFunction(const JSRef<JSFunc>& jsFunction);
+    JsWeakFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction);
+    ~JsWeakFunction() override = default;
+
+    JSRef<JSVal> ExecuteJS(int argc) override
+    {
+        return ExecuteJS(argc, nullptr);
+    }
+    JSRef<JSVal> ExecuteJS(JSRef<JSVal>* argv) override
+    {
+        return ExecuteJS(0, argv);
+    }
+    JSRef<JSVal> ExecuteJS() override
+    {
+        return ExecuteJS(0, nullptr);
+    }
+    JSRef<JSVal> ExecuteJS(int argc, JSRef<JSVal>* argv) override;
+
+protected:
+    JSWeak<JSFunc> jsWeakFunction_;
 };
 
 template<class T, int32_t ARGC = 0>
@@ -58,7 +130,7 @@ public:
     {}
     ~JsEventFunction() override = default;
 
-    void Execute()
+    void Execute() override
     {
         JsFunction::ExecuteJS();
     }

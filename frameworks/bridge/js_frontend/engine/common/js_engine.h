@@ -175,6 +175,9 @@ public:
 
     virtual void JsCallback(const std::string& callbackId, const std::string& args) = 0;
 
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
+
     virtual void RunGarbageCollection() = 0;
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
@@ -270,14 +273,14 @@ public:
 #if defined(PREVIEW)
     virtual void ReplaceJSContent(const std::string& url, const std::string componentName)
     {
-        LOGE("V8 does not support replaceJSContent");
+        LOGE("Ark does not support replaceJSContent");
         return;
     }
 
     virtual void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
                                           const std::string assetPath, bool isBundle)
     {
-        LOGE("V8 does not support InitializeModuleSearcher");
+        LOGE("Ark does not support InitializeModuleSearcher");
     }
 #endif
 

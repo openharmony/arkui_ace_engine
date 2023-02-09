@@ -37,7 +37,14 @@ inline constexpr float KEYFRAME_END = 1.0;
 inline constexpr double DEFAULT_OPACITY_IN_PERCENT = 1.0;
 inline constexpr double NINETY_OPACITY_IN_PERCENT = 0.9;
 inline constexpr double ZERO_OPACITY_IN_PERCENT = 0.0;
-inline constexpr int32_t INDEXER_BUBBLE_ANIMATION_DURATION = 3000;
+inline constexpr int32_t INDEXER_BUBBLE_EXIT_DURATION = 400;
+inline constexpr int32_t INDEXER_BUBBLE_ENTER_DURATION = 200;
+inline constexpr int32_t INDEXER_HOVER_IN_DURATION = 250;
+inline constexpr int32_t INDEXER_HOVER_OUT_DURATION = 250;
+inline constexpr int32_t INDEXER_PRESS_IN_DURATION = 100;
+inline constexpr int32_t INDEXER_PRESS_OUT_DURATION = 100;
+inline constexpr int32_t INDEXER_SELECT_DURATION = 100;
+inline constexpr int32_t INDEXER_BUBBLE_WAIT_DURATION = 2000;
 inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE = 5;
 // data for list mode
 inline constexpr double INDEXER_LIST_ITEM_TEXT_SIZE = 12.0; // list mode, font size (FP)
@@ -47,11 +54,11 @@ inline constexpr double INDEXER_DEFAULT_PADDING_X = 10.0;
 inline constexpr double INDEXER_DEFAULT_PADDING_Y = 16.0;
 inline constexpr uint32_t POPUP_LISTITEM_CLICKED_BG = 0x1A000000;
 inline constexpr double BUBBLE_BOX_SIZE = 56.0;
-inline constexpr double BUBBLE_BOX_RADIUS = 12.0;
+inline constexpr double BUBBLE_BOX_RADIUS = 16.0;
 inline constexpr double BOX_RADIUS = 6.0;
 inline constexpr double ZERO_RADIUS = 0.0;
 inline constexpr double BUBBLE_FONT_SIZE = 24.0;
-inline constexpr double BUBBLE_POSITION_X = 96.0;
+inline constexpr double BUBBLE_POSITION_X = 60.0;
 inline constexpr double BUBBLE_POSITION_Y = 48.0;
 inline constexpr uint32_t BUBBLE_FONT_COLOR = 0xFF254FF7;
 inline constexpr uint32_t BUBBLE_BG_COLOR = 0xFFF1F3F5;
@@ -74,6 +81,5 @@ enum class AlignStyle {
     LEFT = 0,
     RIGHT,
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INDEXER_INDEXER_THEME_H

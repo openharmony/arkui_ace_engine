@@ -171,10 +171,7 @@ void RadioPattern::OnClick()
     } else {
         paintProperty->UpdateRadioCheck(false);
     }
-    if (preCheck_ && check) {
-        UpdateUIStatus(true);
-        PlayAnimation(true);
-    }
+    
     if (!preCheck_ && !check) {
         paintProperty->UpdateRadioCheck(true);
         UpdateState();
@@ -297,11 +294,6 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
 
     auto radioEventHub = GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
-    if (!isFirstCreated_) {
-        radioEventHub->UpdateChangeEvent(check);
-    }
-    // If the radio is set to true at creation time, set isFirstCreated_ to false here.
-    isFirstCreated_ = false;
     if (check) {
         pageEventHub->UpdateRadioGroupValue(radioEventHub->GetGroup(), frameNode->GetId());
     } else {
@@ -310,6 +302,12 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
         radioPaintProperty->UpdateRadioCheck(check);
         PlayAnimation(false);
     }
+
+    if (!isFirstCreated_) {
+        radioEventHub->UpdateChangeEvent(check);
+    }
+    // If the radio is set to true at creation time, set isFirstCreated_ to false here.
+    isFirstCreated_ = false;
 }
 
 void RadioPattern::PlayAnimation(bool isOn)
@@ -483,6 +481,15 @@ bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto geometryNode = dirty->GetGeometryNode();
     offset_ = geometryNode->GetContentOffset();
     size_ = geometryNode->GetContentSize();
+
+    if (isFirstAddhotZoneRect_) {
+        AddHotZoneRect();
+        isFirstAddhotZoneRect_ = false;
+    } else {
+        RemoveLastHotZoneRect();
+        AddHotZoneRect();
+    }
+
     return true;
 }
 
@@ -499,6 +506,13 @@ void RadioPattern::AddHotZoneRect()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->AddHotZoneRect(hotZoneRegion);
+}
+
+void RadioPattern::RemoveLastHotZoneRect() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveLastHotZoneRect();
 }
 
 } // namespace OHOS::Ace::NG

@@ -45,6 +45,9 @@ public:
 
     void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
 
+    void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+
     void OnSurfaceChanged(int32_t width, int32_t height) override;
     void SetColorMode(ColorMode colorMode) override;
 
@@ -114,6 +117,23 @@ public:
         taskExecutor_ = taskExecutor;
     }
 
+    void SetModuleName(const std::string& moduleName)
+    {
+        moduleName_ = moduleName;
+    }
+    void SetBundleName(const std::string& bundleName)
+    {
+        bundleName_ = bundleName;
+    }
+    std::string GetModuleName() const
+    {
+        return moduleName_;
+    }
+    std::string GetBundleName() const
+    {
+        return bundleName_;
+    }
+
     ColorMode colorMode_ = ColorMode::LIGHT;
     bool foregroundFrontend_ = false;
     double density_ = 1.0;
@@ -128,6 +148,9 @@ public:
     std::string formSrc_;
     WindowConfig cardWindowConfig_;
     uint64_t cardId_ = 0; // cardId != formId, cardId is the nodeId of component.
+
+    std::string bundleName_;
+    std::string moduleName_;
 };
 } // namespace OHOS::Ace
 

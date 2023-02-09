@@ -155,8 +155,8 @@ protected:
     std::vector<RefPtr<SvgNode>> children_;
     std::string nodeId_;
     std::string text_;
-
-    std::map<std::string, std::vector<float>> transform_;
+    std::string transform_;
+    std::map<std::string, std::vector<float>> animateTransform_;
 
     std::string hrefClipPath_;
     std::string hrefMaskId_;

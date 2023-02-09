@@ -194,7 +194,7 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
         if (setAspect) {
             src->GetLayoutProperty()->UpdateAspectRatio(size.Width() / size.Height());
         }
-        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     sizeAnimation->AddListener(sizeListener);
     controller_->AddInterpolator(sizeAnimation);
@@ -207,7 +207,7 @@ bool SharedTransitionExchange::CreateSizeAnimation(const RefPtr<FrameNode>& src,
         if (initAspectRatio.has_value()) {
             src->GetLayoutProperty()->UpdateAspectRatio(initAspectRatio.value());
         }
-        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        src->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     });
     return true;
 }

@@ -39,10 +39,21 @@ FormRenderer::FormRenderer(
 
 void FormRenderer::InitUiContent()
 {
-    auto actionEventHandler = [&](const std::string& action) {
-        OnActionEvent(action);
+    auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
+        auto formRenderer = weak.lock();
+        if (formRenderer) {
+            formRenderer->OnActionEvent(action);
+        }
     };
     uiContent_->SetActionEventHandler(actionEventHandler);
+
+    auto errorEventHandler = [weak = weak_from_this()](const std::string& code, const std::string& msg) {
+        auto formRenderer = weak.lock();
+        if (formRenderer) {
+            formRenderer->OnError(code, msg);
+        }
+    };
+    uiContent_->SetErrorEventHandler(errorEventHandler);
 }
 
 void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -56,6 +67,8 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     auto height = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 100.0f);
     uiContent_->SetFormWidth(width);
     uiContent_->SetFormHeight(height);
+    uiContent_->SetFormModuleName(formJsInfo.moduleName);
+    uiContent_->SetFormBundleName(formJsInfo.bundleName);
     uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
     InitUiContent();
 
@@ -95,14 +108,14 @@ void FormRenderer::OnActionEvent(const std::string& action)
     formRendererDelegate_->OnActionEvent(action);
 }
 
-void FormRenderer::OnError(const std::string& param)
+void FormRenderer::OnError(const std::string& code, const std::string& msg)
 {
     if (!formRendererDelegate_) {
         HILOG_ERROR("formRendererDelegate is null!");
         return;
     }
 
-    formRendererDelegate_->OnError(param);
+    formRendererDelegate_->OnError(code, msg);
 }
 }  // namespace Ace
 }  // namespace OHOS

@@ -108,6 +108,17 @@ public:
 
     void SetActionEventHandler(
         std::function<void(const std::string& action)>&& actionCallback) override;
+    void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+
+    void SetFormModuleName(const std::string& moduleName) override
+    {
+        formModuleName_ = moduleName;
+    }
+    void SetFormBundleName(const std::string& bundleName) override
+    {
+        formBundleName_ = bundleName;
+    }
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
@@ -128,6 +139,8 @@ private:
     // ArkTS Form
     bool isFormRender_ = false;
     std::string bundleName_;
+    std::string formBundleName_;
+    std::string formModuleName_;
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
 };
