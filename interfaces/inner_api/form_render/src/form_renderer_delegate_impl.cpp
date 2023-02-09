@@ -33,17 +33,12 @@ int32_t FormRendererDelegateImpl::OnSurfaceCreate(
         HILOG_ERROR("%{public}s error, the passed form id can't be negative.", __func__);
         return ERR_INVALID_DATA;
     }
-    std::lock_guard<std::mutex> lock(callbackMutex_);
-    auto iter = formCallbackMap_.find(formId);
-    if (iter == formCallbackMap_.end()) {
-        HILOG_ERROR("%{public}s error, not find formId:%{public}s.", __func__, std::to_string(formId).c_str());
+
+    if (!surfaceCreateEventHandler_) {
+        HILOG_ERROR("surfaceCreateEventHandler_ is null");
         return ERR_INVALID_DATA;
     }
-    for (const auto& callback : iter->second) {
-        HILOG_INFO("%{public}s, formId: %{public}" PRId64 ", jspath: %{public}s, data: %{public}s", __func__, formId,
-            formJsInfo.jsFormCodePath.c_str(), formJsInfo.formData.c_str());
-        callback->ProcessAddFormSurface(formJsInfo, surfaceNode, want);
-    }
+    surfaceCreateEventHandler_(surfaceNode, formJsInfo, want);
     return ERR_OK;
 }
 
@@ -71,23 +66,11 @@ int32_t FormRendererDelegateImpl::OnError(const std::string& code, const std::st
     return ERR_OK;
 }
 
-void FormRendererDelegateImpl::RegisterSurfaceCreateCallback(
-    std::shared_ptr<FormSurfaceCallbackInterface> formCallback, int64_t formId)
+void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
+    std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
+        const AAFwk::Want&)>&& listener)
 {
-    HILOG_INFO("%{public}s called.", __func__);
-    if (formId <= 0 || formCallback == nullptr) {
-        HILOG_ERROR("%{public}s error, invalid formId or formCallback.", __func__);
-        return;
-    }
-    std::lock_guard<std::mutex> lock(callbackMutex_);
-    auto iter = formCallbackMap_.find(formId);
-    if (iter == formCallbackMap_.end()) {
-        std::set<std::shared_ptr<FormSurfaceCallbackInterface>> callbacks;
-        callbacks.emplace(formCallback);
-        formCallbackMap_.emplace(formId, callbacks);
-    } else {
-        iter->second.emplace(formCallback);
-    }
+    surfaceCreateEventHandler_ = std::move(listener);
 }
 
 void FormRendererDelegateImpl::SetActionEventHandler(

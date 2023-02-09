@@ -34,7 +34,6 @@
 #include "form_js_info.h"
 #include "form_info.h"
 #include "form_mgr.h"
-#include "form_surface_callback_client.h"
 #include "pointer_event.h"
 #endif
 
@@ -183,15 +182,6 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     formCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
     clientInstance->AddForm(formCallbackClient_, formJsInfo);
 
-    if (formSurfaceCallbackClient_ == nullptr) {
-        formSurfaceCallbackClient_ = std::make_shared<FormSurfaceCallbackClient>();
-    }
-    formSurfaceCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
-    if (formJsInfo.uiSyntax == AppExecFwk::FormType::ETS) {
-        CHECK_NULL_VOID(renderDelegate_);
-        renderDelegate_->RegisterSurfaceCreateCallback(formSurfaceCallbackClient_, formJsInfo.formId);
-    }
-
     runningCardId_ = formJsInfo.formId;
     if (info.id == formJsInfo.formId) {
         LOGI("Added form already exist, trigger FormUpdate immediately.");
@@ -210,21 +200,19 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 #endif
 }
 
-void FormManagerDelegate::ProcessAddFormSurface(
-    const AppExecFwk::FormJsInfo& formInfo,
-    const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode,
-    const AAFwk::Want& want)
+void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
+    const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want)
 {
     if (!rsSurfaceNode) {
-        LOGE("Form ProcessAddFormSurface rsSurfaceNode is null");
+        LOGE("Form OnSurfaceCreate rsSurfaceNode is null");
         return;
     }
-    LOGI("Form ProcessAddFormSurface formId=%{public}s", std::to_string(formInfo.formId).c_str());
+    LOGI("Form OnSurfaceCreate formId=%{public}s", std::to_string(formInfo.formId).c_str());
 
     if (onFormSurfaceNodeCallback_) {
         onFormSurfaceNodeCallback_(rsSurfaceNode);
     } else {
-        LOGE("Form ProcessAddFormSurface onFormSurfaceNodeCallback = nullptr");
+        LOGE("Form OnSurfaceCreate onFormSurfaceNodeCallback = nullptr");
     }
 
     if (formRendererDispatcher_) {
@@ -425,6 +413,15 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
 void FormManagerDelegate::RegisterRenderDelegateEvent()
 {
     CHECK_NULL_VOID(renderDelegate_);
+    auto&& surfaceCreateEventHandler = [weak = WeakClaim(this)](
+                                           const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+                                           const OHOS::AppExecFwk::FormJsInfo& formInfo, const AAFwk::Want& want) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnSurfaceCreate(formInfo, surfaceNode, want);
+    };
+    renderDelegate_->SetSurfaceCreateEventHandler(std::move(surfaceCreateEventHandler));
+
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);
