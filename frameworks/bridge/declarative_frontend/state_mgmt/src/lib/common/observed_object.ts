@@ -50,7 +50,6 @@ function Observed<C extends Object>(target: Type<C>): any {
   var f: any = function (...args: any[]) {
     stateMgmtConsole.debug(`New ${original.name}, gets wrapped inside ObservableObject proxy.`);
     return ObservedObject.createNew(new original(...args), undefined);
-//    return new ObservedObject<C>(new original(...args), undefined);
   };
 
   Object.setPrototypeOf(f, Object.getPrototypeOf(original));
@@ -72,15 +71,15 @@ class SubscribableHandler {
     if (owningProperty) {
       this.addOwningProperty(owningProperty);
     }
-    stateMgmtConsole.debug(`SubscribableHandler: construcstor done`);
+    stateMgmtConsole.debug(`SubscribableHandler: constructor done`);
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
     if (subscriber) {
-        stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
-        this.owningProperties_.add(subscriber.id__());
+      stateMgmtConsole.debug(`SubscribableHandler: addOwningProperty: subscriber '${subscriber.id__()}'.`)
+      this.owningProperties_.add(subscriber.id__());
     } else {
-        stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
+      stateMgmtConsole.warn(`SubscribableHandler: addOwningProperty: undefined subscriber. - Internal error?`);
     }
   }
 
@@ -97,11 +96,17 @@ class SubscribableHandler {
   }
 
 
-  protected notifyPropertyHasChanged(propName: string, newValue: any) {
-    stateMgmtConsole.debug(`SubscribableHandler: notifyPropertyHasChanged '${propName}'.`)
+  protected notifyObjectPropertyHasChanged(propName: string, newValue: any) {
+    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasChanged '${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (owningProperty) {
+        if ('objectPropertyHasChangedPU' in owningProperty) {
+          // PU code path
+          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
+        }
+
+        // FU code path
         if ('hasChanged' in owningProperty) {
           (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
         }
@@ -109,15 +114,42 @@ class SubscribableHandler {
           (owningProperty as IMultiPropertiesChangeSubscriber).propertyHasChanged(propName);
         }
       } else {
-        stateMgmtConsole.warn(`SubscribableHandler: notifyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+        stateMgmtConsole.warn(`SubscribableHandler: notifyObjectPropertyHasChanged: unknown subscriber.'${subscribedId}' error!.`);
+      }
+    });
+  }
+
+
+  protected notifyObjectPropertyHasBeenRead(propName: string) {
+    stateMgmtConsole.debug(`SubscribableHandler: notifyObjectPropertyHasBeenRead '${propName}'.`)
+    this.owningProperties_.forEach((subscribedId) => {
+      var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
+      if (owningProperty) {
+        // PU code path
+        if ('propertyHasBeenReadPU' in owningProperty) {
+          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectHasBeenReadPU(this, propName);
+        }
       }
     });
   }
 
   public get(target: Object, property: PropertyKey): any {
     return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
-      (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
+    (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
+
+    /*
+    TODO
+    Requested by Lihong, found not working, still need to investigate
+    return (property === SubscribableHandler.IS_OBSERVED_OBJECT) 
+        ? true 
+        : (property === SubscribableHandler.RAW_OBJECT) 
+            ? target 
+            : (typeof target[property] == 'node comfunction') 
+                ? target[property].bind(target) 
+                : target[property];
+                */
   }
+
 
   public set(target: Object, property: PropertyKey, newValue: any): boolean {
     switch (property) {
@@ -133,10 +165,12 @@ class SubscribableHandler {
         break;
       default:
         if (target[property] == newValue) {
+          stateMgmtConsole.debug(`set: ${property.toString()} from ${target[property]} to ${newValue} - unchanged.`);
           return true;
         }
+        stateMgmtConsole.debug(`set: ${property.toString()} to ${newValue} .`);
         target[property] = newValue;
-        this.notifyPropertyHasChanged(property.toString(), newValue);
+        this.notifyObjectPropertyHasChanged(property.toString(), newValue);
         return true;
         break;
     }
@@ -197,11 +231,19 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * Note: Since ES6 Proying is transparent, 'instance of' will not work. Use
    * this static function instead.
    */
-  static IsObservedObject(obj: any): boolean {
+  public static IsObservedObject(obj: any): boolean {
     return obj ? (obj[SubscribableHandler.IS_OBSERVED_OBJECT] === true) : false;
   }
 
-  static addOwningProperty(obj: Object, subscriber: IPropertySubscriber): boolean {
+  /**
+   * add a subscriber to given ObservedObject
+   * due to the proxy nature this static method approach needs to be used instead of a member 
+   * function
+   * @param obj 
+   * @param subscriber 
+   * @returns false if given object is not an ObservedObject 
+   */
+  public static addOwningProperty(obj: Object, subscriber: IPropertySubscriber): boolean {
     if (!ObservedObject.IsObservedObject(obj)) {
       return false;
     }
@@ -210,7 +252,15 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     return true;
   }
 
-  static removeOwningProperty(obj: Object,
+  /**
+   * remove a subscriber to given ObservedObject
+   * due to the proxy nature this static method approach needs to be used instead of a member 
+   * function
+   * @param obj 
+   * @param subscriber 
+   * @returns false if given object is not an ObservedObject 
+   */
+  public static removeOwningProperty(obj: Object,
     subscriber: IPropertySubscriber): boolean {
     if (!ObservedObject.IsObservedObject(obj)) {
       return false;
@@ -218,6 +268,59 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
 
     obj[SubscribableHandler.UNSUBSCRIBE] = subscriber;
     return true;
+  }
+
+  /**
+   * Deep copy given Object / Array
+   * deep here means that the copy continues recursively for each found object property 
+   * or array item
+   * if the source object was wrapped inside an ObservedObject so will its copy
+   * this rule applies for each individual object or array found in the recursive process
+   * subscriber info will not be copied from the source object to its copy.
+   * @param obj object, array of simple type data item to be deep copied
+   * @returns deep copied object, optionally wrapped inside an ObservedObject
+   */
+  public static GetDeepCopyOfObject(obj: any): any {
+
+    function getProperties(o) {
+      var seenobj = new Set();
+      var seenprop = new Set();
+      function _proto(obj) {
+        return obj instanceof Object ?
+          Object.getPrototypeOf(obj) :
+          obj.constructor.prototype;
+      }
+
+      function _properties(obj) {
+        var ret = [];
+        if (obj === null || seenobj.has(obj)) { return ret; }
+        seenobj.add(obj);
+        if (obj instanceof Object) {
+          var ps = Object.getOwnPropertyNames(obj);
+          for (var i = 0; i < ps.length; ++i) {
+            if (!seenprop.has(ps[i])) {
+              ret.push(ps[i]);
+              seenprop.add(ps[i]);
+            }
+          }
+        }
+        return ret.concat(_properties(_proto(obj)));
+      }
+      return _properties(o);
+    }
+
+    if (obj instanceof Array) {
+      let copy = [];
+      obj.forEach((item, index) => copy[index] = ObservedObject.GetDeepCopyOfObject(item));
+      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+    } else if (typeof obj === "object") {
+      let copy = {};
+      const properties = getProperties(obj);
+      properties.forEach(k => copy[k] = ObservedObject.GetDeepCopyOfObject(obj[k]));
+      return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+    }
+
+    return obj;
   }
 
   /**
