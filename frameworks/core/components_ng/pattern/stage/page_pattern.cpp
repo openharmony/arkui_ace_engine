@@ -140,6 +140,12 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnShow()
 {
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetChildren().empty()) {
+        LOGI("PagePattern has no children, do not execute onShow.");
+        return;
+    }
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
     isOnShow_ = true;
     auto context = PipelineContext::GetCurrentContext();
