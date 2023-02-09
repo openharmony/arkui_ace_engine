@@ -937,14 +937,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         }
     }
 
-    auto isOutOfRegion = false;
-    if (pattern_->NeedExternRegion()) {
-        isOutOfRegion = IsOutOfTouchTestRegion(parentLocalPoint);
-    } else {
-        isOutOfRegion = (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable())
-            && !IsResponseRegion();
-    }
-    if (isOutOfRegion) {
+    if (IsOutOfTouchTestRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
     }
 
