@@ -368,7 +368,11 @@ void FrontendDelegateImpl::OnBackGround()
 
 void FrontendDelegateImpl::OnForeground()
 {
-    OnPageShow();
+    // first page show will be called by push page successfully
+    if (!isFirstNotifyShow_) {
+        OnPageShow();
+    }
+    isFirstNotifyShow_ = false;
 }
 
 bool FrontendDelegateImpl::OnStartContinuation()
