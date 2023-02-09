@@ -129,6 +129,17 @@ shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::str
     return NewUndefined();
 }
 
+bool ArkJSRuntime::ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    bool ret = JSNApi::ExecuteModuleBuffer(vm_, buffer, size, filePath);
+    LOGE(
+        "ArkJSRuntime::EvaluateJsCode after JSNApi::Execute %{public}p, filePath = %{public}s", this, filePath.c_str());
+    HandleUncaughtException();
+    return ret;
+}
+
 bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath, bool needUpdate)
 {
     JSExecutionScope executionScope(vm_);
