@@ -58,11 +58,10 @@ void TimePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
-    double gradientHeight = pipeline->NormalizeToPx(theme->GetGradientHeight());
+    float gradientHeight = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
     if (NearZero(gradientHeight)) {
         return;
     }
-    auto height = static_cast<float>((frameRect.Height() - theme->GetDividerSpacing().ConvertToPx()) / 2);
     // Paint gradient rect over the picker content.
     RSBrush topBrush;
     RSRect rect(0.0f, 0.0f, frameRect.Right(), frameRect.Bottom());
@@ -75,8 +74,8 @@ void TimePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRe
     auto backDecoration = theme->GetPopupDecoration(false);
     Color endColor = backDecoration ? backDecoration->GetBackgroundColor() : Color::WHITE;
     Color middleColor = endColor.ChangeAlpha(0);
-    std::vector<float> topPos { 0.0f, height / frameRect.Bottom(), (frameRect.Bottom() - height) / frameRect.Bottom(),
-        1.0f };
+    std::vector<float> topPos { 0.0f, gradientHeight / frameRect.Bottom(),
+        (frameRect.Bottom() - gradientHeight) / frameRect.Bottom(), 1.0f };
     std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),
         endColor.GetValue() };
     topBrush.SetShaderEffect(
