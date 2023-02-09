@@ -51,9 +51,10 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     return SrcType::FILE;
 }
 
-ImageSourceInfo::ImageSourceInfo(const std::string& imageSrc, Dimension width, Dimension height,
-    InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
-    : src_(std::move(imageSrc)), sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
+ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName, Dimension width,
+    Dimension height, InternalResource::ResourceId resourceId, const RefPtr<PixelMap>& pixmap)
+    : src_(std::move(imageSrc)), bundleName_(std::move(bundleName)), moduleName_(std::move(moduleName)),
+      sourceWidth_(width), sourceHeight_(height), resourceId_(resourceId), pixmap_(pixmap),
       isSvg_(IsSVGSource(src_, resourceId_)), isPng_(IsPngSource(src_, resourceId_)), srcType_(ResolveSrcType())
 {}
 
