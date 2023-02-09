@@ -58,11 +58,11 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
     ACE_SCOPED_TRACE("lazyforeach update cache [%d -%d]", newStartIndex, newEndIndex);
     CHECK_NULL_VOID(builder_);
     std::list<std::optional<std::string>> newIds(std::move(nodeIds));
-    // clean current children.
-    Clean();
 
     // delete all.
     if (newIds.empty()) {
+        // clean current children.
+        Clean();
         builder_->Clean();
         startIndex_ = -1;
         endIndex_ = -1;
@@ -76,13 +76,22 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
         return;
     }
 
-    std::unordered_set<std::optional<std::string>> oldIdsSet(ids_.begin(), ids_.end());
-    // use new ids to create new child tree.
+    int32_t slot = 0;
+    // use new ids to update child tree.
     for (const auto& id : newIds) {
         CHECK_NULL_VOID(id);
         auto uiNode = builder_->GetChildByKey(*id);
         CHECK_NULL_VOID(uiNode);
-        AddChild(uiNode, DEFAULT_NODE_SLOT, oldIdsSet.find(id) != oldIdsSet.end());
+        int32_t childIndex = GetChildIndex(uiNode);
+        if (childIndex < 0) {
+            AddChild(uiNode, slot);
+        } else if (childIndex != slot) {
+            uiNode->MovePosition(slot);
+        }
+        slot++;
+    }
+    while (static_cast<size_t>(slot) < GetChildren().size()) {
+        RemoveChild(GetLastChild());
     }
 
     // delete useless items.
