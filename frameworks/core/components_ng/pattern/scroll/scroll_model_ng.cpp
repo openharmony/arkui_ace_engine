@@ -80,6 +80,15 @@ void ScrollModelNG::SetOnScrollBegin(NG::ScrollBeginEvent&& event)
     eventHub->SetOnScrollBegin(std::move(event));
 }
 
+void ScrollModelNG::SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(event));
+}
+
 void ScrollModelNG::SetOnScroll(NG::OnScrollEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

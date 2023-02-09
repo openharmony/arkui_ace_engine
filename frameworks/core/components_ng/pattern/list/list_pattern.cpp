@@ -135,11 +135,11 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
         if (source == SCROLL_FROM_UPDATE) {
-            onScroll(offsetVP, V2::ScrollState::SCROLL);
+            onScroll(offsetVP, ScrollState::SCROLL);
         } else if (source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING) {
-            onScroll(offsetVP, V2::ScrollState::FLING);
+            onScroll(offsetVP, ScrollState::FLING);
         } else {
-            onScroll(offsetVP, V2::ScrollState::IDLE);
+            onScroll(offsetVP, ScrollState::IDLE);
         }
     }
 
@@ -364,9 +364,14 @@ void ListPattern::InitScrollableEvent()
     CHECK_NULL_VOID(host);
     auto listEventHub = host->GetEventHub<ListEventHub>();
     auto onScrollBegin = listEventHub->GetOnScrollBegin();
+    auto onScrollFrameBegin = listEventHub->GetOnScrollFrameBegin();
     auto scrollableEvent = GetScrollableEvent();
-    if (onScrollBegin && scrollableEvent) {
+    CHECK_NULL_VOID(scrollableEvent);
+    if (onScrollBegin) {
         scrollableEvent->SetScrollBeginCallback(std::move(onScrollBegin));
+    }
+    if (onScrollFrameBegin) {
+        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
     }
 }
 

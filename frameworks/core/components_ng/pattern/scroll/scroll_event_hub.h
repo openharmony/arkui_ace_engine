@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#include "core/components/scroll/scrollable.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 
@@ -38,6 +39,7 @@ enum class ScrollEdge {
 
 using OnScrollEvent = std::function<void(Dimension, Dimension)>;
 using ScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
+using ScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
 using ScrollEdgeEvent = std::function<void(ScrollEdge)>;
 using ScrollEndEvent = std::function<void()>;
 
@@ -88,9 +90,20 @@ public:
         onScrollBegin_ = std::move(event);
     }
 
+    const ScrollFrameBeginEvent& GetScrollFrameBeginEvent()
+    {
+        return onScrollFrameBegin_;
+    }
+
+    void SetOnScrollFrameBegin(ScrollFrameBeginEvent&& event)
+    {
+        onScrollFrameBegin_ = std::move(event);
+    }
+
 private:
     OnScrollEvent onScroll_;
     ScrollBeginEvent onScrollBegin_;
+    ScrollFrameBeginEvent onScrollFrameBegin_;
     ScrollEndEvent onScrollEnd_;
     ScrollEdgeEvent onScrollEdge_;
 

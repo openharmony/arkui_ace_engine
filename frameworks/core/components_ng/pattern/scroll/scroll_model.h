@@ -37,6 +37,7 @@ public:
     virtual RefPtr<ScrollProxy> CreateScrollBarProxy() = 0;
     virtual void SetAxis(Axis axis) = 0;
     virtual void SetOnScrollBegin(NG::ScrollBeginEvent&& event) = 0;
+    virtual void SetOnScrollFrameBegin(NG::ScrollFrameBeginEvent&& event) = 0;
     virtual void SetOnScroll(NG::OnScrollEvent&& event) = 0;
     virtual void SetOnScrollEdge(NG::ScrollEdgeEvent&& event) = 0;
     virtual void SetOnScrollEnd(NG::ScrollEndEvent&& event) = 0;

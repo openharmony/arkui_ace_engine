@@ -1908,7 +1908,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.steps: onReachStart, startIndex!=0; onReachEnd, endIndex!=max; scrollStop, !onScrollStop
      * @tc.expected: step2. equal.
      */
-    listEventHub->SetOnScroll([](Dimension, V2::ScrollState) {});
+    listEventHub->SetOnScroll([](Dimension, ScrollState) {});
     listEventHub->SetOnScrollIndex([](int32_t, int32_t) {});
     listEventHub->SetOnReachStart([]() {});
     listPattern->startIndex_ = 1;
