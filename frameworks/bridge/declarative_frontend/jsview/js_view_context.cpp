@@ -114,7 +114,7 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
 
 } // namespace
 
-const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs)
+const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs, bool isForm)
 {
     AnimationOption option = AnimationOption();
     if (!animationArgs) {
@@ -140,6 +140,14 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
         curve = CreateCurve(curveString->GetString());
     } else {
         curve = Curves::EASE_IN_OUT;
+    }
+
+    // limit animation for ArkTS Form
+    if (isForm) {
+        duration = std::min(duration, static_cast<int32_t>(DEFAULT_DURATION));
+        delay = 0;
+        iterations = 1;
+        tempo = 1.0;
     }
 
     option.SetDuration(duration);
@@ -203,7 +211,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         }
         return;
     }
-    option = CreateAnimation(animationArgs);
+    option = CreateAnimation(animationArgs, pipelineContextBase->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
@@ -262,7 +270,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    AnimationOption option = CreateAnimation(animationArgs);
+    AnimationOption option = CreateAnimation(animationArgs, pipelineContext->IsFormRender());
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         LOGD("RSAnimationInfo: Begin JSAnimateTo, usingSharedRuntime: %{public}d", usingSharedRuntime);
