@@ -153,7 +153,7 @@ public:
     void OnNodeAppear() override;
     void OnNodeDisappear() override;
     void ClipWithRect(const RectF& rectF) override;
-
+    void SetClipBoundsWithCommands(const std::string& commands) override;
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
