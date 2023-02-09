@@ -83,6 +83,9 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
 
 RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceInfo& src)
 {
+    if (!src.IsSupportCache()) {
+        return nullptr;
+    }
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto imageCache = pipelineCtx->GetImageCache();
