@@ -827,8 +827,8 @@ bool RenderSvgBase::PreparePropertyAnimation(const RefPtr<SvgAnimate>& svgAnimat
 
 std::tuple<const Matrix4, float, float> RenderSvgBase::GetRawTransformInfo()
 {
-    transformInfo_ = (!animateTransformAttrs_.empty()) ? SvgTransform::CreateMatrix4(animateTransformAttrs_)
-                                                       : SvgTransform::CreateTransformInfo(transform_);
+    transformInfo_ = (!animateTransformAttrs_.empty()) ? SvgTransform::CreateInfoFromMap(animateTransformAttrs_)
+                                                       : SvgTransform::CreateInfoFromString(transform_);
     float pivotX = 0.5;
     float pivotY = 0.5;
     if (transformInfo_->hasRotateCenter && GetLayoutSize().IsValid()) {
@@ -840,8 +840,8 @@ std::tuple<const Matrix4, float, float> RenderSvgBase::GetRawTransformInfo()
 
 const Matrix4 RenderSvgBase::GetTransformMatrix4()
 {
-    transformInfo_ = (!animateTransformAttrs_.empty()) ? SvgTransform::CreateMatrix4(animateTransformAttrs_)
-                                                       : SvgTransform::CreateTransformInfo(transform_);
+    transformInfo_ = (!animateTransformAttrs_.empty()) ? SvgTransform::CreateInfoFromMap(animateTransformAttrs_)
+                                                       : SvgTransform::CreateInfoFromString(transform_);
     if (transformInfo_->hasRotateCenter) {
         transformInfo_->matrix4 = RenderTransform::GetTransformByOffset(
             transformInfo_->matrix4, transformInfo_->rotateCenter);
@@ -851,7 +851,7 @@ const Matrix4 RenderSvgBase::GetTransformMatrix4()
 
 const Matrix4 RenderSvgBase::GetTransformMatrix4Raw()
 {
-    transformInfo_ = SvgTransform::CreateTransformInfo(transform_);
+    transformInfo_ = SvgTransform::CreateInfoFromString(transform_);
     if (transformInfo_->hasRotateCenter) {
         transformInfo_->matrix4 = RenderTransform::GetTransformByOffset(
             transformInfo_->matrix4, transformInfo_->rotateCenter);
