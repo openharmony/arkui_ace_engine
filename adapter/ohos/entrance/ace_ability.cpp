@@ -509,6 +509,11 @@ void AceAbility::OnStop()
 void AceAbility::OnActive()
 {
     LOGI("AceAbility::OnActive called ");
+    // AbilityManager will miss first OnForeground notification
+    if (isFirstActive_) {
+        Platform::AceContainer::OnShow(abilityId_);
+        isFirstActive_ = false;
+    }
     Ability::OnActive();
     Platform::AceContainer::OnActive(abilityId_);
     LOGI("AceAbility::OnActive called End");

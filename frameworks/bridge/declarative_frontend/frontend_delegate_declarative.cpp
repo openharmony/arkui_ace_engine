@@ -517,15 +517,19 @@ void FrontendDelegateDeclarative::OnBackGround()
 
 void FrontendDelegateDeclarative::OnForeground()
 {
-    taskExecutor_->PostTask(
-        [weak = AceType::WeakClaim(this)] {
-            auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
-            delegate->OnPageShow();
-        },
-        TaskExecutor::TaskType::JS);
+    // first page show will be called by push page successfully
+    if (!isFirstNotifyShow_) {
+        taskExecutor_->PostTask(
+            [weak = AceType::WeakClaim(this)] {
+                auto delegate = weak.Upgrade();
+                if (!delegate) {
+                    return;
+                }
+                delegate->OnPageShow();
+            },
+            TaskExecutor::TaskType::JS);
+    }
+    isFirstNotifyShow_ = false;
 }
 
 void FrontendDelegateDeclarative::OnConfigurationUpdated(const std::string& data)
