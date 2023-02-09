@@ -743,6 +743,10 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
             LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f",
                 formWidth_, formHeight_);
             Platform::AceContainer::SetViewNew(flutterAceView, density, formWidth_, formHeight_, window_);
+            auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
+            CHECK_NULL_VOID(frontend);
+            frontend->SetBundleName(formBundleName_);
+            frontend->SetModuleName(formModuleName_);
         } else {
             Platform::AceContainer::SetViewNew(flutterAceView, density, 0, 0, window_);
         }

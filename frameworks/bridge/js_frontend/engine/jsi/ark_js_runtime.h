@@ -69,6 +69,7 @@ public:
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
     bool EvaluateJsCode(
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) override;
+    bool ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath) override;
     bool ExecuteJsBin(const std::string& fileName) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
@@ -94,6 +95,26 @@ public:
     const EcmaVM* GetEcmaVm() const
     {
         return vm_;
+    }
+
+    void SetAssetPath(const std::string& assetPath)
+    {
+        panda::JSNApi::SetAssetPath(vm_, assetPath);
+    }
+
+    void SetBundleName(const std::string& bundleName)
+    {
+        panda::JSNApi::SetBundleName(vm_, bundleName);
+    }
+
+    void SetBundle(bool isBundle)
+    {
+        panda::JSNApi::SetBundle(vm_, isBundle);
+    }
+
+    void SetModuleName(const std::string& moduleName)
+    {
+        panda::JSNApi::SetModuleName(vm_, moduleName);
     }
 
     void SetDebuggerPostTask(DebuggerPostTask&& task)
@@ -152,22 +173,8 @@ public:
         panda::JSNApi::SetAssetPath(vm_, assetPath);
     }
 
-    void SetBundleName(const std::string& bundleName)
-    {
-        panda::JSNApi::SetBundleName(vm_, bundleName);
-    }
-
-    void SetBundle(bool isBundle)
-    {
-        panda::JSNApi::SetBundle(vm_, isBundle);
-    }
-
-    void SetModuleName(const std::string& moduleName)
-    {
-        panda::JSNApi::SetModuleName(vm_, moduleName);
-    }
-
     bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
+
     void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
     {
         RootView_ = RootView;

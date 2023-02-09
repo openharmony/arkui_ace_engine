@@ -32,6 +32,7 @@
 #include "form_callback_client.h"
 #include "form_host_client.h"
 #include "form_js_info.h"
+#include "form_info.h"
 #include "form_mgr.h"
 #include "form_surface_callback_client.h"
 #include "pointer_event.h"
@@ -136,10 +137,35 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (info.dimension != -1) {
         wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_DIMENSION_KEY, info.dimension);
     }
+
+    std::vector<OHOS::AppExecFwk::FormInfo> formInfos;
+    AppExecFwk::FormType uiSyntax = AppExecFwk::FormType::JS;
+    std::string bundleName(info.bundleName);
+    std::string moduleName(info.moduleName);
+    auto result = OHOS::AppExecFwk::FormMgr::GetInstance().GetFormsInfoByModule(bundleName,
+                                                                                moduleName,
+                                                                                formInfos);
+    if (result != 0) {
+        LOGW("Query form uiSyntax failed.");
+    } else {
+        auto iter = formInfos.begin();
+        while (iter != formInfos.end()) {
+            auto formInfo = *iter;
+            if (info.cardName == formInfo.name) {
+                LOGI("Query form uiSyntax: %{public}d", static_cast<int>(formJsInfo.uiSyntax));
+                uiSyntax = formInfo.uiSyntax;
+                break;
+            }
+            iter++;
+        }
+    }
+
+    if (uiSyntax == AppExecFwk::FormType::ETS) {
+        CHECK_NULL_VOID(renderDelegate_);
+        wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", renderDelegate_->AsObject());
+    }
+
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
-    // 在OHOS::AppExecFwk::Constants中加类似参数
-    CHECK_NULL_VOID(renderDelegate_);
-    wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", renderDelegate_->AsObject());
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -147,21 +173,24 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         OnFormError(std::to_string(ret), errorMsg);
         return;
     }
-    LOGI("Add form success formId:%{public}s", std::to_string(formJsInfo.formId).c_str());
-    LOGI("Add form success type:%{public}d", static_cast<int>(formJsInfo.type));
-    LOGI("Add form success uiSyntax:%{public}d", static_cast<int>(formJsInfo.uiSyntax));
+    LOGI("Add form success formId: %{public}s", std::to_string(formJsInfo.formId).c_str());
+    LOGI("Add form success type: %{public}d", static_cast<int>(formJsInfo.type));
+    LOGI("Add form success uiSyntax: %{public}d", static_cast<int>(formJsInfo.uiSyntax));
 
     if (formCallbackClient_ == nullptr) {
         formCallbackClient_ = std::make_shared<FormCallbackClient>();
     }
     formCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
-    clientInstance->AddForm(formCallbackClient_, formJsInfo.formId);
+    clientInstance->AddForm(formCallbackClient_, formJsInfo);
 
     if (formSurfaceCallbackClient_ == nullptr) {
         formSurfaceCallbackClient_ = std::make_shared<FormSurfaceCallbackClient>();
     }
     formSurfaceCallbackClient_->SetFormManagerDelegate(AceType::WeakClaim(this));
-    renderDelegate_->RegisterSurfaceCreateCallback(formSurfaceCallbackClient_, formJsInfo.formId);
+    if (formJsInfo.uiSyntax == AppExecFwk::FormType::ETS) {
+        CHECK_NULL_VOID(renderDelegate_);
+        renderDelegate_->RegisterSurfaceCreateCallback(formSurfaceCallbackClient_, formJsInfo.formId);
+    }
 
     runningCardId_ = formJsInfo.formId;
     if (info.id == formJsInfo.formId) {

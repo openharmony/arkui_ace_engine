@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 #include <optional>
+#include <regex>
 #include <unistd.h>
 
 #include "base/utils/utils.h"
@@ -80,6 +81,9 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
 const std::string MERGE_SOURCEMAPS_PATH = "sourceMaps.map";
+const std::string FORM_ES_MODULE_PATH = "ets/widgets.abc";
+const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
+constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -1000,11 +1004,31 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         CHECK_NULL_RETURN(frontEnd, false);
         auto delegate = frontEnd->GetDelegate();
         CHECK_NULL_RETURN(delegate, false);
-        if (!delegate->GetAssetContent(fileName, content)) {
+        if (!delegate->GetAssetContent(FORM_ES_MODULE_PATH, content)) {
             LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
             return false;
         }
-        abcPath = delegate->GetAssetPath(fileName).append(fileName);
+        const std::string bundleName = frontEnd->GetBundleName();
+        const std::string moduleName = frontEnd->GetModuleName();
+        const std::string assetPath = ASSET_PATH_PREFIX + moduleName + "/" + FORM_ES_MODULE_PATH;
+        LOGI("bundleName = %{public}s, moduleName = %{public}s, assetPath = %{public}s", bundleName.c_str(),
+            moduleName.c_str(), assetPath.c_str());
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        CHECK_NULL_RETURN(arkRuntime, false);
+        arkRuntime->SetBundleName(bundleName);
+        arkRuntime->SetAssetPath(assetPath);
+        arkRuntime->SetBundle(false);
+        arkRuntime->SetModuleName(moduleName);
+        abcPath = fileName;
+        if (fileName.rfind("ets/", 0) == 0) {
+            abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
+        }
+        LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
+        if (!runtime->ExecuteModuleBufferForForm(content.data(), content.size(), abcPath)) {
+            LOGE("ExecuteCardAbc ExecuteModuleBufferForForm \"%{public}s\" failed.", fileName.c_str());
+            return false;
+        }
+        return true;
     } else {
         LOGI("ExecuteCardAbc In HOST");
         auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
