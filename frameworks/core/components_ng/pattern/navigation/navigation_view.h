@@ -43,6 +43,7 @@ public:
     static void SetCustomToolBar(const RefPtr<UINode>& customToolBar);
 
     static void SetNavigationMode(NG::NavigationMode mode);
+    static void SetUsrNavigationMode(NG::NavigationMode mode);
     static void SetNavBarWidth(const Dimension& value);
     static void SetNavBarPosition(NG::NavBarPosition mode);
     static void SetHideNavBar(bool hideNavBar);

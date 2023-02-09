@@ -750,7 +750,12 @@ void NavigationView::SetNavBarWidth(const Dimension& value)
 
 void NavigationView::SetNavigationMode(NavigationMode mode)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, static_cast<NG::NavigationMode>(mode));
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, mode);
+}
+
+void NavigationView::SetUsrNavigationMode(NavigationMode mode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, UsrNavigationMode, mode);
 }
 
 void NavigationView::SetNavBarPosition(NG::NavBarPosition mode)
