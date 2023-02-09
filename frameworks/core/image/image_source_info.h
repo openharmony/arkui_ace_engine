@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_ACE_IMAGE_SOURCE_INFO_H
 
 #include <optional>
+#include <utility>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/size.h"
@@ -28,14 +29,18 @@
 namespace OHOS::Ace {
 class ImageSourceInfo {
 public:
-    explicit ImageSourceInfo(const std::string& imageSrc, Dimension width = Dimension(-1),
-        Dimension height = Dimension(-1), InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
-        const RefPtr<PixelMap>& pixmap = nullptr);
     // add constructor method for decompressed hap
-    ImageSourceInfo(const std::string& imageSrc, const std::string& bundleName, const std::string& moduleName,
+    explicit ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName,
         Dimension width = Dimension(-1), Dimension height = Dimension(-1),
         InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
         const RefPtr<PixelMap>& pixmap = nullptr);
+
+    explicit ImageSourceInfo(std::string imageSrc, Dimension width = Dimension(-1), Dimension height = Dimension(-1),
+        InternalResource::ResourceId resourceId = InternalResource::ResourceId::NO_ID,
+        const RefPtr<PixelMap>& pixmap = nullptr)
+        : ImageSourceInfo(std::move(imageSrc), "", "", width, height, resourceId, pixmap)
+    {}
+
     explicit ImageSourceInfo(const RefPtr<PixelMap>& pixmap)
         : ImageSourceInfo("", Dimension(-1), Dimension(-1), InternalResource::ResourceId::NO_ID, pixmap)
     {}
