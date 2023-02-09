@@ -88,10 +88,8 @@ public:
     void ProcessFormUninstall(const int64_t formId);
     void OnDeathReceived();
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
-    void ProcessAddFormSurface(
-        const AppExecFwk::FormJsInfo &formInfo,
-        const std::shared_ptr<Rosen::RSSurfaceNode> &rsSurfaceNode,
-        const AAFwk::Want& want);
+    void OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
+        const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want);
 #endif
 
 private:
