@@ -105,7 +105,7 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
     subContext->SetPluginEventOffset(Offset(selfGlobalOffset.GetX(), selfGlobalOffset.GetY()));
     context->SetTouchPipeline(WeakPtr<PipelineBase>(subContext));
 
-    return HitTestResult::STOP_BUBBLING;
+    return HitTestResult::BUBBLING;
 }
 
 void FormNode::DispatchPointerEvent(const TouchEvent& point) const
