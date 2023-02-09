@@ -75,21 +75,6 @@ void TabContentModelNG::Create()
     CHECK_NULL_VOID(tabTheme);
     SetTabBar(tabTheme->GetDefaultTabBarName(), "", nullptr, true); // Set default tab bar.
     ACE_UPDATE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, tabTheme->GetDefaultTabBarName());
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto pattern = frameNode->GetPattern<TabContentPattern>();
-    if (!pattern->HasSurfaceChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
-                auto pattern = weakPattern.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfaceChanged(newWidth, newHeight);
-                }
-            });
-        LOGI("Add surface changed callback id %{public}d", callbackId);
-        pattern->UpdateSurfaceChangedCallbackId(callbackId);
-    }
 }
 
 void TabContentModelNG::Pop()
@@ -181,8 +166,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(tabContentPattern);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
-        auto horizontalPadding = tabContentPattern->GetIsLandscape() ? tabTheme->GetSubtabLandscapeHorizontalPadding()
-                                                                     : tabTheme->GetSubTabHorizontalPadding();
+        auto horizontalPadding = tabTheme->GetSubTabHorizontalPadding();
         layoutProperty->UpdatePadding({ CalcLength(horizontalPadding), CalcLength(horizontalPadding),
             CalcLength(tabTheme->GetSubTabTopPadding()), CalcLength(tabTheme->GetSubTabBottomPadding()) });
     } else if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
@@ -247,6 +231,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             NG::CalcLength(tabTheme->GetBottomTabImageSize()), NG::CalcLength(tabTheme->GetBottomTabImageSize())));
     } else {
         imageProperty->UpdateUserDefinedIdealSize(CalcSize());
+    }
+    if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
+        textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     }
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
