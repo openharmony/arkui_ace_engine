@@ -47,6 +47,7 @@ const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t ANIMATION_ZERO_TO_OUTER = 200;
 const int32_t ANIMATION_OUTER_TO_ZERO = 150;
 const Dimension FOCUS_SIZE = Dimension(1.0);
+const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
 constexpr int32_t MINDDLE_CHILD_INDEX = 2;
 
@@ -112,13 +113,18 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
             pattern->OnTouchDown();
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
             pattern->OnTouchUp();
+            pattern->SetLocalDownDistance(0.0f);
         }
         if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            pattern->OnTouchUp();
+            if (std::abs(info.GetTouches().front().GetLocalLocation().GetDistance() - pattern->GetLocalDownDistance()) >
+                MOVE_DISTANCE) {
+                pattern->OnTouchUp();
+            }
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
