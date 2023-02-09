@@ -226,4 +226,8 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::FlushPipelineImmediately() {}
+
+void PipelineContext::AddVisibleAreaChangeNode(
+    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
+{}
 } // namespace OHOS::Ace::NG

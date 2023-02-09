@@ -390,6 +390,17 @@ void ImagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(false);
+
+    // register to onVisibleAreaChange
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)] (bool visible, double ratio) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        LOGD("current image visible ratio = %f", ratio);
+        self->OnVisibleChange(visible);
+    };
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
 }
 
 } // namespace OHOS::Ace::NG
