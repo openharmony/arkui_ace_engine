@@ -15,10 +15,9 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
-#include <cmath>
-#include <cstdint>
-#include <memory>
+#include <string>
 
+#include "include/utils/SkParsePath.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -1533,6 +1532,14 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
         auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
         rsNode_->SetMask(Rosen::RSMask::CreatePathMask(skPath, SkiaDecorationPainter::CreateMaskSkPaint(basicShape)));
     }
+}
+
+void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
+{
+    CHECK_NULL_VOID(rsNode_);
+    SkPath skPath;
+    SkParsePath::FromSVGString(commands.c_str(),&skPath);
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 }
 
 void RosenRenderContext::ClipWithRect(const RectF& rectF)
