@@ -169,7 +169,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("menus", &JSNavigation::SetMenus);
     JSClass<JSNavigation>::StaticMethod("menuCount", &JSNavigation::SetMenuCount);
     JSClass<JSNavigation>::StaticMethod("onTitleModeChange", &JSNavigation::SetOnTitleModeChanged);
-    JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetNavigationMode);
+    JSClass<JSNavigation>::StaticMethod("mode", &JSNavigation::SetUsrNavigationMode);
     JSClass<JSNavigation>::StaticMethod("navBarWidth", &JSNavigation::SetNavBarWidth);
     JSClass<JSNavigation>::StaticMethod("navBarPosition", &JSNavigation::SetNavBarPosition);
     JSClass<JSNavigation>::StaticMethod("hideNavBar", &JSNavigation::SetHideNavBar);
@@ -538,14 +538,14 @@ void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSNavigation::SetNavigationMode(int32_t value)
+void JSNavigation::SetUsrNavigationMode(int32_t value)
 {
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
 
     if (value >= 0 && value <= NAVIGATION_MODE_RANGE) {
-        NG::NavigationView::SetNavigationMode(static_cast<NG::NavigationMode>(value));
+        NG::NavigationView::SetUsrNavigationMode(static_cast<NG::NavigationMode>(value));
     } else {
         LOGE("invalid value for navigationMode");
     }
