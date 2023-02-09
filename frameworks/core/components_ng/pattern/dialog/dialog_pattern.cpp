@@ -127,19 +127,19 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 }
 
 // set render context properties of content frame
-void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode, const RefPtr<DialogTheme>& theme)
+void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentNode)
 {
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
-    contentRenderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    contentRenderContext->UpdateBackgroundColor(dialogTheme_->GetBackgroundColor());
 
     BorderRadiusProperty radius;
-    radius.SetRadius(theme->GetRadius().GetX());
+    radius.SetRadius(dialogTheme_->GetRadius().GetX());
     contentRenderContext->UpdateBorderRadius(radius);
     contentRenderContext->SetClipToBounds(true);
 }
 
-void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
+void DialogPattern::BuildChild(const DialogProperties& props)
 {
     LOGI("build dialog child");
     // append customNode
@@ -148,8 +148,8 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
         auto contentWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_VOID(contentWrapper);
-        if (!dialogProperties.customStyle) {
-            UpdateContentRenderContext(contentWrapper, dialogTheme_);
+        if (!props.customStyle) {
+            UpdateContentRenderContext(contentWrapper);
         }
         customNode_->MountToParent(contentWrapper);
         auto dialog = GetHost();
@@ -162,15 +162,20 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(contentColumn);
 
-    auto title = BuildTitle(dialogProperties);
-    CHECK_NULL_VOID(title);
-    contentColumn->AddChild(title);
+    if (!props.title.empty()) {
+        auto title = BuildTitle(props);
+        CHECK_NULL_VOID(title);
+        contentColumn->AddChild(title);
+    }
 
-    auto content = BuildContent(dialogProperties);
-    CHECK_NULL_VOID(content);
-    contentColumn->AddChild(content);
-    if (!dialogProperties.customStyle) {
-        UpdateContentRenderContext(contentColumn, dialogTheme_);
+    if (!props.content.empty()) {
+        auto content = BuildContent(props);
+        CHECK_NULL_VOID(content);
+        contentColumn->AddChild(content);
+    }
+
+    if (!props.customStyle) {
+        UpdateContentRenderContext(contentColumn);
     }
 
     auto columnProp = AceType::DynamicCast<LinearLayoutProperty>(contentColumn->GetLayoutProperty());
@@ -184,22 +189,22 @@ void DialogPattern::BuildChild(const DialogProperties& dialogProperties)
     }
 
     // build ActionSheet child
-    if (dialogProperties.type == DialogType::ACTION_SHEET && !dialogProperties.sheetsInfo.empty()) {
-        auto sheetContainer = BuildSheet(dialogProperties.sheetsInfo);
+    if (props.type == DialogType::ACTION_SHEET && !props.sheetsInfo.empty()) {
+        auto sheetContainer = BuildSheet(props.sheetsInfo);
         CHECK_NULL_VOID(sheetContainer);
         sheetContainer->MountToParent(contentColumn);
         sheetContainer->MarkModifyDone();
     }
 
     // Make Menu node if hasMenu (actionMenu)
-    if (dialogProperties.isMenu) {
-        auto menu = BuildMenu(dialogProperties.buttons);
+    if (props.isMenu) {
+        auto menu = BuildMenu(props.buttons);
         CHECK_NULL_VOID(menu);
         menu->MountToParent(contentColumn);
     } else {
         // build buttons
-        if (!dialogProperties.buttons.empty()) {
-            auto buttonContainer = BuildButtons(dialogProperties.buttons);
+        if (!props.buttons.empty()) {
+            auto buttonContainer = BuildButtons(props.buttons);
             CHECK_NULL_VOID(buttonContainer);
             buttonContainer->MountToParent(contentColumn);
         }
@@ -253,7 +258,7 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
     return title;
 }
 
-RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& dialogProperties)
+RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
 {
     // Make Content node
     auto contentNode = FrameNode::CreateFrameNode(
@@ -261,23 +266,23 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& dialogProp
     auto contentProp = AceType::DynamicCast<TextLayoutProperty>(contentNode->GetLayoutProperty());
     CHECK_NULL_RETURN(contentProp, nullptr);
     // textAlign center if title doesn't exist; always align center on watch
-    if (dialogProperties.title.empty() || SystemProperties::GetDeviceType() == DeviceType::WATCH) {
+    if (props.title.empty() || SystemProperties::GetDeviceType() == DeviceType::WATCH) {
         contentProp->UpdateTextAlign(TextAlign::CENTER);
     } else {
         contentProp->UpdateTextAlign(TextAlign::START);
     }
-    contentProp->UpdateContent(dialogProperties.content);
+    contentProp->UpdateContent(props.content);
     auto contentStyle = dialogTheme_->GetContentTextStyle();
     contentProp->UpdateFontSize(contentStyle.GetFontSize());
     contentProp->UpdateTextColor(contentStyle.GetTextColor());
-    LOGD("content = %s", dialogProperties.content.c_str());
+    LOGD("content = %s", props.content.c_str());
     // update padding
     Edge contentPaddingInTheme;
-    if (!dialogProperties.title.empty()) {
+    if (!props.title.empty()) {
         contentPaddingInTheme =
-            dialogProperties.buttons.empty() ? dialogTheme_->GetDefaultPadding() : dialogTheme_->GetAdjustPadding();
+            props.buttons.empty() ? dialogTheme_->GetDefaultPadding() : dialogTheme_->GetAdjustPadding();
     } else {
-        contentPaddingInTheme = dialogProperties.buttons.empty() ? dialogTheme_->GetContentDefaultPadding()
+        contentPaddingInTheme = props.buttons.empty() ? dialogTheme_->GetContentDefaultPadding()
                                                                  : dialogTheme_->GetContentAdjustPadding();
     }
     PaddingProperty contentPadding;
@@ -288,7 +293,7 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& dialogProp
     contentProp->UpdatePadding(contentPadding);
 
     // XTS inspector value
-    message_ = dialogProperties.content;
+    message_ = props.content;
     return contentNode;
 }
 
