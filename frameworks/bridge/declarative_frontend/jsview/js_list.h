@@ -33,6 +33,7 @@ public:
     static void ScrollCallback(const JSCallbackInfo& args);
     static void ReachStartCallback(const JSCallbackInfo& args);
     static void ReachEndCallback(const JSCallbackInfo& args);
+    static void ScrollStartCallback(const JSCallbackInfo& args);
     static void ScrollStopCallback(const JSCallbackInfo& args);
     static void ItemDeleteCallback(const JSCallbackInfo& args);
     static void ItemMoveCallback(const JSCallbackInfo& args);

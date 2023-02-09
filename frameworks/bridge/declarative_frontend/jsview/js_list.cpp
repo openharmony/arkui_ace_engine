@@ -247,6 +247,18 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSList::ScrollStartCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        ListModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    }
+    args.ReturnSelf();
+}
+
 void JSList::ScrollStopCallback(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
@@ -501,6 +513,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onScroll", &JSList::ScrollCallback);
     JSClass<JSList>::StaticMethod("onReachStart", &JSList::ReachStartCallback);
     JSClass<JSList>::StaticMethod("onReachEnd", &JSList::ReachEndCallback);
+    JSClass<JSList>::StaticMethod("onScrollStart", &JSList::ScrollStartCallback);
     JSClass<JSList>::StaticMethod("onScrollStop", &JSList::ScrollStopCallback);
     JSClass<JSList>::StaticMethod("onItemDelete", &JSList::ItemDeleteCallback);
     JSClass<JSList>::StaticMethod("onItemMove", &JSList::ItemMoveCallback);
