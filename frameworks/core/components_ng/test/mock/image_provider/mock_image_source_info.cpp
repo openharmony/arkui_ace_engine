@@ -185,4 +185,9 @@ std::string ImageSourceInfo::GetKey() const
 {
     return std::string("");
 }
+
+bool ImageSourceInfo::IsSupportCache() const
+{
+    return false;
+}
 } // namespace OHOS::Ace
