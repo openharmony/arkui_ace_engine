@@ -429,8 +429,6 @@ private:
 
     RefPtr<RevSourceMap> appSourceMap_;
     RefPtr<NG::PageRouterManager> pageRouterManager_;
-
-    bool isMainPage_ = true;
 };
 
 } // namespace OHOS::Ace::Framework
