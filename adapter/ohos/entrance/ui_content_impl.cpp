@@ -167,6 +167,7 @@ public:
     {
         LOGI("DragWindowListener::OnDrag called.");
         auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID_NOLOG(container);
         int32_t instanceId = instanceId_;
         if (container->IsSubContainer()) {
             instanceId = container->GetParentId();
