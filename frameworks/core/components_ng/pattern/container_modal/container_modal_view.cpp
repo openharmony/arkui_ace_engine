@@ -160,7 +160,7 @@ RefPtr<FrameNode> ContainerModalView::BuildTitle(RefPtr<FrameNode>& containerNod
             windowManager->FireWindowSplitCallBack();
         }));
     containerTitleRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
-        [windowManager, containerPattern](GestureEvent& info) {
+        [windowManager](GestureEvent& info) {
             CHECK_NULL_VOID_NOLOG(windowManager);
             auto mode = windowManager->GetWindowMode();
             if (mode == WindowMode::WINDOW_MODE_FULLSCREEN) {
