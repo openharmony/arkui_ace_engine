@@ -286,6 +286,8 @@ bool TextFieldPattern::UpdateCaretPosition()
         return true;
     } else if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE) {
         StartTwinkling();
+    } else if (caretUpdateType_ == CaretUpdateType::RIGHT_CLICK) {
+        UpdateCaretByRightClick();
     }
     return false;
 }
@@ -354,6 +356,11 @@ bool TextFieldPattern::UpdateCaretByPressOrLongPress()
         ProcessOverlay();
     }
     return true;
+}
+
+void TextFieldPattern::UpdateCaretByRightClick()
+{
+    ProcessOverlay();
 }
 
 bool TextFieldPattern::CaretPositionCloseToTouchPosition()
@@ -1341,6 +1348,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     lastTouchOffset_ = info.GetLocalLocation();
     caretUpdateType_ = CaretUpdateType::PRESSED;
     selectionMode_ = SelectionMode::NONE;
+    isUsingMouse_ = false;
     CloseSelectOverlay();
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     if (lastTouchOffset_.GetX() > frameRect_.Width() - imageRect_.Width() - GetIconRightOffset() &&
@@ -1525,6 +1533,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     selectionMode_ = SelectionMode::SELECT;
     isSingleHandle_ = false;
+    isUsingMouse_ = false;
     LOGI("TextField %{public}d handle long press", GetHost()->GetId());
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (!focusHub->RequestFocusImmediately()) {
@@ -1611,6 +1620,8 @@ void TextFieldPattern::ShowSelectOverlay(
             CHECK_NULL_VOID(pattern);
             pattern->OnHandleMoveDone(handleRect, isFirst);
         };
+        selectInfo.isUsingMouse = pattern->IsUsingMouse();
+        selectInfo.rightClickOffset = pattern->GetRightClickOffset();
 
         selectInfo.menuInfo.showCopy = !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showCut = !pattern->GetEditingValue().text.empty();
@@ -1835,9 +1846,28 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     CHECK_NULL_VOID(pipeline);
 
     auto focusHub = GetHost()->GetOrCreateFocusHub();
-    CloseSelectOverlay();
+    if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
+        LOGI("Handle mouse right click");
+        if (info.GetAction() == MouseAction::PRESS || info.GetAction() == MouseAction::RELEASE) {
+            CloseSelectOverlay();
+        }
+
+        if (info.GetAction() == MouseAction::RELEASE) {
+            rightClickOffset_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
+                static_cast<float>(info.GetGlobalLocation().GetY()));
+            lastTouchOffset_ = info.GetLocalLocation();
+            caretUpdateType_ = CaretUpdateType::RIGHT_CLICK;
+            selectionMode_ = SelectionMode::NONE;
+            isSingleHandle_ = false;
+            isUsingMouse_ = true;
+            GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
+        info.SetStopPropagation(true);
+        return;
+    }
     if (info.GetAction() == MouseAction::PRESS) {
         LOGI("Handle mouse press");
+        CloseSelectOverlay();
         if (!focusHub->IsFocusable()) {
             return;
         }
@@ -1858,6 +1888,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     if (info.GetAction() == MouseAction::RELEASE) {
         LOGI("Handle mouse release");
+        CloseSelectOverlay();
         caretUpdateType_ = CaretUpdateType::NONE;
         isMousePressed_ = false;
         pipeline->ChangeMouseStyle(frameId, HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);

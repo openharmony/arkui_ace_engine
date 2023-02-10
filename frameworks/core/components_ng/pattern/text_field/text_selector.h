@@ -24,7 +24,17 @@
 
 namespace OHOS::Ace::NG {
 
-enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
+enum class CaretUpdateType {
+    PRESSED,
+    LONG_PRESSED,
+    DEL,
+    EVENT,
+    HANDLE_MOVE,
+    HANDLE_MOVE_DONE,
+    INPUT,
+    NONE,
+    RIGHT_CLICK
+};
 /**
  * Stands for selection indexes
  * We use base/destination to indicate the start/end position because of uncertain direction.

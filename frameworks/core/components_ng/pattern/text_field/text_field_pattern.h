@@ -220,6 +220,11 @@ public:
         return lastTouchOffset_;
     }
 
+    const OffsetF& GetRightClickOffset()
+    {
+        return rightClickOffset_;
+    }
+
     float GetSelectionBaseOffsetX() const
     {
         return textSelector_.selectionBaseOffset.GetX();
@@ -326,6 +331,11 @@ public:
     bool InSelectMode() const
     {
         return selectionMode_ != SelectionMode::NONE;
+    }
+
+    bool IsUsingMouse() const
+    {
+        return isUsingMouse_;
     }
 
     void CursorMoveLeft();
@@ -502,6 +512,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool UpdateCaretByPressOrLongPress();
     void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
+    void UpdateCaretByRightClick();
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -609,6 +620,7 @@ private:
     OffsetF parentGlobalOffset_;
     Offset lastTouchOffset_;
     PaddingPropertyF utilPadding_;
+    OffsetF rightClickOffset_;
 
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
@@ -622,6 +634,7 @@ private:
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
     bool newLineInserted_ = false;
+    bool isUsingMouse_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
