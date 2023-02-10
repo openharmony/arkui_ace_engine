@@ -758,7 +758,6 @@ void TextFieldPattern::HandleFocusEvent()
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay();
-    RequestKeyboard(false, true, true);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
