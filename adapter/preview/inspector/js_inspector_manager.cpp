@@ -205,6 +205,9 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
     auto newComponent = GetNewComponentWithJsCode(root);
     if (parentID <= 0) {
         auto rootElement = GetRootElement().Upgrade();
+        if (!rootElement) {
+            return false;
+        }
         auto child = rootElement->GetChildBySlot(-1); // rootElement only has one child,and use the default slot -1
         if (!newComponent) {
             LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
