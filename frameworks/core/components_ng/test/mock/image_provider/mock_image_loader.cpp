@@ -12,19 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gmock/gmock.h" // Brings in gMock.
+#include "mock_image_loader.h"
 
 #include "core/image/image_loader.h"
 
 namespace OHOS::Ace {
-class MockImageLoader : public ImageLoader {
-public:
-    MOCK_METHOD(sk_sp<SkData>, LoadImageData,
-        (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
-    MOCK_METHOD(RefPtr<NG::ImageData>, LoadDecodedImageData,
-        (const ImageSourceInfo& /*imageSourceInfo*/, const WeakPtr<PipelineBase>& /*context*/), (override));
-};
-
+RefPtr<MockImageLoader> loader = AceType::MakeRefPtr<MockImageLoader>();
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
     const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
@@ -37,7 +30,7 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(
 
 RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& /*imageSourceInfo*/)
 {
-    return MakeRefPtr<MockImageLoader>();
+    return loader;
 }
 
 std::string ImageLoader::RemovePathHead(const std::string& uri)
