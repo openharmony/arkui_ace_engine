@@ -117,7 +117,7 @@ public:
 
     // clip node with padding
     virtual void SetClipToBounds(bool useClip) {}
-
+    virtual void SetClipBoundsWithCommands(const std::string& commands) {};
     virtual void SetVisible(bool visible) {}
 
     virtual RefPtr<Canvas> GetCanvas() = 0;
