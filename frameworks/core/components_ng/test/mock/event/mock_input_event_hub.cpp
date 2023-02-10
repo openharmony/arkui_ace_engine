@@ -19,8 +19,7 @@
 namespace OHOS::Ace::NG {
 InputEventHub::InputEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
-bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, MouseTestResult& onMouseResult,
-    MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
 {
     return false;
 }

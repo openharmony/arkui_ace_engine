@@ -239,6 +239,8 @@ public:
         return onShow_;
     }
 
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
+
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -290,6 +292,19 @@ public:
     void UnregisterSurfacePositionChangedCallback(int32_t callbackId)
     {
         surfacePositionChangedCallbackMap_.erase(callbackId);
+    }
+
+    void SetMouseStyleHoldNode(int32_t id)
+    {
+        if (mouseStyleNodeId_ == -1) {
+            mouseStyleNodeId_ = id;
+        }
+    }
+    void FreeMouseStyleHoldNode(int32_t id)
+    {
+        if (mouseStyleNodeId_ == id) {
+            mouseStyleNodeId_ = -1;
+        }
     }
 
 protected:
@@ -373,6 +388,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t rotationAnimationCount_ = 0;
+    int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;

@@ -30,6 +30,7 @@ public:
 
     MOCK_CONST_METHOD2(SetPointerStyle, bool(int32_t, MouseFormat));
     MOCK_CONST_METHOD2(GetPointerStyle, int32_t(int32_t, int32_t&));
+    MOCK_CONST_METHOD2(ChangePointerStyle, bool(int32_t, MouseFormat));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_TEST_MOCK_MOCK_MOUSE_STYLE_H

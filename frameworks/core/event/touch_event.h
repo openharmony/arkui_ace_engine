@@ -179,6 +179,8 @@ struct TouchRestrict final {
     }
     SourceType sourceType = SourceType::NONE;
 
+    SourceType hitTestType = SourceType::TOUCH;
+
     TouchEvent touchEvent;
 };
 
@@ -354,6 +356,10 @@ class ACE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
 public:
+    TouchEventTarget() = default;
+    TouchEventTarget(std::string nodeName, int32_t nodeId) : nodeName_(std::move(nodeName)), nodeId_(nodeId) {}
+    ~TouchEventTarget() override = default;
+
     // if return false means need to stop event dispatch.
     virtual bool DispatchEvent(const TouchEvent& point) = 0;
     // if return false means need to stop event bubbling.
@@ -425,12 +431,24 @@ public:
         return HandleEvent(point);
     }
 
+    std::string GetNodeName() const
+    {
+        return nodeName_;
+    }
+
+    int32_t GetNodeId() const
+    {
+        return nodeId_;
+    }
+
 protected:
     Offset coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     TouchRestrict touchRestrict_ { TouchRestrict::NONE };
     Offset subPipelineGlobalOffset_;
     float viewScale_ = 1.0f;
+    std::string nodeName_ = "NULL";
+    int32_t nodeId_ = -1;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

@@ -1799,35 +1799,28 @@ void TextFieldPattern::InitMouseEvent()
     inputHub->AddOnHoverEvent(hoverEvent_);
 }
 
-void TextFieldPattern::SetMouseStyle(MouseFormat format)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(windowId, format);
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format)) {
-        mouseStyle->SetPointerStyle(windowId, format);
-    }
-}
-
 void TextFieldPattern::OnHover(bool isHover)
 {
+    auto frame = GetHost();
+    CHECK_NULL_VOID(frame);
+    auto frameId = frame->GetId();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
     LOGD("Textfield %{public}d %{public}s", GetHost()->GetId(), isHover ? "on hover" : "exit hover");
     if (enableTouchAndHoverEffect_) {
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
         if (isHover) {
-            SetMouseStyle(HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
+            pipeline->SetMouseStyleHoldNode(frameId);
+            pipeline->ChangeMouseStyle(frameId, HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
             renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetHoverBgColorValue(Color()));
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
-        } else {
-            SetMouseStyle(MouseFormat::DEFAULT);
         }
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(frameId);
         renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -1835,6 +1828,12 @@ void TextFieldPattern::OnHover(bool isHover)
 
 void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
 {
+    auto frame = GetHost();
+    CHECK_NULL_VOID(frame);
+    auto frameId = frame->GetId();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     CloseSelectOverlay();
     if (info.GetAction() == MouseAction::PRESS) {
@@ -1850,10 +1849,10 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         if (!focusHub->RequestFocusImmediately()) {
             LOGE("Request focus failed, cannot open input method");
             StopTwinkling();
-            SetMouseStyle(MouseFormat::HAND_GRABBING);
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_GRABBING);
             return;
         }
-        SetMouseStyle(MouseFormat::TEXT_CURSOR);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
@@ -1861,7 +1860,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         LOGI("Handle mouse release");
         caretUpdateType_ = CaretUpdateType::NONE;
         isMousePressed_ = false;
-        SetMouseStyle(HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
+        pipeline->ChangeMouseStyle(frameId, HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
         if (!focusHub->IsCurrentFocus()) {
             return;
         }

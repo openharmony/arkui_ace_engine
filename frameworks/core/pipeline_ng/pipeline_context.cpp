@@ -16,10 +16,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
@@ -924,11 +926,23 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
     LOGD(
         "MouseEvent (x,y): (%{public}f,%{public}f), button: %{public}d, action: %{public}d, pressedButtons: %{public}d",
         scaleEvent.x, scaleEvent.y, scaleEvent.button, scaleEvent.action, scaleEvent.pressedButtons);
-    eventManager_->MouseTest(scaleEvent, rootNode_);
+    TouchRestrict touchRestrict { TouchRestrict::NONE };
+    touchRestrict.sourceType = event.sourceType;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    eventManager_->MouseTest(scaleEvent, rootNode_, touchRestrict);
     eventManager_->DispatchMouseEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverEventNG(scaleEvent);
     eventManager_->DispatchMouseHoverAnimationNG(scaleEvent);
     window_->RequestFrame();
+}
+
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
+{
+    if (mouseStyleNodeId_ != nodeId) {
+        return false;
+    }
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    return mouseStyle->ChangePointerStyle(GetWindowId(), format);
 }
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
@@ -1047,6 +1061,8 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
 
     if (event.action == AxisAction::BEGIN) {
         TouchRestrict touchRestrict { TouchRestrict::NONE };
+        touchRestrict.sourceType = event.sourceType;
+        touchRestrict.hitTestType = SourceType::TOUCH;
         eventManager_->TouchTest(scaleEvent, rootNode_, touchRestrict);
     }
     eventManager_->DispatchTouchEvent(scaleEvent);
