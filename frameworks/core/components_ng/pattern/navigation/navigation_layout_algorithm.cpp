@@ -186,8 +186,10 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
 
-    navigationMode_ = navigationLayoutProperty->GetNavigationModeValue(NavigationMode::AUTO);
-    if (navigationLayoutProperty->GetNavigationModeValue(navigationMode_) == NavigationMode::AUTO) {
+    usrNavigationMode_ = navigationLayoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
+    navigationMode_ = usrNavigationMode_;
+    navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
+    if (navigationMode_ == NavigationMode::AUTO) {
         if (size.Width() >= static_cast<float>(WINDOW_WIDTH.ConvertToPx())) {
             navigationMode_ = NavigationMode::SPLIT;
             navigationLayoutProperty->UpdateNavigationMode(navigationMode_);
