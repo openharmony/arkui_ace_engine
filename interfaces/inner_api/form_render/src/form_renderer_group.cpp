@@ -14,12 +14,16 @@
  */
 
 #include "form_renderer_group.h"
+
 #include "form_js_info.h"
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
+namespace {
+constexpr char FORM_RENDERER_COMP_ID[] = "ohos.extra.param.key.form_comp_id";
+}
 std::shared_ptr<FormRendererGroup> FormRendererGroup::Create(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
@@ -34,12 +38,21 @@ FormRendererGroup::FormRendererGroup(
 
 void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
+    auto compId = want.GetStringParam(FORM_RENDERER_COMP_ID);
+    HILOG_INFO("AddForm compId %{public}s.", compId.c_str());
+    auto iter = rendererMap_.find(compId);
+    if (iter != rendererMap_.end()) {
+        HILOG_WARN("AddForm compId: %{public}s exist", compId.c_str());
+        auto renderer = iter->second;
+        renderer->Destroy();
+        rendererMap_.erase(iter);
+    }
+    HILOG_INFO("AddForm compId: %{public}s", compId.c_str());
     auto formRenderer = std::make_shared<FormRenderer>(context_, runtime_);
     if (!formRenderer) {
+        HILOG_ERROR("Kee FormRendererGroup::AddForm! 2");
         return;
     }
-    auto compId = want.GetStringParam("ohos.extra.param.key.form_comp_id");
-    HILOG_INFO("AddForm compId %{public}s.", compId.c_str());
     rendererMap_.try_emplace(compId, formRenderer);
     formRenderer->AddForm(want, formJsInfo);
 }

@@ -47,7 +47,7 @@ public:
     bool IsAllowUpdate();
 
 private:
-    void InitUiContent();
+    void InitUIContent();
     void SetRenderDelegate(const sptr<IRemoteObject> &renderRemoteObj);
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;

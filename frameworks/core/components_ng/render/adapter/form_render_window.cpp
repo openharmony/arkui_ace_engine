@@ -147,18 +147,6 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 #endif
 }
 
-void FormRenderWindow::SetFormRSSurfaceNode(void* surfaceNode)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!surfaceNode) {
-        LOGE("FormRenderWindow SetFormRSSurfaceNode surfaceNode is null !!!");
-        return;
-    }
-    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
-    rsSurfaceNode.reset(static_cast<Rosen::RSSurfaceNode*>(surfaceNode));
-#endif
-}
-
 void FormRenderWindow::OnShow()
 {
 #ifdef ENABLE_ROSEN_BACKEND
