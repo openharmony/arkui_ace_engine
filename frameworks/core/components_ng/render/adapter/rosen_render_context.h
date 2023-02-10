@@ -195,7 +195,7 @@ public:
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() const override;
-
+    void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
         needDebugBoundary_ = flag;
