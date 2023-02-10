@@ -18,7 +18,9 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
+#include "base/mousestyle/mouse_style.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace {
 
@@ -274,38 +276,18 @@ private:
     Offset screenLocation_;
 };
 
-class MouseEventTarget : public virtual AceType {
-    DECLARE_ACE_TYPE(MouseEventTarget, AceType);
+using HoverEffectFunc = std::function<void(bool)>;
+
+class MouseEventTarget : public virtual TouchEventTarget {
+    DECLARE_ACE_TYPE(MouseEventTarget, TouchEventTarget);
 
 public:
-    MouseEventTarget() = default;
+    MouseEventTarget(const std::string& nodeName, int32_t nodeId) : TouchEventTarget(nodeName, nodeId) {}
     ~MouseEventTarget() override = default;
 
-    void SetOnMouseCallback(const OnMouseEventFunc& onMouseCallback)
+    void SetCallback(const OnMouseEventFunc& onMouseCallback)
     {
         onMouseCallback_ = onMouseCallback;
-    }
-    void SetOnHoverCallback(const OnHoverEventFunc& onHoverCallback)
-    {
-        onHoverCallback_ = onHoverCallback;
-    }
-
-    void SetCoordinateOffset(const NG::OffsetF& coordinateOffset)
-    {
-        coordinateOffset_ = coordinateOffset;
-    }
-
-    void SetGetEventTargetImpl(const GetEventTargetImpl& getEventTargetImpl)
-    {
-        getEventTargetImpl_ = getEventTargetImpl;
-    }
-
-    std::optional<EventTarget> GetEventTarget() const
-    {
-        if (getEventTargetImpl_) {
-            return getEventTargetImpl_();
-        }
-        return std::nullopt;
     }
 
     bool HandleMouseEvent(const MouseEvent& event)
@@ -329,9 +311,34 @@ public:
         return info.IsStopPropagation();
     }
 
+    bool DispatchEvent(const TouchEvent& point) override
+    {
+        return false;
+    }
+    // if return false means need to stop event bubbling.
+    bool HandleEvent(const TouchEvent& point) override
+    {
+        return false;
+    }
+
+private:
+    OnMouseEventFunc onMouseCallback_;
+};
+
+class HoverEventTarget : public virtual TouchEventTarget {
+    DECLARE_ACE_TYPE(HoverEventTarget, TouchEventTarget);
+
+public:
+    HoverEventTarget(const std::string& nodeName, int32_t nodeId) : TouchEventTarget(nodeName, nodeId) {}
+    ~HoverEventTarget() override = default;
+
+    void SetCallback(const OnHoverEventFunc& onHoverCallback)
+    {
+        onHoverCallback_ = onHoverCallback;
+    }
+
     bool HandleHoverEvent(bool isHovered)
     {
-        LOGI("Do HanleHoverEvent. isHovered = %{public}d", isHovered);
         if (!onHoverCallback_) {
             return false;
         }
@@ -339,16 +346,51 @@ public:
         return true;
     }
 
-    virtual void HandleEvent(const MouseEvent& event) {}
+    bool DispatchEvent(const TouchEvent& point) override
+    {
+        return false;
+    }
+    bool HandleEvent(const TouchEvent& point) override
+    {
+        return false;
+    }
 
 private:
-    OnMouseEventFunc onMouseCallback_;
     OnHoverEventFunc onHoverCallback_;
-    NG::OffsetF coordinateOffset_;
-    GetEventTargetImpl getEventTargetImpl_;
+};
+
+class HoverEffectTarget : public virtual TouchEventTarget {
+    DECLARE_ACE_TYPE(HoverEffectTarget, TouchEventTarget);
+
+public:
+    HoverEffectTarget(const std::string& nodeName, int32_t nodeId) : TouchEventTarget(nodeName, nodeId) {}
+    ~HoverEffectTarget() override = default;
+
+    void SetHoverNode(const WeakPtr<NG::FrameNode>& node)
+    {
+        hoverNode_ = node;
+    }
+    WeakPtr<NG::FrameNode> GetHoverNode() const
+    {
+        return hoverNode_;
+    }
+
+    bool DispatchEvent(const TouchEvent& point) override
+    {
+        return false;
+    }
+    // if return false means need to stop event bubbling.
+    bool HandleEvent(const TouchEvent& point) override
+    {
+        return false;
+    }
+
+private:
+    WeakPtr<NG::FrameNode> hoverNode_;
 };
 
 using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;
+using HoverTestResult = std::list<RefPtr<HoverEventTarget>>;
 
 } // namespace OHOS::Ace
 

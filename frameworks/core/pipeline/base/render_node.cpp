@@ -839,7 +839,7 @@ RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Poi
     return nullptr;
 }
 
-void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseTestResult& result)
+void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseRawResult& result)
 {
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());

@@ -486,6 +486,7 @@ private:
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
     void InitMouseEvent();
+    void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
     void HandleMouseEvent(MouseInfo& info);
     void HandleLongPress(GestureEvent& info);
@@ -494,7 +495,6 @@ private:
     void CursorMoveOnClick(const Offset& offset);
     void UpdateCaretInfoToController() const;
 
-    void SetMouseStyle(MouseFormat format);
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
