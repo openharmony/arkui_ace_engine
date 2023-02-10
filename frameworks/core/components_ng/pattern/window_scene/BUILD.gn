@@ -17,6 +17,7 @@ if (is_standard_system) {
   config("ohos_window_scene_config") {
     include_dirs = [
       "//foundation/window/window_manager/window_scene",
+      "//foundation/window/window_manager/interfaces/innerkits",
       "//foundation/window/window_manager/wm",
     ]
   }
@@ -53,6 +54,7 @@ build_component_ng("window_scene") {
       "//foundation/window/window_manager/window_scene/session/scene:scene_session",
       "//foundation/window/window_manager/window_scene/session/screen:screen_session",
       "//foundation/window/window_manager/wm:libwm",
+      "//foundation/window/window_manager/dm:libdm",
     ]
   }
 }

@@ -19,12 +19,30 @@
 
 namespace OHOS::Ace::NG {
 
+using CreateRootSceneFunc = UIWindow* (*)();
 using CreateWindowSceneFunc = UIWindow* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
     const sptr<Rosen::ISceneSession>&, const std::shared_ptr<Rosen::RSSurfaceNode>&);
 using CreateWindowExtensionFunc = UIWindow* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
     const sptr<Rosen::IExtensionSession>&, const std::shared_ptr<Rosen::RSSurfaceNode>&);
+constexpr char CREATE_ROOT_SCENE_FUNC[] = "OHOS_ACE_CreateRootScene";
 constexpr char CREATE_WINDOW_SCENE_FUNC[] = "OHOS_ACE_CreateWindowScene";
 constexpr char CREATE_WINDOW_EXTENSION_FUNC[] = "OHOS_ACE_CreateWindowExtension";
+
+UIWindow* CreateRootSceneFromLib()
+{
+    void* handle = dlopen("libace.z.so", RTLD_LAZY);
+    if (handle == nullptr) {
+        return nullptr;
+    }
+
+    auto entry = reinterpret_cast<CreateRootSceneFunc>(dlsym(handle, CREATE_ROOT_SCENE_FUNC));
+    dlclose(handle);
+    if (entry == nullptr) {
+        return nullptr;
+    }
+
+    return entry();
+}
 
 UIWindow* CreateWindowSceneFromLib(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISceneSession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
@@ -58,6 +76,12 @@ UIWindow* CreateWindowExtensionFromLib(const std::shared_ptr<AbilityRuntime::Con
     }
 
     return entry(context, iExtensionSession, surfaceNode);
+}
+
+std::shared_ptr<UIWindow> UIWindow::CreateRootScene()
+{
+    std::shared_ptr<UIWindow> rootScene(CreateRootSceneFromLib());
+    return rootScene;
 }
 
 std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,

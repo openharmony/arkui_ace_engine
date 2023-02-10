@@ -18,17 +18,17 @@
 
 #include <mutex>
 
-#include "session/scene/container/include/session_stage.h"
-#include "ui_content.h"
 #include "ui_window.h"
 
 #include "base/thread/task_executor.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Rosen {
-class RSSurfaceNode;
 class RSUIDirector;
 struct VsyncCallback;
+class SessionStage;
+class ISessionChangeListener;
+enum class WindowSizeChangeReason : uint32_t;
 }
 
 namespace OHOS::Ace::NG {
@@ -37,6 +37,7 @@ class WindowPattern : public UIWindow, public Pattern {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
+    WindowPattern() = default;
     WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     ~WindowPattern() override = default;
@@ -44,7 +45,8 @@ public:
     void Init();
     void Destroy();
 
-    void InitUIContent(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage) override;
+    void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+        AbilityRuntime::Context* context = nullptr) override;
 
     void UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason);
 
@@ -128,17 +130,8 @@ public:
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
     // for lifecycle
-    void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override
-    {
-        CHECK_NULL_VOID(sessionStage_);
-        sessionStage_->RegisterSessionStageStateListener(listener);
-    }
-
-    void RegisterSessionChangeListener(const std::shared_ptr<Rosen::ISessionChangeListener>& listener)
-    {
-        CHECK_NULL_VOID(sessionStage_);
-        sessionStage_->RegisterSessionChangeListener(listener);
-    }
+    void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override;
+    void RegisterSessionChangeListener(const std::shared_ptr<Rosen::ISessionChangeListener>& listener);
 
     void Connect()  override;
     void Foreground()  override;
@@ -147,6 +140,9 @@ public:
 
 protected:
     std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode_;
+
+    std::unique_ptr<UIContent> uiContent_;
+    std::shared_ptr<AbilityRuntime::Context> context_;
 
     // for lifecycle
     sptr<Rosen::SessionStage> sessionStage_;
@@ -160,9 +156,6 @@ protected:
     std::recursive_mutex mutex_;
 
 private:
-    std::unique_ptr<UIContent> uiContent_;
-    std::shared_ptr<AbilityRuntime::Context> context_;
-
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     std::list<AceVsyncCallback> callbacks_;

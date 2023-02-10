@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_EXTENSION_H
 
-// #include "extension_session_stage.h"
-
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {

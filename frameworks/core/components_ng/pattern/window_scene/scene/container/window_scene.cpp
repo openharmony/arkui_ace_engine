@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_scene.h"
 
+#include "session/scene/container/include/scene_session_stage.h"
+
 namespace OHOS::Ace::NG {
 
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,

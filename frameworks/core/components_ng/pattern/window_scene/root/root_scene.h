@@ -24,10 +24,18 @@ class RootScene : public WindowPattern {
     DECLARE_ACE_TYPE(RootScene, WindowPattern);
 
 public:
-    RootScene(/** const sptr<Rosen::RootSceneSession>& rootSceneSession */);
+    RootScene() = default;
     ~RootScene() override = default;
 
+    void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+        AbilityRuntime::Context* context = nullptr) override;
+
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override {}
+
+    void Connect()  override {}
+    void Foreground()  override {}
+    void Background() override {}
+    void Disconnect() override {}
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RootScene);

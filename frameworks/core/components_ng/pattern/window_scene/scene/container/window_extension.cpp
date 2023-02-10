@@ -15,6 +15,9 @@
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_extension.h"
 
+// #include "session/scene/container/include/extension_session_stage.h"
+#include "session/scene/container/include/session_stage.h"
+
 namespace OHOS::Ace::NG {
 
 // extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowExtension(

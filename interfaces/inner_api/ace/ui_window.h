@@ -16,16 +16,9 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNER_API_UI_WINDOW_H
 #define FOUNDATION_ACE_INTERFACE_INNER_API_UI_WINDOW_H
 
-#include <memory>
-
 #include <refbase.h>
 
-class NativeValue;
-class NativeEngine;
-
-namespace OHOS::AbilityRuntime {
-class Context;
-}
+#include "ui_content.h"
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
@@ -36,12 +29,10 @@ class ISessionStageStateListener;
 
 namespace OHOS::Ace::NG {
 
-#ifndef ACE_EXPORT
-#define ACE_EXPORT __attribute__((visibility("default")))
-#endif
-
 class ACE_EXPORT UIWindow {
 public:
+    static std::shared_ptr<UIWindow> CreateRootScene();
+
     static std::shared_ptr<UIWindow> CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
         const sptr<Rosen::ISceneSession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
 
@@ -52,7 +43,8 @@ public:
 
     virtual ~UIWindow() = default;
 
-    virtual void InitUIContent(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage) = 0;
+    virtual void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+        AbilityRuntime::Context* context = nullptr) = 0;
 
     // for lifecycle
     virtual void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) = 0;

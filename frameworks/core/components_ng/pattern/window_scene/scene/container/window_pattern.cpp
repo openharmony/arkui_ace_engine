@@ -17,6 +17,7 @@
 
 #include "include/vsync_station.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+#include "session/scene/container/include/session_stage.h"
 
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -126,13 +127,12 @@ void WindowPattern::Destroy()
     callbacks_.clear();
 }
 
-void WindowPattern::InitUIContent(const std::string& contentInfo, NativeEngine* engine, NativeValue* storage)
+void WindowPattern::LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
+    AbilityRuntime::Context* context)
 {
     uiContent_ = UIContent::Create(context_.get(), engine);
-    uiContent_->Initialize(this, contentInfo, storage);
-
-    auto listener = std::make_shared<SessionChangeListener>(instanceId_);
-    RegisterSessionChangeListener(listener);
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->Initialize(this, contentUrl, storage);
 }
 
 void WindowPattern::UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason)
@@ -229,8 +229,24 @@ void WindowPattern::OnHide()
     rsUIDirector_->SendMessages();
 }
 
+void WindowPattern::RegisterSessionStageStateListener(
+    const std::shared_ptr<Rosen::ISessionStageStateListener>& listener)
+{
+    CHECK_NULL_VOID(sessionStage_);
+    sessionStage_->RegisterSessionStageStateListener(listener);
+}
+
+void WindowPattern::RegisterSessionChangeListener(const std::shared_ptr<Rosen::ISessionChangeListener>& listener)
+{
+    CHECK_NULL_VOID(sessionStage_);
+    sessionStage_->RegisterSessionChangeListener(listener);
+}
+
 void WindowPattern::Connect()
 {
+    auto listener = std::make_shared<SessionChangeListener>(instanceId_);
+    RegisterSessionChangeListener(listener);
+
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Connect();
 }
