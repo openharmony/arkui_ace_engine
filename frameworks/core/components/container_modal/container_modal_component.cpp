@@ -70,26 +70,7 @@ RefPtr<Component> ContainerModalComponent::BuildTitle()
     auto titleChildrenRow =
         AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, BuildTitleChildren(false));
 
-    // handle mouse move
-    titleBox->SetOnMouseId([contextWptr = context_, weak = WeakClaim(this)](MouseInfo& info) {
-        auto context = contextWptr.Upgrade();
-        CHECK_NULL_VOID_NOLOG(context);
-        auto container = weak.Upgrade();
-        if (info.GetButton() != MouseButton::LEFT_BUTTON) {
-            return;
-        }
-        if (info.GetAction() == MouseAction::MOVE) {
-            container->isStartMove_ = true;
-        }
-        if (info.GetAction() == MouseAction::PRESS && container->isStartMove_) {
-            context->GetWindowManager()->WindowStartMove();
-        }
-        if (info.GetAction() == MouseAction::RELEASE) {
-            container->isStartMove_ = false;
-        }
-    });
-
-    // handle touch move
+    // handle touch move and mouse move
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
     auto panGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE);
@@ -171,17 +152,7 @@ RefPtr<Component> ContainerModalComponent::BuildControlButton(
     button->SetType(ButtonType::CIRCLE);
     button->SetBackgroundColor(isFocus ? TITLE_BUTTON_BACKGROUND_COLOR : TITLE_BUTTON_BACKGROUND_COLOR_LOST_FOCUS);
     button->SetClickedColor(TITLE_BUTTON_CLICKED_COLOR);
-    if (isFloating) {
-        button->SetClickFunction(std::move(clickCallback));
-    } else {
-        button->SetClickFunction([weak = WeakClaim(this), clickCallback] () {
-            auto container = weak.Upgrade();
-            CHECK_NULL_VOID(container);
-            if (!container->isStartMove_) {
-                clickCallback();
-            }
-        });
-    }
+    button->SetClickFunction(std::move(clickCallback));
     button->SetFocusable(false);
     
     ++controlButtonId;
