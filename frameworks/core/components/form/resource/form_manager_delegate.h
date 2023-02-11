@@ -122,6 +122,7 @@ private:
     std::shared_ptr<FormSurfaceCallbackClient> formSurfaceCallbackClient_;
     std::shared_ptr<FormRendererDelegateImpl> renderDelegate_;
     sptr<IFormRendererDispatcher> formRendererDispatcher_;
+    AppExecFwk::FormJsInfo formJsInfo_;
 #endif
 };
 

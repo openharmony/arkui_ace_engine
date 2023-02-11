@@ -538,8 +538,20 @@ void FormManagerDelegate::OnFormError(const std::string& param)
 
 void FormManagerDelegate::OnFormError(const std::string& code, const std::string& msg)
 {
-    if (onFormErrorCallback_) {
-        onFormErrorCallback_(code, msg);
+    LOGE("OnFormError, add form again, code:%{public}s   msg:%{public}s", code.c_str(), msg.c_str());
+    formRendererDispatcher_ = nullptr;  // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
+    auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(
+        formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
+    if (ret != 0) {
+        int32_t externalErrorCode;
+        std::string errorMsg;
+        OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(ret, externalErrorCode, errorMsg);
+        LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
+        if (onFormErrorCallback_) {
+            onFormErrorCallback_(std::to_string(externalErrorCode), errorMsg);
+        }
+        return;
     }
 }
 
@@ -568,6 +580,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
         if (formJsInfo.uiSyntax == AppExecFwk::FormType::ETS) {
             uiSyntax = OHOS::Ace::FrontendType::ETS_CARD;
         }
+        formJsInfo_ = formJsInfo;
         onFormAcquiredCallback_(runningCardId_, formJsInfo.jsFormCodePath, formJsInfo.formName,
             formJsInfo.formData, formJsInfo.imageDataMap, formJsInfo, type, uiSyntax);
     } else {
@@ -579,6 +592,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJs
             LOGE("update form data success, but update callback is null!!!");
             return;
         }
+        formJsInfo_ = formJsInfo;
         onFormUpdateCallback_(formJsInfo.formId, formJsInfo.formData, formJsInfo.imageDataMap);
     }
 }
