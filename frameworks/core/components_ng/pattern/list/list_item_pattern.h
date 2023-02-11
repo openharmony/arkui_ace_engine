@@ -105,6 +105,10 @@ public:
 
     Axis GetAxis() const;
 
+    void SetSwiperItemForList();
+
+    void SwiperReset();
+
     static float CalculateFriction(float gamma);
 
     void MarkIsSelected(bool isSelected);

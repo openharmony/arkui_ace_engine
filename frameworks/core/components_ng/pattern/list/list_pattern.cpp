@@ -354,6 +354,10 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     if (source == SCROLL_FROM_START) {
         FireOnScrollStart();
         ProcessDragStart(offset);
+        auto item = swiperItem_.Upgrade();
+        if (item) {
+            item->SwiperReset();
+        }
         return true;
     }
     auto scrollBar = GetScrollBar();
@@ -781,5 +785,16 @@ RectF ListPattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF
     }
 
     return selectedZone;
+}
+
+void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
+{
+    if (swiperItem_ != swiperItem) {
+        auto item = swiperItem_.Upgrade();
+        if (item) {
+            item->SwiperReset();
+        }
+        swiperItem_ = std::move(swiperItem);
+    }
 }
 } // namespace OHOS::Ace::NG
