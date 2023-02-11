@@ -415,7 +415,17 @@ void OverlayManager::HideAllPopups()
         if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
             popupInfo.markNeedUpdate = true;
             popupInfo.popupId = -1;
-            UpdatePopupNode(popupInfo.target.Upgrade()->GetId(), popupInfo);
+            auto targetNodeId = popupInfo.target.Upgrade()->GetId();
+            auto popupNode = popupInfo.popupNode;
+            CHECK_NULL_VOID(popupNode);
+            auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+            CHECK_NULL_VOID(layoutProp);
+            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+            if (showInSubWindow) {
+                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+            } else {
+                UpdatePopupNode(targetNodeId, popupInfo);
+            }
         }
     }
 }
