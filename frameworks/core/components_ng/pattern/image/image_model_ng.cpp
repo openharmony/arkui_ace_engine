@@ -32,6 +32,7 @@ namespace OHOS::Ace::NG {
 void ImageModelNG::Create(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
     const std::string& bundleName, const std::string& moduleName)
 {
+    LOGD("creating new image %{public}s", src.c_str());
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto createSourceInfoFunc = [&src, noPixMap, &pixMap, &bundleName, &moduleName]() -> ImageSourceInfo {

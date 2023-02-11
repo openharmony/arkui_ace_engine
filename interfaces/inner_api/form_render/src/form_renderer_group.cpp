@@ -47,10 +47,9 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
         renderer->Destroy();
         rendererMap_.erase(iter);
     }
-    HILOG_INFO("AddForm compId: %{public}s", compId.c_str());
     auto formRenderer = std::make_shared<FormRenderer>(context_, runtime_);
     if (!formRenderer) {
-        HILOG_ERROR("Kee FormRendererGroup::AddForm! 2");
+        HILOG_ERROR("AddForm create formrender failed");
         return;
     }
     rendererMap_.try_emplace(compId, formRenderer);
