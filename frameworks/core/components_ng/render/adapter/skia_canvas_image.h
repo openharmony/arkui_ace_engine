@@ -47,6 +47,7 @@ public:
 #endif
         return nullptr;
     }
+
     virtual sk_sp<SkData> GetCompressData() const
     {
 #ifndef NG_BUILD
@@ -56,6 +57,7 @@ public:
 #endif
         return nullptr;
     }
+
     void SetCompressData(sk_sp<SkData> data, int32_t w, int32_t h)
     {
 #ifndef NG_BUILD
@@ -66,6 +68,7 @@ public:
         }
 #endif
     }
+
     virtual int32_t GetCompressWidth() const
     {
 #ifndef NG_BUILD
@@ -75,6 +78,7 @@ public:
 #endif
         return 0;
     }
+
     virtual int32_t GetCompressHeight() const
     {
 #ifndef NG_BUILD
@@ -84,6 +88,7 @@ public:
 #endif
         return 0;
     }
+
     virtual uint32_t GetUniqueID() const
     {
 #ifndef NG_BUILD
@@ -94,12 +99,14 @@ public:
 #endif
         return 0;
     }
+
     virtual void SetUniqueID(uint32_t id)
     {
 #ifndef NG_BUILD
         uniqueId_ = id;
 #endif
     }
+
 #ifndef NG_BUILD
     virtual fml::RefPtr<flutter::CanvasImage> GetFlutterCanvasImage() const
     {
@@ -109,13 +116,16 @@ public:
         return nullptr;
     }
 #endif
+
+    RefPtr<CanvasImage> Clone() override;
+
     void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
     void AddFilter(SkPaint& paint);
-    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
-        const BorderRadiusArray& radiusXY) override;
+    void DrawToRSCanvas(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
 
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);

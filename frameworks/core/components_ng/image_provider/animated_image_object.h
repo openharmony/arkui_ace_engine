@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 class AnimatedImageObject : public ImageObject {
-    DECLARE_ACE_TYPE(GifImageObject, ImageObject);
+    DECLARE_ACE_TYPE(AnimatedImageObject, ImageObject);
 
 public:
     AnimatedImageObject(const ImageSourceInfo& src, const SizeF& imageSize, const RefPtr<ImageData>& data)

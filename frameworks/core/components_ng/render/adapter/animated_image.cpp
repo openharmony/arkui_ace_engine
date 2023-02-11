@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/render/adapter/animated_image.h"
+
 #include <mutex>
 
 #include "core/animation/animator.h"
@@ -127,7 +128,11 @@ void AnimatedImage::DecodeFrame(uint32_t idx)
 
     // save current frame, notify redraw
     currentFrame_ = SkImage::MakeFromBitmap(bitmap);
-    ImageUtils::PostToUI(redraw_);
+    ImageUtils::PostToUI([weak = WeakClaim(this)] {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self && self->redraw_);
+        self->redraw_();
+    });
 
     CacheFrame(idx);
 }

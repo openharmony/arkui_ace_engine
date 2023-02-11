@@ -130,6 +130,13 @@ int32_t SkiaCanvasImage::GetHeight() const
 #endif
 }
 
+RefPtr<CanvasImage> SkiaCanvasImage::Clone()
+{
+    auto clone = MakeRefPtr<SkiaCanvasImage>(image_);
+    clone->uniqueId_ = uniqueId_;
+    return clone;
+}
+
 void SkiaCanvasImage::AddFilter(SkPaint& paint)
 {
     auto config = GetPaintConfig();
