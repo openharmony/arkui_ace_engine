@@ -92,6 +92,7 @@ void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
 
 void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, tabBarMode);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateTabBarMode(tabBarMode);

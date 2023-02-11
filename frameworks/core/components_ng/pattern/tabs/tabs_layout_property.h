@@ -38,6 +38,7 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
         value->propTabBarPosition_ = CloneTabBarPosition();
         value->propAxis_ = CloneAxis();
+        value->propTabBarMode_ = CloneTabBarMode();
         return value;
     }
 
@@ -46,6 +47,7 @@ public:
         LayoutProperty::Reset();
         ResetTabBarPosition();
         ResetAxis();
+        ResetTabBarMode();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -59,6 +61,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarPosition, BarPosition, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarMode, TabBarMode, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG
