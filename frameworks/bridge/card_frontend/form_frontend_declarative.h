@@ -133,6 +133,14 @@ public:
     {
         return bundleName_;
     }
+    void SetIsBundle(bool isBundle)
+    {
+        isBundle_ = isBundle;
+    }
+    bool IsBundle() const
+    {
+        return isBundle_;
+    }
 
     ColorMode colorMode_ = ColorMode::LIGHT;
     bool foregroundFrontend_ = false;
@@ -151,6 +159,7 @@ public:
 
     std::string bundleName_;
     std::string moduleName_;
+    bool isBundle_ = false;
 };
 } // namespace OHOS::Ace
 

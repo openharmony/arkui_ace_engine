@@ -67,8 +67,6 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     auto height = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 100.0f);
     uiContent_->SetFormWidth(width);
     uiContent_->SetFormHeight(height);
-    uiContent_->SetFormModuleName(formJsInfo.moduleName);
-    uiContent_->SetFormBundleName(formJsInfo.bundleName);
     uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
     InitUiContent();
 
