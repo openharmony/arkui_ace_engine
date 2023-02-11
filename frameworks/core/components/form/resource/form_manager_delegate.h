@@ -65,9 +65,7 @@ public:
     ~FormManagerDelegate() override;
     explicit FormManagerDelegate(const WeakPtr<PipelineBase>& context)
         : FormManagerResource("formAdaptor", context), state_(State::WAITINGFORSIZE)
-    {
-        renderDelegate_ = std::make_shared<FormRendererDelegateImpl>();
-    }
+    {}
 
     void AddForm(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);
     void ReleasePlatformResource();
@@ -81,6 +79,7 @@ public:
     void OnActionEvent(const std::string& action);
     void DispatchPointerEvent(
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+    void AddRenderDelegate();
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);
 #ifdef OHOS_STANDARD_SYSTEM
@@ -120,7 +119,7 @@ private:
     std::shared_ptr<FormCallbackClient> formCallbackClient_;
     std::shared_ptr<FormUtils> formUtils_;
     std::shared_ptr<FormSurfaceCallbackClient> formSurfaceCallbackClient_;
-    std::shared_ptr<FormRendererDelegateImpl> renderDelegate_;
+    sptr<FormRendererDelegateImpl> renderDelegate_;
     sptr<IFormRendererDispatcher> formRendererDispatcher_;
 #endif
 };
