@@ -206,6 +206,7 @@ void SlidingPanelModelNG::Pop()
             dragBarNode->MountToParent(columnNode, 0);
             dragBarNode->MarkModifyDone();
         }
+        NG::ViewStackProcessor::GetInstance()->PopContainer();
         return;
     }
 
