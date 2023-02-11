@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_algorithm.h"
@@ -35,7 +36,9 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -68,7 +71,7 @@ constexpr Placement BUBBLE_LAYOUT_PROPERTY_PLACEMENT = Placement::LEFT;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
+const OffsetF MESSAGE_OFFSET = OffsetF(6, 8);
 
 const std::vector<Placement> BUBBLE_LAYOUT_PROPERTY_PLACEMENTS = {
     Placement::LEFT,
@@ -97,8 +100,14 @@ protected:
     static RefPtr<FrameNode> GetTargetNode();
 };
 
-void BubbleLayoutTestNg::SetUp() {}
-void BubbleLayoutTestNg::TearDown() {}
+void BubbleLayoutTestNg::SetUp()
+{
+    MockPipelineBase::SetUp();
+}
+void BubbleLayoutTestNg::TearDown()
+{
+    MockPipelineBase::TearDown();
+}
 
 PaddingProperty GetPadding(float left, float top, float right, float bottom)
 {
@@ -132,6 +141,10 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest001, TestSize.Level1)
     EXPECT_NE(targetNode, nullptr);
     auto targetTag = targetNode->GetTag();
     auto targetId = targetNode->GetId();
+    // set popupTheme and  buttonTheme to themeManager before using themeManager
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, popupParam);
     EXPECT_NE(popupNode, nullptr);
 
@@ -254,6 +267,10 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest003, TestSize.Level1)
     auto targetId = targetNode->GetId();
     auto targetTag = targetNode->GetTag();
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    // set popupTheme and  buttonTheme to themeManager before using themeManager
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
     EXPECT_FALSE(frameNode == nullptr);
@@ -323,7 +340,7 @@ HWTEST_F(BubbleLayoutTestNg, BubbleLayoutTest003, TestSize.Level1)
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(0, 0));
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset(), OFFSET_TOP_LEFT);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset(), MESSAGE_OFFSET);
 }
 
 /**
