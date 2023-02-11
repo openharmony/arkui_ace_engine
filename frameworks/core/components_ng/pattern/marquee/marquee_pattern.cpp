@@ -25,10 +25,12 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/pipeline/base/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
+constexpr int32_t FORM_LOOP = 1;
 inline bool IsPlayingAnimation(const RefPtr<Animator>& animatorController_)
 {
     return (animatorController_->GetStatus() == Animator::Status::RUNNING);
@@ -129,6 +131,12 @@ void MarqueePattern::OnModifyDone()
     loop_ = GetLoop();
     if (loop_ <= 0) {
         loop_ = ANIMATION_REPEAT_INFINITE;
+    }
+
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (context->IsFormRender()) {
+        loop_ = FORM_LOOP;
     }
 
     if (playStatus_ && animatorController_->GetStatus() == Animator::Status::PAUSED) {

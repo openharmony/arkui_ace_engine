@@ -196,7 +196,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         RequestFrame();
     }
     FlushMessages();
-    if (onShow_ && onFocus_) {
+    if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
     }
     HandleVisibleAreaChangeEvent();
