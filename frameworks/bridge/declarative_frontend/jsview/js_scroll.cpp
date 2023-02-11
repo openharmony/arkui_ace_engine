@@ -252,12 +252,22 @@ void JSScroll::SetScrollBar(int displayMode)
     ScrollModel::GetInstance()->SetDisplayMode(displayMode);
 }
 
-void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)
+void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
 {
-    if (scrollBarWidth.empty()) {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    Dimension scrollBarWidth;
+    if (args.Length() < 1) {
+        LOGE("args is invalid");
         return;
     }
-    ScrollModel::GetInstance()->SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
+    if (!ParseJsDimensionVp(args[0], scrollBarWidth) || args[0]->IsNull() || args[0]->IsUndefined() ||
+        (args[0]->IsString() && args[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0)) {
+        scrollBarWidth = theme->GetNormalWidth();
+    }
+    ScrollModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
 }
 
 void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)

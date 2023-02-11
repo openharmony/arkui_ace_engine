@@ -36,7 +36,7 @@ public:
     static void OnScrollStartCallback(const JSCallbackInfo& args);
     static void OnScrollStopCallback(const JSCallbackInfo& args);
     static void SetScrollBarColor(const std::string& color);
-    static void SetScrollBarWidth(const std::string& width);
+    static void SetScrollBarWidth(const JSCallbackInfo& args);
     static void SetScrollBar(int displayMode);
     static void SetEdgeEffect(int edgeEffect);
     static void JsWidth(const JSCallbackInfo& info);
