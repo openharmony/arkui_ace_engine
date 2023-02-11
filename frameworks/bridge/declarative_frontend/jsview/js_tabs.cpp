@@ -135,14 +135,27 @@ void JSTabs::SetVertical(const std::string& value)
     TabsModel::GetInstance()->SetIsVertical(StringToBool(value));
 }
 
-void JSTabs::SetScrollable(const std::string& value)
+void JSTabs::SetScrollable(const JSCallbackInfo& info)
 {
-    TabsModel::GetInstance()->SetScrollable(StringToBool(value));
+    bool scrollable = true;
+    if (info.Length() < 1) {
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    if (info[0]->IsBoolean()) {
+        scrollable = info[0]->ToBoolean();
+    }
+    TabsModel::GetInstance()->SetScrollable(scrollable);
 }
 
-void JSTabs::SetBarMode(const std::string& value)
+void JSTabs::SetBarMode(const JSCallbackInfo& info)
 {
-    TabsModel::GetInstance()->SetTabBarMode(ConvertStrToTabBarMode(value));
+    auto barMode = TabBarMode::FIXED;
+    if (info.Length() > 0 && info[0]->IsString()) {
+        auto barModeVal = info[0]->ToString();
+        barMode = barModeVal == "Scrollable" ? TabBarMode::SCROLLABLE : TabBarMode::FIXED;
+    }
+    TabsModel::GetInstance()->SetTabBarMode(barMode);
 }
 
 void JSTabs::SetBarWidth(const JSCallbackInfo& info)
@@ -181,9 +194,21 @@ void JSTabs::SetIndex(int32_t index)
     TabsModel::GetInstance()->SetIndex(index);
 }
 
-void JSTabs::SetAnimationDuration(float value)
+void JSTabs::SetAnimationDuration(const JSCallbackInfo& info)
 {
-    TabsModel::GetInstance()->SetAnimationDuration(value);
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    double animationDuration = tabTheme->GetTabContentAnimationDuration();
+    if (!ParseJsDouble(info[0], animationDuration)) {
+        LOGE("The arg is wrong, fail to parse double");
+    }
+    TabsModel::GetInstance()->SetAnimationDuration(static_cast<float>(animationDuration));
 }
 
 void JSTabs::JSBind(BindingTarget globalObj)
