@@ -357,7 +357,7 @@ private:
     void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
     double NormalizeToPx(const Dimension& dimension) const;
 
-    DisplayMode displayMode_ = DisplayMode::OFF;
+    DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
     Edge padding_;
