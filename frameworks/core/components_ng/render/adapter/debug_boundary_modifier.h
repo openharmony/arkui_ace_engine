@@ -33,6 +33,7 @@ public:
     void Draw(RSDrawingContext& context) const override
     {
         CHECK_NULL_VOID(property_);
+        CHECK_NULL_VOID(context.canvas);
         std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas* /* unused */) {} };
         RSCanvas rsCanvas(&skCanvas);
         CHECK_NULL_VOID(&rsCanvas);

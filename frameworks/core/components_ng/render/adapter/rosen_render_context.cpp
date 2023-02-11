@@ -250,12 +250,14 @@ void RosenRenderContext::PaintDebugBoundary()
         painter.DrawDebugBoundaries(rsCanvas, offset);
     };
 
-    if (!debugBoundaryModifier_) {
+    if (!debugBoundaryModifier_ && rsNode_->IsInstanceOf<Rosen::RSCanvasNode>()) {
         debugBoundaryModifier_ = std::make_shared<DebugBoundaryModifier>();
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         rsNode_->AddModifier(debugBoundaryModifier_);
     }
-    debugBoundaryModifier_->SetCustomData(true);
+    if (debugBoundaryModifier_) {
+        debugBoundaryModifier_->SetCustomData(true);
+    }
 }
 
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
