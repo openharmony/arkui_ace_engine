@@ -124,14 +124,18 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
         paintOffset.GetY() + paintWrapper->GetContentSize().Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto textBoxes = textFieldPattern->GetTextBoxes();
+    auto textRect = textFieldPattern->GetTextRect();
+    bool isTextArea = textFieldPattern->IsTextArea();
     switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
         case InputStyle::DEFAULT:
             // for default style, selection height is equal to the content height
             for (const auto& textBox : textBoxes) {
-                canvas.DrawRect(RSRect(textBox.rect_.GetLeft() + paintWrapper->GetContentOffset().GetX(),
-                    paintWrapper->GetContentOffset().GetY() + textBox.rect_.GetTop(),
-                    +paintWrapper->GetContentOffset().GetX() + textBox.rect_.GetRight(),
-                    paintWrapper->GetContentOffset().GetY() + textBox.rect_.GetTop() + textBox.rect_.GetHeight()));
+                canvas.DrawRect(RSRect(
+                    textBox.rect_.GetLeft() + (isTextArea ? paintWrapper->GetContentOffset().GetX() : textRect.GetX()),
+                    textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : paintWrapper->GetContentOffset().GetY()),
+                    textBox.rect_.GetRight() + (isTextArea ? paintWrapper->GetContentOffset().GetX() : textRect.GetX()),
+                    textBox.rect_.GetBottom() +
+                        (isTextArea ? textRect.GetY() : paintWrapper->GetContentOffset().GetY())));
             }
             break;
         case InputStyle::INLINE:
@@ -165,6 +169,11 @@ void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrap
     brush.SetAntiAlias(true);
     brush.SetColor(cursorColor.GetValue());
     canvas.AttachBrush(brush);
+    auto paintOffset = paintWrapper->GetContentOffset() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
+    RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
+        paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
+        paintOffset.GetY() + paintWrapper->GetContentSize().Height());
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     float caretHeight = textFieldPattern->GetCaretRect().Height();
     if (!textFieldPattern->IsTextArea()) {
         auto top = static_cast<float>(

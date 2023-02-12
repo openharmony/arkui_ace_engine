@@ -150,6 +150,7 @@ void OnTextChangedListenerImpl::MoveCursor(MiscServices::Direction direction)
 
 void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
 {
+    LOGI("[OnTextChangedListenerImpl] HandleSetSelection, start %{public}d, end %{public}d", start, end);
     auto task = [textField = pattern_, start, end] {
         auto client = textField.Upgrade();
         if (!client) {
@@ -164,6 +165,7 @@ void OnTextChangedListenerImpl::HandleSetSelection(int32_t start, int32_t end)
 
 void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
 {
+    LOGI("[OnTextChangedListenerImpl] HandleExtendAction %{public}d", action);
     auto task = [textField = pattern_, action] {
         auto client = textField.Upgrade();
         if (!client) {
@@ -178,6 +180,8 @@ void OnTextChangedListenerImpl::HandleExtendAction(int32_t action)
 
 void OnTextChangedListenerImpl::HandleSelect(int32_t keyCode, int32_t cursorMoveSkip)
 {
+    LOGI("[OnTextChangedListenerImpl] HandleSelect, keycode %{public}d, cursor move skip %{public}d", keyCode,
+        cursorMoveSkip);
     auto task = [textField = pattern_, keyCode, cursorMoveSkip] {
         auto client = textField.Upgrade();
         if (!client) {
