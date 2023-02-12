@@ -43,12 +43,19 @@ public:
         return nullptr;
     }
 
-    virtual RefPtr<Modifier> GetModifier(PaintWrapper* paintWrapper)
+    virtual RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper)
     {
         return nullptr;
     }
 
-    virtual void UpdateModifier(PaintWrapper* paintWrapper) {}
+    virtual RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper)
+    {
+        return nullptr;
+    }
+
+    virtual void UpdateContentModifier(PaintWrapper* paintWrapper) {}
+
+    virtual void UpdateOverlayModifier(PaintWrapper* paintWrapper) {}
 };
 } // namespace OHOS::Ace::NG
 
