@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 std::unordered_map<int32_t, std::shared_ptr<RSModifier>> g_ModifiersMap;
 std::mutex g_ModifiersMapLock;
 
-std::shared_ptr<RSModifier> ConvertModifier(const RefPtr<Modifier>& modifier)
+std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier)
 {
     CHECK_NULL_RETURN(modifier, nullptr);
     std::lock_guard<std::mutex> lock(g_ModifiersMapLock);
@@ -34,6 +34,19 @@ std::shared_ptr<RSModifier> ConvertModifier(const RefPtr<Modifier>& modifier)
         return iter->second;
     }
     auto modifierAdapter = std::make_shared<ContentModifierAdapter>(modifier);
+    g_ModifiersMap.emplace(modifier->GetId(), modifierAdapter);
+    return modifierAdapter;
+}
+
+std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_RETURN(modifier, nullptr);
+    std::lock_guard<std::mutex> lock(g_ModifiersMapLock);
+    const auto& iter = g_ModifiersMap.find(modifier->GetId());
+    if (iter != g_ModifiersMap.end()) {
+        return iter->second;
+    }
+    auto modifierAdapter = std::make_shared<OverlayModifierAdapter>(modifier);
     g_ModifiersMap.emplace(modifier->GetId(), modifierAdapter);
     return modifierAdapter;
 }
@@ -66,8 +79,11 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<AnimatablePropertyBase>& property)
 {
     // should manually add convert type here
+    CONVERT_PROP(property, AnimatablePropertyBool, bool);
     CONVERT_PROP(property, AnimatablePropertyFloat, float);
     CONVERT_PROP(property, AnimatablePropertyColor, LinearColor);
+    CONVERT_PROP(property, AnimatablePropertySizeF, SizeF);
+    CONVERT_PROP(property, AnimatablePropertyOffsetF, OffsetF);
     LOGE("ConvertToRSProperty failed!");
     return nullptr;
 }
@@ -83,4 +99,24 @@ void ContentModifierAdapter::AttachProperties()
     }
 }
 
+void OverlayModifierAdapter::Draw(RSDrawingContext& context) const
+{
+    // use dummy deleter avoid delete the SkCanvas by shared_ptr, its owned by context
+    std::shared_ptr<SkCanvas> skCanvas { context.canvas, [](SkCanvas*) {} };
+    RSCanvas canvas(&skCanvas);
+    CHECK_NULL_VOID_NOLOG(modifier_);
+    DrawingContext context_ = { canvas, context.width, context.height };
+    modifier_->onDraw(context_);
+}
+
+void OverlayModifierAdapter::AttachProperties()
+{
+    if (attachedProperties_.empty() && modifier_) {
+        for (const auto& property : modifier_->GetAttachedProperties()) {
+            auto rsProperty = ConvertToRSProperty(property);
+            AttachProperty(rsProperty);
+            attachedProperties_.emplace_back(rsProperty);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

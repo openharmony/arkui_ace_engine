@@ -72,7 +72,9 @@ public:
 
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
 
-    virtual void FlushModifier(const RefPtr<Modifier>& modifier) {}
+    virtual void FlushContentModifier(const RefPtr<Modifier>& modifier) {}
+    virtual void FlushForegroundModifier(const RefPtr<Modifier>& modifier) {}
+    virtual void FlushOverlayModifier(const RefPtr<Modifier>& modifier) {}
 
     virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 
