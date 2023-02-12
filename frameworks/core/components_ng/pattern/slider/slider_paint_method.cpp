@@ -27,30 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5f;
 constexpr Dimension CIRCLE_SHADOW_WIDTH = 1.0_vp;
-constexpr Dimension BEZIER_HORIZON_OFFSET_FIRST = 1.3_vp;
-constexpr Dimension BEZIER_HORIZON_OFFSET_SECOND = 3.2_vp;
-constexpr Dimension BEZIER_HORIZON_OFFSET_THIRD = 6.6_vp;
-constexpr Dimension BEZIER_HORIZON_OFFSET_FOURTH = 16.0_vp;
-constexpr Dimension BEZIER_VERTICAL_OFFSET_FIRST = 0.1_vp;
-constexpr Dimension BEZIER_VERTICAL_OFFSET_SECOND = 3.0_vp;
-constexpr Dimension BEZIER_VERTICAL_OFFSET_THIRD = 8.0_vp;
-constexpr Dimension ARROW_HEIGHT = 8.0_vp;
 } // namespace
-
-CanvasDrawFunction SliderPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
-{
-    auto contentOffset = paintWrapper->GetContentOffset();
-    return [weak = WeakClaim(this), paintWrapper, paragraph = paragraph_, isDrawBubble = isDrawBubble_,
-               textOffset = textOffset_ + contentOffset](RSCanvas& canvas) {
-        auto tip = weak.Upgrade();
-        CHECK_NULL_VOID(tip);
-        if (isDrawBubble) {
-            tip->PaintBubble(canvas, paintWrapper);
-            CHECK_NULL_VOID(paragraph);
-            paragraph->Paint(canvas, textOffset.GetX(), textOffset.GetY());
-        }
-    };
-}
 
 CanvasDrawFunction SliderPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
@@ -229,108 +206,5 @@ SliderPaintMethod::CirclePenAndSize SliderPaintMethod::GetCirclePen(
     circlePenAndSize.shadowPen.SetWidth(shadowWidth);
     circlePenAndSize.shadowRadius = (parameters_.blockDiameter + shadowWidth) * HALF;
     return circlePenAndSize;
-}
-
-void PaintBezier(bool isLeft, Axis axis, RSPath& path, const OffsetF& arrowCenter, const OffsetF& arrowEdge)
-{
-    if (isLeft) {
-        path.MoveTo(arrowCenter.GetX(), arrowCenter.GetY());
-        if (axis == Axis::HORIZONTAL) {
-            path.QuadTo(arrowCenter.GetX() - static_cast<float>(BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx()),
-                arrowCenter.GetY() + static_cast<float>(BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx()),
-                arrowCenter.GetX() - static_cast<float>(BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx()));
-            path.QuadTo(arrowCenter.GetX() - static_cast<float>(BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetX() - static_cast<float>(BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx()));
-        } else {
-            path.QuadTo(arrowCenter.GetX() + static_cast<float>(BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx()),
-                arrowCenter.GetY() + static_cast<float>(BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx()),
-                arrowCenter.GetX() - static_cast<float>(BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx()),
-                arrowCenter.GetY() + static_cast<float>(BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx()));
-            path.QuadTo(arrowCenter.GetX() - static_cast<float>(BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetY() + static_cast<float>(BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetX() - static_cast<float>(BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetY() + static_cast<float>(BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx()));
-        }
-        path.LineTo(arrowEdge.GetX(), arrowEdge.GetY());
-    } else {
-        path.MoveTo(arrowEdge.GetX(), arrowEdge.GetY());
-        if (axis == Axis::HORIZONTAL) {
-            path.LineTo(arrowCenter.GetX() + static_cast<float>(BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx()));
-            path.QuadTo(arrowCenter.GetX() + static_cast<float>(BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetX() + static_cast<float>(BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx()));
-            path.QuadTo(arrowCenter.GetX() + static_cast<float>(BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx()),
-                arrowCenter.GetY() + static_cast<float>(BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx()), arrowCenter.GetX(),
-                arrowCenter.GetY());
-        } else {
-            path.LineTo(arrowCenter.GetX() - static_cast<float>(BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx()));
-            path.QuadTo(arrowCenter.GetX() - static_cast<float>(BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx()),
-                arrowCenter.GetX() - static_cast<float>(BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx()));
-            path.QuadTo(arrowCenter.GetX() + static_cast<float>(BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx()),
-                arrowCenter.GetY() - static_cast<float>(BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx()), arrowCenter.GetX(),
-                arrowCenter.GetY());
-        }
-    }
-}
-
-void SliderPaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper)
-{
-    auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    auto contentOffset = paintWrapper->GetContentOffset();
-    auto offset = bubbleOffset_ + contentOffset;
-    auto arrowHeight = static_cast<float>(ARROW_HEIGHT.ConvertToPx());
-    RSPath path;
-    OffsetF arrowCenter;
-    OffsetF clockwiseFirstPoint;
-    OffsetF clockwiseSecondPoint;
-    float circularRadius = 0.0f;
-    OffsetF clockwiseThirdPoint;
-    OffsetF clockwiseFourthPoint;
-    auto axis = paintProperty->GetDirection().value_or(Axis::HORIZONTAL);
-    if (axis == Axis::HORIZONTAL) {
-        arrowCenter = { offset.GetX() + bubbleSize_.Width() * HALF, offset.GetY() + bubbleSize_.Height() };
-        float bottomLineLength = bubbleSize_.Width() - (bubbleSize_.Height() - arrowHeight);
-        clockwiseFirstPoint = { arrowCenter.GetX() - bottomLineLength * HALF, arrowCenter.GetY() - arrowHeight };
-        clockwiseSecondPoint = { clockwiseFirstPoint.GetX(), offset.GetY() };
-        circularRadius = (clockwiseFirstPoint.GetY() - clockwiseSecondPoint.GetY()) * HALF;
-        clockwiseThirdPoint = { clockwiseSecondPoint.GetX() + bottomLineLength, clockwiseSecondPoint.GetY() };
-        clockwiseFourthPoint = { clockwiseThirdPoint.GetX(), offset.GetY() + circularRadius * 2 };
-    } else {
-        arrowCenter = { offset.GetX() + bubbleSize_.Width(), offset.GetY() + bubbleSize_.Height() * HALF };
-        float bottomLineLength = bubbleSize_.Height() - (bubbleSize_.Width() - arrowHeight);
-        clockwiseFirstPoint = { arrowCenter.GetX() - arrowHeight, arrowCenter.GetY() + bottomLineLength * HALF };
-        clockwiseSecondPoint = { offset.GetX(), clockwiseFirstPoint.GetY() };
-        circularRadius = (clockwiseFirstPoint.GetX() - clockwiseSecondPoint.GetX()) * HALF;
-        clockwiseThirdPoint = { clockwiseSecondPoint.GetX(), clockwiseSecondPoint.GetY() - bottomLineLength };
-        clockwiseFourthPoint = { offset.GetX() + circularRadius * 2, clockwiseThirdPoint.GetY() };
-    }
-    path.MoveTo(arrowCenter.GetX(), arrowCenter.GetY());
-    PaintBezier(
-        true, axis, path, arrowCenter, clockwiseFirstPoint);
-    path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwiseSecondPoint.GetX(),
-        clockwiseSecondPoint.GetY());
-    path.LineTo(clockwiseThirdPoint.GetX(), clockwiseThirdPoint.GetY());
-    path.ArcTo(circularRadius, circularRadius, 0.0f, RSPathDirection::CW_DIRECTION, clockwiseFourthPoint.GetX(),
-        clockwiseFourthPoint.GetY());
-    PaintBezier(
-        false, axis, path, arrowCenter, clockwiseFourthPoint);
-    RSPen pen;
-    pen.SetColor(ToRSColor(paintProperty->GetTipColor().value_or(Color::BLACK)));
-    pen.SetAntiAlias(true);
-    RSBrush brush;
-    brush.SetColor(ToRSColor(paintProperty->GetTipColor().value_or(Color::BLACK)));
-    canvas.AttachPen(pen);
-    canvas.AttachBrush(brush);
-    canvas.DrawPath(path);
-    canvas.ClipPath(path, RSClipOp::INTERSECT);
 }
 } // namespace OHOS::Ace::NG
