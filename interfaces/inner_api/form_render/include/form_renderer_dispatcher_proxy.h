@@ -35,6 +35,8 @@ public:
     void DispatchPointerEvent(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
 
+    void SetAllowUpdate(bool allowUpdate) override;
+
 private:
     template<typename T>
     int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

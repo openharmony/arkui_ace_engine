@@ -39,7 +39,6 @@
 
 namespace OHOS::Ace {
 namespace {
-
 constexpr char FORM_EVENT_ON_ACQUIRE_FORM[] = "onAcquireForm";
 constexpr char FORM_EVENT_ON_UPDATE_FORM[] = "onUpdateForm";
 constexpr char FORM_EVENT_ON_ERROR[] = "onFormError";
@@ -47,7 +46,7 @@ constexpr char FORM_ADAPTOR_RESOURCE_NAME[] = "formAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr int32_t RENDER_DEAD_CODE = 16501005;
-
+constexpr char ALLOW_UPDATE[] = "allowUpdate";
 } // namespace
 
 FormManagerDelegate::~FormManagerDelegate()
@@ -163,6 +162,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (uiSyntax == AppExecFwk::FormType::ETS) {
         CHECK_NULL_VOID(renderDelegate_);
         wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", renderDelegate_->AsObject());
+        wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
     }
 
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
@@ -373,6 +373,22 @@ void FormManagerDelegate::AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCall
     onFormSurfaceNodeCallback_ = callback;
 }
 
+void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        LOGE("callback is null or has released");
+        return;
+    }
+    actionEventHandle_ = callback;
+}
+
+void FormManagerDelegate::OnActionEventHandle(const std::string& action)
+{
+    if (actionEventHandle_) {
+        actionEventHandle_(action);
+    }
+}
+
 bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &want)
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -426,7 +442,7 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     auto&& actionEventHandler = [weak = WeakClaim(this)](const std::string& action) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnActionEvent(action);
+        formManagerDelegate->OnActionEventHandle(action);
     };
     renderDelegate_->SetActionEventHandler(std::move(actionEventHandler));
 
@@ -510,6 +526,16 @@ void FormManagerDelegate::DispatchPointerEvent(
     }
 
     formRendererDispatcher_->DispatchPointerEvent(pointerEvent);
+}
+
+void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
+{
+    if (formRendererDispatcher_ == nullptr) {
+        LOGE("SetAllowUpdate: is null");
+        return;
+    }
+
+    formRendererDispatcher_->SetAllowUpdate(allowUpdate);
 }
 
 void FormManagerDelegate::OnFormAcquired(const std::string& param)

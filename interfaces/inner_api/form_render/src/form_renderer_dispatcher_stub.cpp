@@ -25,6 +25,8 @@ FormRendererDispatcherStub::FormRendererDispatcherStub()
 {
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_POINTER_EVENT)] =
         &FormRendererDispatcherStub::HandleDispatchPointerEvent;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_ALLOW_UPDATE)] =
+        &FormRendererDispatcherStub::HandleSetAllowUpdate;
 }
 
 FormRendererDispatcherStub::~FormRendererDispatcherStub()
@@ -32,7 +34,7 @@ FormRendererDispatcherStub::~FormRendererDispatcherStub()
     memberFuncMap_.clear();
 }
 
-int FormRendererDispatcherStub::OnRemoteRequest(
+int32_t FormRendererDispatcherStub::OnRemoteRequest(
     uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     HILOG_DEBUG("FormRendererDispatcherStub::OnReceived, code = %{public}u, flags= %{public}d.",
@@ -55,7 +57,7 @@ int FormRendererDispatcherStub::OnRemoteRequest(
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
-int FormRendererDispatcherStub::HandleDispatchPointerEvent(MessageParcel &data, MessageParcel &reply)
+int32_t FormRendererDispatcherStub::HandleDispatchPointerEvent(MessageParcel &data, MessageParcel &reply)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
     if (pointerEvent == nullptr) {
@@ -69,6 +71,14 @@ int FormRendererDispatcherStub::HandleDispatchPointerEvent(MessageParcel &data, 
     }
 
     DispatchPointerEvent(pointerEvent);
+    reply.WriteInt32(ERR_OK);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleSetAllowUpdate(MessageParcel &data, MessageParcel &reply)
+{
+    bool allowUpdate = data.ReadBool();
+    SetAllowUpdate(allowUpdate);
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }

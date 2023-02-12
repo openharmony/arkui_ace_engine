@@ -52,6 +52,29 @@ void FormRendererDispatcherProxy::DispatchPointerEvent(
     }
 }
 
+void FormRendererDispatcherProxy::SetAllowUpdate(bool allowUpdate)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return;
+    }
+
+    if (!data.WriteBool(allowUpdate)) {
+        HILOG_ERROR("write allowUpdate fail, action error");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_ALLOW_UPDATE),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+    }
+}
+
 bool FormRendererDispatcherProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(FormRendererDispatcherProxy::GetDescriptor())) {
