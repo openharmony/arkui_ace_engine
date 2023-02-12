@@ -46,6 +46,7 @@ constexpr char FORM_EVENT_ON_ERROR[] = "onFormError";
 constexpr char FORM_ADAPTOR_RESOURCE_NAME[] = "formAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
+constexpr int32_t RENDER_DEAD_CODE = 16501005;
 
 } // namespace
 
@@ -538,14 +539,23 @@ void FormManagerDelegate::OnFormError(const std::string& param)
 
 void FormManagerDelegate::OnFormError(const std::string& code, const std::string& msg)
 {
-    LOGE("OnFormError, add form again, code:%{public}s   msg:%{public}s", code.c_str(), msg.c_str());
+    int32_t externalErrorCode = 0;
+    std::string errorMsg;
+    OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(std::stoi(code), externalErrorCode, errorMsg);
+    if (externalErrorCode != RENDER_DEAD_CODE) {
+        LOGE("OnFormError, not RENDER_DEAD condition, just callback, code:%{public}s   msg:%{public}s",
+            code.c_str(), msg.c_str());
+        if (onFormErrorCallback_) {
+            onFormErrorCallback_(code, msg);
+        }
+        return;
+    }
+    LOGE("OnFormError, render dead, add form again, code:%{public}s   msg:%{public}s", code.c_str(), msg.c_str());
     formRendererDispatcher_ = nullptr;  // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(
         formJsInfo_.formId, wantCache_, clientInstance, formJsInfo_);
     if (ret != 0) {
-        int32_t externalErrorCode;
-        std::string errorMsg;
         OHOS::AppExecFwk::FormMgr::GetInstance().GetExternalError(ret, externalErrorCode, errorMsg);
         LOGE("Add form failed, ret:%{public}d detail:%{public}s", ret, errorMsg.c_str());
         if (onFormErrorCallback_) {
