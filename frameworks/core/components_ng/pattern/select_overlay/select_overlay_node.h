@@ -32,12 +32,14 @@ public:
     explicit SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
     ~SelectOverlayNode() override = default;
 
-    static RefPtr<SelectOverlayNode> CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
+    static RefPtr<FrameNode> CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
 
     void UpdateToolBar(bool menuItemChanged);
 
 private:
     void CreateToolBar();
+
+    static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
 
     RefPtr<FrameNode> selectMenu_;
 

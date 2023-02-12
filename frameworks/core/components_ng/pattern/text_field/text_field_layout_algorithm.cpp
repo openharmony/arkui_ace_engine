@@ -108,10 +108,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     std::string textContent;
     bool showPlaceHolder = false;
-    auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width()) -
-                      pattern->GetHorizontalPaddingSum();
-    auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height()) -
-                       pattern->GetVerticalPaddingSum();
+    auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
+    auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
@@ -209,8 +207,10 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
     if (pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
-        pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE) {
-        textRect_ = pattern->GetTextRect();
+        pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE || pattern->GetIsMousePressed() ||
+        (pattern->GetMouseStatus() == MouseStatus::MOVE && !pattern->GetIsMousePressed()) ||
+        pattern->GetMouseStatus() != MouseStatus::MOVE) {
+        textRect_.SetOffset(pattern->GetTextRect().GetOffset());
     } else {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
@@ -318,7 +318,8 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
     if (!content.empty() && needObscureText) {
-        builder->AddText(TextFieldPattern::CreateObscuredText(static_cast<int32_t>(content.length())));
+        builder->AddText(
+            TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length())));
     } else {
         builder->AddText(StringUtils::Str8ToStr16(content));
     }

@@ -40,7 +40,7 @@ RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t ove
     SelectOverlayInfo info;
     info.singleLineHeight = static_cast<float>(overlayId);
     auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
-    auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
     return selectOverlayNode;
 }
 } // namespace OHOS::Ace::NG

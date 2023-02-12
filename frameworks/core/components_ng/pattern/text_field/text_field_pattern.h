@@ -57,9 +57,10 @@ class OnTextChangedListener;
 namespace OHOS::Ace::NG {
 
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
-constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
+
+enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
 
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
@@ -220,6 +221,11 @@ public:
         return lastTouchOffset_;
     }
 
+    const OffsetF& GetRightClickOffset()
+    {
+        return rightClickOffset_;
+    }
+
     float GetSelectionBaseOffsetX() const
     {
         return textSelector_.selectionBaseOffset.GetX();
@@ -328,6 +334,11 @@ public:
         return selectionMode_ != SelectionMode::NONE;
     }
 
+    bool IsUsingMouse() const
+    {
+        return isUsingMouse_;
+    }
+
     void CursorMoveLeft();
     void CursorMoveRight();
     void CursorMoveUp();
@@ -404,7 +415,7 @@ public:
     }
 
     static std::u16string CreateObscuredText(int32_t len);
-    bool IsTextArea();
+    bool IsTextArea() const;
     const RectF& GetImageRect()
     {
         return imageRect_;
@@ -459,10 +470,20 @@ public:
         surfacePositionChangedCallbackId_ = id;
     }
 
+    void ProcessInnerPadding();
     void OnCursorMoveDone();
     bool IsDisabled();
 
     bool LastInputIsNewLine() const;
+    void OnHandleReverse(bool isReverse);
+    bool GetIsMousePressed() const
+    {
+        return isMousePressed_;
+    }
+    MouseStatus GetMouseStatus() const
+    {
+        return mouseStatus_;
+    }
 
 private:
     void HandleBlurEvent();
@@ -482,6 +503,7 @@ private:
     void InitClickEvent();
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
+    int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
 
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
@@ -502,6 +524,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool UpdateCaretByPressOrLongPress();
     void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
+    void UpdateCaretByRightClick();
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -535,7 +558,6 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
 
     // xts
-    std::u16string GetTextForDisplay() const;
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
     std::string GetPlaceholderFont() const;
@@ -561,8 +583,8 @@ private:
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
-    void ProcessPadding();
     void SetDisabledStyle();
+    void ResetBackgroundColor();
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -608,6 +630,7 @@ private:
     OffsetF parentGlobalOffset_;
     Offset lastTouchOffset_;
     PaddingPropertyF utilPadding_;
+    OffsetF rightClickOffset_;
 
     bool isSingleHandle_ = false;
     bool isFirstHandle_ = false;
@@ -617,10 +640,12 @@ private:
     bool focusEventInitialized_ = false;
     bool preferredLineHeightNeedToUpdate = true;
     bool isMousePressed_ = false;
+    MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
     bool newLineInserted_ = false;
+    bool isUsingMouse_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

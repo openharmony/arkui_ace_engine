@@ -49,10 +49,14 @@ public:
 
     RefPtr<SelectOverlayNode> GetSelectOverlayNode(int32_t overlayId);
 
+    bool IsSameSelectOverlayInfo(const SelectOverlayInfo& info);
+
 private:
     WeakPtr<FrameNode> rootNodeWeak_;
 
     WeakPtr<FrameNode> selectOverlayItem_;
+
+    SelectOverlayInfo selectOverlayInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayManager);
 };
