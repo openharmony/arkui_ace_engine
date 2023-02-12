@@ -161,6 +161,12 @@ void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
     paragraph_->Paint(skCanvas, x, y);
 }
 
+void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
+{
+    CHECK_NULL_VOID(skCanvas);
+    paragraph_->Paint(skCanvas, x, y);
+}
+
 int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
 {
     if (!paragraph_) {

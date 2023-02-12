@@ -28,6 +28,11 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     return nullptr;
 }
 
+RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
+{
+    return nullptr;
+}
+
 void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height) {}
 
 RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& customNode)
@@ -56,10 +61,13 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
 
 void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string& extraInfo) {}
 
+void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo) {}
+
 void DragDropManager::onDragCancel() {}
 
-void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const Point& point,
-    DragEventType type, const std::string& extraInfo) {}
+void DragDropManager::FireOnDragEvent(
+    const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo)
+{}
 
 void DragDropManager::OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode) {}
 
@@ -70,7 +78,8 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
 void DragDropManager::onItemDragCancel() {}
 
 void DragDropManager::FireOnItemDragEvent(const RefPtr<FrameNode>& frameNode, DragType dragType,
-    const OHOS::Ace::ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex) {}
+    const OHOS::Ace::ItemDragInfo& itemDragInfo, DragEventType type, int32_t draggedIndex, int32_t insertIndex)
+{}
 
 void DragDropManager::AddDataToClipboard(const std::string& extraInfo) {}
 

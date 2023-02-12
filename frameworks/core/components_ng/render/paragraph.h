@@ -69,6 +69,7 @@ public:
 
     // interfaces for painting
     virtual void Paint(const RSCanvas& canvas, float x, float y) = 0;
+    virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 };
 
 } // namespace OHOS::Ace::NG

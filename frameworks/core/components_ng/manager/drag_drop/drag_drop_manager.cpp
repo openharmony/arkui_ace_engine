@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -73,6 +74,13 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     }
     dragWindow_->DrawFrameNode(dragWindowRootNode_);
 #endif
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
+}
+
+RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
+{
+    isDragged_ = true;
     currentId_ = ++g_proxyId;
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
@@ -131,6 +139,9 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
             break;
         case DragType::LIST:
             frameNodes = listDragFrameNodes_;
+            break;
+        case DragType::TEXT:
+            frameNodes = textFieldDragFrameNodes_;
             break;
         default:
             break;
@@ -229,14 +240,28 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
     draggedFrameNode_ = nullptr;
 }
 
+void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo)
+{
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::TEXT);
+    if (dragFrameNode) {
+        auto textFieldPattern = dragFrameNode->GetPattern<TextFieldPattern>();
+        if (textFieldPattern) {
+            textFieldPattern->InsertValue(extraInfo);
+        }
+    }
+    LOGI("OnTextDragEnd");
+    isDragged_ = false;
+    currentId_ = -1;
+}
+
 void DragDropManager::onDragCancel()
 {
     preTargetFrameNode_ = nullptr;
     draggedFrameNode_ = nullptr;
 }
 
-void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const Point& point,
-    DragEventType type, const std::string& extraInfo)
+void DragDropManager::FireOnDragEvent(
+    const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo)
 {
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -423,16 +448,19 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-
-    auto newData = JsonUtil::Create(true);
-    newData->Put("customDragInfo", extraInfo.c_str());
-
+    if (!newData_) {
+        newData_ = JsonUtil::Create(true);
+        newData_->Put("customDragInfo", extraInfo.c_str());
+    } else {
+        newData_->Replace("customDragInfo", extraInfo.c_str());
+    }
     if (!clipboard_) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     }
     if (!addDataCallback_) {
-        auto callback = [weakManager = WeakClaim(this), addData = newData->ToString()](const std::string& data) {
+        auto callback = [weakManager = WeakClaim(this)](const std::string& data) {
             auto dragDropManager = weakManager.Upgrade();
+            auto addData = dragDropManager->newData_->ToString();
             CHECK_NULL_VOID_NOLOG(dragDropManager);
             auto clipboardAllData = JsonUtil::Create(true);
             clipboardAllData->Put("preData", data.c_str());

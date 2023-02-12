@@ -277,6 +277,8 @@ void TextModelImpl::SetCopyOption(CopyOptions copyOption)
     component->SetCopyOption(copyOption);
 }
 
+void TextModelImpl::SetDraggable(bool draggable) {}
+
 void TextModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto component = GetComponent();

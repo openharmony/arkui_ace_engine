@@ -30,11 +30,13 @@ public:
 
     MOCK_METHOD1(DrawImage, void(void* skImage));
     MOCK_METHOD3(DrawText,
-        void(std::shared_ptr<txt::Paragraph> paragraph_, const Offset& offset, const RefPtr<RenderText>& renderText));
+        void(std::shared_ptr<txt::Paragraph> paragraph, const Offset& offset, const RefPtr<RenderText>& renderText));
+    MOCK_METHOD2(DrawTextNG, void(const RefPtr<NG::Paragraph>& paragraph, const RefPtr<NG::TextPattern>& textPattern));
     MOCK_METHOD1(DrawPixelMap, void(const RefPtr<PixelMap>&));
     MOCK_METHOD1(DrawFrameNode, void(const RefPtr<NG::FrameNode>&));
     MOCK_CONST_METHOD2(MoveTo, void(int32_t, int32_t));
     MOCK_CONST_METHOD0(Destroy, void());
+    MOCK_CONST_METHOD2(TextDragWindowMove, void(double x, double y));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_TEST_MOCK_MOCK_DRAG_WINDOW_H
