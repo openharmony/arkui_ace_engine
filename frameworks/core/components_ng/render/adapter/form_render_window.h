@@ -38,6 +38,7 @@ public:
     ~FormRenderWindow() = default;
 
     void RequestFrame() override;
+    void Destroy() override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 

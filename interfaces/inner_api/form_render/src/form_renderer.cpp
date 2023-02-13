@@ -36,7 +36,7 @@ FormRenderer::FormRenderer(
     }
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_.get())).GetNativeEngine();
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
-    formRendererDispatcherImpl_ = std::make_unique<FormRendererDispatcherImpl>(uiContent_);
+    formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_);
 }
 
 void FormRenderer::InitUiContent()
@@ -125,7 +125,18 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 
 void FormRenderer::Destroy()
 {
-    HILOG_INFO("FormRenderer %{public}p Destroy start.", this);
+    HILOG_INFO("Destroy FormRenderer start.");
+    if (formRendererDelegate_ != nullptr && formRendererDelegate_->AsObject() != nullptr) {
+        formRendererDelegate_->AsObject()->RemoveDeathRecipient(renderDelegateDeathRecipient_);
+    }
+    renderDelegateDeathRecipient_ = nullptr;
+    formRendererDelegate_ = nullptr;
+    formRendererDispatcherImpl_ = nullptr;
+    uiContent_->Destroy();
+    uiContent_ = nullptr;
+    context_ = nullptr;
+    runtime_ = nullptr;
+    HILOG_INFO("Destroy FormRenderer finish.");
 }
 
 void FormRenderer::OnActionEvent(const std::string& action)

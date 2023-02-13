@@ -52,7 +52,7 @@ private:
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
-    std::unique_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
+    sptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
     sptr<IFormRendererDelegate> formRendererDelegate_;
     std::shared_ptr<UIContent> uiContent_;
     sptr<IRemoteObject::DeathRecipient> renderDelegateDeathRecipient_;
