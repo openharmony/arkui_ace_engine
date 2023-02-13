@@ -42,6 +42,8 @@ public:
     void Destroy();
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
+    void SetAllowUpdate(bool allowUpdate);
+    bool IsAllowUpdate();
 
 private:
     void InitUiContent();
