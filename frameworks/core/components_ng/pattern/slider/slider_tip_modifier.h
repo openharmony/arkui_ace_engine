@@ -89,11 +89,11 @@ public:
     }
 
 private:
-    RefPtr<AnimatablePropertyBool> tipFlag_;
-    RefPtr<AnimatablePropertyOffsetF> contentOffset_;
-    RefPtr<AnimatablePropertySizeF> bubbleSize_;
-    RefPtr<AnimatablePropertyOffsetF> bubbleOffset_;
-    RefPtr<AnimatablePropertyOffsetF> textOffset_;
+    RefPtr<PropertyBool> tipFlag_;
+    RefPtr<PropertyOffsetF> contentOffset_;
+    RefPtr<PropertySizeF> bubbleSize_;
+    RefPtr<PropertyOffsetF> bubbleOffset_;
+    RefPtr<PropertyOffsetF> textOffset_;
     RefPtr<NG::Paragraph> paragraph_;
     Axis axis_ = Axis::HORIZONTAL;
     Color tipColor_ = Color::BLACK;
