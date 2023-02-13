@@ -65,6 +65,7 @@ struct SelectMenuCallback {
 };
 
 struct SelectOverlayInfo {
+    bool isUsingMouse = false;
     bool isSingleHandle = false;
     // when handleReverse is true, The first one is on the right side of the second.
     bool handleReverse = false;
@@ -77,6 +78,8 @@ struct SelectOverlayInfo {
     // show area
     bool useFullScreen = true;
     RectF showArea;
+
+    OffsetF rightClickOffset;
 
     // handle touch event
     std::function<void(const TouchEventInfo&)> onTouchDown;

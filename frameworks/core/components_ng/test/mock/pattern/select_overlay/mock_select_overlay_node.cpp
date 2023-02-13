@@ -21,13 +21,18 @@ SelectOverlayNode::SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& i
     : FrameNode("SelectOverlay", static_cast<int32_t>(info->singleLineHeight), MakeRefPtr<SelectOverlayPattern>(info))
 {}
 
-RefPtr<SelectOverlayNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
+RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     auto selectOverlayNode = AceType::MakeRefPtr<SelectOverlayNode>(info);
     return selectOverlayNode;
 }
 
 void SelectOverlayNode::CreateToolBar() {}
+
+RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    return nullptr;
+}
 
 void SelectOverlayNode::UpdateToolBar(bool menuItemChanged) {}
 } // namespace OHOS::Ace::NG
