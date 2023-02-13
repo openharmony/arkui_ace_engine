@@ -77,4 +77,19 @@ int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle)
     return getResult;
 }
 
+bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const
+{
+    int32_t curPointerStyle = -1;
+    if (GetPointerStyle(windowId, curPointerStyle) == -1) {
+        LOGE("ChangePointerStyle: GetPointerStyle return failed");
+        return false;
+    }
+    if (curPointerStyle == static_cast<int32_t>(mouseFormat)) {
+        return true;
+    }
+
+    LOGD("ChangePointerStyle do SetPointerStyle: %{public}d", mouseFormat);
+    return SetPointerStyle(windowId, mouseFormat);
+}
+
 } // namespace OHOS::Ace

@@ -38,7 +38,7 @@ void RenderMouseListener::Update(const RefPtr<Component>& component)
     SetOnHover(mouseComponent->GetOnHoverId());
 }
 
-void RenderMouseListener::OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result)
+void RenderMouseListener::OnMouseTestHit(const Offset& coordinateOffset, MouseRawResult& result)
 {
     LOGD("render touch listener: on touch test hit!");
     recognizer_->SetCoordinateOffset(coordinateOffset);
