@@ -43,6 +43,12 @@ struct TextSelector {
     TextSelector() = default;
     TextSelector(int32_t base, int32_t destination) : baseOffset(base), destinationOffset(destination) {}
 
+    void TextUpdate(int32_t base, int32_t destination)
+    {
+        baseOffset = base;
+        destinationOffset = destination;
+    }
+
     void Update(int32_t base, int32_t destination)
     {
         baseOffset = std::min(base, destination);
