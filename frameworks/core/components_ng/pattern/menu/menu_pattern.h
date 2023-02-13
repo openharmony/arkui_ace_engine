@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -91,7 +92,11 @@ public:
 
     Dimension FontSize() const
     {
-        return fontSize_.value_or(Dimension());
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(context, Dimension());
+        auto theme = context->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(theme, Dimension());
+        return fontSize_.value_or(theme->GetMenuFontSize());
     }
 
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)
