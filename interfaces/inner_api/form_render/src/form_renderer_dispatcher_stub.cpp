@@ -16,7 +16,7 @@
 
 #include "appexecfwk_errors.h"
 #include "errors.h"
-#include "hilog_wrapper.h"
+#include "form_renderer_hilog.h"
 #include "ipc_skeleton.h"
 
 namespace OHOS {

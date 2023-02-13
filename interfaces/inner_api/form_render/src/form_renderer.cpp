@@ -16,7 +16,7 @@
 #include "form_renderer.h"
 
 #include "form_constants.h"
-#include "hilog_wrapper.h"
+#include "form_renderer_hilog.h"
 #include "refbase.h"
 
 namespace OHOS {
@@ -30,6 +30,7 @@ FormRenderer::FormRenderer(
     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
     : context_(context), runtime_(runtime)
 {
+    HILOG_INFO("FormRenderer %{public}p created.", this);
     if (!context_ || !runtime_) {
         return;
     }
@@ -123,7 +124,10 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->ProcessFormUpdate(formJsInfo.formData);
 }
 
-void FormRenderer::Destroy() {}
+void FormRenderer::Destroy()
+{
+    HILOG_INFO("FormRenderer %{public}p Destroy start.", this);
+}
 
 void FormRenderer::OnActionEvent(const std::string& action)
 {

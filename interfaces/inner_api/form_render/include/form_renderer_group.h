@@ -49,7 +49,7 @@ class FormRenderer;
  */
 class ACE_EXPORT FormRendererGroup {
 public:
-    static std::unique_ptr<FormRendererGroup> Create(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+    static std::shared_ptr<FormRendererGroup> Create(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
                                                      const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
 
     FormRendererGroup(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,

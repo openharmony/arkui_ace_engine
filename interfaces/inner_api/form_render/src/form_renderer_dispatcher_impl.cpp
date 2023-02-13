@@ -14,7 +14,7 @@
  */
 #include "form_renderer_dispatcher_impl.h"
 
-#include "hilog_wrapper.h"
+#include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
