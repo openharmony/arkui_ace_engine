@@ -24,7 +24,6 @@
 #include <utility>
 #include <vector>
 
-#include "base/image/pixel_map.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
@@ -240,26 +239,6 @@ protected:
     static std::mutex cacheFileInfoMutex_;
     static std::list<FileInfo> cacheFileInfo_;
     static bool hasSetCacheFileInfo_;
-};
-
-struct PixmapCachedData : public CachedImageData {
-    DECLARE_ACE_TYPE(PixmapCachedData, CachedImageData);
-
-public:
-    explicit PixmapCachedData(const RefPtr<PixelMap>& data) : pixmap_(data) {}
-    ~PixmapCachedData() override = default;
-
-    size_t GetSize() override
-    {
-        return pixmap_ ? pixmap_->GetByteCount() : 0;
-    }
-
-    const uint8_t* GetData() override
-    {
-        return pixmap_ ? pixmap_->GetPixels() : nullptr;
-    }
-
-    const RefPtr<PixelMap> pixmap_;
 };
 
 } // namespace OHOS::Ace

@@ -298,14 +298,6 @@ const RefPtr<PixelMap>& ImageSourceInfo::GetPixmap() const
     return pixmap_;
 }
 
-bool ImageSourceInfo::IsSupportCache() const
-{
-    if (IsPixmap()) {
-        return false;
-    }
-    return !src_.empty() || resourceId_ != InternalResource::ResourceId::NO_ID;
-}
-
 std::string ImageSourceInfo::GetKey() const
 {
     // only svg sets fillColor
