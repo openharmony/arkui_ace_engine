@@ -139,7 +139,7 @@ void ImageLoadingContext::OnMakeCanvasImage()
         SuccessCallback(image);
         return;
     }
-    LOGI("CanvasImage cache miss, need to MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
+    LOGI("CanvasImage cache miss, start MakeCanvasImage: %{public}s", imageObj_->GetSourceInfo().ToString().c_str());
     // step4: [MakeCanvasImage] according to [resizeTarget]
     canvasKey_ = ImageUtils::GenerateImageKey(src_, resizeTarget);
     imageObj_->MakeCanvasImage(Claim(this), resizeTarget, GetSourceSize().has_value(), syncLoad_);
@@ -154,7 +154,7 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 
 void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage)
 {
-    canvasImage_ = canvasImage;
+    canvasImage_ = canvasImage->Clone();
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE_SUCCESS);
 }
 
