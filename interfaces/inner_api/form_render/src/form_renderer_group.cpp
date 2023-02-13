@@ -16,14 +16,15 @@
 #include "form_renderer_group.h"
 #include "form_js_info.h"
 #include "form_renderer.h"
+#include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
-std::unique_ptr<FormRendererGroup> FormRendererGroup::Create(
+std::shared_ptr<FormRendererGroup> FormRendererGroup::Create(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime)
 {
-    return std::make_unique<FormRendererGroup>(context, runtime);
+    return std::make_shared<FormRendererGroup>(context, runtime);
 }
 
 FormRendererGroup::FormRendererGroup(
@@ -38,12 +39,14 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
         return;
     }
     auto compId = want.GetStringParam("ohos.extra.param.key.form_comp_id");
+    HILOG_INFO("AddForm compId %{public}s.", compId.c_str());
     rendererMap_.try_emplace(compId, formRenderer);
     formRenderer->AddForm(want, formJsInfo);
 }
 
 void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
+    HILOG_INFO("UpdateForm compId %{public}s.", std::to_string(formJsInfo.formId).c_str());
     auto iter = rendererMap_.begin();
     while (iter!= rendererMap_.end()) {
         auto renderer = iter->second;
@@ -54,6 +57,7 @@ void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInf
 
 void FormRendererGroup::DeleteForm(const std::string& compId)
 {
+    HILOG_INFO("DeleteForm compId %{public}s.", compId.c_str());
     auto iter = rendererMap_.find(compId);
     if (iter == rendererMap_.end()) {
         return;

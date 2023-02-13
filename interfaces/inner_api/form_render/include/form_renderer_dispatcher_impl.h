@@ -37,8 +37,16 @@ public:
      */
     void DispatchPointerEvent(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
+    /**
+     * @brief Set AllowUpdate.
+     * @param allowUpdate The allowUpdate.
+     */
+    void SetAllowUpdate(bool allowUpdate) override;
+    bool IsAllowUpdate();
+
 private:
     std::weak_ptr<UIContent> uiContent_;
+    bool allowUpdate_ = true;
 };
 }  // namespace Ace
 }  // namespace OHOS

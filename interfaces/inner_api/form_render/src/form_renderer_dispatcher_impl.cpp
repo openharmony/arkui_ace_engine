@@ -14,7 +14,7 @@
  */
 #include "form_renderer_dispatcher_impl.h"
 
-#include "hilog_wrapper.h"
+#include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
@@ -31,6 +31,16 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(
     }
 
     uiContent->ProcessPointerEvent(pointerEvent);
+}
+
+bool FormRendererDispatcherImpl::IsAllowUpdate()
+{
+    return allowUpdate_;
+}
+
+void FormRendererDispatcherImpl::SetAllowUpdate(bool allowUpdate)
+{
+    allowUpdate_ = allowUpdate;
 }
 } // namespace Ace
 } // namespace OHOS

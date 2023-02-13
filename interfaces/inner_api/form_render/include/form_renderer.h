@@ -42,15 +42,37 @@ public:
     void Destroy();
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
+    void ResetRenderDelegate();
+    void SetAllowUpdate(bool allowUpdate);
+    bool IsAllowUpdate();
 
 private:
     void InitUiContent();
+    void SetRenderDelegate(const sptr<IRemoteObject> &renderRemoteObj);
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     std::unique_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
     sptr<IFormRendererDelegate> formRendererDelegate_;
     std::shared_ptr<UIContent> uiContent_;
+    sptr<IRemoteObject::DeathRecipient> renderDelegateDeathRecipient_;
+};
+
+/**
+ * @class FormRenderDelegateRecipient
+ * FormRenderDelegateRecipient notices IRemoteBroker died.
+ */
+class FormRenderDelegateRecipient : public IRemoteObject::DeathRecipient {
+public:
+    using RemoteDiedHandler = std::function<void()>;
+    explicit FormRenderDelegateRecipient(RemoteDiedHandler handler) : handler_(std::move(handler)) {}
+
+    ~FormRenderDelegateRecipient() override = default;
+
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+
+private:
+    RemoteDiedHandler handler_;
 };
 }  // namespace Ace
 }  // namespace OHOS
