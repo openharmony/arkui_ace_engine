@@ -1863,6 +1863,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
+    info.SetStopPropagation(true);
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         LOGI("Handle mouse right click");
@@ -1884,7 +1885,6 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
             mouseStatus_ = MouseStatus::RELEASED;
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
-        info.SetStopPropagation(true);
         return;
     }
     if (info.GetAction() == MouseAction::PRESS) {
@@ -1936,7 +1936,6 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         mouseStatus_ = MouseStatus::MOVE;
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    info.SetStopPropagation(true);
 }
 
 void TextFieldPattern::UpdatePositionOfParagraph(int32_t position)
