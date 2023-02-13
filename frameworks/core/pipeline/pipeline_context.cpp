@@ -1136,7 +1136,7 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
         stageElement->PushPage(display);
     }
 
-#if defined(ENABLE_NATIVE_VIEW)
+#if defined(ENABLE_NATIVE_VIEW) || defined(ENABLE_ROSEN_BACKEND)
     if (GetIsDeclarative()) {
         // if not use flutter scheduler, can flush pipeline immediately.
         if (isSurfaceReady_) {
