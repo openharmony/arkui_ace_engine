@@ -15,6 +15,7 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
+#include <memory>
 #include <string>
 
 #include "include/utils/SkParsePath.h"
@@ -250,12 +251,14 @@ void RosenRenderContext::PaintDebugBoundary()
         painter.DrawDebugBoundaries(rsCanvas, offset);
     };
 
-    if (!debugBoundaryModifier_) {
+    if (!debugBoundaryModifier_ && rsNode_->IsInstanceOf<Rosen::RSCanvasNode>()) {
         debugBoundaryModifier_ = std::make_shared<DebugBoundaryModifier>();
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         rsNode_->AddModifier(debugBoundaryModifier_);
     }
-    debugBoundaryModifier_->SetCustomData(true);
+    if (debugBoundaryModifier_) {
+        debugBoundaryModifier_->SetCustomData(true);
+    }
 }
 
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
@@ -1050,11 +1053,11 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
         });
 }
 
-void RosenRenderContext::FlushModifier(const RefPtr<Modifier>& modifier)
+void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(modifier);
-    auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertModifier(modifier));
+    auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertContentModifier(modifier));
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
 }
@@ -1079,6 +1082,19 @@ void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDr
             RSCanvas rsCanvas(&canvas);
             overlayDraw(rsCanvas);
         });
+}
+
+void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    auto modifierAdapter = std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(modifier));
+    auto rect = AceType::DynamicCast<OverlayModifier>(modifier)->GetBoundsRect();
+    std::shared_ptr<Rosen::RectI> overlayRect =
+        std::make_shared<Rosen::RectI>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    modifierAdapter->SetOverlayBounds(overlayRect);
+    rsNode_->AddModifier(modifierAdapter);
+    modifierAdapter->AttachProperties();
 }
 
 RefPtr<Canvas> RosenRenderContext::GetCanvas()

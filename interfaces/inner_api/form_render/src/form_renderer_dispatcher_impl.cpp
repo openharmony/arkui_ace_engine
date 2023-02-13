@@ -32,5 +32,15 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(
 
     uiContent->ProcessPointerEvent(pointerEvent);
 }
+
+bool FormRendererDispatcherImpl::IsAllowUpdate()
+{
+    return allowUpdate_;
+}
+
+void FormRendererDispatcherImpl::SetAllowUpdate(bool allowUpdate)
+{
+    allowUpdate_ = allowUpdate;
+}
 } // namespace Ace
 } // namespace OHOS

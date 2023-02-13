@@ -22,7 +22,7 @@ namespace OHOS::Ace {
 
 bool Base64Util::Decode(const std::string& src, std::string& dst)
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     size_t outputLen = 0;
     SkBase64::Error error = SkBase64::Decode(src.data(), src.size(), nullptr, &outputLen);
     if (error != SkBase64::Error::kNoError) {

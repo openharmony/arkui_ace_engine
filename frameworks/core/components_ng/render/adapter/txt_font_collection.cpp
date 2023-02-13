@@ -15,7 +15,7 @@
 
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "ace_shell/shell/common/window_manager.h"
 #else
 #include "flutter/lib/ui/text/font_collection.h"
@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<FontCollection> FontCollection::Current()
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     int32_t id = Container::CurrentId();
     auto window = flutter::ace::WindowManager::GetWindow(id);
     CHECK_NULL_RETURN(window, nullptr);

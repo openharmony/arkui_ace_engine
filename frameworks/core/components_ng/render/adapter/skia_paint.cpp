@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG {
 
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
 SkFilterQuality ToSkFilterQuality(FilterQuality quality)
 {
     // keep FilterQuality define same with SkFilterQuality
@@ -56,7 +56,7 @@ void SkiaPaint::EnableAntiAlias()
 
 void SkiaPaint::SetFilterQuality(FilterQuality quality)
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     options_ = SkSamplingOptions(SkFilterMode::kNearest, SkMipmapMode::kNone);
     switch (quality) {
         case FilterQuality::HIGH:

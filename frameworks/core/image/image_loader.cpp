@@ -420,7 +420,7 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     size_t outputLen;
     SkBase64::Error error = SkBase64::Decode(base64Code.data(), base64Code.size(), nullptr, &outputLen);
     if (error != SkBase64::Error::kNoError) {

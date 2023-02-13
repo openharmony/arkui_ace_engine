@@ -132,6 +132,40 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 
+class OverlayModifier : public Modifier {
+    DECLARE_ACE_TYPE(OverlayModifier, Modifier);
+
+public:
+    OverlayModifier() = default;
+    ~OverlayModifier() override = default;
+    virtual void onDraw(DrawingContext& Context) = 0;
+
+    void AttachProperty(const RefPtr<AnimatablePropertyBase>& prop)
+    {
+        attachedProperties_.push_back(prop);
+    }
+
+    const std::vector<RefPtr<AnimatablePropertyBase>>& GetAttachedProperties()
+    {
+        return attachedProperties_;
+    }
+
+    const RectF& GetBoundsRect()
+    {
+        return rect_;
+    }
+
+    void SetBoundsRect(const RectF& rect)
+    {
+        rect_ = rect;
+    }
+
+private:
+    std::vector<RefPtr<AnimatablePropertyBase>> attachedProperties_;
+    RectF rect_;
+    ACE_DISALLOW_COPY_AND_MOVE(OverlayModifier);
+};
+
 #define DECLARE_PROP_TYPED_CLASS(classname, template_class, type) \
     class classname : public template_class<type> {               \
         DECLARE_ACE_TYPE(classname, template_class);              \
@@ -142,8 +176,11 @@ private:
         ACE_DISALLOW_COPY_AND_MOVE(classname);                    \
     };
 
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyBool, AnimatableProperty, bool);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
 
 } // namespace OHOS::Ace::NG
 

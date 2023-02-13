@@ -461,9 +461,15 @@ void JsiDeclarativeEngineInstance::InitJsNativeModuleObject()
 {
     shared_ptr<JsValue> global = runtime_->GetGlobal();
     global->SetProperty(runtime_, "requireNativeModule", runtime_->NewFunction(RequireNativeModule));
-
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
     if (!usingSharedRuntime_) {
-        JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
+        if (!context->IsFormRender()) {
+            JsiTimerModule::GetInstance()->InitTimerModule(runtime_, global);
+        } else {
+            LOGI("Not supported TimerModule when form render");
+        }
+
         JsiSyscapModule::GetInstance()->InitSyscapModule(runtime_, global);
     }
 }

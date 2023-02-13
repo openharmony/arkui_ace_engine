@@ -23,6 +23,7 @@ namespace OHOS {
 namespace Ace {
 namespace {
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
+constexpr char ALLOW_UPDATE[] = "allowUpdate";
 }
 FormRenderer::FormRenderer(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
@@ -63,6 +64,7 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
         return;
     }
 
+    SetAllowUpdate(want.GetBoolParam(ALLOW_UPDATE, true));
     auto width = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 100.0f);
     auto height = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 100.0f);
     uiContent_->SetFormWidth(width);
@@ -90,8 +92,33 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     uiContent_->Foreground();
 }
 
+bool FormRenderer::IsAllowUpdate()
+{
+    if (formRendererDispatcherImpl_ == nullptr) {
+        HILOG_ERROR("formRendererDispatcherImpl is null");
+        return true;
+    }
+
+    return formRendererDispatcherImpl_->IsAllowUpdate();
+}
+
+void FormRenderer::SetAllowUpdate(bool allowUpdate)
+{
+    if (formRendererDispatcherImpl_ == nullptr) {
+        HILOG_ERROR("formRendererDispatcherImpl is null");
+        return;
+    }
+
+    formRendererDispatcherImpl_->SetAllowUpdate(allowUpdate);
+}
+
 void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
+    if (!IsAllowUpdate()) {
+        HILOG_ERROR("Not allow update");
+        return;
+    }
+
     uiContent_->ProcessFormUpdate(formJsInfo.formData);
 }
 
