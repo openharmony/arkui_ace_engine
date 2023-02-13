@@ -171,9 +171,7 @@ void JSImage::Create(const JSCallbackInfo& info)
         return;
     }
 
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = container->GetPipelineContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     // Interim programme
     std::string bundleName;
@@ -186,7 +184,7 @@ void JSImage::Create(const JSCallbackInfo& info)
             srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
         if (notSupport) {
             LOGE("Not supported src : %{public}s when form render", src.c_str());
-            return;
+            src.clear();
         }
     }
 
@@ -196,10 +194,9 @@ void JSImage::Create(const JSCallbackInfo& info)
     if (!noPixMap) {
         if (context->IsFormRender()) {
             LOGE("Not supported pixMap when form render");
-            return;
+        } else {
+            pixMap = CreatePixelMapFromNapiValue(info[0]);
         }
-
-        pixMap = CreatePixelMapFromNapiValue(info[0]);
     }
 #endif
     ImageModel::GetInstance()->Create(src, noPixMap, pixMap, bundleName, moduleName);

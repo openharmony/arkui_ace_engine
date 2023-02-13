@@ -28,9 +28,7 @@ void JSRenderImage::Constructor(const JSCallbackInfo& args)
     auto jsCalendarController = Referenced::MakeRefPtr<JSRenderImage>();
     jsCalendarController->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = container->GetPipelineContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (args.Length() <= 0 || !args[0]->IsString()) {
         LOGE("args invalid");

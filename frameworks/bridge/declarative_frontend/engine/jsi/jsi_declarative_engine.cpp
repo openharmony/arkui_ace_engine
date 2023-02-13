@@ -457,9 +457,7 @@ void JsiDeclarativeEngineInstance::InitJsNativeModuleObject()
 {
     shared_ptr<JsValue> global = runtime_->GetGlobal();
     global->SetProperty(runtime_, "requireNativeModule", runtime_->NewFunction(RequireNativeModule));
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto context = container->GetPipelineContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (!usingSharedRuntime_) {
         if (!context->IsFormRender()) {

@@ -25,7 +25,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/pipeline/base/render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -133,7 +133,7 @@ void MarqueePattern::OnModifyDone()
         loop_ = ANIMATION_REPEAT_INFINITE;
     }
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (context->IsFormRender()) {
         loop_ = FORM_LOOP;
