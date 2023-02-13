@@ -81,14 +81,13 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
     rsSurfaceNode->SetBounds(0.0f, 0.0f, width, height);
 
     sptr<IRemoteObject> proxy = want.GetRemoteObject("ohos.extra.param.key.process_on_add_surface");
-    sptr<IFormRendererDelegate> formRendererDelegate = iface_cast<IFormRendererDelegate>(proxy);
-    if (formRendererDelegate == nullptr) {
-        return;
-    }
-    formRendererDelegate_ = formRendererDelegate;
+    SetRenderDelegate(proxy);
 
     OHOS::AAFwk::Want newWant;
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
+    if (formRendererDelegate_ == nullptr) {
+        return;
+    }
     formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
     uiContent_->Foreground();
 }
@@ -143,6 +142,53 @@ void FormRenderer::OnError(const std::string& code, const std::string& msg)
     }
 
     formRendererDelegate_->OnError(code, msg);
+}
+
+void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject> &remoteObj)
+{
+    HILOG_INFO("Get renderRemoteObj, add death recipient.");
+    auto renderRemoteObj = iface_cast<IFormRendererDelegate>(remoteObj);
+    if (renderRemoteObj == nullptr) {
+        HILOG_ERROR("renderRemoteObj is nullptr.");
+        return;
+    }
+    if (formRendererDelegate_ == nullptr) {
+        formRendererDelegate_ = renderRemoteObj;
+    }
+
+    if (renderDelegateDeathRecipient_) {
+        return;
+    }
+    renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient([weak = weak_from_this()]() {
+        auto formRender = weak.lock();
+        if (!formRender) {
+            HILOG_ERROR("formRender is nullptr");
+        }
+        formRender->ResetRenderDelegate();
+    });
+    auto renderDelegate = formRendererDelegate_->AsObject();
+    if (renderDelegate == nullptr) {
+        HILOG_ERROR("renderDelegate is nullptr, can not get obj from renderRemoteObj.");
+        return;
+    }
+    renderDelegate->AddDeathRecipient(renderDelegateDeathRecipient_);
+}
+
+void FormRenderer::ResetRenderDelegate()
+{
+    formRendererDelegate_ = nullptr;
+}
+
+void FormRenderDelegateRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+{
+    HILOG_ERROR("Recv FormRenderDelegate death notice");
+    if (remote == nullptr) {
+        HILOG_ERROR("weak remote is null");
+        return;
+    }
+    if (handler_) {
+        handler_();
+    }
 }
 }  // namespace Ace
 }  // namespace OHOS

@@ -427,6 +427,15 @@ bool FormManagerDelegate::ParseAction(const std::string &action, AAFwk::Want &wa
     return true;
 }
 
+void FormManagerDelegate::AddRenderDelegate()
+{
+    if (renderDelegate_) {
+        LOGE("renderDelegate_ has existed");
+        return;
+    }
+    renderDelegate_ = new FormRendererDelegateImpl();
+}
+
 void FormManagerDelegate::RegisterRenderDelegateEvent()
 {
     CHECK_NULL_VOID(renderDelegate_);
