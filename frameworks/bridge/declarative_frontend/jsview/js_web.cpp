@@ -1833,6 +1833,7 @@ void JSWeb::OnCommonDialog(const JSCallbackInfo& args, int dialogEventType)
         return false;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnCommonDialogImpl(std::move(jsCallback), static_cast<DialogEventType>(dialogEventType));
 }
 
@@ -1876,6 +1877,7 @@ void JSWeb::OnConsoleLog(const JSCallbackInfo& args)
         return false;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnConsoleImpl(std::move(jsCallback));
 }
 
@@ -1906,6 +1908,7 @@ void JSWeb::OnPageStart(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetPageStartedEventId(eventMarker);
 }
 
@@ -1968,6 +1971,7 @@ void JSWeb::OnProgressChange(const JSCallbackInfo& args)
         func->Execute(*eventInfo);
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetProgressChangeImpl(std::move(jsCallback));
 }
 
@@ -1997,6 +2001,7 @@ void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetTitleReceiveEventId(eventMarker);
 }
 
@@ -2092,6 +2097,7 @@ void JSWeb::OnGeolocationHide(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetGeolocationHideEventId(eventMarker);
 }
 
@@ -2121,6 +2127,7 @@ void JSWeb::OnGeolocationShow(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetGeolocationShowEventId(eventMarker);
 }
 
@@ -2154,6 +2161,7 @@ void JSWeb::OnRequestFocus(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetRequestFocusEventId(eventMarker);
 }
 
@@ -2184,6 +2192,7 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetDownloadStartEventId(eventMarker);
 }
 
@@ -2229,6 +2238,7 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
         return false;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnHttpAuthRequestImpl(std::move(jsCallback));
 }
 
@@ -2274,6 +2284,7 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
         return false;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnSslErrorRequestImpl(std::move(jsCallback));
 }
 
@@ -2320,6 +2331,7 @@ void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
         return false;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnSslSelectCertRequestImpl(std::move(jsCallback));
 }
 
@@ -2370,6 +2382,7 @@ void JSWeb::OnKeyEvent(const JSCallbackInfo& args)
     };
 
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnKeyEventCallback(onKeyEventId);
 }
 
@@ -2439,6 +2452,7 @@ void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetPageErrorEventId(eventMarker);
 }
 
@@ -2472,6 +2486,7 @@ void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetHttpErrorEventId(eventMarker);
 }
 
@@ -2533,6 +2548,7 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
         return nullptr;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnInterceptRequest(std::move(jsCallback));
 }
 
@@ -2572,6 +2588,7 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
         return false;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnUrlLoadIntercept(std::move(jsCallback));
 }
 
@@ -2633,6 +2650,7 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
         return false;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnFileSelectorShow(std::move(jsCallback));
 }
 
@@ -2696,6 +2714,7 @@ void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
         return false;
     };
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnContextMenuShow(std::move(jsCallback));
 }
 
@@ -2944,6 +2963,7 @@ void JSWeb::OnRenderExited(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetRenderExitedId(eventMarker);
 }
 
@@ -2975,6 +2995,7 @@ void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetRefreshAccessedHistoryId(eventMarker);
 }
 
@@ -3117,6 +3138,7 @@ void JSWeb::OnMouse(const JSCallbackInfo& args)
     };
 
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnMouseEventCallback(onMouseId);
 }
 
@@ -3155,6 +3177,7 @@ void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetResourceLoadId(eventMarker);
 }
 
@@ -3193,6 +3216,7 @@ void JSWeb::OnScaleChange(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetScaleChangeId(eventMarker);
 }
 
@@ -3231,6 +3255,7 @@ void JSWeb::OnScroll(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetScrollId(eventMarker);
 }
 
@@ -3271,6 +3296,7 @@ void JSWeb::OnPermissionRequest(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetPermissionRequestEventId(eventMarker);
 }
 
@@ -3359,6 +3385,7 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         });
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetSearchResultReceiveEventId(eventMarker);
 }
 
@@ -3782,6 +3809,7 @@ void JSWeb::OnInterceptKeyEvent(const JSCallbackInfo& args)
     };
 
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
     webComponent->SetOnInterceptKeyEventCallback(onKeyEventId);
 }
 
