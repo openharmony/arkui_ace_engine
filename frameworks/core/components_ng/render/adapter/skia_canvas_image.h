@@ -133,6 +133,9 @@ public:
     static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
 
 private:
+    void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
+    bool DrawCompressedImage(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
     // TODO: should not deps on flutter.
 #ifndef NG_BUILD
     uint32_t uniqueId_;

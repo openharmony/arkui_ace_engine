@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,9 @@
 #include "rosen_text/ui/typography_create.h"
 #include "utils/camera3d.h"
 #include "utils/scalar.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "pipeline/rs_recording_canvas.h"
+#endif
 
 namespace OHOS::Ace {
 using RSCanvas = Rosen::Drawing::Canvas;
@@ -55,6 +58,10 @@ using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
 using RSMaskFilter = Rosen::Drawing::MaskFilter;
 using RSBlurType = Rosen::Drawing::BlurType;
+#ifdef ENABLE_ROSEN_BACKEND
+using RSImageInfo = Rosen::RsImageInfo;
+using RSRecordingCanvas = Rosen::RSRecordingCanvas;
+#endif
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
