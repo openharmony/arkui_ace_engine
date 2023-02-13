@@ -55,8 +55,8 @@ Dimension ScrollablePaintProperty::GetBarWidth() const
 
 std::string ScrollablePaintProperty::GetBarStateString() const
 {
-    auto mode = propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarMode.value_or(NG::DisplayMode::OFF)
-                                       : NG::DisplayMode::OFF;
+    auto mode = propScrollBarProperty_ ? propScrollBarProperty_->propScrollBarMode.value_or(NG::DisplayMode::AUTO)
+                                       : NG::DisplayMode::AUTO;
     switch (mode) {
         case NG::DisplayMode::AUTO:
             return "BarState.Auto";

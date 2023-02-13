@@ -260,10 +260,10 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property)
 {
     if (!property) {
-        SetScrollBar(DisplayMode::OFF);
+        SetScrollBar(DisplayMode::AUTO);
         return;
     }
-    auto displayMode = property->GetScrollBarMode().value_or(DisplayMode::OFF);
+    auto displayMode = property->GetScrollBarMode().value_or(DisplayMode::AUTO);
     SetScrollBar(displayMode);
     if (scrollBar_) {
         auto barColor = property->GetScrollBarColor();
