@@ -86,8 +86,8 @@ void TextPattern::CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse)
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
     float startSelectHeight = 0.0f;
     float endSelectHeight = 0.0f;
-    auto startOffset = CalcCursorOffsetByPosition(textSelector_.GetStart(), startSelectHeight);
-    auto endOffset = CalcCursorOffsetByPosition(textSelector_.GetEnd(), endSelectHeight);
+    auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight);
+    auto endOffset = CalcCursorOffsetByPosition(textSelector_.destinationOffset, endSelectHeight);
     float selectLineHeight = std::max(startSelectHeight, endSelectHeight);
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
     OffsetF firstHandleOffset(startOffset.GetX() + textPaintOffset.GetX(), startOffset.GetY() + textPaintOffset.GetY());
@@ -154,10 +154,10 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     if (isFirstHandle) {
         auto start =
             paragraph_->GetHandlePositionForClick(Offset(localOffsetX, localOffsetY + handleRect.Height() / 2));
-        textSelector_.Update(start, textSelector_.GetEnd());
+        textSelector_.TextUpdate(start, textSelector_.destinationOffset);
     } else {
         auto end = paragraph_->GetHandlePositionForClick(Offset(localOffsetX, localOffsetY + handleRect.Height() / 2));
-        textSelector_.Update(textSelector_.GetStart(), end);
+        textSelector_.TextUpdate(textSelector_.baseOffset, end);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -434,7 +434,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
-    spanItemChildren_ = textLayoutAlgorithm->GetSpanItemChildren();
     return true;
 }
 
@@ -456,6 +455,10 @@ void TextPattern::BeforeCreateLayoutWrapper()
     const auto& children = host->GetChildren();
     if (children.empty()) {
         return;
+    }
+
+    if (paragraph_) {
+        paragraph_.Reset();
     }
     spanItemChildren_.clear();
 
