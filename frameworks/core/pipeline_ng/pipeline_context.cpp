@@ -711,6 +711,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     eventManager_->SetInstanceId(GetInstanceId());
     if (scalePoint.type == TouchType::DOWN) {
         isNeedShowFocus_ = false;
+        CHECK_NULL_VOID_NOLOG(rootNode_);
         auto rootFocusHub = rootNode_->GetFocusHub();
         if (rootFocusHub) {
             rootFocusHub->ClearAllFocusState();

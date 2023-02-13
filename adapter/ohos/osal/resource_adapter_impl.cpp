@@ -522,6 +522,7 @@ void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, c
         return;
     }
 
+    std::lock_guard<std::mutex> lock(resourceMutex_);
     auto resourceMgrIter = resourceManagers_.find({ bundleName, moduleName });
     if (resourceMgrIter != resourceManagers_.end()) {
         resourceManager_ = resourceMgrIter->second;
