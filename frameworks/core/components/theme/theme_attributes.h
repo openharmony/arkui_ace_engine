@@ -68,6 +68,7 @@ extern const char THEME_PATTERN_TEXTFIELD[];
 extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
+extern const char THEME_PATTERN_APP_BAR[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
