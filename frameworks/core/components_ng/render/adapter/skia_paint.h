@@ -18,7 +18,7 @@
 
 #include "third_party/skia/include/core/SkPaint.h"
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "third_party/skia/include/core/SkSamplingOptions.h"
 #endif
 
@@ -54,7 +54,7 @@ public:
         return rawPaint_;
     }
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     const SkSamplingOptions& GetSamplingOptions()
     {
         return options_;
@@ -63,7 +63,7 @@ public:
 
 private:
     SkPaint rawPaint_;
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     SkSamplingOptions options_;
 #endif
 };

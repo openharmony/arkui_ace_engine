@@ -40,7 +40,7 @@ std::mutex ImageCache::cacheFileInfoMutex_;
 std::list<FileInfo> ImageCache::cacheFileInfo_;
 
 // TODO: Create a real ImageCache later
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 class MockImageCache : public ImageCache {
     void Clear() override {};
     RefPtr<CachedImageData> GetDataFromCacheFile(const std::string& filePath) override

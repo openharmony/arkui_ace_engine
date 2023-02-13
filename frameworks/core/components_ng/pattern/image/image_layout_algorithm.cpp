@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/image/image_layout_algorithm.h"
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "ace_shell/shell/common/window_manager.h"
 #endif
 #include "core/components_ng/base/frame_node.h"
