@@ -64,10 +64,12 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     totalMainSize_ = std::max(totalMainSize_, headerMainSize_ + footerMainSize_);
     MeasureListItem(layoutWrapper, itemLayoutConstraint);
-    if (GetEndIndex() == totalItemCount_ - 1) {
-        totalMainSize_ = GetEndPosition() + footerMainSize_;
-    } else {
-        totalMainSize_ = std::max(totalMainSize_, GetEndPosition() + footerMainSize_);
+    if (!itemPosition_.empty()) {
+        if (GetEndIndex() == totalItemCount_ - 1) {
+            totalMainSize_ = GetEndPosition() + footerMainSize_;
+        } else {
+            totalMainSize_ = std::max(totalMainSize_, GetEndPosition() + footerMainSize_);
+        }
     }
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
@@ -165,6 +167,11 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
     } else {
+        if (forwardLayout_ && headerIndex_ >= 0) {
+            if (GreatOrEqual(headerMainSize_, endPos_ - referencePos_)) {
+                return;
+            }
+        }
         if (forwardLayout_ && footerIndex_ >= 0) {
             if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
                 return;
@@ -172,6 +179,11 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         }
         if (!forwardLayout_ && headerIndex_ >= 0) {
             if (GreatOrEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
+                return;
+            }
+        }
+        if (!forwardLayout_ && footerIndex_ >= 0) {
+            if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
                 return;
             }
         }
