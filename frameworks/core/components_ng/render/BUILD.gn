@@ -68,4 +68,12 @@ build_component_ng("render_ng") {
     "adapter/rosen_render_surface.cpp",
     "adapter/rosen_window.cpp",
   ]
+
+  if (current_os != "ohos") {
+    rosen_sources -= [
+      "adapter/rosen_media_player.cpp",
+      "adapter/rosen_render_surface.cpp",
+    ]
+    rosen_sources += [ "adapter/rosen_render_surface_mingw.cpp" ]
+  }
 }
