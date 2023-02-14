@@ -129,6 +129,9 @@ bool KeyInputHandler::RecognizeKeyEvent(int key, int action, int mods)
     if (mods & GLFW_MOD_CONTROL) {
         keyEvent_.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
     }
+    if (mods & GLFW_MOD_SUPER) {
+        keyEvent_.pressedCodes.push_back(KeyCode::KEY_META_LEFT);
+    }
     if (mods & GLFW_MOD_SHIFT) {
         keyEvent_.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
     }
