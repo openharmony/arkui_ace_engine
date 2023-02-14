@@ -65,6 +65,8 @@ char* realpath(const char* path, char* resolved_path)
 // return orientation of pixmap for cache key
 std::string GetThumbnailOrientation(const ImageSourceInfo& src)
 {
+    // disabling orientation check
+    return "Undefined";
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, "");
     auto dataProvider = pipeline->GetDataProviderManager();
