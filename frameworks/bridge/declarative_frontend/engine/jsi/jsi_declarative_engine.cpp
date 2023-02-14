@@ -836,10 +836,10 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         }
 
         RegisterWorker();
+        engineInstance_->RegisterFaPlugin();
     } else {
         LOGI("Using sharedRuntime, UVLoop handled by AbilityRuntime");
     }
-    engineInstance_->RegisterFaPlugin();
 
     return result;
 }
