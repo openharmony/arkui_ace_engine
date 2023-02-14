@@ -379,6 +379,16 @@ public:
 
     RefPtr<ImageCache> GetImageCache() const;
 
+    const RefPtr<SharedImageManager>& GetSharedImageManager() const
+    {
+        return sharedImageManager_;
+    }
+
+    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
+    {
+        sharedImageManager_ = sharedImageManager;
+    }
+
     Window* GetWindow()
     {
         return window_.get();
@@ -814,6 +824,7 @@ protected:
     int32_t instanceId_ = 0;
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
+    RefPtr<SharedImageManager> sharedImageManager_;
     mutable std::shared_mutex imageCacheMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;

@@ -187,7 +187,6 @@ void JSImage::Create(const JSCallbackInfo& info)
             src.clear();
         }
     }
-
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
