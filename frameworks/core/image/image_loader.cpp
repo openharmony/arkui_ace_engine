@@ -20,6 +20,7 @@
 #include <ratio>
 #include <regex>
 #include <string_view>
+#include <unistd.h>
 
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/utils/SkBase64.h"
@@ -272,24 +273,18 @@ sk_sp<SkData> DataProviderImageLoader::LoadImageData(
         return skData;
     }
     auto pipeline = context.Upgrade();
-    if (!pipeline) {
-        LOGE("the pipeline context is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(pipeline, nullptr);
     auto dataProvider = pipeline->GetDataProviderManager();
-    if (!dataProvider) {
-        LOGE("the data provider is null");
-        return nullptr;
-    }
-    auto dataRes = dataProvider->GetDataProviderResFromUri(src);
-    if (!dataRes || dataRes->GetData().size() == 0) {
-        LOGE("fail to get data res is from data provider");
-        return nullptr;
-    }
-    auto imageData = dataRes->GetData();
-    sk_sp<SkData> data = SkData::MakeWithCopy(imageData.data(), imageData.size());
+    CHECK_NULL_RETURN(dataProvider, nullptr);
+    int32_t fd = dataProvider->GetDataProviderFile(src, "r");
+    CHECK_NULL_RETURN(fd >= 0, nullptr);
+    auto data = SkData::MakeFromFD(fd);
+    close(fd);
     BackgroundTaskExecutor::GetInstance().PostTask(
-        [src, imgData = std::move(imageData)]() { ImageCache::WriteCacheFile(src, imgData.data(), imgData.size()); },
+        [src, data]() {
+            // cache file content
+            ImageCache::WriteCacheFile(src, data->data(), data->size());
+        },
         BgTaskPriority::LOW);
     return data;
 }
