@@ -155,8 +155,9 @@ bool JsiDeclarativeEngineInstance::isModulePreloaded_ = false;
 bool JsiDeclarativeEngineInstance::isModuleInitialized_ = false;
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::globalRuntime_;
 
-// for async task callback executed after this instance has been destroied.
-thread_local shared_ptr<JsRuntime> localRuntime;
+// for async task callback executed after this instance has been destroyed.
+thread_local void* cardRuntime_;
+thread_local shared_ptr<JsRuntime> localRuntime_;
 
 // ArkTsCard start
 thread_local bool isUnique_ = false;
@@ -196,13 +197,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
         LOGD("JsiDeclarativeEngineInstance InitJsEnv not usingSharedRuntime, create own");
         runtime_.reset(new ArkJSRuntime());
     }
-
-    // ArkTsCard start
-    if (isUnique_) {
-        runtime_ = localRuntime;
-    }
-    LOGE("isUnique_ = %{public}d, runtime_ = %{public}p", isUnique_, runtime_.get());
-    // ArkTsCard end
 
     if (runtime_ == nullptr) {
         LOGE("Js Engine cannot allocate JSI JSRuntime");
@@ -379,7 +373,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     isModulePreloaded_ = evalResult;
     globalRuntime_ = nullptr;
     LOGI("PreloadAceModule loaded:%{public}d", isModulePreloaded_);
-    localRuntime = arkRuntime;
+    localRuntime_ = arkRuntime;
+    cardRuntime_ = runtime;
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -657,12 +652,12 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {
         LOGE("jsiEngine is null");
-        return localRuntime;
+        return localRuntime_;
     }
     auto engineInstance = jsiEngine->GetEngineInstance();
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
-        return localRuntime;
+        return localRuntime_;
     }
     return engineInstance->GetJsRuntime();
 }
@@ -789,6 +784,10 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
     } else {
         LOGI("Initialize will use sharedRuntime");
         arkRuntime = std::make_shared<ArkJSRuntime>();
+        if (isUnique_ && reinterpret_cast<NativeEngine*>(cardRuntime_) != nullptr) {
+            sharedRuntime = reinterpret_cast<NativeEngine*>(cardRuntime_);
+            LOGI("Initialize use thread local rootRuntime:%{public}p.", sharedRuntime);
+        }
         auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
         vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
         if (vm == nullptr) {
@@ -1833,6 +1832,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 {
     isUnique_ = true;
+    LOGI("PreloadAceModuleCard for ArkTS Card runtime:%{public}p.", runtime);
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
         LOGE("PreloadAceModule already preloaded");
         return;
@@ -1902,7 +1902,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     isModulePreloaded_ = evalResult;
 
     globalRuntime_ = nullptr;
-    localRuntime = arkRuntime;
+    localRuntime_ = arkRuntime;
+    cardRuntime_ = runtime;
 }
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework
