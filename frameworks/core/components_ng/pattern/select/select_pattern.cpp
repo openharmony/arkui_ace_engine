@@ -338,6 +338,9 @@ void SelectPattern::SetValue(const std::string& value)
 
 void SelectPattern::SetFontSize(const Dimension& value)
 {
+    if (value.IsNegative()) {
+        return;
+    }
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateFontSize(value);
@@ -385,6 +388,9 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 
 void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
+    if (value.IsNegative()) {
+        return;
+    }
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
@@ -456,6 +462,9 @@ void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 
 void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
 {
+    if (value.IsNegative()) {
+        return;
+    }
     selectedFont_.FontSize = value;
     if (selected_ != -1) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
