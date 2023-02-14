@@ -24,7 +24,7 @@ enable_ability_component = false
 enable_system_clipboard = false
 advance_components_support = false
 connect_server_support = false
-enable_rosen_backend = false
+enable_rosen_backend = true
 enable_standard_input = false
 video_components_support = false
 web_components_support = false
@@ -70,4 +70,8 @@ if (defined(preview_support) && preview_support) {
 
 if (defined(model_component_support) && model_component_support) {
   defines += [ "MODEL_COMPONENT_SUPPORTED" ]
+}
+
+if (defined(enable_rosen_backend) && enable_rosen_backend) {
+  defines += [ "ENABLE_ROSEN_BACKEND" ]
 }
