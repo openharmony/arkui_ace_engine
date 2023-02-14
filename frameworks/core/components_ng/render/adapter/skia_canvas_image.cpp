@@ -201,7 +201,7 @@ void SkiaCanvasImage::DrawToRSCanvas(
 bool SkiaCanvasImage::DrawCompressedImage(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
-    CHECK_NULL_RETURN(GetCompressData(), false);
+    CHECK_NULL_RETURN_NOLOG(GetCompressData(), false);
 
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
