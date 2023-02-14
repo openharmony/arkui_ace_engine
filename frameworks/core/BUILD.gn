@@ -382,6 +382,11 @@ template("ace_core_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
+    if (current_os == "mingw" || current_os == "mac") {
+      sources -= [ "common/watch_dog.cpp" ]
+      sources += [ "common/watch_dog_mingw.cpp" ]
+    }
+
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [
         "animation/native_curve_helper.cpp",
