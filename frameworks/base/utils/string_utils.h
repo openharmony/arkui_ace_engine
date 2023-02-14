@@ -38,6 +38,7 @@ ACE_EXPORT extern const std::u16string DEFAULT_USTRING;
 constexpr int32_t TEXT_CASE_LOWERCASE = 1;
 constexpr int32_t TEXT_CASE_UPPERCASE = 2;
 constexpr double PERCENT_VALUE = 100.0;
+const char ELLIPSIS[] = "...";
 
 inline std::u16string Str8ToStr16(const std::string& str)
 {
