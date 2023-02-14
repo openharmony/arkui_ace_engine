@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(PREVIEW)
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 #endif
 #ifdef FLUTTER_2_5
@@ -26,7 +26,11 @@ RefPtr<MediaPlayer> MediaPlayer::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
 #ifdef ENABLE_ROSEN_BACKEND
+#if !defined(PREVIEW)
         return MakeRefPtr<RosenMediaPlayer>();
+#else
+        return nullptr;
+#endif
 #endif
     }
 #ifdef FLUTTER_2_5

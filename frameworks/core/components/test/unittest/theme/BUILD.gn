@@ -112,6 +112,7 @@ ohos_unittest("ThemeManagerTest") {
     sources += [
       "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
       "$ace_root/frameworks/base/log/dump_log.cpp",
+      "$ace_root/frameworks/base/memory/memory_monitor.cpp",
       "$ace_root/frameworks/base/utils/base_id.cpp",
     ]
     external_deps = [

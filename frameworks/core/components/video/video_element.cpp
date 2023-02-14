@@ -1191,7 +1191,7 @@ void VideoElement::OnError(const std::string& errorId, const std::string& param)
 
 void VideoElement::OnResolutionChange() const
 {
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_STANDARD_SYSTEM)
     if (!mediaPlayer_ || !renderNode_) {
         LOGE("player or render is null");
         return;

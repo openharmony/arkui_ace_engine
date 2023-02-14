@@ -168,6 +168,7 @@ std::shared_ptr<RSNode> RosenRenderTexture::CreateRSNode() const
     return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 
+#ifdef OHOS_STANDARD_SYSTEM
 OHOS::sptr<OHOS::Surface> RosenRenderTexture::GetSurface()
 {
     auto surfaceNode = OHOS::Rosen::RSBaseNode::ReinterpretCast<OHOS::Rosen::RSSurfaceNode>(GetRSNode());
@@ -186,5 +187,5 @@ void RosenRenderTexture::SyncProperties(const Size& videoSize, ImageFit imageFit
     RenderTexture::Measure();
     SyncGeometryProperties();
 }
-
+#endif
 } // namespace OHOS::Ace
