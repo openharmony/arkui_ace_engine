@@ -85,8 +85,8 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         });
     };
 
-    frameCallback_.userData_ = nullptr,
-    frameCallback_.callback_ = onVsyncCallback_,
+    frameCallback_.userData_ = nullptr;
+    frameCallback_.callback_ = onVsyncCallback_;
 
     receiver_->RequestNextVSync(frameCallback_);
 
@@ -114,6 +114,18 @@ void FormRenderWindow::RequestFrame()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     receiver_->RequestNextVSync(frameCallback_);
+#endif
+}
+
+void FormRenderWindow::Destroy()
+{
+    LOG_DESTROY();
+#ifdef ENABLE_ROSEN_BACKEND
+    frameCallback_.userData_ = nullptr;
+    frameCallback_.callback_ = nullptr;
+    rsUIDirector_->Destroy();
+    rsUIDirector_.reset();
+    callbacks_.clear();
 #endif
 }
 
