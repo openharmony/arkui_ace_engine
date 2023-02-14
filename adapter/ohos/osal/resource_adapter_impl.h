@@ -18,6 +18,8 @@
 
 #include "resource_manager.h"
 
+#include <mutex>
+
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
@@ -67,6 +69,7 @@ private:
     std::shared_ptr<Global::Resource::ResourceManager> sysResourceManager_;
     std::map<std::pair<std::string, std::string>, std::shared_ptr<Global::Resource::ResourceManager>> resourceManagers_;
     std::string packagePathStr_;
+    std::mutex resourceMutex_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImpl);
 };
