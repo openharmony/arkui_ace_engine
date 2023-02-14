@@ -307,12 +307,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
         if (Container::IsCurrentUseNewPipeline()) {
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto pipelineContext = DynamicCast<PipelineContext>(pipelineContext_);
-            if (!pipelineContext) {
-                LOGE("RunCard failed, pipeline context is nullptr");
-                return;
-            }
-            pipelineContext->SetDrawDelegate(pattern->GetDrawDelegate());
+            pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
             frontend_->RunPage(0, "", data);
             return;
         }
@@ -332,8 +327,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
             LOGE("set draw delegate could not get render form");
             return;
         }
-        auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-        pipelineContext->SetDrawDelegate(formRender->GetDrawDelegate());
+        pipelineContext_->SetDrawDelegate(formRender->GetDrawDelegate());
 
         frontend_->RunPage(0, "", data);
     } else {

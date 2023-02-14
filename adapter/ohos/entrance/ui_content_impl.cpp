@@ -1423,7 +1423,7 @@ void UIContentImpl::HideWindowTitleButton(bool hideSplit, bool hideMaximize, boo
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [container, hideSplit, hideMaximize, hideMinimize]() {
-            auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            auto pipelineContext = container->GetPipelineContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->SetContainerButtonHide(hideSplit, hideMaximize, hideMinimize);
         },

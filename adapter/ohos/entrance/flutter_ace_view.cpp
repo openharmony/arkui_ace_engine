@@ -446,12 +446,9 @@ void FlutterAceView::SurfaceChanged(
     auto instanceId = view->GetInstanceId();
     auto container = Platform::AceContainer::GetContainer(instanceId);
     if (container) {
-        auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+        auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->CloseContextMenu();
-        auto textOverlayManager = pipelineContext->GetTextOverlayManager();
-        CHECK_NULL_VOID(textOverlayManager);
-        textOverlayManager->PopTextOverlay();
+        pipelineContext->HideOverlays();
     }
 
     LOGD("<<< FlutterAceView::SurfaceChanged, end");

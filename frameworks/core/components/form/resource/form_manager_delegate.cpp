@@ -90,7 +90,7 @@ void FormManagerDelegate::Stop()
 
 void FormManagerDelegate::UnregisterEvent()
 {
-    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
+    auto context = context_.Upgrade();
     if (!context) {
         LOGE("fail to get context when unregister event");
         return;
@@ -249,7 +249,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
     context_ = context;
     state_ = State::CREATING;
 
-    auto pipelineContext = DynamicCast<PipelineContext>(context_.Upgrade());
+    auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {
         state_ = State::CREATEFAILED;
         OnFormError("internal error");
@@ -300,7 +300,7 @@ void FormManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& co
 
 void FormManagerDelegate::RegisterEvent()
 {
-    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
+    auto context = context_.Upgrade();
     if (!context) {
         LOGE("register event error due null context, will not receive form manager event");
         return;

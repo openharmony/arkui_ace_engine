@@ -159,7 +159,9 @@ public:
 
     void SetSinglePageId(int32_t pageId);
 
-    bool PopPageStackOverlay();
+    bool PopPageStackOverlay() override;
+
+    void HideOverlays() override;
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
@@ -338,7 +340,7 @@ public:
 
     void BlurWindowWithDrag(bool isBlur);
 
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
     RefPtr<StageElement> GetStageElement() const;
 
