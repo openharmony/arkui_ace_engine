@@ -31,7 +31,8 @@ const std::unordered_map<std::string, std::function<std::string(const SpanCompos
     { "content", [](const SpanComposedElement& inspector) { return inspector.GetSpanData(); } },
     { "fontSize", [](const SpanComposedElement& inspector) { return inspector.GetSpanTextFontSize(); } },
     { "decoration", [](const SpanComposedElement& inspector) { return inspector.GetDeclaration(); } },
-    { "textCase", [](const SpanComposedElement& inspector) { return inspector.GetTextCase(); } }
+    { "textCase", [](const SpanComposedElement& inspector) { return inspector.GetTextCase(); } },
+    { "letterSpacing", [](const SpanComposedElement& inspector) { return inspector.GetLetterSpacing(); } }
 };
 
 } // namespace
@@ -92,6 +93,16 @@ RefPtr<RenderTextSpan> SpanComposedElement::GetRenderTextSpan() const
         return AceType::DynamicCast<RenderTextSpan>(node);
     }
     return nullptr;
+}
+
+std::string SpanComposedElement::GetLetterSpacing() const
+{
+    auto renderTextSpan = GetRenderTextSpan();
+    if (!renderTextSpan) {
+        return "";
+    }
+    auto textCase = renderTextSpan->GetSpanStyle().GetLetterSpacing();
+    return textCase.ToString();
 }
 
 // span render with parent(text) together
