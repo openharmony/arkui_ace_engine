@@ -18,6 +18,7 @@
 #include <map>
 
 #include "base/log/log.h"
+#include "base/log/ace_trace.h"
 #include "core/common/container_scope.h"
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/editing/text_input_client_mgr.h"
@@ -96,6 +97,7 @@ void EventDispatcher::Initialize()
 
 void EventDispatcher::DispatchIdleEvent(int64_t deadline)
 {
+    ACE_SCOPED_TRACE("DispatchIdleEvent");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null");
@@ -113,6 +115,7 @@ void EventDispatcher::DispatchIdleEvent(int64_t deadline)
 
 bool EventDispatcher::DispatchTouchEvent(const TouchEvent& event)
 {
+    ACE_SCOPED_TRACE("DispatchTouchEvent");
     LOGI("Dispatch touch event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
@@ -131,6 +134,7 @@ bool EventDispatcher::DispatchTouchEvent(const TouchEvent& event)
 
 bool EventDispatcher::DispatchBackPressedEvent()
 {
+    ACE_SCOPED_TRACE("DispatchBackPressedEvent");
     LOGI("Dispatch back pressed event");
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
@@ -166,12 +170,14 @@ bool EventDispatcher::DispatchBackPressedEvent()
 
 bool EventDispatcher::DispatchInputMethodEvent(unsigned int code_point)
 {
+    ACE_SCOPED_TRACE("DispatchInputMethodEvent");
     LOGI("Dispatch input method event");
     return TextInputClientMgr::GetInstance().AddCharacter(static_cast<wchar_t>(code_point));
 }
 
 bool EventDispatcher::DispatchKeyEvent(const KeyEvent& event)
 {
+    ACE_SCOPED_TRACE("DispatchKeyEvent");
     LOGI("Dispatch key event");
     if (HandleTextKeyEvent(event)) {
         LOGI("The event is related to the input component and has been handled successfully.");
