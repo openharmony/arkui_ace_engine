@@ -260,6 +260,11 @@ void SvgDom::ControlAnimation(bool play)
     svgContext_->ControlAnimators(play);
 }
 
+bool SvgDom::IsStatic()
+{
+    return svgContext_->GetAnimatorCount() == 0;
+}
+
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color)
 {
