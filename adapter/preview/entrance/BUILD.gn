@@ -58,18 +58,15 @@ template("preview_entrance_source") {
     if (!is_cross_platform_build) {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
-        include_dirs = [ "//commonlibrary/c_utils/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win" ]
         cflags_cc += [ "-DNONLS" ]
       }
 
       if (platform == "mac") {
-        include_dirs = [ "//commonlibrary/c_utils/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac" ]
       }
 
       if (platform == "linux") {
-        include_dirs = [ "//commonlibrary/c_utils/base/include" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux" ]
       }
     }
