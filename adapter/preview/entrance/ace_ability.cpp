@@ -210,19 +210,21 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 {
     DumpAceRunArgs(runArgs);
     LOGI("Start create AceAbility instance");
+    bool initSucceeded = FlutterDesktopInit();
+    if (!initSucceeded) {
+        LOGE("Could not create window; AceDesktopInit failed.");
+        return nullptr;
+    }
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
 
     SetFontMgrConfig(runArgs.containerSdkPath);
 
+    auto controller = FlutterDesktopCreateWindow(
+        runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
+
     const auto &ctx = OHOS::Rosen::GlfwRenderContext::GetGlobal();
     if (ctx != nullptr) {
-        ctx->Init();
-        auto flag = false;
-#ifdef USE_GLFW_WINDOW
-        flag = true;
-#endif
-        ctx->CreateWindow(runArgs.deviceWidth, runArgs.deviceHeight, flag);
-        ctx->SetWindowTitle(runArgs.windowTitle);
+        ctx->InitFrom(FlutterDesktopGetWindow(controller));
     }
 
     EventDispatcher::GetInstance().Initialize();
