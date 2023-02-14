@@ -41,7 +41,11 @@ class ACE_EXPORT RSDirAssetProvider : public RSAssetProvider {
     DECLARE_ACE_TYPE(RSDirAssetProvider, RSAssetProvider);
 
 public:
+#ifdef WINDOWS_PLATFORM
     RSDirAssetProvider(const std::string& basePath) : basePath_(basePath + "\\") {}
+#else
+    RSDirAssetProvider(const std::string& basePath) : basePath_(basePath + "/") {}
+#endif
     ~RSDirAssetProvider() override = default;
 
     bool IsValid() const override
