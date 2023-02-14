@@ -651,10 +651,13 @@ void FrontendDelegateImpl::BackImplement(const std::string& uri, const std::stri
         }
     }
 
-    auto context = pipelineContextHolder_.Get();
-    if (context) {
-        context->NotifyRouterBackDismiss();
-    }
+    taskExecutor_->PostTask(
+        [context = pipelineContextHolder_.Get()]() {
+            if (context) {
+                context->NotifyRouterBackDismiss();
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateImpl::PostponePageTransition()
