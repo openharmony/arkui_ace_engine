@@ -85,7 +85,7 @@ protected:
     virtual IdType GetTypeId() const = 0;
     virtual const char* GetTypeName() const = 0;
 #ifdef ACE_MEMORY_MONITOR
-    virtual size_t GetTypeSize() const = 0;
+    virtual size_t GetTypeSize() const { return 0; }
 #endif // ACE_MEMORY_MONITOR
 };
 
