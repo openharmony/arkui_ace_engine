@@ -24,12 +24,12 @@ using CreateCardFunc = UIContent* (*)(void*, void*, bool);
 using CreateFunc = UIContent* (*)(void*, void*);
 using CreateFunction = UIContent* (*)(void*);
 constexpr char UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateUIContent";
-constexpr char Card_CREATE_FUNC[] = "OHOS_ACE_CreateCardContent";
+constexpr char Card_CREATE_FUNC[] = "OHOS_ACE_CreateFormContent";
 constexpr char SUB_WINDOW_UI_CONTENT_CREATE_FUNC[] = "OHOS_ACE_CreateSubWindowUIContent";
 
 OHOS::AbilityRuntime::Context* context_ = nullptr;
 
-UIContent* CreateUIContent(void* context, void* runtime, bool isCard)
+UIContent* CreateUIContent(void* context, void* runtime, bool isFormRender)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
@@ -42,7 +42,7 @@ UIContent* CreateUIContent(void* context, void* runtime, bool isCard)
         return nullptr;
     }
 
-    auto content = entry(context, runtime, isCard);
+    auto content = entry(context, runtime, isFormRender);
     if (content == nullptr) {
         dlclose(handle);
     }
@@ -99,10 +99,12 @@ std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* cont
     return content;
 }
 
-std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime, bool isCard)
+std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context,
+                                             NativeEngine* runtime,
+                                             bool isFormRender)
 {
     std::unique_ptr<UIContent> content;
-    content.reset(CreateUIContent(reinterpret_cast<void*>(context), reinterpret_cast<void*>(runtime), isCard));
+    content.reset(CreateUIContent(reinterpret_cast<void*>(context), reinterpret_cast<void*>(runtime), isFormRender));
     return content;
 }
 

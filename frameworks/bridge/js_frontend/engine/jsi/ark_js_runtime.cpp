@@ -82,8 +82,8 @@ void ArkJSRuntime::Reset()
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
+            vm_ = nullptr;
         }
-        vm_ = nullptr;
     }
     for (auto data : dataList_) {
         delete data;

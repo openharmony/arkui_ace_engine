@@ -22,6 +22,7 @@
 #include "ability_info.h"
 #include "configuration.h"
 #include "dm/display_manager.h"
+#include "extension_ability_info.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -116,9 +117,9 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* 
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
 }
 
-extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateCardContent(void* context, void* runtime, bool isCard)
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateFormContent(void* context, void* runtime, bool isCard)
 {
-    LOGI("Ace lib loaded, CreateCardUIContent.");
+    LOGI("Ace lib loaded, CreateFormUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime, isCard);
 }
 
@@ -241,6 +242,9 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
 {
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    moduleName_ = hapModuleInfo->name;
+    isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     const auto& obj = context->GetBindingObject();
     CHECK_NULL_VOID(obj);
     auto ref = obj->Get<NativeReference>();
@@ -294,8 +298,8 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
 
     // ArkTSCard need no window : 梳理所有需要window和不需要window的场景
     if (isFormRender_ && !window) {
-        LOGI("CommonInitializeCard url = %{public}s", url.c_str());
-        CommonInitializeCard(window, url, storage);
+        LOGI("CommonInitializeForm url = %{public}s", url.c_str());
+        CommonInitializeForm(window, url, storage);
     }
 
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
@@ -325,10 +329,10 @@ std::string UIContentImpl::GetContentInfo() const
 }
 
 // ArkTSCard start
-void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
+void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
                                          const std::string& contentInfo, NativeValue* storage)
 {
-    LOGI("Initialize CommonInitializeCard start.");
+    LOGI("Initialize CommonInitializeForm start.");
     ACE_FUNCTION_TRACE();
     window_ = window;
     startUrl_ = contentInfo;
@@ -452,12 +456,13 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
     if (isFormRender_) {
         LOGI("Initialize UIContent form assetProvider");
         std::vector<std::string> basePaths;
-        basePaths.push_back("assets/js/entry/");
+        basePaths.emplace_back("assets/js/" + moduleName_ + "/");
         basePaths.emplace_back("assets/js/share/");
         basePaths.emplace_back("");
         basePaths.emplace_back("js/");
         basePaths.emplace_back("ets/");
-        auto assetProvider = CreateAssetProvider("/data/bundles/" + bundleName_ + "/entry.hap", basePaths);
+        auto assetProvider =
+            CreateAssetProvider("/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap", basePaths);
         if (assetProvider) {
             LOGE("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
@@ -657,10 +662,10 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     if (isFormRender_) {
-        resPath = "/data/bundles/" + bundleName_ + "/entry";
-        hapPath = "/data/bundles/" + bundleName_ + "/entry.hap";
+        resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_;
+        hapPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap";
     }
-    LOGI("CommonInitializeCard resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());
+    LOGI("CommonInitializeForm resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());
     container->SetResourceConfiguration(aceResCfg);
     container->SetPackagePathStr(resPath);
     container->SetHapPath(hapPath);
@@ -745,8 +750,9 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
             Platform::AceContainer::SetViewNew(flutterAceView, density, formWidth_, formHeight_, window_);
             auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
             CHECK_NULL_VOID(frontend);
-            frontend->SetBundleName(formBundleName_);
-            frontend->SetModuleName(formModuleName_);
+            frontend->SetBundleName(bundleName_);
+            frontend->SetModuleName(moduleName_);
+            frontend->SetIsBundle(isBundle_);
         } else {
             Platform::AceContainer::SetViewNew(flutterAceView, density, 0, 0, window_);
         }
@@ -756,6 +762,12 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
     if (window_ && window_->IsFocused()) {
         LOGI("UIContentImpl: focus again");
         Focus();
+    }
+
+    if (isFormRender_ && !isFormRenderInit_) {
+        container->UpdateFormSharedImage(formImageDataMap_);
+        container->UpdateFormDate(formData_);
+        isFormRenderInit_ = true;
     }
 
     if (isFormRender_) {
@@ -785,7 +797,7 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
     LayoutInspector::SetCallback(instanceId_);
 }
 
-std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetCardRootNode()
+std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
 {
     return Platform::AceContainer::GetFormSurfaceNode(instanceId_);
 }
@@ -1507,13 +1519,26 @@ void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pix
     pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
 }
 
-void UIContentImpl::ProcessFormUpdate(const std::string& data)
+void UIContentImpl::UpdateFormDate(const std::string& data)
 {
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
-    CHECK_NULL_VOID(frontend);
-    frontend->UpdateData(data);
+    if (isFormRenderInit_) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        container->UpdateFormDate(data);
+    } else {
+        formData_ = data;
+    }
+}
+
+void UIContentImpl::UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap)
+{
+    if (isFormRenderInit_) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        container->UpdateFormSharedImage(imageDataMap);
+    } else {
+        formImageDataMap_ = imageDataMap;
+    }
 }
 
 void UIContentImpl::SetActionEventHandler(

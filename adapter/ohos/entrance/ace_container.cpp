@@ -740,9 +740,7 @@ void AceContainer::SetViewNew(
 
     std::unique_ptr<Window> window;
     if (container->isFormRender_) {
-        auto formRenderWindow = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
-        container->formSurfaceNode_ = formRenderWindow->GetRSSurfaceNode();
-        window = std::move(formRenderWindow);
+        auto window = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
         container->AttachView(std::move(window), view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
@@ -1357,8 +1355,128 @@ std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t i
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_RETURN_NOLOG(container, nullptr);
-    return container->formSurfaceNode_;
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    auto window = static_cast<FormRenderWindow*>(context->GetWindow());
+    CHECK_NULL_RETURN(window, nullptr);
+    return window->GetRSSurfaceNode();
 }
+
+void AceContainer::UpdateFormDate(const std::string& data)
+{
+    auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+    CHECK_NULL_VOID(frontend);
+    frontend->UpdateData(data);
+}
+
+void AceContainer::UpdateFormSharedImage(const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap)
+{
+    std::vector<std::string> picNameArray;
+    std::vector<int> fileDescriptorArray;
+    std::vector<int> byteLenArray;
+    if (!imageDataMap.empty()) {
+        for (auto& imageData : imageDataMap) {
+            picNameArray.push_back(imageData.first);
+            fileDescriptorArray.push_back(imageData.second->GetAshmemFd());
+            byteLenArray.push_back(imageData.second->GetAshmemSize());
+        }
+        GetNamesOfSharedImage(picNameArray);
+        UpdateSharedImage(picNameArray, byteLenArray, fileDescriptorArray);
+    }
+}
+
+void AceContainer::GetNamesOfSharedImage(std::vector<std::string>& picNameArray)
+{
+    if (picNameArray.empty()) {
+        LOGE("picNameArray is null!");
+        return;
+    }
+    auto context = AceType::DynamicCast<NG::PipelineContext>(GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
+    if (!sharedImageManager) {
+        sharedImageManager = AceType::MakeRefPtr<SharedImageManager>(context->GetTaskExecutor());
+        context->SetSharedImageManager(sharedImageManager);
+    }
+    auto nameSize = picNameArray.size();
+    for (uint32_t i = 0; i < nameSize; i++) {
+        // get name of picture
+        auto name = picNameArray[i];
+        sharedImageManager->AddPictureNamesToReloadMap(std::move(name));
+    }
+}
+
+void AceContainer::UpdateSharedImage(
+    std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray, std::vector<int>& fileDescriptorArray)
+{
+    auto context = GetPipelineContext();
+    CHECK_NULL_VOID(context);
+    if (picNameArray.empty() || byteLenArray.empty() || fileDescriptorArray.empty()) {
+        LOGE("array is null! when try UpdateSharedImage");
+        return;
+    }
+    auto nameArraySize = picNameArray.size();
+    if (nameArraySize != byteLenArray.size()) {
+        LOGE("nameArraySize does not equal to fileDescriptorArraySize, please check!");
+        return;
+    }
+    if (nameArraySize != fileDescriptorArray.size()) {
+        LOGE("nameArraySize does not equal to fileDescriptorArraySize, please check!");
+        return;
+    }
+    // now it can be assured that all three arrays are of the same size
+
+    std::string picNameCopy;
+    for (uint32_t i = 0; i < nameArraySize; i++) {
+        // get name of picture
+        auto picName = picNameArray[i];
+        // save a copy of picName and ReleaseStringUTFChars immediately to avoid memory leak
+        picNameCopy = picName;
+
+        // get fd ID
+        auto fd = fileDescriptorArray[i];
+
+        auto newFd = dup(fd);
+        if (newFd < 0) {
+            LOGE("dup fd fail, fail reason: %{public}s, fd: %{public}d, picName: %{private}s, length: %{public}d",
+                strerror(errno), fd, picNameCopy.c_str(), byteLenArray[i]);
+            continue;
+        }
+
+        auto ashmem = Ashmem(newFd, byteLenArray[i]);
+        GetImageDataFromAshmem(picNameCopy, ashmem, context, byteLenArray[i]);
+        ashmem.UnmapAshmem();
+        ashmem.CloseAshmem();
+    }
+}
+
+void AceContainer::GetImageDataFromAshmem(
+    const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len)
+{
+    bool ret = ashmem.MapReadOnlyAshmem();
+    // if any exception causes a [return] before [AddSharedImage], the memory image will not show because [RenderImage]
+    // will never be notified to start loading.
+    if (!ret) {
+        LOGE("MapReadOnlyAshmem fail, fail reason: %{public}s, picName: %{private}s, length: %{public}d, "
+             "fd: %{public}d",
+            strerror(errno), picName.c_str(), len, ashmem.GetAshmemFd());
+        return;
+    }
+    const uint8_t* imageData = reinterpret_cast<const uint8_t*>(ashmem.ReadFromAshmem(len, 0));
+    if (imageData == nullptr) {
+        LOGE("imageData is nullptr, errno is: %{public}s, picName: %{private}s, length: %{public}d, fd: %{public}d",
+            strerror(errno), picName.c_str(), len, ashmem.GetAshmemFd());
+        return;
+    }
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    RefPtr<SharedImageManager> sharedImageManager = context->GetSharedImageManager();
+    if (sharedImageManager) {
+        // read image data from shared memory and save a copy to sharedImageManager
+        sharedImageManager->AddSharedImage(picName, std::vector<uint8_t>(imageData, imageData + len));
+    }
+}
+
 // ArkTsCard end
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()

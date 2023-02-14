@@ -425,7 +425,7 @@ void RosenRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& co
         return;
     }
     auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
-    if (sharedImageManager->IsResourceToReload(nameOfSharedImage, AceType::WeakClaim(this))) {
+    if (sharedImageManager->RegisterLoader(nameOfSharedImage, AceType::WeakClaim(this))) {
         // This case means that the image to load is a memory image and its data is not ready.
         // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
         // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].

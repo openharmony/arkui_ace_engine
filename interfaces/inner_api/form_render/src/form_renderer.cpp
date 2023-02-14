@@ -22,8 +22,9 @@
 namespace OHOS {
 namespace Ace {
 namespace {
+constexpr char FORM_RENDERER_ALLOW_UPDATE[] = "allowUpdate";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
-constexpr char ALLOW_UPDATE[] = "allowUpdate";
+constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 }
 FormRenderer::FormRenderer(
     const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
@@ -36,10 +37,10 @@ FormRenderer::FormRenderer(
     }
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_.get())).GetNativeEngine();
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
-    formRendererDispatcherImpl_ = std::make_unique<FormRendererDispatcherImpl>(uiContent_);
+    formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_);
 }
 
-void FormRenderer::InitUiContent()
+void FormRenderer::InitUIContent()
 {
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
         auto formRenderer = weak.lock();
@@ -65,23 +66,25 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
         return;
     }
 
-    SetAllowUpdate(want.GetBoolParam(ALLOW_UPDATE, true));
+    SetAllowUpdate(want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true));
     auto width = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 100.0f);
     auto height = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 100.0f);
+
     uiContent_->SetFormWidth(width);
     uiContent_->SetFormHeight(height);
-    uiContent_->SetFormModuleName(formJsInfo.moduleName);
-    uiContent_->SetFormBundleName(formJsInfo.bundleName);
-    uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
-    InitUiContent();
+    uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
+    uiContent_->UpdateFormDate(formJsInfo.formData);
 
-    auto rsSurfaceNode = uiContent_->GetCardRootNode();
+    uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
+    InitUIContent();
+
+    auto rsSurfaceNode = uiContent_->GetFormRootNode();
     if (rsSurfaceNode == nullptr) {
         return;
     }
     rsSurfaceNode->SetBounds(0.0f, 0.0f, width, height);
 
-    sptr<IRemoteObject> proxy = want.GetRemoteObject("ohos.extra.param.key.process_on_add_surface");
+    sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
     SetRenderDelegate(proxy);
 
     OHOS::AAFwk::Want newWant;
@@ -120,12 +123,24 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         return;
     }
 
-    uiContent_->ProcessFormUpdate(formJsInfo.formData);
+    uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
+    uiContent_->UpdateFormDate(formJsInfo.formData);
 }
 
 void FormRenderer::Destroy()
 {
-    HILOG_INFO("FormRenderer %{public}p Destroy start.", this);
+    HILOG_INFO("Destroy FormRenderer start.");
+    if (formRendererDelegate_ != nullptr && formRendererDelegate_->AsObject() != nullptr) {
+        formRendererDelegate_->AsObject()->RemoveDeathRecipient(renderDelegateDeathRecipient_);
+    }
+    renderDelegateDeathRecipient_ = nullptr;
+    formRendererDelegate_ = nullptr;
+    formRendererDispatcherImpl_ = nullptr;
+    uiContent_->Destroy();
+    uiContent_ = nullptr;
+    context_ = nullptr;
+    runtime_ = nullptr;
+    HILOG_INFO("Destroy FormRenderer finish.");
 }
 
 void FormRenderer::OnActionEvent(const std::string& action)
@@ -167,6 +182,7 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject> &remoteObj)
         auto formRender = weak.lock();
         if (!formRender) {
             HILOG_ERROR("formRender is nullptr");
+            return;
         }
         formRender->ResetRenderDelegate();
     });

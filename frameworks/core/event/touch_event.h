@@ -33,30 +33,6 @@ enum class TouchType : size_t {
     UNKNOWN,
 };
 
-struct TouchRestrict final {
-    static constexpr uint32_t NONE = 0x00000000;
-    static constexpr uint32_t CLICK = 0x00000001;
-    static constexpr uint32_t LONG_PRESS = 0x00000010;
-    static constexpr uint32_t SWIPE_LEFT = 0x00000100;
-    static constexpr uint32_t SWIPE_RIGHT = 0x00000200;
-    static constexpr uint32_t SWIPE_UP = 0x00000400;
-    static constexpr uint32_t SWIPE_DOWN = 0x00000800;
-    static constexpr uint32_t SWIPE = 0x00000F00;
-    static constexpr uint32_t SWIPE_VERTICAL = 0x0000C00;   // Vertical
-    static constexpr uint32_t SWIPE_HORIZONTAL = 0x0000300; // Horizontal
-    static constexpr uint32_t TOUCH = 0xFFFFFFFF;
-
-    uint32_t forbiddenType = NONE;
-
-    void UpdateForbiddenType(uint32_t gestureType)
-    {
-        forbiddenType |= gestureType;
-    }
-    SourceType sourceType = SourceType::NONE;
-
-    SourceType hitTestType = SourceType::TOUCH;
-};
-
 struct TouchPoint final {
     int32_t id = 0;
     float x = 0.0f;
@@ -197,6 +173,8 @@ struct TouchRestrict final {
         forbiddenType |= gestureType;
     }
     SourceType sourceType = SourceType::NONE;
+
+    SourceType hitTestType = SourceType::TOUCH;
 
     TouchEvent touchEvent;
 };

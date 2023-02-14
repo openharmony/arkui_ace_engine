@@ -60,7 +60,8 @@ public:
         return (res != 0);
     }
 
-    bool IsResourceToReload(const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)
+    // return true if successfully registered
+    bool RegisterLoader(const std::string& name, const WeakPtr<ImageProviderLoader>& providerWp)
     {
         std::lock_guard<std::mutex> lockProviderMap(providerMapMutex_);
         auto providerMapIter = providerMapToReload_.find(name);

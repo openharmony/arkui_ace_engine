@@ -354,9 +354,9 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
-    void SetIsFormRender(bool isCardContainer)
+    void SetIsFormRender(bool isFormRender)
     {
-        isFormRender_ = isCardContainer;
+        isFormRender_ = isFormRender;
     }
 
     void InitializeSubContainer(int32_t parentContainerId);
@@ -384,7 +384,14 @@ public:
     sptr<IRemoteObject> GetToken();
 
     // ArkTSCard
-    std::shared_ptr<Rosen::RSSurfaceNode> formSurfaceNode_ = nullptr;
+    void UpdateFormDate(const std::string& data);
+    void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
+
+    void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
+    void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
+        std::vector<int32_t>& fileDescriptorArray);
+    void GetImageDataFromAshmem(
+        const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
 private:
     void InitializeFrontend();

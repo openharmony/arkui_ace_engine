@@ -85,8 +85,8 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
         });
     };
 
-    frameCallback_.userData_ = nullptr,
-    frameCallback_.callback_ = onVsyncCallback_,
+    frameCallback_.userData_ = nullptr;
+    frameCallback_.callback_ = onVsyncCallback_;
 
     receiver_->RequestNextVSync(frameCallback_);
 
@@ -117,6 +117,18 @@ void FormRenderWindow::RequestFrame()
 #endif
 }
 
+void FormRenderWindow::Destroy()
+{
+    LOG_DESTROY();
+#ifdef ENABLE_ROSEN_BACKEND
+    frameCallback_.userData_ = nullptr;
+    frameCallback_.callback_ = nullptr;
+    rsUIDirector_->Destroy();
+    rsUIDirector_.reset();
+    callbacks_.clear();
+#endif
+}
+
 void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 {
     CHECK_NULL_VOID(root);
@@ -132,18 +144,6 @@ void FormRenderWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
     rsUIDirector_->SendMessages();
-#endif
-}
-
-void FormRenderWindow::SetFormRSSurfaceNode(void* surfaceNode)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    if (!surfaceNode) {
-        LOGE("FormRenderWindow SetFormRSSurfaceNode surfaceNode is null !!!");
-        return;
-    }
-    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode;
-    rsSurfaceNode.reset(static_cast<Rosen::RSSurfaceNode*>(surfaceNode));
 #endif
 }
 
