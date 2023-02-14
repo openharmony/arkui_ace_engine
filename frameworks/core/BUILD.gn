@@ -485,6 +485,23 @@ template("ace_core_source_set") {
 
     deps += uicast_configs.uicast_root_deps
 
+    if ((current_os == "mingw" || current_os == "mac" ||
+         current_os == "linux") && defined(config.enable_rosen_backend) &&
+        config.enable_rosen_backend) {
+      sources -= [
+        "common/flutter/flutter_asset_manager.cpp",
+        "common/flutter/flutter_task_executor.cpp",
+        "common/flutter/flutter_window.cpp",
+      ]
+      sources += [
+        # rs impl
+        "common/rosen/rosen_asset_manager.cpp",
+        "common/rosen/rosen_task_executor.cpp",
+        "common/rosen/rosen_window.cpp",
+      ]
+      deps += [ "//third_party/libuv:uv" ]
+    }
+
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
   }
