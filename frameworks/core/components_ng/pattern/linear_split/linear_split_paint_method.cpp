@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/linear_split/linear_split_paint_method.h"
 
-#include "utils/point.h"
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/point.h"
 #include "base/memory/referenced.h"
@@ -59,7 +57,7 @@ void LinearSplitPaintMethod::PaintContent(RSCanvas& canvas)
             float startPointY = childOffset.GetY();
             float endPointX = startPointX;
             float endPointY = startPointY + splitLength_;
-            canvas.DrawLine(rosen::Point(startPointX, startPointY), rosen::Point(endPointX, endPointY));
+            canvas.DrawLine(ToRSPoint(PointF(startPointX, startPointY)), ToRSPoint(PointF(endPointX, endPointY)));
         }
     } else if (splitType_ == SplitType::COLUMN_SPLIT) {
         for (auto childOffset : childrenOffset_) {
@@ -67,7 +65,7 @@ void LinearSplitPaintMethod::PaintContent(RSCanvas& canvas)
             float startPointX = childOffset.GetX();
             float endPointX = startPointX + splitLength_;
             float endPointY = startPointY;
-            canvas.DrawLine(rosen::Point(startPointX, startPointY), rosen::Point(endPointX, endPointY));
+            canvas.DrawLine(ToRSPoint(PointF(startPointX, startPointY)), ToRSPoint(PointF(endPointX, endPointY)));
         }
     }
 }
