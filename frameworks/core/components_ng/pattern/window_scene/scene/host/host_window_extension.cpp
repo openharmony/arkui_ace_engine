@@ -17,4 +17,22 @@
 
 namespace OHOS::Ace::NG {
 
+HostWindowExtension::HostWindowExtension(const std::string& bundleName, const std::string& abilityName)
+    : bundleName_(bundleName), abilityName_(abilityName)
+{
+    // ExtensionAbilityInfo extensionAbilityInfo = {
+    //     abilityName_ = abilityName_,
+    //     bundleName_ = bundleName_;
+    // }
+    // session_ = ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionAbilityInfo);
+    RegisterLifecycleListener();
+}
+
+void HostWindowExtension::RequestExtensionSessionActivation()
+{
+    // CHECK_NULL_VOID(session_);
+
+    // ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(session_);
+}
+
 } // namespace OHOS::Ace::NG

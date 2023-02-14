@@ -27,7 +27,7 @@ class HostWindowPattern : public Pattern {
     DECLARE_ACE_TYPE(HostWindowPattern, Pattern);
 
 public:
-    HostWindowPattern(const sptr<Rosen::Session>& session);
+    HostWindowPattern();
     ~HostWindowPattern() override = default;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -40,6 +40,8 @@ protected:
     virtual void InitContent();
 
     virtual bool HasStartingPage() = 0;
+
+    void RegisterLifecycleListener();
 
     virtual void OnForeground() {}
     virtual void OnBackground() {}

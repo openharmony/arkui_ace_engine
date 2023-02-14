@@ -24,7 +24,7 @@ class HostWindowScene : public HostWindowPattern {
     DECLARE_ACE_TYPE(HostWindowScene, HostWindowPattern);
 
 public:
-    HostWindowScene(const sptr<Rosen::Session>& session) : HostWindowPattern(session) {}
+    HostWindowScene(const sptr<Rosen::Session>& session);
     ~HostWindowScene() override = default;
 
 protected:

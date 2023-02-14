@@ -48,13 +48,15 @@ private:
     WeakPtr<HostWindowPattern> hostWindowPattern_;
 };
 
-HostWindowPattern::HostWindowPattern(const sptr<Rosen::Session>& session) : session_(session)
+HostWindowPattern::HostWindowPattern()
 {
     LOGI("create HostWindowPattern");
-    CHECK_NULL_VOID(session_);
-
     instanceId_ = Container::CurrentId();
+}
 
+void HostWindowPattern::RegisterLifecycleListener()
+{
+    CHECK_NULL_VOID(session_);
     auto lifecycleListener = std::make_shared<LifecycleListener>(WeakClaim(this));
     session_->RegisterLifecycleListener(lifecycleListener);
 }

@@ -24,7 +24,7 @@ class HostWindowExtension : public HostWindowPattern {
     DECLARE_ACE_TYPE(HostWindowExtension, HostWindowPattern);
 
 public:
-    HostWindowExtension(const sptr<Rosen::Session>& session) : HostWindowPattern(session) {}
+    HostWindowExtension(const std::string& bundleName, const std::string& abilityName);
     ~HostWindowExtension() override = default;
 
 protected:
@@ -38,6 +38,12 @@ protected:
         return false;
     }
 
+    void RequestExtensionSessionActivation();
+
+    std::string bundleName_;
+    std::string abilityName_;
+
+private:
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtension);
 };
 

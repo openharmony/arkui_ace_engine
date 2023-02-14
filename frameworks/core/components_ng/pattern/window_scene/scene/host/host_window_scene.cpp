@@ -20,6 +20,12 @@
 
 namespace OHOS::Ace::NG {
 
+HostWindowScene::HostWindowScene(const sptr<Rosen::Session>& session)
+{
+    session_ = session;
+    RegisterLifecycleListener();
+}
+
 void HostWindowScene::OnForeground()
 {
     auto uiTask = [this]() {
