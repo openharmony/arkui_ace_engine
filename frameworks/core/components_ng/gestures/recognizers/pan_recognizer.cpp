@@ -17,6 +17,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/log/log.h"
+#include "base/ressched/ressched_report.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
@@ -162,6 +163,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     LOGI("pan recognizer receives %{public}d touch up event", event.id);
+    ResSchedReport::GetInstance().ResSchedDataReport("click");
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
     velocityTracker_.UpdateTouchPoint(event, true);
