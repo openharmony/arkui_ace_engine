@@ -1010,8 +1010,20 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         CHECK_NULL_RETURN(frontEnd, false);
         auto delegate = frontEnd->GetDelegate();
         CHECK_NULL_RETURN(delegate, false);
+        if (frontEnd->IsBundle()) {
+            if (!delegate->GetAssetContent(fileName, content)) {
+                LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+                return false;
+            }
+            abcPath = delegate->GetAssetPath(fileName).append(fileName);
+            if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
+                LOGE("ExecuteCardAbc EvaluateJsCode \"%{public}s\" failed.", fileName.c_str());
+                return false;
+            }
+            return true;
+        }
         if (!delegate->GetAssetContent(FORM_ES_MODULE_PATH, content)) {
-            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
+            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", FORM_ES_MODULE_PATH.c_str());
             return false;
         }
         const std::string bundleName = frontEnd->GetBundleName();

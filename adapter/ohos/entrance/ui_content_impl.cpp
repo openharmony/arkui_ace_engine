@@ -22,6 +22,7 @@
 #include "ability_info.h"
 #include "configuration.h"
 #include "dm/display_manager.h"
+#include "extension_ability_info.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -241,6 +242,9 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
 {
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    moduleName_ = hapModuleInfo->name;
+    isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     const auto& obj = context->GetBindingObject();
     CHECK_NULL_VOID(obj);
     auto ref = obj->Get<NativeReference>();
@@ -454,12 +458,13 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
     if (isFormRender_) {
         LOGI("Initialize UIContent form assetProvider");
         std::vector<std::string> basePaths;
-        basePaths.push_back("assets/js/entry/");
+        basePaths.emplace_back("assets/js/" + moduleName_ + "/");
         basePaths.emplace_back("assets/js/share/");
         basePaths.emplace_back("");
         basePaths.emplace_back("js/");
         basePaths.emplace_back("ets/");
-        auto assetProvider = CreateAssetProvider("/data/bundles/" + bundleName_ + "/entry.hap", basePaths);
+        auto assetProvider =
+            CreateAssetProvider("/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap", basePaths);
         if (assetProvider) {
             LOGE("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
@@ -659,8 +664,8 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     if (isFormRender_) {
-        resPath = "/data/bundles/" + bundleName_ + "/entry";
-        hapPath = "/data/bundles/" + bundleName_ + "/entry.hap";
+        resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_;
+        hapPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap";
     }
     LOGI("CommonInitializeCard resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());
     container->SetResourceConfiguration(aceResCfg);
@@ -747,8 +752,9 @@ void UIContentImpl::CommonInitializeCard(OHOS::Rosen::Window* window,
             Platform::AceContainer::SetViewNew(flutterAceView, density, formWidth_, formHeight_, window_);
             auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
             CHECK_NULL_VOID(frontend);
-            frontend->SetBundleName(formBundleName_);
-            frontend->SetModuleName(formModuleName_);
+            frontend->SetBundleName(bundleName_);
+            frontend->SetModuleName(moduleName_);
+            frontend->SetIsBundle(isBundle_);
         } else {
             Platform::AceContainer::SetViewNew(flutterAceView, density, 0, 0, window_);
         }
