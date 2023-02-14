@@ -52,6 +52,12 @@ struct SystemParams {
     OHOS::Ace::DeviceOrientation orientation { DeviceOrientation::PORTRAIT };
 };
 
+#ifndef ENABLE_ROSEN_BACKEND
+using GlfwController = FlutterDesktopWindowControllerRef;
+#else
+using GlfwController = std::shared_ptr<OHOS::Rosen::GlfwRenderContext>;
+#endif
+
 class ACE_FORCE_EXPORT_WITH_PREVIEW AceAbility {
 public:
     explicit AceAbility(const AceRunArgs& runArgs);
@@ -71,46 +77,27 @@ public:
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
     bool OperateComponent(const std::string& attrsJson);
-#ifndef ENABLE_ROSEN_BACKEND
-    FlutterDesktopWindowControllerRef GetGlfwWindowController()
+    GlfwController GetGlfwWindowController()
     {
         return controller_;
     }
-#else
-    std::shared_ptr<OHOS::Rosen::GlfwRenderContext> GetGlfwWindowController()
-    {
-        return glfwContext_;
-    }
-#endif
 
 private:
     void RunEventLoop();
 
     void SetConfigChanges(const std::string& configChanges);
 
-#ifndef ENABLE_ROSEN_BACKEND
-    void SetGlfwWindowController(const FlutterDesktopWindowControllerRef& controller)
+    void SetGlfwWindowController(const GlfwController &controller)
     {
         controller_ = controller;
     }
-#else
-    void SetGlfwRenderContext(const std::shared_ptr<OHOS::Rosen::GlfwRenderContext> &context)
-    {
-        glfwContext_ = context;
-    }
-#endif
 
     // flag indicating if the glfw message loop should be running.
     static std::atomic<bool> loopRunning_;
 
     AceRunArgs runArgs_;
     ConfigChanges configChanges_;
-
-#ifndef ENABLE_ROSEN_BACKEND
-    FlutterDesktopWindowControllerRef controller_ = nullptr;
-#else
-    std::shared_ptr<OHOS::Rosen::GlfwRenderContext> glfwContext_ = nullptr;
-#endif
+    GlfwController controller_ = nullptr;
 };
 
 } // namespace OHOS::Ace::Platform

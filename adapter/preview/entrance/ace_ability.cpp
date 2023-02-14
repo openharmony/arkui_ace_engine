@@ -27,6 +27,7 @@
 #include "adapter/preview/inspector/inspector_client.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
+#include "third_party/skia/include/core/SkFontMgr.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
@@ -150,9 +151,9 @@ AceAbility::~AceAbility()
 #else
 AceAbility::~AceAbility()
 {
-    if (glfwContext_ != nullptr) {
-        glfwContext_->DestroyWindow();
-        glfwContext_->Terminate();
+    if (controller_ != nullptr) {
+        controller_->DestroyWindow();
+        controller_->Terminate();
     }
 }
 #endif
@@ -224,8 +225,9 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
         ctx->SetWindowTitle(runArgs.windowTitle);
     }
 
+    EventDispatcher::GetInstance().Initialize();
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
-    aceAbility->SetGlfwRenderContext(ctx);
+    aceAbility->SetGlfwWindowController(ctx);
     return aceAbility;
 }
 #endif
@@ -398,13 +400,13 @@ void AceAbility::RunEventLoop()
 #else
 void AceAbility::RunEventLoop()
 {
-    while (glfwContext_ != nullptr && !glfwContext_->WindowShouldClose() && loopRunning_) {
-        glfwContext_->WaitForEvents();
+    while (controller_ != nullptr && !controller_->WindowShouldClose() && loopRunning_) {
+        controller_->WaitForEvents();
 
 #ifdef USE_GLFW_WINDOW
         int32_t width;
         int32_t height;
-        glfwContext_->GetWindowSize(width, height);
+        controller_->GetWindowSize(width, height);
         if (width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) {
             AdaptDeviceType(runArgs_);
             SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
@@ -426,23 +428,23 @@ void AceAbility::RunEventLoop()
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null");
-        if (glfwContext_ != nullptr) {
-            glfwContext_->DestroyWindow();
+        if (controller_ != nullptr) {
+            controller_->DestroyWindow();
         }
-        glfwContext_ = nullptr;
+        controller_ = nullptr;
         return;
     }
     auto viewPtr = container->GetAceView();
     AceContainer::DestroyContainer(ACE_INSTANCE_ID);
 
-    if (glfwContext_ != nullptr) {
-        glfwContext_->DestroyWindow();
+    if (controller_ != nullptr) {
+        controller_->DestroyWindow();
     }
     if (viewPtr != nullptr) {
         delete viewPtr;
         viewPtr = nullptr;
     }
-    glfwContext_ = nullptr;
+    controller_ = nullptr;
 }
 #endif
 
@@ -524,8 +526,8 @@ void AceAbility::SurfaceChanged(
 #else
     context->GetTaskExecutor()->PostSyncTask(
         [this, width, height]() {
-            if (glfwContext_ != nullptr) {
-                glfwContext_->SetWindowSize(width, height);
+            if (controller_ != nullptr) {
+                controller_->SetWindowSize(width, height);
             }
         },
         TaskExecutor::TaskType::PLATFORM);

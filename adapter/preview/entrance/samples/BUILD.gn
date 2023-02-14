@@ -71,13 +71,21 @@ foreach(device, ace_devices) {
     sources = [
       "ace_${device}_test.cpp",
       "key_input_handler.cpp",
-      "touch_event_handler.cpp",
+      "touch_event_handler_flutter.cpp",
     ]
     deps = [
       ":copy_napi_modules_shared_library",
       ":copy_preview_shared_library",
       "$ace_napi:ace_napi",
     ]
+    include_dirs = [ "//third_party/flutter/glfw/include" ]
+    if (defined(platform_config.enable_rosen_backend) &&
+        platform_config.enable_rosen_backend) {
+      sources -= [ "touch_event_handler_flutter.cpp" ]
+      sources += [ "touch_event_handler_rs.cpp" ]
+      defines += [ "ENABLE_ROSEN_BACKEND" ]
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context" ]
+    }
     if (use_mac) {
       defines += [ "MAC_PLATFORM" ]
       deps += [ "$ace_root/adapter/preview/build:libace_engine_mac" ]

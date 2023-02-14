@@ -86,10 +86,19 @@ bool RSAceView::HandleTouchEvent(const TouchEvent& touchEvent)
     LOGD("HandleTouchEvent touchEvent.x: %{public}lf, touchEvent.y: %{public}lf, touchEvent.size: %{public}lf",
         touchEvent.x, touchEvent.y, touchEvent.size);
     if (touchEventCallback_) {
-        touchEventCallback_(touchEvent);
+        touchEventCallback_(touchEvent, nullptr);
     }
 
     return true;
+}
+
+bool RSAceView::HandleKeyEvent(const KeyEvent& keyEvent)
+{
+    if (!keyEventCallback_) {
+        return false;
+    }
+
+    return keyEventCallback_(keyEvent);
 }
 
 std::unique_ptr<DrawDelegate> RSAceView::GetDrawDelegate()

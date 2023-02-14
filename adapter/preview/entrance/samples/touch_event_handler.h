@@ -16,14 +16,24 @@
 #ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_SAMPLES_TOUCH_EVENT_HANDLER_H
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_ENTRANCE_SAMPLES_TOUCH_EVENT_HANDLER_H
 
+#include <mutex>
+
+#ifndef ENABLE_ROSEN_BACKEND
+#include "flutter/shell/platform/glfw/public/flutter_glfw.h"
+#else
+#include "glfw_render_context.h"
+#endif
+
 namespace OHOS::Ace::Platform {
 
 class TouchEventHandler {
 public:
-    TouchEventHandler() = default;
-    ~TouchEventHandler() = default;
-
-    static void InitialTouchEventCallback();
+#ifndef ENABLE_ROSEN_BACKEND
+    using GlfwController = FlutterDesktopWindowControllerRef;
+#else
+    using GlfwController = std::shared_ptr<OHOS::Rosen::GlfwRenderContext>;
+#endif
+    static void InitialTouchEventCallback(const GlfwController &controller);
 };
 
 } // namespace OHOS::Ace::Platform

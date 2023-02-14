@@ -65,6 +65,7 @@ const std::map<int, KeyCode> CODE_MAP = {
 
 }
 
+#ifndef ENABLE_ROSEN_BACKEND
 void KeyInputHandler::InitialTextInputCallback(FlutterDesktopWindowControllerRef controller)
 {
     // Register clipboard callback functions.
@@ -79,6 +80,28 @@ void KeyInputHandler::InitialTextInputCallback(FlutterDesktopWindowControllerRef
     // Register key event and input method callback functions.
     FlutterDesktopAddKeyboardHookHandler(controller, std::make_unique<KeyInputHandler>());
 }
+#else
+void KeyInputHandler::InitialTextInputCallback(const std::shared_ptr<OHOS::Rosen::GlfwRenderContext> &controller)
+{
+    // clipboard
+    auto callbackSetClipboardData = [controller](const std::string& data) {
+        controller->SetClipboardData(data);
+    };
+    auto callbackGetClipboardData = [controller]() {
+        return controller->GetClipboardData();
+    };
+    ClipboardProxy::GetInstance()->SetDelegate(
+        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
+
+    // key: key_event(normal, modifier), char: unicode char input
+    controller->OnKey([](int key, int scancode, int action, int mods) {
+        KeyboardHook(nullptr, key, scancode, action, mods);
+    });
+    controller->OnChar([](unsigned int codepoint) {
+        CharHook(nullptr, codepoint);
+    });
+}
+#endif
 
 void KeyInputHandler::KeyboardHook(GLFWwindow* window, int key, int scancode, int action, int mods)
 {

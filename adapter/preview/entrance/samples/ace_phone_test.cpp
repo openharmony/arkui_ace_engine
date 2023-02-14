@@ -103,7 +103,7 @@ int main(int argc, const char* argv[])
     }
 
     OHOS::Ace::Platform::KeyInputHandler::InitialTextInputCallback(ability->GetGlfwWindowController());
-    OHOS::Ace::Platform::TouchEventHandler::InitialTouchEventCallback();
+    OHOS::Ace::Platform::TouchEventHandler::InitialTouchEventCallback(ability->GetGlfwWindowController());
 
     std::thread timer([&ability]() {
         int32_t getJSONTreeTimes = GET_INSPECTOR_TREE_TIMES;
