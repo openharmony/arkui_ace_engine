@@ -49,6 +49,12 @@ template("preview_entrance_source") {
       "$ace_root/frameworks/core/components/theme:build_theme_code",
     ]
 
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
+      sources -= [ "flutter_ace_view.cpp" ]
+      sources += [ "rs_ace_view.cpp" ]
+      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+    }
+
     if (!is_cross_platform_build) {
       if (platform == "windows") {
         defines -= [ "UNICODE" ]
