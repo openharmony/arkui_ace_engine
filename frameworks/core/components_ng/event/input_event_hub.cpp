@@ -29,17 +29,19 @@ RefPtr<FrameNode> InputEventHub::GetFrameNode() const
     return eventHub ? eventHub->GetFrameNode() : nullptr;
 }
 
-bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, MouseTestResult& onMouseResult,
-    MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
+bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
 {
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
 
     if (mouseEventActuator_) {
-        mouseEventActuator_->OnCollectMouseEvent(coordinateOffset, getEventTargetImpl, onMouseResult, hoverNode);
+        mouseEventActuator_->OnCollectMouseEvent(coordinateOffset, getEventTargetImpl, result);
     }
     if (hoverEventActuator_) {
-        hoverEventActuator_->OnCollectHoverEvent(coordinateOffset, getEventTargetImpl, onHoverResult);
+        hoverEventActuator_->OnCollectHoverEvent(coordinateOffset, getEventTargetImpl, result);
+    }
+    if (hoverEffectActuator_) {
+        hoverEffectActuator_->OnCollectHoverEffect(coordinateOffset, getEventTargetImpl, result);
     }
     return false;
 }

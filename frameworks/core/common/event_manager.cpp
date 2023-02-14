@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/ace_events.h"
 #include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_referee.h"
@@ -452,16 +453,72 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
     return true;
 }
 
-void EventManager::MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode)
+void EventManager::LogPrintMouseTest()
 {
+    if (!SystemProperties::GetDebugEnabled()) {
+        return;
+    }
+    if (currMouseTestResults_.empty()) {
+        LOGD("Mouse test onMouse result is empty.");
+    } else {
+        for (const auto& result : currMouseTestResults_) {
+            LOGD("Mouse test onMouse result: %{public}s/%{public}d.", result->GetNodeName().c_str(),
+                result->GetNodeId());
+        }
+    }
+    if (lastHoverTestResults_.empty()) {
+        LOGD("Mouse test onHover last result is empty.");
+    } else {
+        for (const auto& result : lastHoverTestResults_) {
+            LOGD("Mouse test onHover last result: %{public}s/%{public}d.", result->GetNodeName().c_str(),
+                result->GetNodeId());
+        }
+    }
+    if (currHoverTestResults_.empty()) {
+        LOGD("Mouse test onHover current result is empty.");
+    } else {
+        for (const auto& result : currHoverTestResults_) {
+            LOGD("Mouse test onHover current result: %{public}s/%{public}d.", result->GetNodeName().c_str(),
+                result->GetNodeId());
+        }
+    }
+    auto lastNode = lastHoverNode_.Upgrade();
+    auto currNode = currHoverNode_.Upgrade();
+    LOGD("Mouse test last/current hoverEffect node: %{public}s/%{public}d / %{public}s/%{public}d",
+        lastNode ? lastNode->GetTag().c_str() : "NULL", lastNode ? lastNode->GetId() : -1,
+        currNode ? currNode->GetTag().c_str() : "NULL", currNode ? currNode->GetId() : -1);
+}
+
+void EventManager::MouseTest(
+    const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
+{
+    LOGD("Mouse test start. Mouse event is (%{public}f,%{public}f), button: %{public}d, action: %{public}d", event.x,
+        event.y, event.button, event.action);
     CHECK_NULL_VOID(frameNode);
     const NG::PointF point { event.x, event.y };
-    MouseTestResult mouseTestResult;
-    MouseTestResult hoverTestResult;
-    RefPtr<NG::FrameNode> hoverNode = nullptr;
-    frameNode->MouseTest(point, point, mouseTestResult, hoverTestResult, hoverNode);
-    if (mouseTestResult.empty()) {
+    TouchTestResult testResult;
+    frameNode->TouchTest(point, point, touchRestrict, testResult, event.GetId());
+    if (testResult.empty()) {
         LOGD("mouse hover test result is empty");
+    }
+    currMouseTestResults_.clear();
+    HoverTestResult hoverTestResult;
+    WeakPtr<NG::FrameNode> hoverNode = nullptr;
+    for (const auto& result : testResult) {
+        auto mouseResult = AceType::DynamicCast<MouseEventTarget>(result);
+        if (mouseResult) {
+            currMouseTestResults_.emplace_back(mouseResult);
+        }
+        auto hoverResult = AceType::DynamicCast<HoverEventTarget>(result);
+        if (hoverResult) {
+            hoverTestResult.emplace_back(hoverResult);
+        }
+        if (!hoverNode.Upgrade()) {
+            auto hoverEffectResult = AceType::DynamicCast<HoverEffectTarget>(result);
+            if (hoverEffectResult) {
+                hoverNode = hoverEffectResult->GetHoverNode();
+            }
+        }
     }
     if (event.action == MouseAction::WINDOW_LEAVE) {
         lastHoverTestResults_ = std::move(currHoverTestResults_);
@@ -473,18 +530,17 @@ void EventManager::MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode
         lastHoverTestResults_ = std::move(currHoverTestResults_);
         currHoverTestResults_ = std::move(hoverTestResult);
     }
-    currMouseTestResults_ = std::move(mouseTestResult);
     lastHoverNode_ = currHoverNode_;
-    currHoverNode_ = WeakClaim(AceType::RawPtr(hoverNode));
-    LOGD("MouseTest hit test last/new result size = %{public}zu/%{public}zu.", lastHoverTestResults_.size(),
-        currHoverTestResults_.size());
+    currHoverNode_ = hoverNode;
+    LogPrintMouseTest();
+    LOGD("Mouse test end.");
 }
 
 bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 {
+    LOGD("DispatchMouseEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     if (event.action == MouseAction::PRESS || event.action == MouseAction::RELEASE ||
         event.action == MouseAction::MOVE) {
-        LOGD("RenderBox::HandleMouseEvent, button is %{public}d, action is %{public}d", event.button, event.action);
         for (const auto& mouseTarget : currMouseTestResults_) {
             if (mouseTarget) {
                 if (mouseTarget->HandleMouseEvent(event)) {
@@ -498,6 +554,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
 
 void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
 {
+    LOGD("DispatchMouseHoverAnimationNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     auto hoverNodeCur = currHoverNode_.Upgrade();
     auto hoverNodePre = lastHoverNode_.Upgrade();
     if (event.action == MouseAction::PRESS) {
@@ -530,6 +587,7 @@ void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event)
 
 bool EventManager::DispatchMouseHoverEventNG(const MouseEvent& event)
 {
+    LOGD("DispatchMouseHoverEventNG: button is %{public}d, action is %{public}d.", event.button, event.action);
     for (const auto& hoverResult : lastHoverTestResults_) {
         // get all previous hover nodes while it's not in current hover nodes. Those nodes exit hover
         auto it = std::find(currHoverTestResults_.begin(), currHoverTestResults_.end(), hoverResult);
@@ -657,7 +715,6 @@ EventManager::EventManager()
                 gesture->OnRejected(touchId);
             }
         }
-        
     };
     refereeNG_->SetQueryStateFunc(std::move(cleanReferee));
 }

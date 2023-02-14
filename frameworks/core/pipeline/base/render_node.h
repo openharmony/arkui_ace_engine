@@ -19,8 +19,8 @@
 #include <list>
 
 #include "base/geometry/dimension.h"
-#include "base/geometry/rect.h"
 #include "base/geometry/matrix4.h"
+#include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/system_properties.h"
@@ -38,6 +38,7 @@
 #include "core/components_v2/extensions/events/event_extensions.h"
 #include "core/components_v2/inspector/inspector_node.h"
 #include "core/event/axis_event.h"
+#include "core/event/mouse_raw_recognizer.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
@@ -550,7 +551,7 @@ public:
     virtual bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result);
 
-    virtual void MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseTestResult& result);
+    virtual void MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseRawResult& result);
 
     virtual bool MouseHoverTest(const Point& parentLocalPoint);
 
@@ -1145,7 +1146,7 @@ protected:
     explicit RenderNode(bool takeBoundary = false);
     virtual void ClearRenderObject();
 
-    virtual void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) {}
+    virtual void OnMouseTestHit(const Offset& coordinateOffset, MouseRawResult& result) {}
     virtual void OnMouseHoverEnterTest() {}
     virtual void OnMouseHoverExitTest() {}
     void SendAccessibilityEvent(const std::string& eventType);

@@ -61,8 +61,8 @@ public:
 
     void SetHoverAnimation(HoverEffectType type)
     {
-        if (!mouseEventActuator_) {
-            mouseEventActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        if (!hoverEffectActuator_) {
+            hoverEffectActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
         }
         hoverEffectType_ = type;
     }
@@ -113,8 +113,7 @@ public:
     }
 
     // the return value means prevents event bubbling.
-    bool ProcessMouseTestHit(const OffsetF& coordinateOffset, MouseTestResult& onMouseResult,
-        MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode);
+    bool ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result);
 
     bool ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult);
 
@@ -129,6 +128,7 @@ private:
     WeakPtr<EventHub> eventHub_;
     RefPtr<InputEventActuator> mouseEventActuator_;
     RefPtr<InputEventActuator> hoverEventActuator_;
+    RefPtr<InputEventActuator> hoverEffectActuator_;
     RefPtr<InputEventActuator> axisEventActuator_;
 
     RefPtr<InputEvent> showMenu_;

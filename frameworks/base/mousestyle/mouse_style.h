@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H
 
 #include "base/memory/ace_type.h"
-#include "core/components/declaration/common/style.h"
 
 namespace OHOS::Ace {
 
@@ -49,6 +48,7 @@ public:
 
     virtual bool SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const = 0;
     virtual int32_t GetPointerStyle(int32_t windowId, int32_t& pointerStyle) const = 0;
+    virtual bool ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const = 0;
 };
 
 } // namespace OHOS::Ace

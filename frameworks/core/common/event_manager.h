@@ -101,10 +101,12 @@ public:
     void DispatchMouseHoverAnimation(const MouseEvent& event);
     bool DispatchMouseHoverEvent(const MouseEvent& event);
 
-    void MouseTest(const MouseEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode);
+    void LogPrintMouseTest();
+    void MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict);
     bool DispatchMouseEventNG(const MouseEvent& event);
     void DispatchMouseHoverAnimationNG(const MouseEvent& event);
     bool DispatchMouseHoverEventNG(const MouseEvent& event);
+    void DispatchHoverEffectEvent(const MouseEvent& event);
 
     void AxisTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode);
     bool DispatchAxisEvent(const AxisEvent& event);
@@ -146,8 +148,8 @@ private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
-    MouseTestResult currHoverTestResults_;
-    MouseTestResult lastHoverTestResults_;
+    HoverTestResult currHoverTestResults_;
+    HoverTestResult lastHoverTestResults_;
     AxisTestResult axisTestResults_;
     WeakPtr<NG::FrameNode> lastHoverNode_;
     WeakPtr<NG::FrameNode> currHoverNode_;

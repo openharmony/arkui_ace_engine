@@ -516,7 +516,6 @@ private:
     void CursorMoveOnClick(const Offset& offset);
     void UpdateCaretInfoToController() const;
 
-    void SetMouseStyle(MouseFormat format);
     void ProcessOverlay();
     void OnHandleMove(const RectF& handleRect, bool isFirstHandle);
     void OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle);
