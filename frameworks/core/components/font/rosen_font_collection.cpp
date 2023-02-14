@@ -30,6 +30,7 @@ namespace OHOS::Ace {
 
 RosenFontCollection RosenFontCollection::instance;
 
+#ifndef ENABLE_ROSEN_BACKEND
 std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
 {
     if (!isUseRosenEngine) {
@@ -46,6 +47,16 @@ std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
     auto& fontCollection = windowClient->GetFontCollection();
     return fontCollection.GetFontCollection();
 }
+#else
+std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
+{
+    auto collection = std::make_shared<txt::FontCollection>();
+    collection->SetupDefaultFontManager();
+    auto dfmanager = sk_make_sp<txt::DynamicFontManager>();
+    collection->SetDynamicFontManager(dfmanager);
+    return collection;
+}
+#endif
 
 flutter::WindowClient* RosenFontCollection::GetRosenEngineWindowClient()
 {

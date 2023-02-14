@@ -82,7 +82,11 @@ ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
+#ifndef ENABLE_ROSEN_BACKEND
 bool SystemProperties::rosenBackendEnabled_ = false;
+#else
+bool SystemProperties::rosenBackendEnabled_ = true;
+#endif
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;

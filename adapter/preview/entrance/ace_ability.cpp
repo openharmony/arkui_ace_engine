@@ -15,7 +15,6 @@
 
 #include "adapter/preview/entrance/ace_ability.h"
 
-#include <thread>
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
 #endif
@@ -28,6 +27,10 @@
 #include "adapter/preview/inspector/inspector_client.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
+
+#ifndef ENABLE_ROSEN_BACKEND
+#include "frameworks/core/components/common/painter/flutter_svg_painter.h"
+#endif
 
 namespace OHOS::Ace::Platform {
 
@@ -136,6 +139,7 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
     container->SetResourceConfiguration(resConfig);
 }
 
+#ifndef ENABLE_ROSEN_BACKEND
 AceAbility::~AceAbility()
 {
     if (controller_) {
@@ -143,9 +147,41 @@ AceAbility::~AceAbility()
     }
     FlutterDesktopTerminate();
 }
+#else
+AceAbility::~AceAbility()
+{
+}
+#endif
 
+namespace {
+inline void DumpAceRunArgs(const AceRunArgs& runArgs)
+{
+#ifdef ACE_DEBUG
+    LOGI("runArgs.pageProfile: %{private}s", runArgs.pageProfile.c_str());
+    LOGI("runArgs.asset: %{private}s", runArgs.assetPath.c_str());
+    LOGI("runArgs.systemResources: %{private}s", runArgs.systemResourcesPath.c_str());
+    LOGI("runArgs.appResources: %{private}s", runArgs.appResourcesPath.c_str());
+    LOGI("runArgs.themeId: %{private}u", runArgs.themeId);
+    LOGI("runArgs.deviceConfig.orientation: %{private}d", static_cast<int>(runArgs.deviceConfig.orientation));
+    LOGI("runArgs.deviceConfig.density: %{private}lf", runArgs.deviceConfig.density);
+    LOGI("runArgs.deviceConfig.deviceType: %{private}d", static_cast<int>(runArgs.deviceConfig.deviceType));
+    LOGI("runArgs.deviceConfig.fontRatio: %{private}lf", runArgs.deviceConfig.fontRatio);
+    LOGI("runArgs.deviceConfig.colorMode: %{private}d", static_cast<int>(runArgs.deviceConfig.colorMode));
+    LOGI("runArgs.url: %{private}s", runArgs.url.c_str());
+    LOGI("runArgs.windowTitle: %{private}s", runArgs.windowTitle.c_str());
+    LOGI("runArgs.isRound: %{private}s", runArgs.isRound ? "true" : "false");
+    LOGI("runArgs.viewWidth: %{private}d", runArgs.viewWidth);
+    LOGI("runArgs.viewHeight: %{private}d", runArgs.viewHeight);
+    LOGI("runArgs.deviceWidth: %{private}d", runArgs.deviceWidth);
+    LOGI("runArgs.deviceHeight: %{private}d", runArgs.deviceHeight);
+#endif
+}
+} // namespace
+
+#ifndef ENABLE_ROSEN_BACKEND
 std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
 {
+    DumpAceRunArgs(runArgs);
     LOGI("Start create AceAbility instance");
     bool initSucceeded = FlutterDesktopInit();
     if (!initSucceeded) {
@@ -164,7 +200,20 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     aceAbility->SetGlfwWindowController(controller);
     return aceAbility;
 }
+#else
+std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
+{
+    DumpAceRunArgs(runArgs);
+    LOGI("Start create AceAbility instance");
+    AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
 
+    SetFontMgrConfig(runArgs.containerSdkPath);
+    auto aceAbility = std::make_unique<AceAbility>(runArgs);
+    return aceAbility;
+}
+#endif
+
+#ifndef ENABLE_ROSEN_BACKEND
 void AceAbility::InitEnv()
 {
 #ifdef INIT_ICU_DATA_PATH
@@ -216,6 +265,59 @@ void AceAbility::InitEnv()
     view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
     view->NotifyDensityChanged(runArgs_.deviceConfig.density);
 }
+#else
+void AceAbility::InitEnv()
+{
+#ifdef INIT_ICU_DATA_PATH
+    std::string icuPath = ".";
+    u_setDataDirectory(icuPath.c_str());
+#endif
+    std::vector<std::string> paths;
+    paths.push_back(runArgs_.assetPath);
+    std::string appResourcesPath(runArgs_.appResourcesPath);
+    if (!OHOS::Ace::Framework::EndWith(appResourcesPath, DELIMITER)) {
+        appResourcesPath.append(DELIMITER);
+    }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        paths.push_back(appResourcesPath);
+        paths.push_back(appResourcesPath + ASSET_PATH_SHARE_STAGE);
+    } else {
+        paths.push_back(GetCustomAssetPath(runArgs_.assetPath) + ASSET_PATH_SHARE);
+    }
+    AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null, initialize the environment failed.");
+        return;
+    }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        if (runArgs_.formsEnabled) {
+            container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
+        } else {
+            container->SetPageProfile((runArgs_.pageProfile.empty() ? "" : runArgs_.pageProfile + ".json"));
+        }
+    }
+    AceContainer::SetResourcesPathAndThemeStyle(ACE_INSTANCE_ID, runArgs_.systemResourcesPath,
+        runArgs_.appResourcesPath, runArgs_.themeId, runArgs_.deviceConfig.colorMode);
+
+    auto view = new RSAceView(ACE_INSTANCE_ID);
+    if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
+        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
+        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+    } else {
+        AceContainer::RunPage(ACE_INSTANCE_ID, UNUSED_PAGE_ID, runArgs_.url, "");
+        AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
+    }
+    if (runArgs_.projectModel == ProjectModel::STAGE) {
+        container->ParseStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
+    }
+    AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
+    OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
+    // Should make it possible to update surface changes by using viewWidth and viewHeight.
+    view->NotifySurfaceChanged(runArgs_.deviceWidth, runArgs_.deviceHeight);
+    view->NotifyDensityChanged(runArgs_.deviceConfig.density);
+}
+#endif
 
 void AceAbility::Start()
 {
@@ -232,6 +334,7 @@ void AceAbility::Stop()
     container->GetTaskExecutor()->PostTask([]() { loopRunning_ = false; }, TaskExecutor::TaskType::PLATFORM);
 }
 
+#ifndef ENABLE_ROSEN_BACKEND
 void AceAbility::RunEventLoop()
 {
     while (!FlutterDesktopWindowShouldClose(controller_) && loopRunning_) {
@@ -275,6 +378,38 @@ void AceAbility::RunEventLoop()
     }
     controller_ = nullptr;
 }
+#else
+void AceAbility::RunEventLoop()
+{
+    while (loopRunning_) {
+        auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+        if (container) {
+            container->RunNativeEngineLoop();
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    loopRunning_ = true;
+
+    // Currently exit loop is only to restart the AceContainer for real-time preview case.
+    // Previewer background thread will release the AceAbility instance and create new one,
+    // then call the InitEnv() and Start() again.
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        LOGE("container is null");
+        controller_ = nullptr;
+        return;
+    }
+    auto viewPtr = container->GetAceView();
+    AceContainer::DestroyContainer(ACE_INSTANCE_ID);
+
+    if (viewPtr != nullptr) {
+        delete viewPtr;
+        viewPtr = nullptr;
+    }
+    controller_ = nullptr;
+}
+#endif
 
 void AceAbility::SetConfigChanges(const std::string& configChanges)
 {
@@ -339,7 +474,6 @@ void AceAbility::SurfaceChanged(
         LOGE("aceView is null, SurfaceChanged failed.");
         return;
     }
-    auto window = FlutterDesktopGetWindow(controller_);
     // Need to change the window resolution and then change the rendering resolution. Otherwise, the image may not adapt
     // to the new window after the window is modified.
     auto context = container->GetPipelineContext();
@@ -347,9 +481,12 @@ void AceAbility::SurfaceChanged(
         LOGE("context is null, SurfaceChanged failed.");
         return;
     }
+#ifndef ENABLE_ROSEN_BACKEND
+    auto window = FlutterDesktopGetWindow(controller_);
     context->GetTaskExecutor()->PostSyncTask(
         [window, &width, &height]() { FlutterDesktopSetWindowSize(window, width, height); },
         TaskExecutor::TaskType::PLATFORM);
+#endif
     SystemProperties::InitDeviceInfo(
         width, height, orientation == DeviceOrientation::PORTRAIT ? 0 : 1, resolution, runArgs_.isRound);
     DeviceConfig deviceConfig = runArgs_.deviceConfig;

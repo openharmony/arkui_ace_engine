@@ -134,7 +134,7 @@ template("build_component") {
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
-        configs += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config" ]
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
       }
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem
