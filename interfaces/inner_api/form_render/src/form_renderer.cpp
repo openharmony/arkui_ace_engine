@@ -176,6 +176,7 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject> &remoteObj)
         auto formRender = weak.lock();
         if (!formRender) {
             HILOG_ERROR("formRender is nullptr");
+            return;
         }
         formRender->ResetRenderDelegate();
     });
