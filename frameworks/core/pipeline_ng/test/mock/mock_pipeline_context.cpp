@@ -224,4 +224,5 @@ void PipelineContext::FlushPipelineImmediately() {}
 void PipelineContext::AddVisibleAreaChangeNode(
     const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
 {}
+void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 } // namespace OHOS::Ace::NG

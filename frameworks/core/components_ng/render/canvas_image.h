@@ -84,6 +84,10 @@ public:
         return *paintConfig_;
     }
 
+    virtual bool IsStatic()
+    {
+        return true;
+    }
     virtual void SetRedrawCallback(std::function<void()>&& callback) {}
 
     virtual void ControlAnimation(bool play) {}
