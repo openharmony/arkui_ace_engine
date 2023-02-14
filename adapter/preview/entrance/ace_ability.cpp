@@ -150,6 +150,10 @@ AceAbility::~AceAbility()
 #else
 AceAbility::~AceAbility()
 {
+    if (glfwContext_ != nullptr) {
+        glfwContext_->DestroyWindow();
+        glfwContext_->Terminate();
+    }
 }
 #endif
 
@@ -208,7 +212,20 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
 
     SetFontMgrConfig(runArgs.containerSdkPath);
+
+    const auto &ctx = OHOS::Rosen::GlfwRenderContext::GetGlobal();
+    if (ctx != nullptr) {
+        ctx->Init();
+        auto flag = false;
+#ifdef USE_GLFW_WINDOW
+        flag = true;
+#endif
+        ctx->CreateWindow(runArgs.deviceWidth, runArgs.deviceHeight, flag);
+        ctx->SetWindowTitle(runArgs.windowTitle);
+    }
+
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
+    aceAbility->SetGlfwRenderContext(ctx);
     return aceAbility;
 }
 #endif
@@ -381,7 +398,19 @@ void AceAbility::RunEventLoop()
 #else
 void AceAbility::RunEventLoop()
 {
-    while (loopRunning_) {
+    while (glfwContext_ != nullptr && !glfwContext_->WindowShouldClose() && loopRunning_) {
+        glfwContext_->WaitForEvents();
+
+#ifdef USE_GLFW_WINDOW
+        int32_t width;
+        int32_t height;
+        glfwContext_->GetWindowSize(width, height);
+        if (width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) {
+            AdaptDeviceType(runArgs_);
+            SurfaceChanged(runArgs_.deviceConfig.orientation, runArgs_.deviceConfig.density, width, height);
+        }
+#endif
+
         auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
         if (container) {
             container->RunNativeEngineLoop();
@@ -397,17 +426,23 @@ void AceAbility::RunEventLoop()
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     if (!container) {
         LOGE("container is null");
-        controller_ = nullptr;
+        if (glfwContext_ != nullptr) {
+            glfwContext_->DestroyWindow();
+        }
+        glfwContext_ = nullptr;
         return;
     }
     auto viewPtr = container->GetAceView();
     AceContainer::DestroyContainer(ACE_INSTANCE_ID);
 
+    if (glfwContext_ != nullptr) {
+        glfwContext_->DestroyWindow();
+    }
     if (viewPtr != nullptr) {
         delete viewPtr;
         viewPtr = nullptr;
     }
-    controller_ = nullptr;
+    glfwContext_ = nullptr;
 }
 #endif
 
@@ -485,6 +520,14 @@ void AceAbility::SurfaceChanged(
     auto window = FlutterDesktopGetWindow(controller_);
     context->GetTaskExecutor()->PostSyncTask(
         [window, &width, &height]() { FlutterDesktopSetWindowSize(window, width, height); },
+        TaskExecutor::TaskType::PLATFORM);
+#else
+    context->GetTaskExecutor()->PostSyncTask(
+        [this, width, height]() {
+            if (glfwContext_ != nullptr) {
+                glfwContext_->SetWindowSize(width, height);
+            }
+        },
         TaskExecutor::TaskType::PLATFORM);
 #endif
     SystemProperties::InitDeviceInfo(

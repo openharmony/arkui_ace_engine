@@ -18,7 +18,11 @@
 
 #include <atomic>
 
+#ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
+#else
+#include "glfw_render_context.h"
+#endif
 
 #include "adapter/preview/entrance/ace_run_args.h"
 #include "base/utils/macros.h"
@@ -67,27 +71,46 @@ public:
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
     bool OperateComponent(const std::string& attrsJson);
+#ifndef ENABLE_ROSEN_BACKEND
     FlutterDesktopWindowControllerRef GetGlfwWindowController()
     {
         return controller_;
     }
+#else
+    std::shared_ptr<OHOS::Rosen::GlfwRenderContext> GetGlfwWindowController()
+    {
+        return glfwContext_;
+    }
+#endif
 
 private:
     void RunEventLoop();
 
     void SetConfigChanges(const std::string& configChanges);
 
+#ifndef ENABLE_ROSEN_BACKEND
     void SetGlfwWindowController(const FlutterDesktopWindowControllerRef& controller)
     {
         controller_ = controller;
     }
+#else
+    void SetGlfwRenderContext(const std::shared_ptr<OHOS::Rosen::GlfwRenderContext> &context)
+    {
+        glfwContext_ = context;
+    }
+#endif
 
     // flag indicating if the glfw message loop should be running.
     static std::atomic<bool> loopRunning_;
 
     AceRunArgs runArgs_;
     ConfigChanges configChanges_;
+
+#ifndef ENABLE_ROSEN_BACKEND
     FlutterDesktopWindowControllerRef controller_ = nullptr;
+#else
+    std::shared_ptr<OHOS::Rosen::GlfwRenderContext> glfwContext_ = nullptr;
+#endif
 };
 
 } // namespace OHOS::Ace::Platform
