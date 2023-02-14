@@ -18,6 +18,8 @@
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
 
@@ -55,10 +57,29 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     isRequestVsync_ = false;
 
     for (auto& callback : callbacks_) {
-        if (callback) {
+        if (callback.callback_ == nullptr) {
+            continue;
+        }
+
+        auto task = [nanoTimestamp, frameCount, callback = callback.callback_] {
             callback(nanoTimestamp, frameCount);
+        };
+
+        ContainerScope scope(callback.containerId_);
+        auto executor = Container::CurrentTaskExecutor();
+        if (executor != nullptr) {
+            executor->PostTask(task, TaskExecutor::TaskType::UI);
         }
     }
 }
+
+void Window::SetVsyncCallback(AceVsyncCallback&& callback)
+{
+    callbacks_.push_back({
+        .callback_ = std::move(callback),
+        .containerId_ = Container::CurrentId(),
+    });
+}
+
 
 } // namespace OHOS::Ace

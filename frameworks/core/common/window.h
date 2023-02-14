@@ -57,10 +57,7 @@ public:
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
-    virtual void SetVsyncCallback(AceVsyncCallback&& callback)
-    {
-        callbacks_.push_back(std::move(callback));
-    }
+    virtual void SetVsyncCallback(AceVsyncCallback&& callback);
 
     virtual void OnShow()
     {
@@ -111,7 +108,12 @@ protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     double density_ = 1.0;
-    std::list<AceVsyncCallback> callbacks_;
+
+    struct VsyncCallback {
+        AceVsyncCallback callback_ = nullptr;
+        int32_t containerId_ = -1;
+    };
+    std::list<struct VsyncCallback> callbacks_;
 
     uint64_t lastRequestVsyncTime_ = 0;
 
