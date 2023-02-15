@@ -216,6 +216,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
         return true;
     }
     stageNode_->RemoveChild(pageNode);
+    pageNode->SetChildrenInDestroying();
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;

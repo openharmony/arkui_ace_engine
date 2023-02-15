@@ -487,7 +487,7 @@ void UINode::SetActive(bool active)
 
 void UINode::OnVisibleChange(bool isVisible)
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
     }
 }
@@ -533,6 +533,21 @@ bool UINode::MarkRemoving()
         pendingRemove = child->MarkRemoving() || pendingRemove;
     }
     return pendingRemove;
+}
+
+void UINode::SetChildrenInDestroying()
+{
+    if (children_.empty()) {
+        return;
+    }
+
+    for (const auto& child : children_) {
+        if (!child) {
+            continue;
+        }
+        child->SetChildrenInDestroying();
+        child->SetInDestroying();
+    }
 }
 
 } // namespace OHOS::Ace::NG

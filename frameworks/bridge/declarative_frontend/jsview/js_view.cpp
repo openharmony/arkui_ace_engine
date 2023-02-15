@@ -15,6 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
+#include "uicast_interface/uicast_context_impl.h"
+#include "uicast_interface/uicast_impl.h"
+
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -30,8 +33,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/view_full_update_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/view_partial_update_model_impl.h"
-#include "uicast_interface/uicast_impl.h"
-#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace {
 
@@ -125,6 +126,9 @@ void JSView::RenderJSExecution()
         jsViewFunction_->ExecuteOnRenderDone();
         {
             UICastImpl::SendCmd();
+        }
+        if (notifyRenderDone_) {
+            notifyRenderDone_();
         }
     }
 }
