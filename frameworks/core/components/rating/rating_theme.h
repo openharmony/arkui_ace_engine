@@ -79,6 +79,8 @@ public:
                 theme->starColorActive_ = pattern->GetAttr<Color>("icon_color_active", Color::RED);
                 theme->starColorInactive_ = pattern->GetAttr<Color>("icon_color_inactive", Color::GRAY);
                 theme->borderRadius_ = pattern->GetAttr<Dimension>("hover_radius_size", BORDER_RADIUS);
+                theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
+                theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
             } else {
                 LOGW("find pattern of rating fail");
             }
@@ -198,6 +200,16 @@ public:
         return starColorInactive_;
     }
 
+    double GetHoverAnimationDuration() const
+    {
+        return hoverAnimationDuration_;
+    }
+
+    double GetPressAnimationDuration() const
+    {
+        return pressAnimationDuration_;
+    }
+
 protected:
     RatingTheme() = default;
 
@@ -212,6 +224,8 @@ private:
     double ratingScore_ = 0.0;
     double ratingMiniScore_ = 0.0;
     double designedStarAspectRatio_ = 1.0;
+    double hoverAnimationDuration_ = 0.0;
+    double pressAnimationDuration_ = 0.0;
     InternalResource::ResourceId foregroundResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG;
     InternalResource::ResourceId secondaryResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
     InternalResource::ResourceId backgroundResourceId_ = InternalResource::ResourceId::RATE_STAR_BIG_OFF_SVG;
