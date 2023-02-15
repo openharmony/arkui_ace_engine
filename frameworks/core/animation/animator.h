@@ -138,6 +138,9 @@ public:
     // Stop at the start frame.
     void Cancel();
 
+    // Reset isReverse_ value.
+    void ResetIsReverse();
+
     // Get Controller Id.
     int32_t GetId() const;
 
