@@ -500,7 +500,7 @@ void ListPattern::ScrollTo(float position)
 void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
 {
     LOGI("ScrollToIndex:%{public}d", index);
-    if (index >= 0 && index <= maxListItemIndex_) {
+    if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         jumpIndex_ = index;
         scrollIndexAlignment_ = align;
         MarkDirtyNodeSelf();
@@ -513,7 +513,7 @@ void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         ScrollToIndex(0, ScrollIndexAlignment::ALIGN_TOP);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(maxListItemIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
+        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, ScrollIndexAlignment::ALIGN_BUTTON);
     }
 }
 
