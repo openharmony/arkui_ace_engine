@@ -209,11 +209,6 @@ public:
         return bubbleMiniMumHeight_;
     }
 
-    const Dimension& GetLittleSpace() const
-    {
-        return littleSpace_;
-    }
-
     const Dimension& GetArrowHeight() const
     {
         return arrowHeight_;
@@ -243,7 +238,6 @@ private:
     Dimension buttonTextInsideMargin_ = 8.0_vp;
     Dimension buttonSpacing = 4.0_vp;
     Dimension littlePadding_ = 4.0_vp;
-    Dimension littleSpace_ = 3.0_vp;
     Dimension arrowHeight_ = 8.0_vp;
     Dimension focusPaintWidth_ = 2.0_vp;
     Dimension buttonMiniMumWidth = 72.0_vp;
