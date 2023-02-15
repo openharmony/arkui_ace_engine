@@ -1422,6 +1422,14 @@ bool PipelineContext::PopPageStackOverlay()
     return true;
 }
 
+void PipelineContext::HideOverlays()
+{
+    CloseContextMenu();
+    if (textOverlayManager_) {
+        textOverlayManager_->PopTextOverlay();
+    }
+}
+
 void PipelineContext::ScheduleUpdate(const RefPtr<ComposedComponent>& compose)
 {
     CHECK_RUN_ON(UI);

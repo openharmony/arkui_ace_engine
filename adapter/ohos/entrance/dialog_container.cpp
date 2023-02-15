@@ -350,9 +350,7 @@ void DialogContainer::AttachView(std::unique_ptr<Window> window, AceView* view, 
     // Only MainWindow instance will be registered to watch dog.
     frontend_->AttachPipelineContext(pipelineContext_);
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
-    auto context = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(context);
-    context->SetPostRTTaskCallBack([](std::function<void()>&& task) {
+    pipelineContext_->SetPostRTTaskCallBack([](std::function<void()>&& task) {
         auto syncTask = std::make_shared<AceRosenSyncTask>(std::move(task));
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });
@@ -374,11 +372,9 @@ void DialogContainer::InitPipelineContext(std::unique_ptr<Window> window, int32_
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->SetWindowModal(windowModal_);
-    pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());
-    pipelineContext->SetIsSubPipeline(true);
+    pipelineContext_->SetWindowModal(windowModal_);
+    pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
+    pipelineContext_->SetIsSubPipeline(true);
 }
 
 void DialogContainer::InitializeFrontend()

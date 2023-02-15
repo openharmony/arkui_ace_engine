@@ -279,12 +279,7 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
         return true;
     }
     ContainerScope scope(instanceId);
-    auto baseContext = container->GetPipelineContext();
-    auto contextNG = DynamicCast<NG::PipelineContext>(baseContext);
-    if (contextNG) {
-        return contextNG->OnBackPressed();
-    }
-    auto context = DynamicCast<PipelineContext>(baseContext);
+    auto context = container->GetPipelineContext();
     CHECK_NULL_RETURN_NOLOG(context, false);
     if (context->PopPageStackOverlay()) {
         return true;
@@ -1077,10 +1072,8 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     if (isSubContainer_) {
         pipelineContext_->SetIsSubPipeline(true);
     }
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-    if (pipelineContext) {
-        pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());
-    }
+
+    pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     InitWindowCallback();
     InitializeCallback();
 
