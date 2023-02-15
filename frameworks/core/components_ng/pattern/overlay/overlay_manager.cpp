@@ -737,6 +737,7 @@ bool OverlayManager::RemoveOverlay()
         LOGI("overlay removed successfully");
         return true;
     }
+    LOGI("No overlay in this page.");
     return false;
 }
 
