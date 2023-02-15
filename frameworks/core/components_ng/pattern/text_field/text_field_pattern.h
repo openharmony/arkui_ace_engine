@@ -484,6 +484,7 @@ public:
     {
         return mouseStatus_;
     }
+    void UpdateEditingValueToRecord();
 
 private:
     void HandleBlurEvent();
