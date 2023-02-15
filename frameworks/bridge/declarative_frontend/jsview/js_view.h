@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_H
 
+#include <functional>
 #include <list>
 #include <string>
 
@@ -103,6 +104,11 @@ public:
         return cardId_;
     }
 
+    void RegisterRenderDoneCallback(std::function<void()>&& OnRenderDone)
+    {
+        notifyRenderDone_ = std::move(OnRenderDone);
+    }
+
     // Used to set/get card id JS
     void JsSetCardId(int64_t cardId);
     void JsGetCardId(const JSCallbackInfo& info);
@@ -175,6 +181,7 @@ private:
     int32_t instanceId_ = -1;
     int32_t restoreInstanceId_ = -1;
     bool isStatic_ = false;
+    std::function<void()> notifyRenderDone_;
 };
 
 class JSViewFullUpdate : public JSView {

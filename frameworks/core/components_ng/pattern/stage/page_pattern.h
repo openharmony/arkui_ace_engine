@@ -136,6 +136,11 @@ public:
 
     void StopPageTransition();
 
+    void MarkRenderDone()
+    {
+        isRenderDone_ = true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
@@ -155,6 +160,7 @@ private:
     bool isOnShow_ = false;
     bool isFirstLoad_ = true;
     bool isPageInTransition_ = false;
+    bool isRenderDone_ = false;
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
