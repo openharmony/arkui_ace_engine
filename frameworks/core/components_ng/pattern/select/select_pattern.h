@@ -115,6 +115,45 @@ private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
+    bool HasRowNode() const
+    {
+        return rowId_.has_value();
+    }
+
+    bool HasTextNode() const
+    {
+        return textId_.has_value();
+    }
+
+    bool HasSpinnerNode() const
+    {
+        return spinnerId_.has_value();
+    }
+
+    int32_t GetRowId()
+    {
+        if (!rowId_.has_value()) {
+            rowId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return rowId_.value();
+    }
+
+    int32_t GetTextId()
+    {
+        if (!textId_.has_value()) {
+            textId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return textId_.value();
+    }
+
+    int32_t GetSpinnerId()
+    {
+        if (!spinnerId_.has_value()) {
+            spinnerId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return spinnerId_.value();
+    }
+
     // change background color when pressed
     void RegisterOnPress();
     // change background color when hovered
@@ -165,6 +204,10 @@ private:
     // XTS inspector helper functions
     std::string InspectorGetOptions() const;
     std::string InspectorGetSelectedFont() const;
+
+    std::optional<int32_t> rowId_;
+    std::optional<int32_t> textId_;
+    std::optional<int32_t> spinnerId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
