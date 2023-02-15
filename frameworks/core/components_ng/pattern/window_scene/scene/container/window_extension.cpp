@@ -15,14 +15,14 @@
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_extension.h"
 
-// #include "session/scene/container/include/extension_session_stage.h"
-#include "session/scene/container/include/session_stage.h"
+// #include "extension_session_stage.h"
+#include "session_stage.h"
 
 namespace OHOS::Ace::NG {
 
 // extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowExtension(
 //     const std::shared_ptr<AbilityRuntime::Context>& context,
-//     const sptr<Rosen::IExtensionSession>& iExtensionSession,
+//     const sptr<Rosen::ISession>& iExtensionSession,
 //     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 // {
 //     LOGI("Ace lib loaded, CreateWindowExtension.");
@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 
 WindowExtension::WindowExtension(
     /* const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::IExtensionSession>& iExtensionSession,
+    const sptr<Rosen::ISession>& iExtensionSession,
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode */)
     : WindowPattern(nullptr, nullptr)
 {

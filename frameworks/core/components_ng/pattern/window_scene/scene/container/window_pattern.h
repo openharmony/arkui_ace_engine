@@ -27,7 +27,7 @@ namespace OHOS::Rosen {
 class RSUIDirector;
 struct VsyncCallback;
 class SessionStage;
-class ISessionChangeListener;
+class ISizeChangeListener;
 enum class WindowSizeChangeReason : uint32_t;
 }
 
@@ -131,7 +131,7 @@ public:
 
     // for lifecycle
     void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override;
-    void RegisterSessionChangeListener(const std::shared_ptr<Rosen::ISessionChangeListener>& listener);
+    void RegisterSizeChangeListener(const std::shared_ptr<Rosen::ISizeChangeListener>& listener);
 
     void Connect()  override;
     void Foreground()  override;

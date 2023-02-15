@@ -22,8 +22,7 @@
 
 namespace OHOS::Rosen {
 class RSSurfaceNode;
-class ISceneSession;
-class IExtensionSession;
+class ISession;
 class ISessionStageStateListener;
 }
 
@@ -34,11 +33,11 @@ public:
     static std::shared_ptr<UIWindow> CreateRootScene();
 
     static std::shared_ptr<UIWindow> CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::ISceneSession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
+        const sptr<Rosen::ISession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
 
     static std::shared_ptr<UIWindow> CreateWindowExtension(
         const std::shared_ptr<AbilityRuntime::Context>& context,
-        const sptr<Rosen::IExtensionSession>& iExtensionSession,
+        const sptr<Rosen::ISession>& iExtensionSession,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
 
     virtual ~UIWindow() = default;

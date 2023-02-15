@@ -143,7 +143,7 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(session_, false);
     LOGI("update session rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
         rect.posX_, rect.posY_, rect.width_, rect.height_);
-    session_->UpdateSessionRect(rect, Rosen::SessionSizeChangeReason::SHOW);
+    session_->UpdateRect(rect, Rosen::SizeChangeReason::SHOW);
     return false;
 }
 

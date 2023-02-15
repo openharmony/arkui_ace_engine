@@ -21,10 +21,10 @@
 #include <dlfcn.h>
 #endif
 
-#include "scene_session_manager/js_scene_session.h"
-#include "screen_session_manager/js_screen_session.h"
-#include "session/scene/host/include/scene_session.h"
-#include "session/screen/include/screen_session.h"
+#include "js_scene_session.h"
+#include "js_screen_session.h"
+#include "scene_session.h"
+#include "screen_session.h"
 
 #include "base/image/pixel_map.h"
 #include "base/log/ace_trace.h"

@@ -17,12 +17,12 @@
 
 #include "include/vsync_station.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
-#include "session/scene/container/include/session_stage.h"
 
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "session_stage.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
@@ -36,12 +36,12 @@ float GetDisplayRefreshRate()
 
 namespace OHOS::Ace::NG {
 
-class SessionChangeListener : public Rosen::ISessionChangeListener {
+class SizeChangeListener : public Rosen::ISizeChangeListener {
 public:
-    SessionChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
-    virtual ~SessionChangeListener() = default;
+    SizeChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    virtual ~SizeChangeListener() = default;
 
-    void OnSizeChange(Rosen::WSRect rect, Rosen::SessionSizeChangeReason reason) override
+    void OnSizeChange(Rosen::WSRect rect, Rosen::SizeChangeReason reason) override
     {
         ContainerScope scope(instanceId_);
         auto container = Container::Current();
@@ -61,15 +61,12 @@ public:
     }
 
 private:
-    const std::map<Rosen::SessionSizeChangeReason, Rosen::WindowSizeChangeReason> SESSION_TO_WINDOW_MAP {
-        { Rosen::SessionSizeChangeReason::SHOW,     Rosen::WindowSizeChangeReason::UNDEFINED },
-        { Rosen::SessionSizeChangeReason::HIDE,     Rosen::WindowSizeChangeReason::HIDE      },
-        { Rosen::SessionSizeChangeReason::MAXIMIZE, Rosen::WindowSizeChangeReason::MAXIMIZE  },
-        { Rosen::SessionSizeChangeReason::MINIMIZE, Rosen::WindowSizeChangeReason::UNDEFINED },
-        { Rosen::SessionSizeChangeReason::RECOVER,  Rosen::WindowSizeChangeReason::RECOVER   },
-        { Rosen::SessionSizeChangeReason::ROTATION, Rosen::WindowSizeChangeReason::ROTATION  },
-        { Rosen::SessionSizeChangeReason::RESIZE,   Rosen::WindowSizeChangeReason::RESIZE    },
-        { Rosen::SessionSizeChangeReason::MOVE,     Rosen::WindowSizeChangeReason::MOVE      },
+    const std::map<Rosen::SizeChangeReason, Rosen::WindowSizeChangeReason> SESSION_TO_WINDOW_MAP {
+        { Rosen::SizeChangeReason::SHOW,     Rosen::WindowSizeChangeReason::UNDEFINED },
+        { Rosen::SizeChangeReason::HIDE,     Rosen::WindowSizeChangeReason::HIDE      },
+        { Rosen::SizeChangeReason::MAXIMIZE, Rosen::WindowSizeChangeReason::MAXIMIZE  },
+        { Rosen::SizeChangeReason::RECOVER,  Rosen::WindowSizeChangeReason::RECOVER   },
+        { Rosen::SizeChangeReason::ROTATION, Rosen::WindowSizeChangeReason::ROTATION  },
     };
     int32_t instanceId_ = -1;
 };
@@ -236,16 +233,16 @@ void WindowPattern::RegisterSessionStageStateListener(
     sessionStage_->RegisterSessionStageStateListener(listener);
 }
 
-void WindowPattern::RegisterSessionChangeListener(const std::shared_ptr<Rosen::ISessionChangeListener>& listener)
+void WindowPattern::RegisterSizeChangeListener(const std::shared_ptr<Rosen::ISizeChangeListener>& listener)
 {
     CHECK_NULL_VOID(sessionStage_);
-    sessionStage_->RegisterSessionChangeListener(listener);
+    sessionStage_->RegisterSizeChangeListener(listener);
 }
 
 void WindowPattern::Connect()
 {
-    auto listener = std::make_shared<SessionChangeListener>(instanceId_);
-    RegisterSessionChangeListener(listener);
+    auto listener = std::make_shared<SizeChangeListener>(instanceId_);
+    RegisterSizeChangeListener(listener);
 
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Connect();
