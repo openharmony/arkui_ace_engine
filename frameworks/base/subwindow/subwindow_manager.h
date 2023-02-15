@@ -89,6 +89,7 @@ public:
         const std::set<std::string>& dialogCallbacks);
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
+    void CloseDialog(int32_t instanceId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();

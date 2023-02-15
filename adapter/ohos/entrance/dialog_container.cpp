@@ -214,6 +214,7 @@ RefPtr<DialogContainer> DialogContainer::GetContainer(int32_t instanceId)
 
 void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
+    LOGI("DialogContainer::DestroyContainer begin %{public}d", instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     container->Destroy();
@@ -224,17 +225,19 @@ void DialogContainer::DestroyContainer(int32_t instanceId, const std::function<v
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
     taskExecutor->PostTask(
         [instanceId, destroyCallback] {
-            LOGI("Remove on Platform thread...");
+            LOGI("DialogContainer::DestroyContainer Remove on Platform thread...");
             EngineHelper::RemoveEngine(instanceId);
             AceEngine::Get().RemoveContainer(instanceId);
             CHECK_NULL_VOID_NOLOG(destroyCallback);
             destroyCallback();
         },
         TaskExecutor::TaskType::PLATFORM);
+    LOGI("DialogContainer::DestroyContainer end");
 }
 
 void DialogContainer::Destroy()
 {
+    LOGI("DialogContainer::Destroy begin");
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
@@ -261,10 +264,12 @@ void DialogContainer::Destroy()
     }
     resRegister_.Reset();
     assetManager_.Reset();
+    LOGI("DialogContainer::Destroy end");
 }
 
 void DialogContainer::DestroyView()
 {
+    LOGI("DialogContainer::DestroyView begin");
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID_NOLOG(aceView_);
     auto* flutterAceView = static_cast<FlutterAceView*>(aceView_);
@@ -272,6 +277,7 @@ void DialogContainer::DestroyView()
         flutterAceView->DecRefCount();
     }
     aceView_ = nullptr;
+    LOGI("DialogContainer::DestroyView end");
 }
 
 void DialogContainer::SetView(AceView* view, double density, int32_t width, int32_t height,

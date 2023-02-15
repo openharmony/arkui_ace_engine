@@ -670,4 +670,9 @@ void SubwindowOhos::ShowActionMenu(
     }
     LOGI("SubwindowOhos::ShowActionMenu end");
 }
+
+void SubwindowOhos::CloseDialog(int32_t instanceId)
+{
+    Platform::DialogContainer::CloseWindow(instanceId);
+}
 } // namespace OHOS::Ace

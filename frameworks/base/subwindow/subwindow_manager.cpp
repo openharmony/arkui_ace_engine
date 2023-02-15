@@ -356,4 +356,19 @@ void SubwindowManager::ShowActionMenu(
     CHECK_NULL_VOID(subwindow);
     subwindow->ShowActionMenu(title, button, std::move(callback));
 }
+
+void SubwindowManager::CloseDialog(int32_t instanceId)
+{
+    LOGI("SubwindowManager::CloseDialog containerId = %{public}d.", instanceId);
+    auto subwindow = GetDialogSubwindow(instanceId);
+    if (!subwindow) {
+        LOGE("SubwindowManager::CloseDialog Subwindow is null.");
+        return;
+    }
+    for (auto& containerMap : parentContainerMap_) {
+        if (containerMap.second == instanceId) {
+            subwindow->CloseDialog(containerMap.first);
+        }
+    }
+}
 } // namespace OHOS::Ace
