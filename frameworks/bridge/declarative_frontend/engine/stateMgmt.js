@@ -4338,10 +4338,6 @@ class ViewPU extends NativeViewPartialUpdate {
                 ? new SynchedPropertySimpleOneWayPU(source, this, viewVariableName)
                 : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
     }
-
-    onRenderDone() {
-        stateMgmtConsole.info(`${this.constructor.name}: onRenderDone.`);
-      }
 }
 // Array.sort() converts array items to string to compare them, sigh!
 ViewPU.compareNumber = (a, b) => {
