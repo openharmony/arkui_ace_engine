@@ -123,7 +123,8 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_002, TestSize.Level1)
     g_webPattern->HandleDoubleClickEvent(info);
     AxisInfo axisInfo;
     g_webPattern->HandleFocusEvent();
-    g_webPattern->HandleBlurEvent();
+    BlurReason blurReason = BlurReason::FOCUS_SWITCH;
+    g_webPattern->HandleBlurEvent(blurReason);
     KeyEvent keyEvent;
     g_webPattern->WebOnKeyEvent(keyEvent);
 #endif
@@ -151,7 +152,8 @@ HWTEST_F(WebPatternEventTest, WebPatternTestNg_003, TestSize.Level1)
     g_webPattern->HandleFocusEvent();
     EXPECT_TRUE(g_webPattern->needOnFocus_);
     g_webPattern->HandleFocusEvent();
-    g_webPattern->HandleBlurEvent();
+    BlurReason blurReason = BlurReason::FOCUS_SWITCH;
+    g_webPattern->HandleBlurEvent(blurReason);
 
     KeyEvent keyEvent;
     g_webPattern->HandleKeyEvent(keyEvent);

@@ -521,6 +521,10 @@ public:
     {
         offset_ = pos;
     }
+    void SetBlurReason(const OHOS::NWeb::BlurReason& blurReason)
+    {
+        blurReason_ = blurReason;
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -653,6 +657,7 @@ private:
     WindowsSurfaceInfo surfaceInfo_;
     bool forceDarkMode_ = false;
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
+    OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
 #endif
 };
 
