@@ -54,7 +54,6 @@ public:
     }
 #endif
 
-    void SetFormRSSurfaceNode(void* surfaceNode) override;
     void OnShow() override;
     void OnHide() override;
     void FlushTasks() override;

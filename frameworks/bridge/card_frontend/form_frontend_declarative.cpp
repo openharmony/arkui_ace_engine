@@ -28,17 +28,17 @@ const char FILE_TYPE_BIN[] = ".abc";
 
 std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, const std::string& suffix) const
 {
-    if (uri.empty()) {
-        LOGE("page uri is empty");
-        return "";
-    }
     // the case uri is starts with "/" and "/" is the mainPage
     if (uri.size() != 0) {
-        if (uri.compare(0, 1, "/") == 0) { // 1: length of '/'
-            return uri.substr(1) + suffix; // 1: length of '/'
+        auto result = uri;
+        if (result.compare(result.size()-4, 4, ".ets") == 0) { // 4: length of '.ets'
+            result = result.substr(0, result.size()-4); // 4: length of '.ets'
         }
-        if (uri.compare(0, 2, "./") == 0) { // 2: length of './'
-            return uri.substr(2) + suffix; // 2: length of './'
+        if (result.compare(0, 1, "/") == 0) { // 1: length of '/'
+            return result.substr(1) + ".abc"; // 1: length of '/'
+        }
+        if (result.compare(0, 2, "./") == 0) { // 2: length of './'
+            return result.substr(2) + ".abc"; // 2: length of './'
         }
     }
 

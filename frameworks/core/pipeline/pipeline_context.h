@@ -514,16 +514,6 @@ public:
         return buildingFirstPage_;
     }
 
-    const RefPtr<SharedImageManager>& GetSharedImageManager() const
-    {
-        return sharedImageManager_;
-    }
-
-    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
-    {
-        sharedImageManager_ = sharedImageManager;
-    }
-
     using UpdateWindowBlurDrawOpHandler = std::function<void(void)>;
 
     void SetUpdateWindowBlurDrawOpHandler(UpdateWindowBlurDrawOpHandler handler)
@@ -906,7 +896,6 @@ private:
     RefPtr<RootElement> rootElement_;
     WeakPtr<FocusNode> dirtyFocusNode_;
     WeakPtr<FocusNode> dirtyFocusScope_;
-    RefPtr<SharedImageManager> sharedImageManager_;
     std::list<std::function<void()>> buildAfterCallback_;
     RefPtr<RenderFactory> renderFactory_;
     UpdateWindowBlurRegionHandler updateWindowBlurRegionHandler_;
