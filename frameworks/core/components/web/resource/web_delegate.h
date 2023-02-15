@@ -587,6 +587,7 @@ private:
 
     std::string GetCustomScheme();
     void InitWebViewWithSurface();
+    Size GetEnhanceSurfaceSize(const Size& drawSize);
 #endif
 
     WeakPtr<WebComponent> webComponent_;
