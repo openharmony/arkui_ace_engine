@@ -119,7 +119,7 @@ if (form_components_support) {
   defines += [ "FORM_SUPPORTED" ]
 }
 
-if (form_components_support) {
+if (remote_window_support) {
   defines += [ "REMOTE_WINDOW_SUPPORTED" ]
 }
 
