@@ -35,6 +35,4 @@ build_component("video") {
     "//drivers/peripheral/display/interfaces/include",
     "//foundation/multimedia/player_framework/interfaces/inner_api/native",
   ]
-
-
 }
