@@ -568,7 +568,7 @@ CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position)
         return result;
     }
     result.offset.AddX(IsTextArea() ? GetPaddingLeft() : textRect_.GetX());
-    result.offset.AddY(IsTextArea() ? GetPaddingLeft() : textRect_.GetY());
+    result.offset.AddY(IsTextArea() ? textRect_.GetY() : GetPaddingTop());
     return result;
 }
 
