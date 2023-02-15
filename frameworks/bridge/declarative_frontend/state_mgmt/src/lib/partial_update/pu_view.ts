@@ -618,4 +618,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
           : new SynchedPropertyObjectOneWayPU<T>(source, this, viewVariableName)
     ) as ObservedPropertyAbstractPU<T>;
   }
+
+  public onRenderDone(): void {
+    stateMgmtConsole.info(`${this.constructor.name}: onRenderDone.`);
+  }
 }

@@ -196,6 +196,18 @@ public:
         return isRemoving_;
     }
 
+    void SetInDestroying()
+    {
+        isInDestroying_ = true;
+    }
+
+    bool IsInDestroying() const
+    {
+        return isInDestroying_;
+    }
+
+    void SetChildrenInDestroying();
+
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId);
     virtual HitTestMode GetHitTestMode() const
@@ -330,6 +342,7 @@ private:
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
+    bool isInDestroying_ = false;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
