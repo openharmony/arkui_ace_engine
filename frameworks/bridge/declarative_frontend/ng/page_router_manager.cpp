@@ -216,7 +216,7 @@ void PageRouterManager::EnableAlertBeforeBackPage(const std::string& message, st
                     if (successIndex) {
                         auto router = weak.Upgrade();
                         CHECK_NULL_VOID(router);
-                        router->StartBack(router->ngBackUri_, router->backParam_);
+                        router->StartBack(router->ngBackUri_, router->backParam_, true);
                     }
                 }
             },
@@ -435,6 +435,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     if (errorCallback != nullptr) {
         errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
+    CleanPageOverlay();
 
     if (mode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(url);
@@ -454,6 +455,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     CHECK_RUN_ON(JS);
+    CleanPageOverlay();
     RouterOptScope scope(this);
     if (target.url.empty()) {
         LOGE("router.Push uri is empty");
@@ -489,8 +491,11 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
     LoadPage(GenerateNextPageId(), info, params, false, false, false);
 }
 
-void PageRouterManager::StartBack(const RouterPageInfo& target, const std::string& params)
+void PageRouterManager::StartBack(const RouterPageInfo& target, const std::string& params, bool enableAlert)
 {
+    if (!enableAlert) {
+        CleanPageOverlay();
+    }
     if (target.url.empty()) {
         std::string pagePath;
         size_t pageRouteSize = pageRouterStack_.size();
@@ -801,4 +806,21 @@ bool PageRouterManager::OnCleanPageStack()
     return false;
 }
 
+void PageRouterManager::CleanPageOverlay()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto context = DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID_NOLOG(taskExecutor);
+
+    if (overlayManager->RemoveOverlay()) {
+        LOGI("clean page overlay.");
+    }
+}
 } // namespace OHOS::Ace::NG
