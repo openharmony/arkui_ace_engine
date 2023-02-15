@@ -150,12 +150,13 @@ private:
 
     void StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
-    void StartBack(const RouterPageInfo& target, const std::string& params);
+    void StartBack(const RouterPageInfo& target, const std::string& params, bool enableAlert = false);
     bool StartPop();
     void StartReplace(const RouterPageInfo& target, const std::string& params, RouterMode mode = RouterMode::STANDARD,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr);
     void BackCheckAlert(const RouterPageInfo& target, const std::string& params);
     void StartClean();
+    void CleanPageOverlay();
 
     // page operations
     void LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params, bool isRestore = false,
