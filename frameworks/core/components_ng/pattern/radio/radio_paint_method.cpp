@@ -75,7 +75,7 @@ void RadioPaintMethod::PaintRadio(
 {
     OffsetF paintOffset = offset;
     if (isTouch_) {
-        // TODO: Touch effect
+        LOGI("Touch effect is to be realized here");
     }
     if (isHover_) {
         DrawHoverBoard(canvas, contentSize, paintOffset);
