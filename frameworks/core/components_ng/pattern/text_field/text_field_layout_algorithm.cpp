@@ -206,13 +206,16 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
-    if ((pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
-            pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE || pattern->GetIsMousePressed() ||
-            (pattern->GetMouseStatus() == MouseStatus::MOVE && !pattern->GetIsMousePressed()) ||
-            pattern->GetMouseStatus() != MouseStatus::MOVE) &&
-        pattern->GetCaretUpdateType() != CaretUpdateType::DEL) {
+    auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
+                          pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
+    auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
+                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL;
+    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
+                              pattern->GetIsMousePressed();
+    if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
-    } else {
+    }
+    if (!pattern->IsTextArea() && !needToKeepTextRect) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft();
