@@ -2161,15 +2161,21 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
-    auto newVal = StringUtils::ToWstring(textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) +
-                                         insertValue + textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd()));
-    if (static_cast<uint32_t>(newVal.length()) > GetMaxLength()) {
+    auto originLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
+    if (originLength >= GetMaxLength()) {
         LOGW("Max length reached");
         return;
     }
+
+    std::string valueToUpdate;
+    auto wideInsertValue = StringUtils::ToWstring(insertValue);
+    if (originLength + wideInsertValue.length() >= GetMaxLength()) {
+        valueToUpdate = StringUtils::ToString(wideInsertValue.substr(0, GetMaxLength() - originLength));
+    } else {
+        valueToUpdate = insertValue;
+    }
     std::string oldText = textEditingValue_.text;
     auto caretStart = 0;
-    std::string valueToUpdate = insertValue;
     std::string result;
     auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
