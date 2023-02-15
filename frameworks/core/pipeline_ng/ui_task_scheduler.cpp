@@ -54,6 +54,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             if (!node) {
                 continue;
             }
+            if (node->IsInDestroying()) {
+                continue;
+            }
             auto task = node->CreateLayoutTask(forceUseMainThread);
             if (task) {
                 if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
@@ -75,6 +78,9 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     for (auto&& pageNodes : dirtyRenderNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node) {
+                continue;
+            }
+            if (node->IsInDestroying()) {
                 continue;
             }
             auto task = node->CreateRenderTask(forceUseMainThread);

@@ -479,7 +479,7 @@ void UINode::SetActive(bool active)
 
 void UINode::OnVisibleChange(bool isVisible)
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
     }
 }
@@ -514,5 +514,20 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
 void UINode::ChildrenUpdatedFrom(int32_t index)
 {
     childrenUpdatedFrom_ = index;
+}
+
+void UINode::SetChildrenInDestroying()
+{
+    if (children_.empty()) {
+        return;
+    }
+
+    for (const auto& child : children_) {
+        if (!child) {
+            continue;
+        }
+        child->SetChildrenInDestroying();
+        child->SetInDestroying();
+    }
 }
 } // namespace OHOS::Ace::NG
