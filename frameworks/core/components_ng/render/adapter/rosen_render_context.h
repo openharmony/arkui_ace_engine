@@ -206,8 +206,9 @@ public:
         return needDebugBoundary_;
     }
 
-private:
     void OnBackgroundColorUpdate(const Color& value) override;
+
+private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
