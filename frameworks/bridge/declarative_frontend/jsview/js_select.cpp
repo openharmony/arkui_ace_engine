@@ -57,7 +57,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
                     return;
                 }
                 if (!ParseJsMedia(selectIcon, icon)) {
-                    LOGE("selectValue is null");
+                    LOGI("selectIcon is null");
                 }
 
                 params[i] = { value, icon };

@@ -323,14 +323,6 @@ void SelectPattern::BuildChild()
     BorderRadiusProperty border;
     border.SetRadius(theme->GetSelectBorderRadius());
     renderContext->UpdateBorderRadius(border);
-
-    auto props = select->GetLayoutProperty();
-    CHECK_NULL_VOID(props);
-    props->UpdateAlignment(Alignment::CENTER);
-    MeasureProperty measureProp;
-    measureProp.UpdateSelfIdealSizeWithCheck(CalcSize(std::nullopt, CalcLength(theme->GetSelectMinHeight())));
-    measureProp.UpdateMinSizeWithCheck(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
-    props->UpdateCalcLayoutProperty(measureProp);
 }
 
 void SelectPattern::SetValue(const std::string& value)
