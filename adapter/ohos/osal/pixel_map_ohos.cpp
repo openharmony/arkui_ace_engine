@@ -15,6 +15,8 @@
 
 #include "pixel_map_ohos.h"
 
+#include <sstream>
+
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
@@ -145,7 +147,11 @@ void* PixelMapOhos::GetRawPixelMapPtr() const
 
 std::string PixelMapOhos::GetId()
 {
-    return std::string();
+    // using pixmap addr
+    CHECK_NULL_RETURN(pixmap_, "nullptr");
+    std::stringstream strm;
+    strm << pixmap_.get();
+    return strm.str();
 }
 
 std::string PixelMapOhos::GetModifyId()
