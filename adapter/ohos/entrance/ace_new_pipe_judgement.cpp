@@ -53,13 +53,14 @@ std::ifstream& AceNewPipeJudgement::SafeGetLine(std::ifstream& configFile, std::
     return configFile;
 }
 
-bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(
-    const std::string& packagename, uint32_t apiCompatibleVersion, const std::string& apiReleaseType)
+bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(const std::string& packagename, uint32_t apiCompatibleVersion,
+    uint32_t apiTargetVersion, const std::string& apiReleaseType)
 {
-    if ((apiCompatibleVersion == NEW_PIPE_MIN_VERSION &&
-            (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
-                SystemProperties::GetExtSurfaceEnabled())) ||
-        apiCompatibleVersion > NEW_PIPE_MIN_VERSION) {
+    if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
+             (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 SystemProperties::GetExtSurfaceEnabled())) ||
+            apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
+        apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
         return true;
     }
     switch (aceNewPipeEnabledType_) {
@@ -75,7 +76,8 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(
 }
 
 bool AceNewPipeJudgement::QueryAceNewPipeEnabledStage(const std::string& packagename, uint32_t apiCompatibleVersion,
-    const std::string& apiReleaseType, const std::vector<OHOS::AppExecFwk::Metadata>& metaData)
+    uint32_t apiTargetVersion, const std::string& apiReleaseType,
+    const std::vector<OHOS::AppExecFwk::Metadata>& metaData)
 {
     bool closeArkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
@@ -83,10 +85,11 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledStage(const std::string& package
     if (closeArkTSPartialUpdate) {
         return false;
     }
-    if ((apiCompatibleVersion == NEW_PIPE_MIN_VERSION &&
-            (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
-                SystemProperties::GetExtSurfaceEnabled())) ||
-        apiCompatibleVersion > NEW_PIPE_MIN_VERSION) {
+    if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
+             (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 SystemProperties::GetExtSurfaceEnabled())) ||
+            apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
+        apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
         return true;
     }
     switch (aceNewPipeEnabledType_) {
