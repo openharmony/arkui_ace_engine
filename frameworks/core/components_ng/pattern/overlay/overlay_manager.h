@@ -79,7 +79,6 @@ public:
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft);
-
     void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
         bool isLunar, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
@@ -98,10 +97,16 @@ public:
      */
     bool RemoveOverlay();
 
-private:
-    void PopToast();
+    void RegisterOnHideMenu(std::function<void()> callback)
+    {
+        onHideMenuCallback_ = callback;
+    }
 
-    WeakPtr<FrameNode> toast_;
+private:
+    void PopToast(int32_t targetId);
+
+    // toast should contain id to avoid multiple delete.
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> toastMap_;
 
     /**  find/register menu node and update menu's display position
      *
@@ -111,10 +116,6 @@ private:
 
     void FocusDialog(const RefPtr<FrameNode>& dialogNode);
     void BlurDialog();
-
-    // helper functions to show/hide popups with animation
-    void Show(const RefPtr<FrameNode>& node);
-    void Pop(const RefPtr<FrameNode>& node);
 
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);
@@ -128,6 +129,8 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     WeakPtr<UINode> rootNodeWeak_;
+
+    std::function<void()> onHideMenuCallback_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };
