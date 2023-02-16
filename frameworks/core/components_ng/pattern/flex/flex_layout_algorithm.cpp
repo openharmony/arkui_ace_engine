@@ -434,7 +434,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 CheckBaselineProperties(childLayoutWrapper);
                 const auto& flexItemProperty = childLayoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
                 if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
-                    flexItemProperties.totalGrow += flexItemProperty->GetFlexGrowValue();
+                    flexItemProperties.totalGrow += flexItemProperty->GetFlexGrow().value_or(0.0f);
                 }
                 secondaryMeasureList_.emplace_back(child);
             }
@@ -447,7 +447,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                     const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
                     if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
-                        flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrowValue();
+                        flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
                     }
                     secondaryMeasureList_.pop_back();
                 }
