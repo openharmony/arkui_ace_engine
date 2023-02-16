@@ -839,15 +839,18 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
+    auto apiTargetVersion = context->GetApplicationInfo()->apiTargetVersion;
     const auto& hapModuleInfo = context->GetHapModuleInfo();
     std::vector<OHOS::AppExecFwk::Metadata> metaData;
     if (hapModuleInfo) {
         metaData = hapModuleInfo->metadata;
     }
-    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
-        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType, metaData);
-    LOGI("UIContent: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
-        apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
+    auto useNewPipe =
+        AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
+            apiCompatibleVersion, apiTargetVersion, apiReleaseType, metaData);
+    LOGI("UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
+         "useNewPipe: %{public}d",
+        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
@@ -1537,8 +1540,7 @@ void UIContentImpl::UpdateFormSharedImage(const std::map<std::string, sptr<OHOS:
     }
 }
 
-void UIContentImpl::SetActionEventHandler(
-    std::function<void(const std::string& action)>&& actionCallback)
+void UIContentImpl::SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback)
 {
     CHECK_NULL_VOID(actionCallback);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1548,8 +1550,7 @@ void UIContentImpl::SetActionEventHandler(
     pipelineContext->SetActionEventHandler(std::move(actionCallback));
 }
 
-void UIContentImpl::SetErrorEventHandler(
-    std::function<void(const std::string&, const std::string&)>&& errorCallback)
+void UIContentImpl::SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback)
 {
     CHECK_NULL_VOID(errorCallback);
     auto container = Platform::AceContainer::GetContainer(instanceId_);

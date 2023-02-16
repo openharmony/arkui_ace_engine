@@ -53,64 +53,55 @@ std::ifstream& AceNewPipeJudgement::SafeGetLine(std::ifstream& configFile, std::
     return configFile;
 }
 
-bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(
-    const std::string& packagename, uint32_t apiCompatibleVersion, const std::string& apiReleaseType)
+bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(const std::string& packagename, uint32_t apiCompatibleVersion,
+    uint32_t apiTargetVersion, const std::string& apiReleaseType)
 {
+    if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
+             (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 SystemProperties::GetExtSurfaceEnabled())) ||
+            apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
+        apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
+        return true;
+    }
     switch (aceNewPipeEnabledType_) {
-        case AceNewPipeEnabledType::ACE_NEW_PIPE_PARTIALLY_ENABLED: {
-            if (aceNewPipeEnabledList_.find(packagename) != aceNewPipeEnabledList_.end()) {
-                return true;
-            }
-            break;
-        }
+        case AceNewPipeEnabledType::ACE_NEW_PIPE_PARTIALLY_ENABLED:
+            return aceNewPipeEnabledList_.find(packagename) != aceNewPipeEnabledList_.end();
         case AceNewPipeEnabledType::ACE_NEW_PIPE_ENABLED_FOR_ALL:
             return true;
-        case AceNewPipeEnabledType::ACE_NEW_PIPE_DISABLED: {
-            if (aceNewPipeEnabledList_.find(packagename) != aceNewPipeEnabledList_.end()) {
-                return false;
-            }
-            break;
-        }
+        case AceNewPipeEnabledType::ACE_NEW_PIPE_DISABLED:
+            return false;
         default:
-            break;
+            return false;
     }
-    return (apiCompatibleVersion == NEW_PIPE_MIN_VERSION &&
-               (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE ||
-                   apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW || SystemProperties::GetExtSurfaceEnabled())) ||
-           apiCompatibleVersion > NEW_PIPE_MIN_VERSION;
 }
 
 bool AceNewPipeJudgement::QueryAceNewPipeEnabledStage(const std::string& packagename, uint32_t apiCompatibleVersion,
-    const std::string& apiReleaseType, const std::vector<OHOS::AppExecFwk::Metadata>& metaData)
+    uint32_t apiTargetVersion, const std::string& apiReleaseType,
+    const std::vector<OHOS::AppExecFwk::Metadata>& metaData)
 {
-    switch (aceNewPipeEnabledType_) {
-        case AceNewPipeEnabledType::ACE_NEW_PIPE_PARTIALLY_ENABLED: {
-            if (aceNewPipeEnabledList_.find(packagename) != aceNewPipeEnabledList_.end()) {
-                return true;
-            }
-            break;
-        }
-        case AceNewPipeEnabledType::ACE_NEW_PIPE_ENABLED_FOR_ALL:
-            return true;
-        case AceNewPipeEnabledType::ACE_NEW_PIPE_DISABLED: {
-            if (aceNewPipeEnabledList_.find(packagename) != aceNewPipeEnabledList_.end()) {
-                return false;
-            }
-            break;
-        }
-        default:
-            break;
-    }
     bool closeArkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
     });
     if (closeArkTSPartialUpdate) {
         return false;
     }
-    return (apiCompatibleVersion == NEW_PIPE_MIN_VERSION &&
-               (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE ||
-                   apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW || SystemProperties::GetExtSurfaceEnabled())) ||
-           apiCompatibleVersion > NEW_PIPE_MIN_VERSION;
+    if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
+             (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 SystemProperties::GetExtSurfaceEnabled())) ||
+            apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
+        apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
+        return true;
+    }
+    switch (aceNewPipeEnabledType_) {
+        case AceNewPipeEnabledType::ACE_NEW_PIPE_PARTIALLY_ENABLED:
+            return aceNewPipeEnabledList_.find(packagename) != aceNewPipeEnabledList_.end();
+        case AceNewPipeEnabledType::ACE_NEW_PIPE_ENABLED_FOR_ALL:
+            return true;
+        case AceNewPipeEnabledType::ACE_NEW_PIPE_DISABLED:
+            return false;
+        default:
+            return false;
+    }
 }
 
 void AceNewPipeJudgement::InitAceNewPipeConfig()
@@ -131,12 +122,6 @@ void AceNewPipeJudgement::InitAceNewPipeWithConfigFile()
     if (!configFile.is_open() || !SafeGetLine(configFile, line) || line.empty()) {
         aceNewPipeEnabledType_ = AceNewPipeEnabledType::ACE_NEW_PIPE_DISABLED;
     } else if (line == ACE_NEW_PIPE_DISABLED_TAG) {
-        while (SafeGetLine(configFile, line)) {
-            if (line.empty() || StartsWith(line, "//")) {
-                continue;
-            }
-            aceNewPipeEnabledList_.insert(line);
-        }
         aceNewPipeEnabledType_ = AceNewPipeEnabledType::ACE_NEW_PIPE_DISABLED;
     } else if (line == ACE_NEW_PIPE_ENABLED_FOR_ALL_TAG) {
         aceNewPipeEnabledType_ = AceNewPipeEnabledType::ACE_NEW_PIPE_ENABLED_FOR_ALL;
