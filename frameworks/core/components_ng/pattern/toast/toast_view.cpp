@@ -73,7 +73,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     Dimension maxWidth;
     Dimension minHeight;
     FontWeight fontWeight;
-    Dimension toastbottom;
+    Dimension toastBottom;
     BorderRadiusProperty borderRadius;
     PaddingProperty paddings;
 
@@ -83,7 +83,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     fontSize = toastTheme->GetTextStyle().GetFontSize();
     minWidth = Dimension(toastTheme->GetMinWidth().ConvertToPx());
     minHeight = Dimension(toastTheme->GetMinHeight().ConvertToPx());
-    toastbottom = Dimension(
+    toastBottom = Dimension(
         GreatOrEqual(bottomPosition.Value(), 0.0) ? bottomPosition.Value() : toastTheme->GetBottom().ConvertToPx());
     auto radius = toastTheme->GetRadius();
     borderRadius.SetRadius(Dimension(radius.GetX().ConvertToPx()));
@@ -102,7 +102,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
 
     textlayoutProperty->UpdateContent(message);
     textlayoutProperty->UpdateTextColor(textColor);
-    textlayoutProperty->UpdateTextAlign(TextAlign::START);
+    textlayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     textlayoutProperty->UpdateFontWeight(fontWeight);
     textlayoutProperty->UpdateFontSize(fontSize);
     textlayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
@@ -113,9 +113,10 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     textContext->UpdateBackgroundColor(toastBackgroundColor);
     textContext->UpdateBorderRadius(borderRadius);
     textContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
+    toastNode->MarkModifyDone();
 
     toastContext->UpdateOffset(
-        OffsetT<Dimension>(0.0_px, rootHeight - Dimension(CONTAINER_TITLE_HEIGHT.ConvertToPx()) - toastbottom));
+        OffsetT<Dimension>(0.0_px, rootHeight - Dimension(CONTAINER_TITLE_HEIGHT.ConvertToPx()) - toastBottom));
 
     textNode->MountToParent(toastNode);
     return toastNode;

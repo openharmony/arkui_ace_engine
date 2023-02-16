@@ -620,7 +620,15 @@ bool PipelineContext::OnBackPressed()
     }
 
     // if has popup, back press would hide popup and not trigger page back
-    if (overlayManager_->RemoveOverlay()) {
+    auto hasOverlay = false;
+    taskExecutor_->PostSyncTask(
+        [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)), &hasOverlay]() {
+            auto overlay = weakOverlay.Upgrade();
+            CHECK_NULL_VOID_NOLOG(overlay);
+            hasOverlay = overlay->RemoveOverlay();
+        },
+        TaskExecutor::TaskType::UI);
+    if (hasOverlay) {
         LOGI("popup hidden: back press accepted");
         return true;
     }
@@ -926,8 +934,8 @@ bool PipelineContext::RequestDefaultFocus()
     }
     auto defaultFocusNode = mainFocusHub->GetChildFocusNodeByType();
     if (!defaultFocusNode) {
-        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.",
-            mainNode->GetTag().c_str(), mainNode->GetId());
+        LOGD("RequestDefaultFocus: %{public}s/%{public}d do not has default focus node.", mainNode->GetTag().c_str(),
+            mainNode->GetId());
         return false;
     }
     if (!defaultFocusNode->IsFocusableWholePath()) {
