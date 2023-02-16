@@ -70,7 +70,9 @@ void ScrollBarPattern::OnModifyDone()
     auto scrollEndTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->StartAnimator();
+        if (pattern->GetDisplayMode() == DisplayMode::AUTO) {
+            pattern->StartAnimator();
+        }
     };
 
     auto hub = host->GetEventHub<EventHub>();
