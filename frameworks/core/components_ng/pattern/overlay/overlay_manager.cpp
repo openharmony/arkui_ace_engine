@@ -265,6 +265,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
 void OverlayManager::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
 {
+    LOGI("OverlayManager::ShowToast");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
@@ -277,9 +278,8 @@ void OverlayManager::ShowToast(
     toastMap_.clear();
 
     auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
-    auto toastId = toastNode->GetId();
     CHECK_NULL_VOID(toastNode);
-
+    auto toastId = toastNode->GetId();
     // mount to parent
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -289,17 +289,18 @@ void OverlayManager::ShowToast(
     option.SetCurve(curve);
     option.SetDuration(TOAST_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()] {
+    auto&& callback = [weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(id);
+        overlayManager->PopToast(toastId);
+    };
+    continuousTask_.Reset(callback);
+    option.SetOnFinishEvent([continuousTask = continuousTask_, duration, id = Container::CurrentId()] {
+        ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(context);
-        context->GetTaskExecutor()->PostDelayedTask(
-            [weak, toastId, duration, id] {
-                ContainerScope scope(id);
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->PopToast(toastId);
-            },
-            TaskExecutor::TaskType::UI, duration);
+        context->GetTaskExecutor()->PostDelayedTask(continuousTask, TaskExecutor::TaskType::UI, duration);
     });
     auto ctx = toastNode->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -318,6 +319,7 @@ void OverlayManager::ShowToast(
 
 void OverlayManager::PopToast(int32_t toastId)
 {
+    LOGI("OverlayManager::PopToast");
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     option.SetCurve(curve);
