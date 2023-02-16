@@ -82,15 +82,27 @@ public:
         constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
         constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 
-        auto left = propControlButtonStyle_->propControlButtonLeft.value_or(DEFAULT_CONTROL_BUTTON_LEFT);
-        auto top = propControlButtonStyle_->propControlButtonTop.value_or(DEFAULT_CONTROL_BUTTON_TOP);
-        auto width = propControlButtonStyle_->propControlButtonWidth.value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
-        auto height = propControlButtonStyle_->propControlButtonHeight.value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
         auto type = propSideBarContainerType_.value_or(SideBarContainerType::EMBED);
         auto sideBarWidth = propSideBarWidth_.value_or(DEFAULT_SIDE_BAR_WIDTH);
         auto minSideBarWidth = propMinSideBarWidth_.value_or(DEFAULT_MIN_SIDE_BAR_WIDTH);
         auto maxSideBarWidth = propMaxSideBarWidth_.value_or(DEFAULT_MAX_SIDE_BAR_WIDTH);
         auto sideBarPosition = propSideBarPosition_.value_or(SideBarPosition::START);
+        json->Put("type",
+            type == SideBarContainerType::EMBED ? "SideBarContainerType.Embed" : "SideBarContainerType.OVERLAY");
+        json->Put("showSideBar", propShowSideBar_.value_or(true) ? "true" : "false");
+        json->Put("showControlButton", propShowControlButton_.value_or(true) ? "true" : "false");
+        json->Put("sideBarWidth", std::to_string(sideBarWidth.Value()).c_str());
+        json->Put("minSideBarWidth", std::to_string(minSideBarWidth.Value()).c_str());
+        json->Put("maxSideBarWidth", std::to_string(maxSideBarWidth.Value()).c_str());
+        json->Put("sideBarPosition",
+            sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End");
+
+        CHECK_NULL_VOID(propControlButtonStyle_);
+
+        auto left = propControlButtonStyle_->propControlButtonLeft.value_or(DEFAULT_CONTROL_BUTTON_LEFT);
+        auto top = propControlButtonStyle_->propControlButtonTop.value_or(DEFAULT_CONTROL_BUTTON_TOP);
+        auto width = propControlButtonStyle_->propControlButtonWidth.value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+        auto height = propControlButtonStyle_->propControlButtonHeight.value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
 
         auto jsonControl = JsonUtil::Create(true);
         jsonControl->Put("left", std::to_string(left.Value()).c_str());
@@ -105,15 +117,6 @@ public:
 
         jsonControl->Put("icon", jsonIcon);
         json->Put("controlButton", jsonControl->ToString().c_str());
-        json->Put("type",
-            type == SideBarContainerType::EMBED ? "SideBarContainerType.Embed" : "SideBarContainerType.OVERLAY");
-        json->Put("showSideBar", propShowSideBar_.value_or(true) ? "true" : "false");
-        json->Put("showControlButton", propShowControlButton_.value_or(true) ? "true" : "false");
-        json->Put("sideBarWidth", std::to_string(sideBarWidth.Value()).c_str());
-        json->Put("minSideBarWidth", std::to_string(minSideBarWidth.Value()).c_str());
-        json->Put("maxSideBarWidth", std::to_string(maxSideBarWidth.Value()).c_str());
-        json->Put("sideBarPosition",
-            sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End");
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SideBarContainerType, SideBarContainerType, PROPERTY_UPDATE_MEASURE);
