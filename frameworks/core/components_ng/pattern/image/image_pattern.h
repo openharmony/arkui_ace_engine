@@ -74,6 +74,12 @@ public:
     void OnWindowShow() override;
     void OnVisibleChange(bool isVisible) override;
 
+    void EnableDrag();
+    void SetDraggable(bool draggable)
+    {
+        draggable_ = draggable;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override
@@ -111,6 +117,7 @@ private:
     RectF dstRect_;
     RectF srcRect_;
 
+    bool draggable_ = false;
     bool isShow_ = true; // TODO: remove it later when use [isActive_] to determine image data management
 
     // clear alt data after [OnImageLoadSuccess] being called

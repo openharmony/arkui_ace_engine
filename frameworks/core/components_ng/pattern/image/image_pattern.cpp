@@ -20,6 +20,7 @@
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -112,6 +113,9 @@ void ImagePattern::OnImageLoadSuccess()
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
     SetRedrawCallback();
 
+    if (draggable_) {
+        EnableDrag();
+    }
     // clear alt data
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
@@ -394,13 +398,52 @@ void ImagePattern::OnAttachToFrameNode()
     // register to onVisibleAreaChange
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto callback = [weak = WeakClaim(this)] (bool visible, double ratio) {
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto self = weak.Upgrade();
         CHECK_NULL_VOID(self);
         LOGD("current image visible ratio = %f", ratio);
         self->OnVisibleChange(visible);
     };
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+}
+
+void ImagePattern::EnableDrag()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto size = host->GetGeometryNode()->GetContentSize();
+    auto dragStart = [imageWk = WeakClaim(RawPtr(image_)), ctxWk = WeakClaim(RawPtr(loadingCtx_)), size](
+                         const RefPtr<OHOS::Ace::DragEvent>& /*event*/,
+                         const std::string& /*extraParams*/) -> DragDropInfo {
+        DragDropInfo info;
+        auto image = imageWk.Upgrade();
+        auto ctx = ctxWk.Upgrade();
+        CHECK_NULL_RETURN(image && ctx, info);
+
+        info.extraInfo = "image drag";
+        info.pixelMap = image->GetPixelMap();
+        if (info.pixelMap) {
+            LOGI("using pixmap onDrag");
+            return info;
+        }
+
+        auto node = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<ImagePattern>(); });
+        auto pattern = node->GetPattern<ImagePattern>();
+        pattern->image_ = image;
+        pattern->loadingCtx_ = ctx;
+
+        auto props = node->GetLayoutProperty<ImageLayoutProperty>();
+        props->UpdateImageSourceInfo(ctx->GetSourceInfo());
+        // set dragged image size to match this image
+        props->UpdateUserDefinedIdealSize(CalcSize(CalcLength(size.Width()), CalcLength(size.Height())));
+
+        info.customNode = node;
+        return info;
+    };
+    auto eventHub = GetHost()->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDragStart(std::move(dragStart));
 }
 
 } // namespace OHOS::Ace::NG
