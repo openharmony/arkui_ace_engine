@@ -27,7 +27,6 @@
 #include "adapter/preview/inspector/inspector_client.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
-#include "third_party/skia/include/core/SkFontMgr.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
@@ -114,15 +113,23 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
         LOGI("Initialize for current process.");
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
     });
-    if (runArgs_.formsEnabled) {
-        LOGI("CreateContainer with JS_CARD frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD, runArgs_);
-    } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
-        LOGI("CreateContainer with JS frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS, runArgs_);
+
+    if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
+        if (runArgs_.formsEnabled) {
+            LOGI("CreateContainer with JS_CARD frontend");
+            AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD, runArgs_);
+        } else {
+            LOGI("CreateContainer with JS frontend");
+            AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS, runArgs_);
+        }
     } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
-        LOGI("CreateContainer with JSDECLARATIVE frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, runArgs_);
+        if (runArgs_.formsEnabled) {
+            LOGI("CreateContainer with ETS_CARD frontend");
+            AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::ETS_CARD, runArgs_);
+        } else {
+            LOGI("CreateContainer with JSDECLARATIVE frontend");
+            AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, runArgs_);
+        }
     } else {
         LOGE("UnKnown frontend type");
     }

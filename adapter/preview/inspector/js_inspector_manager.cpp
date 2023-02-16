@@ -24,6 +24,7 @@
 #include "adapter/preview/inspector/inspector_client.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
+#include "core/components_ng/base/inspector.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -99,6 +100,10 @@ void JsInspectorManager::InitializeCallback()
 // resourse the child from root node to assemble the JSON tree
 void JsInspectorManager::AssembleJSONTree(std::string& jsonStr)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        jsonStr = NG::Inspector::GetInspector(false);
+        return;
+    }
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 

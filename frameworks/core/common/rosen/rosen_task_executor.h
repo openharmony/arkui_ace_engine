@@ -27,6 +27,7 @@
 
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "base/thread/sem_queue.h"
 
 namespace OHOS::Ace {
 
@@ -39,35 +40,6 @@ private:
     std::mutex mutex_;
     std::condition_variable cv_;
     bool valid_ = false;
-};
-
-template<class T>
-class SemQueue {
-public:
-    void PopFront(T &t)
-    {
-        std::unique_lock lock(mutex_);
-        if (queue_.empty()) {
-            const auto &func = [this]() {
-                return !queue_.empty();
-            };
-            cv_.wait(lock, func);
-        }
-        t = queue_.front();
-        queue_.pop();
-    }
-
-    void Push(const T &t)
-    {
-        std::unique_lock lock(mutex_);
-        queue_.push(std::move(t));
-        cv_.notify_all();
-    }
-
-private:
-    std::queue<T> queue_;
-    std::mutex mutex_;
-    std::condition_variable cv_;
 };
 
 class ACE_EXPORT RSTaskExecutor final : public TaskExecutor {
