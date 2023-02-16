@@ -86,6 +86,7 @@ foreach(item, ace_platforms) {
     # libace target
     ohos_shared_library("libace") {
       deps = [ "$ace_root/build:libace_static_ohos" ]
+      version_script = "libace.map"
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem
     }
