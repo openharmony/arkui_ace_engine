@@ -17,12 +17,12 @@
 
 #include "include/vsync_station.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+#include "session_stage.h"
 
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "session_stage.h"
 
 namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;

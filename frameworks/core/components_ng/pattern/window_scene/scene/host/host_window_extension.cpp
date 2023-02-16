@@ -15,24 +15,60 @@
 
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
 
+#include "extension_session.h"
+#include "extension_session_manager.h"
+
+#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 
 HostWindowExtension::HostWindowExtension(const std::string& bundleName, const std::string& abilityName)
-    : bundleName_(bundleName), abilityName_(abilityName)
 {
-    // ExtensionAbilityInfo extensionAbilityInfo = {
-    //     abilityName_ = abilityName_,
-    //     bundleName_ = bundleName_;
-    // }
-    // session_ = ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionAbilityInfo);
+    auto callerToken = nullptr;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowPattern = pipelineContext->GetWindowPattern();
+    if (windowPattern) {
+        // callerToken = windowPattern->GetCallerToken();
+    } else {
+        LOGD("Current pipeline does not use window scene");
+    }
+
+    Rosen::WindowSession::AbilityInfo extensionAbilityInfo = {
+        .bundleName_ = bundleName,
+        .abilityName_ = abilityName,
+        .callerToken_ = callerToken,
+        .isExtension_ = true,
+    };
+    session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionAbilityInfo);
     RegisterLifecycleListener();
+    RequestExtensionSessionActivation();
+}
+
+HostWindowExtension::~HostWindowExtension()
+{
+    RequestExtensionSessionBackground();
 }
 
 void HostWindowExtension::RequestExtensionSessionActivation()
 {
-    // CHECK_NULL_VOID(session_);
+    CHECK_NULL_VOID(session_);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(extensionSession);
+}
 
-    // ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(session_);
+void HostWindowExtension::RequestExtensionSessionBackground()
+{
+    CHECK_NULL_VOID(session_);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(extensionSession);
+}
+
+void HostWindowExtension::RequestExtensionSessionDestruction()
+{
+    CHECK_NULL_VOID(session_);
+    sptr<Rosen::ExtensionSession> extensionSession(static_cast<Rosen::ExtensionSession*>(session_.GetRefPtr()));
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(extensionSession);
 }
 
 } // namespace OHOS::Ace::NG

@@ -15,27 +15,22 @@
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_extension.h"
 
-// #include "extension_session_stage.h"
-#include "session_stage.h"
+#include "extension_session_stage.h"
 
 namespace OHOS::Ace::NG {
 
-// extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowExtension(
-//     const std::shared_ptr<AbilityRuntime::Context>& context,
-//     const sptr<Rosen::ISession>& iExtensionSession,
-//     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
-// {
-//     LOGI("Ace lib loaded, CreateWindowExtension.");
-//     return new WindowExtension(context, iExtensionSession, surfaceNode);
-// }
-
-WindowExtension::WindowExtension(
-    /* const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iExtensionSession,
-    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode */)
-    : WindowPattern(nullptr, nullptr)
+extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
-    // sessionStage_ = new Rosen::ExtensionSessionStage(iExtensionSession);
+    LOGI("Ace lib loaded, CreateWindowExtension.");
+    return new WindowExtension(context, iSession, surfaceNode);
+}
+
+WindowExtension::WindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    : WindowPattern(context, surfaceNode)
+{
+    sessionStage_ = new Rosen::ExtensionSessionStage(iSession);
 }
 
 } // namespace OHOS::Ace::NG

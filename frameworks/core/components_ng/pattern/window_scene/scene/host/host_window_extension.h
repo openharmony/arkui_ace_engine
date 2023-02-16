@@ -25,7 +25,7 @@ class HostWindowExtension : public HostWindowPattern {
 
 public:
     HostWindowExtension(const std::string& bundleName, const std::string& abilityName);
-    ~HostWindowExtension() override = default;
+    ~HostWindowExtension();
 
 protected:
     /**
@@ -39,9 +39,8 @@ protected:
     }
 
     void RequestExtensionSessionActivation();
-
-    std::string bundleName_;
-    std::string abilityName_;
+    void RequestExtensionSessionBackground();
+    void RequestExtensionSessionDestruction();
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowExtension);

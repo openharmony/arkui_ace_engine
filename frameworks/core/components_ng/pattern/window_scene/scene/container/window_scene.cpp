@@ -20,17 +20,17 @@
 namespace OHOS::Ace::NG {
 
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     LOGI("Ace lib loaded, CreateWindowScene.");
-    return new WindowScene(context, iSceneSession, surfaceNode);
+    return new WindowScene(context, iSession, surfaceNode);
 }
 
 WindowScene::WindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
     : WindowPattern(context, surfaceNode)
 {
-    sessionStage_ = new Rosen::SceneSessionStage(iSceneSession);
+    sessionStage_ = new Rosen::SceneSessionStage(iSession);
 }
 
 } // namespace OHOS::Ace::NG

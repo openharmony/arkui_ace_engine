@@ -45,7 +45,7 @@ UIWindow* CreateRootSceneFromLib()
 }
 
 UIWindow* CreateWindowSceneFromLib(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
@@ -58,11 +58,11 @@ UIWindow* CreateWindowSceneFromLib(const std::shared_ptr<AbilityRuntime::Context
         return nullptr;
     }
 
-    return entry(context, iSceneSession, surfaceNode);
+    return entry(context, iSession, surfaceNode);
 }
 
 UIWindow* CreateWindowExtensionFromLib(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iExtensionSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
@@ -75,7 +75,7 @@ UIWindow* CreateWindowExtensionFromLib(const std::shared_ptr<AbilityRuntime::Con
         return nullptr;
     }
 
-    return entry(context, iExtensionSession, surfaceNode);
+    return entry(context, iSession, surfaceNode);
 }
 
 std::shared_ptr<UIWindow> UIWindow::CreateRootScene()
@@ -85,16 +85,16 @@ std::shared_ptr<UIWindow> UIWindow::CreateRootScene()
 }
 
 std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSceneSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
-    std::shared_ptr<UIWindow> window(CreateWindowSceneFromLib(context, iSceneSession, surfaceNode));
+    std::shared_ptr<UIWindow> window(CreateWindowSceneFromLib(context, iSession, surfaceNode));
     return window;
 }
 
 std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iExtensionSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
-    std::shared_ptr<UIWindow> window(CreateWindowExtensionFromLib(context, iExtensionSession, surfaceNode));
+    std::shared_ptr<UIWindow> window(CreateWindowExtensionFromLib(context, iSession, surfaceNode));
     return window;
 }
 
