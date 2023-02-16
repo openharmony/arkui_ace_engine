@@ -133,6 +133,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
+    void RemoveLastHotZoneRect() const;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -155,6 +156,7 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    bool isFirstAddhotZoneRect_ = true;
     
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };
