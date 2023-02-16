@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
@@ -531,13 +532,15 @@ void RegisterAllModule(BindingTarget globalObj)
     for (auto& iter : bindFuncs) {
         iter.second(globalObj);
     }
+    RegisterExtraViews(globalObj);
 }
 
 void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 {
     auto func = bindFuncs.find(moduleName);
     if (func == bindFuncs.end()) {
-        LOGW("Component not exist, name: %{public}s", moduleName.c_str());
+        LOGI("JS module not exist, try to find in extra, name: %{public}s", moduleName.c_str());
+        RegisterExtraViewByName(globalObj, moduleName);
         return;
     }
     if ((*func).first == "Swiper") {
