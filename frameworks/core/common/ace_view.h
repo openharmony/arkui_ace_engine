@@ -57,7 +57,8 @@ public:
     using CardViewAccessibilityParamsCallback = std::function<void(const std::string& key, bool focus)>;
     virtual void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) = 0;
 
-    using ViewChangeCallback = std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>;
+    using ViewChangeCallback = std::function<void(int32_t width, int32_t height,
+        WindowSizeChangeReason type, const std::function<void()>& callback, const uint64_t syncId)>;
     virtual void RegisterViewChangeCallback(ViewChangeCallback&& callback) = 0;
 
     using ViewPositionChangeCallback = std::function<void(int32_t posX, int32_t posY)>;

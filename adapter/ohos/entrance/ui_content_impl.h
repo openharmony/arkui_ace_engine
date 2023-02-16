@@ -67,7 +67,9 @@ public:
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
-    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
+    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0) override;
+    void NotifyReleaseProcess() override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 

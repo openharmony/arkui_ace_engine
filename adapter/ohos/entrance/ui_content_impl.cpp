@@ -1382,7 +1382,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 
-void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
+void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::function<void()>& callback, const uint64_t syncId)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
@@ -1391,8 +1392,9 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    NotifyReleaseProcess();
     taskExecutor->PostTask(
-        [config, container, reason]() {
+        [config, container, reason, callback, syncId]() {
             container->SetWindowPos(config.Left(), config.Top());
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
@@ -1407,10 +1409,15 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             metrics.device_pixel_ratio = config.Density();
             Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-                static_cast<WindowSizeChangeReason>(reason));
+                static_cast<WindowSizeChangeReason>(reason), callback, syncId);
             Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
         },
         TaskExecutor::TaskType::PLATFORM);
+}
+
+void UIContentImpl::NotifyReleaseProcess()
+{
+    Platform::FlutterAceView::NotifyReleaseProcess();
 }
 
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)

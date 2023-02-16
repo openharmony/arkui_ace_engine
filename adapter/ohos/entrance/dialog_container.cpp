@@ -130,11 +130,14 @@ void DialogContainer::InitializeViewChangeCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](
-        int32_t width, int32_t height, WindowSizeChangeReason type) {
+        int32_t width, int32_t height, WindowSizeChangeReason type, const std::function<void()>& callback,
+        const uint64_t syncId) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height, type]() { context->OnSurfaceChanged(width, height, type); },
+            [context, width, height, type, callback, syncId]() {
+                context->OnSurfaceChanged(width, height, type, callback);
+            },
             TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
