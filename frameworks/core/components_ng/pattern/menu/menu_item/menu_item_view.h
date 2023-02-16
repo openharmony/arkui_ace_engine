@@ -38,13 +38,15 @@ public:
     // createMenuItem with startIcon, content, endIcon, labelInfo
     static void Create(const MenuItemProperties& props);
 
+    static void SetSelected(bool isSelected = false);
     static void SetSelectIcon(bool isShow = false);
     static void SetOnChange(std::function<void(bool)>&& onChange);
 
 private:
     static void AddIcon(const std::optional<std::string>& startIcon, const RefPtr<FrameNode>& row);
     static void AddContent(const std::string& content, const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& menuItem);
-    static void AddLabelInfo(const std::optional<std::string>& labelInfo, const RefPtr<FrameNode>& row);
+    static void AddLabelInfo(
+        const std::optional<std::string>& labelInfo, const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& menuItem);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_VIEW_H

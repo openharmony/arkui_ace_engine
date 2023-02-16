@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -81,7 +82,8 @@ void MenuItemView::AddContent(
     menuItemPattern->SetContentNode(contentNode);
 }
 
-void MenuItemView::AddLabelInfo(const std::optional<std::string>& labelInfo, const RefPtr<FrameNode>& row)
+void MenuItemView::AddLabelInfo(
+    const std::optional<std::string>& labelInfo, const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& menuItem)
 {
     auto labelStr = labelInfo.value_or("");
     if (!labelStr.empty()) {
@@ -102,6 +104,10 @@ void MenuItemView::AddLabelInfo(const std::optional<std::string>& labelInfo, con
 
         labelNode->MountToParent(row);
         labelNode->MarkModifyDone();
+
+        auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->SetLabelNode(labelNode);
     }
 }
 
@@ -150,7 +156,7 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
     rightRow->MountToParent(menuItem);
-    AddLabelInfo(menuItemProps.labelInfo, rightRow);
+    AddLabelInfo(menuItemProps.labelInfo, rightRow, menuItem);
     AddIcon(menuItemProps.endIcon, rightRow);
 
     auto buildFunc = menuItemProps.buildFunc;
@@ -159,6 +165,13 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
         CHECK_NULL_VOID(pattern);
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
+}
+
+void MenuItemView::SetSelected(bool isSelected)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelected(isSelected);
 }
 
 void MenuItemView::SetSelectIcon(bool isShow)
