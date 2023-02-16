@@ -179,7 +179,7 @@ void CheckBoxGroupPattern::OnClick()
     CHECK_NULL_VOID(paintProperty);
     bool isSelected = false;
     auto status = paintProperty->GetSelectStatus();
-    isSelected = status != CheckBoxGroupPaintProperty::SelectStatus::ALL;
+    isSelected = status == CheckBoxGroupPaintProperty::SelectStatus::NONE;
     paintProperty->UpdateCheckBoxGroupSelect(isSelected);
     isClick_ = true;
     UpdateState();
@@ -255,10 +255,17 @@ void CheckBoxGroupPattern::UpdateUnSelect()
 
 void CheckBoxGroupPattern::UpdateUIStatus(bool check)
 {
-    uiStatus_ = check ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
-    shapeScale_ = 1.0f;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto selectStatus = paintProperty->GetSelectStatus();
+    if (selectStatus == CheckBoxGroupPaintProperty::SelectStatus::PART) {
+        uiStatus_ = check ? UIStatus::PART_TO_ON : UIStatus::PART_TO_OFF;
+    } else {
+        uiStatus_ = check ? UIStatus::OFF_TO_ON : UIStatus::ON_TO_OFF;
+    }
+    shapeScale_ = 1.0f;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

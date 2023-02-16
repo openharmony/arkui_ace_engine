@@ -298,6 +298,8 @@ public:
     }
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
+    
+    void RemoveLastHotZoneRect() const;
 
     bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
 
