@@ -164,7 +164,7 @@ bool AnimatedImage::GetCachedFrame(uint32_t idx)
     auto cache = ctx->GetImageCache();
     CHECK_NULL_RETURN(cache, false);
     auto image = cache->GetCacheImageNG(cacheKey_ + std::to_string(idx));
-    CHECK_NULL_RETURN(image && image->imagePtr, false);
+    CHECK_NULL_RETURN_NOLOG(image && image->imagePtr, false);
     currentFrame_ = image->imagePtr;
     LOGD("frame cache found src = %{public}s, frame = %{public}d", cacheKey_.c_str(), idx);
     return true;

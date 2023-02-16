@@ -33,4 +33,9 @@ void SvgCanvasImage::DrawToRSCanvas(
 void SvgCanvasImage::SetRedrawCallback(std::function<void()>&& callback) {}
 
 void SvgCanvasImage::ControlAnimation(bool play) {}
+
+bool SvgCanvasImage::IsStatic()
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG
