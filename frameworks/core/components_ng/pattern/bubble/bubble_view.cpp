@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -21,6 +22,7 @@
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/popup/popup_theme.h"
@@ -41,11 +43,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-
-constexpr Dimension DEFAULT_FONT_SIZE = 14.0_fp;
-constexpr Dimension BUTTON_PADDING = 8.0_fp;
-constexpr Dimension BUTTON_ZERO_PADDING = 0.0_fp;
-
 OffsetF GetDisplayWindowRectOffset()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -55,6 +52,26 @@ OffsetF GetDisplayWindowRectOffset()
     auto displayWindowOffset = OffsetF(pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetX(),
         pipelineContext->GetDisplayWindowRectInfo().GetOffset().GetY());
     return displayWindowOffset;
+}
+
+RefPtr<PopupTheme> GetPopupTheme()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
+    return popupTheme;
+}
+
+Dimension GetMaxWith()
+{
+    auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
+    auto parent = gridColumnInfo->GetParent();
+    if (parent) {
+        parent->BuildColumnWidth();
+    }
+    auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
+    return maxWidth;
 }
 
 } // namespace
@@ -101,11 +118,32 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
         child = CreateCombinedChild(param, popupId, targetId);
+        popupPaintProp->UpdatePrimaryButtonShow(primaryButton.showButton);
+        popupPaintProp->UpdateSecondaryButtonShow(secondaryButton.showButton);
         popupPaintProp->UpdateAutoCancel(false);
     } else {
-        child = CreateMessage(message, useCustom);
+        auto textNode = CreateMessage(message, useCustom);
+        auto popupTheme = GetPopupTheme();
+        auto padding = popupTheme->GetPadding();
+
+        auto layoutProps = textNode->GetLayoutProperty<TextLayoutProperty>();
+        PaddingProperty textPadding;
+        textPadding.left = CalcLength(padding.Left());
+        textPadding.right = CalcLength(padding.Right());
+        textPadding.top = CalcLength(padding.Top());
+        textPadding.bottom = CalcLength(padding.Bottom());
+        layoutProps->UpdatePadding(textPadding);
+        layoutProps->UpdateAlignment(Alignment::CENTER);
+        auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
+        layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
+        textNode->MarkModifyDone();
+        child = textNode;
     }
     // TODO: GridSystemManager is not completed, need to check later.
+    auto maxWidth = GetMaxWith();
+    auto childLayoutProperty = child->GetLayoutProperty();
+    CHECK_NULL_RETURN(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
     child->MountToParent(popupNode);
     return popupNode;
 }
@@ -191,23 +229,13 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateContent(message);
-    layoutProperty->UpdateFontSize(DEFAULT_FONT_SIZE);
+    auto popupTheme = GetPopupTheme();
+    layoutProperty->UpdateFontSize(popupTheme->GetFontSize());
     if (IsUseCustom) {
         layoutProperty->UpdateTextColor(Color::BLACK);
     } else {
-        layoutProperty->UpdateTextColor(Color::WHITE);
+        layoutProperty->UpdateTextColor(popupTheme->GetFontColor());
     }
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, nullptr);
-    auto padding = popupTheme->GetPadding();
-    PaddingProperty textPadding;
-    textPadding.left = CalcLength(padding.Left());
-    textPadding.right = CalcLength(padding.Right());
-    textPadding.top = CalcLength(padding.Top());
-    textPadding.bottom = CalcLength(padding.Bottom());
-    layoutProperty->UpdatePadding(textPadding);
     textNode->MarkModifyDone();
     return textNode;
 }
@@ -220,20 +248,24 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(const RefPtr<PopupParam>& para
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START); // mainAxisAlign
     layoutProps->UpdateCrossAxisAlign(FlexAlign::FLEX_END);  // crossAxisAlign
     auto message = BubbleView::CreateMessage(param->GetMessage(), param->IsUseCustom());
-    message->MountToParent(columnNode);
-    auto buttonRow = BubbleView::CreateButtons(param, popupId, targetId);
-    buttonRow->MountToParent(columnNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
-    CHECK_NULL_RETURN(popupTheme, nullptr);
+
+    auto popupTheme = GetPopupTheme();
     auto padding = popupTheme->GetPadding();
-    PaddingProperty columnPadding;
-    columnPadding.left = CalcLength(padding.Left());
-    columnPadding.right = CalcLength(padding.Right());
-    columnPadding.top = CalcLength(padding.Top());
-    columnPadding.bottom = CalcLength(padding.Bottom());
-    layoutProps->UpdatePadding(columnPadding);
+    auto textLayoutProps = message->GetLayoutProperty<TextLayoutProperty>();
+    PaddingProperty textPadding;
+    textPadding.left = CalcLength(padding.Left());
+    textPadding.right = CalcLength(padding.Right());
+    textPadding.top = CalcLength(padding.Top());
+    textLayoutProps->UpdatePadding(textPadding);
+    message->MarkModifyDone();
+    message->MountToParent(columnNode);
+
+    auto buttonRow = BubbleView::CreateButtons(param, popupId, targetId);
+    auto maxWidth = GetMaxWith();
+    auto childLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(maxWidth), std::nullopt));
+    buttonRow->MountToParent(columnNode);
 
     columnNode->MarkModifyDone();
     return columnNode;
@@ -244,7 +276,7 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
     auto rowId = ElementRegister::GetInstance()->MakeUniqueId();
     auto rowNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, rowId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
     auto layoutProps = rowNode->GetLayoutProperty<LinearLayoutProperty>();
-    layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+    layoutProps->UpdateSpace(GetPopupTheme()->GetButtonSpacing());
     auto primaryButtonProp = param->GetPrimaryButtonProperties();
     auto primaryButton = BubbleView::CreateButton(primaryButtonProp, popupId, targetId, param);
     if (primaryButton) {
@@ -257,6 +289,12 @@ RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int
         secondaryButton->MountToParent(rowNode);
         secondaryButton->MarkModifyDone();
     }
+    auto popupTheme = GetPopupTheme();
+    auto littlePadding = popupTheme->GetLittlePadding();
+    PaddingProperty rowPadding;
+    rowPadding.right = CalcLength(littlePadding);
+    rowPadding.bottom = CalcLength(littlePadding);
+    layoutProps->UpdatePadding(rowPadding);
 
     rowNode->MarkModifyDone();
     return rowNode;
@@ -272,26 +310,42 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
     CHECK_NULL_RETURN(buttonTheme, nullptr);
+    auto popupTheme = GetPopupTheme();
+    auto focusColor = popupTheme->GetFocusColor();
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    // set button focus color
+    buttonPattern->setComponentButtonType(ComponentButtonType::POPUP);
+    buttonPattern->SetFocusBorderColor(focusColor);
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
     auto isUseCustom = param->IsUseCustom();
     auto isShow = param->IsShow();
+
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
+    auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateFontSize(popupTheme->GetButtonFontSize());
+    auto buttonTextInsideMargin = popupTheme->GetButtonTextInsideMargin();
     buttonTextNode->MountToParent(buttonNode);
 
     PaddingProperty buttonPadding;
-    buttonPadding.left = CalcLength(BUTTON_PADDING);
-    buttonPadding.right = CalcLength(BUTTON_PADDING);
-    buttonPadding.top = CalcLength(BUTTON_ZERO_PADDING);
-    buttonPadding.bottom = CalcLength(BUTTON_ZERO_PADDING);
+    auto padding = buttonTheme->GetPadding();
+    buttonPadding.left = CalcLength(buttonTextInsideMargin);
+    buttonPadding.right = CalcLength(buttonTextInsideMargin);
     buttonProp->UpdatePadding(buttonPadding);
     buttonProp->UpdateType(ButtonType::CAPSULE);
     buttonProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
+    buttonProp->UpdateAlignment(Alignment::CENTER);
+    auto buttonMiniMumWidth = popupTheme->GetButtonMiniMumWidth().ConvertToPx();
+    buttonProp->UpdateCalcMinSize(CalcSize(CalcLength(buttonMiniMumWidth), std::nullopt));
     auto renderContext = buttonNode->GetRenderContext();
     if (renderContext) {
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     }
+    buttonNode->MarkModifyDone();
 
     auto buttonEventHub = buttonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(buttonEventHub, nullptr);

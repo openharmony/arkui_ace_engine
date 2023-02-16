@@ -41,6 +41,8 @@ public:
         paintProperty->propBackgroundColor_ = CloneBackgroundColor();
         paintProperty->propArrowOffset_ = CloneArrowOffset();
         paintProperty->propPlacement_ = ClonePlacement();
+        paintProperty->propPrimaryButtonShow_ = ClonePrimaryButtonShow();
+        paintProperty->propSecondaryButtonShow_ = CloneSecondaryButtonShow();
         return paintProperty;
     }
 
@@ -54,6 +56,8 @@ public:
         ResetUseCustom();
         ResetPlacement();
         ResetArrowOffset();
+        ResetPrimaryButtonShow();
+        ResetSecondaryButtonShow();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCancel, bool, PROPERTY_UPDATE_RENDER);
@@ -63,6 +67,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UseCustom, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowOffset, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrimaryButtonShow, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondaryButtonShow, bool, PROPERTY_UPDATE_RENDER);
 
     ACE_DISALLOW_COPY_AND_MOVE(BubbleRenderProperty);
 };

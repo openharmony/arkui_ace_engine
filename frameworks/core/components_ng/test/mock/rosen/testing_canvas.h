@@ -19,11 +19,14 @@
 
 #include "testing_bitmap.h"
 #include "testing_brush.h"
+#include "testing_color.h"
 #include "testing_path.h"
 #include "testing_pen.h"
 #include "testing_point.h"
+#include "testing_point3.h"
 #include "testing_rect.h"
 #include "testing_round_rect.h"
+#include "testing_shadowflags.h"
 
 namespace OHOS::Ace::Testing {
 enum class ClipOp {
@@ -49,6 +52,9 @@ public:
     virtual void Rotate(float deg, float sx, float sy) {}
     virtual void Translate(float dx, float dy) {}
     virtual void DrawBitmap(const TestingBitmap& bitmap, const float px, const float py) {}
+    virtual void DrawShadow(const TestingPath& path, const TestingPoint3& planeParams, const TestingPoint3& devLightPos,
+        float lightRadius, TestingColor ambientColor, TestingColor spotColor, TestingShadowFlags flag)
+    {}
 
     virtual TestingCanvas& AttachPen(const TestingPen& pen)
     {

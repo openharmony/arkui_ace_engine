@@ -26,6 +26,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -264,10 +265,25 @@ void BubblePaintMethod::PaintTopBubble(RSCanvas& rsCanvas)
     path_.QuadTo(arrowPositionX - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx() + arrowOffset,
         arrowPositionY + BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(), arrowPositionX + arrowOffset, arrowPositionY);
     path_.Close();
-    // TODO: need shadow
-    // RosenDecorationPainter::PaintShadow(path_, ShadowConfig::DefaultShadowM, skCanvas);
+    // paint shadow
+    PaintShadow(path_, ShadowConfig::DefaultShadowM, rsCanvas);
     rsCanvas.DrawPath(path_);
     rsCanvas.ClipPath(path_, RSClipOp::INTERSECT);
+}
+
+void BubblePaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
+{
+    canvas.Save();
+    RSPath rsPath = path;
+    rsPath.Offset(shadow.GetOffset().GetX(), shadow.GetOffset().GetY());
+    RSColor spotColor = ToRSColor(shadow.GetColor());
+    RSPoint3 planeParams = { 0.0f, 0.0f, shadow.GetElevation() };
+    RSPoint3 lightPos = { rsPath.GetBounds().GetLeft() / 2 + rsPath.GetBounds().GetRight(),
+        rsPath.GetBounds().GetTop() / 2.0 + rsPath.GetBounds().GetBottom() / 2.0, shadow.GetLightHeight() };
+    RSColor ambientColor = RSColor(0, 0, 0, 0);
+    canvas.DrawShadow(rsPath, planeParams, lightPos, shadow.GetLightRadius(), ambientColor, spotColor,
+        RSShadowFlags::TRANSPARENT_OCCLUDER);
+    canvas.Restore();
 }
 
 void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
@@ -329,7 +345,8 @@ void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
     path_.QuadTo(arrowPositionX - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx() + arrowOffset,
         arrowPositionY - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(), arrowPositionX + arrowOffset, arrowPositionY);
     path_.Close();
-    // TODO: shadow is not completed.
+    // paint shadow
+    PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawPath(path_);
     canvas.ClipPath(path_, RSClipOp::INTERSECT);
 }
@@ -337,7 +354,7 @@ void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
 void BubblePaintMethod::PaintDefaultBubble(RSCanvas& canvas)
 {
     auto rrect = MakeRRect();
-    // TODO: need paint shadow
+    PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawRoundRect(rrect);
     canvas.ClipRoundRect(rrect, RSClipOp::INTERSECT);
 }
@@ -362,7 +379,7 @@ RSRoundRect BubblePaintMethod::MakeRRect()
 void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
     BuildCompletePath(path_);
-    // TODO: need shadow
+    PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawPath(path_);
     canvas.ClipPath(path_, RSClipOp::INTERSECT);
 }
@@ -370,7 +387,8 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
 void BubblePaintMethod::BuildCompletePath(RSPath& path)
 {
     float arrowOffset = GetArrowOffset(arrowPlacement_);
-    float radiusPx = border_.BottomLeftRadius().GetY().ConvertToPx();
+    auto borderRadius = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Height() / 2);
+    float radiusPx = borderRadius;
     path.Reset();
     path.MoveTo(childOffset_.GetX() + radiusPx, childOffset_.GetY());
     BuildTopLinePath(path, arrowOffset, radiusPx);
@@ -386,51 +404,53 @@ void BubblePaintMethod::BuildCompletePath(RSPath& path)
 
 void BubblePaintMethod::BuildTopLinePath(RSPath& path, float arrowOffset, float radius)
 {
+    float childOffsetY = childOffset_.GetY();
+    float arrowPositionY = arrowPosition_.GetY();
     switch (arrowPlacement_) {
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            path.LineTo(arrowPosition_.GetX() + arrowOffset - BEZIER_WIDTH_HALF.ConvertToPx(), childOffset_.GetY());
+            path.LineTo(arrowPosition_.GetX() + arrowOffset - BEZIER_WIDTH_HALF.ConvertToPx(), childOffsetY);
             path.QuadTo(arrowPosition_.GetX() + arrowOffset - BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
+                arrowPositionY + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
                 arrowPosition_.GetX() + arrowOffset - BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx(),
-                arrowPosition_.GetY() + BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx());
+                arrowPositionY + BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx() + arrowOffset,
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(), arrowPosition_.GetX() + arrowOffset,
-                arrowPosition_.GetY());
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(), arrowPosition_.GetX() + arrowOffset,
+                arrowPositionY);
             path.QuadTo(arrowPosition_.GetX() + arrowOffset + BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(),
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(),
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(),
                 arrowPosition_.GetX() + arrowOffset + BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx(),
-                arrowPosition_.GetY() + BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx());
+                arrowPositionY + BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() + arrowOffset + BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
+                arrowPositionY + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
                 arrowPosition_.GetX() + arrowOffset + BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx(),
-                arrowPosition_.GetY() + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx());
+                arrowPositionY + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx());
             break;
         default:
             break;
     }
-    path.LineTo(childOffset_.GetX() + childSize_.Width() - radius, childOffset_.GetY());
+    path.LineTo(childOffset_.GetX() + childSize_.Width() - radius, childOffsetY);
 }
 
 void BubblePaintMethod::BuildCornerPath(RSPath& path, const Placement& placement, float radius)
 {
+    float childOffsetY = childOffset_.GetY();
     switch (placement) {
         case Placement::TOP_LEFT:
-            path.ArcTo(
-                radius, radius, 0.0f, RSPathDirection::CW_DIRECTION, childOffset_.GetX() + radius, childOffset_.GetY());
+            path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION, childOffset_.GetX() + radius, childOffsetY);
             break;
         case Placement::TOP_RIGHT:
             path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION, childOffset_.GetX() + childSize_.Width(),
-                childOffset_.GetY() + radius);
+                childOffsetY + radius);
             break;
         case Placement::BOTTOM_RIGHT:
             path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION,
-                childOffset_.GetX() + childSize_.Width() - radius, childOffset_.GetY() + childSize_.Height());
+                childOffset_.GetX() + childSize_.Width() - radius, childOffsetY + childSize_.Height());
             break;
         case Placement::BOTTOM_LEFT:
             path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION, childOffset_.GetX(),
-                childOffset_.GetY() + childSize_.Height() - radius);
+                childOffsetY + childSize_.Height() - radius);
             break;
         default:
             break;
@@ -439,91 +459,97 @@ void BubblePaintMethod::BuildCornerPath(RSPath& path, const Placement& placement
 
 void BubblePaintMethod::BuildRightLinePath(RSPath& path, float arrowOffset, float radius)
 {
+    float childOffsetY = childOffset_.GetY();
+    float arrowPositionY = arrowPosition_.GetY();
     switch (arrowPlacement_) {
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
             path.LineTo(childOffset_.GetX() + childSize_.Width(),
-                arrowPosition_.GetY() + arrowOffset - BEZIER_WIDTH_HALF.ConvertToPx());
+                arrowPositionY + arrowOffset - BEZIER_WIDTH_HALF.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset - BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
+                arrowPositionY + arrowOffset - BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
                 arrowPosition_.GetX() - BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset - BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx());
+                arrowPositionY + arrowOffset - BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() + BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(), arrowPosition_.GetX(),
-                arrowPosition_.GetY() + arrowOffset);
+                arrowPositionY + arrowOffset - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(), arrowPosition_.GetX(),
+                arrowPositionY + arrowOffset);
             path.QuadTo(arrowPosition_.GetX() + BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset + BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(),
+                arrowPositionY + arrowOffset + BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(),
                 arrowPosition_.GetX() - BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset + BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx());
+                arrowPositionY + arrowOffset + BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset + BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
+                arrowPositionY + arrowOffset + BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
                 arrowPosition_.GetX() - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset + BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx());
+                arrowPositionY + arrowOffset + BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx());
             break;
         default:
             break;
     }
-    path.LineTo(childOffset_.GetX() + childSize_.Width(), childOffset_.GetY() + childSize_.Height() - radius);
+    path.LineTo(childOffset_.GetX() + childSize_.Width(), childOffsetY + childSize_.Height() - radius);
 }
 
 void BubblePaintMethod::BuildBottomLinePath(RSPath& path, float arrowOffset, float radius)
 {
+    float childOffsetY = childOffset_.GetY();
+    float arrowPositionY = arrowPosition_.GetY();
     switch (arrowPlacement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
             path.LineTo(arrowPosition_.GetX() + arrowOffset + BEZIER_WIDTH_HALF.ConvertToPx(),
-                childOffset_.GetY() + childSize_.Height());
+                childOffsetY + childSize_.Height());
             path.QuadTo(arrowPosition_.GetX() + arrowOffset + BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
                 arrowPosition_.GetX() + arrowOffset + BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx(),
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx());
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() + arrowOffset + BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(),
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(), arrowPosition_.GetX() + arrowOffset,
-                arrowPosition_.GetY());
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(), arrowPosition_.GetX() + arrowOffset,
+                arrowPositionY);
             path.QuadTo(arrowPosition_.GetX() + arrowOffset - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(),
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(),
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(),
                 arrowPosition_.GetX() + arrowOffset - BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx(),
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx());
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() + arrowOffset - BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
                 arrowPosition_.GetX() + arrowOffset - BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx(),
-                arrowPosition_.GetY() - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx());
+                arrowPositionY - BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx());
             break;
         default:
             break;
     }
-    path.LineTo(childOffset_.GetX() + radius, childOffset_.GetY() + childSize_.Height());
+    path.LineTo(childOffset_.GetX() + radius, childOffsetY + childSize_.Height());
 }
 
 void BubblePaintMethod::BuildLeftLinePath(RSPath& path, float arrowOffset, float radius)
 {
+    float childOffsetY = childOffset_.GetY();
+    float arrowPositionY = arrowPosition_.GetY();
     switch (arrowPlacement_) {
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            path.LineTo(childOffset_.GetX(), arrowPosition_.GetY() + arrowOffset + BEZIER_WIDTH_HALF.ConvertToPx());
+            path.LineTo(childOffset_.GetX(), arrowPositionY + arrowOffset + BEZIER_WIDTH_HALF.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset + BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
+                arrowPositionY + arrowOffset + BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
                 arrowPosition_.GetX() + BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset + BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx());
+                arrowPositionY + arrowOffset + BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset + BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(), arrowPosition_.GetX(),
-                arrowPosition_.GetY() + arrowOffset);
+                arrowPositionY + arrowOffset + BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(), arrowPosition_.GetX(),
+                arrowPositionY + arrowOffset);
             path.QuadTo(arrowPosition_.GetX() - BEZIER_VERTICAL_OFFSET_FIRST.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(),
+                arrowPositionY + arrowOffset - BEZIER_HORIZON_OFFSET_FIRST.ConvertToPx(),
                 arrowPosition_.GetX() + BEZIER_VERTICAL_OFFSET_SECOND.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset - BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx());
+                arrowPositionY + arrowOffset - BEZIER_HORIZON_OFFSET_SECOND.ConvertToPx());
             path.QuadTo(arrowPosition_.GetX() + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset - BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
+                arrowPositionY + arrowOffset - BEZIER_HORIZON_OFFSET_THIRD.ConvertToPx(),
                 arrowPosition_.GetX() + BEZIER_VERTICAL_OFFSET_THIRD.ConvertToPx(),
-                arrowPosition_.GetY() + arrowOffset - BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx());
+                arrowPositionY + arrowOffset - BEZIER_HORIZON_OFFSET_FOURTH.ConvertToPx());
             break;
         default:
             break;
     }
-    path.LineTo(childOffset_.GetX(), childOffset_.GetY() + radius);
+    path.LineTo(childOffset_.GetX(), childOffsetY + radius);
 }
 
 float BubblePaintMethod::GetArrowOffset(const Placement& placement)
