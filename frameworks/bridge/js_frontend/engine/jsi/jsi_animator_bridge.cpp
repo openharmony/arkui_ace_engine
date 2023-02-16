@@ -390,7 +390,7 @@ shared_ptr<JsValue> JsiAnimatorBridgeUtils::JsAnimatorUpdate(shared_ptr<JsRuntim
     if (argv.empty()) {
         return runtime->NewUndefined();
     }
-    shared_ptr<JsValue> paramObj = argv[0]->GetElement(runtime, 0);
+    const shared_ptr<JsValue>& paramObj = argv[0];
     if (!paramObj || !paramObj->IsObject(runtime)) {
         LOGE("JsAnimatorUpdate failed, first argument is not an object!");
         return runtime->NewUndefined();
@@ -430,7 +430,7 @@ shared_ptr<JsValue> JsiAnimatorBridgeUtils::JsAnimatorReset(shared_ptr<JsRuntime
             ERROR_CODE_PARAM_INVALID);
         return runtime->NewUndefined();
     }
-    shared_ptr<JsValue> paramObj = argv[0]->GetElement(runtime, 0);
+    const shared_ptr<JsValue>& paramObj = argv[0];
     if (!paramObj || !paramObj->IsObject(runtime)) {
         LOGE("JsAnimatorUpdate failed, first argument is not an object!");
         runtime->ThrowError("Parameter error. The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
@@ -667,6 +667,7 @@ void JsiAnimatorTaskUpdate::AnimatorBridgeTaskFunc(const RefPtr<JsAcePage>& page
         return;
     }
     animator->ClearInterpolators();
+    animator->ResetIsReverse();
     UpdateAnimator(animator, animatorBridge, runtime_, params_);
 }
 
