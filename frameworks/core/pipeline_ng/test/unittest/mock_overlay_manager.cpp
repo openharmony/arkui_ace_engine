@@ -24,7 +24,7 @@ void OverlayManager::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
 {}
 
-void OverlayManager::PopToast() {}
+void OverlayManager::PopToast(int32_t toastId) {}
 
 void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo) {}
 

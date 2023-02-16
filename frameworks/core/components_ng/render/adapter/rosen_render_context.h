@@ -186,6 +186,7 @@ public:
         const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
+    void ScaleAnimation(const AnimationOption& option, double begin, double end) override;
 
     void PaintAccessibilityFocus() override;
 
