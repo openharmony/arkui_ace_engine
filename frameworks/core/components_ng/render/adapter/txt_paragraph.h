@@ -59,6 +59,7 @@ public:
 
     // interfaces for painting
     void Paint(const RSCanvas& canvas, float x, float y) override;
+    void Paint(SkCanvas* skCanvas, float x, float y) override;
 
     // interfaces for calculate the the specified paragraph position
     int32_t GetHandlePositionForClick(const Offset& offset) override;

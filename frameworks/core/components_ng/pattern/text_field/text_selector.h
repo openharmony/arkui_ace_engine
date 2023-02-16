@@ -93,6 +93,11 @@ struct TextSelector {
         return destinationOffset == baseOffset;
     }
 
+    double GetSelectHeight() const
+    {
+        return std::max(firstHandle.Height(), secondHandle.Height());
+    }
+
     std::string ToString()
     {
         std::string result;

@@ -57,6 +57,9 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void ProcessDefaultPadding(PaddingProperty& paddings);
+
+private:
+    void AddDragFrameNodeToManager() const;
 };
 
 } // namespace OHOS::Ace::NG

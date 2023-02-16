@@ -54,6 +54,7 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
+    void SetDraggable(bool draggable) override;
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

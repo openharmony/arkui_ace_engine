@@ -154,6 +154,7 @@ ohos_unittest("video_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/syntax/for_each_node.cpp",
 
     # mock
+    "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
@@ -162,6 +163,8 @@ ohos_unittest("video_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_media_player_creator.cpp",
