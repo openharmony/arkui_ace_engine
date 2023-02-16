@@ -51,7 +51,7 @@ public:
 private:
     float constrainStrokeWidth_ = 0.0f;
     float dividerLength_ = 0.0f;
-    bool vertical_;
+    bool vertical_ = false;
 
     std::optional<Color> dividerColor_;
     std::optional<LineCap> lineCap_;
