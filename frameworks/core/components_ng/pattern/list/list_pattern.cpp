@@ -358,6 +358,9 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         if (item) {
             item->SwiperReset();
         }
+        if (animator_ && !animator_->IsStopped()) {
+            animator_->Stop();
+        }
         return true;
     }
     auto scrollBar = GetScrollBar();
@@ -470,6 +473,9 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
 void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
 {
     LOGI("AnimateTo:%f, duration:%f", position, duration);
+    if (!IsScrollableStopped()) {
+        StopScrollable();
+    }
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
     }
