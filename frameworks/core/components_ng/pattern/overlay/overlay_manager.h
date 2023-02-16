@@ -131,6 +131,7 @@ private:
     WeakPtr<UINode> rootNodeWeak_;
 
     std::function<void()> onHideMenuCallback_ = nullptr;
+    CancelableCallback<void()> continuousTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };
