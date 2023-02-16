@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_extension.h"
 
-#include "extension_session_stage.h"
+#include "session/container/include/extension_session_stage.h"
 
 namespace OHOS::Ace::NG {
 

@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/window_scene/root/root_scene.h"
 
 #include "dm/display_manager.h"
-#include "session_stage.h"
+#include "session/container/include/session_stage.h"
 #include "wm_common.h"
 
 namespace OHOS::Ace::NG {

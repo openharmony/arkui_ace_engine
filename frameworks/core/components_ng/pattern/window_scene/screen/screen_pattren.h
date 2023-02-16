@@ -16,10 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCREEN_PATTERN_H
 
-#include "screen_session.h"
-
 #include "core/components_ng/pattern/stack/stack_pattern.h"
-
+#include "session/screen/include/screen_session.h"
 namespace OHOS::Ace::NG {
 
 class ScreenPattern : public StackPattern {

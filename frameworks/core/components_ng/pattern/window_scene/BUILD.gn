@@ -55,9 +55,9 @@ build_component_ng("window_scene") {
     ]
 
     external_deps = [
-      "window_manager:ui_session",
-      "window_manager:ui_session_manager",
-      "window_manager:screen_session",
+      "window_manager:scene_session",
+      "window_manager:scene_session_manager",
+      "window_manager:screen_session"
     ]
   }
 }
