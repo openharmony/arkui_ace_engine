@@ -20,42 +20,58 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_tip_modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SliderPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SliderPaintMethod, NodePaintMethod)
 
 public:
-    struct Parameters {
-        float trackThickness = 0.0f;
-        float blockDiameter = 0.0f;
-        float sliderLength = 0.0f;
-        float borderBlank = 0.0f;
-        float stepRatio = 0.0f;
-        float valueRatio = 0.0f;
-        float hotCircleShadowWidth = 0.0f;
-        bool hotFlag = false;
-        bool mouseHoverFlag_ = false;
-        bool mousePressedFlag_ = false;
-    };
     struct TipParameters {
         SizeF bubbleSize_;
         OffsetF bubbleOffset_;
         OffsetF textOffset_;
         bool isDrawTip_ = false;
     };
-    explicit SliderPaintMethod(const RefPtr<SliderTipModifier>& sliderTipModifier, const Parameters& parameters,
+    explicit SliderPaintMethod(const RefPtr<SliderContentModifier>& sliderContentModifier,
+        const SliderContentModifier::Parameters& parameters, const RefPtr<SliderTipModifier>& sliderTipModifier,
         RefPtr<NG::Paragraph> paragraph, const TipParameters& tipParameters)
-        : sliderTipModifier_(sliderTipModifier), parameters_(parameters), paragraph_(std::move(paragraph)),
-          tipParameters_(tipParameters)
+        : sliderContentModifier_(sliderContentModifier), parameters_(parameters), sliderTipModifier_(sliderTipModifier),
+          paragraph_(std::move(paragraph)), tipParameters_(tipParameters)
     {}
     ~SliderPaintMethod() override = default;
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(sliderContentModifier_, nullptr);
+        return sliderContentModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(sliderContentModifier_);
+        auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(sliderTheme);
+        sliderContentModifier_->UpdateData(
+            paintProperty, paintWrapper->GetContentSize(), paintWrapper->GetContentOffset(), sliderTheme);
+        sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
+        sliderContentModifier_->GetBackgroundPen(parameters_, paintWrapper->GetContentOffset(), sliderTheme);
+        if (paintProperty->GetShowStepsValue(false)) {
+            sliderContentModifier_->GetMarkerPen(parameters_, paintWrapper->GetContentOffset(), sliderTheme);
+        }
+        sliderContentModifier_->GetSelectPen(parameters_, paintWrapper->GetContentOffset(), sliderTheme);
+        sliderContentModifier_->GetCirclePen(parameters_, paintWrapper->GetContentOffset(), sliderTheme);
+    }
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
     {
@@ -107,40 +123,12 @@ public:
     }
 
 private:
-    struct LinePenAndSize {
-        RSPen pen;
-        PointF start;
-        PointF end;
-    };
-
-    struct MarkerPenAndPath {
-        RSPen pen;
-        RSPath path;
-    };
-
-    struct CirclePenAndSize {
-        RSPen pen;
-        RSPen shadowPen;
-        PointF center;
-        float radius;
-        float shadowRadius;
-    };
-
-    LinePenAndSize GetBackgroundPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
-        const RefPtr<SliderTheme>& theme) const;
-    MarkerPenAndPath GetMarkerPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
-        const RefPtr<SliderTheme>& theme) const;
-    LinePenAndSize GetSelectPen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
-        const RefPtr<SliderTheme>& theme) const;
-    CirclePenAndSize GetCirclePen(const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
-        const RefPtr<SliderTheme>& theme) const;
+    RefPtr<SliderContentModifier> sliderContentModifier_;
+    SliderContentModifier::Parameters parameters_;
 
     RefPtr<SliderTipModifier> sliderTipModifier_;
-    Parameters parameters_;
     RefPtr<NG::Paragraph> paragraph_;
     TipParameters tipParameters_;
-    // Distance between slide track and Content boundary
-    float centerWidth_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPaintMethod);
 };
 } // namespace OHOS::Ace::NG
