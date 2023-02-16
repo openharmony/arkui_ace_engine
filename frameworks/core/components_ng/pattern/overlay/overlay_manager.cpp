@@ -289,11 +289,12 @@ void OverlayManager::ShowToast(
     option.SetCurve(curve);
     option.SetDuration(TOAST_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), toastId, duration] {
+    option.SetOnFinishEvent([weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()] {
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID_NOLOG(context);
         context->GetTaskExecutor()->PostDelayedTask(
-            [weak, toastId, duration] {
+            [weak, toastId, duration, id] {
+                ContainerScope scope(id);
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->PopToast(toastId);
@@ -323,10 +324,11 @@ void OverlayManager::PopToast(int32_t toastId)
     option.SetDuration(TOAST_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
     // OnFinishEvent should be executed in UI thread.
-    option.SetOnFinishEvent([weak = WeakClaim(this), toastId] {
+    option.SetOnFinishEvent([weak = WeakClaim(this), toastId, id = Container::CurrentId()] {
         auto context = PipelineContext::GetCurrentContext();
         context->GetTaskExecutor()->PostTask(
-            [weak, toastId]() {
+            [weak, toastId, id]() {
+                ContainerScope scope(id);
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID_NOLOG(overlayManager);
                 auto toastIter = overlayManager->toastMap_.find(toastId);
