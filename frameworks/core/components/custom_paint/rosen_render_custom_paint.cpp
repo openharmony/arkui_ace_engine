@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
+#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
 #include "third_party/bounds_checking_function/include/securec.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
@@ -37,11 +38,13 @@
 #include "third_party/skia/include/utils/SkBase64.h"
 #include "third_party/skia/include/utils/SkParsePath.h"
 
+#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/linear_map.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -49,6 +52,7 @@
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
+#include "core/components/text/text_theme.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_provider.h"
@@ -77,6 +81,7 @@ const std::string URL_SYMBOL = ";base64,";
 const std::string IMAGE_PNG = "image/png";
 const std::string IMAGE_JPEG = "image/jpeg";
 const std::string IMAGE_WEBP = "image/webp";
+const std::u16string ELLIPSIS = u"\u2026";
 
 // If args is empty or invalid format, use default: image/png
 std::string GetMimeType(const std::string& args)
@@ -518,8 +523,7 @@ void RosenRenderCustomPaint::StrokeText(const Offset& offset, const std::string&
     PaintText(offset, x, y, true);
 }
 
-double RosenRenderCustomPaint::MeasureTextInner(const std::string& text, double fontSize,
-    int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
 {
     using namespace Constants;
     txt::ParagraphStyle style;
@@ -531,22 +535,110 @@ double RosenRenderCustomPaint::MeasureTextInner(const std::string& text, double 
     std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
     txt::TextStyle txtStyle;
     std::vector<std::string> fontFamilies;
-    txtStyle.font_size = fontSize;
-    FontStyle fontStyleInt = OHOS::Ace::Framework::ConvertStrToFontStyle(std::to_string(fontStyle));
-    txtStyle.font_style = ConvertTxtFontStyle(fontStyleInt);
-    FontWeight fontWeightStr = StringUtils::StringToFontWeight(fontWeight);
+    if (context.fontSize) {
+        txtStyle.font_size = context.fontSize.value().ConvertToPx();
+    } else {
+        auto context = PipelineBase::GetCurrentContext();
+        auto textTheme = context->GetTheme<TextTheme>();
+        txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
+    }
+    txtStyle.font_style = ConvertTxtFontStyle(context.fontStyle);
+    FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
     txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
-    StringUtils::StringSplitter(fontFamily, ',', fontFamilies);
+    StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
     txtStyle.font_families = fontFamilies;
-    txtStyle.letter_spacing = letterSpacing;
+    if (context.letterSpacing.has_value()) {
+        txtStyle.letter_spacing = context.letterSpacing.value().ConvertToPx();
+    }
+
     builder->PushStyle(txtStyle);
-    builder->AddText(StringUtils::Str8ToStr16(text));
+    builder->AddText(StringUtils::Str8ToStr16(context.textContent));
     auto paragraph = builder->Build();
     if (!paragraph) {
         return 0.0;
     }
     paragraph->Layout(Size::INFINITE_SIZE);
-    return paragraph->GetMaxIntrinsicWidth();
+    return std::ceil(paragraph->GetLongestLine());
+}
+
+Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
+{
+    using namespace Constants;
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    if (!fontCollection) {
+        LOGW("fontCollection is null");
+        return Size(0.0, 0.0);
+    }
+    txt::ParagraphStyle style;
+    style.text_align = ConvertTxtTextAlign(context.textAlign);
+    if (context.textOverlayFlow == TextOverflow::ELLIPSIS) {
+        style.ellipsis = ELLIPSIS;
+    }
+    if (GreatNotEqual(context.maxlines, 0.0)) {
+        style.max_lines = context.maxlines;
+    }
+
+    std::unique_ptr<txt::ParagraphBuilder> builder = txt::ParagraphBuilder::CreateTxtBuilder(style, fontCollection);
+    txt::TextStyle txtStyle;
+    std::vector<std::string> fontFamilies;
+    if (context.fontSize.has_value()) {
+        txtStyle.font_size = context.fontSize.value().ConvertToPx();
+    } else {
+        auto context = PipelineBase::GetCurrentContext();
+        auto textTheme = context->GetTheme<TextTheme>();
+        txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
+    }
+    txtStyle.font_style = ConvertTxtFontStyle(context.fontStyle);
+    FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
+    txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
+    StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
+    txtStyle.font_families = fontFamilies;
+    if (context.letterSpacing.has_value()) {
+        txtStyle.letter_spacing = context.letterSpacing.value().ConvertToPx();
+    }
+    if (context.lineHeight.has_value()) {
+        if (context.lineHeight->Unit() == DimensionUnit::PERCENT) {
+            txtStyle.has_height_override = true;
+            txtStyle.height = context.lineHeight->Value();
+        } else {
+            auto lineHeight = context.lineHeight.value().ConvertToPx();
+            if (!NearEqual(lineHeight, txtStyle.font_size) && (lineHeight > 0.0) && (!NearZero(txtStyle.font_size))) {
+                txtStyle.height = lineHeight / txtStyle.font_size;
+                txtStyle.has_height_override = true;
+            }
+        }
+    }
+    builder->PushStyle(txtStyle);
+    std::string content = context.textContent;
+    StringUtils::TransformStrCase(content, static_cast<int32_t>(context.textCase));
+    builder->AddText(StringUtils::Str8ToStr16(content));
+    auto paragraph = builder->Build();
+    if (!paragraph) {
+        return Size(0.0, 0.0);
+    }
+    if (context.constraintWidth.has_value()) {
+        paragraph->Layout(context.constraintWidth.value().ConvertToPx());
+    } else {
+        paragraph->Layout(Size::INFINITE_SIZE);
+    }
+    double textWidth = 0.0;
+    auto* paragraphTxt = static_cast<txt::ParagraphTxt*>(paragraph.get());
+    if (paragraphTxt->GetLineCount() == 1) {
+        textWidth = std::max(paragraph->GetLongestLine(), paragraph->GetMaxIntrinsicWidth());
+    } else {
+        textWidth = paragraph->GetLongestLine();
+    }
+    auto sizeWidth = std::min(paragraph->GetMaxWidth(), textWidth);
+    sizeWidth =
+        context.constraintWidth.has_value() ? context.constraintWidth.value().ConvertToPx() : std::ceil(sizeWidth);
+
+    float baselineOffset = 0.0;
+    if (context.baselineOffset.has_value()) {
+        baselineOffset = static_cast<float>(context.baselineOffset.value().ConvertToPx());
+    }
+    float heightFinal = static_cast<float>(paragraph->GetHeight()) + std::fabs(baselineOffset);
+
+    return Size(sizeWidth, heightFinal);
 }
 
 double RosenRenderCustomPaint::MeasureText(const std::string& text, const PaintState& state)
@@ -1949,5 +2041,4 @@ sk_sp<SkImage> RosenRenderCustomPaint::GetImage(const std::string& src)
 
     return image;
 }
-
 } // namespace OHOS::Ace

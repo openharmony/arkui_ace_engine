@@ -20,6 +20,7 @@
 
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/base/utils/noncopyable.h"
+#include "frameworks/base/utils/measure_util.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
@@ -76,8 +77,7 @@ public:
         }
     }
 	
-    double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-        const std::string& fontWeight, const std::string& fontFamily, double letterSpace) override;
+    double MeasureText(const MeasureContext& context) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(CardFrontendDelegateDeclarative);
 

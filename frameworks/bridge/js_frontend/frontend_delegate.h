@@ -18,9 +18,11 @@
 
 #include <vector>
 
+#include "base/geometry/size.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/measure_util.h"
 #include "core/event/ace_event_helper.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/common/media_query/media_query_info.h"
@@ -111,8 +113,8 @@ public:
     // ----------------
     // system.measure
     // ----------------
-    virtual double MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing) = 0;
+    virtual double MeasureText(const MeasureContext& context) = 0;
+    virtual Size MeasureTextSize(const MeasureContext& context) = 0;
 
     // ----------------
     // system.prompt
