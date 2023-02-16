@@ -30,12 +30,12 @@ public:
     static void SetIndex(int32_t index);
     static void SetVertical(const std::string& value);
     static void SetBarPosition(const JSCallbackInfo& info);
-    static void SetScrollable(const JSCallbackInfo& info);
-    static void SetBarMode(const JSCallbackInfo& info);
+    static void SetScrollable(const std::string& value);
+    static void SetBarMode(const std::string& value);
     static void SetBarWidth(const JSCallbackInfo& info);
     static void SetBarHeight(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
-    static void SetAnimationDuration(const JSCallbackInfo& info);
+    static void SetAnimationDuration(float value);
 };
 
 } // namespace OHOS::Ace::Framework
