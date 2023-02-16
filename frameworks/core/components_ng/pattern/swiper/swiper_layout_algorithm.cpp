@@ -99,7 +99,6 @@ void SwiperLayoutAlgorithm::InitInActiveItems(float translateLength)
 
 void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
 {
-    ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::InitItemRange");
     itemRange_.clear();
 
     if (currentIndex_ < 0 || currentIndex_ > totalCount_ - 1) {
@@ -306,6 +305,10 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     // Mark inactive in wrapper.
     for (const auto& index : inActiveItems_) {
+        if (!NearZero(currentOffset_)) {
+            continue;
+        }
+
         if (swiperLayoutProperty->GetShowIndicatorValue(true) && index == totalCount_) {
             continue;
         }
