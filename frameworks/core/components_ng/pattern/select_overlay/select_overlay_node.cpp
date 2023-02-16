@@ -196,12 +196,9 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
 {
     std::vector<OptionParam> params;
     params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut);
-    params.emplace_back(
-        Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy);
-    params.emplace_back(
-        Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste);
-    params.emplace_back(
-        Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll);
 
     auto menuWrapper = MenuView::Create(std::move(params), -1);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
@@ -241,6 +238,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
         }
     }
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ElementRegister::GetInstance()->AddUINode(menu);
 
     return menu;
 }

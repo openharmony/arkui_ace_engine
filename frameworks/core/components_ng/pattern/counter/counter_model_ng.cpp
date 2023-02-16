@@ -82,6 +82,7 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(symbol);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(Color::BLACK);
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::CENTER);
     textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
@@ -146,7 +147,11 @@ void CounterModelNG::SetHeight(const Dimension& value)
     auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
     CHECK_NULL_VOID(subNode);
     auto subLayoutProperty = subNode->GetLayoutProperty();
-    subLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), CalcLength(value)));
+    subLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    auto subTextNode = AceType::DynamicCast<FrameNode>(subNode->GetFirstChild());
+    CHECK_NULL_VOID(subTextNode);
+    auto subTextLayoutProperty = subTextNode->GetLayoutProperty();
+    subTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
 
     int32_t contentId = frameNode->GetPattern<CounterPattern>()->GetContentId();
     auto contentNode = AceType::DynamicCast<FrameNode>(
@@ -159,7 +164,11 @@ void CounterModelNG::SetHeight(const Dimension& value)
     auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
     CHECK_NULL_VOID(addNode);
     auto addLayoutProperty = addNode->GetLayoutProperty();
-    addLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), CalcLength(value)));
+    addLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetFirstChild());
+    CHECK_NULL_VOID(addTextNode);
+    auto addTextLayoutProperty = addTextNode->GetLayoutProperty();
+    addTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
 }
 
 void CounterModelNG::SetWidth(const Dimension& value)

@@ -57,9 +57,10 @@ class OnTextChangedListener;
 namespace OHOS::Ace::NG {
 
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
-constexpr Dimension CURSOR_PADDING = 2.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
+
+enum class MouseStatus { PRESSED, RELEASED, MOVE, NONE };
 
 enum {
     ACTION_SELECT_ALL, // Smallest code unit.
@@ -414,7 +415,7 @@ public:
     }
 
     static std::u16string CreateObscuredText(int32_t len);
-    bool IsTextArea();
+    bool IsTextArea() const;
     const RectF& GetImageRect()
     {
         return imageRect_;
@@ -469,10 +470,21 @@ public:
         surfacePositionChangedCallbackId_ = id;
     }
 
+    void ProcessInnerPadding();
     void OnCursorMoveDone();
     bool IsDisabled();
 
     bool LastInputIsNewLine() const;
+    void OnHandleReverse(bool isReverse);
+    bool GetIsMousePressed() const
+    {
+        return isMousePressed_;
+    }
+    MouseStatus GetMouseStatus() const
+    {
+        return mouseStatus_;
+    }
+    void UpdateEditingValueToRecord();
 
 private:
     void HandleBlurEvent();
@@ -492,6 +504,7 @@ private:
     void InitClickEvent();
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
+    int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
 
     void AddScrollEvent();
     void OnTextAreaScroll(float dy);
@@ -546,7 +559,6 @@ private:
     void OnTextInputActionUpdate(TextInputAction value);
 
     // xts
-    std::u16string GetTextForDisplay() const;
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
     std::string GetPlaceholderFont() const;
@@ -572,7 +584,6 @@ private:
     void GetTextRectsInRange(int32_t begin, int32_t end, std::vector<RSTypographyProperties::TextBox>& textBoxes);
     bool CursorInContentRegion();
     bool OffsetInContentRegion(const Offset& offset);
-    void ProcessPadding();
     void SetDisabledStyle();
     void ResetBackgroundColor();
 
@@ -630,6 +641,7 @@ private:
     bool focusEventInitialized_ = false;
     bool preferredLineHeightNeedToUpdate = true;
     bool isMousePressed_ = false;
+    MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;

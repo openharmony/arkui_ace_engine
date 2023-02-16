@@ -38,6 +38,7 @@ public:
     ~FormRenderWindow() = default;
 
     void RequestFrame() override;
+    void Destroy() override;
     void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
@@ -53,7 +54,6 @@ public:
     }
 #endif
 
-    void SetFormRSSurfaceNode(void* surfaceNode) override;
     void OnShow() override;
     void OnHide() override;
     void FlushTasks() override;

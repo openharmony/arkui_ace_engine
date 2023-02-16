@@ -61,6 +61,11 @@ void MenuItemPattern::OnModifyDone()
     }
 }
 
+void MenuItemPattern::OnMountToParentDone()
+{
+    ModifyFontSize();
+}
+
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
 {
     auto host = GetHost();
@@ -388,5 +393,31 @@ void MenuItemPattern::AddSelectIcon()
         row->RemoveChildAtIndex(0);
         selectIcon_ = nullptr;
     }
+}
+
+void MenuItemPattern::ModifyFontSize()
+{
+    auto menu = GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto menuFontSize = menuPattern->FontSize();
+
+    ModifyFontSize(menuFontSize);
+}
+
+void MenuItemPattern::ModifyFontSize(const Dimension& fontSize)
+{
+    CHECK_NULL_VOID(content_);
+    auto contentProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(contentProperty);
+    contentProperty->UpdateFontSize(fontSize);
+    content_->MarkModifyDone();
+
+    CHECK_NULL_VOID(label_);
+    auto labelProperty = label_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(labelProperty);
+    labelProperty->UpdateFontSize(fontSize);
+    label_->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

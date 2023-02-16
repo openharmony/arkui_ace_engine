@@ -45,7 +45,6 @@ public:
     static void JsOnAccessibility(const JSCallbackInfo& info);
     static void JsCommonRemoteMessage(const JSCallbackInfo& info);
 
-    static void UpdateEventTarget(NodeId nodeId, BaseEventInfo& info);
     static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
 
 protected:

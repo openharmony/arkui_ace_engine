@@ -167,6 +167,13 @@ public:
 
     virtual bool CallRouterBackToPopPage() = 0;
 
+    virtual bool PopPageStackOverlay()
+    {
+        return false;
+    }
+
+    virtual void HideOverlays() {}
+
     virtual void OnPageShow() {}
 
     virtual void OnActionEvent(const std::string& action);
@@ -216,6 +223,8 @@ public:
     virtual void SetAppTitle(const std::string& title) = 0;
 
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
+
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
     virtual void RefreshRootBgColor() const {}
 
@@ -378,6 +387,16 @@ public:
     void SetImageCache(const RefPtr<ImageCache>& imageChache);
 
     RefPtr<ImageCache> GetImageCache() const;
+
+    const RefPtr<SharedImageManager>& GetSharedImageManager() const
+    {
+        return sharedImageManager_;
+    }
+
+    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
+    {
+        sharedImageManager_ = sharedImageManager;
+    }
 
     Window* GetWindow()
     {
@@ -814,6 +833,7 @@ protected:
     int32_t instanceId_ = 0;
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
+    RefPtr<SharedImageManager> sharedImageManager_;
     mutable std::shared_mutex imageCacheMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;

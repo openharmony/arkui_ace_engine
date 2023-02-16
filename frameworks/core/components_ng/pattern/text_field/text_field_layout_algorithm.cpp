@@ -108,10 +108,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     TextStyle textStyle;
     std::string textContent;
     bool showPlaceHolder = false;
-    auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width()) -
-                      pattern->GetHorizontalPaddingSum();
-    auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height()) -
-                       pattern->GetVerticalPaddingSum();
+    auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
+    auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
@@ -127,11 +125,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
     } else {
-        // for text area, max width is content width without password icon
+        // for text area or placeholder, max width is content width without password icon
         paragraph_->Layout(idealWidth);
     }
     auto paragraphNewWidth = static_cast<float>(paragraph_->GetMaxIntrinsicWidth());
-    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea()) {
+    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea() && !showPlaceHolder) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
     }
     if (showPlaceHolder) {
@@ -208,10 +206,16 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
-    if (pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
-        pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE) {
-        textRect_ = pattern->GetTextRect();
-    } else {
+    auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
+                          pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
+    auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
+                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL;
+    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
+                              pattern->GetIsMousePressed();
+    if (needToKeepTextRect) {
+        textRect_.SetOffset(pattern->GetTextRect().GetOffset());
+    }
+    if (!pattern->IsTextArea() && !needToKeepTextRect) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft();
@@ -300,6 +304,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     if (layoutProperty->HasPlaceholderTextAlign()) {
         textStyle.SetTextAlign(layoutProperty->GetPlaceholderTextAlign().value());
     }
+    textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText)
@@ -312,13 +317,14 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
     paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
-        paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
+        paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
     builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
     StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));
     if (!content.empty() && needObscureText) {
-        builder->AddText(TextFieldPattern::CreateObscuredText(static_cast<int32_t>(content.length())));
+        builder->AddText(
+            TextFieldPattern::CreateObscuredText(static_cast<int32_t>(StringUtils::ToWstring(content).length())));
     } else {
         builder->AddText(StringUtils::Str8ToStr16(content));
     }

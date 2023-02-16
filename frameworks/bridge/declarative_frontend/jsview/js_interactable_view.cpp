@@ -197,26 +197,6 @@ void JSInteractableView::JsOnAccessibility(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnAccessibility(std::move(onAccessibility));
 }
 
-void JSInteractableView::UpdateEventTarget(NodeId id, BaseEventInfo& info)
-{
-    auto container = Container::Current();
-    if (!container) {
-        LOGE("fail to get container");
-        return;
-    }
-    auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-    if (!context) {
-        LOGE("fail to get context");
-        return;
-    }
-    auto accessibilityManager = context->GetAccessibilityManager();
-    if (!accessibilityManager) {
-        LOGE("fail to get accessibility manager");
-        return;
-    }
-    accessibilityManager->UpdateEventTarget(id, info);
-}
-
 void JSInteractableView::JsCommonRemoteMessage(const JSCallbackInfo& info)
 {
     if (info.Length() != 0 && info[0]->IsObject()) {

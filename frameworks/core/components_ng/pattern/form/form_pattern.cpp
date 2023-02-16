@@ -84,6 +84,9 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     info.width = Dimension(size.Width());
     info.height = Dimension(size.Height());
     layoutProperty->UpdateRequestFormInfo(info);
+    if (formManagerBridge_ && cardInfo_.allowUpdate != info.allowUpdate) {
+        formManagerBridge_->SetAllowUpdate(info.allowUpdate);
+    }
 
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
@@ -127,6 +130,7 @@ void FormPattern::InitFormManagerDelegate()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     formManagerBridge_ = AceType::MakeRefPtr<FormManagerDelegate>(context);
+    formManagerBridge_->AddRenderDelegate();
     formManagerBridge_->RegisterRenderDelegateEvent();
     auto formUtils = FormManager::GetInstance().GetFormUtils();
     if (formUtils) {
@@ -240,6 +244,15 @@ void FormPattern::InitFormManagerDelegate()
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
             host->GetRenderContext()->RequestNextFrame();
+    });
+
+    formManagerBridge_->AddActionEventHandle(
+        [weak = WeakClaim(this), instanceID](const std::string& action) {
+            ContainerScope scope(instanceID);
+            LOGI("OnActionEvent action: %{public}s", action.c_str());
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->OnActionEvent(action);
     });
 }
 
@@ -387,7 +400,7 @@ void FormPattern::OnActionEvent(const std::string& action) const
     }
 
     auto type = actionType->GetString();
-    if (type != "router" && type != "message") {
+    if (type != "router" && type != "message" && type != "background") {
         LOGE("undefined event type");
         return;
     }

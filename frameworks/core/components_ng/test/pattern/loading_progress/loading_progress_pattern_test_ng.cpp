@@ -160,11 +160,11 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPaintMethodTest001, TestSi
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->loadingColor_ = COLOR_DEFUALT;
     /**
-     * @tc.steps: step3. test UpdateModifier function.
+     * @tc.steps: step3. test UpdateContentModifier function.
      * @tc.cases: case1. PaintWrapper has no loadingProgressPaintProperty and modifier will use default Color.
      */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
-    paintMethod->UpdateModifier(&paintWrapper);
+    paintMethod->UpdateContentModifier(&paintWrapper);
     EXPECT_EQ(paintMethod->color_, Color::BLUE);
     /**
      * @tc.cases: case2. LoadingProgressPaintProperty has no Color property and modifier will use Theme Color.
@@ -173,7 +173,7 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPaintMethodTest001, TestSi
     EXPECT_TRUE(loadingProgressPaintProperty != nullptr);
     PaintWrapper paintWrapper2(nullptr, nullptr, loadingProgressPaintProperty);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
-    paintMethod->UpdateModifier(&paintWrapper2);
+    paintMethod->UpdateContentModifier(&paintWrapper2);
     EXPECT_EQ(paintMethod->color_, COLOR_DEFUALT);
 }
 

@@ -86,8 +86,10 @@ public:
     void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
 
     // ArkTS Form
-    std::shared_ptr<Rosen::RSSurfaceNode> GetCardRootNode() override;
-    void ProcessFormUpdate(const std::string& data) override;
+    std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
+    void UpdateFormDate(const std::string& data) override;
+    void UpdateFormSharedImage(
+        const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
 
     void SetFormWidth(float width) override
     {
@@ -111,18 +113,9 @@ public:
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
-    void SetFormModuleName(const std::string& moduleName) override
-    {
-        formModuleName_ = moduleName;
-    }
-    void SetFormBundleName(const std::string& bundleName) override
-    {
-        formBundleName_ = bundleName;
-    }
-
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
-    void CommonInitializeCard(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
@@ -138,11 +131,14 @@ private:
     
     // ArkTS Form
     bool isFormRender_ = false;
+    bool isFormRenderInit_ = false;
     std::string bundleName_;
-    std::string formBundleName_;
-    std::string formModuleName_;
+    std::string moduleName_;
+    bool isBundle_ = false;
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
+    std::string formData_;
+    std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
 };
 
 } // namespace OHOS::Ace

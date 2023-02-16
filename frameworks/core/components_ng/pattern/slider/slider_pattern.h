@@ -37,8 +37,11 @@ public:
     {
         SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter_, sliderLength_, borderBlank_,
             stepRatio_, valueRatio_, hotBlockShadowWidth_, hotFlag_, mouseHoverFlag_, mousePressedFlag_ };
-        return MakeRefPtr<SliderPaintMethod>(
-            paintParameters, paragraph_, bubbleFlag_, bubbleSize_, bubbleOffset_, textOffset_);
+        SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
+        if (!sliderTipModifier_ && bubbleFlag_) {
+            sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>();
+        }
+        return MakeRefPtr<SliderPaintMethod>(sliderTipModifier_, paintParameters, paragraph_, tipParameters);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -136,6 +139,7 @@ private:
     SizeF bubbleSize_;
     OffsetF bubbleOffset_;
     OffsetF textOffset_;
+    RefPtr<SliderTipModifier> sliderTipModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

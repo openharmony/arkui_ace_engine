@@ -16,9 +16,9 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include "base/memory/referenced.h"
-#include "base/utils/time_util.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
@@ -56,6 +56,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             if (!node) {
                 continue;
             }
+            if (node->IsInDestroying()) {
+                continue;
+            }
             time = GetSysTimestamp();
             auto task = node->CreateLayoutTask(forceUseMainThread);
             if (task) {
@@ -83,6 +86,9 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     for (auto&& pageNodes : dirtyRenderNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node) {
+                continue;
+            }
+            if (node->IsInDestroying()) {
                 continue;
             }
             time = GetSysTimestamp();

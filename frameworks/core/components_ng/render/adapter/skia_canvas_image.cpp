@@ -49,7 +49,7 @@ SkPixmap CloneSkPixmap(SkPixmap& srcPixmap)
 
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     return AceType::MakeRefPtr<SkiaCanvasImage>();
 #else
     auto* imageRef = reinterpret_cast<fml::RefPtr<flutter::CanvasImage>*>(rawImage);
@@ -114,14 +114,14 @@ SkColorType SkiaCanvasImage::PixelFormatToSkColorType(const RefPtr<PixelMap>& pi
 
 void SkiaCanvasImage::ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage)
 {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
     image_->set_image(std::move(newSkGpuObjSkImage));
 #endif
 }
 
 int32_t SkiaCanvasImage::GetWidth() const
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     return 0;
 #else
     return image_->image() ? image_->width() : image_->compressWidth();
@@ -130,7 +130,7 @@ int32_t SkiaCanvasImage::GetWidth() const
 
 int32_t SkiaCanvasImage::GetHeight() const
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     return 0;
 #else
     return image_->image() ? image_->height() : image_->compressHeight();
@@ -201,7 +201,7 @@ void SkiaCanvasImage::DrawToRSCanvas(
 bool SkiaCanvasImage::DrawCompressedImage(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
-    CHECK_NULL_RETURN(GetCompressData(), false);
+    CHECK_NULL_RETURN_NOLOG(GetCompressData(), false);
 
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
