@@ -15,11 +15,10 @@
 
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
 
-#include "extension_session.h"
-#include "extension_session_manager.h"
-
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "session/host/include/extension_session.h"
+#include "session_manager/include/extension_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
