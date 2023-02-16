@@ -1427,8 +1427,8 @@ void RosenRenderCustomPaint::ImageObjReady(const RefPtr<ImageObject>& imageObj)
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
         currentSource_ = loadingSource_;
         CanvasImage canvasImage = canvasImage_;
-        TaskFunc func = [canvasImage](RenderCustomPaint& interface, const Offset& offset) {
-            interface.DrawImage(offset, canvasImage, 0, 0);
+        TaskFunc func = [canvasImage](RenderCustomPaint& iface, const Offset& offset) {
+            iface.DrawImage(offset, canvasImage, 0, 0);
         };
         tasks_.emplace_back(func);
         MarkNeedRender();

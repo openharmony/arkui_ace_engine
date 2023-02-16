@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,7 @@ const std::map<int, KeyCode> CODE_MAP = {
 
 }
 
+#ifndef ENABLE_ROSEN_BACKEND
 void KeyInputHandler::InitialTextInputCallback(FlutterDesktopWindowControllerRef controller)
 {
     // Register clipboard callback functions.
@@ -79,6 +80,28 @@ void KeyInputHandler::InitialTextInputCallback(FlutterDesktopWindowControllerRef
     // Register key event and input method callback functions.
     FlutterDesktopAddKeyboardHookHandler(controller, std::make_unique<KeyInputHandler>());
 }
+#else
+void KeyInputHandler::InitialTextInputCallback(const std::shared_ptr<OHOS::Rosen::GlfwRenderContext> &controller)
+{
+    // clipboard
+    auto callbackSetClipboardData = [controller](const std::string& data) {
+        controller->SetClipboardData(data);
+    };
+    auto callbackGetClipboardData = [controller]() {
+        return controller->GetClipboardData();
+    };
+    ClipboardProxy::GetInstance()->SetDelegate(
+        std::make_unique<ClipboardProxyImpl>(callbackSetClipboardData, callbackGetClipboardData));
+
+    // key: key_event(normal, modifier), char: unicode char input
+    controller->OnKey([](int key, int scancode, int action, int mods) {
+        KeyboardHook(nullptr, key, scancode, action, mods);
+    });
+    controller->OnChar([](unsigned int codepoint) {
+        CharHook(nullptr, codepoint);
+    });
+}
+#endif
 
 void KeyInputHandler::KeyboardHook(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -105,6 +128,9 @@ bool KeyInputHandler::RecognizeKeyEvent(int key, int action, int mods)
     keyEvent_.pressedCodes.clear();
     if (mods & GLFW_MOD_CONTROL) {
         keyEvent_.pressedCodes.push_back(KeyCode::KEY_CTRL_LEFT);
+    }
+    if (mods & GLFW_MOD_SUPER) {
+        keyEvent_.pressedCodes.push_back(KeyCode::KEY_META_LEFT);
     }
     if (mods & GLFW_MOD_SHIFT) {
         keyEvent_.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);

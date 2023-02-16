@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "adapter/preview/entrance/samples/touch_event_handler.h"
+#include "touch_event_handler.h"
 
 #include <vector>
 #include "base/log/log.h"
@@ -96,13 +96,15 @@ bool HandleTouchEvent(const std::vector<uint8_t>& data)
 
 }
 
-void TouchEventHandler::InitialTouchEventCallback()
+void TouchEventHandler::InitialTouchEventCallback(const GlfwController &controller)
 {
     LOGI("Initial callback function of touch event.");
+#ifdef USE_GLFW_WINDOW
     auto touchEventCallback = [](std::unique_ptr<flutter::PointerDataPacket>& packet)->bool {
         return packet && HandleTouchEvent(packet->data());
     };
     FlutterEngineRegisterHandleTouchEventCallback(std::move(touchEventCallback));
+#endif
 }
 
 } // namespace OHOS::Ace::Platform

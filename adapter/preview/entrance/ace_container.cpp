@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,21 @@
 
 #include <functional>
 
+#ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "adapter/preview/entrance/dir_asset_provider.h"
+#include "core/common/flutter/flutter_asset_manager.h"
+#include "core/common/flutter/flutter_task_executor.h"
+#else // ENABLE_ROSEN_BACKEND == true
+#include <ui/rs_surface_node.h>
+#include <ui/rs_ui_director.h>
+
+#include "adapter/preview/entrance/rs_dir_asset_provider.h"
+#include "core/common/rosen/rosen_asset_manager.h"
+#include "core/common/rosen/rosen_task_executor.h"
+#endif
 
 #include "adapter/preview/entrance/ace_application_info.h"
-#include "adapter/preview/entrance/dir_asset_provider.h"
 #include "adapter/preview/osal/stage_card_parser.h"
 #include "adapter/preview/osal/stage_module_parser.h"
 #include "base/log/ace_trace.h"
@@ -31,8 +42,6 @@
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
 #include "core/common/container_scope.h"
-#include "core/common/flutter/flutter_asset_manager.h"
-#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/platform_window.h"
 #include "core/common/text_field_manager.h"
@@ -66,12 +75,20 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type)
 {
     ThemeConstants::InitDeviceType();
 
+#ifndef ENABLE_ROSEN_BACKEND
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
     auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
     if (type != FrontendType::DECLARATIVE_JS) {
         flutterTaskExecutor->InitJsThread();
     }
     taskExecutor_ = flutterTaskExecutor;
+#else
+    auto rsTaskExecutor = Referenced::MakeRefPtr<RSTaskExecutor>();
+    if (type != FrontendType::DECLARATIVE_JS) {
+        rsTaskExecutor->InitJsThread();
+    }
+    taskExecutor_ = rsTaskExecutor;
+#endif
 }
 
 void AceContainer::Initialize()
@@ -602,6 +619,7 @@ void AceContainer::AddRouterChangeCallback(int32_t instanceId, const OnRouterCha
     container->pipelineContext_->AddRouterChangeCallback(onRouterChangeCallback);
 }
 
+#ifndef ENABLE_ROSEN_BACKEND
 void AceContainer::AddAssetPath(
     int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
 {
@@ -626,6 +644,30 @@ void AceContainer::AddAssetPath(
         container->assetManager_->PushBack(std::move(dirAssetProvider));
     }
 }
+#else
+void AceContainer::AddAssetPath(
+    int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
+{
+    auto container = GetContainerInstance(instanceId);
+    if (!container) {
+        return;
+    }
+
+    if (!container->assetManager_) {
+        RefPtr<RSAssetManager> rsAssetManager = Referenced::MakeRefPtr<RSAssetManager>();
+        container->assetManager_ = rsAssetManager;
+        if (container->frontend_) {
+            container->frontend_->SetAssetManager(rsAssetManager);
+        }
+    }
+
+    for (const auto& path : paths) {
+        LOGD("Current path is: %{private}s", path.c_str());
+        auto dirAssetProvider = AceType::MakeRefPtr<RSDirAssetProvider>(path);
+        container->assetManager_->PushBack(std::move(dirAssetProvider));
+    }
+}
+#endif
 
 void AceContainer::SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
     const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode)
@@ -693,6 +735,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
     }
 }
 
+#ifndef ENABLE_ROSEN_BACKEND
 void AceContainer::SetView(FlutterAceView* view, double density, int32_t width, int32_t height)
 {
     if (view == nullptr) {
@@ -712,7 +755,29 @@ void AceContainer::SetView(FlutterAceView* view, double density, int32_t width, 
     std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
     container->AttachView(std::move(window), view, density, width, height);
 }
+#else
+void AceContainer::SetView(RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender)
+{
+    if (view == nullptr) {
+        return;
+    }
 
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
+    if (!container) {
+        return;
+    }
+    auto platformWindow = PlatformWindow::Create(view);
+    if (!platformWindow) {
+        LOGE("Create PlatformWindow failed!");
+        return;
+    }
+
+    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+    container->AttachView(std::move(window), view, density, width, height, onRender);
+}
+#endif
+
+#ifndef ENABLE_ROSEN_BACKEND
 void AceContainer::AttachView(
     std::unique_ptr<Window> window, FlutterAceView* view, double density, int32_t width, int32_t height)
 {
@@ -797,6 +862,115 @@ void AceContainer::AttachView(
 
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
+#else
+void AceContainer::AttachView(
+    std::unique_ptr<Window> window, RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender)
+{
+    ContainerScope scope(instanceId_);
+    aceView_ = view;
+    auto instanceId = aceView_->GetInstanceId();
+
+    auto rsTaskExecutor = AceType::DynamicCast<RSTaskExecutor>(taskExecutor_);
+    if (type_ == FrontendType::DECLARATIVE_JS) {
+        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+        rsTaskExecutor->InitJsThread(false);
+        InitializeFrontend();
+        auto front = GetFrontend();
+        if (front) {
+            front->UpdateState(Frontend::State::ON_CREATE);
+            front->SetJsMessageDispatcher(AceType::Claim(this));
+        }
+    }
+    resRegister_ = aceView_->GetPlatformResRegister();
+    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
+        std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+    pipelineContext->SetRootSize(density, width, height);
+    pipelineContext->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
+    pipelineContext->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
+    pipelineContext->SetMessageBridge(messageBridge_);
+    pipelineContext->SetWindowModal(windowModal_);
+    pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());
+    pipelineContext->SetIsJsCard(type_ == FrontendType::JS_CARD);
+    pipelineContext_ = pipelineContext;
+    InitializeCallback();
+
+    ThemeConstants::InitDeviceType();
+    // Only init global resource here, construct theme in UI thread
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+    if (themeManager) {
+        pipelineContext_->SetThemeManager(themeManager);
+        // Init resource, load theme map.
+        themeManager->InitResource(resourceInfo_);
+        themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
+        taskExecutor_->PostTask(
+            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_, aceView = aceView_]() {
+                themeManager->ParseSystemTheme();
+                themeManager->SetColorScheme(colorScheme);
+                themeManager->LoadCustomTheme(assetManager);
+                // get background color from theme
+                aceView->SetBackgroundColor(themeManager->GetBackgroundColor());
+            },
+            TaskExecutor::TaskType::UI);
+    }
+
+    taskExecutor_->PostTask(
+        [pipelineContext, onRender, this]() {
+            auto director = Rosen::RSUIDirector::Create();
+            if (director == nullptr) {
+                return;
+            }
+
+            struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig = {
+                .SurfaceNodeName = "preview_surface",
+                .onRender = onRender,
+            };
+            static auto snode = Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig);
+            director->SetRSSurfaceNode(snode);
+
+            auto func = [taskExecutor = taskExecutor_, id = instanceId_](const std::function<void()>& task) {
+                ContainerScope scope(id);
+                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+            };
+            director->SetUITaskRunner(func);
+
+            director->Init();
+            pipelineContext->SetRSUIDirector(director);
+            LOGI("Init Rosen Backend");
+        },
+        TaskExecutor::TaskType::UI);
+
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
+    taskExecutor_->PostTask(
+        [weak]() {
+            auto context = weak.Upgrade();
+            if (context == nullptr) {
+                LOGE("context is nullptr");
+                return;
+            }
+            context->SetupRootElement();
+        },
+        TaskExecutor::TaskType::UI);
+    aceView_->Launch();
+
+    frontend_->AttachPipelineContext(pipelineContext_);
+    auto cardFronted = AceType::DynamicCast<CardFrontend>(frontend_);
+    if (cardFronted) {
+        cardFronted->SetDensity(static_cast<double>(density));
+        taskExecutor_->PostTask(
+            [weak, width, height]() {
+                auto context = weak.Upgrade();
+                if (context == nullptr) {
+                    LOGE("context is nullptr");
+                    return;
+                }
+                context->OnSurfaceChanged(width, height);
+            },
+            TaskExecutor::TaskType::UI);
+    }
+
+    AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
+}
+#endif
 
 void AceContainer::InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs)
 {

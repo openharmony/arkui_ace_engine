@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include <vector>
 
 #include "adapter/preview/entrance/ace_run_args.h"
-#include "adapter/preview/entrance/flutter_ace_view.h"
 #include "adapter/preview/osal/fetch_manager.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
@@ -32,6 +31,12 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+
+#ifndef ENABLE_ROSEN_BACKEND
+#include "adapter/preview/entrance/flutter_ace_view.h"
+#else
+#include "adapter/preview/entrance/rs_ace_view.h"
+#endif
 
 namespace OHOS::Ace::Platform {
 
@@ -54,7 +59,13 @@ public:
     static void AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths);
     static void SetResourcesPathAndThemeStyle(int32_t instanceId, const std::string& systemResourcesPath,
         const std::string& appResourcesPath, const int32_t& themeId, const ColorMode& colorMode);
+
+#ifndef ENABLE_ROSEN_BACKEND
     static void SetView(FlutterAceView* view, double density, int32_t width, int32_t height);
+#else
+    static void SetView(RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
+#endif
+
     static void InitDeviceInfo(int32_t instanceId, const AceRunArgs& runArgs);
     static bool RunPage(int32_t instanceId, int32_t pageId, const std::string& url, const std::string& params);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
@@ -137,10 +148,17 @@ public:
 
     void SetWindowId(uint32_t windowId) override {}
 
+#ifndef ENABLE_ROSEN_BACKEND
     FlutterAceView* GetAceView() const
     {
         return aceView_;
     }
+#else
+    RSAceView* GetAceView() const
+    {
+        return aceView_;
+    }
+#endif
 
     void* GetView() const override
     {
@@ -205,11 +223,22 @@ public:
 private:
     void InitializeFrontend();
     void InitializeCallback();
+
+#ifndef ENABLE_ROSEN_BACKEND
     void AttachView(
         std::unique_ptr<Window> window, FlutterAceView* view, double density, int32_t width, int32_t height);
+#else
+    void AttachView(
+        std::unique_ptr<Window> window, RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender);
+#endif
+
+#ifndef ENABLE_ROSEN_BACKEND
+    FlutterAceView* aceView_ = nullptr;
+#else
+    RSAceView* aceView_ = nullptr;
+#endif
 
     int32_t instanceId_;
-    FlutterAceView* aceView_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<PlatformResRegister> resRegister_;
