@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <optional>
+#include <string>
 
 #include "core/components_ng/base/frame_node.h"
 
@@ -28,7 +29,9 @@ public:
     static void Create();
 
     static void SetHeader(const RefPtr<UINode>& header);
+    static void SetHeader(const std::string& headerStr);
     static void SetFooter(const RefPtr<UINode>& footer);
+    static void SetFooter(const std::string& footerStr);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_VIEW_H

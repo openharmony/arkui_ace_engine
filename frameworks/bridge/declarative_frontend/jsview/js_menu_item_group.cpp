@@ -28,32 +28,51 @@ void JSMenuItemGroup::Create(const JSCallbackInfo& info)
             return;
         }
         auto obj = JSRef<JSObject>::Cast(info[0]);
-        auto headerBuilder = obj->GetProperty("header");
-        if (!headerBuilder.IsEmpty() && headerBuilder->IsFunction()) {
-            LOGI("JSMenuItemGroup set header");
-            RefPtr<NG::UINode> header;
-            {
-                auto headerBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerBuilder));
-                CHECK_NULL_VOID(headerBuilderFunc);
-                NG::ScopedViewStackProcessor builderViewStackProcessor;
-                headerBuilderFunc->Execute();
-                header = NG::ViewStackProcessor::GetInstance()->Finish();
-                CHECK_NULL_VOID(header);
+        auto headerProp = obj->GetProperty("header");
+        if (!headerProp.IsEmpty()) {
+            if (headerProp->IsFunction()) {
+                LOGI("JSMenuItemGroup set header");
+                RefPtr<NG::UINode> header;
+                {
+                    auto headerBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerProp));
+                    CHECK_NULL_VOID(headerBuilderFunc);
+                    NG::ScopedViewStackProcessor builderViewStackProcessor;
+                    headerBuilderFunc->Execute();
+                    header = NG::ViewStackProcessor::GetInstance()->Finish();
+                    CHECK_NULL_VOID(header);
+                }
+                NG::MenuItemGroupView::SetHeader(header);
+            } else {
+                std::string headerStr;
+                if (!ParseJsString(headerProp, headerStr)) {
+                    LOGE("header content is null");
+                    return;
+                }
+                NG::MenuItemGroupView::SetHeader(headerStr);
             }
-            NG::MenuItemGroupView::SetHeader(header);
         }
-        auto footerBuilder = obj->GetProperty("footer");
-        if (!footerBuilder.IsEmpty() && footerBuilder->IsFunction()) {
-            RefPtr<NG::UINode> footer;
-            {
-                auto footerBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerBuilder));
-                CHECK_NULL_VOID(footerBuilderFunc);
-                NG::ScopedViewStackProcessor builderViewStackProcessor;
-                footerBuilderFunc->Execute();
-                footer = NG::ViewStackProcessor::GetInstance()->Finish();
-                CHECK_NULL_VOID(footer);
+        auto footerProp = obj->GetProperty("footer");
+        if (!footerProp.IsEmpty()) {
+            if (footerProp->IsFunction()) {
+                LOGI("JSMenuItemGroup set footer");
+                RefPtr<NG::UINode> footer;
+                {
+                    auto footerBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerProp));
+                    CHECK_NULL_VOID(footerBuilderFunc);
+                    NG::ScopedViewStackProcessor builderViewStackProcessor;
+                    footerBuilderFunc->Execute();
+                    footer = NG::ViewStackProcessor::GetInstance()->Finish();
+                    CHECK_NULL_VOID(footer);
+                }
+                NG::MenuItemGroupView::SetFooter(footer);
+            } else {
+                std::string footerStr;
+                if (!ParseJsString(footerProp, footerStr)) {
+                    LOGE("footer content is null");
+                    return;
+                }
+                NG::MenuItemGroupView::SetFooter(footerStr);
             }
-            NG::MenuItemGroupView::SetFooter(footer);
         }
         return;
     }

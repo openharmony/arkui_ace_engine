@@ -150,6 +150,7 @@ build_component_ng("pattern_ng") {
     "menu/menu_item/menu_item_view.cpp",
     "menu/menu_item_group/menu_item_group_layout_algorithm.cpp",
     "menu/menu_item_group/menu_item_group_paint_method.cpp",
+    "menu/menu_item_group/menu_item_group_pattern.cpp",
     "menu/menu_item_group/menu_item_group_view.cpp",
     "menu/menu_layout_algorithm.cpp",
     "menu/menu_paint_method.cpp",

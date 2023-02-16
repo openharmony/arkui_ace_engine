@@ -53,40 +53,33 @@ public:
         return MakeRefPtr<MenuItemGroupPaintProperty>();
     }
 
-    void AddHeader(const RefPtr<NG::UINode>& header)
+    void AddHeader(const RefPtr<NG::UINode>& header);
+    void AddFooter(const RefPtr<NG::UINode>& footer);
+
+    void AddHeaderContent(const RefPtr<NG::FrameNode>& headerContent)
     {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (headerIndex_ < 0) {
-            headerIndex_ = itemStartIndex_;
-            host->AddChild(header);
-            itemStartIndex_++;
-        } else {
-            host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
-        }
-        auto frameNode = AceType::DynamicCast<FrameNode>(header);
-        CHECK_NULL_VOID(frameNode);
+        headerContent_ = headerContent;
     }
 
-    void AddFooter(const RefPtr<NG::UINode>& footer)
+    void AddFooterContent(const RefPtr<NG::FrameNode>& footerContent)
     {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        if (footerIndex_ < 0) {
-            footerIndex_ = itemStartIndex_;
-            host->AddChild(footer);
-            itemStartIndex_++;
-        } else {
-            host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
-        }
-        auto frameNode = AceType::DynamicCast<FrameNode>(footer);
-        CHECK_NULL_VOID(frameNode);
+        footerContent_ = footerContent;
     }
+
+    RefPtr<FrameNode> GetMenu();
+
+protected:
+    void OnMountToParentDone() override;
 
 private:
+    void ModifyFontSize();
+
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
     int32_t itemStartIndex_ = 0;
+
+    RefPtr<FrameNode> headerContent_;
+    RefPtr<FrameNode> footerContent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPattern);
 };
