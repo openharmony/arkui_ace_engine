@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/select/select_pattern.h"
 
 #include <cstdint>
+#include <optional>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
@@ -244,7 +245,7 @@ void SelectPattern::SetDisabledStyle()
     auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER_DISABLE);
     imageSourceInfo.SetSrc(iconPath);
     if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());    
+        imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());
     }
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
@@ -326,7 +327,10 @@ void SelectPattern::BuildChild()
     auto props = select->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     props->UpdateAlignment(Alignment::CENTER);
-    props->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), CalcLength(theme->GetSelectMinHeight())));
+    MeasureProperty measureProp;
+    measureProp.UpdateSelfIdealSizeWithCheck(CalcSize(std::nullopt, CalcLength(theme->GetSelectMinHeight())));
+    measureProp.UpdateMinSizeWithCheck(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
+    props->UpdateCalcLayoutProperty(measureProp);
 }
 
 void SelectPattern::SetValue(const std::string& value)
