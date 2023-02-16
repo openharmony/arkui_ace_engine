@@ -4273,7 +4273,7 @@ void WebDelegate::OnBlur()
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnBlur();
+        nweb_->OnBlur(blurReason_);
     }
 }
 
