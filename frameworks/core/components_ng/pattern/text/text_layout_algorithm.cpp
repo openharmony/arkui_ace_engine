@@ -20,7 +20,6 @@
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
-#include "core/components/font/constants_converter.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -98,9 +97,9 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             }
         }
         if (!contentConstraint.selfIdealSize.Width()) {
-            double paragraphNewWidth = paragraph_->GetMaxWidth();
-            paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
-            paragraphNewWidth = std::clamp(GetTextWidth(), 0.0f, contentConstraint.maxSize.Width());
+            float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
+            paragraphNewWidth =
+                std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
             if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
                 paragraph_->Layout(std::ceil(paragraphNewWidth));
             }
@@ -245,8 +244,7 @@ TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)
 float TextLayoutAlgorithm::GetTextWidth() const
 {
     CHECK_NULL_RETURN(paragraph_, 0.0);
-    // TODO: need check Line count
-    return paragraph_->GetMaxIntrinsicWidth();
+    return paragraph_->GetTextWidth();
 }
 
 const RefPtr<Paragraph>& TextLayoutAlgorithm::GetParagraph()

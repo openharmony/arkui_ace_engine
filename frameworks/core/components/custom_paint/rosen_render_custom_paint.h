@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "third_party/skia/include/core/SkPaint.h"
 #include "third_party/skia/include/core/SkPath.h"
 
+#include "base/utils/measure_util.h"
 #include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/custom_paint/render_custom_paint.h"
 #include "core/image/image_object.h"
@@ -56,8 +57,8 @@ public:
     void ClearRect(const Offset& offset, const Rect& rect) override;
     void FillText(const Offset& offset, const std::string& text, double x, double y) override;
     void StrokeText(const Offset& offset, const std::string& text, double x, double y) override;
-    static double MeasureTextInner(const std::string& text, double fontSize, int32_t fontStyle,
-        const std::string& fontWeight, const std::string& fontFamily, double letterSpacing);
+    static double MeasureTextInner(const MeasureContext& context);
+    static Size MeasureTextSizeInner(const MeasureContext& context);
     double MeasureText(const std::string& text, const PaintState& state) override;
     double MeasureTextHeight(const std::string& text, const PaintState& state) override;
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state) override;

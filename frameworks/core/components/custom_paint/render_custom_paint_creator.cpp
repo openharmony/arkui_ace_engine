@@ -16,6 +16,8 @@
 #include "flutter_render_custom_paint.h"
 #include "rosen_render_custom_paint.h"
 
+#include "base/utils/measure_util.h"
+
 namespace OHOS::Ace {
 RefPtr<RenderNode> RenderCustomPaint::Create()
 {
@@ -30,18 +32,29 @@ RefPtr<RenderNode> RenderCustomPaint::Create()
     }
 }
 
-double RenderCustomPaint::PaintMeasureText(const std::string& text, double fontSize,
-    int32_t fontStyle, const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+double RenderCustomPaint::PaintMeasureText(const MeasureContext& context)
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
 #ifdef ENABLE_ROSEN_BACKEND
-        return RosenRenderCustomPaint::MeasureTextInner(text, fontSize, fontStyle,
-            fontWeight, fontFamily, letterSpacing);
+        return RosenRenderCustomPaint::MeasureTextInner(context);
 #else
         return 0.0;
 #endif
     } else {
         return 0.0;
+    }
+}
+
+Size RenderCustomPaint::MeasureTextSize(const MeasureContext& context)
+{
+    if (SystemProperties::GetRosenBackendEnabled()) {
+#ifdef ENABLE_ROSEN_BACKEND
+        return RosenRenderCustomPaint::MeasureTextSizeInner(context);
+#else
+        return Size(0.0, 0.0);
+#endif
+    } else {
+        return Size(0.0, 0.0);
     }
 }
 } // namespace OHOS::Ace

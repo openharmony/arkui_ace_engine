@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "base/resource/ace_res_config.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "base/utils/measure_util.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/platform_bridge.h"
 #include "core/common/thread_checker.h"
@@ -860,13 +861,18 @@ bool FrontendDelegateImpl::IsWebFeature()
     return manifestParser_->IsWebFeature();
 }
 
-double FrontendDelegateImpl::MeasureText(const std::string& text, double fontSize, int32_t fontStyle,
-    const std::string& fontWeight, const std::string& fontFamily, double letterSpacing)
+double FrontendDelegateImpl::MeasureText(const MeasureContext& context)
 {
     LOGD("FrontendDelegateImpl MeasureTxt.");
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
-    return pipelineContext->MeasureText(text, fontSize, fontStyle, fontWeight, fontFamily, letterSpacing);
+    return MeasureUtil::MeasureText(context);
 }
+
+Size FrontendDelegateImpl::MeasureTextSize(const MeasureContext& context)
+{
+    LOGD("FrontendDelegateImpl MeasureTxtSize.");
+    return MeasureUtil::MeasureTextSize(context);
+}
+
 
 void FrontendDelegateImpl::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
 {
