@@ -327,15 +327,18 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = context->GetApplicationInfo()->apiReleaseType;
+    auto apiTargetVersion = context->GetApplicationInfo()->apiTargetVersion;
     const auto& hapModuleInfo = context->GetHapModuleInfo();
     std::vector<OHOS::AppExecFwk::Metadata> metaData;
     if (hapModuleInfo) {
         metaData = hapModuleInfo->metadata;
     }
-    auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
-        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType, metaData);
-    LOGI("UIContent: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
-        apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
+    auto useNewPipe =
+        AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
+            apiCompatibleVersion, apiTargetVersion, apiReleaseType, metaData);
+    LOGI("UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
+         "useNewPipe: %{public}d",
+        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
         rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
