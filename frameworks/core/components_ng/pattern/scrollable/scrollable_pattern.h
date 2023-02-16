@@ -116,6 +116,22 @@ public:
         coordinationEvent_ = coordinationEvent;
     }
 
+    bool IsScrollableStopped() const
+    {
+        CHECK_NULL_RETURN_NOLOG(scrollableEvent_, true);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN_NOLOG(scrollable, true);
+        return scrollable->IsStopped();
+    }
+
+    void StopScrollable()
+    {
+        CHECK_NULL_VOID_NOLOG(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID_NOLOG(scrollable);
+        scrollable->StopScrollable();
+    }
+
 protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
