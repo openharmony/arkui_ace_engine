@@ -31,16 +31,16 @@ public:
     std::string GetColorString() const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
-    void OnModifyDone() override;
+    void OnMountToParentDone() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<BlankLayoutProperty>();
     }
+
 private:
     RefPtr<FrameNode> GetParentFrameNode(RefPtr<FrameNode> node);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_PATTERN_H
