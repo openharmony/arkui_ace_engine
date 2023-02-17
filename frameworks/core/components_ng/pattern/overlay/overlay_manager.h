@@ -129,6 +129,7 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     WeakPtr<UINode> rootNodeWeak_;
+    CancelableCallback<void()> continuousTask_;
 
     std::function<void()> onHideMenuCallback_ = nullptr;
 
