@@ -91,7 +91,7 @@ public:
     ~ScrollBar() override = default;
 
     bool InBarTouchRegion(const Point& point) const;
-    bool InBarRegion(const Point& point) const;
+    bool InBarActiveRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
