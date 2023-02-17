@@ -391,7 +391,8 @@ void AceAbility::OnStart(const Want& want)
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
-        auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/") };
+        auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/"),
+                                  std::string("assets/js/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
 

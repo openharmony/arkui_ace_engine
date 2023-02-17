@@ -25,15 +25,10 @@ namespace {
 
 const char SLASH = '/';
 const char SLASHSTR[] = "/";
+const char SUPDIRECTORY[] = "../";
 
-bool ParseFileUri(const RefPtr<AssetManager>& assetManager, const std::string& fileUri, std::string& assetsFilePath)
+void GetFileInfo(const std::string& fileUri, std::string& fileName, std::string& filePath)
 {
-    if (!assetManager || fileUri.empty() || (fileUri.length() > PATH_MAX)) {
-        return false;
-    }
-
-    std::string fileName;
-    std::string filePath;
     size_t slashPos = fileUri.find_last_of(SLASH);
     if (slashPos == std::string::npos) {
         fileName = fileUri;
@@ -45,7 +40,46 @@ bool ParseFileUri(const RefPtr<AssetManager>& assetManager, const std::string& f
     if (StartWith(filePath, SLASHSTR)) {
         filePath = filePath.substr(1);
     }
+}
 
+bool ParseWorkerUri(const RefPtr<AssetManager>& assetManager, const std::string& fileUri, std::string& assetsFilePath)
+{
+    if (!assetManager || fileUri.empty() || (fileUri.length() > PATH_MAX)) {
+        return false;
+    }
+
+    std::string fileName;
+    std::string filePath;
+    GetFileInfo(fileUri, fileName, filePath);
+    if (StartWith(filePath, SUPDIRECTORY)) {
+        filePath = filePath.substr(3); // 3 : offset of filePath
+    }
+    std::vector<std::string> files;
+    assetManager->GetAssetList(filePath, files);
+
+    bool fileExist = false;
+    for (const auto& file : files) {
+        size_t filePos = file.find_last_of(SLASH);
+        if (filePos != std::string::npos) {
+            if (file.substr(filePos + 1) == fileName) {
+                assetsFilePath = filePath + fileName;
+                fileExist = true;
+                break;
+            }
+        }
+    }
+    return fileExist;
+}
+
+bool ParseFileUri(const RefPtr<AssetManager>& assetManager, const std::string& fileUri, std::string& assetsFilePath)
+{
+    if (!assetManager || fileUri.empty() || (fileUri.length() > PATH_MAX)) {
+        return false;
+    }
+
+    std::string fileName;
+    std::string filePath;
+    GetFileInfo(fileUri, fileName, filePath);
     std::vector<std::string> files;
     assetManager->GetAssetList(filePath, files);
 
@@ -84,16 +118,16 @@ template<typename T>
 bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content, std::string& ami)
 {
     std::string targetFilePath;
-    if (!ParseFileUri(assetManager_, fileUri, targetFilePath)) {
+    if (!ParseWorkerUri(assetManager_, fileUri, targetFilePath)) {
         LOGE("GetResourceData parse file uri failed.");
         return false;
     }
     ami = assetManager_->GetAssetPath(targetFilePath, true) + targetFilePath;
+    LOGI("GetResourceData ami: %{private}s.", ami.c_str());
     if (!GetAssetContentAllowEmpty(assetManager_, targetFilePath, content)) {
         LOGE("GetResourceData GetAssetContent failed.");
         return false;
     }
-
     return true;
 }
 
