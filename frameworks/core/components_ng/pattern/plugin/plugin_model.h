@@ -29,6 +29,8 @@ public:
     virtual void SetOnComplete(std::function<void(const std::string&)>&& OnComplete) = 0;
     virtual void SetOnError(std::function<void(const std::string&)>&& OnError) = 0;
     virtual void SetPluginSize(const Dimension& width, const Dimension& height) = 0;
+    virtual void SetWidth(const Dimension& width) = 0;
+    virtual void SetHeight(const Dimension& height) = 0;
     virtual void SetData(const std::string& data) = 0;
 
 private:
