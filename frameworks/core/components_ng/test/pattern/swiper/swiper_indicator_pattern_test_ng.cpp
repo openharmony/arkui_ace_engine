@@ -743,11 +743,11 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorHandleClick001, TestSize.L
     indicatorPattern->HandleClick(info);
 }
 /**
- * @tc.name: SwiperIndicatorGetContentDrawFunction001
- * @tc.desc: Test SwiperIndicator GetContentDrawFunction
+ * @tc.name: SwiperIndicatorGetContentModifier001
+ * @tc.desc: Test SwiperIndicator GetContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorGetContentDrawFunction001, TestSize.Level1)
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorGetContentModifier001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init Swiper node
@@ -758,7 +758,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorGetContentDrawFunction001,
     EXPECT_FALSE(controller == nullptr);
 
     /**
-     * @tc.steps: step2. Create PaintWrapper and SwiperIndicatorPaintMethod.
+     * @tc.steps: step2. Create PaintWrapper and GetContentModifier.
      */
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto pipeline = MockPipelineBase::GetCurrent();
@@ -775,8 +775,9 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorGetContentDrawFunction001,
     EXPECT_FALSE(indicatorNode == nullptr);
     frameNode->AddChild(indicatorNode);
 
+    RefPtr<SwiperIndicatorModifier> modifier = AceType::MakeRefPtr<SwiperIndicatorModifier>();
     RefPtr<SwiperIndicatorPaintMethod> paintMethod =
-        AceType::MakeRefPtr<SwiperIndicatorPaintMethod>(Axis::HORIZONTAL, 0, 1);
+        AceType::MakeRefPtr<SwiperIndicatorPaintMethod>(modifier);
 
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
@@ -792,24 +793,11 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorGetContentDrawFunction001,
 
     PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
     /**
-     * @tc.steps: step3. call GetContentDrawFunction.
+     * @tc.steps: step3. call GetContentModifier.
      */
-    EXPECT_TRUE(paintMethod->GetContentDrawFunction(nullptr) == nullptr);
-    CanvasDrawFunction func = paintMethod->GetContentDrawFunction(&paintWrapper);
-    EXPECT_FALSE(func == nullptr);
-    RSCanvas rsCanvas;
-    func(rsCanvas);
-
-    paintMethod = AceType::MakeRefPtr<SwiperIndicatorPaintMethod>(Axis::VERTICAL, 1, 1);
-    paintProperty->UpdateIndicatorMask(true);
-    func = paintMethod->GetContentDrawFunction(&paintWrapper);
-    EXPECT_FALSE(func == nullptr);
-    func(rsCanvas);
-
-    paintMethod = AceType::MakeRefPtr<SwiperIndicatorPaintMethod>(Axis::HORIZONTAL, 1, 1);
-    paintProperty->UpdateIndicatorMask(true);
-    func = paintMethod->GetContentDrawFunction(&paintWrapper);
-    EXPECT_FALSE(func == nullptr);
-    func(rsCanvas);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    RefPtr<Modifier> ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
+    EXPECT_FALSE(ptrModifier == nullptr);
 }
 } // namespace OHOS::Ace::NG

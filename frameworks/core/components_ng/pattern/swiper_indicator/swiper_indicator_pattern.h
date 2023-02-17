@@ -54,10 +54,16 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (!swiperIndicatorModifier_) {
+            swiperIndicatorModifier_ = AceType::MakeRefPtr<SwiperIndicatorModifier>();
+        }
+        auto paintMethod = MakeRefPtr<SwiperIndicatorPaintMethod>(swiperIndicatorModifier_);
         auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
-        auto paintMethod = MakeRefPtr<SwiperIndicatorPaintMethod>(
-            swiperPattern->GetDirection(), swiperPattern->GetCurrentIndex(), swiperPattern->TotalCount());
+        paintMethod->SetAxis(swiperPattern->GetDirection());
+        paintMethod->SetCurrentIndex(swiperPattern->GetCurrentIndex());
+        paintMethod->SetItemCount(swiperPattern->TotalCount());
+        paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
         paintMethod->SetIsHover(isHover_);
         paintMethod->SetIsPressed(isPressed_);
         paintMethod->SetHoverPoint(hoverPoint_);
@@ -104,6 +110,8 @@ private:
     bool isHover_ = false;
     bool isPressed_ = false;
     PointF hoverPoint_;
+
+    RefPtr<SwiperIndicatorModifier> swiperIndicatorModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG
