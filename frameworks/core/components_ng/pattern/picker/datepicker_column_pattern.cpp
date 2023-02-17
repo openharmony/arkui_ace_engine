@@ -48,7 +48,8 @@ const int32_t ANIMATION_ZERO_TO_OUTER = 200;
 const int32_t ANIMATION_OUTER_TO_ZERO = 150;
 const Dimension FOCUS_SIZE = Dimension(1.0);
 const float MOVE_DISTANCE = 5.0f;
-constexpr int32_t HOVER_ANIMATION_DURATION = 40;
+constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t MINDDLE_CHILD_INDEX = 2;
 
 } // namespace
@@ -134,9 +135,11 @@ void DatePickerColumnPattern::InitMouseAndPressEvent()
 void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
 {
     if (isHover) {
-        PlayPressAnimation(hoverColor_);
+        hoverd_ = true;
+        PlayHoverAnimation(hoverColor_);
     } else {
-        OnTouchUp();
+        hoverd_ = false;
+        PlayHoverAnimation(Color::TRANSPARENT);
     }
 }
 
@@ -147,7 +150,11 @@ void DatePickerColumnPattern::OnTouchDown()
 
 void DatePickerColumnPattern::OnTouchUp()
 {
-    PlayPressAnimation(Color::TRANSPARENT);
+    if (hoverd_) {
+        PlayPressAnimation(hoverColor_);
+    } else {
+        PlayPressAnimation(Color::TRANSPARENT);
+    }
 }
 
 void DatePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
@@ -166,12 +173,27 @@ void DatePickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
 void DatePickerColumnPattern::PlayPressAnimation(const Color& pressColor)
 {
     AnimationOption option = AnimationOption();
-    option.SetDuration(HOVER_ANIMATION_DURATION);
+    option.SetDuration(PRESS_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), pressColor]() {
         auto picker = weak.Upgrade();
         if (picker) {
             picker->SetButtonBackgroundColor(pressColor);
+        }
+    });
+}
+
+void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
+{
+    AnimationOption option = AnimationOption();
+    option.SetDuration(HOVER_ANIMATION_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    option.SetFillMode(FillMode::FORWARDS);
+    AnimationUtils::Animate(option, [weak = AceType::WeakClaim(this), color]() {
+        auto picker = weak.Upgrade();
+        if (picker) {
+            picker->SetButtonBackgroundColor(color);
         }
     });
 }
