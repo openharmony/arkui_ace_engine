@@ -135,11 +135,6 @@ public:
         return "";
     }
 
-    virtual std::string GetSrcPath() const
-    {
-        return "";
-    }
-
     virtual std::string GetWebHapPath() const
     {
         return "";

@@ -54,7 +54,6 @@ template("ace_osal_ohos_source_set") {
 
     sources = [
       "ace_engine_ext.cpp",
-      "ace_extractor.cpp",
       "ace_trace.cpp",
       "anr_thread.cpp",
       "event_report.cpp",
@@ -115,7 +114,6 @@ template("ace_osal_ohos_source_set") {
       "pixel_map_ohos.cpp",
     ]
     external_deps += [
-      "ability_base:extractortool",
       "ability_runtime:runtime",
       "hicollie_native:libhicollie",
       "hisysevent_native:libhisysevent",

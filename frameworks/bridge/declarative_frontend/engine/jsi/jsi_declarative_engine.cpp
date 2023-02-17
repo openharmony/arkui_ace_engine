@@ -931,16 +931,8 @@ void JsiDeclarativeEngine::RegisterOffWorkerFunc()
 
 void JsiDeclarativeEngine::RegisterAssetFunc()
 {
-    auto container = Container::Current();
-    auto hapPath = container->GetHapPath();
-    auto srcPath = container->GetSrcPath();
-    if (hapPath.empty() && srcPath.empty()) {
-        LOGE("container get the path failed.");
-        return;
-    }
     auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(engineInstance_->GetDelegate()));
-    auto&& assetFunc = [weakDelegate, hapPath, srcPath](const std::string& uri, std::vector<uint8_t>& content,
-                                                        std::string& ami) {
+    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
         auto delegate = weakDelegate.Upgrade();
         if (delegate == nullptr) {
@@ -950,19 +942,8 @@ void JsiDeclarativeEngine::RegisterAssetFunc()
         size_t index = uri.find_last_of(".");
         if (index == std::string::npos) {
             LOGE("invalid uri");
-            return;
-        }
-        std::string fileSrc = uri.substr(0, index) + ".abc";
-        if (uri.find("/el2/") != std::string::npos) {
-            delegate->GetResourceData(fileSrc, content, ami);
         } else {
-            std::string filePath;
-            if (uri.find("../") != std::string::npos) {
-                filePath = "/assets/js/" + fileSrc.substr(3);
-            } else {
-                filePath = "/assets/js/" + srcPath + "/" + fileSrc;
-            }
-            delegate->GetResourceData(hapPath + filePath, content, ami);
+            delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
         }
     };
     nativeEngine_->SetGetAssetFunc(assetFunc);
