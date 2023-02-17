@@ -151,8 +151,8 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         for (const auto& child : spanItemChildren_) {
             if (child) {
                 child->UpdateParagraph(paragraph_);
-                child->positon = spanTextLength + child->content.length();
-                spanTextLength += child->content.length();
+                child->positon = spanTextLength + StringUtils::ToWstring(child->content).length();
+                spanTextLength += StringUtils::ToWstring(child->content).length();
             }
         }
     }

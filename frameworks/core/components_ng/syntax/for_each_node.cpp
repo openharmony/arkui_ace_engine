@@ -138,7 +138,7 @@ void ForEachNode::FlushUpdateAndMarkDirty()
 {
     // mark parent dirty to flush measure.
     MarkNeedSyncRenderTree();
-    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT | PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 } // namespace OHOS::Ace::NG
