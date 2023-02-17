@@ -78,9 +78,11 @@ void OnMessage(const std::string& message)
 void SetSwitchCallBack(const std::function<void(bool)>& setSwitchStatus,
     const std::function<void(int32_t)>& createLayoutInfo, int32_t instanceId)
 {
-    g_inspector->setSwitchStatus_ = setSwitchStatus;
-    g_inspector->createLayoutInfo_ = createLayoutInfo;
-    g_inspector->instanceId_ = instanceId;
+    if (g_inspector != nullptr) {
+        g_inspector->setSwitchStatus_ = setSwitchStatus;
+        g_inspector->createLayoutInfo_ = createLayoutInfo;
+        g_inspector->instanceId_ = instanceId;
+    }
 }
 
 void ResetService()
