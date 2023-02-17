@@ -220,6 +220,43 @@ public:
 
     void ParseStageAppConfig(const std::string& assetPath, bool formsEnabled);
 
+    void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override
+    {
+        std::lock_guard<std::mutex> lock(cardFrontMutex_);
+        cardFrontendMap_.try_emplace(cardId, frontend);
+    }
+
+    WeakPtr<Frontend> GetCardFrontend(int64_t cardId) const override
+    {
+        std::lock_guard<std::mutex> lock(cardFrontMutex_);
+        auto it = cardFrontendMap_.find(cardId);
+        if (it != cardFrontendMap_.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    void GetCardFrontendMap(std::unordered_map<int64_t, WeakPtr<Frontend>>& cardFrontendMap) const override
+    {
+        cardFrontendMap = cardFrontendMap_;
+    }
+
+    void SetCardPipeline(WeakPtr<PipelineBase> pipeline, int64_t cardId) override
+    {
+        std::lock_guard<std::mutex> lock(cardPipelineMutex_);
+        cardPipelineMap_.try_emplace(cardId, pipeline);
+    }
+
+    WeakPtr<PipelineBase> GetCardPipeline(int64_t cardId) const override
+    {
+        std::lock_guard<std::mutex> lock(cardPipelineMutex_);
+        auto it = cardPipelineMap_.find(cardId);
+        if (it == cardPipelineMap_.end()) {
+            return nullptr;
+        }
+        return it->second;
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -251,6 +288,10 @@ private:
     ResourceInfo resourceInfo_;
     static std::once_flag onceFlag_;
     std::string pageProfile_;
+    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
+    std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
+    mutable std::mutex cardFrontMutex_;
+    mutable std::mutex cardPipelineMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
