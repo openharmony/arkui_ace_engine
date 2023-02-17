@@ -73,6 +73,15 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(Layout
         return;
     }
 
+    auto grid = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(grid);
+    auto focusHub = grid->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    // textField not in Grid
+    if (!focusHub->IsCurrentFocus()) {
+        return;
+    }
+
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
@@ -81,8 +90,6 @@ void GridScrollLayoutAlgorithm::UpdateOffsetOnVirtualKeyboardHeightChange(Layout
     auto focused = textFieldManager->GetOnFocusTextField().Upgrade();
     CHECK_NULL_VOID(focused);
     auto position = textFieldManager->GetClickPosition().GetY();
-    auto grid = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(grid);
     auto gridOffset = grid->GetTransformRelativeOffset();
     auto offset = mainSize + gridOffset.GetY() - position;
     if (LessOrEqual(offset, 0.0)) {
