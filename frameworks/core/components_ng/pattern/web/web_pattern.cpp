@@ -23,6 +23,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -465,12 +466,12 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     };
     focusHub->SetOnFocusInternal(focusTask);
 
-    auto blurTask = [weak = WeakClaim(this)]() {
+    auto blurTask = [weak = WeakClaim(this)](const BlurReason& blurReason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandleBlurEvent();
+        pattern->HandleBlurEvent(blurReason);
     };
-    focusHub->SetOnBlurInternal(blurTask);
+    focusHub->SetOnBlurReasonInternal(blurTask);
 
     auto keyTask = [weak = WeakClaim(this)](const KeyEvent& keyEvent) -> bool {
         auto pattern = weak.Upgrade();
@@ -491,10 +492,11 @@ void WebPattern::HandleFocusEvent()
     }
 }
 
-void WebPattern::HandleBlurEvent()
+void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
+
     delegate_->OnBlur();
     OnQuickMenuDismissed();
 }

@@ -303,7 +303,7 @@ private:
     void SendDoubleClickEvent(const MouseClickInfo& info);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent();
-    void HandleBlurEvent();
+    void HandleBlurEvent(const BlurReason& blurReason);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
