@@ -77,15 +77,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textfieldLayoutProperty);
     if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
-        if (LessOrEqual(layoutConstraint->minSize.Width(), 0.0f)) {
-            frameSize.SetWidth(std::clamp(textRect_.GetSize().Width() + pattern->GetHorizontalPaddingSum(),
-                pattern->GetHorizontalPaddingSum(), layoutConstraint->maxSize.Width()));
-        } else if (LessOrEqual(textRect_.Width(), 0.0f)) {
-            frameSize.SetWidth(layoutConstraint->minSize.Width());
-        } else {
-            frameSize.SetWidth(std::clamp(textRect_.Width() + pattern->GetHorizontalPaddingSum(),
-                layoutConstraint->minSize.Width(), layoutConstraint->maxSize.Width()));
-        }
+        frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
@@ -149,6 +141,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.Reset();
+        if (textFieldLayoutProperty->GetWidthAutoValue(false)) {
+            if (LessOrEqual(contentConstraint.minSize.Width(), 0.0f)) {
+                idealWidth = std::clamp(textRect_.GetSize().Width(), 0.0f, contentConstraint.maxSize.Width());
+            } else if (LessOrEqual(textRect_.Width(), 0.0f)) {
+                idealWidth = contentConstraint.minSize.Width();
+            } else {
+                idealWidth =
+                    std::clamp(textRect_.Width(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
+            }
+        }
         return SizeF(idealWidth, preferredHeight);
     }
     float imageSize = 0.0f;
