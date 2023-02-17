@@ -193,6 +193,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_.StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_.FlushTask();
     taskScheduler_.FinishRecordFrameInfo();
+    TryCallNextFrameLayoutCallback();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAninmation) {
         RequestFrame();
