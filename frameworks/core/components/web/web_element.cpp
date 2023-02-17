@@ -77,6 +77,7 @@ void WebElement::OnBlur()
         LOGE("Delegate is nullptr.");
         return;
     }
+    renderWeb->GetDelegate()->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(FocusNode::blurReason_));
     renderWeb->GetDelegate()->OnBlur();
     renderWeb->SetWebIsFocus(false);
     renderWeb->OnQuickMenuDismissed();
