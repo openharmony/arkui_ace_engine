@@ -27,6 +27,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -309,6 +310,12 @@ public:
     bool IsLayoutDirtyMarked() const
     {
         return isLayoutDirtyMarked_;
+    }
+
+    bool HasPositionProp() const
+    {
+        CHECK_NULL_RETURN_NOLOG(renderContext_, false);
+        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
     }
 
 private:
