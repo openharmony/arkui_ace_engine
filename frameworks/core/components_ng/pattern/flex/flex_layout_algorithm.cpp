@@ -706,6 +706,11 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
     }
     allocatedSize_ = 0.0f;
     allocatedSize_ += space_ * (validSizeCount_ - 1);
+    // space is not valid when mainAxisAlign is SPACE_AROUND/SPACE_BETWEEN/SPACE_EVENLY
+    if (mainAxisAlign_ == FlexAlign::SPACE_AROUND || mainAxisAlign_ == FlexAlign::SPACE_BETWEEN ||
+        mainAxisAlign_ == FlexAlign::SPACE_EVENLY) {
+        allocatedSize_ = 0.0;
+    }
     for (const auto& child : children) {
         if (child->IsOutOfLayout() ||
             child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
