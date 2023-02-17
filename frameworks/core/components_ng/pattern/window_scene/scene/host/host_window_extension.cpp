@@ -33,13 +33,12 @@ HostWindowExtension::HostWindowExtension(const std::string& bundleName, const st
         LOGD("Current pipeline does not use window scene");
     }
 
-    Rosen::WindowSession::AbilityInfo extensionAbilityInfo = {
+    Rosen::SessionInfo extensionSessionInfo = {
         .bundleName_ = bundleName,
         .abilityName_ = abilityName,
         .callerToken_ = callerToken,
-        .isExtension_ = true,
     };
-    session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionAbilityInfo);
+    session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     RegisterLifecycleListener();
     RequestExtensionSessionActivation();
 }
