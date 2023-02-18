@@ -474,7 +474,6 @@ public:
     void OnCursorMoveDone();
     bool IsDisabled();
 
-    bool LastInputIsNewLine() const;
     bool GetIsMousePressed() const
     {
         return isMousePressed_;
@@ -644,7 +643,6 @@ private:
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
-    bool newLineInserted_ = false;
     bool isUsingMouse_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;

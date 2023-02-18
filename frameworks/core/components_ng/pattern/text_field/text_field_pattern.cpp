@@ -68,7 +68,8 @@ constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 3;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
-constexpr char16_t NEWLINE_CODE = u'\n';
+const std::string NEWLINE = "\n";
+const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 const std::string DIGIT_WHITE_LIST = "^[0-9]*$";
 const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "[\\w.]";
@@ -751,8 +752,11 @@ bool TextFieldPattern::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetric
     }
 
     const auto& textBox = *boxes.begin();
+    auto wideText = textEditingValue_.GetWideText();
+    auto lastStringBeforeCursor = wideText.substr(textEditingValue_.caretPosition - 1, 1);
     // Caret is within width of the downstream glyphs.
-    if (newLineInserted_ && caretUpdateType_ == CaretUpdateType::INPUT) {
+    if (lastStringBeforeCursor == WIDE_NEWLINE &&
+        (caretUpdateType_ == CaretUpdateType::INPUT || caretUpdateType_ == CaretUpdateType::DEL)) {
         result.offset.SetX(MakeEmptyOffset().GetX());
         result.offset.SetY(textBox.rect_.GetBottom());
         result.height = textBox.rect_.GetHeight();
@@ -762,11 +766,6 @@ bool TextFieldPattern::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetric
     result.offset.SetY(textBox.rect_.GetTop());
     result.height = textBox.rect_.GetHeight();
     return true;
-}
-
-bool TextFieldPattern::LastInputIsNewLine() const
-{
-    return textEditingValue_.LastChar() == NEWLINE_CODE;
 }
 
 OffsetF TextFieldPattern::MakeEmptyOffset() const
@@ -2182,7 +2181,6 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         textEditingValue_.text =
             textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
     }
-    newLineInserted_ = false;
     textEditingValue_.CursorMoveToPosition(
         caretStart + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
     SetEditingValueToProperty(textEditingValue_.text);
@@ -2451,7 +2449,6 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (IsTextArea()) {
         if (GetInputFilter() != "\n") {
             InsertValue("\n");
-            newLineInserted_ = true;
         }
         return;
     }
