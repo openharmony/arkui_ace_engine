@@ -48,6 +48,7 @@ public:
     ~ListPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     static void PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas);
 
