@@ -18,6 +18,7 @@
 
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/slider/slider_style.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,8 +44,17 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
         LayoutProperty::ToJsonValue(json);
-        json->Put("thickness", GetThickness().value_or(Dimension(20.0, DimensionUnit::VP)).ToString().c_str());
+        json->Put("trackThickness",
+            GetThickness()
+                .value_or(GetSliderModeValue(SliderModel::SliderMode::OUTSET) == SliderModel::SliderMode::OUTSET
+                              ? theme->GetOutsetTrackThickness()
+                              : theme->GetInsetTrackThickness())
+                .ToString().c_str());
         static const std::array<std::string, 3> SLIDER_MODE_TO_STRING = {
             "SliderMode.OUTSET",
             "SliderMode.INSET",
