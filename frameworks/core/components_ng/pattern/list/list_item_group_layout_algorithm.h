@@ -117,6 +117,8 @@ public:
     }
 
     float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
+    void CheckRecycle(const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos,
+        bool forwardLayout);
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);

@@ -295,16 +295,6 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
             currentStartPos = currentStartPos - spaceWidth_;
         }
     }
-
-    // Mark inactive in wrapper.
-    for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
-        if (GreatOrEqual(pos->second.second, startPos_ - referencePos_)) {
-            break;
-        }
-        LOGI("recycle item:%{public}d", pos->first);
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
-        itemPosition_.erase(pos++);
-    }
 }
 
 void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
@@ -342,11 +332,26 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
         }
         totalMainSize_ -= delta;
     }
+}
 
+void ListItemGroupLayoutAlgorithm::CheckRecycle(
+    const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos, bool forwardLayout)
+{
     // Mark inactive in wrapper.
+    if (forwardLayout) {
+        for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
+            if (GreatOrEqual(pos->second.second, startPos - referencePos)) {
+                break;
+            }
+            LOGI("recycle item:%{public}d", pos->first);
+            layoutWrapper->RemoveChildInRenderTree(pos->first);
+            itemPosition_.erase(pos++);
+        }
+        return;
+    }
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
-        if (LessOrEqual(pos->second.first, endPos_ - (referencePos_ - totalMainSize_))) {
+        if (LessOrEqual(pos->second.first, endPos - (referencePos - totalMainSize_))) {
             break;
         }
         layoutWrapper->RemoveChildInRenderTree(pos->first);
