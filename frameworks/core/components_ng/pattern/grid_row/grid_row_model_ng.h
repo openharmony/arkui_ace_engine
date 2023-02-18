@@ -25,6 +25,7 @@ public:
     void Create(const RefPtr<V2::GridContainerSize>& col, const RefPtr<V2::Gutter>& gutter,
         const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction) override;
     void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange) override;
+    void SetAlignItems(FlexAlign alignItem) override;
 };
 } // namespace OHOS::Ace::NG
 

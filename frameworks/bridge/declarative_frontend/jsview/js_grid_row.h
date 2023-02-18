@@ -26,6 +26,8 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JsBreakpointEvent(const JSCallbackInfo& info);
     static void Height(const JSCallbackInfo& info);
+    static void AlignItems(const JSCallbackInfo& info);
+    static void ParseAlignItems(int32_t alignItem);
 
 };
 
