@@ -175,14 +175,23 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    // skip the rest of steps for flex_start since geometry info of every children component is re-calculated
-    if (layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START) == FlexAlign::FLEX_START) {
-        return;
-    }
     for (auto& child : row) {
         auto childNode = child.first->GetHostNode();
         auto childSize = child.first->GetGeometryNode()->GetFrameSize();
-        if (layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START) == FlexAlign::STRETCH) {
+        auto childLayoutProperty = child.first->GetLayoutProperty();
+        if (!childLayoutProperty) {
+            LOGD("Child %{public}d, tag %{public}s, has no layout property, continue", childNode->GetId(),
+                childNode->GetTag().c_str());
+            continue;
+        }
+        auto alignSelf = FlexAlign::FLEX_START;
+        if (childLayoutProperty->GetFlexItemProperty()) {
+            alignSelf = childLayoutProperty->GetFlexItemProperty()->GetAlignSelf().value_or(
+                layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START));
+        } else {
+            alignSelf = layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START);
+        }
+        if (alignSelf == FlexAlign::STRETCH) {
             // this child has height close to row height, not necessary to stretch
             if (NearEqual(currentRowHeight, childSize.Height())) {
                 continue;
@@ -192,9 +201,9 @@ void GridRowLayoutAlgorithm::CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper
             child.first->Measure(parentConstraint);
         } else {
             float extraOffset = 0.0f;
-            if (layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START) == FlexAlign::CENTER) {
+            if (alignSelf == FlexAlign::CENTER) {
                 extraOffset = (currentRowHeight - childSize.Height()) * 0.5f;
-            } else if (layoutProperty->GetAlignItemsValue(FlexAlign::FLEX_START) == FlexAlign::FLEX_END) {
+            } else if (alignSelf == FlexAlign::FLEX_END) {
                 extraOffset = currentRowHeight - childSize.Height();
             }
             if (!NearZero(extraOffset)) {
