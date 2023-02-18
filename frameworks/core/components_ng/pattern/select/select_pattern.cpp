@@ -282,38 +282,50 @@ void SelectPattern::BuildChild()
     auto theme = pipeline->GetTheme<SelectTheme>();
 
     auto select = GetHost();
-    if (!select->GetChildren().empty()) {
-        select->RemoveChildAtIndex(0);
-    }
 
-    auto row = FrameNode::CreateFrameNode(
-        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
+    bool hasRowNode = HasRowNode();
+    bool hasTextNode = HasTextNode();
+    bool hasSpinnerNode = HasSpinnerNode();
+    auto rowId = GetRowId();
+    auto textId = GetTextId();
+    auto spinnerId = GetSpinnerId();
+
+    auto row = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_VOID(row);
     auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_VOID(rowProps);
     rowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rowProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     rowProps->UpdateSpace(theme->GetContentSpinnerPadding());
-    text_ = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<TextPattern>());
+    text_ =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(text_);
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
     InitTextProps(textProps, theme);
 
-    spinner_ = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
+    spinner_ = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(spinner_);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
     InitSpinner(spinner_, iconTheme, theme);
 
     // mount triangle and text
-    text_->MountToParent(row);
-    spinner_->MountToParent(row);
+    text_->MarkModifyDone();
+    if (!hasTextNode) {
+        text_->MountToParent(row);
+    }
+    if (!hasSpinnerNode) {
+        spinner_->MountToParent(row);
+    }
     spinner_->MarkModifyDone();
-    row->MountToParent(select);
+    if (!hasRowNode) {
+        row->MountToParent(select);
+    }
     row->MarkModifyDone();
+    row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
     // set bgColor and border
     auto renderContext = select->GetRenderContext();
