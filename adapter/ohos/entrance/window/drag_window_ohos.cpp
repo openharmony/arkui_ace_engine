@@ -21,6 +21,7 @@
 #include "fml/memory/ref_ptr.h"
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
@@ -378,43 +379,39 @@ void DragWindowOhos::DrawTextNG(const RefPtr<NG::Paragraph>& paragraph, const Re
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     CHECK_NULL_VOID(canvasNode);
+    Offset globalOffset;
+    textPattern->GetGlobalOffset(globalOffset);
     SkPath path;
     if (textPattern->GetStartOffset().GetY() == textPattern->GetEndOffset().GetY()) {
-        path.moveTo(textPattern->GetStartOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetStartOffset().GetY() - textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetEndOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetEndOffset().GetY() - textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetEndOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetEndOffset().GetY() + textPattern->GetSelectHeight() -
-                textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetStartOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetStartOffset().GetY() + textPattern->GetSelectHeight() -
-                textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetStartOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetStartOffset().GetY() - textPattern->GetGlobalOffset().GetY());
+        path.moveTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetStartOffset().GetY() - globalOffset.GetY());
+        path.lineTo(textPattern->GetEndOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetEndOffset().GetY() - globalOffset.GetY());
+        path.lineTo(textPattern->GetEndOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetEndOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
+        path.lineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetStartOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
+        path.lineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetStartOffset().GetY() - globalOffset.GetY());
     } else {
-        path.moveTo(textPattern->GetStartOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetStartOffset().GetY() - textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetTextContentRect().Width(),
-            textPattern->GetStartOffset().GetY() - textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetTextContentRect().Width(),
-            textPattern->GetEndOffset().GetY() - textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetEndOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetEndOffset().GetY() - textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetEndOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetEndOffset().GetY() + textPattern->GetSelectHeight() -
-                textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetTextContentRect().GetX(), textPattern->GetEndOffset().GetY() +
-                                                                  textPattern->GetSelectHeight() -
-                                                                  textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetTextContentRect().GetX(), textPattern->GetStartOffset().GetY() +
-                                                                  textPattern->GetSelectHeight() -
-                                                                  textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetStartOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetStartOffset().GetY() + textPattern->GetSelectHeight() -
-                textPattern->GetGlobalOffset().GetY());
-        path.lineTo(textPattern->GetStartOffset().GetX() - textPattern->GetGlobalOffset().GetX(),
-            textPattern->GetStartOffset().GetY() - textPattern->GetGlobalOffset().GetY());
+        path.moveTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetStartOffset().GetY() - globalOffset.GetY());
+        path.lineTo(
+            textPattern->GetTextContentRect().Width(), textPattern->GetStartOffset().GetY() - globalOffset.GetY());
+        path.lineTo(
+            textPattern->GetTextContentRect().Width(), textPattern->GetEndOffset().GetY() - globalOffset.GetY());
+        path.lineTo(textPattern->GetEndOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetEndOffset().GetY() - globalOffset.GetY());
+        path.lineTo(textPattern->GetEndOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetEndOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
+        path.lineTo(textPattern->GetTextContentRect().GetX(),
+            textPattern->GetEndOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
+        path.lineTo(textPattern->GetTextContentRect().GetX(),
+            textPattern->GetStartOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
+        path.lineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetStartOffset().GetY() + textPattern->GetSelectHeight() - globalOffset.GetY());
+        path.lineTo(textPattern->GetStartOffset().GetX() - globalOffset.GetX(),
+            textPattern->GetStartOffset().GetY() - globalOffset.GetY());
     }
     rootNode_->SetClipToBounds(true);
     rootNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(path));
