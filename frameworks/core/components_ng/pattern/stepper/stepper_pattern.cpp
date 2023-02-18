@@ -20,6 +20,7 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/components/stepper/stepper_theme.h"
+#include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -32,6 +33,20 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t PRESS_ANIMATION_DURATION = 100;
+constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+
+constexpr float BUTTON_ON_HOVER_BEZIER_CURVE_X0 = 0.2f;
+constexpr float BUTTON_ON_HOVER_BEZIER_CURVE_Y0 = 0.0f;
+constexpr float BUTTON_ON_HOVER_BEZIER_CURVE_X1 = 0.2f;
+constexpr float BUTTON_ON_HOVER_BEZIER_CURVE_Y1 = 1.0f;
+
+constexpr float BUTTON_ON_PRESS_BEZIER_CURVE_X0 = 0.33f;
+constexpr float BUTTON_ON_PRESS_BEZIER_CURVE_Y0 = 0.0f;
+constexpr float BUTTON_ON_PRESS_BEZIER_CURVE_X1 = 0.67f;
+constexpr float BUTTON_ON_PRESS_BEZIER_CURVE_Y1 = 1.0f;
+} // namespace
 
 void StepperPattern::OnModifyDone()
 {
@@ -97,9 +112,7 @@ void StepperPattern::UpdateOrCreateLeftButtonNode(int32_t index)
 
 void StepperPattern::CreateLeftButtonNode()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto stepperTheme = pipeline->GetTheme<StepperTheme>();
+    auto stepperTheme = GetTheme();
     CHECK_NULL_VOID(stepperTheme);
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -108,13 +121,14 @@ void StepperPattern::CreateLeftButtonNode()
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
-    SetButtonOnHoverBoardColor(buttonNode, stepperTheme->GetMouseHoverColor());
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
+    InitButtonOnHoverEvent(buttonNode, true);
+    InitButtonTouchEvent(buttonNode);
     // Create rowNode
     auto rowNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
@@ -216,9 +230,7 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
 
 void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto stepperTheme = pipeline->GetTheme<StepperTheme>();
+    auto stepperTheme = GetTheme();
     CHECK_NULL_VOID(stepperTheme);
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -234,13 +246,16 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
-    SetButtonOnHoverBoardColor(buttonNode, stepperTheme->GetMouseHoverColor());
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    Color buttonBackgroundColor =
+        rightIsHover_ ? stepperTheme->GetMouseHoverColor() : stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
+    InitButtonOnHoverEvent(buttonNode, false);
+    InitButtonTouchEvent(buttonNode);
     // Create rowNode
     auto rowNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
@@ -292,9 +307,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
 
 void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::string& defaultContent)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto stepperTheme = pipeline->GetTheme<StepperTheme>();
+    auto stepperTheme = GetTheme();
     CHECK_NULL_VOID(stepperTheme);
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -308,13 +321,16 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
         V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
-    SetButtonOnHoverBoardColor(buttonNode, stepperTheme->GetMouseHoverColor());
+    Color buttonBackgroundColor =
+        rightIsHover_ ? stepperTheme->GetMouseHoverColor() : stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
-    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonBackgroundColor);
     buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateBorderRadius(stepperTheme->GetRadius());
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
+    InitButtonOnHoverEvent(buttonNode, false);
+    InitButtonTouchEvent(buttonNode);
     // Create textNode
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -334,9 +350,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
 
 void StepperPattern::CreateWaitingRightButtonNode()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto stepperTheme = pipeline->GetTheme<StepperTheme>();
+    auto stepperTheme = GetTheme();
     CHECK_NULL_VOID(stepperTheme);
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
@@ -367,21 +381,125 @@ void StepperPattern::UpdateRightButtonNode(int32_t index)
     CreateRightButtonNode(index);
 }
 
-void StepperPattern::SetButtonOnHoverBoardColor(RefPtr<FrameNode> buttonNode, const Color& buttonOnHoverBoardColor)
+void StepperPattern::InitButtonOnHoverEvent(RefPtr<FrameNode> buttonNode, bool isLeft)
 {
     CHECK_NULL_VOID(buttonNode);
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(buttonInputHub);
-    auto hoverCallback = [buttonNode, buttonOnHoverBoardColor](bool isHovered) {
-        if (isHovered) {
-            buttonNode->GetRenderContext()->UpdateBackgroundColor(buttonOnHoverBoardColor);
-        } else {
-            buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-        }
-        buttonNode->MarkModifyDone();
+    auto hoverCallback = [weak = WeakClaim(this), buttonNode, isLeft](bool isHovered) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ButtonOnHover(buttonNode, isHovered, isLeft);
     };
     buttonOnHoverListenr_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
     buttonInputHub->AddOnHoverEvent(buttonOnHoverListenr_);
+}
+
+void StepperPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHover, bool isLeft)
+{
+    if (isLeft) {
+        if (leftIsHover_ == isHover) {
+            return;
+        }
+        leftIsHover_ = isHover;
+    } else {
+        if (rightIsHover_ == isHover) {
+            return;
+        }
+        rightIsHover_ = isHover;
+    }
+    if (isHover) {
+        ButtonHoverInAnimation(buttonNode);
+    } else {
+        ButtonHoverOutAnimation(buttonNode);
+    }
+}
+
+void StepperPattern::ButtonHoverInAnimation(RefPtr<FrameNode> buttonNode)
+{
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    option.SetDuration(HOVER_ANIMATION_DURATION);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(BUTTON_ON_HOVER_BEZIER_CURVE_X0, BUTTON_ON_HOVER_BEZIER_CURVE_Y0,
+        BUTTON_ON_HOVER_BEZIER_CURVE_X1, BUTTON_ON_HOVER_BEZIER_CURVE_Y1));
+    auto stepperTheme = GetTheme();
+    CHECK_NULL_VOID(stepperTheme);
+    Color buttonBackgroundColor = stepperTheme->GetMouseHoverColor();
+    AnimationUtils::Animate(option,
+        [renderContext, buttonBackgroundColor]() { renderContext->UpdateBackgroundColor(buttonBackgroundColor); });
+}
+void StepperPattern::ButtonHoverOutAnimation(RefPtr<FrameNode> buttonNode)
+{
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    option.SetDuration(HOVER_ANIMATION_DURATION);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(BUTTON_ON_HOVER_BEZIER_CURVE_X0, BUTTON_ON_HOVER_BEZIER_CURVE_Y0,
+        BUTTON_ON_HOVER_BEZIER_CURVE_X1, BUTTON_ON_HOVER_BEZIER_CURVE_Y1));
+    auto stepperTheme = GetTheme();
+    CHECK_NULL_VOID(stepperTheme);
+    Color buttonBackgroundColor = stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
+    AnimationUtils::Animate(option,
+        [renderContext, buttonBackgroundColor]() { renderContext->UpdateBackgroundColor(buttonBackgroundColor); });
+}
+
+void StepperPattern::InitButtonTouchEvent(RefPtr<FrameNode> buttonNode)
+{
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    buttonEventHub->SetStateEffect(false);
+    auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(buttonGestureHub);
+    auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ButtonOnTouch(buttonNode, info.GetTouches().front().GetTouchType());
+    };
+    buttonTouchListenr_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    buttonGestureHub->AddTouchEvent(buttonTouchListenr_);
+}
+
+void StepperPattern::ButtonOnTouch(RefPtr<FrameNode> buttonNode, TouchType touchType)
+{
+    if (touchType == TouchType::DOWN) {
+        ButtonTouchDownAnimation(buttonNode);
+    }
+    if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        ButtonTouchUpAnimation(buttonNode);
+    }
+}
+
+void StepperPattern::ButtonTouchDownAnimation(RefPtr<FrameNode> buttonNode)
+{
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    option.SetDuration(PRESS_ANIMATION_DURATION);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(BUTTON_ON_PRESS_BEZIER_CURVE_X0, BUTTON_ON_PRESS_BEZIER_CURVE_Y0,
+        BUTTON_ON_PRESS_BEZIER_CURVE_X1, BUTTON_ON_PRESS_BEZIER_CURVE_Y1));
+    auto stepperTheme = GetTheme();
+    CHECK_NULL_VOID(stepperTheme);
+    Color buttonBackgroundColor = stepperTheme->GetButtonPressedColor();
+    AnimationUtils::Animate(option,
+        [renderContext, buttonBackgroundColor]() { renderContext->UpdateBackgroundColor(buttonBackgroundColor); });
+}
+
+void StepperPattern::ButtonTouchUpAnimation(RefPtr<FrameNode> buttonNode)
+{
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    AnimationOption option;
+    option.SetDuration(PRESS_ANIMATION_DURATION);
+    option.SetCurve(AceType::MakeRefPtr<CubicCurve>(BUTTON_ON_PRESS_BEZIER_CURVE_X0, BUTTON_ON_PRESS_BEZIER_CURVE_Y0,
+        BUTTON_ON_PRESS_BEZIER_CURVE_X1, BUTTON_ON_PRESS_BEZIER_CURVE_Y1));
+    auto stepperTheme = GetTheme();
+    CHECK_NULL_VOID(stepperTheme);
+    Color buttonBackgroundColor =
+        rightIsHover_ ? stepperTheme->GetMouseHoverColor() : stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
+    AnimationUtils::Animate(option,
+        [renderContext, buttonBackgroundColor]() { renderContext->UpdateBackgroundColor(buttonBackgroundColor); });
 }
 
 void StepperPattern::InitButtonClickEvent()
