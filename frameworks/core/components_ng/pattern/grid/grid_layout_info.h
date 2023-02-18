@@ -72,6 +72,13 @@ struct GridLayoutInfo {
         return totalRow > 0 ? totalHeight / totalRow : 0;
     }
 
+    void ResetPositionFlags()
+    {
+        reachEnd_ = false;
+        reachStart_ = false;
+        offsetEnd_ = false;
+    }
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f;
