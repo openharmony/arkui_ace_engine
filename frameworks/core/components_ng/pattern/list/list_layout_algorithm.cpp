@@ -363,6 +363,10 @@ void ListLayoutAlgorithm::LayoutBackward(
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
         if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
+            if (!mainSizeIsDefined_ && GetEndIndex() == totalItemCount_ - 1) {
+                auto itemTotalSize = GetEndPosition() - currentStartPos;
+                contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
+            }
         }
         endMainPos_ = currentStartPos + contentMainSize_;
         startMainPos_ = currentStartPos;
