@@ -262,11 +262,13 @@ void AceAbility::InitEnv()
     }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null, initialize the environment failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     if (runArgs_.projectModel == ProjectModel::STAGE) {
+        container->InitialStageModuleParser();
+        auto stageModuleInfo = container->GetStageModuleInfo();
+        if (stageModuleInfo && stageModuleInfo->GetPartialUpdateFlag()) {
+            container->SetUseNewPipeline();
+        }
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
         } else {
@@ -285,7 +287,7 @@ void AceAbility::InitEnv()
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
     }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
-        container->ParseStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
+        container->InitializeStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
     }
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
@@ -314,11 +316,13 @@ void AceAbility::InitEnv()
     }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null, initialize the environment failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     if (runArgs_.projectModel == ProjectModel::STAGE) {
+        container->InitialStageModuleParser();
+        auto stageModuleInfo = container->GetStageModuleInfo();
+        if (stageModuleInfo && stageModuleInfo->GetPartialUpdateFlag()) {
+            container->SetUseNewPipeline();
+        }
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
         } else {
@@ -337,7 +341,7 @@ void AceAbility::InitEnv()
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
     }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
-        container->ParseStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
+        container->InitializeStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
     }
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);

@@ -23,6 +23,7 @@
 
 #include "adapter/preview/entrance/ace_run_args.h"
 #include "adapter/preview/osal/fetch_manager.h"
+#include "adapter/preview/osal/stage_module_parser.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
@@ -218,7 +219,7 @@ public:
         pageProfile_ = pageProfile;
     }
 
-    void ParseStageAppConfig(const std::string& assetPath, bool formsEnabled);
+    void InitializeStageAppConfig(const std::string& assetPath, bool formsEnabled);
 
     void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override
     {
@@ -256,6 +257,11 @@ public:
         }
         return it->second;
     }
+    const RefPtr<StageModuleInfo>& GetStageModuleInfo() const
+    {
+        return stageModuleInfo_;
+    }
+    void InitialStageModuleParser();
 
 private:
     void InitializeFrontend();
@@ -292,6 +298,9 @@ private:
     std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
+    // These two variables are used to record the information of stage model application.
+    RefPtr<StageAppInfo> stageAppInfo_;
+    RefPtr<StageModuleInfo> stageModuleInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

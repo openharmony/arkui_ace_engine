@@ -34,7 +34,6 @@
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/stage_card_parser.h"
-#include "adapter/preview/osal/stage_module_parser.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -80,7 +79,6 @@ std::once_flag AceContainer::onceFlag_;
 AceContainer::AceContainer(int32_t instanceId, FrontendType type)
     : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type)
 {
-    SetUseNewPipeline();
     ThemeConstants::InitDeviceType();
 
 #ifndef ENABLE_ROSEN_BACKEND
@@ -93,6 +91,20 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type)
         taskExecutor->InitJsThread();
     }
     taskExecutor_ = taskExecutor;
+}
+
+void AceContainer::InitialStageModuleParser()
+{
+    const char* configFilename = "module.json";
+    std::string appConfig;
+    if (!Framework::GetAssetContentImpl(assetManager_, configFilename, appConfig)) {
+        LOGE("Can not load the application config of stage model.");
+        return;
+    }
+    auto stageModuleParser = AceType::MakeRefPtr<StageModuleParser>();
+    stageModuleParser->Parse(appConfig);
+    stageAppInfo_ = stageModuleParser->GetAppInfo();
+    stageModuleInfo_ = stageModuleParser->GetModuleInfo();
 }
 
 void AceContainer::Initialize()
@@ -202,38 +214,22 @@ void AceContainer::RunNativeEngineLoop()
     taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
 }
 
-void AceContainer::ParseStageAppConfig(const std::string& assetPath, bool formsEnabled)
+void AceContainer::InitializeStageAppConfig(const std::string& assetPath, bool formsEnabled)
 {
-    const char* configFilename = "module.json";
-    std::string appConfig;
-    if (!Framework::GetAssetContentImpl(assetManager_, configFilename, appConfig)) {
-        LOGE("Can not load the application config of stage model.");
-        return;
-    }
-    RefPtr<StageModuleParser> stageModuleParser = AceType::MakeRefPtr<StageModuleParser>();
-    stageModuleParser->Parse(appConfig);
-    auto appInfo = stageModuleParser->GetAppInfo();
-    if (!appInfo) {
-        LOGE("Extract appInfo from module.json failed");
-        return;
-    }
-    std::string bundleName = appInfo->GetBundleName();
-    auto& moduleInfo = stageModuleParser->GetModuleInfo();
-    const std::string& compileMode = moduleInfo->GetCompileMode();
-    const std::string& moduleName = moduleInfo->GetModuleName();
-    bool isBundle = (compileMode != "esmodule");
-    if (frontend_) {
-        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        if (declarativeFrontend) {
-            declarativeFrontend->InitializeModuleSearcher(bundleName, moduleName, assetPath, isBundle);
-        }
-    } else {
-        LOGE("frontend_ is nullptr");
-    }
+    CHECK_NULL_VOID(stageAppInfo_);
+    CHECK_NULL_VOID(stageModuleInfo_);
     if (pipelineContext_ && !formsEnabled) {
-        LOGI("Set MinPlatformVersion to %{public}d", appInfo->GetMinAPIVersion());
-        pipelineContext_->SetMinPlatformVersion(appInfo->GetMinAPIVersion());
+        LOGI("Set MinPlatformVersion to %{public}d", stageAppInfo_->GetMinAPIVersion());
+        pipelineContext_->SetMinPlatformVersion(stageAppInfo_->GetMinAPIVersion());
     }
+
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto& bundleName = stageAppInfo_->GetBundleName();
+    auto& compileMode = stageModuleInfo_->GetCompileMode();
+    auto& moduleName = stageModuleInfo_->GetModuleName();
+    bool isBundle = (compileMode != "esmodule");
+    declarativeFrontend->InitializeModuleSearcher(bundleName, moduleName, assetPath, isBundle);
 }
 
 void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl)
