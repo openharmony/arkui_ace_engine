@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
+#include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -56,9 +57,6 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
         json->Put("lunar", V2::ConvertBoolToString(GetLunar().value_or(false)).c_str());
-        json->Put("selectedDate", GetDateSelected().c_str());
-        json->Put("startDate", GetDateStart().c_str());
-        json->Put("endDate", GetDateEnd().c_str());
     }
 
     std::string GetDateStart() const
