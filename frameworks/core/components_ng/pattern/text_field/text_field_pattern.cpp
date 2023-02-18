@@ -267,8 +267,6 @@ bool TextFieldPattern::UpdateCaretPosition()
             SetCaretOffsetXForEmptyText();
         }
         return true;
-    } else if (caretUpdateType_ == CaretUpdateType::HANDLE_MOVE) {
-        StartTwinkling();
     } else if (caretUpdateType_ == CaretUpdateType::RIGHT_CLICK) {
         UpdateCaretByRightClick();
     }
@@ -685,6 +683,9 @@ void TextFieldPattern::OnTextAreaScroll(float dy)
 void TextFieldPattern::GetTextRectsInRange(
     int32_t base, int32_t destination, std::vector<RSTypographyProperties::TextBox>& textBoxes)
 {
+    if (base > destination) {
+        std::swap(base, destination);
+    }
     textBoxes = paragraph_->GetRectsForRange(
         base, destination, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
 }
@@ -1549,7 +1550,7 @@ void TextFieldPattern::ProcessOverlay()
         } else if (textEditingValue_.CaretAtLast()) {
             UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition);
         } else {
-            UpdateSelection(textEditingValue_.caretPosition + 1, textEditingValue_.caretPosition);
+            UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition + 1);
         }
     }
     std::vector<RSTypographyProperties::TextBox> tmp;
@@ -1605,14 +1606,9 @@ void TextFieldPattern::ShowSelectOverlay(
             CHECK_NULL_VOID(pattern);
             pattern->OnHandleMoveDone(handleRect, isFirst);
         };
-        selectInfo.onHandleReverse = [weak](bool isReverse) {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnHandleReverse(isReverse);
-        };
         selectInfo.isUsingMouse = pattern->IsUsingMouse();
         selectInfo.rightClickOffset = pattern->GetRightClickOffset();
-
+        selectInfo.singleLineHeight = pattern->PreferredLineHeight();
         selectInfo.menuInfo.showCopy = !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showCut = !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showCopyAll = !pattern->GetEditingValue().text.empty();
@@ -1652,13 +1648,6 @@ void TextFieldPattern::ShowSelectOverlay(
         pattern->SetSelectOverlay(pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo));
     };
     clipboard_->HasData(hasDataCallback);
-}
-
-void TextFieldPattern::OnHandleReverse(bool isReverse)
-{
-    if (isReverse) {
-        isFirstHandle_ = !isFirstHandle_;
-    }
 }
 
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* /*node*/)
@@ -1728,7 +1717,16 @@ int32_t TextFieldPattern::UpdateCaretPositionOnHandleMove(const OffsetF& localOf
         }
         return position;
     }
-    position = ConvertTouchOffsetToCaretPosition(Offset(localOffset.GetX(), localOffset.GetY()));
+    if (localOffset.GetY() < contentRect_.GetY()) {
+        position = ConvertTouchOffsetToCaretPosition(Offset(
+            localOffset.GetX() - GetPaddingLeft(), localOffset.GetY() - textRect_.GetY() - PreferredLineHeight()));
+    } else if (GreatOrEqual(localOffset.GetY(), contentRect_.GetY() + contentRect_.Height())) {
+        position = ConvertTouchOffsetToCaretPosition(Offset(
+            localOffset.GetX() - GetPaddingLeft(), localOffset.GetY() - textRect_.GetY() + PreferredLineHeight()));
+    } else {
+        position = ConvertTouchOffsetToCaretPosition(
+            Offset(localOffset.GetX() - GetPaddingLeft(), localOffset.GetY() - textRect_.GetY()));
+    }
     return position;
 }
 
@@ -1754,6 +1752,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHan
 {
     CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
     caretUpdateType_ = CaretUpdateType::HANDLE_MOVE_DONE;
+    isFirstHandle_ = isFirstHandle;
     StopTwinkling();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -1765,20 +1764,9 @@ void TextFieldPattern::SetHandlerOnMoveDone()
     }
     SelectHandleInfo info;
     auto newHandleOffset = parentGlobalOffset_;
-    if (textBoxes_.empty()) {
-        newHandleOffset += caretRect_.GetOffset();
-    } else {
-        if (isFirstHandle_) {
-            newHandleOffset += OffsetF(textBoxes_.begin()->rect_.GetLeft(), textBoxes_.begin()->rect_.GetTop());
-        } else {
-            newHandleOffset += OffsetF(textBoxes_.rbegin()->rect_.GetRight(), textBoxes_.rbegin()->rect_.GetTop());
-        }
-        if (IsTextArea()) {
-            newHandleOffset += OffsetF(contentRect_.GetX(), textRect_.GetY());
-        } else {
-            newHandleOffset += OffsetF(textRect_.GetX(), contentRect_.GetY());
-        }
-    }
+    auto handleOffset =
+        CalcCursorOffsetByPosition(isFirstHandle_ ? textSelector_.baseOffset : textSelector_.destinationOffset);
+    newHandleOffset += handleOffset.offset;
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     RectF newHandle;
     newHandle.SetOffset(newHandleOffset);

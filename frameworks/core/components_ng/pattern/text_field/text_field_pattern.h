@@ -475,7 +475,6 @@ public:
     bool IsDisabled();
 
     bool LastInputIsNewLine() const;
-    void OnHandleReverse(bool isReverse);
     bool GetIsMousePressed() const
     {
         return isMousePressed_;
