@@ -35,6 +35,9 @@
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
 
+namespace OHOS::AbilityRuntime {
+    class Context;
+}
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
@@ -291,6 +294,15 @@ public:
         return pageUrlChecker_;
     }
 
+    // virtual sptr<IRemoteObject> GetAbilityToken()
+    // {
+    //     return nullptr;
+    // }
+
+    virtual std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityRuntimeContext()
+    {
+        return nullptr;
+    }
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;

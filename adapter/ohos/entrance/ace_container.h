@@ -20,7 +20,6 @@
 #include <memory>
 #include <mutex>
 
-#include "ability_context.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 
@@ -405,6 +404,9 @@ public:
     void GetImageDataFromAshmem(
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
+    sptr<IRemoteObject> GetAbilityToken();
+
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityRuntimeContext() override;
 private:
     void InitializeFrontend();
     void InitializeCallback();

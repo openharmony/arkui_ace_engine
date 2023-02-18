@@ -52,6 +52,7 @@ build_component_ng("window_scene") {
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
       "//foundation/window/window_manager/wm:libwm",
       "//foundation/window/window_manager/dm:libdm",
+      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
     ]
 
     external_deps = [

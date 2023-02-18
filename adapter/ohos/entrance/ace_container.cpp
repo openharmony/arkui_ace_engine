@@ -18,6 +18,7 @@
 #include <fstream>
 #include <functional>
 
+#include "ability_context.h"
 #include "ability_info.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
@@ -1443,6 +1444,36 @@ sptr<IRemoteObject> AceContainer::GetToken()
     }
     LOGE("fail to get Token");
     return nullptr;
+}
+
+sptr<IRemoteObject> AceContainer::GetAbilityToken()
+{
+    auto context = runtimeContext_.lock();
+    if (!context) {
+        LOGE("runtimeContext is null.");
+        return nullptr;
+    }
+    return context->GetToken();
+}
+
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
+{
+    return runtimeContext_.lock();
+}
+
+sptr<IRemoteObject> AceContainer::GetAbilityToken()
+{
+    auto context = runtimeContext_.lock();
+    if (!context) {
+        LOGE("runtimeContext is null.");
+        return nullptr;
+    }
+    return context->GetToken();
+}
+
+std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
+{
+    return runtimeContext_.lock();
 }
 
 // ArkTsCard start

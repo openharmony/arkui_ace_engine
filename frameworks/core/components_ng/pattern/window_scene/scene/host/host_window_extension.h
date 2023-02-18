@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class HostWindowExtension : public HostWindowPattern {
     DECLARE_ACE_TYPE(HostWindowExtension, HostWindowPattern);
 
