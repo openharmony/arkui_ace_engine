@@ -1699,21 +1699,29 @@ class DistributedStorage {
 *   obsObj = Observed(ClassA)(params to ClassA constructor)
 *
 * Note this works only for classes, not for ClassA[]
-* Also does not work for classes with genetics it seems
 * In that case use factory function
 *   obsObj = ObservedObject.createNew<ClassA[]>([])
 */
-function Observed(target) {
-    var original = target;
-    // the new constructor behaviour
-    var f = function (...args) {
+const Observed = function () {
+    let object_creation_ongoing__ = 0;
+    return function Observed(target) {
         
-        return ObservedObject.createNew(new original(...args), undefined);
+        const Observed = class extends target {
+            constructor(...args) {
+                object_creation_ongoing__ += 1;
+                super(...args);
+                object_creation_ongoing__ -= 1;
+                if (object_creation_ongoing__ == 0) {
+                    return ObservedObject.createNew(this, null);
+                }
+                else {
+                    return this;
+                }
+            }
+        };
+        return Observed;
     };
-    Object.setPrototypeOf(f, Object.getPrototypeOf(original));
-    // return new constructor (will override original)
-    return f;
-}
+}();
 class SubscribableHandler {
     constructor(owningProperty) {
         this.owningProperties_ = new Set();
@@ -1763,32 +1771,32 @@ class SubscribableHandler {
             }
         });
     }
-    notifyObjectPropertyHasBeenRead(propName) {
+    notifyObjectPropertyHasBeenRead(propName, obj) {
         
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
             if (owningProperty) {
                 // PU code path
                 if ('propertyHasBeenReadPU' in owningProperty) {
-                    owningProperty.objectHasBeenReadPU(this, propName);
+                    owningProperty.objectHasBeenReadPU(obj, propName);
                 }
             }
         });
     }
     get(target, property) {
-        return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
-            (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
-        /*
-        TODO
-        Requested by Lihong, found not working, still need to investigate
-        return (property === SubscribableHandler.IS_OBSERVED_OBJECT)
-            ? true
-            : (property === SubscribableHandler.RAW_OBJECT)
-                ? target
-                : (typeof target[property] == 'node comfunction')
-                    ? target[property].bind(target)
-                    : target[property];
-                    */
+        if (property === SubscribableHandler.IS_OBSERVED_OBJECT) {
+            return true;
+        }
+        else if (property === SubscribableHandler.RAW_OBJECT) {
+            return target;
+        }
+        else {
+            let ret = target[property];
+            if (typeof ret == "object") {
+                this.notifyObjectPropertyHasBeenRead(property.toString(), ret);
+            }
+            return ret;
+        }
     }
     set(target, property, newValue) {
         switch (property) {
@@ -1909,45 +1917,36 @@ class ObservedObject extends ExtendableProxy {
      * @returns deep copied object, optionally wrapped inside an ObservedObject
      */
     static GetDeepCopyOfObject(obj) {
-        function getProperties(o) {
-            var seenobj = new Set();
-            var seenprop = new Set();
-            function _proto(obj) {
-                return obj instanceof Object ?
-                    Object.getPrototypeOf(obj) :
-                    obj.constructor.prototype;
+        
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+        let copy = Array.isArray(obj) ? [] : !obj.constructor ? {} : new obj.constructor();
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+        if (obj instanceof Set) {
+            for (let setKey of obj.keys()) {
+                copy.add(ObservedObject.GetDeepCopyOfObject(setKey));
             }
-            function _properties(obj) {
-                var ret = [];
-                if (obj === null || seenobj.has(obj)) {
-                    return ret;
-                }
-                seenobj.add(obj);
-                if (obj instanceof Object) {
-                    var ps = Object.getOwnPropertyNames(obj);
-                    for (var i = 0; i < ps.length; ++i) {
-                        if (!seenprop.has(ps[i])) {
-                            ret.push(ps[i]);
-                            seenprop.add(ps[i]);
-                        }
-                    }
-                }
-                return ret.concat(_properties(_proto(obj)));
+        }
+        else if (obj instanceof Map) {
+            for (let mapKey of obj.keys()) {
+                copy.set(mapKey, ObservedObject.GetDeepCopyOfObject(obj.get(mapKey)));
             }
-            return _properties(o);
         }
-        if (obj instanceof Array) {
-            let copy = [];
-            obj.forEach((item, index) => copy[index] = ObservedObject.GetDeepCopyOfObject(item));
-            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+        else if (obj instanceof Object) {
+            for (let objKey of Object.keys(obj)) {
+                copy[objKey] = ObservedObject.GetDeepCopyOfObject(obj[objKey]);
+            }
         }
-        else if (typeof obj === "object") {
-            let copy = {};
-            const properties = getProperties(obj);
-            properties.forEach(k => copy[k] = ObservedObject.GetDeepCopyOfObject(obj[k]));
-            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+        else if (obj instanceof Date) {
+            copy.setTime(obj.getTime());
         }
-        return obj;
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                copy[key] = ObservedObject.GetDeepCopyOfObject(obj[key]);
+            }
+        }
+        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     }
     /**
      * Create a new ObservableObject and subscribe its owner to propertyHasChanged
