@@ -612,6 +612,7 @@ std::string AceAbility::GetDefaultJSONTree()
 
 bool AceAbility::OperateComponent(const std::string& attrsJson)
 {
+    LOGD("OperateComponent attrsJson %{public}s", attrsJson.c_str());
     auto root = JsonUtil::ParseJsonString(attrsJson);
     if (!root || !root->IsValid()) {
         LOGE("the attrsJson is illegal json format");

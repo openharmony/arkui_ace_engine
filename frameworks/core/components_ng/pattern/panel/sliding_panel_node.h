@@ -33,7 +33,7 @@ public:
     {}
     ~SlidingPanelNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child) override;
-
+    const RefPtr<UINode> GetContentChildFromGroup() override;
     bool HasColumnNode() const
     {
         return columnId_.has_value();

@@ -23,8 +23,9 @@
 
 #include "adapter/preview/inspector/inspector_client.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
-#include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_v2/inspector/shape_composed_element.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -207,21 +208,41 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
     auto operateType = root->GetString("type", "");
     auto parentID = root->GetInt("parentID", -1);
     auto slot = root->GetInt("slot", -1);
-    auto newComponent = GetNewComponentWithJsCode(root);
-    if (parentID <= 0) {
-        auto rootElement = GetRootElement().Upgrade();
-        if (!rootElement) {
-            return false;
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGD("parentID:%{public}d slot:%{public}d", parentID, slot);
+        auto newUINode = AceType::DynamicCast<NG::FrameNode>(GetNewFrameNodeWithJsCode(root));
+        CHECK_NULL_RETURN(newUINode, false);
+        auto parent = ElementRegister::GetInstance()->GetUINodeById(parentID);
+        CHECK_NULL_RETURN(parent, false);
+        auto parentGroupNode = AceType::DynamicCast<NG::GroupNode>(parent);
+        if (parentGroupNode) {
+            LOGD("parentNode is GroupNode");
+            parentGroupNode->RemoveChildAndReturnIndex(parentGroupNode->GetContentChildFromGroup());
+            parentGroupNode->AddChildToGroup(newUINode);
+        } else {
+            parent->RemoveChildAtIndex(slot);
+            newUINode->MountToParent(parent, slot, false);
         }
-        auto child = rootElement->GetChildBySlot(-1); // rootElement only has one child,and use the default slot -1
-        if (!newComponent) {
-            LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
-            return false;
-        }
-        rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
+        newUINode->OnMountToParentDone();
+        newUINode->MarkModifyDone();
+        newUINode->FlushUpdateAndMarkDirty();
+        parent->FlushUpdateAndMarkDirty();
         return true;
+    } else {
+        auto newComponent = GetNewComponentWithJsCode(root);
+        if (parentID <= 0) {
+            auto rootElement = GetRootElement().Upgrade();
+            auto child = rootElement->GetChildBySlot(-1); // rootElement only has one child,and use the default slot -1
+            if (!newComponent) {
+                LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
+                return false;
+            }
+            rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
+            return true;
+        }
+        return OperateGeneralComponent(parentID, slot, operateType, newComponent);
     }
-    return OperateGeneralComponent(parentID, slot, operateType, newComponent);
 }
 
 bool JsInspectorManager::OperateGeneralComponent(
@@ -275,6 +296,27 @@ RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::uniqu
     }
     auto component = declarativeFrontend->GetNewComponentWithJsCode(jsCode, viewID);
     return component;
+}
+
+RefPtr<NG::UINode> JsInspectorManager::GetNewFrameNodeWithJsCode(const std::unique_ptr<JsonValue>& root)
+{
+    std::string jsCode = root->GetString("jsCode", "");
+    std::string viewID = root->GetString("viewID", "");
+    if (jsCode.length() == 0) {
+        LOGE("Get jsCode Failed");
+        return nullptr;
+    }
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(pipeline->GetFrontend());
+
+    CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+    auto jsEngine = declarativeFrontend->GetJsEngine();
+    CHECK_NULL_RETURN(jsEngine, nullptr);
+    if (!jsEngine->ExecuteJsForFastPreview(jsCode, viewID)) {
+        return nullptr;
+    }
+    return NG::ViewStackProcessor::GetInstance()->GetNewUINode();
 }
 
 RefPtr<V2::InspectorComposedElement> JsInspectorManager::GetInspectorElementById(NodeId nodeId)

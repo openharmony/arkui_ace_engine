@@ -59,6 +59,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #if defined(PREVIEW)
@@ -1253,6 +1254,20 @@ RefPtr<Component> JsiDeclarativeEngine::GetNewComponentWithJsCode(const std::str
     auto component = ViewStackProcessor::GetInstance()->GetNewComponent();
     return component;
 }
+
+bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, const std::string& viewID)
+{
+    std::string dest;
+    if (!Base64Util::Decode(jsCode, dest)) {
+        return false;
+    }
+    NG::ViewStackProcessor::GetInstance()->ClearStack();
+    NG::ViewStackProcessor::GetInstance()->PushKey(viewID);
+    bool result = engineInstance_->InitAceModule((uint8_t*)dest.data(), dest.size());
+    NG::ViewStackProcessor::GetInstance()->PopKey();
+    return result;
+}
+
 #endif
 
 void JsiDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
@@ -1552,8 +1567,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s, state: %{public}d",
-        packageName.c_str(), static_cast<int32_t>(state));
+    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s, state: %{public}d", packageName.c_str(),
+        static_cast<int32_t>(state));
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
         LOGE("update app state failed, runtime is null.");

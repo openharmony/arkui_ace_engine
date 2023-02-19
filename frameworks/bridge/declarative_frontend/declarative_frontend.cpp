@@ -646,6 +646,14 @@ void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t 
 {
     delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);
 }
+
+RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
+{
+    if (jsEngine_) {
+        return jsEngine_->GetNewComponentWithJsCode(jsCode, viewID);
+    }
+    return nullptr;
+}
 #endif
 
 void DeclarativeFrontend::TransferJsPluginGetError(int callbackId, int32_t errorCode, std::string&& errorMessage) const
@@ -925,14 +933,6 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
-}
-
-RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
-{
-    if (jsEngine_) {
-        return jsEngine_->GetNewComponentWithJsCode(jsCode, viewID);
-    }
-    return nullptr;
 }
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)

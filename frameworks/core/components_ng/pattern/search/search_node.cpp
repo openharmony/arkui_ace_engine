@@ -32,4 +32,9 @@ void SearchNode::AddChildToGroup(const RefPtr<UINode>& child)
     child->MountToParent(searchNode);
 }
 
+const RefPtr<UINode> SearchNode::GetContentChildFromGroup()
+{
+    return GetChildren().back();
+}
+
 } // namespace OHOS::Ace::NG

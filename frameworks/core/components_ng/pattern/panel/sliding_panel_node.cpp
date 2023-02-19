@@ -31,4 +31,9 @@ void SlidingPanelNode::AddChildToGroup(const RefPtr<UINode>& child)
     }
 }
 
+const RefPtr<UINode> SlidingPanelNode::GetContentChildFromGroup()
+{
+    return GetChildren().back();
+}
+
 } // namespace OHOS::Ace::NG

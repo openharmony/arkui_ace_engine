@@ -32,7 +32,7 @@ public:
     ~SearchNode() override = default;
 
     void AddChildToGroup(const RefPtr<UINode>& child) override;
-
+    const RefPtr<UINode> GetContentChildFromGroup() override;
     bool HasTextFieldNode() const
     {
         return textFieldId_.has_value();

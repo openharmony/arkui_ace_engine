@@ -47,4 +47,16 @@ void CounterNode::AddChildToGroup(const RefPtr<UINode>& child)
     child->MountToParent(contentNode);
 }
 
+const RefPtr<UINode> CounterNode::GetContentChildFromGroup()
+{
+    auto pattern = GetPattern<CounterPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->HasContentNode()) {
+        return nullptr;
+    }
+    int32_t contentId = pattern->GetContentId();
+    const auto contentNode = GetChildAtIndex(GetChildIndexById(contentId));
+    return contentNode;
+}
+
 } // namespace OHOS::Ace::NG

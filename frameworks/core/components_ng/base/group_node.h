@@ -27,7 +27,9 @@ public:
     GroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false)
         : FrameNode(tag, nodeId, pattern, isRoot) {}
     ~GroupNode() override = default;
-    virtual void AddChildToGroup(const RefPtr<UINode>& children) {}
+    // GetContentChildFromGroup and AddChildToGroup are a pair of methods
+    virtual void AddChildToGroup(const RefPtr<UINode>& children) {};
+    virtual const RefPtr<UINode> GetContentChildFromGroup() { return nullptr; };
 };
 
 } // namespace OHOS::Ace::NG
