@@ -45,7 +45,12 @@ void ExclusiveRecognizer::OnAccepted()
         if (recognizer && (recognizer != activeRecognizer_)) {
             LOGD("the sub gesture %{public}s is rejected because %{public}s is accepted", AceType::TypeName(recognizer),
                 AceType::TypeName(activeRecognizer_));
-            recognizer->OnRejected();
+            if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+                auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+                group->ForceReject();
+            } else {
+                recognizer->OnRejected();
+            }
         }
     }
 }

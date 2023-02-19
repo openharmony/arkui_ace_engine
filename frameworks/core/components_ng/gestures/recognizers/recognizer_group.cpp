@@ -15,6 +15,7 @@
 
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -52,6 +53,55 @@ void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& 
             recognizers_.emplace_back(child);
             child->SetGestureGroup(AceType::WeakClaim(this));
         }
+    }
+}
+
+RefereeState RecognizerGroup::CheckStates()
+{
+    int count = 0;
+    for (auto& recognizer : recognizers_) {
+        if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+            if (recognizer->GetRefereeState() != RefereeState::SUCCEED_BLOCKED &&
+                recognizer->GetRefereeState() != RefereeState::SUCCEED &&
+                recognizer->GetRefereeState() != RefereeState::FAIL) {
+                count++;
+                break;
+            }
+            continue;
+        }
+        auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+        if (group) {
+            auto state = group->CheckStates();
+            if (state == RefereeState::PENDING) {
+                count++;
+                break;
+            }
+        }
+    }
+    if (count > 0) {
+        return RefereeState::PENDING;
+    }
+    return refereeState_;
+}
+
+void RecognizerGroup::ForceReject()
+{
+    for (auto& recognizer : recognizers_) {
+        if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+            if (recognizer->GetRefereeState() != RefereeState::SUCCEED_BLOCKED &&
+                recognizer->GetRefereeState() != RefereeState::SUCCEED &&
+                recognizer->GetRefereeState() != RefereeState::FAIL) {
+                recognizer->OnRejected();
+            }
+            continue;
+        }
+        auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+        if (group) {
+            group->ForceReject();
+        }
+    }
+    if (GetRefereeState() != RefereeState::FAIL) {
+        OnRejected();
     }
 }
 
