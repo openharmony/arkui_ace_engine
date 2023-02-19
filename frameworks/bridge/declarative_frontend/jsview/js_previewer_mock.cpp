@@ -17,32 +17,33 @@
 
 #include "base/log/ace_trace.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_canvas_renderer.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_rendering_context.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/preview_mock_model_impl.h"
+#include "frameworks/core/components_ng/pattern/preview_mock/preview_mock_model.h"
+#include "frameworks/core/components_ng/pattern/preview_mock/preview_mock_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<PreviewMockModel> PreviewMockModel::instance_ = nullptr;
+
+PreviewMockModel* PreviewMockModel::GetInstance()
+{
+    if (!instance_) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::PreviewMockModelNG());
+        } else {
+            instance_.reset(new Framework::PreviewMockModelImpl());
+        }
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-namespace {
-constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
-constexpr double DEFAULT_OFFSET = 25;
-constexpr double DEFAULT_HEIGHT = 30;
-}
 
 void CreateMockComponent(const std::string inspectorTag)
 {
-    RefPtr<OHOS::Ace::CustomPaintComponent> mockComponent = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
-    auto jsContext = Referenced::MakeRefPtr<JSRenderingContext>();
-    jsContext->SetAnti(true);
-    jsContext->SetComponent(mockComponent->GetTaskPool());
-    jsContext->SetAntiAlias();
-    mockComponent->GetTaskPool()->UpdateFontSize(DEFAULT_FONT_SIZE);
-    mockComponent->GetTaskPool()->FillText("This component is not supported on PC preview.", Offset(0, DEFAULT_OFFSET));
-    mockComponent->SetInspectorTag(inspectorTag);
-    ViewStackProcessor::GetInstance()->Push(mockComponent);
-
-    RefPtr<BoxComponent> mountBox = ViewStackProcessor::GetInstance()->GetBoxComponent();
-    mountBox->SetColor(Color::FromString("#808080"));
-    mountBox->SetHeight(DEFAULT_HEIGHT);
+    OHOS::Ace::PreviewMockModel::GetInstance()->Create(inspectorTag);
 }
 
 void JSForm::Create(const JSCallbackInfo& info)
@@ -89,8 +90,7 @@ void JSRichText::Create(const JSCallbackInfo& info)
         LOGI("richtext create error, info is non-valid");
         return;
     }
-    LOGE("lihao js Create JSRichText::Create");
-    CreateMockComponent("RichTextComponent");
+    CreateMockComponent("RichText");
 }
 
 void JSRichText::Mock(const JSCallbackInfo& info) {}
@@ -245,7 +245,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         return;
     }
 
-    CreateMockComponent("WebComponent");
+    CreateMockComponent("Web");
 }
 
 void JSWeb::Mock(const JSCallbackInfo& info) {}
@@ -387,7 +387,7 @@ void JSXComponent::Create(const JSCallbackInfo& info)
         LOGI("xcomponent create error, info is invalid");
         return;
     }
-    CreateMockComponent("XComponentComponent");
+    CreateMockComponent("XComponent");
 }
 
 void JSXComponent::Mock(const JSCallbackInfo& info) {}
