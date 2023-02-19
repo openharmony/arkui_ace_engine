@@ -78,7 +78,7 @@ public:
         JSClass<JSWebCookie>::CustomMethod("setCookie", &JSWebCookie::SetCookie);
         JSClass<JSWebCookie>::CustomMethod("getCookie", &JSWebCookie::GetCookie);
         JSClass<JSWebCookie>::CustomMethod("deleteEntireCookie", &JSWebCookie::DeleteEntirelyCookie);
-        JSClass<JSWebCookie>::CustomMethod("saveCookieSync", &JSWebCookie::SaveCookieSync);
+        JSClass<JSWebCookie>::CustomMethod("saveCookie", &JSWebCookie::SaveCookieSync);
         JSClass<JSWebCookie>::Bind(globalObj, JSWebCookie::Constructor, JSWebCookie::Destructor);
     }
 
