@@ -313,6 +313,8 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                         UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
                         CheckSizeValidity(childLayoutWrapper);
                         CheckBaselineProperties(childLayoutWrapper);
+                    } else {
+                        allocatedSize_ += space_;
                     }
                 } else {
                     child.layoutWrapper->SetActive(false);
@@ -341,6 +343,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 firstLoopIter = ++loopIter;
             }
         }
+        allocatedSize_ -= space_;
         auto remainedMainAxisSize = mainAxisSize_ - allocatedSize_;
         auto spacePerWeight = remainedMainAxisSize / newTotalFlexWeight;
         auto secondIterLoop = magicNodes_.rbegin();
@@ -487,6 +490,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             }
             ++iter;
         }
+        allocatedSize_ -= space_;
     }
 }
 
