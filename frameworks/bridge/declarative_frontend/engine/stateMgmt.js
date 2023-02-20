@@ -4229,22 +4229,22 @@ class ViewPU extends NativeViewPartialUpdate {
      *
      */
     updateDirtyElements() {
-        if (this.dirtDescendantElementIds_.size == 0) {
+        do {
             
-            return;
-        }
-        
-        // request list of all (gloabbly) deleteelmtIds;
-        let deletedElmtIds = [];
-        this.getDeletedElemtIds(deletedElmtIds);
-        // see which elmtIds are managed by this View
-        // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
-        // process all elmtIds marked as needing update in ascending order.
-        // ascending order ensures parent nodes will be updated before their children
-        // prior cleanup ensure no already deleted Elements have their update func executed
-        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-        this.dirtDescendantElementIds_.clear();
+            // request list of all (gloabbly) deleteelmtIds;
+            let deletedElmtIds = [];
+            this.getDeletedElemtIds(deletedElmtIds);
+            // see which elmtIds are managed by this View
+            // and clean up all book keeping for them
+            this.purgeDeletedElmtIds(deletedElmtIds);
+            // process all elmtIds marked as needing update in ascending order.
+            // ascending order ensures parent nodes will be updated before their children
+            // prior cleanup ensure no already deleted Elements have their update func executed
+            Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+                this.UpdateElement(elmtId);
+                this.dirtDescendantElementIds_.delete(elmtId);
+            });
+        } while (this.dirtDescendantElementIds_.size);
     }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
     purgeDeletedElmtIds(rmElmtIds) {
