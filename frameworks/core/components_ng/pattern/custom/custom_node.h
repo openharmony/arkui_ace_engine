@@ -54,6 +54,8 @@ public:
         return 1;
     }
 
+    void Render();
+
 private:
     std::string viewKey_;
     RenderFunction renderFunction_;

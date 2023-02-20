@@ -38,6 +38,12 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
 
 void CustomNode::Build()
 {
+    Render();
+    UINode::Build();
+}
+
+void CustomNode::Render()
+{
     if (renderFunction_) {
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
@@ -54,13 +60,11 @@ void CustomNode::Build()
         }
         renderFunction_ = nullptr;
     }
-    UINode::Build();
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
     if (!renderFunction_) {
-        Build();
         UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
         return;
     }
@@ -70,12 +74,16 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bo
             auto customNode = weak.Upgrade();
             CHECK_NULL_VOID(customNode);
 
-            customNode->Build();
+            customNode->Render();
             if (customNode->GetChildren().empty()) {
                 return;
             }
             auto child = customNode->GetChildren().front();
             while (!InstanceOf<FrameNode>(child)) {
+                auto custom = DynamicCast<CustomNode>(child);
+                if (custom) {
+                    custom->Render();
+                }
                 auto children = child->GetChildren();
                 if (children.empty()) {
                     return;
