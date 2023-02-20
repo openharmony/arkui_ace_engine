@@ -1156,12 +1156,14 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
+    int32_t value = 0.0;
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
-        return;
+        if (!info[0]->IsUndefined()) {
+            return;
+        }
     }
 
-    int32_t value;
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     } else {
@@ -1188,6 +1190,8 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
     Dimension y;
     if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->SetPosition(x, y);
+    } else {
+        ViewAbstractModel::GetInstance()->SetPosition(0.0_vp, 0.0_vp);
     }
 }
 
@@ -1197,6 +1201,8 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
     Dimension y;
     if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
+    } else {
+        ViewAbstractModel::GetInstance()->MarkAnchor(0.0_vp, 0.0_vp);
     }
 }
 
@@ -1206,6 +1212,8 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
     Dimension y;
     if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->SetOffset(x, y);
+    } else {
+        ViewAbstractModel::GetInstance()->SetOffset(0.0_vp, 0.0_vp);
     }
 }
 
@@ -1518,7 +1526,7 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
+        backgroundColor = Color::TRANSPARENT;
     }
 
     ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
