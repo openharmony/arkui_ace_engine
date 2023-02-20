@@ -89,7 +89,6 @@ class ObservedPropertyObject<T extends Object> extends ObservedPropertyObjectAbs
   }
 
   public get(): T {
-    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: get`);
     this.notifyPropertyRead();
     return this.wrappedValue_;
   }

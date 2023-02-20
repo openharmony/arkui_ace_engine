@@ -2025,7 +2025,6 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         this.subscribers_.delete(subscriberId);
     }
     notifyHasChanged(newValue) {
-        /*  */
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2048,7 +2047,6 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         });
     }
     notifyPropertyRead() {
-        /*  */
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2239,7 +2237,6 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
         return true;
     }
     get() {
-        /*  */
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
@@ -2917,7 +2914,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertryHasBeenReadPU`);
     }
     notifyPropertryHasBeenReadPU() {
-        /*  */
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2929,7 +2925,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.recordDependentUpdate();
     }
     notifyPropertryHasChangedPU() {
-        /*  */
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -3170,7 +3165,6 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
         return this.wrappedValue_;
     }
     getUnmonitored() {
-        /*  */
         // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
         return this.wrappedValue_;
     }
@@ -3542,13 +3536,11 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         this.notifyPropertryHasChangedPU();
     }
     getUnmonitored() {
-        /*  */
         // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
         return (this.source_ ? this.source_.getUnmonitored() : undefined);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        /*  */
         this.notifyPropertryHasBeenReadPU();
         return this.getUnmonitored();
     }
@@ -3814,7 +3806,6 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
         this.notifyPropertryHasChangedPU();
     }
     getUnmonitored() {
-        /*  */
         // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
         return this.obsObject_;
     }
