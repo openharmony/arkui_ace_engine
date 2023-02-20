@@ -34,6 +34,11 @@ public:
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
+    RefPtr<PixelMap> GetPixelMap() override
+    {
+        return pixelMap_;
+    }
+
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
 

@@ -28,6 +28,23 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // green
     0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
+
+SkPixmap CloneSkPixmap(SkPixmap& srcPixmap)
+{
+    SkImageInfo dstImageInfo = SkImageInfo::Make(srcPixmap.info().width(), srcPixmap.info().height(),
+        SkColorType::kBGRA_8888_SkColorType, srcPixmap.alphaType());
+    auto dstPixels = std::make_unique<uint8_t[]>(srcPixmap.computeByteSize());
+    SkPixmap dstPixmap(dstImageInfo, dstPixels.release(), srcPixmap.rowBytes());
+
+    SkBitmap dstBitmap;
+    if (!dstBitmap.installPixels(dstPixmap)) {
+        return dstPixmap;
+    }
+    if (!dstBitmap.writePixels(srcPixmap, 0, 0)) {
+        return dstPixmap;
+    }
+    return dstPixmap;
+}
 } // namespace
 
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
@@ -139,6 +156,22 @@ void SkiaCanvasImage::AddFilter(SkPaint& paint)
             paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
         }
     }
+}
+
+RefPtr<PixelMap> SkiaCanvasImage::GetPixelMap()
+{
+    CHECK_NULL_RETURN(GetCanvasImage(), nullptr);
+    auto rasterImage = GetCanvasImage()->makeRasterImage();
+    SkPixmap srcPixmap;
+    if (!rasterImage->peekPixels(&srcPixmap)) {
+        return nullptr;
+    }
+    SkPixmap newSrcPixmap = CloneSkPixmap(srcPixmap);
+    const auto* addr = newSrcPixmap.addr32();
+    auto width = static_cast<int32_t>(newSrcPixmap.width());
+    auto height = static_cast<int32_t>(newSrcPixmap.height());
+    int32_t length = width * height;
+    return PixelMap::ConvertSkImageToPixmap(addr, length, width, height);
 }
 
 void SkiaCanvasImage::ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY)

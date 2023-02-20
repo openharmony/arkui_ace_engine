@@ -119,6 +119,8 @@ public:
 
     RefPtr<CanvasImage> Clone() override;
 
+    RefPtr<PixelMap> GetPixelMap() override;
+
     void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
