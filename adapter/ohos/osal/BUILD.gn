@@ -48,7 +48,6 @@ template("ace_osal_ohos_source_set") {
       "$ability_runtime_napi_path/inner/napi_common",
       "//base/hiviewdfx/hicollie/interfaces/native/innerkits/include",
       "//commonlibrary/c_utils/base/include",
-      "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf",
       "//foundation/window/window_manager/interfaces/innerkits",
     ]
 
@@ -75,7 +74,6 @@ template("ace_osal_ohos_source_set") {
 
     if (is_standard_system) {
       sources += [
-        "frame_trace_adapter_impl.cpp",
         "resource_adapter_impl.cpp",
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
@@ -83,7 +81,6 @@ template("ace_osal_ohos_source_set") {
       deps = [
         "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
         "$ace_flutter_engine_root/icu:ace_libicu_ohos",
-        "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
       ]
       public_deps += [
         "//base/global/resource_management/frameworks/resmgr:global_resmgr",
@@ -105,6 +102,13 @@ template("ace_osal_ohos_source_set") {
         ]
       } else {
         sources += [ "fake_accessibility_manager.cpp" ]
+      }
+      if (frame_trace_support) {
+        include_dirs += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
+        sources += [ "frame_trace_adapter_impl.cpp" ]
+        deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
+      } else {
+        sources += [ "frame_trace_adapter_fake_impl.cpp" ]
       }
     } else {
       external_deps += [ "multimedia_image:image" ]
