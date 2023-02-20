@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PLUGIN_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PLUGIN_MODEL_IMPL_H
 
+#include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "core/components_ng/pattern/plugin/plugin_model.h"
 
@@ -27,6 +28,8 @@ public:
     void SetOnError(std::function<void(const std::string&)>&& OnError) override;
     void SetPluginSize(const Dimension& width, const Dimension& height) override;
     void SetData(const std::string& data) override;
+    void SetHeight(const Dimension& height) override;
+    void SetWidth(const Dimension& width) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PLUGIN_MODEL_IMPL_H

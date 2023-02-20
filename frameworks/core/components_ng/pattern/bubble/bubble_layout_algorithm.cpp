@@ -168,6 +168,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     targetSpace_ = popupTheme->GetTargetSpace();
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
+    arrowHeight_ = static_cast<float>(popupTheme->GetArrowHeight().ConvertToPx());
 }
 
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
@@ -177,12 +178,12 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const Re
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() + targetSize_.Height() + scaledBubbleSpacing);
     if (showBottomArrow_) {
-        bottomPosition += OffsetF(0.0, scaledBubbleSpacing);
+        bottomPosition += OffsetF(0.0, arrowHeight_);
     }
     OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
         targetOffset_.GetY() - childSize.Height() - scaledBubbleSpacing);
     if (showTopArrow_) {
-        topPosition += OffsetF(0.0, -scaledBubbleSpacing);
+        topPosition += OffsetF(0.0, -arrowHeight_);
     }
     OffsetF topArrowPosition;
     OffsetF bottomArrowPosition;
@@ -246,11 +247,10 @@ void BubbleLayoutAlgorithm::InitArrowTopAndBottomPosition(OffsetF& topArrowPosit
     topArrowPosition =
         topPosition + OffsetF(std::max(padding_.Left().ConvertToPx(), border_.TopLeftRadius().GetX().ConvertToPx()) +
                                   BEZIER_WIDTH_HALF.ConvertToPx(),
-                          childSize.Height() + scaledBubbleSpacing_);
+                          childSize.Height() + arrowHeight_);
     bottomArrowPosition = bottomPosition + OffsetF(std::max(padding_.Left().ConvertToPx(),
                                                        border_.BottomLeftRadius().GetX().ConvertToPx()) +
-                                                       BEZIER_WIDTH_HALF.ConvertToPx(),
-                                               -scaledBubbleSpacing_);
+                                                       BEZIER_WIDTH_HALF.ConvertToPx(), -arrowHeight_);
 }
 
 OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacement(const SizeF& childSize, const OffsetF& topPosition,

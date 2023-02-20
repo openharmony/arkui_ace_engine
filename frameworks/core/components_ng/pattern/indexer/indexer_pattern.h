@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include "base/memory/referenced.h"
+#include "core/animation/animator.h"
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -30,7 +31,6 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class IndexerPattern : public Pattern {
     DECLARE_ACE_TYPE(IndexerPattern, Pattern);
 
@@ -84,8 +84,8 @@ private:
     bool MoveIndexByStep(int32_t step);
     bool KeyIndexByStep(int32_t step);
     bool MoveIndexBySearch(const std::string& searchStr);
-    void ApplyIndexChanged(bool refreshBubble = true);
-    void OnSelectChanged();
+    void ApplyIndexChanged(bool refreshBubble = true, bool fromTouchUp = false);
+    void OnSelect(bool changed = false);
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
     void SetPositionOfPopupNode(RefPtr<FrameNode>& customNode);
@@ -98,7 +98,6 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void OnHover(bool isHover);
     void OnChildHover(int32_t index, bool isHover);
-    void BeginBubbleAnimation(RefPtr<FrameNode> animationNode);
     void ResetStatus();
     void OnKeyEventDisapear();
     void InitBubbleList(
@@ -107,12 +106,20 @@ private:
     void OnPopupTouchDown(const TouchEventInfo& info);
     void AddListItemClickListener(RefPtr<FrameNode>& listItemNode, int32_t index);
     void OnListItemClick(int32_t index);
-    void ChangeListItemsBgColor(int32_t clickIndex);
+    void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> InitBubbleView();
     bool NeedShowBubble();
     void ShowBubble();
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
+    void RemoveBubbleNode(int32_t popnodeId, int32_t targetId) const;
+    void StartBubbleAppearAnimation(RefPtr<FrameNode> animationNode);
+    void IndexerHoverInAnimation();
+    void IndexerHoverOutAnimation();
+    void IndexerPressInAnimation();
+    void IndexerPressOutAnimation();
+    void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
+    void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -125,6 +132,8 @@ private:
     std::vector<std::string> arrayValue_;
     int32_t itemCount_ = 0;
     int32_t selected_ = 0;
+    int32_t animateSelected_ = -1;
+    int32_t lastSelected_ = -1;
     bool initialized_ = false;
     int32_t childHoverIndex_ = -1;
     int32_t childFocusIndex_ = -1;

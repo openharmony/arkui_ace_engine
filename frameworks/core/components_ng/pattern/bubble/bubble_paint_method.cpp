@@ -139,7 +139,6 @@ void BubblePaintMethod::PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper
     CHECK_NULL_VOID(popupTheme);
     backgroundColor_ = paintProperty->GetBackgroundColor().value_or(popupTheme->GetBackgroundColor());
     border_.SetBorderRadius(popupTheme->GetRadius());
-    targetSpacing_ = static_cast<float>(popupTheme->GetTargetSpace().ConvertToPx());
     padding_ = popupTheme->GetPadding();
     RSPen paint;
     paint.SetColor(backgroundColor_.GetValue());
@@ -212,9 +211,9 @@ void BubblePaintMethod::PaintTopBubble(RSCanvas& rsCanvas)
     float childHeight = childSize_.Height();
     float childWidth = childSize_.Width();
     float childOffsetX = childOffset_.GetX();
-    float childOffsetY = childOffset_.GetY() - targetSpacing_;
+    float childOffsetY = childOffset_.GetY();
     float arrowPositionX = arrowPosition_.GetX();
-    float arrowPositionY = arrowPosition_.GetY() - targetSpacing_;
+    float arrowPositionY = arrowPosition_.GetY();
     float arrowOffset = GetArrowOffset(Placement::TOP);
     path_.Reset();
     path_.MoveTo(arrowPositionX + arrowOffset, arrowPositionY);
@@ -292,9 +291,9 @@ void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
     float childHeight = childSize_.Height();
     float childWidth = childSize_.Width();
     float childOffsetX = childOffset_.GetX();
-    float childOffsetY = childOffset_.GetY() - targetSpacing_;
+    float childOffsetY = childOffset_.GetY();
     float arrowPositionX = arrowPosition_.GetX();
-    float arrowPositionY = arrowPosition_.GetY() - targetSpacing_;
+    float arrowPositionY = arrowPosition_.GetY();
     float arrowOffset = GetArrowOffset(Placement::BOTTOM);
     path_.Reset();
     path_.MoveTo(arrowPositionX + arrowOffset, arrowPositionY);
@@ -388,9 +387,10 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
 void BubblePaintMethod::BuildCompletePath(RSPath& path)
 {
     float arrowOffset = GetArrowOffset(arrowPlacement_);
-    float radiusPx = border_.BottomLeftRadius().GetY().ConvertToPx();
+    auto borderRadius = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Height() / 2);
+    float radiusPx = borderRadius;
     path.Reset();
-    path.MoveTo(childOffset_.GetX() + radiusPx, childOffset_.GetY() - targetSpacing_);
+    path.MoveTo(childOffset_.GetX() + radiusPx, childOffset_.GetY());
     BuildTopLinePath(path, arrowOffset, radiusPx);
     BuildCornerPath(path, Placement::TOP_RIGHT, radiusPx);
     BuildRightLinePath(path, arrowOffset, radiusPx);
@@ -404,8 +404,8 @@ void BubblePaintMethod::BuildCompletePath(RSPath& path)
 
 void BubblePaintMethod::BuildTopLinePath(RSPath& path, float arrowOffset, float radius)
 {
-    float childOffsetY = childOffset_.GetY() - targetSpacing_;
-    float arrowPositionY = arrowPosition_.GetY() - targetSpacing_;
+    float childOffsetY = childOffset_.GetY();
+    float arrowPositionY = arrowPosition_.GetY();
     switch (arrowPlacement_) {
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
@@ -435,7 +435,7 @@ void BubblePaintMethod::BuildTopLinePath(RSPath& path, float arrowOffset, float 
 
 void BubblePaintMethod::BuildCornerPath(RSPath& path, const Placement& placement, float radius)
 {
-    float childOffsetY = childOffset_.GetY() - targetSpacing_;
+    float childOffsetY = childOffset_.GetY();
     switch (placement) {
         case Placement::TOP_LEFT:
             path.ArcTo(radius, radius, 0.0f, RSPathDirection::CW_DIRECTION, childOffset_.GetX() + radius, childOffsetY);
@@ -459,8 +459,8 @@ void BubblePaintMethod::BuildCornerPath(RSPath& path, const Placement& placement
 
 void BubblePaintMethod::BuildRightLinePath(RSPath& path, float arrowOffset, float radius)
 {
-    float childOffsetY = childOffset_.GetY() - targetSpacing_;
-    float arrowPositionY = arrowPosition_.GetY() - targetSpacing_;
+    float childOffsetY = childOffset_.GetY();
+    float arrowPositionY = arrowPosition_.GetY();
     switch (arrowPlacement_) {
         case Placement::LEFT:
         case Placement::LEFT_TOP:
@@ -491,8 +491,8 @@ void BubblePaintMethod::BuildRightLinePath(RSPath& path, float arrowOffset, floa
 
 void BubblePaintMethod::BuildBottomLinePath(RSPath& path, float arrowOffset, float radius)
 {
-    float childOffsetY = childOffset_.GetY() - targetSpacing_;
-    float arrowPositionY = arrowPosition_.GetY() - targetSpacing_;
+    float childOffsetY = childOffset_.GetY();
+    float arrowPositionY = arrowPosition_.GetY();
     switch (arrowPlacement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
@@ -523,8 +523,8 @@ void BubblePaintMethod::BuildBottomLinePath(RSPath& path, float arrowOffset, flo
 
 void BubblePaintMethod::BuildLeftLinePath(RSPath& path, float arrowOffset, float radius)
 {
-    float childOffsetY = childOffset_.GetY() - targetSpacing_;
-    float arrowPositionY = arrowPosition_.GetY() - targetSpacing_;
+    float childOffsetY = childOffset_.GetY();
+    float arrowPositionY = arrowPosition_.GetY();
     switch (arrowPlacement_) {
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:

@@ -32,10 +32,11 @@ public:
     ~AceNewPipeJudgement() = default;
 
     // Decide if it's a new framework
-    static bool QueryAceNewPipeEnabledFA(
-        const std::string& packagename, uint32_t apiCompatibleVersion, const std::string& apiReleaseType);
+    static bool QueryAceNewPipeEnabledFA(const std::string& packagename, uint32_t apiCompatibleVersion,
+        uint32_t apiTargetVersion, const std::string& apiReleaseType);
     static bool QueryAceNewPipeEnabledStage(const std::string& packagename, uint32_t apiCompatibleVersion,
-        const std::string& apiReleaseType, const std::vector<OHOS::AppExecFwk::Metadata>& metaData);
+        uint32_t apiTargetVersion, const std::string& apiReleaseType,
+        const std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     // Load acenewpipe.config
     static void InitAceNewPipeConfig();
 

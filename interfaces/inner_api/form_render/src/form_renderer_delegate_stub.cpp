@@ -14,7 +14,7 @@
  */
 #include "form_renderer_delegate_stub.h"
 
-#include "hilog_wrapper.h"
+#include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
@@ -24,6 +24,8 @@ FormRendererDelegateStub::FormRendererDelegateStub()
         &FormRendererDelegateStub::HandleOnSurfaceCreate;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ACTION_CREATE)] =
         &FormRendererDelegateStub::HandleOnActionEvent;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR)] =
+        &FormRendererDelegateStub::HandleOnError;
 }
 
 FormRendererDelegateStub::~FormRendererDelegateStub()
@@ -83,6 +85,15 @@ int FormRendererDelegateStub::HandleOnActionEvent(MessageParcel &data, MessagePa
 {
     std::string action = data.ReadString();
     int32_t errCode = OnActionEvent(action);
+    reply.WriteInt32(errCode);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnError(MessageParcel &data, MessageParcel &reply)
+{
+    std::string code = data.ReadString();
+    std::string msg = data.ReadString();
+    int32_t errCode = OnError(code, msg);
     reply.WriteInt32(errCode);
     return ERR_OK;
 }

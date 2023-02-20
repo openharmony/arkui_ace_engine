@@ -121,7 +121,6 @@ private:
     bool showBottomArrow_ = true;
     bool showTopArrow_ = true;
     bool showCustomArrow_ = false;
-    float targetSpacing_ = 0.0f;
 
     // Get from theme
     Border border_;

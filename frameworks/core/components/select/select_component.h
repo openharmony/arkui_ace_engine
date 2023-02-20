@@ -51,6 +51,16 @@ public:
         }
     }
 
+    bool HasSetTipText() const
+    {
+        return hasSetTipText_;
+    }
+
+    void SetTipText(bool hasSetTipText)
+    {
+        hasSetTipText_ = hasSetTipText;
+    }
+
     bool GetDisabled() const
     {
         return disabled_;
@@ -419,6 +429,7 @@ public:
 private:
     bool disabled_ { false };
     bool clicked_ { false };
+    bool hasSetTipText_ { false };
     EventMarker onChanged_;
     RefPtr<TextComponent> tipText_;
     RefPtr<SelectPopupComponent> popup_;

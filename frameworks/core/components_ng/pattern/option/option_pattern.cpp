@@ -47,6 +47,16 @@ void OptionPattern::OnModifyDone()
     CHECK_NULL_VOID(textTheme_);
     selectTheme_ = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme_);
+
+    auto eventHub = host->GetEventHub<OptionEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->IsEnabled()) {
+        CHECK_NULL_VOID(text_);
+        auto textProperty = text_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textProperty);
+        textProperty->UpdateTextColor(selectTheme_->GetDisabledMenuFontColor());
+        text_->MarkModifyDone();
+    }
 }
 
 void OptionPattern::OnSelectProcess()

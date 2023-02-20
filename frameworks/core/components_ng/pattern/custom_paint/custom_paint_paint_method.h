@@ -236,9 +236,8 @@ public:
 
     void FlushPipelineImmediately()
     {
-        auto context = AceType::DynamicCast<PipelineContext>(context_);
-        if (context) {
-            context->FlushPipelineImmediately();
+        if (context_) {
+            context_->FlushPipelineImmediately();
         }
     }
 

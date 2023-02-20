@@ -66,6 +66,11 @@ public:
     virtual int32_t GetWidth() const = 0;
     virtual int32_t GetHeight() const = 0;
 
+    virtual RefPtr<CanvasImage> Clone()
+    {
+        return Claim(this);
+    }
+
     void SetPaintConfig(const ImagePaintConfig& config)
     {
         paintConfig_ = std::make_unique<ImagePaintConfig>(config);
@@ -79,6 +84,10 @@ public:
         return *paintConfig_;
     }
 
+    virtual bool IsStatic()
+    {
+        return true;
+    }
     virtual void SetRedrawCallback(std::function<void()>&& callback) {}
 
     virtual void ControlAnimation(bool play) {}

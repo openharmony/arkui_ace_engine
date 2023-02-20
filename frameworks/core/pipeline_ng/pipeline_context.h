@@ -21,6 +21,7 @@
 #include <list>
 #include <utility>
 
+#include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
@@ -127,6 +128,7 @@ public:
     void HandleOnAreaChangeEvent();
 
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+    void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent();
 
@@ -238,6 +240,8 @@ public:
         return onShow_;
     }
 
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format);
+
     bool RequestDefaultFocus();
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -291,6 +295,19 @@ public:
         surfacePositionChangedCallbackMap_.erase(callbackId);
     }
 
+    void SetMouseStyleHoldNode(int32_t id)
+    {
+        if (mouseStyleNodeId_ == -1) {
+            mouseStyleNodeId_ = id;
+        }
+    }
+    void FreeMouseStyleHoldNode(int32_t id)
+    {
+        if (mouseStyleNodeId_ == id) {
+            mouseStyleNodeId_ = -1;
+        }
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
 
@@ -314,6 +331,10 @@ private:
     void FlushTouchEvents();
 
     void FlushBuildFinishCallbacks();
+
+    void DumpPipelineInfo() const;
+
+    FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     template<typename T>
     struct NodeCompare {
@@ -368,11 +389,14 @@ private:
     WeakPtr<FrameNode> dirtyFocusScope_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t rotationAnimationCount_ = 0;
+    int32_t mouseStyleNodeId_ = -1;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
     bool isNeedShowFocus_ = false;
     bool onShow_ = false;
     bool onFocus_ = true;
+
+    std::list<FrameInfo> dumpFrameInfos_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

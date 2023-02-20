@@ -30,13 +30,13 @@ public:
     {}
     ~DataPanelPaintMethod() override = default;
 
-    RefPtr<Modifier> GetModifier(PaintWrapper* paintWrapper) override
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(dataPanelModifier_, nullptr);
         return dataPanelModifier_;
     }
 
-    void UpdateModifier(PaintWrapper* paintWrapper) override
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(dataPanelModifier_);
         auto paintProperty = DynamicCast<DataPanelPaintProperty>(paintWrapper->GetPaintProperty());

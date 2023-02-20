@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/state_style_manager.h"
@@ -262,6 +263,12 @@ public:
         return currentPage_;
     }
 
+    // Sets the implicit animation option. This is needed for 3D Model View.
+    void SetImplicitAnimationOption(const AnimationOption& option);
+
+    // Returns implicit animation option.
+    const AnimationOption& GetImplicitAnimationOption() const;
+
 private:
     ViewStackProcessor();
 
@@ -289,6 +296,8 @@ private:
 
     // elmtId to account get access to
     ElementIdType accountGetAccessToNodeId_ = ElementRegister::UndefinedElementId;
+
+    AnimationOption implicitAnimationOption_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };

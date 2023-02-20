@@ -58,6 +58,7 @@
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/tool_bar/tool_bar_theme.h"
 #include "core/components/video/video_theme.h"
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 
 namespace OHOS::Ace {
@@ -114,7 +115,8 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { SemiModalTheme::TypeId(), &ThemeBuildFunc<SemiModalTheme::Builder> },
     { IconTheme::TypeId(), &ThemeBuildFunc<IconTheme::Builder> },
     { V2::PatternLockTheme::TypeId(), &ThemeBuildFunc<V2::PatternLockTheme::Builder> },
-    { IndexerTheme::TypeId(), &ThemeBuildFunc<IndexerTheme::Builder> }
+    { IndexerTheme::TypeId(), &ThemeBuildFunc<IndexerTheme::Builder> },
+    { NG::AppBarTheme::TypeId(), &ThemeBuildFunc<NG::AppBarTheme::Builder> }
 };
 } // namespace
 

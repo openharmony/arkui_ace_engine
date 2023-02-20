@@ -88,6 +88,58 @@ public:
         buttonType_ = buttonType;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        json->Put("type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
+        json->Put("fontSize", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
+        json->Put("fontWeight",
+            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
+        json->Put("fontColor", layoutProperty->GetFontColor().value_or(Color::BLACK).ColorToString().c_str());
+        auto fontFamilyVector =
+            layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+        std::string fontFamily = fontFamilyVector.at(0);
+        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+            fontFamily += ',' + fontFamilyVector.at(i);
+        }
+        json->Put("fontFamily", fontFamily.c_str());
+        json->Put("fontStyle", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                                   ? "FontStyle.Normal"
+                                   : "FontStyle.Italic");
+        json->Put("label", layoutProperty->GetLabelValue("").c_str());
+        auto eventHub = host->GetEventHub<ButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        json->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
+        auto optionJson = JsonUtil::Create(true);
+        optionJson->Put(
+            "type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
+        optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
+        json->Put("options", optionJson->ToString().c_str());
+    }
+
+    static std::string ConvertButtonTypeToString(ButtonType buttonType)
+    {
+        std::string result;
+        switch (buttonType) {
+            case ButtonType::NORMAL:
+                result = "ButtonType.Normal";
+                break;
+            case ButtonType::CAPSULE:
+                result = "ButtonType.Capsule";
+                break;
+            case ButtonType::CIRCLE:
+                result = "ButtonType.Circle";
+                break;
+            default:
+                LOGD("The input does not match any ButtonType");
+        }
+        return result;
+    }
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

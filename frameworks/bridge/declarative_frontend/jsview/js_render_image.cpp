@@ -28,13 +28,26 @@ void JSRenderImage::Constructor(const JSCallbackInfo& args)
     auto jsCalendarController = Referenced::MakeRefPtr<JSRenderImage>();
     jsCalendarController->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsCalendarController));
-    if (args.Length() > 0) {
-        std::string text = "";
-        if (args[0]->IsString()) {
-            JSViewAbstract::ParseJsString(args[0], text);
-            jsCalendarController->src_ = text;
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (args.Length() <= 0 || !args[0]->IsString()) {
+        LOGE("args invalid");
+        return;
+    }
+
+    std::string text = "";
+    JSViewAbstract::ParseJsString(args[0], text);
+    if (context->IsFormRender()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(text);
+        bool notSupport = (
+            srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            LOGE("Not supported src : %{public}s when form render", text.c_str());
+            return;
         }
     }
+
+    jsCalendarController->src_ = text;
 }
 
 void JSRenderImage::Destructor(JSRenderImage* controller)

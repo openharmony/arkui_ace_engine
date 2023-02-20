@@ -64,6 +64,7 @@ public:
     void Clean();
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
+    int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     void AttachToMainTree();
     void DetachFromMainTree();
 
@@ -195,6 +196,18 @@ public:
         return isRemoving_;
     }
 
+    void SetInDestroying()
+    {
+        isInDestroying_ = true;
+    }
+
+    bool IsInDestroying() const
+    {
+        return isInDestroying_;
+    }
+
+    void SetChildrenInDestroying();
+
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId);
     virtual HitTestMode GetHitTestMode() const
@@ -284,6 +297,17 @@ public:
         return childrenUpdatedFrom_;
     }
 
+#ifdef PREVIEW
+    void SetDebugLine(const std::string& line)
+    {
+        debugLine_ = line;
+    }
+    std::string GetDebugLine() const
+    {
+        return debugLine_;
+    }
+#endif
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -329,10 +353,14 @@ private:
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
+    bool isInDestroying_ = false;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
 
+#ifdef PREVIEW
+    std::string debugLine_;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
 

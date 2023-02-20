@@ -21,7 +21,9 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
@@ -135,7 +137,7 @@ RefPtr<FrameNode> ListItemPattern::GetListFrameNode() const
     CHECK_NULL_RETURN(host, nullptr);
     auto parent = host->GetParent();
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-    while (parent && !frameNode) {
+    while (parent && (!frameNode || (parent->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG))) {
         parent = parent->GetParent();
         frameNode = AceType::DynamicCast<FrameNode>(parent);
     }
@@ -149,6 +151,15 @@ Axis ListItemPattern::GetAxis() const
     auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, Axis::VERTICAL);
     return layoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+}
+
+void ListItemPattern::SetSwiperItemForList()
+{
+    auto frameNode = GetListFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    listPattern->SetSwiperItem(AceType::WeakClaim(this));
 }
 
 void ListItemPattern::OnModifyDone()
@@ -228,6 +239,7 @@ void ListItemPattern::HandleDragStart(const GestureEvent& info)
         springController_->ClearStopListeners();
         springController_->Stop();
     }
+    SetSwiperItemForList();
 }
 
 float ListItemPattern::CalculateFriction(float gamma)
@@ -355,6 +367,24 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         end = width * static_cast<int32_t>(swiperIndex_);
     }
     StartSpringMotion(curOffset_, end, info.GetMainVelocity() * friction);
+}
+
+void ListItemPattern::SwiperReset()
+{
+    if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD) {
+        return;
+    }
+    swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
+    float velocity = 0.0f;
+    if (springMotion_) {
+        velocity = springMotion_->GetCurrentVelocity();
+    }
+    if (springController_ && !springController_->IsStopped()) {
+        // clear stop listener before stop
+        springController_->ClearStopListeners();
+        springController_->Stop();
+    }
+    StartSpringMotion(curOffset_, 0.0f, velocity);
 }
 
 void ListItemPattern::MarkIsSelected(bool isSelected)

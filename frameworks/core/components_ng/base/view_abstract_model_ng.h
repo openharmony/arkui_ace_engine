@@ -649,7 +649,10 @@ public:
 
     void SetRestoreId(int32_t restoreId) override {}
 
-    void SetDebugLine(const std::string& line) override {}
+    void SetDebugLine(const std::string& line) override
+    {
+        ViewAbstract::SetDebugLine(line);
+    }
 
     void SetHoverEffect(HoverEffectType hoverEffect) override
     {

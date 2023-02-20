@@ -33,23 +33,29 @@ JsFunction::JsFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsF
     jsFunction_ = jsFunction;
 }
 
+JsWeakFunction::JsWeakFunction(const JSRef<JSFunc>& jsFunction)
+{
+    jsWeakFunction_ = jsFunction;
+}
+
+JsWeakFunction::JsWeakFunction(const JSRef<JSObject>& jsObject, const JSRef<JSFunc>& jsFunction)
+{
+    jsThis_ = jsObject;
+    jsWeakFunction_ = jsFunction;
+}
+
 JsFunction::~JsFunction()
 {
     LOGD("Destroy: JsFunction");
 }
 
-void JsFunction::Execute()
-{
-    JsFunction::ExecuteJS();
-}
-
-void JsFunction::Execute(const JSRef<JSObject>& jsParamsObject)
+void JsFunctionBase::Execute(const JSRef<JSObject>& jsParamsObject)
 {
     JSRef<JSVal> paramObj = JSRef<JSVal>::Cast(jsParamsObject);
     ExecuteJS(1, &paramObj);
 }
 
-void JsFunction::Execute(const std::vector<std::string>& keys, const std::string& param)
+void JsFunctionBase::Execute(const std::vector<std::string>& keys, const std::string& param)
 {
     LOGI("param : %{private}s", param.c_str());
     std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(param);
@@ -78,10 +84,10 @@ void JsFunction::Execute(const std::vector<std::string>& keys, const std::string
     }
 
     JSRef<JSVal> paramObj = JSRef<JSVal>::Cast(eventInfo);
-    JsFunction::ExecuteJS(1, &paramObj);
+    ExecuteJS(1, &paramObj);
 }
 
-void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::string& param)
+void JsFunctionBase::ExecuteNew(const std::vector<std::string>& keys, const std::string& param)
 {
     JSRef<JSVal> jsVal;
     if (keys.size() > 1) {
@@ -92,7 +98,17 @@ void JsFunction::ExecuteNew(const std::vector<std::string>& keys, const std::str
             controller->SetXComponentContext(jsVal);
         }
     }
-    JsFunction::ExecuteJS(1, &jsVal);
+    ExecuteJS(1, &jsVal);
+}
+
+JSRef<JSVal> JsWeakFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])
+{
+    JAVASCRIPT_EXECUTION_SCOPE_STATIC
+    ACE_FUNCTION_TRACE();
+    JSRef<JSVal> jsObject = jsThis_.Lock();
+    auto jsFunction = jsWeakFunction_.Lock();
+    JSRef<JSVal> result = jsFunction->Call(jsObject, argc, argv);
+    return result;
 }
 
 JSRef<JSVal> JsFunction::ExecuteJS(int argc, JSRef<JSVal> argv[])

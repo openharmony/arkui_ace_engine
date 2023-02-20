@@ -18,6 +18,7 @@
 
 #include <map>
 
+#include "base/utils/macros.h"
 #include "form_renderer_dispatcher_interface.h"
 #include "iremote_object.h"
 #include "iremote_stub.h"
@@ -28,7 +29,7 @@ namespace Ace {
  * @class FormRendererDispatcherStub
  * Form render service stub.
  */
-class FormRendererDispatcherStub : public IRemoteStub<IFormRendererDispatcher> {
+class ACE_EXPORT FormRendererDispatcherStub : public IRemoteStub<IFormRendererDispatcher> {
 public:
     FormRendererDispatcherStub();
     virtual ~FormRendererDispatcherStub();
@@ -44,6 +45,7 @@ public:
 
 private:
     int32_t HandleDispatchPointerEvent(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleSetAllowUpdate(MessageParcel &data, MessageParcel &reply);
 
     using FormRendererDispatcherFunc =
         int32_t (FormRendererDispatcherStub::*)(MessageParcel &data, MessageParcel &reply);

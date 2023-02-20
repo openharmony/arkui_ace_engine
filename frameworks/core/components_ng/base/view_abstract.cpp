@@ -777,7 +777,7 @@ void ViewAbstract::BindPopup(
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
     if (popupInfo.isCurrentOnShow == isShow) {
-        LOGI("No need to change popup show flag.");
+        LOGI("No need to change popup show flag, current show %{public}d", isShow);
         return;
     }
     popupInfo.markNeedUpdate = true;
@@ -814,6 +814,7 @@ void ViewAbstract::BindPopup(
     popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
     if (showInSubWindow) {
+        LOGI("Popup now show in subwindow.");
         SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
         return;
     }
@@ -822,6 +823,7 @@ void ViewAbstract::BindPopup(
         CHECK_NULL_VOID(overlay);
         overlay->ErasePopup(targetId);
     };
+    LOGI("begin to update popup node.");
     targetNode->PushDestroyCallback(destroyCallback);
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
@@ -942,6 +944,16 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     if (uiNode) {
         uiNode->UpdateInspectorId(inspectorId);
     }
+}
+
+void ViewAbstract::SetDebugLine(const std::string& line)
+{
+#ifdef PREVIEW
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetDebugLine(line);
+    }
+#endif
 }
 
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)

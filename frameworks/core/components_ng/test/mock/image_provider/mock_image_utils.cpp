@@ -12,8 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <thread>
+
+#include "mock_image_loader.h"
+
 #include "core/components_ng/image_provider/image_utils.h"
-namespace OHOS::Ace::NG {
+namespace OHOS::Ace {
+std::vector<std::thread> threads = std::vector<std::thread>();
+
+namespace NG {
 void ImageUtils::PostToUI(std::function<void()>&& task)
 {
     task();
@@ -21,6 +28,7 @@ void ImageUtils::PostToUI(std::function<void()>&& task)
 
 void ImageUtils::PostToBg(std::function<void()>&& task)
 {
-    task();
+    threads.emplace_back(task);
 }
-} // namespace OHOS::Ace::NG
+} // namespace NG
+} // namespace OHOS::Ace

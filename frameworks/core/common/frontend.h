@@ -257,6 +257,9 @@ public:
         return state_;
     }
 
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
+
 protected:
     bool disallowPopLastPage_ = false;
     FrontendDialogCallback dialogCallback_ = nullptr;

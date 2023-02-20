@@ -15,12 +15,16 @@
 
 #include "core/image/image_loader.h"
 
+#include <condition_variable>
+#include <mutex>
+#include <ratio>
 #include <regex>
 #include <string_view>
 
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/utils/SkBase64.h"
 
+#include "base/image/image_source.h"
 #include "base/log/ace_trace.h"
 #include "base/network/download_manager.h"
 #include "base/resource/ace_res_config.h"
@@ -29,11 +33,13 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
-#include "core/common/ace_engine.h"
+#include "core/common/container.h"
+#include "core/common/thread_checker.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/image/flutter_image_cache.h" // TODO: add adapter layer and use FlutterImageCache there
 #include "core/image/image_cache.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -49,6 +55,8 @@ const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std:
 const std::regex MEDIA_RES_NAME_REGEX(R"(^resource://.*/(\w+)\.\w+$)", std::regex::icase);
 constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
 
+const std::chrono::duration<int, std::milli> TIMEOUT_DURATION(10000);
+
 #ifdef WINDOWS_PLATFORM
 char* realpath(const char* path, char* resolved_path)
 {
@@ -59,6 +67,33 @@ char* realpath(const char* path, char* resolved_path)
 }
 #endif
 
+#ifdef PIXEL_MAP_SUPPORTED
+// return orientation of pixmap for cache key
+std::string GetThumbnailOrientation(const ImageSourceInfo& src)
+{
+    // disabling orientation check
+    return "Undefined";
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, "");
+    auto dataProvider = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProvider, "");
+
+    // get file fd
+    // concat to get file path ("datashare://media/xx")
+    auto path = src.GetSrc();
+    auto pos = path.find("/thumbnail");
+    path = path.substr(0, pos);
+    int32_t fd = dataProvider->GetDataProviderFile(path, "r");
+    CHECK_NULL_RETURN(fd >= 0, "");
+
+    // check image orientation
+    auto imageSrc = ImageSource::Create(fd);
+    CHECK_NULL_RETURN(imageSrc, "");
+    std::string orientation = imageSrc->GetProperty("Orientation");
+    LOGD("image %{public}s has orientation = %{public}s", path.c_str(), orientation.c_str());
+    return orientation;
+}
+#endif
 } // namespace
 
 std::string ImageLoader::RemovePathHead(const std::string& uri)
@@ -107,6 +142,9 @@ RefPtr<ImageLoader> ImageLoader::CreateImageLoader(const ImageSourceInfo& imageS
             return MakeRefPtr<DecodedDataProviderImageLoader>();
         }
         case SrcType::MEMORY: {
+            if (Container::IsCurrentUseNewPipeline()) {
+                return MakeRefPtr<SharedMemoryImageLoader>();
+            }
             LOGE("Image source type: shared memory. image data is not come from image loader.");
             return nullptr;
         }
@@ -393,7 +431,7 @@ sk_sp<SkData> Base64ImageLoader::LoadImageData(
         return nullptr;
     }
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     size_t outputLen;
     SkBase64::Error error = SkBase64::Decode(base64Code.data(), base64Code.size(), nullptr, &outputLen);
     if (error != SkBase64::Error::kNoError) {
@@ -529,29 +567,34 @@ sk_sp<SkData> DecodedDataProviderImageLoader::LoadImageData(
 }
 
 RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWk)
 {
 #if !defined(PIXEL_MAP_SUPPORTED)
     return nullptr;
 #else
-    auto pipelineContext = context.Upgrade();
-    if (!pipelineContext) {
-        LOGE("pipeline context is null when try start thumbnailLoadTask, uri: %{public}s",
-            imageSourceInfo.ToString().c_str());
-        return nullptr;
+    auto orientation = GetThumbnailOrientation(src);
+
+    // query thumbnail from cache
+    auto pipeline = pipelineWk.Upgrade();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto cache = pipeline->GetImageCache();
+    CHECK_NULL_RETURN(cache, nullptr);
+    auto data = DynamicCast<PixmapCachedData>(cache->GetCacheImageData(src.GetKey() + orientation));
+    if (data) {
+        LOGD("thumbnail cache found %{public}s, orientation = %{public}s", src.GetSrc().c_str(), orientation.c_str());
+        return MakeRefPtr<NG::ImageData>(data->pixmap_);
     }
-    auto dataProvider = pipelineContext->GetDataProviderManager();
-    if (!dataProvider) {
-        LOGE("the data provider is null when try load thumbnail resource, uri: %{public}s",
-            imageSourceInfo.ToString().c_str());
-        return nullptr;
+
+    auto dataProvider = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProvider, nullptr);
+
+    void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
+    auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
+    CHECK_NULL_RETURN(pixmap, nullptr);
+    if (cache) {
+        cache->CacheImageData(src.GetKey() + orientation, MakeRefPtr<PixmapCachedData>(pixmap));
     }
-    void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(imageSourceInfo.GetSrc());
-    auto pixmapOhos = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
-    if (!pixmapOhos) {
-        return nullptr;
-    }
-    return MakeRefPtr<NG::ImageData>(pixmapOhos);
+    return MakeRefPtr<NG::ImageData>(pixmap);
 #endif
 }
 
@@ -573,6 +616,42 @@ RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
     }
     return MakeRefPtr<NG::ImageData>(imageSourceInfo.GetPixmap());
 #endif
+}
+
+sk_sp<SkData> SharedMemoryImageLoader::LoadImageData(
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& pipelineWk)
+{
+    CHECK_RUN_ON(BG);
+    auto pipeline = pipelineWk.Upgrade();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto manager = pipeline->GetSharedImageManager();
+    CHECK_NULL_RETURN(manager, nullptr);
+    auto id = RemovePathHead(src.GetSrc());
+    bool found = manager->FindImageInSharedImageMap(id, AceType::WeakClaim(this));
+    // image data not ready yet, wait for data
+    if (!found) {
+        manager->RegisterLoader(id, AceType::WeakClaim(this));
+        // wait for SharedImageManager to notify
+        std::unique_lock<std::mutex> lock(mtx_);
+        auto status = cv_.wait_for(lock, TIMEOUT_DURATION);
+        if (status == std::cv_status::timeout) {
+            return nullptr;
+        }
+    }
+
+    auto skData = SkData::MakeWithCopy(data_.data(), data_.size());
+    return skData;
+}
+
+void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)
+{
+    LOGI("SharedMemory image data is ready %{public}s", uri.c_str());
+    {
+        std::scoped_lock<std::mutex> lock(mtx_);
+        data_ = memData;
+    }
+
+    cv_.notify_one();
 }
 
 } // namespace OHOS::Ace

@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -451,6 +452,15 @@ void JSText::JsFocusable(const JSCallbackInfo& info)
     JSInteractableView::SetFocusNode(false);
 }
 
+void JSText::JsDraggable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGE("The info is wrong, it is supposed to be an boolean");
+        return;
+    }
+    TextModel::GetInstance()->SetDraggable(info[0]->IsBoolean());
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -489,6 +499,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onDragLeave", &JSText::JsOnDragLeave);
     JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
+    JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::Inherit<JSContainerBase>();
     JSClass<JSText>::Inherit<JSViewAbstract>();
     JSClass<JSText>::Bind<>(globalObj);

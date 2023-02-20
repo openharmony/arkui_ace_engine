@@ -218,8 +218,7 @@ void FrameNode::OnAttachToMainTree()
     UINode::OnAttachToMainTree();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear();
-    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
-        renderContext_->HasAnchor()) {
+    if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -241,7 +240,7 @@ void FrameNode::OnAttachToMainTree()
 void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
     }
 }
@@ -279,8 +278,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     bool skipSync = geometryTransition != nullptr && geometryTransition->IsNodeActive(WeakClaim(this));
     bool forceSync = geometryTransition != nullptr && geometryTransition->IsNodeInAndIdentity(WeakClaim(this));
-    if (!skipSync && (forceSync || frameSizeChange || frameOffsetChange ||
-        (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
+    if (!skipSync && (forceSync || frameSizeChange || frameOffsetChange || HasPositionProp() ||
+                         (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -723,8 +722,7 @@ void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
     eventHub_->MarkModifyDone();
-    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
-        renderContext_->HasAnchor()) {
+    if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -948,14 +946,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
     {
         ACE_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
-        auto isOutOfRegion = false;
-        if (pattern_->NeedExternRegion()) {
-            isOutOfRegion = IsOutOfTouchTestRegion(parentLocalPoint);
-        } else {
-            isOutOfRegion = (!InResponseRegionList(parentLocalPoint, responseRegionList) || !GetTouchable())
-                && !IsResponseRegion();
-        }
-        if (isOutOfRegion) {
+        if (IsOutOfTouchTestRegion(parentLocalPoint)) {
             return HitTestResult::OUT_OF_REGION;
         }
     }
@@ -1005,21 +996,31 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
         InResponseRegionList(parentLocalPoint, responseRegionList)) {
         consumed = true;
-        auto gestureHub = eventHub_->GetGestureEventHub();
-        if (gestureHub) {
-            TouchTestResult finalResult;
-            const auto coordinateOffset = globalPoint - localPoint;
-            preventBubbling = gestureHub->ProcessTouchTestHit(
-                coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId);
-            newComingTargets.swap(finalResult);
+        if (touchRestrict.hitTestType == SourceType::TOUCH) {
+            auto gestureHub = eventHub_->GetGestureEventHub();
+            if (gestureHub) {
+                TouchTestResult finalResult;
+                const auto coordinateOffset = globalPoint - localPoint;
+                preventBubbling = gestureHub->ProcessTouchTestHit(
+                    coordinateOffset, touchRestrict, newComingTargets, finalResult, touchId);
+                newComingTargets.swap(finalResult);
+            }
+        } else if (touchRestrict.hitTestType == SourceType::MOUSE) {
+            auto mouseHub = eventHub_->GetInputEventHub();
+            if (mouseHub) {
+                const auto coordinateOffset = globalPoint - localPoint;
+                preventBubbling = mouseHub->ProcessMouseTestHit(coordinateOffset, newComingTargets);
+            }
         }
     }
 
-    // combine into exclusive recognizer group.
     result.splice(result.end(), std::move(newComingTargets));
-    auto gestureHub = eventHub_->GetGestureEventHub();
-    if (gestureHub) {
-        gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result, touchId);
+    if (touchRestrict.hitTestType == SourceType::TOUCH) {
+        // combine into exclusive recognizer group.
+        auto gestureHub = eventHub_->GetGestureEventHub();
+        if (gestureHub) {
+            gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result, touchId);
+        }
     }
 
     // consumed by children and return result.
@@ -1079,52 +1080,7 @@ bool FrameNode::InResponseRegionList(const PointF& parentLocalPoint, const std::
 HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     MouseTestResult& onMouseResult, MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode)
 {
-    if (!isActive_ || !eventHub_->IsEnabled()) {
-        return HitTestResult::OUT_OF_REGION;
-    }
-    const auto& rect = renderContext_->GetPaintRectWithTransform();
-    LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
-        GetTag().c_str(), rect.Left(), rect.Top(), rect.Width(), rect.Height());
-    // TODO: disableTouchEvent || disabled_ need handle
-
-    // TODO: Region need change to RectList
-    if (!rect.IsInRegion(parentLocalPoint)) {
-        return HitTestResult::OUT_OF_REGION;
-    }
-
-    bool preventBubbling = false;
-
-    const auto localPoint = parentLocalPoint - rect.GetOffset();
-    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        const auto& child = *iter;
-        auto childHitResult = child->MouseTest(globalPoint, localPoint, onMouseResult, onHoverResult, hoverNode);
-        if (childHitResult == HitTestResult::STOP_BUBBLING) {
-            preventBubbling = true;
-        }
-        // In normal process, the node block the brother node.
-        if (childHitResult == HitTestResult::BUBBLING) {
-            // TODO: add hit test mode judge.
-            break;
-        }
-    }
-
-    MouseTestResult mouseResult;
-    MouseTestResult hoverResult;
-    bool isPrevent = false;
-    auto mouseHub = eventHub_->GetInputEventHub();
-    if (mouseHub) {
-        const auto coordinateOffset = globalPoint - localPoint;
-        isPrevent = mouseHub->ProcessMouseTestHit(coordinateOffset, mouseResult, hoverResult, hoverNode);
-        onHoverResult.splice(onHoverResult.end(), std::move(hoverResult));
-    }
-
-    if (!preventBubbling) {
-        preventBubbling = isPrevent;
-        onMouseResult.splice(onMouseResult.end(), std::move(mouseResult));
-    }
-    if (preventBubbling) {
-        return HitTestResult::STOP_BUBBLING;
-    }
+    // unuseable function. do nothing.
     return HitTestResult::BUBBLING;
 }
 

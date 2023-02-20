@@ -70,6 +70,11 @@ public:
         return geometryNode_;
     }
 
+    RefPtr<RenderContext> GetRenderContext() const
+    {
+        return renderContext_.Upgrade();
+    }
+
     SizeF GetContentSize() const
     {
         return geometryNode_->GetContentSize();

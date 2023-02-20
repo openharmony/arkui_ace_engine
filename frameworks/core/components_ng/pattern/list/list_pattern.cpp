@@ -119,7 +119,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
-    return (listLayoutProperty && listLayoutProperty->GetDivider().has_value());
+    CHECK_NULL_RETURN(listLayoutProperty, false);
+    return ((listLayoutProperty->GetDivider().has_value() || listLayoutProperty->GetPaddingProperty()));
 }
 
 void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump)
@@ -354,6 +355,13 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
     if (source == SCROLL_FROM_START) {
         FireOnScrollStart();
         ProcessDragStart(offset);
+        auto item = swiperItem_.Upgrade();
+        if (item) {
+            item->SwiperReset();
+        }
+        if (animator_ && !animator_->IsStopped()) {
+            animator_->Stop();
+        }
         return true;
     }
     auto scrollBar = GetScrollBar();
@@ -466,6 +474,9 @@ bool ListPattern::HandleDirectionKey(KeyCode code)
 void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
 {
     LOGI("AnimateTo:%f, duration:%f", position, duration);
+    if (!IsScrollableStopped()) {
+        StopScrollable();
+    }
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
     }
@@ -496,7 +507,7 @@ void ListPattern::ScrollTo(float position)
 void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
 {
     LOGI("ScrollToIndex:%{public}d", index);
-    if (index >= 0 && index <= maxListItemIndex_) {
+    if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         jumpIndex_ = index;
         scrollIndexAlignment_ = align;
         MarkDirtyNodeSelf();
@@ -509,7 +520,7 @@ void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         ScrollToIndex(0, ScrollIndexAlignment::ALIGN_TOP);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(maxListItemIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
+        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, ScrollIndexAlignment::ALIGN_BUTTON);
     }
 }
 
@@ -781,5 +792,16 @@ RectF ListPattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF
     }
 
     return selectedZone;
+}
+
+void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
+{
+    if (swiperItem_ != swiperItem) {
+        auto item = swiperItem_.Upgrade();
+        if (item) {
+            item->SwiperReset();
+        }
+        swiperItem_ = std::move(swiperItem);
+    }
 }
 } // namespace OHOS::Ace::NG

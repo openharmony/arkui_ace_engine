@@ -83,7 +83,6 @@ private:
     bool hideSplit_ = false;
     bool hideMaximize_ = false;
     bool hideMinimize_ = false;
-    bool isStartMove_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -26,9 +26,7 @@ void JsClickFunction::Execute()
 
     // This is required to request for new frame, which eventually will call
     // FlushBuild, FlushLayout and FlushRender on the dirty elements
-#ifdef USE_V8_ENGINE
-    V8DeclarativeEngineInstance::TriggerPageUpdate();
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     JsiDeclarativeEngineInstance::TriggerPageUpdate(JsiDeclarativeEngineInstance::GetCurrentRuntime());
 #endif
 }

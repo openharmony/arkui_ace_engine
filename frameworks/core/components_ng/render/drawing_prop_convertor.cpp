@@ -157,6 +157,9 @@ RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& 
     rsTextStyle.fontStyle_ = static_cast<rosen::FontStyle>(textStyle.GetFontStyle());
     rsTextStyle.textBaseline_ = static_cast<rosen::TextBaseline>(textStyle.GetTextBaseline());
     rsTextStyle.fontFamilies_ = textStyle.GetFontFamilies();
+    if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
+        rsTextStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
+    }
     if (context) {
         rsTextStyle.fontSize_ = context->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {

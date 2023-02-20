@@ -262,6 +262,23 @@ if (is_standard_system) {
       "$uv_path/thirdparty/libuv/libuv${dylib_suffix}",
     ]
 
+    rosen_path = get_label_info(
+            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+            "root_out_dir")
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context",
+      "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
+      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+      "//third_party/flutter/glfw:glfw",
+    ]
+
+    sources += [
+      "${rosen_path}/graphic/graphic_standard/libglfw${dylib_suffix}",
+      "${rosen_path}/graphic/graphic_standard/libglfw_render_context${dylib_suffix}",
+      "${rosen_path}/graphic/graphic_standard/librender_service_base${dylib_suffix}",
+      "${rosen_path}/graphic/graphic_standard/librender_service_client${dylib_suffix}",
+    ]
+
     # Add ark engine-related dynamic libraries
     ark_js_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
                                  "root_out_dir")
@@ -343,7 +360,7 @@ if (is_standard_system) {
       out_path = get_label_info(
               "//foundation/distributeddatamgr/preferences/frameworks/js/napi:preferences",
               "root_out_dir")
-      deps = [ "//foundation/distributeddatamgr/preferences/frameworks/js/napi:preferences" ]
+      deps = [ "//foundation/distributeddatamgr/preferences/frameworks/js/napi/preferences:preferences" ]
       sources = [ "${out_path}/distributeddatamgr/preferences/libpreferences${dylib_suffix}" ]
 
       #rdb

@@ -36,9 +36,15 @@ void SvgCanvasImage::DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, con
         canvas, GetPaintConfig().imageFit_, Size(srcRect.GetWidth(), srcRect.GetHeight()), GetSvgFillColor());
 }
 
+bool SvgCanvasImage::IsStatic()
+{
+    CHECK_NULL_RETURN(svgDom_, true);
+    return svgDom_->IsStatic();
+}
+
 void SvgCanvasImage::SetRedrawCallback(std::function<void()>&& callback)
 {
-    svgDom_->SetAnimationCallback(std::move(callback));
+    svgDom_->SetAnimationCallback(std::move(callback), WeakClaim(this));
 }
 
 void SvgCanvasImage::ControlAnimation(bool play)

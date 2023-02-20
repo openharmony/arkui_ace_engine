@@ -110,7 +110,6 @@ void FocusHub::DumpFocusTree(int32_t depth)
 void FocusHub::DumpFocusNodeTree(int32_t depth)
 {
     if (DumpLog::GetInstance().GetDumpFile()) {
-        // DumpFocus();
         std::string information = GetFrameName();
         if (IsCurrentFocus()) {
             information += "(Node*)";
@@ -130,7 +129,6 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);
     if (DumpLog::GetInstance().GetDumpFile()) {
-        // DumpFocus();
         std::string information = GetFrameName();
         if (IsCurrentFocus()) {
             information += "(Scope*)";

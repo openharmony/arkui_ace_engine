@@ -48,7 +48,20 @@ public:
         host->GetRenderContext()->UpdateBackgroundColor(PipelineContext::GetCurrentContext()->GetAppBgColor());
     }
 
+    void OnRebuildFrame() override
+    {
+        if (onRebuildFrameCallback_) {
+            onRebuildFrameCallback_();
+        }
+    }
+
+    void SetOnRebuildFrameCallback(std::function<void()>&& callback)
+    {
+        onRebuildFrameCallback_ = std::move(callback);
+    }
+
 private:
+    std::function<void()> onRebuildFrameCallback_;
     int32_t currentPageIndex_ = 0;
     friend class StageManager;
 

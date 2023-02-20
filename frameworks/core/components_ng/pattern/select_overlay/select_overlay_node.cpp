@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -98,8 +99,11 @@ SelectOverlayNode::SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& i
     : FrameNode("SelectOverlay", ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<SelectOverlayPattern>(info))
 {}
 
-RefPtr<SelectOverlayNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
+RefPtr<FrameNode> SelectOverlayNode::CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
+    if (info->isUsingMouse) {
+        return CreateMenuNode(info);
+    }
     auto selectOverlayNode = AceType::MakeRefPtr<SelectOverlayNode>(info);
     selectOverlayNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(selectOverlayNode);
@@ -186,6 +190,57 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
     }
     selectMenu_->MarkModifyDone();
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    std::vector<OptionParam> params;
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll);
+
+    auto menuWrapper = MenuView::Create(std::move(params), -1);
+    auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
+    menuWrapper->RemoveChild(menu);
+    menuWrapper.Reset();
+    // set click position to menu
+    auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateMenuOffset(info->rightClickOffset);
+
+    if (!info->menuInfo.showCut) {
+        auto cutOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+        auto optionEventHub = cutOption->GetEventHub<OptionEventHub>();
+        if (optionEventHub) {
+            optionEventHub->SetEnabled(false);
+        }
+    }
+    if (!info->menuInfo.showCopy) {
+        auto copyOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(1));
+        auto optionEventHub = copyOption->GetEventHub<OptionEventHub>();
+        if (optionEventHub) {
+            optionEventHub->SetEnabled(false);
+        }
+    }
+    if (!info->menuInfo.showPaste) {
+        auto pasteOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(2));
+        auto optionEventHub = pasteOption->GetEventHub<OptionEventHub>();
+        if (optionEventHub) {
+            optionEventHub->SetEnabled(false);
+        }
+    }
+    if (!info->menuInfo.showCopyAll) {
+        auto selectAllOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(3));
+        auto optionEventHub = selectAllOption->GetEventHub<OptionEventHub>();
+        if (optionEventHub) {
+            optionEventHub->SetEnabled(false);
+        }
+    }
+    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    ElementRegister::GetInstance()->AddUINode(menu);
+
+    return menu;
 }
 
 } // namespace OHOS::Ace::NG

@@ -141,15 +141,27 @@ void SubContainer::UpdateSurfaceSize()
 
 void SubContainer::RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
-    const FrontendType& cardType)
+    const FrontendType& cardType, const FrontendType& uiSyntax)
 {
+    LOGI("SubContainer::RunCard RunCard!!! path = %{public}s formSrc = %{public}s", path.c_str(), formSrc.c_str());
     if (formId == runningCardId_) {
         LOGE("the card is showing, no need run again");
         return;
     }
-    runningCardId_ = formId;
-    cardType_ = cardType;
 
+    runningCardId_ = formId;
+    if (onFormAcquiredCallback_) {
+        onFormAcquiredCallback_(formId);
+    }
+
+    if (uiSyntax == FrontendType::ETS_CARD) {
+        // ArkTSCard: 确认Acquired事件时序
+        LOGI("Run Card in FRS");
+        uiSyntax_ = FrontendType::ETS_CARD;
+        return;
+    }
+
+    cardType_ = cardType;
     if (cardType_ == FrontendType::ETS_CARD) {
         frontend_ = AceType::MakeRefPtr<CardFrontendDeclarative>();
     } else if (cardType_ == FrontendType::JS_CARD) {
@@ -160,10 +172,6 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     }
 
     frontend_->Initialize(cardType_, taskExecutor_);
-
-    if (onFormAcquiredCallback_) {
-        onFormAcquiredCallback_(formId);
-    }
 
     frontend_->ResetPageLoadState();
     LOGI("run card path:%{private}s, module:%{private}s, data:%{private}s", path.c_str(), module.c_str(), data.c_str());
@@ -191,6 +199,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     } else {
         frontend_->SetFormSrc(formSrc);
     }
+    LOGI("RunCard formSrc = %{public}s", formSrc.c_str());
     frontend_->SetCardWindowConfig(GetWindowConfig());
     auto&& window = std::make_unique<FormWindow>(outSidePipelineContext_);
 
@@ -209,7 +218,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     UpdateRootElementSize();
     pipelineContext_->SetIsJsCard(true); // JSCard & eTSCard both use this flag
     if (cardType_ == FrontendType::ETS_CARD) {
-        pipelineContext_->SetIsEtsCard(true); // only eTSCard use this flag
+        pipelineContext_->SetIsFormRender(true); // only eTSCard use this flag
     }
 
     ResourceInfo cardResourceInfo;
@@ -298,12 +307,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
         if (Container::IsCurrentUseNewPipeline()) {
             auto pattern = formPattern_.Upgrade();
             CHECK_NULL_VOID(pattern);
-            auto pipelineContext = DynamicCast<PipelineContext>(pipelineContext_);
-            if (!pipelineContext) {
-                LOGE("RunCard failed, pipeline context is nullptr");
-                return;
-            }
-            pipelineContext->SetDrawDelegate(pattern->GetDrawDelegate());
+            pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
             frontend_->RunPage(0, "", data);
             return;
         }
@@ -323,8 +327,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
             LOGE("set draw delegate could not get render form");
             return;
         }
-        auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_);
-        pipelineContext->SetDrawDelegate(formRender->GetDrawDelegate());
+        pipelineContext_->SetDrawDelegate(formRender->GetDrawDelegate());
 
         frontend_->RunPage(0, "", data);
     } else {

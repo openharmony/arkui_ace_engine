@@ -167,7 +167,8 @@ public:
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
         const TransitionOptions& options, const SizeF& frameSize = SizeF());
 
-    void FlushModifier(const RefPtr<Modifier>& modifier) override;
+    void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
+    void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
@@ -195,7 +196,7 @@ public:
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() const override;
-
+    void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
         needDebugBoundary_ = flag;

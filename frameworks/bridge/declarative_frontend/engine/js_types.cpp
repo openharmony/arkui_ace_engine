@@ -17,17 +17,7 @@
 
 namespace OHOS::Ace::Framework {
 
-#ifdef USE_V8_ENGINE
-void JsStopPropagation(const v8::FunctionCallbackInfo<v8::Value>& info)
-{
-    v8::Local<v8::Object> thisObj = info.This();
-    BaseEventInfo* eventInfo = static_cast<BaseEventInfo*>(thisObj->GetAlignedPointerFromInternalField(0));
-    if (eventInfo) {
-        eventInfo->SetStopPropagation(true);
-    }
-}
-
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 Local<JSValueRef> JsStopPropagation(panda::JsiRuntimeCallInfo *info)
 {
     Local<JSValueRef> thisObj = info->GetThisRef();

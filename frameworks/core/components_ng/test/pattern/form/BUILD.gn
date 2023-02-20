@@ -25,6 +25,7 @@ ohos_unittest("form_pattern_test_ng") {
 
     #mock
     "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_form_manager_delegate.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_rosen_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_sub_container.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
 
@@ -37,6 +38,15 @@ ohos_unittest("form_pattern_test_ng") {
 
   sources += test_pattern_sources
   deps = test_pattern_deps
+
+  include_dirs = [
+    "//drivers/peripheral/display/interfaces/include",
+    "//foundation/graphic/graphic_2d/interfaces/innerkits/surface",
+  ]
+  deps += [
+    "//foundation/graphic/graphic_2d:libsurface",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+  ]
   if (is_standard_system) {
     external_deps = [
       "ability_base:want",
@@ -46,6 +56,7 @@ ohos_unittest("form_pattern_test_ng") {
       "c_utils:utils",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "input:libmmi-client",
       "ipc:ipc_core",
     ]
   }

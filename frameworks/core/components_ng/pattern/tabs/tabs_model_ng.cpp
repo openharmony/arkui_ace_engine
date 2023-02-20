@@ -77,22 +77,12 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
-        SetIndex(index);
-    } else {
-        auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-        CHECK_NULL_VOID(swiperLayoutProperty);
-        auto index = swiperLayoutProperty->GetIndexValue(0);
-        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-        CHECK_NULL_VOID(tabBarPattern);
-        auto tabBarLayoutProperty = GetTabBarLayoutProperty();
-        CHECK_NULL_VOID(tabBarLayoutProperty);
-        tabBarLayoutProperty->UpdateIndicator(index);
-        tabBarPattern->UpdateTextColor(index);
     }
 
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
     SetTabBarPosition(barPosition);
+    SetIndex(index);
 }
 
 void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
@@ -102,6 +92,7 @@ void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
 
 void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, tabBarMode);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateTabBarMode(tabBarMode);

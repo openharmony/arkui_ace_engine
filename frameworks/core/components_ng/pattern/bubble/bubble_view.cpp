@@ -366,7 +366,11 @@ RefPtr<FrameNode> BubbleView::CreateButton(
         popupInfo.markNeedUpdate = isShow;
         overlayManager->UpdatePopupNode(targetId, popupInfo);
     };
-    buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));
+    if (buttonParam.action) {
+        buttonEventHub->AddClickEvent(buttonParam.action);
+    } else {
+        buttonEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));
+    }
 
     return buttonNode;
 }

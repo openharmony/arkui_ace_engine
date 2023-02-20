@@ -1,0 +1,98 @@
+{
+  global:
+    extern "C++" {
+      construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Animator;
+      construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Container;
+      construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Framework::MediaQueryInfo;
+      construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Platform::AceContainer;
+      construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::Scheduler;
+      construction?vtable?for?OHOS::Ace::AceType-in-OHOS::Ace::ThemeConstants;
+      construction?vtable?for?OHOS::Ace::Container-in-OHOS::Ace::Platform::AceContainer;
+      construction?vtable?for?OHOS::Ace::IUIService-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
+      construction?vtable?for?OHOS::Ace::JsMessageDispatcher-in-OHOS::Ace::Platform::AceContainer;
+      construction?vtable?for?OHOS::Ace::ScheduleTask-in-OHOS::Ace::Scheduler;
+      construction?vtable?for?OHOS::Ace::UIServiceStub-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
+      construction?vtable?for?OHOS::IPCObjectStub-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
+      construction?vtable?for?OHOS::IRemoteBroker-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
+      construction?vtable?for?OHOS::IRemoteObject-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
+      construction?vtable?for?OHOS::IRemoteStub?OHOS::Ace::IUIService?-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
+      construction?vtable?for?OHOS::Parcelable-in-OHOS::Ace::PluginComponentManager::UIServiceListener;
+
+      guard?variable?for?OHOS::Ace::Animator::TypeId??::myTypeId;
+      guard?variable?for?OHOS::Ace::Backend::TypeId??::myTypeId;
+      guard?variable?for?OHOS::Ace::Container::TypeId??::myTypeId;
+      guard?variable?for?OHOS::Ace::Framework::MediaQueryInfo::TypeId??::myTypeId;
+      guard?variable?for?OHOS::Ace::LogWrapper::GetBriefFileName?char?const*?::separator;
+      guard?variable?for?OHOS::Ace::Platform::AceContainer::TypeId??::myTypeId;
+      guard?variable?for?OHOS::Ace::Scheduler::TypeId??::myTypeId;
+      guard?variable?for?OHOS::Ace::ThemeConstants::TypeId??::myTypeId;
+
+      non-virtual?thunk?to?OHOS::Ace::Animator::~Animator*;
+      non-virtual?thunk?to?OHOS::Ace::Platform::AceContainer::DispatchPluginError*;
+      non-virtual?thunk?to?OHOS::Ace::Platform::AceContainer::Dispatch*;
+      non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnPushCallBack*;
+      non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnRequestCallBack*;
+      non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnReturnRequest*;
+
+      OHOS_ACE_*;
+
+      OHOS::Ace::AceApplicationInfo::*;
+      OHOS::Ace::AceScopedTrace::*;
+      OHOS::Ace::Animator::*;
+      "OHOS::Ace::Backend::Create()";
+      "OHOS::Ace::Backend::TypeId()::myTypeId";
+      "OHOS::Ace::BaseId::BaseId()";
+      OHOS::Ace::ConnectServerManager::*;
+      OHOS::Ace::Container::*;
+      OHOS::Ace::Curves::*;
+      OHOS::Ace::EngineHelper::*;
+      OHOS::Ace::EventReport::*;
+      OHOS::Ace::ExceptionHandler::HandleJsException*;
+      OHOS::Ace::Framework::*;
+      OHOS::Ace::GridSystemManager::*;
+      OHOS::Ace::JsonValue::*;
+      "OHOS::Ace::KeyToString(int)";
+      OHOS::Ace::Localization::*;
+      OHOS::Ace::LogWrapper::*;
+      OHOS::Ace::Platform::AceApplicationInfoImpl::*;
+      OHOS::Ace::Platform::AceContainer::*;
+      OHOS::Ace::Platform::FlutterAceView::*;
+      OHOS::Ace::PluginComponentManager::*;
+      OHOS::Ace::Scheduler::*;
+      OHOS::Ace::ScopedDelegate::*;
+      OHOS::Ace::SubwindowManager::*;
+      "OHOS::Ace::SystemGridInfo::ToString() const";
+      OHOS::Ace::SystemProperties::*;
+      OHOS::Ace::ThemeConstants::*;
+      OHOS::Ace::UIContentImpl::*;
+
+      virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
+
+      vtable?for?OHOS::Ace::AceApplicationInfo;
+      vtable?for?OHOS::Ace::Animator;
+      vtable?for?OHOS::Ace::BaseId;
+      vtable?for?OHOS::Ace::Container;
+      vtable?for?OHOS::Ace::Framework::MediaQueryInfo;
+      vtable?for?OHOS::Ace::Framework::RevSourceMap;
+      vtable?for?OHOS::Ace::Framework::StandardFunctionCodec;
+      vtable?for?OHOS::Ace::Localization;
+      vtable?for?OHOS::Ace::Platform::AceApplicationInfoImpl;
+      vtable?for?OHOS::Ace::Platform::AceContainer;
+      vtable?for?OHOS::Ace::Platform::FlutterAceView;
+      vtable?for?OHOS::Ace::PluginComponentManager::UIServiceListener;
+      vtable?for?OHOS::Ace::Scheduler;
+      vtable?for?OHOS::Ace::SubwindowManager;
+      vtable?for?OHOS::Ace::ThemeConstants;
+      vtable?for?OHOS::Ace::UIContentImpl;
+
+      VTT?for?OHOS::Ace::Animator;
+      VTT?for?OHOS::Ace::Container;
+      VTT?for?OHOS::Ace::Framework::MediaQueryInfo;
+      VTT?for?OHOS::Ace::Platform::AceContainer;
+      VTT?for?OHOS::Ace::PluginComponentManager::UIServiceListener;
+      VTT?for?OHOS::Ace::Scheduler;
+      VTT?for?OHOS::Ace::ThemeConstants;
+    };
+  local:
+    *;
+};

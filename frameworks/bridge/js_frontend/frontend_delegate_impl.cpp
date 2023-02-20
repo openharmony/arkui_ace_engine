@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -369,7 +369,11 @@ void FrontendDelegateImpl::OnBackGround()
 
 void FrontendDelegateImpl::OnForeground()
 {
-    OnPageShow();
+    // first page show will be called by push page successfully
+    if (!isFirstNotifyShow_) {
+        OnPageShow();
+    }
+    isFirstNotifyShow_ = false;
 }
 
 bool FrontendDelegateImpl::OnStartContinuation()
@@ -647,10 +651,13 @@ void FrontendDelegateImpl::BackImplement(const std::string& uri, const std::stri
         }
     }
 
-    auto context = pipelineContextHolder_.Get();
-    if (context) {
-        context->NotifyRouterBackDismiss();
-    }
+    taskExecutor_->PostTask(
+        [context = pipelineContextHolder_.Get()]() {
+            if (context) {
+                context->NotifyRouterBackDismiss();
+            }
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void FrontendDelegateImpl::PostponePageTransition()
@@ -1311,11 +1318,7 @@ void FrontendDelegateImpl::PushPageTransitionListener(
     const TransitionEvent& event, const RefPtr<JsAcePage>& page)
 {
     if (event == TransitionEvent::PUSH_END) {
-        if (isMainPage_) {
-            isMainPage_ = false;
-        } else {
-            OnPageShow();
-        }
+        OnPageShow();
     }
 }
 

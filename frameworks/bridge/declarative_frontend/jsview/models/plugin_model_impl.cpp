@@ -53,6 +53,22 @@ void PluginModelImpl::SetPluginSize(const Dimension& width, const Dimension& hei
     }
 };
 
+void PluginModelImpl::SetWidth(const Dimension& width)
+{
+    auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (plugin) {
+        plugin->SetWidth(width);
+    }
+};
+
+void PluginModelImpl::SetHeight(const Dimension& height)
+{
+    auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (plugin) {
+        plugin->SetHeight(height);
+    }
+};
+
 void PluginModelImpl::SetData(const std::string& data)
 {
     auto plugin = AceType::DynamicCast<PluginComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

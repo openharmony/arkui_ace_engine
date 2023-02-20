@@ -24,6 +24,7 @@ bool SystemProperties::windowAnimationEnabled_ = true;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
+uint32_t SystemProperties::dumpFrameCount_ = 0;
 
 float SystemProperties::GetFontWeightScale()
 {

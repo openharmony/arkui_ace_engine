@@ -38,8 +38,7 @@ namespace {
 constexpr uint32_t INPUT_EVENTS_SIZE = 1;
 constexpr uint32_t INPUT_EVENTS_SIZE_2 = 2;
 constexpr uint32_t INPUT_EVENTS_SIZE_0 = 0;
-constexpr uint32_t MOUSE_RESULT_SIZE = 1;
-constexpr uint32_t HOVER_RESULT_SIZE = 1;
+constexpr uint32_t MOUSE_RESULT_SIZE = 6;
 constexpr uint32_t AXIS_RESULT_SIZE = 1;
 const HoverEffectType HOVER_EFFECT_TYPE = HoverEffectType::BOARD;
 constexpr float WIDTH = 400.0f;
@@ -160,7 +159,7 @@ HWTEST_F(InputEventHubTestNg, InputEventHubHoverEventTest003, TestSize.Level1)
      * value.
      */
     inputEventHub->SetHoverAnimation(HOVER_EFFECT_TYPE);
-    EXPECT_NE(inputEventHub->mouseEventActuator_, nullptr);
+    EXPECT_NE(inputEventHub->hoverEffectActuator_, nullptr);
     EXPECT_EQ(inputEventHub->GetHoverEffect(), HOVER_EFFECT_TYPE);
 
     /**
@@ -250,11 +249,9 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
      * @tc.steps: step2. Invoke ProcessMouseTestHit when eventHub is nullptr.
      * @tc.expected: ProcessMouseTestHit return false.
      */
-    MouseTestResult onMouseResult;
-    MouseTestResult onHoverResult;
-    auto hoverNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    TouchTestResult mouseResult;
     auto inputEventHub2 = AceType::MakeRefPtr<InputEventHub>(nullptr);
-    EXPECT_FALSE(inputEventHub2->ProcessMouseTestHit(COORDINATE_OFFSET, onMouseResult, onHoverResult, hoverNode));
+    EXPECT_FALSE(inputEventHub2->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
 
     /**
      * @tc.steps: step3. Initialize mouseEventActuator_ and mouseEventActuator_, their inputEvents_ is empty and
@@ -263,19 +260,17 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
      */
     inputEventHub->mouseEventActuator_ =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
-    inputEventHub->hoverEventActuator_ =
+    inputEventHub->hoverEffectActuator_ =
         AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
-    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, onMouseResult, onHoverResult, hoverNode));
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
 
     /**
      * @tc.steps: step4. Invoke ProcessMouseTestHit when hoverNode is nullptr and the hover effect is UNKNOWN or not.
      * @tc.expected: OnCollectMouseEvent will return directly, and ProcessMouseTestHit return false.
      */
-    auto hoverNode2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    hoverNode2.Reset();
-    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, onMouseResult, onHoverResult, hoverNode2));
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
     inputEventHub->SetHoverAnimation(HOVER_EFFECT_TYPE);
-    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, onMouseResult, onHoverResult, hoverNode2));
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
 
     /**
      * @tc.steps: step5. Set MouseEvent and mouseEventActuator_ and userCallback_ will be initialized.
@@ -316,22 +311,25 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessMouseTest005, TestSize.Level1)
      * initialized.
      * @tc.expected: ProcessMouseTestHit return false, mouse and hover result size has been increased one.
      */
-    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, onMouseResult, onHoverResult, hoverNode));
-    EXPECT_EQ(inputEventHub->mouseEventActuator_->eventTarget_->coordinateOffset_, COORDINATE_OFFSET);
-    EXPECT_EQ(inputEventHub->hoverEventActuator_->eventTarget_->coordinateOffset_, COORDINATE_OFFSET);
-    EXPECT_EQ(onMouseResult.size(), MOUSE_RESULT_SIZE);
-    EXPECT_EQ(onHoverResult.size(), HOVER_RESULT_SIZE);
+    EXPECT_FALSE(inputEventHub->ProcessMouseTestHit(COORDINATE_OFFSET, mouseResult));
+    EXPECT_EQ(inputEventHub->mouseEventActuator_->mouseEventTarget_->GetCoordinateOffset(),
+        Offset(COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY()));
+    EXPECT_EQ(inputEventHub->hoverEventActuator_->hoverEventTarget_->GetCoordinateOffset(),
+        Offset(COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY()));
+    EXPECT_EQ(inputEventHub->hoverEffectActuator_->hoverEffectTarget_->GetCoordinateOffset(),
+        Offset(COORDINATE_OFFSET.GetX(), COORDINATE_OFFSET.GetY()));
+    EXPECT_EQ(mouseResult.size(), MOUSE_RESULT_SIZE);
 
     /**
      * @tc.steps: step10. Handle mouse and hover event when the events and userCallback is nullptr or not.
      */
     const MouseEvent mouseEvent = { .action = MouseAction::MOVE };
-    EXPECT_TRUE(inputEventHub->hoverEventActuator_->eventTarget_->HandleHoverEvent(HOVER_VALUE));
-    inputEventHub->hoverEventActuator_->eventTarget_->HandleMouseEvent(mouseEvent);
+    EXPECT_TRUE(inputEventHub->hoverEventActuator_->hoverEventTarget_->HandleHoverEvent(HOVER_VALUE));
+    inputEventHub->mouseEventActuator_->mouseEventTarget_->HandleMouseEvent(mouseEvent);
     inputEventHub->mouseEventActuator_->userCallback_ = nullptr;
     inputEventHub->hoverEventActuator_->userCallback_ = nullptr;
-    EXPECT_TRUE(inputEventHub->hoverEventActuator_->eventTarget_->HandleHoverEvent(HOVER_VALUE));
-    inputEventHub->hoverEventActuator_->eventTarget_->HandleMouseEvent(mouseEvent);
+    EXPECT_TRUE(inputEventHub->hoverEventActuator_->hoverEventTarget_->HandleHoverEvent(HOVER_VALUE));
+    inputEventHub->mouseEventActuator_->mouseEventTarget_->HandleMouseEvent(mouseEvent);
 }
 
 /**

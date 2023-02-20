@@ -139,11 +139,19 @@ void JSTabs::SetVertical(const std::string& value)
 
 void JSTabs::SetScrollable(const std::string& value)
 {
+    if (value == "undefined") {
+        TabsModel::GetInstance()->SetScrollable(true);
+        return;
+    }
     TabsModel::GetInstance()->SetScrollable(StringToBool(value));
 }
 
 void JSTabs::SetBarMode(const std::string& value)
 {
+    if (value == "undefined") {
+        TabsModel::GetInstance()->SetTabBarMode(TabBarMode::FIXED);
+        return;
+    }
     TabsModel::GetInstance()->SetTabBarMode(ConvertStrToTabBarMode(value));
 }
 
@@ -185,6 +193,15 @@ void JSTabs::SetIndex(int32_t index)
 
 void JSTabs::SetAnimationDuration(float value)
 {
+    if (std::isnan(value)) {
+        LOGI("The arg is nan, use default value");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        TabsModel::GetInstance()->SetAnimationDuration(static_cast<float>(tabTheme->GetTabContentAnimationDuration()));
+        return;
+    }
     TabsModel::GetInstance()->SetAnimationDuration(value);
 }
 

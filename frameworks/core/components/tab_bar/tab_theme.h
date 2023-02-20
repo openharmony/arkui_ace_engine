@@ -97,6 +97,7 @@ public:
                     pattern->GetAttr<double>("tab_content_animation_duration", 0.0);
                 theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
                 theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
+                theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -291,6 +292,11 @@ public:
         return tabBarDefaultWidth_;
     }
 
+    const Dimension& GetSubTabBarMinWidth() const
+    {
+        return subTabBarMinWidth_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -332,6 +338,7 @@ private:
     double tabContentAnimationDuration_;
     Dimension tabBarDefaultHeight_;
     Dimension tabBarDefaultWidth_;
+    Dimension subTabBarMinWidth_;
 };
 
 } // namespace OHOS::Ace

@@ -146,7 +146,7 @@ RefPtr<UINode> ViewStackProcessor::Finish()
         frameNode->MarkModifyDone();
         auto renderContext = frameNode->GetRenderContext();
         if (renderContext) {
-            renderContext->SetNeedDebugBoundary(false);
+            renderContext->SetNeedDebugBoundary(true);
         }
     }
     // ForEach Partial Update Path.
@@ -223,6 +223,16 @@ std::string ViewStackProcessor::GetKey()
 std::string ViewStackProcessor::ProcessViewId(const std::string& viewId)
 {
     return viewKey_.empty() ? viewId : viewKey_ + "_" + viewId;
+}
+
+void ViewStackProcessor::SetImplicitAnimationOption(const AnimationOption& option)
+{
+    implicitAnimationOption_ = option;
+}
+
+const AnimationOption& ViewStackProcessor::GetImplicitAnimationOption() const
+{
+    return implicitAnimationOption_;
 }
 
 ScopedViewStackProcessor::ScopedViewStackProcessor()

@@ -455,28 +455,17 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest009, TestSize.Level1)
      * @tc.steps: step4. call switchPattern OnDirtyLayoutWrapperSwap function, compare result.
      * @tc.expected: step4. OnDirtyLayoutWrapperSwap success and result correct.
      */
-
-    // case 1: LayoutWrapper::SkipMeasure = true , skipLayout = true;
     bool first_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_FALSE(first_case);
-
-    // case 2: LayoutWrapper::SkipMeasure = false , skipLayout = false;
     bool second_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_FALSE(second_case);
-
     layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(switchLayoutAlgorithm, NO_SKIP_MEASURE);
     layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
     switchPattern->isOn_ = true;
-
-    // case 3: LayoutWrapper::SkipMeasure = true , skipLayout = false;
     bool third_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, false);
     EXPECT_FALSE(third_case);
-
-    // case 4: LayoutWrapper::SkipMeasure = false , skipLayout = true;
     bool forth_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, true);
     EXPECT_TRUE(forth_case);
-
-    // case 5: LayoutWrapper::SkipMeasure = false , skipLayout = true, isOn_ is false;
     switchPattern->isOn_ = false;
     bool fifth_case = switchPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, true);
     EXPECT_TRUE(fifth_case);

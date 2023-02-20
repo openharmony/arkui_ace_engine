@@ -104,7 +104,7 @@ void RosenRenderContext::PaintChild(const RefPtr<RenderNode>& child, const Offse
             if (!renderPlugin) {
                 return;
             }
-            auto pluginContext = DynamicCast<PipelineContext>(renderPlugin->GetSubPipelineContext());
+            auto pluginContext = renderPlugin->GetSubPipelineContext();
             if (!pluginContext) {
                 return;
             }

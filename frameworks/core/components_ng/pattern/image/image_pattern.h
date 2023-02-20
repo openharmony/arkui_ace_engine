@@ -82,14 +82,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* frameNode) override
-    {
-        auto id = frameNode->GetId();
-        auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
-        CHECK_NULL_VOID_NOLOG(pipeline);
-        pipeline->RemoveWindowStateChangedCallback(id);
-        pipeline->RemoveNodesToNotifyMemoryLevel(id);
-    }
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void OnModifyDone() override;
 
@@ -102,7 +95,9 @@ private:
         const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
+    void PrepareAnimation();
     void SetRedrawCallback();
+    void RegisterVisibleAreaChange();
 
     DataReadyNotifyTask CreateDataReadyCallback();
     LoadSuccessNotifyTask CreateLoadSuccessCallback();

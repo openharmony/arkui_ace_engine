@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,22 +18,14 @@
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 #include "base/image/pixel_map.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/image_provider/adapter/flutter_image_provider.h"
-#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
-
 #ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/ui/rs_node.h"
-#include "render_service_client/core/ui/rs_surface_node.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
+#include "pipeline/rs_recording_canvas.h"
 #endif
 
 namespace OHOS::Ace::NG {
 namespace {
-#ifdef ENABLE_ROSEN_BACKEND
 constexpr uint8_t RADIUS_POINTS_SIZE = 4;
-#endif
 
 const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // green
@@ -60,7 +52,7 @@ SkPixmap CloneSkPixmap(SkPixmap& srcPixmap)
 
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     return AceType::MakeRefPtr<SkiaCanvasImage>();
 #else
     auto* imageRef = reinterpret_cast<fml::RefPtr<flutter::CanvasImage>*>(rawImage);
@@ -125,14 +117,14 @@ SkColorType SkiaCanvasImage::PixelFormatToSkColorType(const RefPtr<PixelMap>& pi
 
 void SkiaCanvasImage::ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage)
 {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
     image_->set_image(std::move(newSkGpuObjSkImage));
 #endif
 }
 
 int32_t SkiaCanvasImage::GetWidth() const
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     return 0;
 #else
     return image_->image() ? image_->width() : image_->compressWidth();
@@ -141,11 +133,18 @@ int32_t SkiaCanvasImage::GetWidth() const
 
 int32_t SkiaCanvasImage::GetHeight() const
 {
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     return 0;
 #else
     return image_->image() ? image_->height() : image_->compressHeight();
 #endif
+}
+
+RefPtr<CanvasImage> SkiaCanvasImage::Clone()
+{
+    auto clone = MakeRefPtr<SkiaCanvasImage>(image_);
+    clone->uniqueId_ = uniqueId_;
+    return clone;
 }
 
 void SkiaCanvasImage::AddFilter(SkPaint& paint)
@@ -171,11 +170,21 @@ RefPtr<PixelMap> SkiaCanvasImage::GetPixelMap()
         return nullptr;
     }
     SkPixmap newSrcPixmap = CloneSkPixmap(srcPixmap);
-    const auto *addr = newSrcPixmap.addr32();
+    const auto* addr = newSrcPixmap.addr32();
     auto width = static_cast<int32_t>(newSrcPixmap.width());
     auto height = static_cast<int32_t>(newSrcPixmap.height());
     int32_t length = width * height;
     return PixelMap::ConvertSkImageToPixmap(addr, length, width, height);
+}
+
+void SkiaCanvasImage::ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
+{
+    std::vector<RSPoint> radius(RADIUS_POINTS_SIZE);
+    for (size_t i = 0; i < radius.size(); ++i) {
+        radius[i] = RSPoint(radiusXY[i].GetX(), radiusXY[i].GetY());
+    }
+    RSRoundRect rRect(dstRect, radius);
+    canvas.ClipRoundRect(rRect, RSClipOp::INTERSECT);
 }
 
 void SkiaCanvasImage::DrawToRSCanvas(
@@ -185,22 +194,26 @@ void SkiaCanvasImage::DrawToRSCanvas(
     CHECK_NULL_VOID(image || GetCompressData());
     RSImage rsImage(&image);
     RSSamplingOptions options;
+    ClipRRect(canvas, dstRect, radiusXY);
+    if (DrawCompressedImage(canvas, srcRect, dstRect, radiusXY)) {
+        return;
+    }
+    canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+}
+
+bool SkiaCanvasImage::DrawCompressedImage(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
+{
+    CHECK_NULL_RETURN_NOLOG(GetCompressData(), false);
+
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    if (rsCanvas == nullptr) {
-        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-        return;
-    }
+    CHECK_NULL_RETURN(rsCanvas, false);
     auto skCanvas = rsCanvas->ExportSkCanvas();
-    if (skCanvas == nullptr) {
-        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-        return;
-    }
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    if (recordingCanvas == nullptr) {
-        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-        return;
-    }
+    CHECK_NULL_RETURN(skCanvas, false);
+    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(skCanvas);
+    CHECK_NULL_RETURN(recordingCanvas, false);
+
     SkPaint paint;
     AddFilter(paint);
     SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
@@ -226,12 +239,12 @@ void SkiaCanvasImage::DrawToRSCanvas(
         auto skDstRect = SkRect::MakeXYWH(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetWidth(), dstRect.GetHeight());
         recordingCanvas->concat(SkMatrix::MakeRectToRect(skSrcRect, skDstRect, SkMatrix::kFill_ScaleToFit));
     }
+
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
-    recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
-#else
-    canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+    recordingCanvas->DrawImageWithParm(nullptr, std::move(data), rsImageInfo, paint);
 #endif
+    return true;
 }
 } // namespace OHOS::Ace::NG

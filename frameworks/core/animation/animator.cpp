@@ -101,8 +101,7 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
 
 void Animator::AttachSchedulerOnContainer()
 {
-    auto container = Container::Current();
-    auto pipeline = container->GetPipelineContext();
+    auto pipeline = PipelineBase::GetCurrentContext();
     AttachScheduler(pipeline);
 }
 
@@ -966,6 +965,11 @@ void Animator::Copy(const RefPtr<Animator>& controller)
     status_ = controller->status_;
     scaledDuration_ = controller->scaledDuration_;
     scaledStartDelay_ = controller->scaledStartDelay_;
+}
+
+void Animator::ResetIsReverse()
+{
+    isReverse_ = false;
 }
 
 } // namespace OHOS::Ace

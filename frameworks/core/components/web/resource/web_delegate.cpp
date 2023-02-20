@@ -4273,7 +4273,7 @@ void WebDelegate::OnBlur()
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnBlur();
+        nweb_->OnBlur(blurReason_);
     }
 }
 
@@ -4339,7 +4339,9 @@ void WebDelegate::OnSelectPopupMenu(
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        // Not implement yet.
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnSelectPopupMenu(params, callback);
         return;
     }
     auto renderWeb = renderWeb_.Upgrade();
@@ -4473,7 +4475,8 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
             LOGI("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
                 (int32_t)offset.GetX(), (int32_t)offset.GetY(),
                 (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
-            surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), drawSize.Width(), drawSize.Height());
+            Size webSize = GetEnhanceSurfaceSize(drawSize);
+            surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), webSize.Width(), webSize.Height());
         }
     } else {
         Resize(drawSize.Width(), drawSize.Height());
@@ -4483,6 +4486,25 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
 Offset WebDelegate::GetWebRenderGlobalPos()
 {
     return offset_;
+}
+
+Size WebDelegate::GetEnhanceSurfaceSize(const Size& drawSize)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN_NOLOG(pipeline, Size());
+    double dipScale = pipeline->GetDipScale();
+    if (NearZero(dipScale)) {
+        return Size();
+    }
+    int width = std::ceil(std::floor(drawSize.Width() / dipScale) * dipScale);
+    int height = std::ceil(std::floor(drawSize.Height() / dipScale) * dipScale);
+    if (width <= 0) {
+        width = 1;
+    }
+    if (height <= 0) {
+        height = 1;
+    }
+    return Size(width, height);
 }
 #ifdef ENABLE_ROSEN_BACKEND
 void WebDelegate::SetSurface(const sptr<Surface>& surface)

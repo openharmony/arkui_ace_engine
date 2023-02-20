@@ -18,6 +18,7 @@
 #include <stack>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/render/canvas.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/render_context.h"
+#include "frameworks/base/window/drag_window.h"
 
 namespace OHOS::Ace::NG {
 
@@ -80,18 +82,21 @@ void TextPattern::CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
     auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
 
     // calculate firstHandleOffset, secondHandleOffset and handlePaintSize
     float startSelectHeight = 0.0f;
     float endSelectHeight = 0.0f;
-    auto startOffset = CalcCursorOffsetByPosition(textSelector_.GetStart(), startSelectHeight);
-    auto endOffset = CalcCursorOffsetByPosition(textSelector_.GetEnd(), endSelectHeight);
+    auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight);
+    auto endOffset = CalcCursorOffsetByPosition(textSelector_.destinationOffset, endSelectHeight);
     float selectLineHeight = std::max(startSelectHeight, endSelectHeight);
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
-    OffsetF firstHandleOffset(startOffset.GetX() + textPaintOffset.GetX(), startOffset.GetY() + textPaintOffset.GetY());
-    OffsetF secondHandleOffset(endOffset.GetX() + textPaintOffset.GetX(), endOffset.GetY() + textPaintOffset.GetY());
+    OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
+    OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
 
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
@@ -128,7 +133,10 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - rootOffset;
     auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
 
     auto localOffsetX = handleRect.GetX();
@@ -154,10 +162,10 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     if (isFirstHandle) {
         auto start =
             paragraph_->GetHandlePositionForClick(Offset(localOffsetX, localOffsetY + handleRect.Height() / 2));
-        textSelector_.Update(start, textSelector_.GetEnd());
+        textSelector_.TextUpdate(start, textSelector_.destinationOffset);
     } else {
         auto end = paragraph_->GetHandlePositionForClick(Offset(localOffsetX, localOffsetY + handleRect.Height() / 2));
-        textSelector_.Update(textSelector_.GetStart(), end);
+        textSelector_.TextUpdate(textSelector_.baseOffset, end);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -385,6 +393,117 @@ void TextPattern::HandleMouseEvent(const MouseInfo& info)
     }
 }
 
+void TextPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID_NOLOG(!panEventInitialized_);
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandlePanStart(info);
+    };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandlePanUpdate(info);
+    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandlePanEnd(info);
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {};
+    auto panEvent = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    gestureHub->AddPanEvent(panEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    panEventInitialized_ = true;
+}
+
+void TextPattern::HandlePanStart(const GestureEvent& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto offset = info.GetLocalLocation();
+    if (!IsDraggable(offset)) {
+        return;
+    }
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+#if !defined(PREVIEW)
+    if (!dragWindow_) {
+        auto rect = pipelineContext->GetCurrentWindowRect();
+        auto initTextPattern = AceType::Claim(this);
+
+        // create textdrag window
+        dragWindow_ = DragWindow::CreateTextDragWindow("APP_DRAG_WINDOW",
+            static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
+            static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()),
+            static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()),
+            contentRect_.Height() + contentRect_.GetY());
+        if (dragWindow_) {
+            dragWindow_->SetOffset(static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
+                static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()));
+            // draw select text on drag window
+            dragWindow_->DrawTextNG(paragraph_, initTextPattern);
+            // add select data to clipboard
+            auto manager = pipelineContext->GetDragDropManager();
+            CHECK_NULL_VOID(manager);
+            dragDropProxy_ = manager->CreateTextDragDropProxy();
+            CHECK_NULL_VOID(dragDropProxy_);
+            dragDropProxy_->OnTextDragStart(GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd()));
+        }
+    }
+#endif
+}
+
+bool TextPattern::IsDraggable(const Offset& offset)
+{
+    if (copyOption_ != CopyOptions::None && draggable_ &&
+        GreatNotEqual(textSelector_.GetEnd(), textSelector_.GetStart())) {
+        // Determine if the pan location is in the selected area
+        std::vector<Rect> selectedRects;
+        paragraph_->GetRectsForRange(textSelector_.GetStart(), textSelector_.GetEnd(), selectedRects);
+        if (selectedRects.empty()) {
+            return false;
+        } else {
+            auto panOffset = OffsetF(offset.GetX(), offset.GetY()) - contentRect_.GetOffset() +
+                             OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+            for (const auto& selectedRect : selectedRects) {
+                if (selectedRect.IsInRegion(Point(panOffset.GetX(), panOffset.GetY()))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    return false;
+}
+
+void TextPattern::HandlePanUpdate(const GestureEvent& info)
+{
+    if (dragWindow_) {
+        if (dragWindow_) {
+            dragWindow_->TextDragWindowMove(info.GetOffsetX(), info.GetOffsetY());
+        }
+        return;
+    }
+}
+
+void TextPattern::HandlePanEnd(const GestureEvent& info)
+{
+    if (dragWindow_) {
+        dragWindow_->Destroy();
+        dragWindow_ = nullptr;
+        if (dragDropProxy_) {
+            dragDropProxy_->OnDragEnd(info, true);
+        }
+        return;
+    }
+}
+
 void TextPattern::OnModifyDone()
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -402,7 +521,7 @@ void TextPattern::OnModifyDone()
 
     textForDisplay_ = textLayoutProperty->GetContent().value_or("");
     copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
-
+    draggable_ = textLayoutProperty->GetDraggable().value_or(false);
     if (copyOption_ != CopyOptions::None) {
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
@@ -411,6 +530,9 @@ void TextPattern::OnModifyDone()
         }
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
         InitLongPressEvent(gestureEventHub);
+        if (draggable_) {
+            InitPanEvent(gestureEventHub);
+        }
         InitClickEvent(gestureEventHub);
         InitMouseEvent();
     }
@@ -434,7 +556,6 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
-    spanItemChildren_ = textLayoutAlgorithm->GetSpanItemChildren();
     return true;
 }
 
@@ -456,6 +577,10 @@ void TextPattern::BeforeCreateLayoutWrapper()
     const auto& children = host->GetChildren();
     if (children.empty()) {
         return;
+    }
+
+    if (paragraph_) {
+        paragraph_.Reset();
     }
     spanItemChildren_.clear();
 
@@ -488,6 +613,32 @@ void TextPattern::BeforeCreateLayoutWrapper()
         const auto& nextChildren = current->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push(*iter);
+        }
+    }
+}
+
+void TextPattern::GetGlobalOffset(Offset& offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto globalOffset = host->GetPaintRectOffset() - rootOffset;
+    offset = Offset(globalOffset.GetX(), globalOffset.GetY());
+}
+
+void TextPattern::OnVisibleChange(bool isVisible)
+{
+    if (!isVisible) {
+        if (textSelector_.IsValid()) {
+            textSelector_.Update(-1, -1);
+            if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                selectOverlayProxy_->Close();
+            }
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     }
 }

@@ -89,6 +89,9 @@ void SubwindowOhos::InitContainer()
         CHECK_NULL_VOID(window_);
     }
     std::string url = "";
+    auto subSurface = window_->GetSurfaceNode();
+    CHECK_NULL_VOID(subSurface);
+    subSurface->SetShadowElevation(0.0f);
     window_->SetUIContent(url, nullptr, nullptr, false);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(window_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);

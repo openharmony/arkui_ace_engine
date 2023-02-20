@@ -49,6 +49,11 @@ public:
     virtual bool EvaluateJsCode(
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) = 0;
 
+    virtual bool ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath)
+    {
+        return false;
+    }
+
     virtual bool ExecuteJsBin([[maybe_unused]] const std::string &fileName)
     {
         return true;
@@ -75,6 +80,8 @@ public:
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 
     // Set c++ data to js environment.
     void SetEmbedderData(void *data)

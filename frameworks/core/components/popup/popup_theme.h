@@ -61,8 +61,8 @@ public:
                 themeConstants->GetColor(THEME_POPUP_BACKGROUND_COLOR).ChangeOpacity(DEFAULT_OPACITY);
             theme->textStyle_.SetTextColor(themeConstants->GetColor(THEME_POPUP_TEXT_COLOR));
             theme->textStyle_.SetFontSize(themeConstants->GetDimension(THEME_POPUP_TEXT_FONTSIZE));
-            theme->radius_ = Radius(themeConstants->GetDimension(THEME_POPUP_RADIUS),
-                themeConstants->GetDimension(THEME_POPUP_RADIUS));
+            theme->radius_ = Radius(
+                themeConstants->GetDimension(THEME_POPUP_RADIUS), themeConstants->GetDimension(THEME_POPUP_RADIUS));
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             theme->showTime_ = SHOW_TIME;
             theme->hideTime_ = HIDE_TIME;
@@ -209,6 +209,11 @@ public:
         return bubbleMiniMumHeight_;
     }
 
+    const Dimension& GetArrowHeight() const
+    {
+        return arrowHeight_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -233,6 +238,7 @@ private:
     Dimension buttonTextInsideMargin_ = 8.0_vp;
     Dimension buttonSpacing = 4.0_vp;
     Dimension littlePadding_ = 4.0_vp;
+    Dimension arrowHeight_ = 8.0_vp;
     Dimension focusPaintWidth_ = 2.0_vp;
     Dimension buttonMiniMumWidth = 72.0_vp;
     Dimension bubbleMiniMumHeight_ = 48.0_vp;

@@ -37,7 +37,8 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    static void PrintGridMatrix(const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix);
+    static void PrintGridMatrix(
+        const std::map<int32_t, std::map<int32_t, int32_t>>& gridMatrix, const std::map<int32_t, float>& positions);
     static void PrintLineHeightMap(const std::map<int32_t, float>& lineHeightMap);
 
 private:
@@ -50,7 +51,7 @@ private:
     // fill start of viewport
     bool FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float FillNewLineForward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
-    void UpdateMatrixForDeletedItems(int32_t deletedLineCount);
+    void AddForwardLines(int32_t currentIndex, float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
     void UpdateMatrixForAddedItems();
 
     // fill end of viewport
@@ -69,7 +70,7 @@ private:
     // Find next valid cell when current is not valid.
     void GetNextGrid(int32_t& curMain, int32_t& curCross, bool reverse) const;
     // Find a valid cell to place grid item and save to grid matrix.
-    bool CheckGridPlaced(int32_t index, int32_t main, int32_t cross, int32_t& mainSpan, int32_t& crossSpan);
+    bool CheckGridPlaced(int32_t index, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan);
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;
     void ModifyCurrentOffsetWhenReachEnd(float mainSize);

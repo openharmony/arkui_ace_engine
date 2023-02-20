@@ -101,6 +101,18 @@ RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
     return nullptr;
 }
 
+int32_t UINode::GetChildIndex(const RefPtr<UINode>& child) const
+{
+    int32_t index = 0;
+    for (const auto& iter : children_) {
+        if (iter == child) {
+            return index;
+        }
+        index++;
+    }
+    return -1;
+}
+
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode)
 {
     if (!oldNode) {
@@ -475,7 +487,7 @@ void UINode::SetActive(bool active)
 
 void UINode::OnVisibleChange(bool isVisible)
 {
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
     }
 }
@@ -521,6 +533,21 @@ bool UINode::MarkRemoving()
         pendingRemove = child->MarkRemoving() || pendingRemove;
     }
     return pendingRemove;
+}
+
+void UINode::SetChildrenInDestroying()
+{
+    if (children_.empty()) {
+        return;
+    }
+
+    for (const auto& child : children_) {
+        if (!child) {
+            continue;
+        }
+        child->SetChildrenInDestroying();
+        child->SetInDestroying();
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -78,6 +78,28 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    static std::string ConvertCopyOptionsToString(CopyOptions copyOptions)
+    {
+        std::string result;
+        switch (copyOptions) {
+            case CopyOptions::None:
+                result = "CopyOptions.None";
+                break;
+            case CopyOptions::InApp:
+                result = "CopyOptions.InApp";
+                break;
+            case CopyOptions::Local:
+                result = "CopyOptions.Local";
+                break;
+            case CopyOptions::Distributed:
+                result = "CopyOptions.Distributed";
+                break;
+            default:
+                LOGD("The input does not match any CopyOptions");
+        }
+        return result;
+    }
+
     enum class FocusChoice { SEARCH = 0, CANCEL_BUTTON, SEARCH_BUTTON };
 
 private:

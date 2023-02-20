@@ -22,7 +22,7 @@
 #include "base/log/log.h"
 #include "core/image/image_provider.h"
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "core/components_ng/render/canvas_image.h"
 #endif
 
@@ -53,7 +53,7 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
             if (!player) {
                 return;
             }
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
             auto canvasImage = NG::CanvasImage::Create(nullptr);
 #else
             auto canvasImage = flutter::CanvasImage::Create();

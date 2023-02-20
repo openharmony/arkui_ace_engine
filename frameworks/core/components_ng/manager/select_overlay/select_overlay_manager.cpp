@@ -28,8 +28,13 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(cons
     CHECK_NULL_RETURN(rootNode, nullptr);
     auto current = selectOverlayItem_.Upgrade();
     if (current) {
+        if (info.isUsingMouse && IsSameSelectOverlayInfo(info)) {
+            auto proxy = MakeRefPtr<SelectOverlayProxy>(current->GetId());
+            return proxy;
+        }
         DestroySelectOverlay(current->GetId());
     }
+    selectOverlayInfo_ = info;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(info);
     auto selectOverlayNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     // mount to parent
@@ -64,8 +69,8 @@ void SelectOverlayManager::DestroySelectOverlay(int32_t overlayId)
 bool SelectOverlayManager::HasSelectOverlay(int32_t overlayId)
 {
     auto current = selectOverlayItem_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(current, true);
-    return current->GetId() != overlayId;
+    CHECK_NULL_RETURN_NOLOG(current, false);
+    return current->GetId() == overlayId;
 }
 
 RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t overlayId)
@@ -75,5 +80,19 @@ RefPtr<SelectOverlayNode> SelectOverlayManager::GetSelectOverlayNode(int32_t ove
         return DynamicCast<SelectOverlayNode>(current);
     }
     return nullptr;
+}
+
+bool SelectOverlayManager::IsSameSelectOverlayInfo(const SelectOverlayInfo& info)
+{
+    if (selectOverlayInfo_.menuInfo.IsIconChanged(info.menuInfo)) {
+        return false;
+    }
+    if (selectOverlayInfo_.isUsingMouse != info.isUsingMouse) {
+        return false;
+    }
+    if (selectOverlayInfo_.rightClickOffset != info.rightClickOffset) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

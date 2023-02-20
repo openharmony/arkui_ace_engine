@@ -18,9 +18,11 @@
 #include <iomanip>
 #include <sstream>
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -148,8 +150,12 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     singleStarImagePaintConfig_.srcRect_ = singleStarRect_;
     singleStarImagePaintConfig_.dstRect_ = singleStarDstRect_;
     singleStarImagePaintConfig_.imageFit_ = ImageFit::TOP_LEFT;
-    return MakeRefPtr<RatingPaintMethod>(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
-        singleStarImagePaintConfig_, starNum, isHover_);
+    if (!ratingModifier_) {
+        ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
+    }
+    ratingModifier_->UpdateCanvasImage(
+        foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig_);
+    return MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_);
 }
 
 bool RatingPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -360,6 +366,7 @@ void RatingPattern::HandleTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
 }
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
@@ -373,13 +380,13 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
     ratingRenderProperty->UpdateTouchStar(touchStar);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVERTOPRESS : RatingModifier::RatingAnimationType::PRESS;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RatingPattern::HandleClick(const GestureEvent& info)
 {
     CHECK_NULL_VOID_NOLOG(!IsIndicator());
-
     RecalculatedRatingScoreBasedOnEventPoint(info.GetLocalLocation().GetX(), false);
     FireChangeEvent();
 }
@@ -543,6 +550,7 @@ void RatingPattern::InitMouseEvent()
 void RatingPattern::HandleHoverEvent(bool isHover)
 {
     isHover_ = isHover;
+    state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
     // Remove hover state when rating is not hovered.
     CHECK_NULL_VOID_NOLOG(!isHover);
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();

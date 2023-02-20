@@ -57,7 +57,7 @@ void JSSelect::Create(const JSCallbackInfo& info)
                     return;
                 }
                 if (!ParseJsMedia(selectIcon, icon)) {
-                    LOGE("selectValue is null");
+                    LOGI("selectIcon is null");
                 }
 
                 params[i] = { value, icon };
@@ -194,7 +194,9 @@ void JSSelect::Selected(int value)
     if (!optionText) {
         return;
     }
-    tipText->SetData(optionText->GetData());
+    if (!selectComponent->HasSetTipText()) {
+        tipText->SetData(optionText->GetData());
+    }
 }
 
 void JSSelect::Value(const std::string& value)
@@ -210,6 +212,9 @@ void JSSelect::Value(const std::string& value)
         return;
     }
     auto tipText = selectComponent->GetTipText();
+    if (!value.empty()) {
+        selectComponent->SetTipText(true);
+    }
     tipText->SetData(value);
 }
 

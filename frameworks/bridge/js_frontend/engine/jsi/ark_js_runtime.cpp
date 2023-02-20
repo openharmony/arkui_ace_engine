@@ -82,8 +82,8 @@ void ArkJSRuntime::Reset()
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
+            vm_ = nullptr;
         }
-        vm_ = nullptr;
     }
     for (auto data : dataList_) {
         delete data;
@@ -127,6 +127,17 @@ bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t *data, int32_t size, const 
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
     return NewUndefined();
+}
+
+bool ArkJSRuntime::ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    bool ret = JSNApi::ExecuteModuleBuffer(vm_, buffer, size, filePath);
+    LOGE(
+        "ArkJSRuntime::EvaluateJsCode after JSNApi::Execute %{public}p, filePath = %{public}s", this, filePath.c_str());
+    HandleUncaughtException();
+    return ret;
 }
 
 bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath, bool needUpdate)
@@ -252,8 +263,11 @@ bool ArkJSRuntime::HasPendingException()
 
 void ArkJSRuntime::HandleUncaughtException()
 {
+    if (uncaughtErrorHandler_ == nullptr) {
+        return;
+    }
     Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
-    if (!exception.IsEmpty() && !exception->IsHole() && uncaughtErrorHandler_ != nullptr) {
+    if (!exception.IsEmpty() && !exception->IsHole()) {
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
         uncaughtErrorHandler_(errorPtr, shared_from_this());

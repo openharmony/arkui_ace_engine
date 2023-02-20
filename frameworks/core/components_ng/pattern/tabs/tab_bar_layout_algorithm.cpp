@@ -38,11 +38,18 @@ void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstr
 {
     childConstraint.parentIdealSize = OptionalSizeF(ideaSize);
     const auto& barMode = layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
     if (barMode == TabBarMode::FIXED) {
         auto childIdeaSize = ideaSize;
         if (axis == Axis::HORIZONTAL) {
             childIdeaSize.SetWidth(ideaSize.Width() / childCount);
             childConstraint.maxSize.SetHeight(childConstraint.maxSize.Height());
+            if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
+                childConstraint.minSize.SetWidth(tabTheme->GetSubTabBarMinWidth().ConvertToPx());
+            }
         } else if (axis == Axis::VERTICAL) {
             childIdeaSize.SetHeight(tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE
                                         ? ideaSize.Height() / (childCount * 2)
@@ -54,6 +61,9 @@ void TabBarLayoutAlgorithm::UpdateChildConstraint(LayoutConstraintF& childConstr
             childConstraint.maxSize.SetWidth(Infinity<float>());
             childConstraint.maxSize.SetHeight(childConstraint.maxSize.Height());
             childConstraint.selfIdealSize.SetHeight(ideaSize.Height());
+            if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE) {
+                childConstraint.minSize.SetWidth(tabTheme->GetSubTabBarMinWidth().ConvertToPx());
+            }
         } else if (axis == Axis::VERTICAL) {
             childConstraint.maxSize.SetHeight(Infinity<float>());
             childConstraint.selfIdealSize.SetWidth(ideaSize.Width());
@@ -76,7 +86,9 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto idealSize =
         CreateIdealSize(constraint.value(), axis, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
     if (!constraint->selfIdealSize.Width().has_value() && axis == Axis::VERTICAL) {
-        idealSize.SetWidth(static_cast<float>(tabTheme->GetTabBarDefaultWidth().ConvertToPx()));
+        idealSize.SetWidth(static_cast<float>(tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE
+                                                  ? tabTheme->GetTabBarDefaultWidth().ConvertToPx()
+                                                  : tabTheme->GetTabBarDefaultHeight().ConvertToPx()));
     }
     if (!constraint->selfIdealSize.Height().has_value() && axis == Axis::HORIZONTAL) {
         idealSize.SetHeight(static_cast<float>(tabTheme->GetTabBarDefaultHeight().ConvertToPx()));

@@ -55,4 +55,36 @@ int32_t GridItemLayoutProperty::GetCustomCrossIndex(Axis axis) const
     }
     return propRowStart_.value_or(-1);
 }
+
+int32_t GridItemLayoutProperty::GetMainSpan(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return std::max(propRowEnd_.value_or(-1) - propRowStart_.value_or(-1) + 1, 1);
+    }
+    return std::max(propColumnEnd_.value_or(-1) - propColumnStart_.value_or(-1) + 1, 1);
+}
+
+int32_t GridItemLayoutProperty::GetCrossSpan(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return std::max(propColumnEnd_.value_or(-1) - propColumnStart_.value_or(-1) + 1, 1);
+    }
+    return std::max(propRowEnd_.value_or(-1) - propRowStart_.value_or(-1) + 1, 1);
+}
+
+int32_t GridItemLayoutProperty::GetMainStart(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propRowStart_.value_or(-1);
+    }
+    return propColumnStart_.value_or(-1);
+}
+
+int32_t GridItemLayoutProperty::GetCrossStart(Axis axis) const
+{
+    if (axis == Axis::VERTICAL) {
+        return propColumnStart_.value_or(-1);
+    }
+    return propRowStart_.value_or(-1);
+}
 } // namespace OHOS::Ace::NG

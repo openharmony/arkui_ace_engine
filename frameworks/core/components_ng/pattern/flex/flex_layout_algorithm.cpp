@@ -313,6 +313,8 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                         UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
                         CheckSizeValidity(childLayoutWrapper);
                         CheckBaselineProperties(childLayoutWrapper);
+                    } else {
+                        allocatedSize_ += space_;
                     }
                 } else {
                     child.layoutWrapper->SetActive(false);
@@ -341,6 +343,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 firstLoopIter = ++loopIter;
             }
         }
+        allocatedSize_ -= space_;
         auto remainedMainAxisSize = mainAxisSize_ - allocatedSize_;
         auto spacePerWeight = remainedMainAxisSize / newTotalFlexWeight;
         auto secondIterLoop = magicNodes_.rbegin();
@@ -434,7 +437,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 CheckBaselineProperties(childLayoutWrapper);
                 const auto& flexItemProperty = childLayoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
                 if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
-                    flexItemProperties.totalGrow += flexItemProperty->GetFlexGrowValue();
+                    flexItemProperties.totalGrow += flexItemProperty->GetFlexGrow().value_or(0.0f);
                 }
                 secondaryMeasureList_.emplace_back(child);
             }
@@ -447,7 +450,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                     const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
                     if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
-                        flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrowValue();
+                        flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
                     }
                     secondaryMeasureList_.pop_back();
                 }
@@ -487,6 +490,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             }
             ++iter;
         }
+        allocatedSize_ -= space_;
     }
 }
 
@@ -706,6 +710,11 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
     }
     allocatedSize_ = 0.0f;
     allocatedSize_ += space_ * (validSizeCount_ - 1);
+    // space is not valid when mainAxisAlign is SPACE_AROUND/SPACE_BETWEEN/SPACE_EVENLY
+    if (mainAxisAlign_ == FlexAlign::SPACE_AROUND || mainAxisAlign_ == FlexAlign::SPACE_BETWEEN ||
+        mainAxisAlign_ == FlexAlign::SPACE_EVENLY) {
+        allocatedSize_ = 0.0;
+    }
     for (const auto& child : children) {
         if (child->IsOutOfLayout() ||
             child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {

@@ -39,6 +39,7 @@ public:
         value->propBreakPoints_ = CloneBreakPoints();
         value->propDirection_ = CloneDirection();
         value->propSizeType_ = CloneSizeType();
+        value->propAlignItems_ = CloneAlignItems();
         return value;
     }
 
@@ -49,6 +50,7 @@ public:
         ResetBreakPoints();
         ResetDirection();
         ResetSizeType();
+        ResetAlignItems();
         LayoutProperty::Reset();
     }
 
@@ -59,6 +61,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BreakPoints, V2::BreakPoints, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, V2::GridRowDirection, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SizeType, V2::GridSizeType, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignItems, FlexAlign, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 #endif

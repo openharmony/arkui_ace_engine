@@ -15,10 +15,10 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
-#include <cmath>
-#include <cstdint>
 #include <memory>
+#include <string>
 
+#include "include/utils/SkParsePath.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
@@ -251,12 +251,14 @@ void RosenRenderContext::PaintDebugBoundary()
         painter.DrawDebugBoundaries(rsCanvas, offset);
     };
 
-    if (!debugBoundaryModifier_) {
+    if (!debugBoundaryModifier_ && rsNode_->IsInstanceOf<Rosen::RSCanvasNode>()) {
         debugBoundaryModifier_ = std::make_shared<DebugBoundaryModifier>();
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
         rsNode_->AddModifier(debugBoundaryModifier_);
     }
-    debugBoundaryModifier_->SetCustomData(true);
+    if (debugBoundaryModifier_) {
+        debugBoundaryModifier_->SetCustomData(true);
+    }
 }
 
 void RosenRenderContext::OnBackgroundColorUpdate(const Color& value)
@@ -277,6 +279,7 @@ DataReadyNotifyTask RosenRenderContext::CreateBgImageDataReadyCallback()
                 imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
+        LOGD("bgImage data ready %{public}s", sourceInfo.ToString().c_str());
         rosenRenderContext->bgLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
     return task;
@@ -295,6 +298,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
         }
         ctx->bgImage_ = ctx->bgLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bgImage_);
+        LOGI("bgImage load success %{public}s", sourceInfo.ToString().c_str());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBackground();
             ctx->RequestNextFrame();
@@ -1051,11 +1055,11 @@ void RosenRenderContext::FlushContentDrawFunction(CanvasDrawFunction&& contentDr
         });
 }
 
-void RosenRenderContext::FlushModifier(const RefPtr<Modifier>& modifier)
+void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
 {
     CHECK_NULL_VOID(rsNode_);
     CHECK_NULL_VOID(modifier);
-    auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertModifier(modifier));
+    auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertContentModifier(modifier));
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
 }
@@ -1080,6 +1084,19 @@ void RosenRenderContext::FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDr
             RSCanvas rsCanvas(&canvas);
             overlayDraw(rsCanvas);
         });
+}
+
+void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+    auto modifierAdapter = std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(modifier));
+    auto rect = AceType::DynamicCast<OverlayModifier>(modifier)->GetBoundsRect();
+    std::shared_ptr<Rosen::RectI> overlayRect =
+        std::make_shared<Rosen::RectI>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    modifierAdapter->SetOverlayBounds(overlayRect);
+    rsNode_->AddModifier(modifierAdapter);
+    modifierAdapter->AttachProperties();
 }
 
 RefPtr<Canvas> RosenRenderContext::GetCanvas()
@@ -1533,6 +1550,14 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
         auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
         rsNode_->SetMask(Rosen::RSMask::CreatePathMask(skPath, SkiaDecorationPainter::CreateMaskSkPaint(basicShape)));
     }
+}
+
+void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
+{
+    CHECK_NULL_VOID(rsNode_);
+    SkPath skPath;
+    SkParsePath::FromSVGString(commands.c_str(),&skPath);
+    rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 }
 
 void RosenRenderContext::ClipWithRect(const RectF& rectF)

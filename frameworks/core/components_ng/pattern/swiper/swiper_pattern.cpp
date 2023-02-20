@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -103,6 +103,7 @@ void SwiperPattern::OnModifyDone()
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
+        layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
     }
@@ -249,6 +250,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     maxChildSize_ = swiperLayoutAlgorithm->GetMaxChildSize();
     return GetEdgeEffect() == EdgeEffect::FADE;
 }
@@ -318,6 +322,9 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     currentIndex_ = index;
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     FireChangeEvent();
     CalculateCacheRange();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -726,9 +733,14 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
+    turnPageRate_ = currentOffset_ / MainSize();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+        auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
+        indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -937,6 +949,9 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         swiper->targetIndex_.reset();
         if (swiper->currentIndex_ != nextIndex) {
             swiper->currentIndex_ = nextIndex;
+            auto layoutProperty = swiper->GetLayoutProperty<SwiperLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
             swiper->FireChangeEvent();
             swiper->CalculateCacheRange();
         }
@@ -946,7 +961,11 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         swiper->FireAnimationEndEvent();
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto indicatorNode = host->GetLastChild();
+        CHECK_NULL_VOID(indicatorNode);
+        if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+            indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);

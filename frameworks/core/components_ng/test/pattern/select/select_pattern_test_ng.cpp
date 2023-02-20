@@ -20,7 +20,6 @@
 #define protected public
 #define private public
 #include "core/components/select/select_theme.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
@@ -68,17 +67,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };
@@ -106,17 +95,7 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest002, TestSize.Level1)
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<IconTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<SelectTheme>()))
-        .WillOnce(Return(AceType::MakeRefPtr<TextFieldTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
 
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
         { OPTION_TEXT_2, INTERNAL_SOURCE } };

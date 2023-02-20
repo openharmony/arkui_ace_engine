@@ -19,7 +19,7 @@
 #include <unordered_map>
 
 #include "flutter/fml/memory/ref_counted.h"
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "flutter/lib/ui/io_manager.h"
 #else
 #include "flutter/lib/ui/painting/image.h"

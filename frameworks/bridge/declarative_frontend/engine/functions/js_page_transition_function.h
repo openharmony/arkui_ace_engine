@@ -32,7 +32,10 @@ public:
     {
         LOGD("Destroy: JsPageTransitionFunction");
     };
-
+    void Execute() override
+    {
+        ExecuteJS();
+    }
     void Execute(RouteType routeType, float progress);
 };
 

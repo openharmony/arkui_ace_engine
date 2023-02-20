@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -71,6 +72,7 @@ void MenuItemGroupView::SetHeader(const std::string& headerStr)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
+    layoutProps->UpdateFontSize(theme->GetMenuFontSize());
     pattern->AddHeaderContent(content);
     pattern->AddHeader(row);
 }
@@ -108,6 +110,7 @@ void MenuItemGroupView::SetFooter(const std::string& footerStr)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
+    layoutProps->UpdateFontSize(theme->GetMenuFontSize());
     pattern->AddFooterContent(content);
     pattern->AddFooter(row);
 }

@@ -100,6 +100,8 @@ public:
                 theme->buttonClickedColor_ = pattern->GetAttr<Color>("button_bg_color_clicked", Color());
                 theme->menuButtonTextStyle_.SetTextColor(pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color()));
                 theme->menuButtonTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_fp));
+                theme->handleDiameter_ = pattern->GetAttr<Dimension>("handle_outer_diameter", 0.0_vp);
+                theme->handleDiameterInner_ = pattern->GetAttr<Dimension>("handle_inner_diameter", 0.0_vp);
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
@@ -205,7 +207,7 @@ public:
 
     Dimension GetHandleHotZoneRadius() const
     {
-        return 10.0_vp;
+        return handleDiameter_;
     }
 
 protected:

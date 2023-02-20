@@ -36,6 +36,7 @@ enum class DragType {
     COMMON,
     GRID,
     LIST,
+    TEXT,
 };
 
 class ACE_EXPORT DragDropProxy : public virtual AceType {
@@ -45,9 +46,10 @@ public:
     explicit DragDropProxy(int64_t id) : id_(id) {}
     ~DragDropProxy() override = default;
 
+    void OnTextDragStart(const std::string& extraInfo);
     void OnDragStart(const GestureEvent& info, const std::string& extraInfo, const RefPtr<FrameNode>& frameNode);
     void OnDragMove(const GestureEvent& info);
-    void OnDragEnd(const GestureEvent& info);
+    void OnDragEnd(const GestureEvent& info, bool isTextDragEnd = false);
     void onDragCancel();
     void OnItemDragStart(const GestureEvent& info, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(const GestureEvent& info, int32_t draggedIndex, DragType dragType);

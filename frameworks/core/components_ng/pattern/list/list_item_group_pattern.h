@@ -89,8 +89,6 @@ public:
         renderContext->UpdateZIndex(1);
     }
 
-    RefPtr<ListLayoutProperty> GetListLayoutProperty();
-
     const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
     {
         return itemPosition_;
