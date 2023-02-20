@@ -50,7 +50,6 @@ private:
 
 HostWindowPattern::HostWindowPattern()
 {
-    LOGI("create HostWindowPattern");
     instanceId_ = Container::CurrentId();
 }
 
@@ -63,12 +62,6 @@ void HostWindowPattern::RegisterLifecycleListener()
 
 void HostWindowPattern::InitContent()
 {
-    // had initialized, should not initialize again
-    if (initialized_) {
-        return;
-    }
-    initialized_ = true;
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -149,37 +142,14 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 void HostWindowPattern::OnAttachToFrameNode()
 {
+    InitContent();
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     renderContext->SetClipToBounds(true);
-}
-
-void HostWindowPattern::OnModifyDone()
-{
-    if (clickListener_) {
-        return;
-    }
-    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto hostWindowPattern = weak.Upgrade();
-        CHECK_NULL_VOID(hostWindowPattern);
-        hostWindowPattern->OnClick();
-    };
-    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    gesture->AddClickEvent(clickListener_);
-}
-
-void HostWindowPattern::OnClick()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG

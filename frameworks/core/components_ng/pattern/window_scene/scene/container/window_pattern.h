@@ -37,10 +37,10 @@ class WindowPattern : public UIWindow, public Pattern {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
-    WindowPattern() = default;
+    WindowPattern();
     WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
-    ~WindowPattern() override = default;
+    ~WindowPattern();
 
     void Init();
     void Destroy();
@@ -153,12 +153,11 @@ protected:
     uint32_t windowFlags_;
     Rect windowRect_;
 
-    std::recursive_mutex mutex_;
-
 private:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     std::list<AceVsyncCallback> callbacks_;
+    std::recursive_mutex mutex_;
 
     WeakPtr<TaskExecutor> taskExecutor_;
     int32_t instanceId_ = 0;

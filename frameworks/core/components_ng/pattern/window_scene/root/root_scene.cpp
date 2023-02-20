@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/window_scene/root/root_scene.h"
 
-#include "dm/display_manager.h"
-#include "session/container/include/session_stage.h"
-#include "wm_common.h"
-
 namespace OHOS::Ace::NG {
 
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateRootScene()
@@ -34,20 +30,6 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_ = UIContent::Create(context, engine);
     CHECK_NULL_VOID(uiContent_);
     uiContent_->Initialize(this, contentUrl, storage);
-
-    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    CHECK_NULL_VOID(defaultDisplay);
-    auto deviceWidth = defaultDisplay->GetWidth();
-    auto deviceHeight = defaultDisplay->GetHeight();
-    auto deviceDensity = defaultDisplay->GetVirtualPixelRatio();
-    LOGI("LoadContent: deviceWidth: %{public}d, deviceHeight: %{public}d, deviceDensity: %{public}f", deviceWidth,
-        deviceHeight, deviceDensity);
-
-    ViewportConfig config;
-    config.SetPosition(0, 0);
-    config.SetSize(deviceWidth, deviceHeight);
-    config.SetDensity(deviceDensity);
-    UpdateViewportConfig(config, Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 
 } // namespace OHOS::Ace::NG

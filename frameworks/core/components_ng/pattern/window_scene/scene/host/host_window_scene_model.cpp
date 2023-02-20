@@ -22,13 +22,11 @@ namespace OHOS::Ace::NG {
 
 void HostWindowSceneModel::Create(const sptr<Rosen::Session>& session)
 {
-    LOGI("create HostWindowSceneModel");
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HOST_WINDOW_SCENE_ETS_TAG, nodeId,
         [&session]() { return AceType::MakeRefPtr<HostWindowScene>(session); });
     stack->Push(frameNode);
-    frameNode->GetPattern<HostWindowScene>()->InitContent();
 }
 
 } // namespace OHOS::Ace::NG

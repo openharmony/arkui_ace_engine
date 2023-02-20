@@ -44,6 +44,8 @@ public:
         return false;
     }
 
+    void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override {}
+
     ACE_DISALLOW_COPY_AND_MOVE(RootSceneNode);
 };
 

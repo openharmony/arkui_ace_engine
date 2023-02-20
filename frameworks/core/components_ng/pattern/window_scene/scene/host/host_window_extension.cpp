@@ -16,26 +16,26 @@
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_extension.h"
 
 #include "ability_context.h"
-#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/extension_session.h"
 #include "session_manager/include/extension_session_manager.h"
+
 #include "core/common/container.h"
+#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 HostWindowExtension::HostWindowExtension(const std::string& bundleName, const std::string& abilityName)
 {
     sptr<OHOS::IRemoteObject> callerToken = nullptr;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto windowPattern = pipelineContext->GetWindowPattern();
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto windowPattern = container->GetWindowPattern();
     if (windowPattern) {
         // to get callerSession
         // callerToken = windowPattern->GetCallerToken();
     } else {
         LOGD("Current pipeline does not use window scene");
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
         auto context = container->GetAbilityRuntimeContext();
         if (context != nullptr) {
             callerToken = context->GetToken();

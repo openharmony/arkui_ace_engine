@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 
+#include "session/host/include/session.h"
+
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "session/host/include/session.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,8 +31,6 @@ public:
     ~HostWindowPattern() override = default;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
-    void OnModifyDone() override;
 
 protected:
     void OnAttachToFrameNode() override;
@@ -54,11 +53,6 @@ protected:
 
 private:
     void BufferAvailableCallback();
-    void OnClick();
-
-    bool initialized_ = false;
-
-    RefPtr<ClickEvent> clickListener_;
 
     friend class LifecycleListener;
 

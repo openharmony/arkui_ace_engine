@@ -404,9 +404,8 @@ public:
     void GetImageDataFromAshmem(
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
-    sptr<IRemoteObject> GetAbilityToken();
-
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityRuntimeContext() override;
+
 private:
     void InitializeFrontend();
     void InitializeCallback();

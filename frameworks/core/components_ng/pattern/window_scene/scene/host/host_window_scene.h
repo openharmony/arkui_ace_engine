@@ -36,9 +36,6 @@ protected:
     void OnForeground() override;
     void OnBackground() override;
 
-private:
-    friend class HostWindowSceneModel;
-
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);
 };
 
