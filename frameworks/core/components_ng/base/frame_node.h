@@ -335,6 +335,8 @@ private:
     void DumpInfo() override;
 
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;

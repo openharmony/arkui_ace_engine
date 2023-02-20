@@ -71,6 +71,7 @@ public:
     {
         return hoverEffectType_;
     }
+    std::string GetHoverEffectStr() const;
 
     // Set by user define, which will replace old one.
     void SetHoverEvent(OnHoverEventFunc&& onHoverEventFunc)

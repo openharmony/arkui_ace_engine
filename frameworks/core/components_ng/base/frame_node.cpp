@@ -186,15 +186,58 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
     bool enabled = true;
     bool focusable = false;
     bool focused = false;
+    bool defaultFocus = false;
+    bool groupDefaultFocus = false;
+    bool focusOnTouch = false;
+    int32_t tabIndex = 0;
     auto focusHub = GetFocusHub();
     if (focusHub) {
         enabled = focusHub->IsEnabled();
         focusable = focusHub->IsFocusable();
         focused = focusHub->IsCurrentFocus();
+        defaultFocus = focusHub->IsDefaultFocus();
+        groupDefaultFocus = focusHub->IsDefaultGroupFocus();
+        focusOnTouch = focusHub->IsFocusOnTouch();
+        tabIndex = focusHub->GetTabIndex();
     }
     json->Put("enabled", enabled);
     json->Put("focusable", focusable);
     json->Put("focused", focused);
+    json->Put("defaultFocus", defaultFocus);
+    json->Put("groupDefaultFocus", groupDefaultFocus);
+    json->Put("focusOnTouch", focusOnTouch);
+    json->Put("tabIndex", tabIndex);
+}
+
+void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    std::string hoverEffect = "HoverEffect.Auto";
+    auto inputEventHub = GetOrCreateInputEventHub();
+    if (inputEventHub) {
+        hoverEffect = inputEventHub->GetHoverEffectStr();
+    }
+    json->Put("hoverEffect", hoverEffect.c_str());
+}
+
+void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    bool touchable = true;
+    std::string hitTestMode = "HitTestMode.Default";
+    auto gestureEventHub = GetOrCreateGestureEventHub();
+    std::vector<DimensionRect> responseRegion;
+    if (gestureEventHub) {
+        touchable = gestureEventHub->GetTouchable();
+        hitTestMode = gestureEventHub->GetHitTestModeStr();
+        responseRegion = gestureEventHub->GetResponseRegion();
+    }
+    json->Put("touchable", touchable);
+    json->Put("hitTestBehavior", hitTestMode.c_str());
+    auto jsArr = JsonUtil::CreateArray(true);
+    for (int32_t i = 0; i < static_cast<int32_t>(responseRegion.size()); ++i) {
+        auto iStr = std::to_string(i);
+        jsArr->Put(iStr.c_str(), responseRegion[i].ToJsonString().c_str());
+    }
+    json->Put("responseRegion", jsArr);
 }
 
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -211,6 +254,8 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         eventHub_->ToJsonValue(json);
     }
     FocusToJsonValue(json);
+    MouseToJsonValue(json);
+    TouchToJsonValue(json);
 }
 
 void FrameNode::OnAttachToMainTree()
