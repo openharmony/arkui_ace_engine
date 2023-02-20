@@ -563,6 +563,7 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
         RequestFrame();
     }
+    FlushUITasks();
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
