@@ -74,6 +74,9 @@ void DialogPattern::OnModifyDone()
     if (!onClick_) {
         InitClickEvent(gestureHub);
     }
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    RegisterOnKeyEvent(focusHub);
 }
 
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -528,6 +531,28 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         button->MountToParent(menu);
     }
     return menu;
+}
+
+void DialogPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool DialogPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        PopDialog();
+        return true;
+    }
+    return false;
 }
 
 // XTS inspector
