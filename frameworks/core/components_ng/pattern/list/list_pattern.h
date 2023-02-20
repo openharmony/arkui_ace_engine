@@ -220,6 +220,7 @@ private:
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
+    float contentMainSize_ = 0.0f;
 
     float currentDelta_ = 0.0f;
 
