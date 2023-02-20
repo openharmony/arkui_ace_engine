@@ -62,9 +62,19 @@ public:
         return info_.width;
     }
 
+    void SetWidth(const Dimension& width)
+    {
+        info_.width = width;
+    }
+
     const Dimension& GetHeight() const
     {
         return info_.height;
+    }
+
+    void SetHeight(const Dimension& height)
+    {
+        info_.height = height;
     }
 
     void SetOnCompleteEventId(const EventMarker& event)
