@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,7 +48,7 @@ public:
 
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::function<void()>& callback = nullptr) override;
+        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0) override;
     void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
 
     // override Rosen::IInputEventConsumer virtual callback function
@@ -88,7 +88,7 @@ public:
 
     // handle window Rosen::IWindowChangeListener
     void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::function<void()>& callback = nullptr);
+        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0);
     void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true);
 
     // handle window Rosen::IOccupiedAreaChangeListener

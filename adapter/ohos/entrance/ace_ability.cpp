@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,10 +167,10 @@ uint32_t AceWindowListener::GetBackgroundColor()
 }
 
 void AceWindowListener::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::function<void()>& callback)
+    const std::function<void()>& callback, const uint64_t syncId)
 {
     CHECK_NULL_VOID(callbackOwner_);
-    callbackOwner_->OnSizeChange(rect, reason, callback);
+    callbackOwner_->OnSizeChange(rect, reason, callback, syncId);
 }
 
 void AceWindowListener::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -681,7 +681,7 @@ void AceAbility::OnRemoteTerminated()
 }
 
 void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::function<void()>& callback)
+    const std::function<void()>& callback, const uint64_t syncId)
 {
     LOGI("width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", rect.width_, rect.height_,
         rect.posX_, rect.posY_);
@@ -697,7 +697,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [rect, density = density_, reason, container, callback]() {
+        [rect, density = density_, reason, container, callback, syncId]() {
             auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
             CHECK_NULL_VOID(flutterAceView);
             flutter::ViewportMetrics metrics;
@@ -706,7 +706,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             metrics.device_pixel_ratio = density;
             Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(flutterAceView, rect.width_, rect.height_,
-                rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), callback);
+                rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), callback, syncId);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
