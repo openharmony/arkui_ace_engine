@@ -474,8 +474,6 @@ public:
     void OnCursorMoveDone();
     bool IsDisabled();
 
-    bool LastInputIsNewLine() const;
-    void OnHandleReverse(bool isReverse);
     bool GetIsMousePressed() const
     {
         return isMousePressed_;
@@ -484,6 +482,7 @@ public:
     {
         return mouseStatus_;
     }
+    void UpdateEditingValueToRecord();
 
 private:
     void HandleBlurEvent();
@@ -643,7 +642,6 @@ private:
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
-    bool newLineInserted_ = false;
     bool isUsingMouse_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
