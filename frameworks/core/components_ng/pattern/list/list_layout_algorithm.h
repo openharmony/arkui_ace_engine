@@ -96,6 +96,16 @@ public:
         return currentOffset_;
     }
 
+    float GetContentMainSize() const
+    {
+        return contentMainSize_;
+    }
+
+    void SetPrevContentMainSize(float mainSize)
+    {
+        prevContentMainSize_ = mainSize;
+    }
+
     int32_t GetStartIndex() const
     {
         return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
@@ -216,6 +226,7 @@ private:
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
     void CreateItemGroupList(LayoutWrapper* layoutWrapper);
+    void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
@@ -238,6 +249,7 @@ private:
 
     bool mainSizeIsDefined_ = false;
     float contentMainSize_ = 0.0f;
+    float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
 

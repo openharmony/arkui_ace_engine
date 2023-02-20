@@ -27,12 +27,14 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -83,6 +85,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     if (totalItemCount_ > 0) {
+        OnSurfaceChanged(layoutWrapper);
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
@@ -455,6 +458,38 @@ float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float child
         default:
             LOGW("Invalid ListItemAlign: %{public}d", listItemAlign_);
             return 0.0f;
+    }
+}
+
+void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
+{
+    if (GreatOrEqual(contentMainSize_, prevContentMainSize_)) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    // textField not in List
+    if (!focusHub->IsCurrentFocus()) {
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID_NOLOG(textFieldManager);
+    // only when textField is onFocus
+    auto textField = textFieldManager->GetOnFocusTextField().Upgrade();
+    CHECK_NULL_VOID_NOLOG(textField);
+    auto textFieldHost = textField->GetHost();
+    CHECK_NULL_VOID(textFieldHost);
+    auto position = textFieldHost->GetTransformRelativeOffset().GetY() + textField->GetHostFrameSize()->Height();
+    auto globalOffset = host->GetTransformRelativeOffset();
+    auto offset = contentMainSize_ + globalOffset.GetY() - position;
+    if (LessOrEqual(offset, 0.0)) {
+        // negative offset to scroll down
+        currentDelta_ -= static_cast<float>(offset);
+        LOGI("update offset on virtual keyboard height change, %{public}f", offset);
     }
 }
 
