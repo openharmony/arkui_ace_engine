@@ -109,7 +109,7 @@ public:
         return textSelector_.GetSelectHeight();
     }
 
-    const OffsetF& GetGlobalOffset() const;
+    void GetGlobalOffset(Offset& offset);
 
     const RectF& GetTextContentRect() const
     {
@@ -120,6 +120,8 @@ public:
     {
         return baselineOffset_;
     }
+
+    void OnVisibleChange(bool isVisible) override;
 
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;

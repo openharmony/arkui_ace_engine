@@ -18,6 +18,7 @@
 #include <stack>
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/ui_node.h"
@@ -81,6 +82,9 @@ void TextPattern::CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
     auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
     auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
 
@@ -91,8 +95,8 @@ void TextPattern::CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse)
     auto endOffset = CalcCursorOffsetByPosition(textSelector_.destinationOffset, endSelectHeight);
     float selectLineHeight = std::max(startSelectHeight, endSelectHeight);
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), selectLineHeight };
-    OffsetF firstHandleOffset(startOffset.GetX() + textPaintOffset.GetX(), startOffset.GetY() + textPaintOffset.GetY());
-    OffsetF secondHandleOffset(endOffset.GetX() + textPaintOffset.GetX(), endOffset.GetY() + textPaintOffset.GetY());
+    OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
+    OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
 
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
@@ -129,7 +133,10 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - rootOffset;
     auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
 
     auto localOffsetX = handleRect.GetX();
@@ -610,12 +617,30 @@ void TextPattern::BeforeCreateLayoutWrapper()
     }
 }
 
-const OffsetF& TextPattern::GetGlobalOffset() const
+void TextPattern::GetGlobalOffset(Offset& offset)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN_NOLOG(host, OffsetF(0.0, 0.0));
-    auto offset = host->GetPaintRectOffset();
-    return offset;
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto rootOffset = pipeline->GetRootRect().GetOffset();
+    auto globalOffset = host->GetPaintRectOffset() - rootOffset;
+    offset = Offset(globalOffset.GetX(), globalOffset.GetY());
+}
+
+void TextPattern::OnVisibleChange(bool isVisible)
+{
+    if (!isVisible) {
+        if (textSelector_.IsValid()) {
+            textSelector_.Update(-1, -1);
+            if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                selectOverlayProxy_->Close();
+            }
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
 }
 
 void TextPattern::DumpInfo()
