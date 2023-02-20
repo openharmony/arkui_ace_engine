@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ABILITY_COMPONENT_PATTERN_H
 
+#include "frameworks/base/geometry/rect.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/core/common/window_ng/window_extension_connection_proxy_ng.h"
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_event_hub.h"
@@ -104,6 +105,7 @@ private:
     bool isActive_ = false;
     bool hasConnectionToAbility_ = false;
     RefPtr<WindowExtensionConnectionAdapterNG> adapter_;
+    Rect lastRect_;
     ACE_DISALLOW_COPY_AND_MOVE(AbilityComponentPattern);
 };
 
