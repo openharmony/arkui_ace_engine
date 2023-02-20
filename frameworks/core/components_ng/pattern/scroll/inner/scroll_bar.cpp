@@ -68,10 +68,10 @@ bool ScrollBar::InBarTouchRegion(const Point& point) const
     return false;
 }
 
-bool ScrollBar::InBarRegion(const Point& point) const
+bool ScrollBar::InBarActiveRegion(const Point& point) const
 {
     if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
-        return barRect_.IsInRegion(point);
+        return activeRect_.IsInRegion(point);
     }
     return false;
 }
@@ -266,7 +266,7 @@ void ScrollBar::SetMouseEvent()
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID_NOLOG(scrollBar);
             Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-            bool inRegion = scrollBar->InBarRegion(point);
+            bool inRegion = scrollBar->InBarActiveRegion(point);
             if (inRegion && !scrollBar->IsHover()) {
                 scrollBar->PlayGrowAnimation();
                 scrollBar->SetHover(true);
