@@ -247,6 +247,7 @@ private:
     bool IsShowIndicator() const;
     float GetTranslateLength() const;
     void OnIndexChange() const;
+    bool IsOutOfHotRegion(const PointF& dragPoint) const;
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
