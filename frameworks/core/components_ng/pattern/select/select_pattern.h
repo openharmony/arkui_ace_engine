@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <optional>
 
+#include "base/memory/referenced.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -27,6 +28,7 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
+#include "core/components_ng/pattern/select/select_layout_algorithm.h"
 #include "core/components_ng/pattern/select/select_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
@@ -42,6 +44,11 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<SelectLayoutAlgorithm>();
     }
 
     RefPtr<EventHub> CreateEventHub() override

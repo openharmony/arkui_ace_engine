@@ -135,6 +135,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_overlay_manager.cpp",
 
     # self
+    "$ace_root/frameworks/core/components_ng/pattern/select/select_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select/select_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select/select_view.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/utils.cpp",
