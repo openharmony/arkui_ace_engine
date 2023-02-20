@@ -86,6 +86,11 @@ void SvgContext::SetFuncAnimateFlush(FuncAnimateFlush&& funcAnimateFlush, const 
     animateCallbacks_[imagePtr] = funcAnimateFlush;
 }
 
+size_t SvgContext::GetAnimatorCount()
+{
+    return animators_.size();
+}
+
 void SvgContext::AnimateFlush()
 {
     CHECK_RUN_ON(UI);

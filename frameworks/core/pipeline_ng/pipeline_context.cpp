@@ -505,23 +505,27 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             auto curve = MakeRefPtr<CubicCurve>(0.2, 0.0, 0.2, 1.0); // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
             option.SetCurve(curve);
             auto weak = WeakClaim(this);
-            Animate(option, curve, [width, height, weak]() {
-                auto pipeline = weak.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                pipeline->SetRootRect(width, height, 0.0);
-                pipeline->FlushUITasks();
-            }, [weak]() {
-                auto pipeline = weak.Upgrade();
-                CHECK_NULL_VOID(pipeline);
-                pipeline->rotationAnimationCount_--;
-                if (pipeline->rotationAnimationCount_ < 0) {
-                    LOGE("PipelineContext::Root node ROTATION animation callback"
-                        "rotationAnimationCount Invalid %{public}d", pipeline->rotationAnimationCount_);
-                }
-                if (pipeline->rotationAnimationCount_ == 0) {
-                    pipeline->window_->SetDrawTextAsBitmap(false);
-                }
-            });
+            Animate(
+                option, curve,
+                [width, height, weak]() {
+                    auto pipeline = weak.Upgrade();
+                    CHECK_NULL_VOID(pipeline);
+                    pipeline->SetRootRect(width, height, 0.0);
+                    pipeline->FlushUITasks();
+                },
+                [weak]() {
+                    auto pipeline = weak.Upgrade();
+                    CHECK_NULL_VOID(pipeline);
+                    pipeline->rotationAnimationCount_--;
+                    if (pipeline->rotationAnimationCount_ < 0) {
+                        LOGE("PipelineContext::Root node ROTATION animation callback"
+                             "rotationAnimationCount Invalid %{public}d",
+                            pipeline->rotationAnimationCount_);
+                    }
+                    if (pipeline->rotationAnimationCount_ == 0) {
+                        pipeline->window_->SetDrawTextAsBitmap(false);
+                    }
+                });
             rotationAnimationCount_++;
             window_->SetDrawTextAsBitmap(true);
             break;
@@ -1042,6 +1046,11 @@ void PipelineContext::AddVisibleAreaChangeNode(
         callbackList.emplace_back(info);
         visibleAreaChangeNodes_[node->GetId()] = callbackList;
     }
+}
+
+void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
+{
+    visibleAreaChangeNodes_.erase(nodeId);
 }
 
 void PipelineContext::HandleVisibleAreaChangeEvent()

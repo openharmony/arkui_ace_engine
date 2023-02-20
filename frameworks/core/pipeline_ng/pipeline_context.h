@@ -127,6 +127,7 @@ public:
     void HandleOnAreaChangeEvent();
 
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+    void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent();
 
