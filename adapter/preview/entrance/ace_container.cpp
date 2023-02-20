@@ -27,9 +27,10 @@
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_director.h>
 
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "core/common/rosen/rosen_asset_manager.h"
-#include "core/common/rosen/rosen_task_executor.h"
+#include "core/common/flutter/flutter_task_executor.h"
 #endif
 
 #include "adapter/preview/entrance/ace_application_info.h"
@@ -82,12 +83,8 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context
 {
     ThemeConstants::InitDeviceType();
 
-#ifndef ENABLE_ROSEN_BACKEND
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
     auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
-#else
-    auto taskExecutor = Referenced::MakeRefPtr<RSTaskExecutor>();
-#endif
     if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
         taskExecutor->InitJsThread();
     }
@@ -912,7 +909,10 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, RSAceView* view, d
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
 
-    auto rsTaskExecutor = AceType::DynamicCast<RSTaskExecutor>(taskExecutor_);
+    auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
+    ACE_DCHECK(state != nullptr);
+    auto rsTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+    rsTaskExecutor->InitOtherThreads(state->GetTaskRunners());
     if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::ETS_CARD) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         rsTaskExecutor->InitJsThread(false);
