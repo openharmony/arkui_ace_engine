@@ -40,18 +40,19 @@ namespace OHOS::Ace::NG {
 
 void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     position_ = props->GetMenuOffset().value_or(OffsetF());
 
-    CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    screenSize_ = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
+    auto constraint = props->GetLayoutConstraint();
+    auto wrapperIdealSize =
+        CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    screenSize_ = wrapperIdealSize;
 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     outPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
