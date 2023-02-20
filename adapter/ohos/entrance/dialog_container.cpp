@@ -136,7 +136,7 @@ void DialogContainer::InitializeViewChangeCallback()
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
             [context, width, height, type, callback, syncId]() {
-                context->OnSurfaceChanged(width, height, type, callback);
+                context->OnSurfaceChanged(width, height, type, callback, syncId);
             },
             TaskExecutor::TaskType::UI);
     };
