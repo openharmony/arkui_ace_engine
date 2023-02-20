@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_event_hub.h"
@@ -55,12 +56,25 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
+        auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+        auto isSelect = paintProperty->GetCheckBoxSelectValue(false);
+        if (!checkboxModifier_) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+            auto boardColor = isSelect ? paintProperty->GetCheckBoxSelectedColorValue(checkBoxTheme->GetActiveColor())
+                                       : checkBoxTheme->GetInactivePointColor();
+            auto checkColor = isSelect ? checkBoxTheme->GetPointColor() : Color::TRANSPARENT;
+            auto borderColor = isSelect ? Color::TRANSPARENT : checkBoxTheme->GetInactiveColor();
+            auto shadowColor = isSelect ? checkBoxTheme->GetShadowColor() : Color::TRANSPARENT;
+            checkboxModifier_ =
+                AceType::MakeRefPtr<CheckBoxModifier>(isSelect, boardColor, checkColor, borderColor, shadowColor);
+        }
+        auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(checkboxModifier_);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        auto paintMethod = MakeRefPtr<CheckBoxPaintMethod>(enabled, isTouch_, isHover_, shapeScale_, uiStatus_);
-        paintMethod->SetHotZoneOffset(hotZoneOffset_);
-        paintMethod->SetHotZoneSize(hotZoneSize_);
+        paintMethod->SetEnabled(enabled);
+        paintMethod->SetIsHover(isHover_);
         return paintMethod;
     }
 
@@ -122,7 +136,6 @@ public:
     }
 
     FocusPattern GetFocusPattern() const override;
-    void UpdateAnimation(bool check);
     void UpdateUIStatus(bool check);
 
 private:
@@ -136,7 +149,6 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
-    void UpdateCheckBoxShape(float value);
     void UpdateState();
     void UpdateUnSelect();
     void UpdateCheckBoxGroupStatus(const RefPtr<FrameNode>& frameNode,
@@ -158,10 +170,6 @@ private:
     bool isTouch_ = false;
     bool isHover_ = false;
     bool isFirstCreated_ = true;
-    // animation control
-    RefPtr<Animator> controller_;
-    RefPtr<CurveAnimation<float>> translate_;
-    float shapeScale_ = 1.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -169,6 +177,8 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+
+    RefPtr<CheckBoxModifier> checkboxModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPattern);
 };
