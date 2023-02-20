@@ -420,13 +420,6 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target, const std::stri
     std::string url = target.url;
     std::string pagePath = url + ".js";
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-    if (pagePath.empty()) {
-        LOGE("[Engine Log] this uri not support in route push.");
-        if (errorCallback != nullptr) {
-            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
-        }
-        return;
-    }
     if (errorCallback != nullptr) {
         errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
@@ -456,21 +449,37 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     }
 
     if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
-        LoadNewPageUrlCallback callback =
-            [weak = AceType::WeakClaim(this), target = target,
-                params = params, mode = mode, errorCallback = errorCallback]() {
-                auto pageRouterManager = weak.Upgrade();
-                if (!pageRouterManager) {
-                    return;
-                }
-                pageRouterManager->PushOhmUrl(target, params, mode, errorCallback);
-            };
-
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         auto pageUrlChecker = container->GetPageUrlChecker();
         CHECK_NULL_VOID(pageUrlChecker);
-        pageUrlChecker->LoadPageUrl(target.url, callback);
+        auto instanceId = container->GetInstanceId();
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto callback =
+            [weak = AceType::WeakClaim(this), target, params, mode, errorCallback, taskExecutor, instanceId]() {
+                ContainerScope scope(instanceId);
+                auto pageRouterManager = weak.Upgrade();
+                CHECK_NULL_VOID(pageRouterManager);
+                taskExecutor->PostTask(
+                    [pageRouterManager, target, params, mode, errorCallback]() {
+                        pageRouterManager->PushOhmUrl(target, params, mode, errorCallback);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        auto silentInstallErrorCallBack = 
+            [errorCallback, taskExecutor, instanceId](
+                int32_t errorCode, const std::string& errorMsg) {
+                ContainerScope scope(instanceId);
+                taskExecutor->PostTask(
+                    [errorCallback, errorCode, errorMsg]() {
+                        errorCallback(errorMsg, errorCode);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }
 
@@ -517,13 +526,6 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target, const std::s
     std::string url = target.url;
     std::string pagePath = url + ".js";
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-    if (pagePath.empty()) {
-        LOGE("[Engine Log] this uri not support in route push.");
-        if (errorCallback != nullptr) {
-            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
-        }
-        return;
-    }
     if (errorCallback != nullptr) {
         errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
@@ -556,7 +558,37 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
     }
 
     if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
-        ReplaceOhmUrl(target, params, mode, errorCallback);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        CHECK_NULL_VOID(pageUrlChecker);
+        auto instanceId = container->GetInstanceId();
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto callback =
+            [weak = AceType::WeakClaim(this), target, params, mode, errorCallback, taskExecutor, instanceId]() {
+                ContainerScope scope(instanceId);
+                auto pageRouterManager = weak.Upgrade();
+                CHECK_NULL_VOID(pageRouterManager);
+                taskExecutor->PostTask(
+                    [pageRouterManager, target, params, mode, errorCallback]() {
+                        pageRouterManager->ReplaceOhmUrl(target, params, mode, errorCallback);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        auto silentInstallErrorCallBack = 
+            [errorCallback, taskExecutor, instanceId](
+                int32_t errorCode, const std::string& errorMsg) {
+                ContainerScope scope(instanceId);
+                taskExecutor->PostTask(
+                    [errorCallback, errorCode, errorMsg]() {
+                        errorCallback(errorMsg, errorCode);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }
 
