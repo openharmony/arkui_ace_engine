@@ -44,6 +44,11 @@ struct ImagePaintStyle {
             RENDERMODEVALUE[static_cast<int32_t>(propImageRenderMode.value_or(ImageRenderMode::ORIGINAL))]);
         json->Put("matchTextDirection", propMatchTextDirection.value_or(false) ? "true" : "false");
         json->Put("fillColor", propSvgFillColor.value_or(Color::BLACK).ColorToString().c_str());
+        std::string colorFilter;
+        for (auto& num : propColorFilter.value_or(std::vector<float>())) {
+            colorFilter += std::to_string(num) + " ";
+        }
+        json->Put("colorFilter", colorFilter.c_str());
     }
 };
 
