@@ -19,8 +19,12 @@ group("unittest") {
   deps = []
   if (!is_wearable_product && !is_asan) {
     deps += [
+      "clipboard:unittest",
+      "environment:unittest",
       "ime:unittest",
       "plugin:unittest",
+      "register:unittest",
+      "storage:unittest",
     ]
   }
 }
