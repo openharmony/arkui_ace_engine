@@ -212,7 +212,7 @@ ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
     if (findLineEnd == std::string::npos) {
         return std::make_pair(0, 0);
     }
-    uint32_t lineEnd = findLineEnd - 1;
+    int32_t lineEnd = findLineEnd - 1;
     if (lineEnd < 1 || rawStack[lineEnd - 1] == '?') {
         return std::make_pair(0, 0);
     }
