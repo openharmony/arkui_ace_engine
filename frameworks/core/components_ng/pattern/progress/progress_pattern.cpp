@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 bool ProgressPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -36,5 +37,28 @@ void ProgressPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+}
+
+void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto jsonValue = JsonUtil::Create(true);
+    auto progressStyle = layoutProperty->GetTypeValue(ProgressType::LINEAR);
+    jsonValue->Put("strokeWidth",
+        layoutProperty->GetStrokeWidthValue(
+            progressStyle == ProgressType::LINEAR ?
+                theme->GetTrackThickness() :
+                theme->GetScaleLength())
+        .ToString().c_str());
+    jsonValue->Put("scaleCount", std::to_string(paintProperty->GetScaleCountValue(theme->GetScaleNumber())).c_str());
+    jsonValue->Put("scaleWidth", paintProperty->GetScaleWidthValue(theme->GetScaleWidth()).ToString().c_str());
+    json->Put("style", jsonValue->ToString().c_str());
 }
 } // namespace OHOS::Ace::NG

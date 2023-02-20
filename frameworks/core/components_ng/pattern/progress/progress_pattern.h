@@ -62,6 +62,7 @@ public:
         return MakeRefPtr<ProgressPaintProperty>();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;

@@ -27,6 +27,7 @@ public:
     void Create(RefPtr<PickerTheme> pickerTheme) override;
     void SetSelected(uint32_t value) override;
     void SetRange(const std::vector<std::string>& value) override;
+    void SetValue(const std::string& value) override;
     void SetOnChange(TextChangeEvent&& onChange) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
 
