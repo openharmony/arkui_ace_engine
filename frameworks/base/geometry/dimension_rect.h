@@ -93,6 +93,16 @@ public:
         return output;
     }
 
+    std::string ToJsonString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("x", offset_.GetX().ToString().c_str());
+        jsonValue->Put("y", offset_.GetY().ToString().c_str());
+        jsonValue->Put("width", width_.ToString().c_str());
+        jsonValue->Put("height", height_.ToString().c_str());
+        return jsonValue->ToString();
+    }
+
 private:
     Dimension width_ = 0.0_vp;
     Dimension height_ = 0.0_vp;
