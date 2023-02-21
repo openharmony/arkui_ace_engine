@@ -157,8 +157,10 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#ifdef VIDEO_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
+#endif
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
@@ -431,7 +433,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Camera", JSCamera::JSBind },
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
+#ifdef VIDEO_SUPPORTED
     { "Video", JSVideo::JSBind },
+#endif
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
     { "XComponent", JSXComponent::JSBind },
@@ -469,7 +473,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ImageData", JSCanvasImageData::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
+#ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },
+#endif
     { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
@@ -496,6 +502,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
+    { "Video", JSVideo::JSBind },
+    { "VideoController", JSVideoController::JSBind },
+    
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
@@ -520,7 +529,9 @@ void RegisterAllModule(BindingTarget globalObj)
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponentController::JSBind(globalObj);
 #endif
+#ifdef VIDEO_SUPPORTED
     JSVideoController::JSBind(globalObj);
+#endif
     JSTextInputController::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
@@ -554,7 +565,9 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSAbilityComponentController::JSBind(globalObj);
 #endif
     } else if ((*func).first == "Video") {
+#ifdef VIDEO_SUPPORTED
         JSVideoController::JSBind(globalObj);
+#endif
     } else if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {

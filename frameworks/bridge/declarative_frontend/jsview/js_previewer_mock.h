@@ -63,5 +63,18 @@ public:
     static void JSBind(BindingTarget globalObj);
 };
 
+class JSVideo : public JSViewAbstract, public JSInteractableView {
+public:
+    static void Create(const JSCallbackInfo& info);
+    static void Mock(const JSCallbackInfo& info);
+    static void JSBind(BindingTarget globalObj);
+};
+
+class JSVideoController : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Mock(const JSCallbackInfo& info);
+};
+
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_PREVIEWER_MOCK_H
