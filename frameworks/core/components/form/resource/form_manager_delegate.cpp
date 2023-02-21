@@ -45,7 +45,7 @@ constexpr char FORM_EVENT_ON_ERROR[] = "onFormError";
 constexpr char FORM_ADAPTOR_RESOURCE_NAME[] = "formAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
-constexpr int32_t RENDER_DEAD_CODE = 16501005;
+constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 } // namespace
 
