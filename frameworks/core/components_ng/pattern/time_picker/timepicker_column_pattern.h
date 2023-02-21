@@ -210,6 +210,7 @@ private:
     void HandleMouseEvent(bool isHover);
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
+    void PlayHoverAnimation(const Color& color);
 
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -234,6 +235,7 @@ private:
     float deltaSize_ = 0.0f;
     RefPtr<PanEvent> panEvent_;
     bool pressed_ = false;
+    bool hoverd_ = false;
     double scrollDelta_ = 0.0;
     bool animationCreated_ = false;
     RefPtr<Animator> toController_;
