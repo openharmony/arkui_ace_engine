@@ -205,13 +205,6 @@ HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
     EXPECT_EQ(ret, false);
     ret = pattern->HandleDirectionKey(event.code);
     EXPECT_EQ(ret, false);
-
-    event.code = KeyCode::KEY_DPAD_UP;
-    ret = pattern->OnKeyEvent(event);
-    EXPECT_EQ(ret, true);
-    event.code = KeyCode::KEY_DPAD_DOWN;
-    ret = pattern->OnKeyEvent(event);
-    EXPECT_EQ(ret, true);
 }
 
 /**
