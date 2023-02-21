@@ -1169,11 +1169,7 @@ void VideoElement::UpdateChildInner(const RefPtr<Component>& childComponent)
 void VideoElement::OnError(const std::string& errorId, const std::string& param)
 {
     isError_ = true;
-#if defined(PREVIEW)
-    std::string errorcode = "This component is not supported on PC Preview.";
-#else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
-#endif
     UpdateChildInner(CreateErrorText(errorcode));
 
     if (onError_) {

@@ -328,11 +328,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 
 void VideoPattern::OnError(const std::string& errorId)
 {
-#if defined(PREVIEW)
-    std::string errorcode = "This component is not supported on PC Preview.";
-#else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
-#endif
     auto json = JsonUtil::Create(true);
     json->Put("error", "");
     auto param = json->ToString();

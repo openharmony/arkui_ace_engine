@@ -17,7 +17,9 @@
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#ifdef VIDEO_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_video.h"
+#endif
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -56,7 +58,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_toggle.h"
+#ifdef VIDEO_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.h"
@@ -171,7 +175,9 @@ void JsBindViews(BindingTarget globalObj)
     JSNavigator::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
     JSCounter::JSBind(globalObj);
+#ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
+#endif
     JSRating::JSBind(globalObj);
     JSGrid::JSBind(globalObj);
     JSGridItem::JSBind(globalObj);

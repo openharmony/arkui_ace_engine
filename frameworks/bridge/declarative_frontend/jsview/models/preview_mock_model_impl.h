@@ -42,14 +42,16 @@ public:
         mockComponent->GetTaskPool()->UpdateFontSize(DEFAULT_FONT_SIZE);
         mockComponent->GetTaskPool()->FillText(
             "This component is not supported on PC preview.", Offset(0, DEFAULT_OFFSET));
-        mockComponent->SetInspectorTag(content + "Component");
+        if (content == "Video") {
+            mockComponent->SetInspectorTag(content + "ComponentV2");
+        } else {
+            mockComponent->SetInspectorTag(content + "Component");
+        }
         ViewStackProcessor::GetInstance()->Push(mockComponent);
-
         RefPtr<BoxComponent> mountBox = ViewStackProcessor::GetInstance()->GetBoxComponent();
         mountBox->SetColor(Color::FromString("#808080"));
         mountBox->SetHeight(DEFAULT_HEIGHT);
     }
-
 };
 } // namespace OHOS::Ace::Framework
 
