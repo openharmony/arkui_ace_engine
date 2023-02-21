@@ -253,6 +253,9 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
         LOGE("animator is null");
         return nullptr;
     }
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
+    }
     animator->Play();
     napi_value result = nullptr;
     napi_get_null(env, &result);
@@ -308,6 +311,9 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
     if (!animator) {
         LOGE("animator is null");
         return nullptr;
+    }
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
     }
     animator->Reverse();
     napi_value result;

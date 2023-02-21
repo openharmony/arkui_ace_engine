@@ -102,6 +102,7 @@ void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
 void Animator::AttachSchedulerOnContainer()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     AttachScheduler(pipeline);
 }
 
