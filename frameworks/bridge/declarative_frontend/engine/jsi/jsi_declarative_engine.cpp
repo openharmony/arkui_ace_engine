@@ -1030,7 +1030,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 #ifdef PREVIEW
         const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_PATH).append(FORM_ES_MODULE_PATH);
 #else
-        const std::string assetPath = ASSET_PATH_PREFIX + moduleName + "/" + FORM_ES_MODULE_PATH;
+        const std::string assetPath = ASSET_PATH_PREFIX + bundleName + "/" + moduleName + "/" + FORM_ES_MODULE_PATH;
 #endif
         LOGI("bundleName = %{public}s, moduleName = %{public}s, assetPath = %{public}s", bundleName.c_str(),
             moduleName.c_str(), assetPath.c_str());
