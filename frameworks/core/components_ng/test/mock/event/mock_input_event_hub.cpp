@@ -28,4 +28,9 @@ bool InputEventHub::ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTest
 {
     return false;
 }
+
+std::string InputEventHub::GetHoverEffectStr() const
+{
+    return "HoverEffect.Auto";
+}
 } // namespace OHOS::Ace::NG
