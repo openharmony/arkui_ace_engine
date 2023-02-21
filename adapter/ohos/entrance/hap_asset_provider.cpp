@@ -29,8 +29,11 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
     }
 
     bool newCreate = false;
-    std::string loadPath = AbilityBase::ExtractorUtil::GetLoadFilePath(hapPath);
-    runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath, newCreate);
+    std::string loadPath_ = AbilityBase::ExtractorUtil::GetLoadFilePath(hapPath);
+    LOGE("load path = %{public}s", loadPath_.c_str());
+    AbilityBase::ExtractorUtil::DeleteExtractor(loadPath_);
+    runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath_, newCreate);
+    // AbilityBase::ExtractorUtil::AddExtractor(loadPath_, runtimeExtractor_);
     CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, false);
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
@@ -67,26 +70,26 @@ private:
     std::vector<uint8_t> data_;
 };
 
-std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& assetName) const
+std::unique_ptr<fml::Mapping> HapAssetProvider::GetAsMapping(const std::string& assetName) const 
 {
     ACE_SCOPED_TRACE("GetAsMapping");
-    LOGD("assert name is: %{public}s :: %{public}s", hapPath_.c_str(), assetName.c_str());
+    LOGI("assert name is: %{public}s :: %{public}s", hapPath_.c_str(), assetName.c_str());
     std::lock_guard<std::mutex> lock(mutex_);
 
     for (const auto& basePath : assetBasePaths_) {
         std::string fileName = basePath + assetName;
         bool hasFile = runtimeExtractor_->HasEntry(fileName);
         if (!hasFile) {
-            LOGD("HasEntry failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
+            LOGI("HasEntry failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
             continue;
         }
         std::ostringstream osstream;
         hasFile = runtimeExtractor_->GetFileBuffer(fileName, osstream);
         if (!hasFile) {
-            LOGD("GetFileBuffer failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
+            LOGI("GetFileBuffer failed: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
             continue;
         }
-        LOGD("GetFileBuffer Success: %{public}s %{public}s", hapPath_.c_str(), fileName.c_str());
+        LOGI("GetFileBuffer Success: %{public}s %{public}s, contentLength = %{public}d", hapPath_.c_str(), fileName.c_str(), static_cast<int32_t>(osstream.str().size()));
         return std::make_unique<HapAssetMapping>(osstream);
     }
     LOGI("Cannot find base path of %{public}s", assetName.c_str());

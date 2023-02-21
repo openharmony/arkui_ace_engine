@@ -1044,7 +1044,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         if (fileName.rfind("ets/", 0) == 0) {
             abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
         }
-        LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
+        LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s, content size = %{public}d", abcPath.c_str(), static_cast<int32_t>(content.size()));
         if (!runtime->ExecuteModuleBufferForForm(content.data(), content.size(), abcPath)) {
             LOGE("ExecuteCardAbc ExecuteModuleBufferForForm \"%{public}s\" failed.", fileName.c_str());
             return false;

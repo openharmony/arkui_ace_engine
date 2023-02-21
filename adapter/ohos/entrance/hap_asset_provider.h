@@ -33,7 +33,10 @@ class ACE_EXPORT HapAssetProvider : public FlutterAssetProvider {
 
 public:
     HapAssetProvider() = default;
-    ~HapAssetProvider() override = default;
+    ~HapAssetProvider() override
+    {
+        AbilityBase::ExtractorUtil::DeleteExtractor(loadPath_);
+    }
 
     bool Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths);
 
@@ -50,6 +53,7 @@ public:
 private:
     mutable std::mutex mutex_;
     std::string hapPath_;
+    std::string loadPath_;
     std::shared_ptr<AbilityBase::Extractor> runtimeExtractor_;
     std::vector<std::string> assetBasePaths_;
 };

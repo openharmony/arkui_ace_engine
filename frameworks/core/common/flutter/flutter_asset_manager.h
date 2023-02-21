@@ -106,6 +106,7 @@ private:
     std::deque<RefPtr<AssetProvider>> providers_;
     std::vector<std::string> packagePath_;
     std::string appLibPathKey_;
+    std::string loadPath_;
 };
 
 } // namespace OHOS::Ace
