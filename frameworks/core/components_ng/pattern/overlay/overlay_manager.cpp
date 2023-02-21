@@ -327,7 +327,9 @@ void OverlayManager::PopToast(int32_t toastId)
     option.SetFillMode(FillMode::FORWARDS);
     // OnFinishEvent should be executed in UI thread.
     option.SetOnFinishEvent([weak = WeakClaim(this), toastId, id = Container::CurrentId()] {
+        ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(context);
         context->GetTaskExecutor()->PostTask(
             [weak, toastId, id]() {
                 ContainerScope scope(id);
