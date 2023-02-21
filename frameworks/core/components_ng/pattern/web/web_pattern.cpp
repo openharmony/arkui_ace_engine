@@ -64,8 +64,9 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
-constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
-constexpr double DEFAULT_AXIS_RATIO = -0.06f;
+constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
+constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
+constexpr double DEFAULT_AXIS_RATIO = -0.06;
 
 WebPattern::WebPattern() = default;
 
@@ -261,7 +262,10 @@ bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
         return false;
     }
     std::chrono::duration<float> timeout_ = clickInfo.start - doubleClickQueue_.back().start;
-    if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL) {
+    double offsetX = clickInfo.x - doubleClickQueue_.back().x;
+    double offsetY = clickInfo.y - doubleClickQueue_.back().y;
+    double offset = sqrt(offsetX * offsetX + offsetY * offsetY);
+    if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL && offset < DEFAULT_DBCLICK_OFFSET) {
         SendDoubleClickEvent(clickInfo);
         std::queue<MouseClickInfo> empty;
         swap(empty, doubleClickQueue_);
