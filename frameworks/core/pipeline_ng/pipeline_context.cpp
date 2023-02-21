@@ -580,7 +580,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
         height = manager->GetHeight();
         positionY = static_cast<float>(manager->GetClickPosition().GetY());
     }
-    auto rootSize = rootNode_->GetGeometryNode()->GetFrameSize();
+    SizeF rootSize { static_cast<float>(rootWidth_), static_cast<float>(rootHeight_) };
     float offsetFix = (rootSize.Height() - positionY) > 100.0 ? keyboardHeight - (rootSize.Height() - positionY) / 2.0
                                                               : keyboardHeight;
     LOGI("OnVirtualKeyboardAreaChange positionY:%{public}f safeArea:%{public}f offsetFix:%{public}f, "
