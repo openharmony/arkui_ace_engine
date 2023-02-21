@@ -19,50 +19,41 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_owner.h"
+#include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-const Dimension RING_RADIUS = 10.5_vp;
-const Dimension ORBIT_RADIUS = 17.0_vp;
-const float RING_MOVEMENT = 0.06f;
-const float FULL_COUNT = 100.0f;
-const float COUNT = 50.0f;
-const float HALF = 0.5f;
-const int32_t LOADING_DURATION = 300;
-const float LOADING_TEMPO = 0.2f;
-
+namespace {
+constexpr int32_t LOADING_DURATION = 300;
+constexpr float LOADING_TEMPO = 0.2f;
+constexpr float FOLLOW_START = 58.0f;
+constexpr float FOLLOW_SPAN = 18.0f;
+constexpr float FOLLOW_TO_RECYCLE_START = 76.0f;
+constexpr float FOLLOW_TO_RECYCLE_SPAN = 24.0f;
+constexpr float FULL_COUNT = 100.0f;
+}
 class LoadingProgressModifier : public ContentModifier {
     DECLARE_ACE_TYPE(LoadingProgressModifier, ContentModifier);
 
 public:
-    LoadingProgressModifier();
+    LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner = LoadingProgressOwner::SELF);
     ~LoadingProgressModifier() override = default;
-    void onDraw(DrawingContext& context) override
-    {
-        float scale_ = 1.0;
-        float date = date_->Get();
-        UpdateLoadingSize(std::min(context.width, context.height));
-        scale_ = std::min((context.width / (ORBIT_RADIUS.ConvertToPx() + cometRadius_ / HALF)),
-            (context.height / (RING_RADIUS.ConvertToPx() * (1 + RING_MOVEMENT) + ringWidth_ * HALF))) * HALF;
-        if (date > COUNT) {
-            DrawRing(context, date, scale_);
-            DrawOrbit(context, date, scale_);
-        } else {
-            DrawOrbit(context, date, scale_);
-            DrawRing(context, date, scale_);
-        }
-    }
-
-    void DrawRing(DrawingContext& canvas, float date, float scale_) const;
-    void DrawOrbit(DrawingContext& canvas, float date, float scale_) const;
+    void onDraw(DrawingContext& context) override;
+    void DrawOrbit(DrawingContext& canvas, float date, float scale_);
+    void DrawRing(DrawingContext& canvas, float date, float scale_);
     void UpdateLoadingSize(float diameter);
     void CalculateValue(int32_t start, int32_t end, double percent = 1.0);
-
-    void SetDate(float date)
+    void StartRecycle()
     {
+        if (isLoading_) {
+            return;
+        }
         if (date_) {
+            isLoading_ = true;
+            date_->Set(0.0f);
             AnimationOption option = AnimationOption();
             RefPtr<Curve> curve = AceType::MakeRefPtr<LinearCurve>();
             option.SetDuration(LOADING_DURATION);
@@ -70,7 +61,7 @@ public:
             option.SetCurve(curve);
             option.SetIteration(-1);
             option.SetTempo(LOADING_TEMPO);
-            AnimationUtils::Animate(option, [&]() { date_->Set(date); });
+            AnimationUtils::Animate(option, [&]() { date_->Set(FULL_COUNT); });
         }
     }
 
@@ -81,13 +72,58 @@ public:
         }
     }
 
+    void DrawCustomStyle(DrawingContext& context);
+
+    void RefreshRecycle(DrawingContext& context, Color& color, float scale);
+
+    void ChangeRefreshFollowData(float refreshFollowRatio)
+    {
+        CHECK_NULL_VOID(date_);
+        auto ratio = CorrectNormalize(refreshFollowRatio);
+        date_->Set(FOLLOW_START + FOLLOW_SPAN * ratio);
+    }
+
+    void ChangeRefreshTansitionData(float refreshTransitionRatio)
+    {
+        CHECK_NULL_VOID(date_);
+        auto ratio = CorrectNormalize(refreshTransitionRatio);
+        date_->Set(FOLLOW_TO_RECYCLE_START + FOLLOW_TO_RECYCLE_SPAN * ratio);
+    }
+
+    void ChangeRefreshFadeAwayData(float refreshTransitionRatio)
+    {
+        CHECK_NULL_VOID(date_);
+        auto ratio = CorrectNormalize(refreshTransitionRatio);
+        date_->Set(FOLLOW_TO_RECYCLE_START + FOLLOW_TO_RECYCLE_SPAN * ratio);
+    }
+
+    float CorrectNormalize(float originData)
+    {
+        auto ratio = originData;
+        if (ratio < 0.0f) {
+            ratio = 0.0f;
+        }
+        if (ratio > 1.0f) {
+            ratio = 1.0f;
+        };
+        return ratio;
+    }
+
+    LoadingProgressOwner GetOwner()
+    {
+        return loadingProgressOwner_;
+    }
+
 private:
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<AnimatablePropertyColor> color_;
     float ringWidth_ = 0.0f;
     float cometRadius_ = 0.0f;
+    LoadingProgressOwner loadingProgressOwner_;
+    bool isLoading_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(LoadingProgressModifier);
 };
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_MODIFIER_H
+

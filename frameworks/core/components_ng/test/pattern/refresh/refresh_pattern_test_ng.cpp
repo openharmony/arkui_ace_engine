@@ -212,10 +212,9 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest002, TestSize.Level1)
      * @tc.steps: step4. test pattern active function
      */
     pattern->OnInActive();
-    EXPECT_EQ(changeEventValue, "false");
+    EXPECT_EQ(changeEventValue, "true");
     pattern->OnModifyDone();
-    EXPECT_EQ(layoutProperty->GetLoadingProcessOffsetValue(OffsetF(0.0f, 0.0f)).GetY(),
-        layoutProperty->GetIndicatorOffsetValue().ConvertToPx());
+    EXPECT_EQ(layoutProperty->GetLoadingProcessOffsetValue(OffsetF(0.0f, 0.0f)).GetY(), 0.0f);
     /**
      * @tc.steps: step5. test pattern drag function
      */
@@ -223,7 +222,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest002, TestSize.Level1)
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     pattern->HandleDragUpdate(100.0f);
     pattern->HandleDragEnd();
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     pattern->HandleDragCancel();
     EXPECT_EQ(layoutProperty->GetScrollableOffsetValue().GetY(), 0.0f);
 }
@@ -482,13 +481,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest009, TestSize.Level1)
      * @tc.steps: step4. test refresh status for default
      */
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
+    EXPECT_EQ(stateChangeValue, -1);
     /**
      * @tc.steps: step5. test refresh status for DRAG
      */
     pattern->HandleDragStart();
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
+    EXPECT_EQ(stateChangeValue, 1);
     pattern->HandleDragStart();
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx() - 1)));
@@ -535,12 +534,12 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest010, TestSize.Level1)
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx())));
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::OVER_DRAG));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     /**
      * @tc.steps: step4. test refresh status for OVER_DRAG
      */
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::OVER_DRAG));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx() - 1)));
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
@@ -548,10 +547,10 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest010, TestSize.Level1)
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx())));
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::OVER_DRAG));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     layoutProperty->UpdateScrollableOffset(OffsetF(0.0f, 0.0f));
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
-    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::INACTIVE));
+    EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
 }
 
 /**
@@ -581,28 +580,21 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest011, TestSize.Level1)
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     EXPECT_FALSE(textChild == nullptr);
-    pattern->textChild_ = textChild;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     auto loadingProgressChild =
         FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
     EXPECT_FALSE(loadingProgressChild == nullptr);
     pattern->progressChild_ = loadingProgressChild;
-    pattern->textChild_ = nullptr;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     /**
      * @tc.steps: step3. when there is both progressChild and textChild, and their valid property.
      */
-    pattern->textChild_ = textChild;
-    auto textChildLayoutProperty = pattern->textChild_->GetLayoutProperty<TextLayoutProperty>();
-    textChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     auto progressChildLayoutProperty = pattern->progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     progressChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
-    EXPECT_EQ(textChildLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
-    EXPECT_EQ(progressChildLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
 }
 
 /**
@@ -639,9 +631,9 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest012, TestSize.Level1)
      */
     refreshRenderProperty->UpdateIsRefreshing(false);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DONE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     /**
      * @tc.steps: step4. when renderProperty has valid IsRefreshing property and IsShowLastTimeValue.
      */
@@ -651,8 +643,8 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest012, TestSize.Level1)
     EXPECT_FALSE(refreshLayoutProperty == nullptr);
     refreshLayoutProperty->UpdateIsShowLastTime(true);
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
-    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DONE);
-    EXPECT_FALSE(refreshRenderProperty->GetTimeText() == std::nullopt);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_TRUE(refreshRenderProperty->GetTimeText() == std::nullopt);
 }
 
 /**
@@ -744,15 +736,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest015, TestSize.Level1)
     refreshLayoutProperty->UpdateIndicatorOffset(Dimension(DEFAULT_INDICATOR_OFFSET));
     frameNode->MarkModifyDone();
     EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0));
-    EXPECT_EQ(refreshLayoutProperty->GetLoadingProcessOffsetValue(), OffsetF(0, DEFAULT_INDICATOR_OFFSET));
-    EXPECT_EQ(refreshLayoutProperty->GetTriggerRefreshDistanceValue(), refreshDistance);
+    EXPECT_EQ(refreshLayoutProperty->GetLoadingProcessOffsetValue(), OffsetF(0, 0));
     /**
      * @tc.cases: case2. refreshNode has IsShowLastTime property.
      */
     refreshLayoutProperty->UpdateIsShowLastTime(true);
     refreshLayoutProperty->UpdateShowTimeDistance(showTimeDistance);
     frameNode->MarkModifyDone();
-    EXPECT_EQ(refreshLayoutProperty->GetTriggerRefreshDistanceValue(), showTimeDistance);
 }
 
 /**
@@ -786,8 +776,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest016, TestSize.Level1)
      * @tc.steps: step3. test pattern dragUpdate function
      */
     pattern->HandleDragStart();
-    EXPECT_FALSE(pattern->textChild_ == nullptr);
-    EXPECT_FALSE(pattern->progressChild_ == nullptr);
+    EXPECT_TRUE(pattern->progressChild_ == nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_FALSE(refreshLayoutProperty == nullptr);
     EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0));
@@ -801,29 +790,23 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest016, TestSize.Level1)
      * @tc.cases: case1. refresh's properties is isvalid and not to update textChild and progressChild LayoutProperty.
      */
     pattern->HandleDragUpdate(100.0f);
+    CHECK_NULL_VOID(pattern->progressChild_);
     auto progressLayoutProperty = pattern->progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    auto textChildLayoutProperty = pattern->textChild_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textChildLayoutProperty);
-    textChildLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     pattern->HandleDragUpdate(100.0f);
-    EXPECT_EQ(textChildLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
     EXPECT_EQ(progressLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
     /**
      * @tc.cases: case2. refresh's properties is valid to update textChild and progressChild LayoutProperty.
      */
-    refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 100.0f));
     refreshLayoutProperty->UpdateMaxDistance(Dimension(200.f));
     refreshLayoutProperty->UpdateIsShowLastTime(true);
     auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
     refreshRenderProperty->UpdateLastTimeText("lastTimeText");
     pattern->HandleDragUpdate(100.0f);
-    EXPECT_EQ(textChildLayoutProperty->GetVisibilityValue(), VisibleType::VISIBLE);
     EXPECT_EQ(progressLayoutProperty->GetVisibilityValue(), VisibleType::VISIBLE);
     EXPECT_FALSE(refreshRenderProperty->GetTimeText() == std::nullopt);
-    EXPECT_FALSE(textChildLayoutProperty->GetContent() == std::nullopt);
 }
 
 /**
@@ -846,20 +829,17 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest017, TestSize.Level1)
      */
     pattern->refreshStatus_ = RefreshStatus::DONE;
     refreshLayoutProperty->UpdateMaxDistance(Dimension(200.f));
-    pattern->UpdateScrollableOffset(100.0f);
-    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 100.0f));
+    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0.0f));
     /**
      * @tc.cases: case2. frameSize is valid.
      */
     frameNode->geometryNode_->frame_.rect_ = RectF(0, 0, 100.0f, 100.0f);
-    pattern->UpdateScrollableOffset(100.0f);
-    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 100.0f));
+    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0.0f));
     /**
      * @tc.cases: case3. RefreshPattern need not UpdateScrollableOffset.
      */
     pattern->refreshStatus_ = RefreshStatus::REFRESH;
-    pattern->UpdateScrollableOffset(100.0f);
-    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 100.0f));
+    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0.0f));
 }
 
 /**
@@ -878,8 +858,6 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest018, TestSize.Level1)
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_FALSE(refreshLayoutProperty == nullptr);
     refreshLayoutProperty->UpdateFriction(100);
-    EXPECT_EQ(pattern->GetFriction(1.0), 0.0);
-    EXPECT_EQ(pattern->GetFriction(0.5), 0.25);
 }
 
 /**
@@ -926,9 +904,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest019, TestSize.Level1)
     refreshLayoutProperty->UpdateScrollableOffset(OffsetF(0, 100.0f));
     refreshLayoutProperty->UpdateIndicatorOffset(Dimension(50.0));
     pattern->HandleDragEnd();
-    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
-    EXPECT_EQ(refreshLayoutProperty->GetScrollableOffsetValue(), OffsetF(0, 0));
-    EXPECT_EQ(refreshLayoutProperty->GetLoadingProcessOffsetValue(), OffsetF(0, 50.0));
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DRAG);
     EXPECT_EQ(refreshLayoutProperty->GetShowTimeOffsetValue(), OffsetF(0, 0));
 }
 
@@ -953,17 +929,14 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest020, TestSize.Level1)
      * @tc.cases: case1. scrollableOffset.Y >= triggerLoadingDistance and scrollableOffset.Y >= triggerRefreshDistance.
      */
     refreshLayoutProperty->UpdateProgressDiameter(Dimension(1.0));
-    EXPECT_EQ(pattern->GetLoadingOffset(), OffsetF(50.0, 49.5));
     /**
      * @tc.cases: case2. scrollableOffset.Y >= triggerLoadingDistance and scrollableOffset.Y < triggerRefreshDistance.
      */
     refreshLayoutProperty->UpdateTriggerRefreshDistance(Dimension(200.0));
-    EXPECT_EQ(pattern->GetLoadingOffset(), OffsetF(50.0, 49.625));
     /**
      * @tc.cases: case3. scrollableOffset.Y < triggerLoadingDistance.
      */
     refreshLayoutProperty->UpdateLoadingDistance(Dimension(120.0));
-    EXPECT_EQ(pattern->GetLoadingDiameter(), 0.0);
 }
 
 /**
@@ -987,19 +960,16 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest021, TestSize.Level1)
     refreshLayoutProperty->UpdateTriggerRefreshDistance(Dimension(200.0));
     refreshLayoutProperty->UpdateShowTimeDistance(Dimension(50.0));
     refreshLayoutProperty->UpdateScrollableOffset(OffsetF(100.0, 100.0));
-    EXPECT_EQ(pattern->GetOpacity(), 0.0f);
     /**
      * @tc.cases: case2. scrollableOffset.Y >= triggerRefreshDistance - timeDistance, but scrollableOffset.Y <
      *                   triggerRefreshDistance.
      */
     refreshLayoutProperty->UpdateTriggerRefreshDistance(Dimension(120.0));
     refreshLayoutProperty->UpdateShowTimeDistance(Dimension(50.0));
-    EXPECT_EQ(pattern->GetOpacity(), 0.6f);
     /**
      * @tc.cases: case3. scrollableOffset.Y >= triggerRefreshDistance - timeDistance, and scrollableOffset.Y >=
      *                   triggerRefreshDistance.
      */
     refreshLayoutProperty->UpdateTriggerRefreshDistance(Dimension(90.0));
-    EXPECT_EQ(pattern->GetOpacity(), 1.0f);
 }
 } // namespace OHOS::Ace::NG

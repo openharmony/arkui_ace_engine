@@ -70,7 +70,6 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
             paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue();
             alignChild = Alignment::TOP_CENTER;
         } else if (index == layoutWrapper->GetTotalChildCount() - 1) {
-            paddingOffsetChild += layoutProperty->GetLoadingProcessOffsetValue();
             alignChild = Alignment::TOP_CENTER;
         }
         auto translate = Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), alignChild) +

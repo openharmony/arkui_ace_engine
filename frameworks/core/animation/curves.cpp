@@ -37,7 +37,6 @@ const RefPtr<CubicCurve> Curves::SMOOTH = AceType::MakeRefPtr<CubicCurve>(0.4f, 
 const RefPtr<AnticipateCurve> Curves::ANTICIPATE = AceType::MakeRefPtr<AnticipateCurve>(2.0f);
 const RefPtr<CubicCurve> Curves::MAGNETIC = AceType::MakeRefPtr<CubicCurve>(0.8f, 0.0f, 1.0f, 0.6f);
 const RefPtr<ElasticsCurve> Curves::ELASTICS = AceType::MakeRefPtr<ElasticsCurve>(2.0f);
-
 const std::string Curves::DEFAULT_CURVE_NAME = "Curves.Ease";
 
 std::string Curves::ToString(const RefPtr<Curve>& curve)
