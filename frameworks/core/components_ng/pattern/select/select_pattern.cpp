@@ -22,6 +22,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/utils/utils.h"
+#include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/select/select_theme.h"
@@ -103,10 +104,42 @@ void SelectPattern::RegisterOnClick()
     GestureEventFunc callback = [weak = WeakClaim(this)](GestureEvent& /* info */) mutable {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
+
+        auto selected = pattern->GetSelected();
+        if (selected > -1 && selected < pattern->GetOptions().size()) {
+            pattern->UpdateSelectedProps(selected);
+        }
         pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(callback));
+}
+
+void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+
+    AnimationOption option = AnimationOption();
+    if (isHoverChange) {
+        option.SetDuration(selectTheme->GetHoverAnimationDuration());
+        option.SetCurve(Curves::FRICTION);
+    } else {
+        option.SetDuration(selectTheme->GetPressAnimationDuration());
+        option.SetCurve(Curves::SHARP);
+    }
+
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID_NOLOG(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID_NOLOG(renderContext);
+        renderContext->BlendBgColor(pattern->GetBgBlendColor());
+    });
 }
 
 // change background color when hovered
@@ -119,28 +152,21 @@ void SelectPattern::RegisterOnHover()
     auto mouseCallback = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
+        pattern->SetIsHover(isHover);
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
         // update hover status, repaint background color
         if (isHover) {
-            auto hoverColor = theme->GetHoverColor();
-            renderContext->UpdateBackgroundColor(hoverColor);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            pattern->SetBgBlendColor(theme->GetHoverColor());
         } else {
-            auto bgColor = theme->GetBackgroundColor();
-            renderContext->UpdateBackgroundColor(bgColor);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            pattern->SetBgBlendColor(Color::TRANSPARENT);
         }
+        pattern->PlayBgColorAnimation();
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnHoverEvent(mouseEvent);
-    inputHub->SetHoverAnimation(HoverEffectType::BOARD);
 }
 
 // change background color when pressed
@@ -153,17 +179,21 @@ void SelectPattern::RegisterOnPress()
         auto theme = host->GetContext()->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
+        const auto& renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         // update press status, repaint background color
         if (touchType == TouchType::DOWN) {
             LOGD("triggers option press");
-            auto renderContext = host->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateBackgroundColor(theme->GetClickedColor());
+            pattern->SetBgBlendColor(theme->GetClickedColor());
+            pattern->PlayBgColorAnimation(false);
         }
         if (touchType == TouchType::UP) {
-            auto renderContext = host->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+            if (pattern->IsHover()) {
+                pattern->SetBgBlendColor(theme->GetHoverColor());
+            } else {
+                pattern->SetBgBlendColor(Color::TRANSPARENT);
+            }
+            pattern->PlayBgColorAnimation(false);
         }
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -263,7 +293,7 @@ void SelectPattern::SetSelected(int32_t index)
         LOGW("newly selected index invalid");
         return;
     }
-    UpdateSelectedProps(index);
+    UpdateLastSelectedProps(index);
     selected_ = index;
 }
 
@@ -525,8 +555,7 @@ const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
     return options_;
 }
 
-// update selected option props
-void SelectPattern::UpdateSelectedProps(int32_t index)
+void SelectPattern::UpdateLastSelectedProps(int32_t index)
 {
     CHECK_NULL_VOID(options_[index]);
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
@@ -554,6 +583,14 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         }
         options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
+}
+
+// update selected option props
+void SelectPattern::UpdateSelectedProps(int32_t index)
+{
+    CHECK_NULL_VOID(options_[index]);
+    auto newSelected = options_[index]->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(newSelected);
 
     // set newSelected props
     auto host = GetHost();
