@@ -15,6 +15,8 @@
 
 #include "core/pipeline/pipeline_base.h"
 
+#include <cinttypes>
+
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
@@ -504,7 +506,7 @@ bool PipelineBase::CloseImplicitAnimation()
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
 
     if (onVsyncProfiler_) {
         AceTracker::Start();
