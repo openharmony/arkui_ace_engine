@@ -655,11 +655,21 @@ void FrameNode::AdjustParentLayoutFlag(PropertyChangeFlag& flag)
 
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
+    return UpdateLayoutWrapper(nullptr, forceMeasure, forceLayout);
+}
+
+RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
+    RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure, bool forceLayout)
+{
     CHECK_NULL_RETURN_NOLOG(layoutProperty_, nullptr);
     CHECK_NULL_RETURN_NOLOG(pattern_, nullptr);
     if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
-        auto layoutWrapper =
-            MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+        if (!layoutWrapper) {
+            layoutWrapper =
+                MakeRefPtr<LayoutWrapper>(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+        } else {
+            layoutWrapper->Update(WeakClaim(this), MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>());
+        }
         layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(nullptr, true, true));
         isLayoutDirtyMarked_ = false;
         return layoutWrapper;
@@ -676,7 +686,11 @@ RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool for
     // It is necessary to copy the layoutProperty property to prevent the layoutProperty property from being
     // modified during the layout process, resulting in the problem of judging whether the front-end setting value
     // changes the next time js is executed.
-    auto layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+    if (!layoutWrapper) {
+        layoutWrapper = MakeRefPtr<LayoutWrapper>(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+    } else {
+        layoutWrapper->Update(WeakClaim(this), geometryNode_->Clone(), layoutProperty_->Clone());
+    }
     LOGD("%{public}s create layout wrapper: %{public}x, %{public}d, %{public}d", GetTag().c_str(), flag, forceMeasure,
         forceLayout);
     do {

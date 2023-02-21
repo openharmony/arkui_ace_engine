@@ -38,6 +38,12 @@ CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
 
 void CustomNode::Build()
 {
+    Render();
+    UINode::Build();
+}
+
+void CustomNode::Render()
+{
     if (renderFunction_) {
         {
             ACE_SCOPED_TRACE("CustomNode:OnAppear");
@@ -54,13 +60,40 @@ void CustomNode::Build()
         }
         renderFunction_ = nullptr;
     }
-    UINode::Build();
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
-    Build();
-    UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+    if (!renderFunction_) {
+        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+        return;
+    }
+
+    parent->AppendChild(MakeRefPtr<LayoutWrapper>(
+        [weak = AceType::WeakClaim(this), forceMeasure, forceLayout](RefPtr<LayoutWrapper> layoutWrapper) {
+            auto customNode = weak.Upgrade();
+            CHECK_NULL_VOID(customNode);
+
+            customNode->Render();
+            if (customNode->GetChildren().empty()) {
+                return;
+            }
+            auto child = customNode->GetChildren().front();
+            while (!InstanceOf<FrameNode>(child)) {
+                auto custom = DynamicCast<CustomNode>(child);
+                if (custom) {
+                    custom->Render();
+                }
+                auto children = child->GetChildren();
+                if (children.empty()) {
+                    return;
+                }
+                child = children.front();
+            }
+            auto frameChild = DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(frameChild);
+            frameChild->UpdateLayoutWrapper(layoutWrapper, forceMeasure, forceLayout);
+        }));
 }
 
 } // namespace OHOS::Ace::NG

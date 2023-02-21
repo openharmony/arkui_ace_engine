@@ -38,6 +38,7 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
     auto iter = childrenMap_.find(index);
     if (iter != childrenMap_.end()) {
         if (addToRenderTree) {
+            iter->second->BuildLazyItem();
             iter->second->isActive_ = true;
         }
         return iter->second;
@@ -72,6 +73,7 @@ const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(b
     }
     if (addToRenderTree) {
         for (const auto& child : cachedList_) {
+            child->BuildLazyItem();
             if (!child->isActive_) {
                 child->isActive_ = true;
             }
@@ -343,4 +345,14 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
     CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
     layoutWrapperBuilder_->AdjustGridOffset();
 }
+
+void LayoutWrapper::BuildLazyItem()
+{
+    if (!lazyBuildFunction_) {
+        return;
+    }
+    lazyBuildFunction_(Claim(this));
+    lazyBuildFunction_ = nullptr;
+}
+
 } // namespace OHOS::Ace::NG
