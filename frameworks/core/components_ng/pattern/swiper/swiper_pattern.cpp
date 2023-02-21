@@ -807,6 +807,13 @@ void SwiperPattern::HandleDragStart()
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
     auto mainDelta = static_cast<float>(info.GetMainDelta());
+
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    if (IsOutOfHotRegion(dragPoint)) {
+        return;
+    }
+
     auto isOutOfBoundary = IsOutOfBoundary(mainDelta + currentOffset_);
     if (!IsLoop() && isOutOfBoundary) {
         auto edgeEffect = GetEdgeEffect();
@@ -1199,6 +1206,17 @@ float SwiperPattern::GetTranslateLength() const
     auto itemSpace = SwiperUtils::GetItemSpace(layoutProperty);
     auto translateLength = GetDirection() == Axis::HORIZONTAL ? maxChildSize_.Width() : maxChildSize_.Height();
     return translateLength + itemSpace;
+}
+
+bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+
+    auto hotRegion = geometryNode->GetFrameRect();
+    return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
 } // namespace OHOS::Ace::NG
