@@ -73,7 +73,7 @@ public:
 
     AnimationOption GetImplicitAnimationOption() override
     {
-        return {};
+        return ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
     }
 
     void ClearVisualState() override

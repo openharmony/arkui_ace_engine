@@ -28,6 +28,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 
 namespace OHOS::Ace::Framework {
+constexpr char JS_CRASH_CODE[] = "100001";
 
 int32_t GetLineOffset(const AceType *data)
 {
@@ -41,6 +42,16 @@ int32_t GetLineOffset(const AceType *data)
 #endif
     const int32_t offset = 14;
     return offset;
+}
+
+std::string GetMsgStr(const std::string& msg)
+{
+    int pos = msg.find('\n');
+    if (pos == std::string::npos) {
+        return msg;
+    }
+
+    return msg.substr(0, pos);
 }
 
 RefPtr<JsAcePage> GetRunningPage(const AceType *data)
@@ -58,6 +69,32 @@ RefPtr<JsAcePage> GetRunningPage(const AceType *data)
     }
 #endif
     return nullptr;
+}
+
+std::string JsiBaseUtils::GenerateErrorMsg(
+    const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
+{
+    std::string errMsg;
+    if (!error) {
+        errMsg.append("error uncaught");
+        return errMsg;
+    }
+
+    std::string messageStr;
+    std::string rawStack;
+    shared_ptr<JsValue> message = error->GetProperty(runtime, "message");
+    if (message) {
+        messageStr = message->ToString(runtime);
+    }
+
+    shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
+    if (stack) {
+        rawStack = stack->ToString(runtime);
+    }
+
+    errMsg.append("{\"ErrMsg\":\"").append(messageStr)
+        .append("\", \"Stacktrace\": \"").append(GetMsgStr(rawStack)).append("\"}");
+    return errMsg;
 }
 
 std::string JsiBaseUtils::GenerateSummaryBody(
@@ -175,7 +212,7 @@ ErrorPos JsiBaseUtils::GetErrorPos(const std::string& rawStack)
     if (findLineEnd == std::string::npos) {
         return std::make_pair(0, 0);
     }
-    uint32_t lineEnd = findLineEnd - 1;
+    int32_t lineEnd = findLineEnd - 1;
     if (lineEnd < 1 || rawStack[lineEnd - 1] == '?') {
         return std::make_pair(0, 0);
     }
@@ -475,7 +512,16 @@ void JsiBaseUtils::ReportJsErrorEvent(std::shared_ptr<JsValue> error, std::share
         LOGI("ReportJsErrorEvent: jsi engine has been destroyed");
         return;
     }
+
     LOGI("ReportJsErrorEvent");
+    auto arkJSRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+    if (arkJSRuntime && arkJSRuntime->GetErrorEventHandler()) {
+        std::string msg = GenerateErrorMsg(error, runtime);
+        LOGI("Handle error event, errMsg: \n%{public}s", msg.c_str());
+        arkJSRuntime->GetErrorEventHandler()(JS_CRASH_CODE, msg);
+        return;
+    }
+
     std::string summaryBody = GenerateSummaryBody(error, runtime);
     LOGE("summaryBody: \n%{public}s", summaryBody.c_str());
     EventReport::JsErrReport(AceApplicationInfo::GetInstance().GetPackageName(), "", summaryBody);

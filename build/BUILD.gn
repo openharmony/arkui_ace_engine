@@ -23,8 +23,6 @@ foreach(item, ace_platforms) {
   engine_config = item.config
   support_engines = []
   support_engines = engine_config.js_engines
-  build_in_engine = defined(engine_config.use_build_in_js_engine) &&
-                    engine_config.use_build_in_js_engine
 
   # generate libace_static lib
   libace_static("libace_static_" + item.name) {
@@ -39,6 +37,8 @@ foreach(item, ace_platforms) {
 
   # generate separated libace_engine lib
   if (platform == "ohos") {
+    build_in_engine = defined(engine_config.use_build_in_js_engine) &&
+                      engine_config.use_build_in_js_engine
     foreach(engine, support_engines) {
       if (!build_in_engine) {
         # generate libace_engine
@@ -86,6 +86,7 @@ foreach(item, ace_platforms) {
     # libace target
     ohos_shared_library("libace") {
       deps = [ "$ace_root/build:libace_static_ohos" ]
+      version_script = "libace.map"
       part_name = ace_engine_part
       subsystem_name = ace_engine_subsystem
     }

@@ -26,7 +26,10 @@ public:
     explicit JsWebViewFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsWebViewFunction() override = default;
-
+    void Execute() override
+    {
+        ExecuteJS();
+    }
     void Execute(const std::string& result);
 };
 } // namespace OHOS::Ace::Framework

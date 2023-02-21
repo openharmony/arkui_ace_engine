@@ -27,7 +27,7 @@ namespace OHOS::Ace {
 void PurgeMallocCache();
 
 #ifdef ACE_MEMORY_MONITOR
-class ACE_EXPORT MemoryMonitor {
+class ACE_FORCE_EXPORT MemoryMonitor {
 public:
     static MemoryMonitor& GetInstance();
 

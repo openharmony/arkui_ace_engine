@@ -72,6 +72,32 @@ public:
                 theme->focusIndicatorRadius_ = pattern->GetAttr<Dimension>("focus_indicator_radius", 0.0_vp);
                 theme->subTabIndicatorHeight_ = pattern->GetAttr<Dimension>("subtab_indicator_height", 0.0_vp);
                 theme->subTabTextOffColor_ = pattern->GetAttr<Color>("subtab_text_off_color", Color::WHITE);
+                theme->subTabIndicatorGap_ = pattern->GetAttr<Dimension>("subtab_indicator_gap", 0.0_vp);
+                theme->subTabHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_horizontal_padding", 0.0_vp);
+                theme->subTabTopPadding_ = pattern->GetAttr<Dimension>("subtab_top_padding", 0.0_vp);
+                theme->subTabBottomPadding_ = pattern->GetAttr<Dimension>("subtab_bottom_padding", 0.0_vp);
+                theme->subTabBarHoverColor_ = pattern->GetAttr<Color>("subtab_hover_color", Color::WHITE);
+                theme->subTabBarPressedColor_ = pattern->GetAttr<Color>("subtab_press_color", Color::WHITE);
+                theme->subtabTextDefaultFontSize_ =
+                    pattern->GetAttr<Dimension>("subtab_text_default_font_size", 0.0_vp);
+                theme->subtabLandscapeHorizontalPadding_ =
+                    pattern->GetAttr<Dimension>("subtab_landscape_horizontal_padding", 0.0_vp);
+                theme->bottomTabHorizontalPadding_ =
+                    pattern->GetAttr<Dimension>("bottom_tab_horizontal_padding", 0.0_vp);
+                theme->bottomTabTextOn_ = pattern->GetAttr<Color>("bottom_tab_text_on", Color::WHITE);
+                theme->bottomTabTextOff_ = pattern->GetAttr<Color>("bottom_tab_text_off", Color::WHITE);
+                theme->bottomTabImageSize_ = pattern->GetAttr<Dimension>("bottom_tab_image_size", 0.0_vp);
+                theme->bottomTabTextSize_ = pattern->GetAttr<Dimension>("bottom_tab_text_size", 0.0_vp);
+                theme->defaultTabBarName_ = pattern->GetAttr<std::string>("default_tab_bar_name", "");
+                theme->bottomTabBarSpace_ = pattern->GetAttr<Dimension>("bottom_tab_bar_space", 0.0_vp);
+                theme->subTabBarHoverDuration_ = pattern->GetAttr<double>("sub_tab_bar_hover_duration", 0.0);
+                theme->subTabBarHoverToPressDuration_ =
+                    pattern->GetAttr<double>("sub_tab_bar_hover_to_press_duration", 0.0);
+                theme->tabContentAnimationDuration_ =
+                    pattern->GetAttr<double>("tab_content_animation_duration", 0.0);
+                theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
+                theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
+                theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -166,6 +192,111 @@ public:
         return subTabIndicatorHeight_;
     }
 
+    const Dimension& GetSubTabIndicatorGap() const
+    {
+        return subTabIndicatorGap_;
+    }
+
+    const Dimension& GetSubTabHorizontalPadding() const
+    {
+        return subTabHorizontalPadding_;
+    }
+
+    const Dimension& GetSubTabTopPadding() const
+    {
+        return subTabTopPadding_;
+    }
+
+    const Dimension& GetSubTabBottomPadding() const
+    {
+        return subTabBottomPadding_;
+    }
+
+    const Color& GetSubTabBarHoverColor() const
+    {
+        return subTabBarHoverColor_;
+    }
+
+    const Color& GetSubTabBarPressedColor() const
+    {
+        return subTabBarPressedColor_;
+    }
+
+    const Dimension& GetSubTabTextDefaultFontSize() const
+    {
+        return subtabTextDefaultFontSize_;
+    }
+
+    const Dimension& GetSubtabLandscapeHorizontalPadding() const
+    {
+        return subtabLandscapeHorizontalPadding_;
+    }
+
+    const Dimension& GetBottomTabHorizontalPadding() const
+    {
+        return bottomTabHorizontalPadding_;
+    }
+
+    const Color& GetBottomTabTextOn() const
+    {
+        return bottomTabTextOn_;
+    }
+
+    const Color& GetBottomTabTextOff() const
+    {
+        return bottomTabTextOff_;
+    }
+
+    const Dimension& GetBottomTabImageSize() const
+    {
+        return bottomTabImageSize_;
+    }
+
+    const Dimension& GetBottomTabTextSize() const
+    {
+        return bottomTabTextSize_;
+    }
+
+    const std::string& GetDefaultTabBarName() const
+    {
+        return defaultTabBarName_;
+    }
+
+    const Dimension& GetBottomTabBarSpace() const
+    {
+        return bottomTabBarSpace_;
+    }
+
+    double GetSubTabBarHoverDuration() const
+    {
+        return subTabBarHoverDuration_;
+    }
+
+    double GetSubTabBarHoverToPressDuration() const
+    {
+        return subTabBarHoverToPressDuration_;
+    }
+
+    double GetTabContentAnimationDuration() const
+    {
+        return tabContentAnimationDuration_;
+    }
+
+    const Dimension& GetTabBarDefaultHeight() const
+    {
+        return tabBarDefaultHeight_;
+    }
+
+    const Dimension& GetTabBarDefaultWidth() const
+    {
+        return tabBarDefaultWidth_;
+    }
+
+    const Dimension& GetSubTabBarMinWidth() const
+    {
+        return subTabBarMinWidth_;
+    }
+
 protected:
     TabTheme() = default;
 
@@ -187,6 +318,27 @@ private:
     Dimension focusIndicatorVerticalPadding_;
     Color subTabTextOffColor_;
     Dimension subTabIndicatorHeight_;
+    Dimension subTabIndicatorGap_;
+    Dimension subTabHorizontalPadding_;
+    Dimension subTabTopPadding_;
+    Dimension subTabBottomPadding_;
+    Color subTabBarHoverColor_;
+    Color subTabBarPressedColor_;
+    Dimension subtabTextDefaultFontSize_;
+    Dimension subtabLandscapeHorizontalPadding_;
+    Dimension bottomTabHorizontalPadding_;
+    Color bottomTabTextOn_;
+    Color bottomTabTextOff_;
+    Dimension bottomTabImageSize_;
+    Dimension bottomTabTextSize_;
+    std::string defaultTabBarName_;
+    Dimension bottomTabBarSpace_;
+    double subTabBarHoverDuration_;
+    double subTabBarHoverToPressDuration_;
+    double tabContentAnimationDuration_;
+    Dimension tabBarDefaultHeight_;
+    Dimension tabBarDefaultWidth_;
+    Dimension subTabBarMinWidth_;
 };
 
 } // namespace OHOS::Ace

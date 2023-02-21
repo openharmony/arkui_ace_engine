@@ -24,17 +24,30 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+struct NewLineOffset {
+    int32_t newLineCount = 0;
+    int32_t offset = 0;
+    int32_t span = 0;
+    float offsetY = 0;
+    std::string ToString()
+    {
+        std::string result = "new line count: ";
+        result += std::to_string(newLineCount);
+        result += " , offset: ";
+        result += std::to_string(offset);
+        result += " , span: ";
+        result += std::to_string(span);
+        result += " , offsetY: ";
+        result += std::to_string(offsetY);
+        return result;
+    }
+};
 
+using ChildrenRow = std::list<std::pair<RefPtr<LayoutWrapper>, NewLineOffset>>;
 class ACE_EXPORT GridRowLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(GridRowLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    struct NewLineOffset {
-        int32_t newLineCount = 0;
-        int32_t offset = 0;
-        int32_t span = 0;
-        float offsetY = 0;
-    };
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
@@ -42,10 +55,12 @@ private:
     void MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight);
     float MeasureChildren(LayoutWrapper* layoutWrapper, double columnUnitWidth, double childHeightLimit,
         std::pair<double, double>& gutter, V2::GridSizeType sizeType, int32_t columnNum);
-
+    void CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper,
+        std::list<std::pair<RefPtr<LayoutWrapper>, NewLineOffset>>& row, float currentRowHeight);
     std::pair<double, double> gutterInDouble_ { 0, 0 };
     double columnUnitWidth_ = 0;
-    std::list<std::pair<RefPtr<LayoutWrapper>, NewLineOffset>> gridColChildren_ {};
+    std::list<ChildrenRow> gridColChildrenRows_ {};
+    ChildrenRow gridColChildrenOfOneRow_ {};
 };
 } // namespace OHOS::Ace::NG
 

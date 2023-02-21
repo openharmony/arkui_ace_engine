@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -839,7 +839,7 @@ RefPtr<RenderNode> RenderNode::FindDropChild(const Point& globalPoint, const Poi
     return nullptr;
 }
 
-void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseTestResult& result)
+void RenderNode::MouseTest(const Point& globalPoint, const Point& parentLocalPoint, MouseRawResult& result)
 {
     LOGD("MouseTest: type is %{public}s, the region is %{public}lf, %{public}lf, %{public}lf, %{public}lf",
         GetTypeName(), GetTouchRect().Left(), GetTouchRect().Top(), GetTouchRect().Width(), GetTouchRect().Height());
@@ -2120,12 +2120,14 @@ bool RenderNode::ProcessExternalRSNode(const RefPtr<Component>& component)
             return false;
         }
     }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(LINUX_PLATFORM)
     // extract RSNode from tail component.
     auto rsNode = RosenRenderRemoteWindow::ExtractRSNode(tailComponent);
     SyncRSNode(rsNode);
     // avoid redundant function call.
     component->MarkUseExternalRSNode(false);
     return rsNode != nullptr;
+#endif
 #endif
     return false;
 }

@@ -34,11 +34,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
-namespace {
-
-constexpr int32_t ANIMATION_DURATION_DEFAULT = 200;
-
-} // namespace
 namespace OHOS::Ace::NG {
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -58,7 +53,11 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     swiperPaintProperty->UpdateLoop(false);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    swiperPaintProperty->UpdateDuration(ANIMATION_DURATION_DEFAULT);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    swiperPaintProperty->UpdateDuration(tabTheme->GetTabContentAnimationDuration());
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     swiperLayoutProperty->UpdateCachedCount(0);
     swiperLayoutProperty->UpdateShowIndicator(false);
@@ -93,6 +92,7 @@ void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
 
 void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, tabBarMode);
     auto tabBarLayoutProperty = GetTabBarLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateTabBarMode(tabBarMode);

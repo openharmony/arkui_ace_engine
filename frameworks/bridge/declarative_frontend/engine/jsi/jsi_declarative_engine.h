@@ -296,6 +296,9 @@ public:
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
 
+    void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
+
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
     FrontendDelegate* GetFrontend() override

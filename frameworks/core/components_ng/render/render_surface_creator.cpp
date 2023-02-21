@@ -16,7 +16,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "core/components_ng/render/adapter/flutter_render_surface.h"
 #endif
 #include "core/components_ng/render/render_surface.h"
@@ -29,7 +29,7 @@ RefPtr<RenderSurface> RenderSurface::Create()
         return MakeRefPtr<RosenRenderSurface>();
 #endif
     }
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     return MakeRefPtr<FlutterRenderSurface>();
 #else
     return nullptr;

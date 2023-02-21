@@ -223,10 +223,12 @@ void AceAbility::OnStart(const Want& want)
     // TODO: now choose pipeline using param set as package name, later enable for all.
     auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
+    auto apiTargetVersion = abilityContext->GetApplicationInfo()->apiTargetVersion;
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFA(
-        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
-    LOGI("AceAbility: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
-        apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
+        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiTargetVersion, apiReleaseType);
+    LOGI("AceAbility: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
+         "useNewPipe: %{public}d",
+        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
     OHOS::sptr<AceWindowListener> aceWindowListener = new AceWindowListener(self);
@@ -302,6 +304,9 @@ void AceAbility::OnStart(const Want& want)
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePath, srcPath, isHap);
     useNewPipe = useNewPipe && (frontendType == FrontendType::ETS_CARD || frontendType == FrontendType::DECLARATIVE_JS);
+    if (frontendType != FrontendType::ETS_CARD && frontendType != FrontendType::DECLARATIVE_JS) {
+        LOGI("AceAbility: JS project use old pipeline");
+    }
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
@@ -386,7 +391,8 @@ void AceAbility::OnStart(const Want& want)
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
-        auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/") };
+        auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/"),
+                                  std::string("assets/js/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
 
@@ -508,13 +514,13 @@ void AceAbility::OnStop()
 void AceAbility::OnActive()
 {
     LOGI("AceAbility::OnActive called ");
-    Ability::OnActive();
-    Platform::AceContainer::OnActive(abilityId_);
     // AbilityManager will miss first OnForeground notification
     if (isFirstActive_) {
         Platform::AceContainer::OnShow(abilityId_);
         isFirstActive_ = false;
     }
+    Ability::OnActive();
+    Platform::AceContainer::OnActive(abilityId_);
     LOGI("AceAbility::OnActive called End");
 }
 

@@ -41,6 +41,8 @@ using RSAnimationTimingCurve = Rosen::RSAnimationTimingCurve;
 template<typename T>
 using RSAnimatableProperty = Rosen::RSAnimatableProperty<T>;
 template<typename T>
+using RSProperty = Rosen::RSProperty<T>;
+template<typename T>
 using RSAnimatableArithmetic = Rosen::RSAnimatableArithmetic<T>;
 using RSContentStyleModifier = Rosen::RSContentStyleModifier;
 using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
@@ -66,7 +68,27 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
 
-std::shared_ptr<RSModifier> ConvertModifier(const RefPtr<Modifier>& modifier);
+std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier);
+std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modifier);
+
+class OverlayModifierAdapter : public RSOverlayStyleModifier {
+public:
+    OverlayModifierAdapter() = default;
+    explicit OverlayModifierAdapter(const RefPtr<Modifier>& modifier)
+        : modifier_(AceType::DynamicCast<OverlayModifier>(modifier))
+    {}
+    ~OverlayModifierAdapter() override = default;
+
+    void Draw(RSDrawingContext& context) const override;
+
+    void AttachProperties();
+
+private:
+    RefPtr<OverlayModifier> modifier_;
+    std::vector<std::shared_ptr<RSPropertyBase>> attachedProperties_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(OverlayModifierAdapter);
+};
 
 } // namespace OHOS::Ace::NG
 

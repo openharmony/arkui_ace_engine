@@ -21,13 +21,15 @@
 
 #include "pointer_event.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class IFormRendererDispatcher
  * IFormRendererDispatcher interface is used to form render dispatcher.
  */
-class IFormRendererDispatcher : public OHOS::IRemoteBroker {
+class ACE_EXPORT IFormRendererDispatcher : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.ace.FormRendererDispatcher")
 
@@ -39,9 +41,15 @@ public:
      */
     virtual void DispatchPointerEvent(
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) = 0;
+    /**
+     * @brief Set AllowUpdate.
+     * @param allowUpdate The allowUpdate.
+     */
+    virtual void SetAllowUpdate(bool allowUpdate) = 0;
 
     enum Message : uint32_t {
         DISPATCH_POINTER_EVENT = 1,
+        SET_ALLOW_UPDATE,
     };
 };
 }  // namespace Ace

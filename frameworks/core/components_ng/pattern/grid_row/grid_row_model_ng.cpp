@@ -40,7 +40,6 @@ void GridRowModelNG::Create(const RefPtr<V2::GridContainerSize>& col, const RefP
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::GRID_ROW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridRowLayoutPattern>(); });
     stack->Push(frameNode);
-
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, *col);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, *gutter);
     ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, BreakPoints, *breakpoints);
@@ -54,5 +53,15 @@ void GridRowModelNG::SetOnBreakPointChange(std::function<void(const std::string)
     auto eventHub = frameNode->GetEventHub<GridRowEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnBreakpointChange(std::move(onChange));
+}
+
+void GridRowModelNG::SetAlignItems(FlexAlign alignItem)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutPriority = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    CHECK_NULL_VOID(layoutPriority);
+    layoutPriority->UpdateAlignItems(alignItem);
+    ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, AlignItems, alignItem);
 }
 } // namespace OHOS::Ace::NG

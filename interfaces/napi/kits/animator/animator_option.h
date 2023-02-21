@@ -52,7 +52,9 @@ public:
     AnimatorResult() = default;
     AnimatorResult(RefPtr<Animator>& animator, std::shared_ptr<AnimatorOption>& option)
         : animator_(animator), option_(option)
-    {}
+    {
+        ApplyOption();
+    }
     ~AnimatorResult() = default;
 
     RefPtr<Animator> GetAnimator() const
@@ -104,6 +106,8 @@ public:
     {
         onrepeat_ = onrepeat;
     }
+
+    void ApplyOption();
 
 private:
     RefPtr<Animator> animator_;

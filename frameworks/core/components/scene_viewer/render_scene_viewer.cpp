@@ -555,8 +555,8 @@ void RenderSceneViewer::HandleLightsUpdate(const RefPtr<SceneViewerComponent>& s
         lights_ = svComponent->GetLights();
         for (auto& light : lights_) {
             light->SetContextAndCallback(
-            context_,
-            std::bind(&RenderSceneViewer::PerformLightUpdate, this));
+                context_,
+                std::bind(&RenderSceneViewer::PerformLightUpdate, this));
         }
         PerformLightUpdate();
         return;

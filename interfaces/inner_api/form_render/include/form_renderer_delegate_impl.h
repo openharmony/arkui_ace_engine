@@ -24,7 +24,7 @@ namespace Ace {
  * @class FormRendererDelegate
  * FormRendererDelegate interface is used to form renderer delegate.
  */
-class FormRendererDelegateImpl : public FormRendererDelegateStub {
+class ACE_EXPORT FormRendererDelegateImpl : public FormRendererDelegateStub {
 public:
     FormRendererDelegateImpl() = default;
     ~FormRendererDelegateImpl() override = default;
@@ -43,7 +43,25 @@ public:
      * @param action The action.
      */
     int32_t OnActionEvent(const std::string& action) override;
+    /**
+     * @brief OnError.
+     * @param code The code.
+     * @param msg The msg.
+     */
+    int32_t OnError(const std::string& code, const std::string& msg) override;
+
+    void SetSurfaceCreateEventHandler(std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
+            const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
+    void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
+    void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& listener);
+
+private:
+    std::function<void(
+        const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>
+        surfaceCreateEventHandler_;
+    std::function<void(const std::string&)> actionEventHandler_;
+    std::function<void(const std::string&, const std::string&)> errorEventHandler_;
 };
-}  // namespace Ace
-}  // namespace OHOS
+} // namespace Ace
+} // namespace OHOS
 #endif  // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_IMPL_H

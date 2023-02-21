@@ -27,9 +27,7 @@
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_processor.h"
 
-#ifdef USE_V8_ENGINE
-#include "bridge/declarative_frontend/engine/v8/v8_declarative_engine.h"
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #endif
 
@@ -116,7 +114,7 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
 
 } // namespace
 
-const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs)
+const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonValue>& animationArgs, bool isForm)
 {
     AnimationOption option = AnimationOption();
     if (!animationArgs) {
@@ -142,6 +140,14 @@ const AnimationOption JSViewContext::CreateAnimation(const std::unique_ptr<JsonV
         curve = CreateCurve(curveString->GetString());
     } else {
         curve = Curves::EASE_IN_OUT;
+    }
+
+    // limit animation for ArkTS Form
+    if (isForm) {
+        duration = std::min(duration, static_cast<int32_t>(DEFAULT_DURATION));
+        delay = 0;
+        iterations = 1;
+        tempo = 1.0;
     }
 
     option.SetDuration(duration);
@@ -173,6 +179,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContextBase);
     if (info[0]->IsNull() || !info[0]->IsObject()) {
         if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
             NG::ViewStackProcessor::GetInstance()->FlushImplicitAnimation();
             pipelineContextBase->CloseImplicitAnimation();
         } else {
@@ -197,18 +204,20 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
     if (animationArgs->IsNull()) {
         LOGE("Js Parse failed. animationArgs is null.");
         if (Container::IsCurrentUseNewPipeline()) {
+            NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
             pipelineContextBase->CloseImplicitAnimation();
         } else {
             ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
         }
         return;
     }
-    option = CreateAnimation(animationArgs);
+    option = CreateAnimation(animationArgs, pipelineContextBase->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
     if (Container::IsCurrentUseNewPipeline()) {
+        NG::ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
         pipelineContextBase->OpenImplicitAnimation(option, option.GetCurve(), onFinishEvent);
     } else {
         ViewStackProcessor::GetInstance()->SetImplicitAnimationOption(option);
@@ -261,7 +270,7 @@ void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
 
-    AnimationOption option = CreateAnimation(animationArgs);
+    AnimationOption option = CreateAnimation(animationArgs, pipelineContext->IsFormRender());
     if (SystemProperties::GetRosenBackendEnabled()) {
         bool usingSharedRuntime = container->GetSettings().usingSharedRuntime;
         LOGD("RSAnimationInfo: Begin JSAnimateTo, usingSharedRuntime: %{public}d", usingSharedRuntime);

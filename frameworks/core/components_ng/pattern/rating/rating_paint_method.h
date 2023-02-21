@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RATING_RATING_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RATING_RATING_PAINT_METHOD_H
 
+#include "core/components/rating/rating_theme.h"
+#include "core/components_ng/pattern/rating/rating_modifier.h"
+#include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
@@ -23,28 +26,44 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RatingPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(RatingPaintMethod, NodePaintMethod)
 public:
-    RatingPaintMethod(const RefPtr<CanvasImage>& foregroundImageCanvas, const RefPtr<CanvasImage>& secondaryImageCanvas,
-        const RefPtr<CanvasImage>& backgroundImageCanvas, const ImagePaintConfig& singleStarImagePaintConfig,
-        int32_t starNum)
-        : foregroundImageCanvas_(foregroundImageCanvas), secondaryImageCanvas_(secondaryImageCanvas),
-          backgroundImageCanvas_(backgroundImageCanvas), singleStarImagePaintConfig_(singleStarImagePaintConfig),
-          starNum_(starNum)
+    RatingPaintMethod(
+        const RefPtr<RatingModifier>& ratingModifier, int32_t starNum, RatingModifier::RatingAnimationType state)
+        : ratingModifier_(ratingModifier), starNum_(starNum), state_(state)
     {}
     ~RatingPaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(ratingModifier_, nullptr);
+        return ratingModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(ratingModifier_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto ratingTheme = pipeline->GetTheme<RatingTheme>();
+        CHECK_NULL_VOID(ratingTheme);
+        auto paintProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());
+        if (paintProperty) {
+            constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
+            ratingModifier_->SetDrawScore(paintProperty->GetRatingScoreValue(0.f));
+            ratingModifier_->SetStepSize(paintProperty->GetStepSize().value_or(ratingTheme->GetStepSize()));
+            ratingModifier_->SetTouchStar(paintProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER));
+        }
+        ratingModifier_->SetHoverState(state_);
+        ratingModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+        ratingModifier_->SetStartNum(starNum_);
+    }
 
 private:
-    RefPtr<CanvasImage> foregroundImageCanvas_;
-    RefPtr<CanvasImage> secondaryImageCanvas_;
-    RefPtr<CanvasImage> backgroundImageCanvas_;
+    RefPtr<RatingModifier> ratingModifier_;
 
-    ImagePaintConfig singleStarImagePaintConfig_;
     int32_t starNum_ = 0;
-
+    RatingModifier::RatingAnimationType state_;
     ACE_DISALLOW_COPY_AND_MOVE(RatingPaintMethod);
 };
 
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RATING_RATING_PAINT_METHOD_H

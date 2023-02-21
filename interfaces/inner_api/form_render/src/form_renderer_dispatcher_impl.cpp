@@ -14,12 +14,33 @@
  */
 #include "form_renderer_dispatcher_impl.h"
 
-#include "hilog_wrapper.h"
+#include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
+FormRendererDispatcherImpl::FormRendererDispatcherImpl(const std::shared_ptr<UIContent> uiContent)
+    : uiContent_(uiContent) {}
+
 void FormRendererDispatcherImpl::DispatchPointerEvent(
     const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
-{}
+{
+    auto uiContent = uiContent_.lock();
+    if (!uiContent) {
+        HILOG_ERROR("uiContent is nullptr");
+        return;
+    }
+
+    uiContent->ProcessPointerEvent(pointerEvent);
+}
+
+bool FormRendererDispatcherImpl::IsAllowUpdate()
+{
+    return allowUpdate_;
+}
+
+void FormRendererDispatcherImpl::SetAllowUpdate(bool allowUpdate)
+{
+    allowUpdate_ = allowUpdate;
+}
 } // namespace Ace
 } // namespace OHOS

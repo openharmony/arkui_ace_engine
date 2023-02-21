@@ -178,7 +178,7 @@ void SkiaCanvas::DrawImage(
     CHECK_NULL_VOID(skiaImage);
     auto imageObj = skiaImage->GetCanvasImage();
     CHECK_NULL_VOID(imageObj);
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     rawCanvas_->drawImageRect(imageObj, ToSkRect(srcRect), ToSkRect(dstRect), skiaPaint->GetSamplingOptions(),
         &skiaPaint->GetRawPaint(), SkCanvas::kFast_SrcRectConstraint);
 #else

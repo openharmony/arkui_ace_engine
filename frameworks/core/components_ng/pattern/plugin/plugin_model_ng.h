@@ -26,6 +26,8 @@ public:
     void SetOnError(std::function<void(const std::string&)>&& OnError) override;
     void SetPluginSize(const Dimension& width, const Dimension& height) override;
     void SetData(const std::string& data) override;
+    void SetWidth(const Dimension& width) override;
+    void SetHeight(const Dimension& height) override;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_MODEL_NG_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,6 +61,7 @@ void SystemProperties::InitDeviceType(DeviceType type)
 }
 
 bool SystemProperties::traceEnabled_ = false;
+bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -82,7 +83,11 @@ ColorMode SystemProperties::colorMode_ = ColorMode::LIGHT;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
+#ifndef ENABLE_ROSEN_BACKEND
 bool SystemProperties::rosenBackendEnabled_ = false;
+#else
+bool SystemProperties::rosenBackendEnabled_ = true;
+#endif
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
@@ -91,6 +96,7 @@ bool SystemProperties::astcEnabled_ = false;
 int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
+uint32_t SystemProperties::dumpFrameCount_ = 0;
 
 DeviceType SystemProperties::GetDeviceType()
 {

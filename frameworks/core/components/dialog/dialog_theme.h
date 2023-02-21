@@ -75,7 +75,7 @@ public:
                 themeConstants->GetDimension(THEME_DIALOG_PADDING_RIGHT_ADJUST),
                 themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM_ADJUST));
             theme->contentDefaultPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_LEFT),
-                themeConstants->GetDimension(THEME_DIALOG_TITLE_PADDING_VERTICAL),
+                themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM),
                 themeConstants->GetDimension(THEME_DIALOG_PADDING_RIGHT),
                 themeConstants->GetDimension(THEME_DIALOG_PADDING_BOTTOM));
             theme->contentAdjustPadding_ = Edge(themeConstants->GetDimension(THEME_DIALOG_PADDING_LEFT_ADJUST),

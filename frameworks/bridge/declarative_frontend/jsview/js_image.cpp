@@ -30,6 +30,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 
@@ -111,7 +112,7 @@ void JSImage::SetBorder(const Border& border)
 
 void JSImage::OnComplete(const JSCallbackInfo& args)
 {
-    LOGD("JSImage V8OnComplete");
+    LOGD("JSImage OnComplete");
     if (args[0]->IsFunction()) {
         auto jsLoadSuccFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageSuccessEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageSuccEventToJSValue);
@@ -130,7 +131,7 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
 
 void JSImage::OnError(const JSCallbackInfo& args)
 {
-    LOGD("JSImage V8OnError");
+    LOGD("JSImage OnError");
     if (args[0]->IsFunction()) {
         auto jsLoadFailFunc = AceType::MakeRefPtr<JsEventFunction<LoadImageFailEvent, 1>>(
             JSRef<JSFunc>::Cast(args[0]), LoadImageFailEventToJSValue);
@@ -149,7 +150,7 @@ void JSImage::OnError(const JSCallbackInfo& args)
 
 void JSImage::OnFinish(const JSCallbackInfo& info)
 {
-    LOGD("JSImage V8OnFinish");
+    LOGD("JSImage OnFinish");
     if (!info[0]->IsFunction()) {
         LOGE("info[0] is not a function.");
         return;
@@ -169,17 +170,52 @@ void JSImage::Create(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
+
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    // Interim programme
+    std::string bundleName;
+    std::string moduleName;
     std::string src;
     auto noPixMap = ParseJsMedia(info[0], src);
-
+    if (context->IsFormRender()) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(src);
+        bool notSupport = (
+            srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            LOGE("Not supported src : %{public}s when form render", src.c_str());
+            src.clear();
+        }
+    }
+    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
     RefPtr<PixelMap> pixMap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!noPixMap) {
-        pixMap = CreatePixelMapFromNapiValue(info[0]);
+        if (context->IsFormRender()) {
+            LOGE("Not supported pixMap when form render");
+        } else {
+            pixMap = CreatePixelMapFromNapiValue(info[0]);
+        }
     }
 #endif
+    ImageModel::GetInstance()->Create(src, noPixMap, pixMap, bundleName, moduleName);
+}
 
-    ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
+// Interim programme
+void JSImage::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
+{
+    if (!jsValue->IsObject() || jsValue->IsString()) {
+        return;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (!jsObj->IsUndefined()) {
+        JSRef<JSVal> bundle = jsObj->GetProperty("bundleName");
+        JSRef<JSVal> module = jsObj->GetProperty("moduleName");
+        if (bundle->IsString() && module->IsString()) {
+            bundleName = bundle->ToString();
+            moduleName = module->ToString();
+        }
+    }
 }
 
 void JSImage::JsBorder(const JSCallbackInfo& info)

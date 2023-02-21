@@ -26,6 +26,7 @@ public:
         const RefPtr<V2::BreakPoints>& breakpoints, V2::GridRowDirection direction) override;
     void SetOnBreakPointChange(std::function<void(const std::string)>&& onChange) override;
     void SetHeight() override;
+    void SetAlignItems(FlexAlign alignItem) override {};
 };
 } // namespace OHOS::Ace::Framework
 

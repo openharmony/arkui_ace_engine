@@ -83,6 +83,7 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_VIDEO,
     THEME_PATTERN_ICON,
     THEME_PATTERN_INDEXER,
+    THEME_PATTERN_APP_BAR,
 };
 
 bool IsDirExist(const std::string& path)
@@ -518,6 +519,7 @@ void ResourceAdapterImpl::UpdateResourceManager(const std::string& bundleName, c
         return;
     }
 
+    std::lock_guard<std::mutex> lock(resourceMutex_);
     auto resourceMgrIter = resourceManagers_.find({ bundleName, moduleName });
     if (resourceMgrIter != resourceManagers_.end()) {
         resourceManager_ = resourceMgrIter->second;

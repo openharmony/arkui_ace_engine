@@ -140,6 +140,8 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnShow()
 {
+    // Do not invoke onPageShow unless the initialRender function has been executed.
+    CHECK_NULL_VOID_NOLOG(isRenderDone_);
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
     isOnShow_ = true;
     auto context = PipelineContext::GetCurrentContext();

@@ -84,15 +84,42 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return task;
 }
 
+void ImagePattern::PrepareAnimation()
+{
+    if (image_->IsStatic()) {
+        return;
+    }
+    SetRedrawCallback();
+    RegisterVisibleAreaChange();
+}
+
 void ImagePattern::SetRedrawCallback()
 {
-    // set animation flush function for svg / gif
     CHECK_NULL_VOID_NOLOG(image_);
+    // set animation flush function for svg / gif
     image_->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();
     });
+}
+
+void ImagePattern::RegisterVisibleAreaChange()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    // register to onVisibleAreaChange
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        LOGD("current image visible ratio = %f", ratio);
+        self->OnVisibleChange(visible);
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // reset visibleAreaChangeNode
+    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
 }
 
 void ImagePattern::OnImageLoadSuccess()
@@ -113,8 +140,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    SetRedrawCallback();
-
+    PrepareAnimation();
     if (draggable_) {
         EnableDrag();
     }
@@ -389,7 +415,7 @@ void ImagePattern::OnWindowShow()
 
 void ImagePattern::OnVisibleChange(bool visible)
 {
-    CHECK_NULL_VOID(image_);
+    CHECK_NULL_VOID_NOLOG(image_);
     // control svg / gif animation
     image_->ControlAnimation(visible);
 }
@@ -401,15 +427,36 @@ void ImagePattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToBounds(false);
 }
 
+void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto id = frameNode->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
+    pipeline->RemoveNodesToNotifyMemoryLevel(id);
+    pipeline->RemoveVisibleAreaChangeNode(id);
+}
+
 void ImagePattern::EnableDrag()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetContentSize();
-    auto dragStart = [image = image_, ctx = loadingCtx_, size](const RefPtr<OHOS::Ace::DragEvent>& /*event*/,
+    auto dragStart = [imageWk = WeakClaim(RawPtr(image_)), ctxWk = WeakClaim(RawPtr(loadingCtx_)), size](
+                         const RefPtr<OHOS::Ace::DragEvent>& /*event*/,
                          const std::string& /*extraParams*/) -> DragDropInfo {
         DragDropInfo info;
+        auto image = imageWk.Upgrade();
+        auto ctx = ctxWk.Upgrade();
+        CHECK_NULL_RETURN(image && ctx, info);
+
         info.extraInfo = "image drag";
+        info.pixelMap = image->GetPixelMap();
+        if (info.pixelMap) {
+            LOGI("using pixmap onDrag");
+            return info;
+        }
+
         auto node = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             []() { return AceType::MakeRefPtr<ImagePattern>(); });
         auto pattern = node->GetPattern<ImagePattern>();

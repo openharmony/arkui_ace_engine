@@ -61,7 +61,7 @@ void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProper
         pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
     }
 
-    Color strokeColor = Color::BLACK;
+    Color strokeColor = Color::TRANSPARENT;
     if (shapePaintProperty.HasStroke()) {
         strokeColor = shapePaintProperty.GetStrokeValue();
     }

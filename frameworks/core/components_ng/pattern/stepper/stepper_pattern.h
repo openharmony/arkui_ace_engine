@@ -16,11 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STEPPER_STEPPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STEPPER_STEPPER_PATTERN_H
 
+#include "core/components/stepper/stepper_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stepper/stepper_event_hub.h"
 #include "core/components_ng/pattern/stepper/stepper_layout_algorithm.h"
 #include "core/components_ng/pattern/stepper/stepper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,6 +36,11 @@ public:
     ~StepperPattern() override = default;
 
     bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    bool UsResRegion() override
     {
         return false;
     }
@@ -58,6 +65,18 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    static RefPtr<StepperTheme> GetTheme()
+    {
+        static RefPtr<StepperTheme> stepperTheme;
+        if (!stepperTheme) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_RETURN(pipeline, nullptr);
+            stepperTheme = pipeline->GetTheme<StepperTheme>();
+            CHECK_NULL_RETURN(stepperTheme, nullptr);
+        }
+        return stepperTheme;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -76,7 +95,14 @@ private:
     void InitButtonClickEvent();
     void HandlingLeftButtonClickEvent();
     void HandlingRightButtonClickEvent();
-    void SetButtonOnHoverBoardColor(RefPtr<FrameNode> buttonNode, const Color& buttonOnHoverBoardColor);
+    void InitButtonOnHoverEvent(RefPtr<FrameNode> buttonNode, bool isLeft);
+    void ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHover, bool isLeft);
+    void ButtonHoverInAnimation(RefPtr<FrameNode> buttonNode);
+    void ButtonHoverOutAnimation(RefPtr<FrameNode> buttonNode);
+    void InitButtonTouchEvent(RefPtr<FrameNode> buttonNode);
+    void ButtonOnTouch(RefPtr<FrameNode> buttonNode, TouchType touchType);
+    void ButtonTouchDownAnimation(RefPtr<FrameNode> buttonNode);
+    void ButtonTouchUpAnimation(RefPtr<FrameNode> buttonNode);
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
@@ -85,6 +111,9 @@ private:
     RefPtr<ClickEvent> leftClickEvent_;
     RefPtr<ClickEvent> rightClickEvent_;
     RefPtr<InputEvent> buttonOnHoverListenr_;
+    RefPtr<TouchEventImpl> buttonTouchListenr_;
+    bool leftIsHover_ = false;
+    bool rightIsHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
 };
 

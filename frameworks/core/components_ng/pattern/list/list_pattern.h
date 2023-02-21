@@ -20,6 +20,7 @@
 #include "core/animation/simple_spring_chain.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_paint_method.h"
@@ -176,6 +177,7 @@ public:
         multiSelectable_ = multiSelectable;
     }
 
+    void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
 private:
     void OnScrollEndCallback() override;
 
@@ -248,6 +250,9 @@ private:
     bool isMouseEventInit_ = false;
     OffsetF mouseStartOffset_;
     OffsetF mouseEndOffset_;
+
+    // ListItem swiperAction
+    WeakPtr<ListItemPattern> swiperItem_;
 };
 } // namespace OHOS::Ace::NG
 

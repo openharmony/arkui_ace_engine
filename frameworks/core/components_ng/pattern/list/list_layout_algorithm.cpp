@@ -176,9 +176,13 @@ void ListLayoutAlgorithm::MeasureList(
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
     }
-    if (jumpIndex_ && (jumpIndex_.value() < 0 || jumpIndex_.value() >= totalItemCount_)) {
-        LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
-        jumpIndex_.reset();
+    if (jumpIndex_) {
+        if (jumpIndex_.value() == LAST_ITEM) {
+            jumpIndex_ = totalItemCount_ - 1;
+        } else if ((jumpIndex_.value() < 0) || (jumpIndex_.value() >= totalItemCount_)) {
+            LOGW("jump index is illegal, %{public}d, %{public}d", jumpIndex_.value(), totalItemCount_);
+            jumpIndex_.reset();
+        }
     }
     if (jumpIndex_) {
         LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
@@ -226,7 +230,8 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
     ++currentIndex;
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
-        SetListItemGroupParam(wrapper, startPos, true);
+        auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -249,7 +254,8 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
     --currentIndex;
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
-        SetListItemGroupParam(wrapper, endPos, false);
+        auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty);
     }
     {
         ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d", currentIndex);
@@ -282,7 +288,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + paddingAfterContent_));
+    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutForward");
@@ -311,12 +317,18 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             startMainPos_ = currentEndPos - contentMainSize_;
             endMainPos_ = currentEndPos;
         }
+        if (Negative(currentOffset_) && itemPosition_.begin()->second.isGroup) {
+            AdjustPostionForListItemGroup(layoutWrapper, axis, GetStartIndex());
+        }
     }
 
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (GreatOrEqual(pos->second.endPos + chainOffset, startMainPos_ - paddingBeforeContent_)) {
+        if (GreatOrEqual(pos->second.endPos + chainOffset, startMainPos_)) {
+            if (pos->second.isGroup) {
+                CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.startPos + chainOffset, true);
+            }
             break;
         }
         LOGI("recycle item:%{public}d", pos->first);
@@ -346,7 +358,7 @@ void ListLayoutAlgorithm::LayoutBackward(
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
-    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos - paddingBeforeContent_));
+    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutBackward");
@@ -357,6 +369,10 @@ void ListLayoutAlgorithm::LayoutBackward(
     if (GreatNotEqual(currentStartPos, startMainPos_)) {
         if (!canOverScroll_ || jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos;
+            if (!mainSizeIsDefined_ && GetEndIndex() == totalItemCount_ - 1) {
+                auto itemTotalSize = GetEndPosition() - currentStartPos;
+                contentMainSize_ = std::min(contentMainSize_, itemTotalSize);
+            }
         }
         endMainPos_ = currentStartPos + contentMainSize_;
         startMainPos_ = currentStartPos;
@@ -366,7 +382,10 @@ void ListLayoutAlgorithm::LayoutBackward(
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (LessOrEqual(pos->second.startPos + chainOffset, endMainPos_ + paddingAfterContent_)) {
+        if (LessOrEqual(pos->second.startPos + chainOffset, endMainPos_)) {
+            if (pos->second.isGroup) {
+                CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.endPos + chainOffset, false);
+            }
             break;
         }
         layoutWrapper->RemoveChildInRenderTree(pos->first);
@@ -448,15 +467,50 @@ float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float child
     }
 }
 
-void ListLayoutAlgorithm::SetListItemGroupParam(
-    const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout) const
+void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos,
+    bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty) const
 {
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
-    itemGroup->SetListMainSize(
-        startMainPos_ - paddingBeforeContent_, endMainPos_ + paddingAfterContent_, referencePos, forwardLayout);
+    itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
+    itemGroup->SetListLayoutProperty(layoutProperty);
+}
+
+void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper, int32_t index,
+    float referencePos, bool forwardLayout) const
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    auto algorithmWrapper = wrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(algorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    itemGroup->CheckRecycle(wrapper, startMainPos_, endMainPos_, referencePos, forwardLayout);
+}
+
+void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    auto algorithmWrapper = wrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(algorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    itemGroup->SetListMainSize(startMainPos_, endMainPos_, itemPosition_[index].endPos, false);
+    itemGroup->Measure(AceType::RawPtr(wrapper));
+    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
+    float delta = 0.0f;
+    for (auto& pos : itemPosition_) {
+        if (pos.first == index) {
+            delta = (pos.second.endPos - pos.second.startPos) - mainLen;
+            pos.second.endPos = pos.second.startPos + mainLen;
+        } else if (pos.first > index) {
+            pos.second.startPos -= delta;
+            pos.second.endPos -= delta;
+        }
+    }
 }
 
 void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)

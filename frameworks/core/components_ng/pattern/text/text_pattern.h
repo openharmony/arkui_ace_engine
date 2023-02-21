@@ -19,8 +19,10 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
@@ -30,7 +32,6 @@
 #include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -93,6 +94,35 @@ public:
         return textForDisplay_;
     }
 
+    const OffsetF& GetStartOffset() const
+    {
+        return textSelector_.selectionBaseOffset;
+    }
+
+    const OffsetF& GetEndOffset() const
+    {
+        return textSelector_.selectionDestinationOffset;
+    }
+
+    double GetSelectHeight() const
+    {
+        return textSelector_.GetSelectHeight();
+    }
+
+    void GetGlobalOffset(Offset& offset);
+
+    const RectF& GetTextContentRect() const
+    {
+        return contentRect_;
+    }
+
+    float GetBaselineOffset() const
+    {
+        return baselineOffset_;
+    }
+
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -108,10 +138,16 @@ private:
     void OnHandleTouchUp();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClickEvent(GestureEvent& info);
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandlePanStart(const GestureEvent& info);
+    void HandlePanUpdate(const GestureEvent& info);
+    void HandlePanEnd(const GestureEvent& info);
 
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void InitSelection(const Offset& pos);
     void CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+
+    bool IsDraggable(const Offset& offset);
 
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
@@ -124,6 +160,8 @@ private:
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     RefPtr<Clipboard> clipboard_;
+    RefPtr<DragWindow> dragWindow_;
+    RefPtr<DragDropProxy> dragDropProxy_;
     CopyOptions copyOption_ = CopyOptions::None;
     TextSelector textSelector_;
     OffsetF contentOffset_;
@@ -131,6 +169,8 @@ private:
     float baselineOffset_ = 0.0f;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    bool panEventInitialized_ = false;
+    bool draggable_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };

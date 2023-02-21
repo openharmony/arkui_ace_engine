@@ -68,6 +68,7 @@ extern const char THEME_PATTERN_TEXTFIELD[];
 extern const char THEME_PATTERN_TEXT_OVERLAY[];
 extern const char THEME_PATTERN_VIDEO[];
 extern const char THEME_PATTERN_INDEXER[];
+extern const char THEME_PATTERN_APP_BAR[];
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];
@@ -140,5 +141,6 @@ extern const char DRAG_BAR_COLOR[];
 extern const char POPUP_BORDER_RADIUS[];
 extern const char POPUP_HORIZONTAL_PADDING[];
 extern const char POPUP_VERTICAL_PADDING[];
+extern const char POPUP_BUTTON_TEXT_FONT_SIZE[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SKIA_CANVAS_IMAGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SKIA_CANVAS_IMAGE_H
 
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
 #include "flutter/flow/skia_gpu_object.h"
 #include "third_party/skia/include/core/SkImage.h"
 #else
@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG {
 class SkiaCanvasImage : public CanvasImage {
     DECLARE_ACE_TYPE(SkiaCanvasImage, CanvasImage)
 public:
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
     explicit SkiaCanvasImage(const fml::RefPtr<flutter::CanvasImage>& image) : image_(image) {}
 #else
     SkiaCanvasImage() = default;
@@ -40,25 +40,27 @@ public:
 
     virtual sk_sp<SkImage> GetCanvasImage() const
     {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
         if (image_) {
             return image_->image();
         }
 #endif
         return nullptr;
     }
+
     virtual sk_sp<SkData> GetCompressData() const
     {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
         if (image_) {
             return image_->compressData();
         }
 #endif
         return nullptr;
     }
+
     void SetCompressData(sk_sp<SkData> data, int32_t w, int32_t h)
     {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
         if (image_) {
             image_->setCompress(data, w, h);
             auto skimage = image_->image();
@@ -66,27 +68,30 @@ public:
         }
 #endif
     }
+
     virtual int32_t GetCompressWidth() const
     {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
         if (image_) {
             return image_->compressWidth();
         }
 #endif
         return 0;
     }
+
     virtual int32_t GetCompressHeight() const
     {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
         if (image_) {
             return image_->compressHeight();
         }
 #endif
         return 0;
     }
+
     virtual uint32_t GetUniqueID() const
     {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
         if (image_ && image_->image()) {
             return image_->image()->uniqueID();
         }
@@ -94,13 +99,15 @@ public:
 #endif
         return 0;
     }
+
     virtual void SetUniqueID(uint32_t id)
     {
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
         uniqueId_ = id;
 #endif
     }
-#ifndef NG_BUILD
+
+#ifndef FLUTTER_2_5
     virtual fml::RefPtr<flutter::CanvasImage> GetFlutterCanvasImage() const
     {
         if (image_) {
@@ -109,13 +116,18 @@ public:
         return nullptr;
     }
 #endif
+
+    RefPtr<CanvasImage> Clone() override;
+
+    RefPtr<PixelMap> GetPixelMap() override;
+
     void ReplaceSkImage(flutter::SkiaGPUObject<SkImage> newSkGpuObjSkImage);
     int32_t GetWidth() const override;
     int32_t GetHeight() const override;
 
     void AddFilter(SkPaint& paint);
-    void DrawToRSCanvas(RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect,
-        const BorderRadiusArray& radiusXY) override;
+    void DrawToRSCanvas(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
 
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
@@ -123,8 +135,11 @@ public:
     static SkColorType PixelFormatToSkColorType(const RefPtr<PixelMap>& pixmap);
 
 private:
+    void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
+    bool DrawCompressedImage(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
     // TODO: should not deps on flutter.
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
     uint32_t uniqueId_;
     fml::RefPtr<flutter::CanvasImage> image_;
 #endif

@@ -54,11 +54,13 @@ void OptionPaintMethod::PaintDivider(RSCanvas& canvas, PaintWrapper* paintWrappe
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     auto optionSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto horInterval = selectTheme->GetMenuIconPadding().ConvertToPx();
+    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
+                       static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
 
     RSPath path;
     // draw divider above content, length = content width
-    path.AddRect(horInterval, 0, optionSize.Width() - horInterval, selectTheme->GetDefaultDividerWidth().ConvertToPx());
+    path.AddRect(horInterval, 0, optionSize.Width() - horInterval,
+        static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx()));
     LOGD("drawing option divider with length %{public}f", optionSize.Width() - 2 * horInterval);
 
     RSBrush brush;

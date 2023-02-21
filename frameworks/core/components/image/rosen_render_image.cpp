@@ -425,7 +425,7 @@ void RosenRenderImage::UpdateSharedMemoryImage(const RefPtr<PipelineContext>& co
         return;
     }
     auto nameOfSharedImage = ImageLoader::RemovePathHead(sourceInfo_.GetSrc());
-    if (sharedImageManager->IsResourceToReload(nameOfSharedImage, AceType::WeakClaim(this))) {
+    if (sharedImageManager->RegisterLoader(nameOfSharedImage, AceType::WeakClaim(this))) {
         // This case means that the image to load is a memory image and its data is not ready.
         // Add [this] to [providerMapToReload_] so that it will be notified to start loading image.
         // When the data is ready, [SharedImageManager] will call [UpdateData] in [AddImageData].
@@ -773,7 +773,6 @@ void RosenRenderImage::CanvasDrawImageRect(
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
         return;
     }
-#ifdef OHOS_PLATFORM
     int fitNum = static_cast<int>(imageFit_);
     int repeatNum = static_cast<int>(imageRepeat_);
     auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(canvas);
@@ -812,7 +811,6 @@ void RosenRenderImage::CanvasDrawImageRect(
     canvas->drawImageRect(image_->image(), skSrcRect, skDstRect, &paint);
     LOGD("dstRect params: %{public}s", realDstRect.ToString().c_str());
     LOGD("scaledSrcRect params: %{public}s", scaledSrcRect.ToString().c_str());
-#endif
 }
 
 void RosenRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect, const SkPaint& paint,

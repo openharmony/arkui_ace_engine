@@ -45,9 +45,10 @@
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/gestures/gesture_info.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
@@ -467,18 +468,16 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 
         JSRef<JSVal> actionValue = obj->GetProperty("action");
         if (actionValue->IsFunction()) {
-            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(actionValue));
             if (popupParam) {
-                auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
-                                         TouchEventInfo&) {
+                auto clickCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
+                                         GestureEvent& info) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                     ACE_SCORING_EVENT("primaryButton.action");
-                    LOGI("Call primary touch");
-                    func->Execute();
+                    LOGI("Call primary click");
+                    func->Execute(info);
                 };
-                properties.touchFunc = touchCallback;
-            } else {
-                LOGI("Empty");
+                properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
             }
         }
         properties.showButton = true;
@@ -500,18 +499,16 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
 
         JSRef<JSVal> actionValue = obj->GetProperty("action");
         if (actionValue->IsFunction()) {
-            auto actionFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(actionValue));
+            auto jsOnClickFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(actionValue));
             if (popupParam) {
-                auto touchCallback = [execCtx = info.GetExecutionContext(), func = std::move(actionFunc)](
-                                         TouchEventInfo&) {
+                auto clickCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
+                                         GestureEvent& info) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("secondaryButton.action");
-                    LOGI("Call primary touch");
-                    func->Execute();
+                    ACE_SCORING_EVENT("primaryButton.action");
+                    LOGI("Call primary click");
+                    func->Execute(info);
                 };
-                properties.touchFunc = touchCallback;
-            } else {
-                LOGI("Empty.");
+                properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
             }
         }
         properties.showButton = true;
@@ -1161,12 +1158,14 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
+    int32_t value = 0.0;
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER };
     if (!CheckJSCallbackInfo("JsLayoutWeight", info, checkList)) {
-        return;
+        if (!info[0]->IsUndefined()) {
+            return;
+        }
     }
 
-    int32_t value;
     if (info[0]->IsNumber()) {
         value = info[0]->ToNumber<int32_t>();
     } else {
@@ -1193,6 +1192,8 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
     Dimension y;
     if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->SetPosition(x, y);
+    } else {
+        ViewAbstractModel::GetInstance()->SetPosition(0.0_vp, 0.0_vp);
     }
 }
 
@@ -1202,6 +1203,8 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
     Dimension y;
     if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->MarkAnchor(x, y);
+    } else {
+        ViewAbstractModel::GetInstance()->MarkAnchor(0.0_vp, 0.0_vp);
     }
 }
 
@@ -1211,6 +1214,8 @@ void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
     Dimension y;
     if (ParseLocationProps(info, x, y)) {
         ViewAbstractModel::GetInstance()->SetOffset(x, y);
+    } else {
+        ViewAbstractModel::GetInstance()->SetOffset(0.0_vp, 0.0_vp);
     }
 }
 
@@ -1364,6 +1369,10 @@ void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
+    }
+    // flexbasis don't support percent case.
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        value.SetUnit(DimensionUnit::AUTO);
     }
     ViewAbstractModel::GetInstance()->SetFlexBasis(value);
 }
@@ -1526,7 +1535,7 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        return;
+        backgroundColor = Color::TRANSPARENT;
     }
 
     ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
@@ -1765,9 +1774,6 @@ void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
 {
-    if (info[0]->IsUndefined()) {
-        return;
-    }
     if (info[0]->IsObject()) {
         std::optional<Dimension> left;
         std::optional<Dimension> right;
@@ -4501,8 +4507,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
         CHECK_NULL_RETURN(cardPipelineContext, nullptr);
         auto cardThemeManager = cardPipelineContext->GetThemeManager();
         CHECK_NULL_RETURN(cardThemeManager, nullptr);
-        cardThemeManager->UpdateThemeConstants(bundleName, moduleName);
-        return cardThemeManager->GetThemeConstants();
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
     }
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -4522,8 +4527,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
             LOGE("pluginThemeManager is null!");
             return nullptr;
         }
-        pluginThemeManager->UpdateThemeConstants(bundleName, moduleName);
-        return pluginThemeManager->GetThemeConstants();
+        return pluginThemeManager->GetThemeConstants(bundleName, moduleName);
     }
 #endif
     auto container = Container::Current();
@@ -4532,8 +4536,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
-    themeManager->UpdateThemeConstants(bundleName, moduleName);
-    return themeManager->GetThemeConstants();
+    return themeManager->GetThemeConstants(bundleName, moduleName);
 }
 
 void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)

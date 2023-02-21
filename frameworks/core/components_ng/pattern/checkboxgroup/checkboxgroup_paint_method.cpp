@@ -100,7 +100,7 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
     pen.SetWidth(borderWidth_);
     pen.SetAntiAlias(true);
     if (isTouch_) {
-        DrawTouchBoard(canvas, contentSize, paintOffset);
+        LOGI("Touch effect is to be realized here");
     }
     if (isHover_) {
         DrawHoverBoard(canvas, contentSize, paintOffset);
@@ -134,7 +134,7 @@ void CheckBoxGroupPaintMethod::PaintCheckBox(RSCanvas& canvas, PaintWrapper* pai
         }
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
         DrawAnimationOnToOff(canvas, paintOffset, pen, contentSize);
-    } else if (uiStatus_ == UIStatus::UNSELECTED && status != CheckBoxGroupPaintProperty::SelectStatus::PART) {
+    } else if (uiStatus_ == UIStatus::UNSELECTED || uiStatus_ == UIStatus::PART_TO_OFF) {
         brush.SetColor(ToRSColor(inactivePointColor_));
         pen.SetColor(ToRSColor(inactiveColor_));
         if (!enabled_) {

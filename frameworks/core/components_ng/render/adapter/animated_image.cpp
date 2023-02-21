@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t STANDARD_FRAME_DURATION = 100;
+constexpr int32_t FORM_REPEAT_COUNT = 1;
 } // namespace
 
 AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, const std::string& url)
@@ -33,7 +34,9 @@ AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, 
 {
     // set up animator
     int32_t totalDuration = 0;
-    animator_ = MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    animator_ = MakeRefPtr<Animator>(pipelineContext);
     CHECK_NULL_VOID(animator_);
 
     auto info = codec_->getFrameInfo();
@@ -45,6 +48,9 @@ AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, 
     }
     animator_->SetDuration(totalDuration);
     animator_->SetIteration(codec_->getRepetitionCount());
+    if (pipelineContext->IsFormRender()) {
+        animator_->SetIteration(FORM_REPEAT_COUNT);
+    }
 
     // initialize PictureAnimation interpolator
     auto picAnimation = MakeRefPtr<PictureAnimation<uint32_t>>();
@@ -158,7 +164,7 @@ bool AnimatedImage::GetCachedFrame(uint32_t idx)
     auto cache = ctx->GetImageCache();
     CHECK_NULL_RETURN(cache, false);
     auto image = cache->GetCacheImageNG(cacheKey_ + std::to_string(idx));
-    CHECK_NULL_RETURN(image && image->imagePtr, false);
+    CHECK_NULL_RETURN_NOLOG(image && image->imagePtr, false);
     currentFrame_ = image->imagePtr;
     LOGD("frame cache found src = %{public}s, frame = %{public}d", cacheKey_.c_str(), idx);
     return true;

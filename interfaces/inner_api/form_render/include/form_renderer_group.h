@@ -16,26 +16,54 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_GROUP_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_GROUP_H
 
-#include <map>
-
-#include "form_renderer.h"
+#include <unordered_map>
+#include <memory>
+#include <string>
 
 namespace OHOS {
+namespace AbilityRuntime {
+class Context;
+class Runtime;
+}
+
+namespace AAFwk {
+class Want;
+}
+
+namespace AppExecFwk {
+struct FormJsInfo;
+}
+
 namespace Ace {
+#ifndef ACE_EXPORT
+#define ACE_EXPORT __attribute__((visibility("default")))
+#endif
+
+class FormRenderer;
+
 /**
  * @class FormRendererGroup
  * FormRendererGroup interface is used to form renderer group.
+ * Provider:FormRendererGroup:runtime = 1:1:1
+ * FormRendererGroup:FormRenderer = 1:compId
  */
-class FormRendererGroup {
+class ACE_EXPORT FormRendererGroup {
 public:
-    FormRendererGroup() = default;
+    static std::shared_ptr<FormRendererGroup> Create(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+                                                     const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
+
+    FormRendererGroup(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+                      const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
     ~FormRendererGroup() = default;
-    
-    void AddForm();
-    void UpdateForm();
+
+    void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void DeleteForm(const std::string& compId);
 
 private:
-    std::map<std::string, std::shared_ptr<FormRenderer>> rendererMap_;
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
+    std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
+    std::unordered_map<std::string, std::shared_ptr<FormRenderer>> rendererMap_;
 };
 }  // namespace Ace
 }  // namespace OHOS

@@ -185,6 +185,8 @@ public:
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // inspector debugLine
+    static void SetDebugLine(const std::string& line);
     // transition
     static void SetTransition(const TransitionOptions& options);
     // sharedTransition

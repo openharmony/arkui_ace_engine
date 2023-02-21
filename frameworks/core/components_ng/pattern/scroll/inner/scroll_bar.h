@@ -91,7 +91,7 @@ public:
     ~ScrollBar() override = default;
 
     bool InBarTouchRegion(const Point& point) const;
-    bool InBarRegion(const Point& point) const;
+    bool InBarActiveRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
@@ -287,6 +287,16 @@ public:
         return isPressed_;
     }
 
+    void SetHover(bool hover)
+    {
+        isHover_ = hover;
+    }
+
+    bool IsHover() const
+    {
+        return isHover_;
+    }
+
     void SetDriving(bool isDriving)
     {
         isDriving_ = isDriving;
@@ -347,7 +357,7 @@ private:
     void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
     double NormalizeToPx(const Dimension& dimension) const;
 
-    DisplayMode displayMode_ = DisplayMode::OFF;
+    DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
     Edge padding_;

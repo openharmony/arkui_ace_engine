@@ -38,28 +38,6 @@ enum class TouchType : size_t {
     UNKNOWN,
 };
 
-struct TouchRestrict final {
-    static constexpr uint32_t NONE = 0x00000000;
-    static constexpr uint32_t CLICK = 0x00000001;
-    static constexpr uint32_t LONG_PRESS = 0x00000010;
-    static constexpr uint32_t SWIPE_LEFT = 0x00000100;
-    static constexpr uint32_t SWIPE_RIGHT = 0x00000200;
-    static constexpr uint32_t SWIPE_UP = 0x00000400;
-    static constexpr uint32_t SWIPE_DOWN = 0x00000800;
-    static constexpr uint32_t SWIPE = 0x00000F00;
-    static constexpr uint32_t SWIPE_VERTICAL = 0x0000C00;   // Vertical
-    static constexpr uint32_t SWIPE_HORIZONTAL = 0x0000300; // Horizontal
-    static constexpr uint32_t TOUCH = 0xFFFFFFFF;
-
-    uint32_t forbiddenType = NONE;
-
-    void UpdateForbiddenType(uint32_t gestureType)
-    {
-        forbiddenType |= gestureType;
-    }
-    SourceType sourceType = SourceType::NONE;
-};
-
 struct TouchPoint final {
     int32_t id = 0;
     float x = 0.0f;
@@ -178,6 +156,32 @@ struct TouchEvent final {
         event.pointers.emplace_back(std::move(point));
         return event;
     }
+};
+
+struct TouchRestrict final {
+    static constexpr uint32_t NONE = 0x00000000;
+    static constexpr uint32_t CLICK = 0x00000001;
+    static constexpr uint32_t LONG_PRESS = 0x00000010;
+    static constexpr uint32_t SWIPE_LEFT = 0x00000100;
+    static constexpr uint32_t SWIPE_RIGHT = 0x00000200;
+    static constexpr uint32_t SWIPE_UP = 0x00000400;
+    static constexpr uint32_t SWIPE_DOWN = 0x00000800;
+    static constexpr uint32_t SWIPE = 0x00000F00;
+    static constexpr uint32_t SWIPE_VERTICAL = 0x0000C00;   // Vertical
+    static constexpr uint32_t SWIPE_HORIZONTAL = 0x0000300; // Horizontal
+    static constexpr uint32_t TOUCH = 0xFFFFFFFF;
+
+    uint32_t forbiddenType = NONE;
+
+    void UpdateForbiddenType(uint32_t gestureType)
+    {
+        forbiddenType |= gestureType;
+    }
+    SourceType sourceType = SourceType::NONE;
+
+    SourceType hitTestType = SourceType::TOUCH;
+
+    TouchEvent touchEvent;
 };
 
 class TouchCallBackInfo : public BaseEventInfo {
@@ -352,6 +356,10 @@ class ACE_EXPORT TouchEventTarget : public virtual AceType {
     DECLARE_ACE_TYPE(TouchEventTarget, AceType);
 
 public:
+    TouchEventTarget() = default;
+    TouchEventTarget(std::string nodeName, int32_t nodeId) : nodeName_(std::move(nodeName)), nodeId_(nodeId) {}
+    ~TouchEventTarget() override = default;
+
     // if return false means need to stop event dispatch.
     virtual bool DispatchEvent(const TouchEvent& point) = 0;
     // if return false means need to stop event bubbling.
@@ -423,12 +431,24 @@ public:
         return HandleEvent(point);
     }
 
+    std::string GetNodeName() const
+    {
+        return nodeName_;
+    }
+
+    int32_t GetNodeId() const
+    {
+        return nodeId_;
+    }
+
 protected:
     Offset coordinateOffset_;
     GetEventTargetImpl getEventTargetImpl_;
     TouchRestrict touchRestrict_ { TouchRestrict::NONE };
     Offset subPipelineGlobalOffset_;
     float viewScale_ = 1.0f;
+    std::string nodeName_ = "NULL";
+    int32_t nodeId_ = -1;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;

@@ -57,8 +57,7 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    static RefPtr<PipelineContext> pipeline = AceType::MakeRefPtr<PipelineContext>();
-    return pipeline;
+    return AceType::MakeRefPtr<PipelineContext>();
 }
 
 // non-static method
@@ -220,4 +219,16 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::FlushPipelineImmediately() {}
+
+FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
+{
+    return nullptr;
+}
+
+void PipelineContext::DumpPipelineInfo() const {}
+
+void PipelineContext::AddVisibleAreaChangeNode(
+    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
+{}
+void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 } // namespace OHOS::Ace::NG

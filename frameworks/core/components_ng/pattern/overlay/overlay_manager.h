@@ -97,6 +97,11 @@ public:
      */
     bool RemoveOverlay();
 
+    void RegisterOnHideMenu(std::function<void()> callback)
+    {
+        onHideMenuCallback_ = callback;
+    }
+
 private:
     void PopToast(int32_t targetId);
 
@@ -124,6 +129,9 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     WeakPtr<UINode> rootNodeWeak_;
+
+    std::function<void()> onHideMenuCallback_ = nullptr;
+    CancelableCallback<void()> continuousTask_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };

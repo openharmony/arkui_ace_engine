@@ -65,7 +65,7 @@ public:
     void UpdateTouchRect() override;
 
 protected:
-    void OnMouseTestHit(const Offset& coordinateOffset, MouseTestResult& result) override;
+    void OnMouseTestHit(const Offset& coordinateOffset, MouseRawResult& result) override;
 
 private:
     RefPtr<MouseRawRecognizer> recognizer_;

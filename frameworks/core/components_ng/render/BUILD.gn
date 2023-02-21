@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,7 @@ build_component_ng("render_ng") {
     "adapter/animated_image.cpp",
     "adapter/fake_animation_utils.cpp",
     "adapter/fake_modifier_adapter.cpp",
+    "adapter/form_render_window.cpp",
     "adapter/pixelmap_image.cpp",
     "adapter/skia_canvas.cpp",
     "adapter/skia_canvas_image.cpp",
@@ -67,4 +68,12 @@ build_component_ng("render_ng") {
     "adapter/rosen_render_surface.cpp",
     "adapter/rosen_window.cpp",
   ]
+
+  if (current_os != "ohos") {
+    rosen_sources -= [
+      "adapter/rosen_media_player.cpp",
+      "adapter/rosen_render_surface.cpp",
+    ]
+    rosen_sources += [ "adapter/rosen_render_surface_mingw.cpp" ]
+  }
 }

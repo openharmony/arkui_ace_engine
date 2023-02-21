@@ -28,10 +28,36 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+
+void ToggleButtonPattern::OnAttachToFrameNode()
+{
+    InitParameters();
+}
+
+void ToggleButtonPattern::InitParameters()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
+    CHECK_NULL_VOID(toggleTheme);
+    checkedColor_ = toggleTheme->GetCheckedColor();
+    unCheckedColor_ = toggleTheme->GetBackgroundColor();
+    textMargin_ = toggleTheme->GetTextMargin();
+    buttonMargin_ = toggleTheme->GetButtonMargin();
+    buttonHeight_ = toggleTheme->GetButtonHeight();
+    buttonRadius_ = toggleTheme->GetButtonRadius();
+    textFontSize_ = toggleTheme->GetTextFontSize();
+    textColor_ = toggleTheme->GetTextColor();
+    disabledAlpha_ = toggleTheme->GetDisabledAlpha();
+    auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    clickedColor_ = buttonTheme->GetClickedColor();
+}
 
 void ToggleButtonPattern::OnModifyDone()
 {
@@ -58,20 +84,14 @@ void ToggleButtonPattern::OnModifyDone()
         changed = isOn ^ isOn_.value();
         isOn_ = isOn;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
-    CHECK_NULL_VOID(toggleTheme);
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
     if (isOn_.value()) {
-        auto color = toggleTheme->GetCheckedColor();
-        auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(color);
+        auto selectedColor = buttonPaintProperty->GetSelectedColor().value_or(checkedColor_);
         renderContext->UpdateBackgroundColor(selectedColor);
     } else {
-        auto backgroundColor = toggleTheme->GetBackgroundColor();
-        auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(backgroundColor);
+        auto bgColor = buttonPaintProperty->GetBackgroundColor().value_or(unCheckedColor_);
         renderContext->UpdateBackgroundColor(bgColor);
     }
 
@@ -80,20 +100,49 @@ void ToggleButtonPattern::OnModifyDone()
         CHECK_NULL_VOID(toggleButtonEventHub);
         toggleButtonEventHub->UpdateChangeEvent(isOn_.value());
     }
+    InitButtonAndText();
+    HandleEnabled();
+    InitTouchEvent();
+    InitClickEvent();
+}
 
+void ToggleButtonPattern::HandleEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!enabled) {
+        if (host->GetFirstChild()) {
+            auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+            CHECK_NULL_VOID(textNode);
+            auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            auto color = textLayoutProperty->GetTextColorValue(textColor_);
+            textLayoutProperty->UpdateTextColor(color.BlendOpacity(disabledAlpha_));
+        }
+        renderContext->BlendBgColor(Color::WHITE.BlendOpacity(disabledAlpha_));
+    } else {
+        renderContext->ResetBlendBgColor();
+    }
+}
+
+void ToggleButtonPattern::InitClickEvent()
+{
     if (clickListener_) {
         return;
     }
-
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto buttonPattern = weak.Upgrade();
-        CHECK_NULL_VOID(buttonPattern);
         buttonPattern->OnClick();
     };
-
     clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     gesture->AddClickEvent(clickListener_);
 }
@@ -108,20 +157,15 @@ void ToggleButtonPattern::OnClick()
     if (paintProperty->HasIsOn()) {
         isLastSelected = paintProperty->GetIsOnValue();
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto toggleTheme = pipeline->GetTheme<ToggleTheme>();
-    CHECK_NULL_VOID(toggleTheme);
-    auto color = toggleTheme->GetCheckedColor();
     const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     Color selectedColor;
     auto buttonPaintProperty = host->GetPaintProperty<ToggleButtonPaintProperty>();
     CHECK_NULL_VOID(buttonPaintProperty);
     if (isLastSelected) {
-        selectedColor = buttonPaintProperty->GetBackgroundColor().value_or(toggleTheme->GetBackgroundColor());
+        selectedColor = buttonPaintProperty->GetBackgroundColor().value_or(unCheckedColor_);
     } else {
-        selectedColor = buttonPaintProperty->GetSelectedColor().value_or(color);
+        selectedColor = buttonPaintProperty->GetSelectedColor().value_or(checkedColor_);
     }
     paintProperty->UpdateIsOn(!isLastSelected);
     isOn_ = !isLastSelected;
@@ -130,6 +174,38 @@ void ToggleButtonPattern::OnClick()
     CHECK_NULL_VOID(buttonEventHub);
     buttonEventHub->UpdateChangeEvent(!isLastSelected);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ToggleButtonPattern::InitButtonAndText()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonHeight_)));
+    if (!layoutProperty->HasBorderRadius()) {
+        layoutProperty->UpdateBorderRadius(buttonRadius_);
+    }
+    if (!host->GetFirstChild()) {
+        return;
+    }
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateFontSize(textFontSize_);
+    textLayoutProperty->UpdateTextColor(textColor_);
+
+    if (!textLayoutProperty->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.left = CalcLength(textMargin_.ConvertToPx());
+        margin.right = CalcLength(textMargin_.ConvertToPx());
+        margin.top = CalcLength(textMargin_.ConvertToPx());
+        margin.bottom = CalcLength(textMargin_.ConvertToPx());
+        textLayoutProperty->UpdateMargin(margin);
+    }
+    textNode->MarkModifyDone();
+    textNode->MarkDirtyNode();
 }
 
 } // namespace OHOS::Ace::NG

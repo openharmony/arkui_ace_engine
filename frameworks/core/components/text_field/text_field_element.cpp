@@ -192,7 +192,7 @@ void TextFieldElement::OnFocus()
         textField->OnEditChange(true);
     }
     LOGI("On focus, request keyboard");
-    RequestKeyboard(true, true);
+    RequestKeyboard(true, false);
     FocusNode::OnFocus();
     textField->SetCanPaintSelection(true);
     auto context = context_.Upgrade();

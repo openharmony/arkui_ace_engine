@@ -39,6 +39,7 @@ public:
         auto copy = MakeRefPtr<NavigationLayoutProperty>();
         copy->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         copy->propNavigationMode_ = CloneNavigationMode();
+        copy->propUsrNavigationMode_ = CloneUsrNavigationMode();
         copy->propNavBarWidth_ = CloneNavBarWidth();
         copy->propNavBarPosition_ = CloneNavBarPosition();
         copy->propHideNavBar_ = CloneHideNavBar();
@@ -53,6 +54,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetNavigationMode();
+        ResetUsrNavigationMode();
         ResetNavBarWidth();
         ResetNavBarPosition();
         ResetHideNavBar();
@@ -63,6 +65,7 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UsrNavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavBarPosition, NavBarPosition, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideNavBar, bool, PROPERTY_UPDATE_MEASURE);

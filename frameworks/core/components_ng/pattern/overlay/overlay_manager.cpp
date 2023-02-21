@@ -30,6 +30,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
+#include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
@@ -46,6 +47,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -194,8 +196,10 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     AnimationUtils::Animate(
         option,
         [context]() {
-            context->UpdateOpacity(1.0);
-            context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            if (context) {
+                context->UpdateOpacity(1.0);
+                context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            }
         },
         option.GetOnFinishEvent());
 }
@@ -261,6 +265,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
 void OverlayManager::ShowToast(
     const std::string& message, int32_t duration, const std::string& bottom, bool isRightToLeft)
 {
+    LOGI("OverlayManager::ShowToast");
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
@@ -273,9 +278,8 @@ void OverlayManager::ShowToast(
     toastMap_.clear();
 
     auto toastNode = ToastView::CreateToastNode(message, bottom, isRightToLeft);
-    auto toastId = toastNode->GetId();
     CHECK_NULL_VOID(toastNode);
-
+    auto toastId = toastNode->GetId();
     // mount to parent
     toastNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -285,15 +289,18 @@ void OverlayManager::ShowToast(
     option.SetCurve(curve);
     option.SetDuration(TOAST_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), toastId, duration] {
+    auto&& callback = [weak = WeakClaim(this), toastId, duration, id = Container::CurrentId()]() {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        ContainerScope scope(id);
+        overlayManager->PopToast(toastId);
+    };
+    continuousTask_.Reset(callback);
+    option.SetOnFinishEvent([continuousTask = continuousTask_, duration, id = Container::CurrentId()] {
+        ContainerScope scope(id);
         auto context = PipelineContext::GetCurrentContext();
-        context->GetTaskExecutor()->PostDelayedTask(
-            [weak, toastId, duration] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->PopToast(toastId);
-            },
-            TaskExecutor::TaskType::UI, duration);
+        CHECK_NULL_VOID_NOLOG(context);
+        context->GetTaskExecutor()->PostDelayedTask(continuousTask, TaskExecutor::TaskType::UI, duration);
     });
     auto ctx = toastNode->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -302,44 +309,55 @@ void OverlayManager::ShowToast(
     AnimationUtils::Animate(
         option,
         [ctx]() {
-            ctx->UpdateOpacity(1.0);
-            ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            if (ctx) {
+                ctx->UpdateOpacity(1.0);
+                ctx->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            }
         },
         option.GetOnFinishEvent());
 }
 
 void OverlayManager::PopToast(int32_t toastId)
 {
+    LOGI("OverlayManager::PopToast");
+    AnimationOption option;
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    option.SetCurve(curve);
+    option.SetDuration(TOAST_ANIMATION_DURATION);
+    option.SetFillMode(FillMode::FORWARDS);
+    // OnFinishEvent should be executed in UI thread.
+    option.SetOnFinishEvent([weak = WeakClaim(this), toastId, id = Container::CurrentId()] {
+        auto context = PipelineContext::GetCurrentContext();
+        context->GetTaskExecutor()->PostTask(
+            [weak, toastId, id]() {
+                ContainerScope scope(id);
+                auto overlayManager = weak.Upgrade();
+                CHECK_NULL_VOID_NOLOG(overlayManager);
+                auto toastIter = overlayManager->toastMap_.find(toastId);
+                if (toastIter == overlayManager->toastMap_.end()) {
+                    LOGI("No toast under pop");
+                    return;
+                }
+                auto toastUnderPop = toastIter->second.Upgrade();
+                CHECK_NULL_VOID_NOLOG(toastUnderPop);
+                LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
+                auto context = PipelineContext::GetCurrentContext();
+                CHECK_NULL_VOID_NOLOG(context);
+                auto rootNode = context->GetRootElement();
+                CHECK_NULL_VOID_NOLOG(rootNode);
+                rootNode->RemoveChild(toastUnderPop);
+                overlayManager->toastMap_.erase(toastId);
+                rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            },
+            TaskExecutor::TaskType::UI);
+    });
     auto toastIter = toastMap_.find(toastId);
     if (toastIter == toastMap_.end()) {
         LOGI("No toast under pop");
         return;
     }
     auto toastUnderPop = toastIter->second.Upgrade();
-    AnimationOption option;
-    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-    option.SetCurve(curve);
-    option.SetDuration(TOAST_ANIMATION_DURATION);
-    option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), toastId] {
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(overlayManager);
-        auto toastIter = overlayManager->toastMap_.find(toastId);
-        if (toastIter == overlayManager->toastMap_.end()) {
-            LOGI("No toast under pop");
-            return;
-        }
-        auto toastUnderPop = toastIter->second.Upgrade();
-        CHECK_NULL_VOID_NOLOG(toastUnderPop);
-        LOGI("begin to pop toast, id is %{public}d", toastUnderPop->GetId());
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID_NOLOG(context);
-        auto rootNode = context->GetRootElement();
-        CHECK_NULL_VOID_NOLOG(rootNode);
-        rootNode->RemoveChild(toastUnderPop);
-        overlayManager->toastMap_.erase(toastId);
-        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    });
+    CHECK_NULL_VOID_NOLOG(toastUnderPop);
     auto ctx = toastUnderPop->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     ctx->UpdateOpacity(1.0);
@@ -347,8 +365,10 @@ void OverlayManager::PopToast(int32_t toastId)
     AnimationUtils::Animate(
         option,
         [ctx]() {
-            ctx->UpdateOpacity(0.0);
-            ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
+            if (ctx) {
+                ctx->UpdateOpacity(0.0);
+                ctx->OnTransformTranslateUpdate({ 0.0f, TOAST_ANIMATION_POSITION, 0.0f });
+            }
         },
         option.GetOnFinishEvent());
     // start animation immediately
@@ -371,13 +391,13 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
     if (iter != rootChildren.end()) {
         // Pop popup
         CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
-        LOGI("begin pop");
+        LOGI("OverlayManager: popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
     } else {
         // Push popup
         CHECK_NULL_VOID_NOLOG(!popupInfo.isCurrentOnShow);
-        LOGI("begin push");
+        LOGI("OverlayManager: popup begin push");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(true);
         auto hub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
         if (!popupInfo.isBlockEvent && hub) {
@@ -466,7 +486,17 @@ void OverlayManager::HideAllPopups()
         if (popupInfo.isCurrentOnShow && popupInfo.target.Upgrade()) {
             popupInfo.markNeedUpdate = true;
             popupInfo.popupId = -1;
-            UpdatePopupNode(popupInfo.target.Upgrade()->GetId(), popupInfo);
+            auto targetNodeId = popupInfo.target.Upgrade()->GetId();
+            auto popupNode = popupInfo.popupNode;
+            CHECK_NULL_VOID(popupNode);
+            auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+            CHECK_NULL_VOID(layoutProp);
+            auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
+            if (showInSubWindow) {
+                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+            } else {
+                UpdatePopupNode(targetNodeId, popupInfo);
+            }
         }
     }
 }
@@ -589,6 +619,9 @@ void OverlayManager::HideMenu(int32_t targetId)
         return;
     }
     PopMenuAnimation(menuMap_[targetId]);
+    if (onHideMenuCallback_) {
+        onHideMenuCallback_();
+    }
     BlurDialog();
 }
 
@@ -678,21 +711,37 @@ bool OverlayManager::RemoveOverlay()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
+    auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
         // stage node is at index 0, remove overlay at index 1
         auto overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(overlay, false);
         // close dialog with animation
-        auto dialogPattern = overlay->GetPattern<DialogPattern>();
-        if (dialogPattern) {
+        auto pattern = overlay->GetPattern();
+        if (AceType::DynamicCast<DialogPattern>(pattern)) {
             CloseDialog(overlay);
             return true;
+        } else if (AceType::DynamicCast<BubblePattern>(pattern)) {
+            auto popupNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildAtIndex(childrenSize - 1));
+            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+            for (const auto& popup : popupMap_) {
+                auto targetId = popup.first;
+                auto popupInfo = popup.second;
+                if (popupNode == popupInfo.popupNode) {
+                    popupMap_.erase(targetId);
+                    rootNode->RemoveChild(popupNode);
+                    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+                    return true;
+                }
+            }
+            return false;
         }
         rootNode->RemoveChildAtIndex(1);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         LOGI("overlay removed successfully");
         return true;
     }
+    LOGI("No overlay in this page.");
     return false;
 }
 

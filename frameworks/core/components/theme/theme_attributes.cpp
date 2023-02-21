@@ -65,6 +65,7 @@ const char THEME_PATTERN_TEXTFIELD[] = "textfield_pattern";
 const char THEME_PATTERN_TEXT_OVERLAY[] = "text_overlay_pattern";
 const char THEME_PATTERN_VIDEO[] = "video_pattern";
 const char THEME_PATTERN_INDEXER[] = "indexer_pattern";
+const char THEME_PATTERN_APP_BAR[] = "app_bar_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";
@@ -137,4 +138,5 @@ const char DRAG_BAR_COLOR[] = "drag_bar_color";
 const char POPUP_BORDER_RADIUS[] = "popup_border_radius";
 const char POPUP_HORIZONTAL_PADDING[] = "popup_horizontal_padding";
 const char POPUP_VERTICAL_PADDING[] = "popup_vertical_padding";
+const char POPUP_BUTTON_TEXT_FONT_SIZE[] = "popup_button_text_font_size";
 } // namespace OHOS::Ace

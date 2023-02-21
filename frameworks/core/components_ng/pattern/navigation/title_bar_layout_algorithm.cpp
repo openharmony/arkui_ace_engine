@@ -18,7 +18,9 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
+#include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
@@ -34,21 +36,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr int32_t MAX_MENU_ITEMS_NUM = 3;
-}
-
-float TitleBarLayoutAlgorithm::GetFontHeightByFontSize(const RefPtr<LayoutWrapper>& layoutWrapper,
-    const RefPtr<FrameNode>& textNode, const Dimension& fontSize)
-{
-    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, 0.0f);
-    auto preFontSize = textLayoutProperty->GetFontSize().value_or(MIN_TITLE_FONT_SIZE);
-    textLayoutProperty->UpdateFontSize(fontSize);
-    auto constraint = textLayoutProperty->CreateChildConstraint();
-    layoutWrapper->Measure(constraint);
-    textLayoutProperty->UpdateFontSize(preFontSize);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0f);
-    return geometryNode->GetFrameSize().Height();
 }
 
 void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
@@ -305,7 +292,17 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
             if (isInitialTitle_) {
                 auto title = AceType::DynamicCast<FrameNode>(titleNode);
                 CHECK_NULL_VOID(title);
-                minTitleHeight_ = GetFontHeightByFontSize(titleWrapper, title, MIN_TITLE_FONT_SIZE);
+
+                auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
+                CHECK_NULL_VOID(textLayoutProperty);
+                MeasureContext context;
+                context.textContent = textLayoutProperty->GetContentValue();
+                context.fontSize = titleFontSize_;
+#ifdef ENABLE_ROSEN_BACKEND
+                minTitleHeight_ = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(context).Height());
+#else
+                minTitleHeight_ = 0.0;
+#endif
                 initialTitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
                 isInitialTitle_ = false;
                 OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);

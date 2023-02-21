@@ -159,7 +159,9 @@ public:
 
     void SetSinglePageId(int32_t pageId);
 
-    bool PopPageStackOverlay();
+    bool PopPageStackOverlay() override;
+
+    void HideOverlays() override;
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
@@ -338,7 +340,7 @@ public:
 
     void BlurWindowWithDrag(bool isBlur);
 
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
     RefPtr<StageElement> GetStageElement() const;
 
@@ -512,16 +514,6 @@ public:
     bool IsBuildingFirstPage() const
     {
         return buildingFirstPage_;
-    }
-
-    const RefPtr<SharedImageManager>& GetSharedImageManager() const
-    {
-        return sharedImageManager_;
-    }
-
-    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
-    {
-        sharedImageManager_ = sharedImageManager;
     }
 
     using UpdateWindowBlurDrawOpHandler = std::function<void(void)>;
@@ -906,7 +898,6 @@ private:
     RefPtr<RootElement> rootElement_;
     WeakPtr<FocusNode> dirtyFocusNode_;
     WeakPtr<FocusNode> dirtyFocusScope_;
-    RefPtr<SharedImageManager> sharedImageManager_;
     std::list<std::function<void()>> buildAfterCallback_;
     RefPtr<RenderFactory> renderFactory_;
     UpdateWindowBlurRegionHandler updateWindowBlurRegionHandler_;

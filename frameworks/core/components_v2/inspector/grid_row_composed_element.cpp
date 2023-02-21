@@ -17,7 +17,6 @@
 
 #include "base/log/dump_log.h"
 #include "core/components_v2/grid_layout/grid_container_utils.h"
-#include "core/components_v2/grid_layout/grid_row_element.h"
 #include "core/components_v2/grid_layout/render_grid_row.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -175,39 +174,9 @@ std::string GridRowComposedElement::GetGridRowGutter() const
     return result;
 }
 
-void GridRowComposedElement::AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
+RefPtr<Element> GridRowComposedElement::GetRenderElement() const
 {
-    auto gridRowElement = GetContentElement<GridRowElement>(GridRowElement::TypeId());
-    if (!gridRowElement) {
-        LOGE("get GetStackElement failed");
-        return;
-    }
-    gridRowElement->UpdateChildWithSlot(nullptr, newComponent, slot, slot);
-    gridRowElement->MarkDirty();
-}
-
-void GridRowComposedElement::UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent)
-{
-    auto gridRowElement = GetContentElement<GridRowElement>(GridRowElement::TypeId());
-    if (!gridRowElement) {
-        LOGE("get GetStackElement failed");
-        return;
-    }
-    auto child = gridRowElement->GetChildBySlot(slot);
-    gridRowElement->UpdateChildWithSlot(child, newComponent, slot, slot);
-    gridRowElement->MarkDirty();
-}
-
-void GridRowComposedElement::DeleteChildWithSlot(int32_t slot)
-{
-    auto gridRowElement = GetContentElement<GridRowElement>(GridRowElement::TypeId());
-    if (!gridRowElement) {
-        LOGE("get GetStackElement failed");
-        return;
-    }
-    auto child = gridRowElement->GetChildBySlot(slot);
-    gridRowElement->UpdateChildWithSlot(child, nullptr, slot, slot);
-    gridRowElement->MarkDirty();
+    return GetContentElement<GridRowElement>(GridRowElement::TypeId());
 }
 
 } // namespace OHOS::Ace::V2

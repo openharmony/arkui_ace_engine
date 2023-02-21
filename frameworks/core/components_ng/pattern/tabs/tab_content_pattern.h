@@ -39,6 +39,11 @@ public:
         return false;
     }
 
+    bool UsResRegion() override
+    {
+        return false;
+    }
+    
     void BeforeCreateLayoutWrapper() override
     {
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
@@ -62,6 +67,16 @@ public:
     const TabBarParam& GetTabBarParam() const
     {
         return tabBarParam_;
+    }
+
+    void SetTabBarStyle(TabBarStyle tabBarStyle)
+    {
+        tabBarParam_.SetTabBarStyle(tabBarStyle);
+    }
+
+    TabBarStyle GetTabBarStyle() const
+    {
+        return tabBarParam_.GetTabBarStyle();
     }
 
 private:

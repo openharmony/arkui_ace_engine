@@ -63,6 +63,7 @@ public:
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
+    virtual void SetDraggable(bool draggable) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

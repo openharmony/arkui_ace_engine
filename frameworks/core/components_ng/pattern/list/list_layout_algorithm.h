@@ -47,6 +47,7 @@ class ACE_EXPORT ListLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
+    static const int32_t LAST_ITEM = -1;
 
     ListLayoutAlgorithm() = default;
 
@@ -179,8 +180,8 @@ public:
     }
 
 protected:
-    virtual void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
-        LayoutConstraintF& contentConstraint);
+    virtual void UpdateListItemConstraint(
+        Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     virtual int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         Axis axis, int32_t& currentIndex, float startPos, float& endPos);
     virtual int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
@@ -193,8 +194,11 @@ protected:
         return index;
     }
 
-    void SetListItemGroupParam(
-        const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout) const;
+    void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
+        const RefPtr<ListLayoutProperty>& layoutProperty) const;
+    void CheckListItemGroupRecycle(
+        LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
+    void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;

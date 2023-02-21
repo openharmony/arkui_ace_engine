@@ -110,9 +110,6 @@ private:
     // set variables from theme
     void InitializeTheme();
 
-    float GetFontHeightByFontSize(const RefPtr<LayoutWrapper>& layoutWrapper,
-        const RefPtr<FrameNode>& textNode, const Dimension& fontSize);
-
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
     Dimension defaultPaddingStart_;

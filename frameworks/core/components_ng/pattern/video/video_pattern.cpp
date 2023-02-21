@@ -686,11 +686,16 @@ void VideoPattern::OnAreaChangedInner()
         CHECK_NULL_VOID(layoutProperty);
         auto videoFrameSize = MeasureVideoContentLayout(videoNodeSize, layoutProperty);
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
-        renderSurface_->SetExtSurfaceBounds(transformRelativeOffset.GetX() + videoNodeOffset.GetX() +
-                                    (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
+
+        Rect rect = Rect(transformRelativeOffset.GetX() + videoNodeOffset.GetX() +
+                             (videoNodeSize.Width() - videoFrameSize.Width()) / AVERAGE_VALUE,
             transformRelativeOffset.GetY() + videoNodeOffset.GetY() +
                 (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE,
             videoFrameSize.Width(), videoFrameSize.Height());
+        if (rect != lastBoundsRect_) {
+            renderSurface_->SetExtSurfaceBounds(rect.Left(), rect.Top(), rect.Width(), rect.Height());
+            lastBoundsRect_ = rect;
+        }
     }
 }
 

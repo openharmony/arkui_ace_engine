@@ -69,10 +69,11 @@ public:
             if (!themeStyle) {
                 return theme;
             }
-            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("navigation_pattern", nullptr);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_NAVIGATION_BAR, nullptr);
             if (pattern) {
                 theme->titleColor_ = pattern->GetAttr<Color>("title_color", Color::WHITE);
                 theme->titleFontSize_  = pattern->GetAttr<Dimension>("title_text_font_size", 0.0_vp);
+                theme->titleFontSizeMin_ = pattern->GetAttr<Dimension>("title_text_font_size_min", 0.0_vp);
                 theme->titleFontSizeBig_  = pattern->GetAttr<Dimension>("title_text_font_size_big", 0.0_vp);
                 theme->subTitleColor_ = pattern->GetAttr<Color>("sub_title_text_color", Color::WHITE);
                 theme->subTitleFontSize_  = pattern->GetAttr<Dimension>("sub_title_text_font_size", 0.0_vp);
@@ -85,6 +86,7 @@ public:
                 theme->maxPaddingEnd_ = pattern->GetAttr<Dimension>("title_right_spacing", 0.0_vp);
                 theme->defaultPaddingStart_ = pattern->GetAttr<Dimension>("back_button_left_spacing", 0.0_vp);
                 theme->backButtonIconColor_ = pattern->GetAttr<Color>("back_button_icon_color", Color::WHITE);
+                theme->alphaDisabled_ = pattern->GetAttr<double>("button_alpha_disabled", 0.0);
             }
             return theme;
         }
@@ -109,6 +111,11 @@ public:
     const Dimension& GetTitleFontSize() const
     {
         return titleFontSize_;
+    }
+
+    const Dimension& GetTitleFontSizeMin() const
+    {
+        return titleFontSizeMin_;
     }
 
     const Dimension& GetSubTitleFontSize() const
@@ -201,6 +208,11 @@ public:
         return backButtonIconColor_;
     }
 
+    double GetAlphaDisabled() const
+    {
+        return alphaDisabled_;
+    }
+
 protected:
     NavigationBarTheme() = default;
 
@@ -209,6 +221,7 @@ private:
     Color subTitleColor_;
     Dimension titleFontSizeBig_;
     Dimension titleFontSize_;
+    Dimension titleFontSizeMin_;
     Dimension subTitleFontSize_;
     Dimension height_;
     Dimension heightEmphasize_;
@@ -231,6 +244,7 @@ private:
     Dimension titleMinPadding_;
     uint32_t mostMenuItemCountInBar_ = 0;
     Color backButtonIconColor_;
+    double alphaDisabled_ = 0.0;
 };
 
 } // namespace OHOS::Ace

@@ -38,6 +38,15 @@ public:
 
     sk_sp<SkImage> GetCanvasImage() const override;
 
+    RefPtr<CanvasImage> Clone() override
+    {
+        return Claim(this);
+    }
+
+    bool IsStatic() override
+    {
+        return false;
+    }
     void SetRedrawCallback(std::function<void()>&& callback) override
     {
         redraw_ = std::move(callback);

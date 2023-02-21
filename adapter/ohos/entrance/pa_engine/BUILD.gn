@@ -50,7 +50,7 @@ template("pa_backend") {
       "eventhandler:libeventhandler",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
-      "ipc_js:rpc",
+      "ipc:ipc_napi_common",
       "napi:ace_napi",
       "relational_store:native_dataability",
       "relational_store:native_rdb",

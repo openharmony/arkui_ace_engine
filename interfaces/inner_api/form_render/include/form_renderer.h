@@ -16,30 +16,63 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_H
 
+#include "ability_context.h"
+#include "form_js_info.h"
+#include "js_runtime.h"
+#include "runtime.h"
+#include "ui_content.h"
+
 #include "form_renderer_delegate_interface.h"
 #include "form_renderer_dispatcher_impl.h"
-#include "ui_content.h"
 
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRenderer
- * FormRenderer interface is used to form renderer.
  */
-class FormRenderer {
+class FormRenderer : public std::enable_shared_from_this<FormRenderer> {
 public:
-    FormRenderer() = default;
+    FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> context,
+                 const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime);
     ~FormRenderer() = default;
-    /**
-     * @brief OnActionEvent.
-     * @param action The action.
-     */
-    int32_t OnActionEvent(const std::string& action);
+
+    void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+
+    void Destroy();
+    void OnActionEvent(const std::string& action);
+    void OnError(const std::string& code, const std::string& msg);
+    void ResetRenderDelegate();
+    void SetAllowUpdate(bool allowUpdate);
+    bool IsAllowUpdate();
 
 private:
-    std::shared_ptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
-    std::shared_ptr<IFormRendererDelegate> formRendererDelegate_;
-    std::shared_ptr<UIContent> uIContent_;
+    void InitUIContent();
+    void SetRenderDelegate(const sptr<IRemoteObject> &renderRemoteObj);
+
+    std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
+    std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
+    sptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
+    sptr<IFormRendererDelegate> formRendererDelegate_;
+    std::shared_ptr<UIContent> uiContent_;
+    sptr<IRemoteObject::DeathRecipient> renderDelegateDeathRecipient_;
+};
+
+/**
+ * @class FormRenderDelegateRecipient
+ * FormRenderDelegateRecipient notices IRemoteBroker died.
+ */
+class FormRenderDelegateRecipient : public IRemoteObject::DeathRecipient {
+public:
+    using RemoteDiedHandler = std::function<void()>;
+    explicit FormRenderDelegateRecipient(RemoteDiedHandler handler) : handler_(std::move(handler)) {}
+
+    ~FormRenderDelegateRecipient() override = default;
+
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+
+private:
+    RemoteDiedHandler handler_;
 };
 }  // namespace Ace
 }  // namespace OHOS

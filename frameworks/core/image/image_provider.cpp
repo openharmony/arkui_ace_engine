@@ -82,13 +82,17 @@ void ImageProvider::ProccessLoadingResult(
         for (const auto& callback : callbacks) {
             if (imageObj == nullptr) {
                 taskExecutor->PostTask([imageInfo, callback, errorMsg]() {
-                    callback.failedCallback(imageInfo, errorMsg);
+                    if (callback.failedCallback) {
+                        callback.failedCallback(imageInfo, errorMsg);
+                    }
                 }, TaskExecutor::TaskType::UI);
                 return;
             }
             auto obj = imageObj->Clone();
             taskExecutor->PostTask([obj, imageInfo, callback]() {
-                callback.successCallback(imageInfo, obj);
+                if (callback.successCallback) {
+                    callback.successCallback(imageInfo, obj);
+                }
             }, TaskExecutor::TaskType::UI);
             if (canStartUploadImageObj) {
                 bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
@@ -128,7 +132,7 @@ void ImageProvider::ProccessUploadResult(
     const RefPtr<TaskExecutor>& taskExecutor,
     const ImageSourceInfo& imageInfo,
     const Size& imageSize,
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     const RefPtr<NG::CanvasImage>& canvasImage,
 #else
     const fml::RefPtr<flutter::CanvasImage>& canvasImage,
@@ -481,7 +485,7 @@ sk_sp<SkImage> ImageProvider::ApplySizeToSkImage(
             srcKey.c_str(), dstWidth, dstHeight, rawImage->width(), rawImage->height());
         return rawImage;
     }
-#ifdef NG_BUILD
+#ifdef FLUTTER_2_5
     if (!rawImage->scalePixels(scaledBitmap.pixmap(), SkSamplingOptions(SkFilterMode::kLinear, SkMipmapMode::kNone),
             SkImage::kDisallow_CachingHint)) {
 #else

@@ -16,36 +16,13 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_TYPES_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JS_TYPES_H
 
-#ifdef USE_V8_ENGINE
-#include "frameworks/bridge/declarative_frontend/engine/v8/v8_types.h"
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #endif
 
 namespace OHOS::Ace::Framework {
 
-#ifdef USE_V8_ENGINE
-// This way we will make sure there won't be any name clashes
-using JSVal = V8Value;
-using JSObject = V8Object;
-using JSFunc = V8Function;
-using JSArray = V8Array;
-using JSString = V8String;
-using JSCallbackInfo = V8CallbackInfo;
-using JSGCMarkCallbackInfo = V8GCMarkCallbackInfo;
-using JSException = V8Exception;
-using JSExecutionContext = V8ExecutionContext;
-using JSObjTemplate = V8ObjTemplate;
-
-template<class T>
-inline auto ToJSValue(T&& val)
-{
-    return V8ValueConvertor::toV8Value(std::forward<T>(val));
-};
-
-void JsStopPropagation(const v8::FunctionCallbackInfo<v8::Value>& info);
-
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
 
 using JSVal = JsiValue;
 using JSObject = JsiObject;

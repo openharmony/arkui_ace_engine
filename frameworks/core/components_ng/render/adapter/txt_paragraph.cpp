@@ -49,7 +49,7 @@ void TxtParagraph::CreateBuilder()
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
         style.ellipsis = ELLIPSIS;
     }
-#ifndef NG_BUILD
+#ifndef FLUTTER_2_5
     // keep WordBreak define same with WordBreakType in minikin
     style.word_break_type = static_cast<minikin::WordBreakType>(paraStyle_.wordBreak);
 #endif
@@ -157,6 +157,12 @@ void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
 {
     CHECK_NULL_VOID(paragraph_);
     SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
+    CHECK_NULL_VOID(skCanvas);
+    paragraph_->Paint(skCanvas, x, y);
+}
+
+void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
+{
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
 }

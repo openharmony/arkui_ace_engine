@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <vector>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
@@ -505,22 +506,41 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
 
 void JSTextField::JsWidth(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
     if (info[0]->IsString() && info[0]->ToString() == "auto") {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         TextFieldModel::GetInstance()->SetWidthAuto(true);
         return;
     }
-    JSViewAbstract::JsWidth(info);
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+
+    TextFieldModel::GetInstance()->SetWidthAuto(false);
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        LOGW("Parse width fail");
         return;
     }
-    TextFieldModel::GetInstance()->SetWidthAuto(false);
+    if (LessNotEqual(value.Value(), 0.0)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetWidth(value);
 }
 
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            auto textFieldPadding = theme->GetPadding();
+            ViewAbstractModel::GetInstance()->SetPaddings(
+                textFieldPadding.Top(), textFieldPadding.Bottom(), textFieldPadding.Left(), textFieldPadding.Right());
+            return;
+        }
         JSViewAbstract::JsPadding(info);
         return;
     }

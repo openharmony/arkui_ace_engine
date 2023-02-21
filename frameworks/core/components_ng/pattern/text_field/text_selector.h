@@ -24,7 +24,17 @@
 
 namespace OHOS::Ace::NG {
 
-enum class CaretUpdateType { PRESSED, LONG_PRESSED, DEL, EVENT, HANDLE_MOVE, HANDLE_MOVE_DONE, INPUT, NONE };
+enum class CaretUpdateType {
+    PRESSED,
+    LONG_PRESSED,
+    DEL,
+    EVENT,
+    HANDLE_MOVE,
+    HANDLE_MOVE_DONE,
+    INPUT,
+    NONE,
+    RIGHT_CLICK
+};
 /**
  * Stands for selection indexes
  * We use base/destination to indicate the start/end position because of uncertain direction.
@@ -33,10 +43,16 @@ struct TextSelector {
     TextSelector() = default;
     TextSelector(int32_t base, int32_t destination) : baseOffset(base), destinationOffset(destination) {}
 
+    void TextUpdate(int32_t base, int32_t destination)
+    {
+        baseOffset = base;
+        destinationOffset = destination;
+    }
+
     void Update(int32_t base, int32_t destination)
     {
-        baseOffset = std::min(base, destination);
-        destinationOffset = std::max(base, destination);
+        baseOffset = base;
+        destinationOffset = destination;
     }
 
     // Usually called when none is selected.
@@ -58,12 +74,12 @@ struct TextSelector {
 
     inline int32_t GetStart() const
     {
-        return std::min(baseOffset, destinationOffset);
+        return baseOffset;
     }
 
     inline int32_t GetEnd() const
     {
-        return std::max(baseOffset, destinationOffset);
+        return destinationOffset;
     }
 
     inline bool IsValid() const
@@ -81,6 +97,11 @@ struct TextSelector {
     {
         destinationOffset = std::min(charCount, destinationOffset + 1);
         return destinationOffset == baseOffset;
+    }
+
+    double GetSelectHeight() const
+    {
+        return std::max(firstHandle.Height(), secondHandle.Height());
     }
 
     std::string ToString()

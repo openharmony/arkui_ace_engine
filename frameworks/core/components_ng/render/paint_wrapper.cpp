@@ -36,9 +36,13 @@ void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintIm
     CHECK_NULL_VOID(nodePaintImpl_);
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
-    auto modifier = nodePaintImpl_->GetModifier(this);
-    if (modifier) {
-        renderContext->FlushModifier(modifier);
+    auto contentModifier = nodePaintImpl_->GetContentModifier(this);
+    if (contentModifier) {
+        renderContext->FlushContentModifier(contentModifier);
+    }
+    auto overlayModifier = nodePaintImpl_->GetOverlayModifier(this);
+    if (overlayModifier) {
+        renderContext->FlushOverlayModifier(overlayModifier);
     }
 }
 
@@ -49,17 +53,21 @@ void PaintWrapper::FlushRender()
     auto renderContext = renderContext_.Upgrade();
     CHECK_NULL_VOID(renderContext);
 
-    auto modifier = nodePaintImpl_->GetModifier(this);
-    if (modifier) {
-        nodePaintImpl_->UpdateModifier(this);
-        return;
+    auto contentModifier = nodePaintImpl_->GetContentModifier(this);
+    if (contentModifier) {
+        nodePaintImpl_->UpdateContentModifier(this);
+    }
+
+    auto overlayModifier = nodePaintImpl_->GetOverlayModifier(this);
+    if (overlayModifier) {
+        nodePaintImpl_->UpdateOverlayModifier(this);
     }
 
     renderContext->StartRecording();
 
     // first set content paint function.
     auto contentDraw = nodePaintImpl_->GetContentDrawFunction(this);
-    if (contentDraw) {
+    if (contentDraw && !contentModifier) {
         renderContext->FlushContentDrawFunction(std::move(contentDraw));
     }
 
@@ -71,7 +79,7 @@ void PaintWrapper::FlushRender()
 
     // at last, set overlay paint function.
     auto overlayDraw = nodePaintImpl_->GetOverlayDrawFunction(this);
-    if (overlayDraw) {
+    if (overlayDraw && !overlayModifier) {
         renderContext->FlushOverlayDrawFunction(std::move(overlayDraw));
     }
 

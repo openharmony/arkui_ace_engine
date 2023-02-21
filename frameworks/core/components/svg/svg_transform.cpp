@@ -79,7 +79,7 @@ Matrix4 SvgTransform::CreateMatrix4(const std::string& transform)
     return retMat;
 }
 
-TransformInfo SvgTransform::CreateTransformInfo(const std::string& transform)
+TransformInfo SvgTransform::CreateInfoFromString(const std::string& transform)
 {
     auto retMat = Matrix4::CreateIdentity();
     std::vector<std::string> attrs;
@@ -132,7 +132,7 @@ TransformInfo SvgTransform::CreateTransformInfo(const std::string& transform)
     return transformInfo;
 }
 
-TransformInfo SvgTransform::CreateMatrix4(const std::map<std::string, std::vector<float>>& transform)
+TransformInfo SvgTransform::CreateInfoFromMap(const std::map<std::string, std::vector<float>>& transform)
 {
     auto retMat = Matrix4::CreateIdentity();
     auto mat = Matrix4::CreateIdentity();

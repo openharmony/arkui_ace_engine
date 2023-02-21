@@ -16,16 +16,8 @@
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_paint_method.h"
 
 namespace OHOS::Ace::NG {
-CanvasDrawFunction SwiperIndicatorPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
-{
-    return nullptr;
-}
-
-void SwiperIndicatorPaintMethod::PaintMask(
-    RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset)
-{}
-
-void SwiperIndicatorPaintMethod::PaintContent(
-    RSCanvas& canvas, const RefPtr<SwiperIndicatorPaintProperty>& paintProperty, SizeF contentSize)
-{}
+void SwiperIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper) {}
+void SwiperIndicatorPaintMethod::CalculatePointCenterX(const PaintWrapper* paintWrapper) {}
+void SwiperIndicatorPaintMethod::CalculatePointCenterY(const PaintWrapper* paintWrapper) {}
+void SwiperIndicatorPaintMethod::CalculatePointRadius(const PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG

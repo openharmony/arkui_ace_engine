@@ -435,8 +435,8 @@ void Scrollable::ExecuteScrollFrameBegin(double& mainDelta, ScrollState state)
     }
 
     auto offset = Dimension(mainDelta / context->GetDipScale(), DimensionUnit::VP);
-    auto scrollRes = scrollFrameBeginCallback_(offset, state);
-    mainDelta = context->NormalizeToPx(scrollRes.offset);
+    auto scrollRes = scrollFrameBeginCallback_(-offset, state);
+    mainDelta = -context->NormalizeToPx(scrollRes.offset);
 }
 
 void Scrollable::FixScrollMotion(double position)

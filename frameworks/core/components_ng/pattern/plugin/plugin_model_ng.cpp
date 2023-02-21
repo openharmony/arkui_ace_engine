@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/plugin/plugin_layout_property.h"
 #include "core/components_ng/pattern/plugin/plugin_node.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -63,6 +65,31 @@ void PluginModelNG::SetPluginSize(const Dimension& width, const Dimension& heigh
     auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
     pluginInfo.width = width;
     pluginInfo.height = height;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), CalcLength(height)));
+    ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
+};
+
+void PluginModelNG::SetWidth(const Dimension& width)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pluginLayoutProperty = frameNode->GetLayoutProperty<PluginLayoutProperty>();
+    CHECK_NULL_VOID(pluginLayoutProperty);
+    auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
+    pluginInfo.width = width;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+    ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
+};
+
+void PluginModelNG::SetHeight(const Dimension& height)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pluginLayoutProperty = frameNode->GetLayoutProperty<PluginLayoutProperty>();
+    CHECK_NULL_VOID(pluginLayoutProperty);
+    auto pluginInfo = pluginLayoutProperty->GetRequestPluginInfo().value_or(RequestPluginInfo());
+    pluginInfo.height = height;
+    pluginLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
     ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
 };
 

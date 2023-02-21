@@ -13,9 +13,16 @@
  * limitations under the License.
  */
 
+#include <unistd.h>
 #include "frame_trace_adapter_impl.h"
 
 namespace OHOS::Ace {
+#ifdef __aarch64__
+const char* FRAME_TRACE_SO_PATH = "/system/lib64/libframe_trace_intf.z.so";
+#else
+const char* FRAME_TRACE_SO_PATH = "/system/lib/libframe_trace_intf.z.so";
+#endif
+
 void FrameTraceAdapterImpl::QuickExecute(std::function<void()> && func)
 {
     FRAME_TRACE::TraceAndExecute(std::move(func), FRAME_TRACE::TraceType::QUICK_TRACE);
@@ -39,6 +46,9 @@ FrameTraceAdapter* FrameTraceAdapter::GetInstance()
 
 bool FrameTraceAdapterImpl::IsEnabled()
 {
+    if (access(FRAME_TRACE_SO_PATH, F_OK) != 0) {
+        return false;
+    }
     return FRAME_TRACE::IsEnabled();
 }
 }

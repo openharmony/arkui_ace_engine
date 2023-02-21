@@ -28,6 +28,7 @@ public:
     void Pop() override;
     void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         std::function<void()>&& builder, bool useContentOnly) override;
+    void SetTabBarStyle(TabBarStyle tabBarStyle) override {}
 
 private:
     RefPtr<Component> ProcessTabBarBuilderFunction(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -270,6 +270,11 @@ public:
         return isSubContainer_;
     }
 
+    bool IsFormRender() const
+    {
+        return isFormRender_;
+    }
+
     void* GetSharedRuntime() override
     {
         return sharedRuntime_;
@@ -323,6 +328,9 @@ public:
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
 
+    // ArkTsCard
+    static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
+
     void SetWindowName(const std::string& name)
     {
         windowName_ = name;
@@ -348,6 +356,11 @@ public:
     void SetIsSubContainer(bool isSubContainer)
     {
         isSubContainer_ = isSubContainer;
+    }
+
+    void SetIsFormRender(bool isFormRender)
+    {
+        isFormRender_ = isFormRender;
     }
 
     void InitializeSubContainer(int32_t parentContainerId);
@@ -378,6 +391,16 @@ public:
     {
         return webHapPath_;
     }
+
+    // ArkTSCard
+    void UpdateFormDate(const std::string& data);
+    void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
+
+    void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
+    void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
+        std::vector<int32_t>& fileDescriptorArray);
+    void GetImageDataFromAshmem(
+        const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
 private:
     void InitializeFrontend();
@@ -418,6 +441,7 @@ private:
     sptr<IRemoteObject> token_;
 
     bool isSubContainer_ = false;
+    bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
 
@@ -429,6 +453,8 @@ private:
 
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;
+
+    std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

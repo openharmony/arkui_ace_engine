@@ -75,7 +75,7 @@ void JSFlex::SetAlignItems(int32_t value)
         (value == static_cast<int32_t>(FlexAlign::STRETCH))) {
         FlexModel::GetInstance()->SetAlignItems(value);
     } else {
-        LOGE("invalid value for justifyContent");
+        LOGE("invalid value for alignItems");
     }
 }
 
@@ -88,7 +88,7 @@ void JSFlex::SetAlignContent(int32_t value)
         (value == static_cast<int32_t>(WrapAlignment::STRETCH))) {
         FlexModel::GetInstance()->SetAlignContent(value);
     } else {
-        LOGE("invalid value for justifyContent");
+        LOGE("invalid value for alignContent");
     }
 }
 

@@ -92,7 +92,8 @@ bool EventManager::DispatchMouseHoverEvent(const MouseEvent& event)
     return true;
 }
 
-void EventManager::MouseTest(const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode)
+void EventManager::MouseTest(
+    const MouseEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict)
 {
     SetInstanceId(instanceId_ | MOUSE_TEST_FLAG);
 }

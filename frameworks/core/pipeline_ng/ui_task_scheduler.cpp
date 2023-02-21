@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
@@ -49,15 +50,24 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     ACE_FUNCTION_TRACE();
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     // Priority task creation
+    uint64_t time = 0;
     for (auto&& pageNodes : dirtyLayoutNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node) {
                 continue;
             }
+            if (node->IsInDestroying()) {
+                continue;
+            }
+            time = GetSysTimestamp();
             auto task = node->CreateLayoutTask(forceUseMainThread);
             if (task) {
                 if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
                     (*task)();
+                    time = GetSysTimestamp() - time;
+                    if (frameInfo_ != nullptr) {
+                        frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
+                    }
                 } else {
                     LOGW("need to use multithread feature");
                 }
@@ -72,15 +82,24 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     ACE_FUNCTION_TRACE();
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
+    uint64_t time = 0;
     for (auto&& pageNodes : dirtyRenderNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node) {
                 continue;
             }
+            if (node->IsInDestroying()) {
+                continue;
+            }
+            time = GetSysTimestamp();
             auto task = node->CreateRenderTask(forceUseMainThread);
             if (task) {
                 if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
                     (*task)();
+                    time = GetSysTimestamp() - time;
+                    if (frameInfo_ != nullptr) {
+                        frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::RENDER);
+                    }
                 } else {
                     LOGW("need to use multithread feature");
                 }

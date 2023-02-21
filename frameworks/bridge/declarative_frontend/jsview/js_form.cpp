@@ -315,6 +315,7 @@ void JSForm::JSBind(BindingTarget globalObj)
     JSClass<JSForm>::StaticMethod("dimension", &JSForm::SetDimension, opt);
     JSClass<JSForm>::StaticMethod("allowUpdate", &JSForm::AllowUpdate, opt);
     JSClass<JSForm>::StaticMethod("visibility", &JSForm::SetVisibility, opt);
+    JSClass<JSForm>::StaticMethod("moduleName", &JSForm::SetModuleName, opt);
     JSClass<JSForm>::StaticMethod("clip", &JSViewAbstract::JsClip, opt);
 
     JSClass<JSForm>::StaticMethod("onAcquired", &JSForm::JsOnAcquired);

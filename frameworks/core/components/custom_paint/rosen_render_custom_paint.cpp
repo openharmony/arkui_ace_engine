@@ -421,8 +421,7 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
         auto textTheme = context->GetTheme<TextTheme>();
         txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
     }
-    FontStyle fontStyleInt = OHOS::Ace::Framework::ConvertStrToFontStyle(std::to_string(context.fontStyle));
-    txtStyle.font_style = ConvertTxtFontStyle(fontStyleInt);
+    txtStyle.font_style = ConvertTxtFontStyle(context.fontStyle);
     FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
     txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
@@ -468,8 +467,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         auto textTheme = context->GetTheme<TextTheme>();
         txtStyle.font_size = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
     }
-    FontStyle fontStyleInt = OHOS::Ace::Framework::ConvertStrToFontStyle(std::to_string(context.fontStyle));
-    txtStyle.font_style = ConvertTxtFontStyle(fontStyleInt);
+    txtStyle.font_style = ConvertTxtFontStyle(context.fontStyle);
     FontWeight fontWeightStr = StringUtils::StringToFontWeight(context.fontWeight);
     txtStyle.font_weight = ConvertTxtFontWeight(fontWeightStr);
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
@@ -510,7 +508,8 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         textWidth = paragraph->GetLongestLine();
     }
     auto sizeWidth = std::min(paragraph->GetMaxWidth(), textWidth);
-    sizeWidth = context.constraintWidth.has_value() ? context.constraintWidth->Value() : std::ceil(sizeWidth);
+    sizeWidth =
+        context.constraintWidth.has_value() ? context.constraintWidth.value().ConvertToPx() : std::ceil(sizeWidth);
 
     float baselineOffset = 0.0;
     if (context.baselineOffset.has_value()) {
@@ -1428,8 +1427,8 @@ void RosenRenderCustomPaint::ImageObjReady(const RefPtr<ImageObject>& imageObj)
         skiaDom_ = AceType::DynamicCast<SvgSkiaImageObject>(imageObj_)->GetSkiaDom();
         currentSource_ = loadingSource_;
         CanvasImage canvasImage = canvasImage_;
-        TaskFunc func = [canvasImage](RenderCustomPaint& interface, const Offset& offset) {
-            interface.DrawImage(offset, canvasImage, 0, 0);
+        TaskFunc func = [canvasImage](RenderCustomPaint& iface, const Offset& offset) {
+            iface.DrawImage(offset, canvasImage, 0, 0);
         };
         tasks_.emplace_back(func);
         MarkNeedRender();

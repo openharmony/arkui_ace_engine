@@ -166,6 +166,11 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
+void TextModelNG::SetDraggable(bool draggable)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Draggable, draggable);
+}
+
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto dragStart = [dragStartFunc = std::move(onDragStart)](

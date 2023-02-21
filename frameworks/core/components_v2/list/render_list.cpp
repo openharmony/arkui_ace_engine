@@ -1228,16 +1228,6 @@ bool RenderList::UpdateScrollPosition(double offset, int32_t source)
     }
     currentOffset_ += offset;
     bool next = HandleOverScroll();
-    if (source == SCROLL_FROM_AXIS) {
-        double curMainPos = 0.0;
-        double mainSize = 0.0;
-        GetCurMainPosAndMainSize(curMainPos, mainSize);
-        if (currentOffset_ < 0 && curMainPos < mainSize) {
-            currentOffset_ += mainSize - curMainPos;
-        } else if (currentOffset_ > 0) {
-            currentOffset_ = 0;
-        }
-    }
     MarkNeedLayout(true);
     return next;
 }

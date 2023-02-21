@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DISPATCHER_STUB_H
-#define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DISPATCHER_STUB_H
+#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_STUB_H
+#define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_STUB_H
 
 #include <map>
 
@@ -22,16 +22,18 @@
 #include "iremote_object.h"
 #include "iremote_stub.h"
 
+#include "base/utils/macros.h"
+
 namespace OHOS {
 namespace Ace {
 /**
  * @class FormRendererDelegateStub
  * Form renderer delegate stub.
  */
-class FormRendererDelegateStub : public IRemoteStub<IFormRendererDelegate> {
+class ACE_EXPORT FormRendererDelegateStub : public IRemoteStub<IFormRendererDelegate> {
 public:
     FormRendererDelegateStub();
-    virtual ~FormRendererDelegateStub();
+    ~FormRendererDelegateStub() override;
     /**
      * @brief handle remote request.
      * @param data input param.
@@ -39,12 +41,13 @@ public:
      * @param option message option.
      * @return Returns ERR_OK on success, others on failure.
      */
-    virtual int32_t OnRemoteRequest(
-        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
+     int32_t OnRemoteRequest(
+        uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
 
 private:
     int32_t HandleOnSurfaceCreate(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnActionEvent(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnError(MessageParcel &data, MessageParcel &reply);
 
     using FormRendererDelegateFunc =
         int32_t (FormRendererDelegateStub::*)(MessageParcel &data, MessageParcel &reply);
@@ -54,4 +57,4 @@ private:
 };
 } // namespace Ace
 } // namespace OHOS
-#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DISPATCHER_STUB_H
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DELEGATE_STUB_H

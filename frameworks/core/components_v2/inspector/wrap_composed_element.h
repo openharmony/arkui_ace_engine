@@ -38,13 +38,15 @@ public:
     std::string GetJustifyContent() const;
     std::string GetAlignItems() const;
     std::string GetAlignContent() const;
-    void AddChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void UpdateChildWithSlot(int32_t slot, const RefPtr<Component>& newComponent) override;
-    void DeleteChildWithSlot(int32_t slot) override;
 
     AceType::IdType GetTargetTypeId() const override
     {
         return WrapElement::TypeId();
+    }
+
+    RefPtr<Element> GetRenderElement() const override
+    {
+        return GetContentElement<WrapElement>(WrapElement::TypeId());
     }
 };
 

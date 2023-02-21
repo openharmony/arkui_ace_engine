@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_PATTERN_H
 
+#include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
@@ -135,11 +136,22 @@ public:
     {
         content_ = content;
     }
+    void SetLabelNode(const RefPtr<FrameNode>& label)
+    {
+        label_ = label;
+    }
 
     void UpdateBackgroundColor(const Color& color);
 
+    RefPtr<FrameNode> GetMenu();
+
+    void ModifyFontSize();
+
+    void ModifyFontSize(const Dimension& fontSize);
+
 protected:
     void OnModifyDone() override;
+    void OnMountToParentDone() override;
 
 private:
     // register menu item's callback
@@ -157,7 +169,6 @@ private:
     void AddSelectIcon();
 
     RefPtr<FrameNode> GetMenuWrapper();
-    RefPtr<FrameNode> GetMenu();
 
     void ShowSubMenu();
 
@@ -182,6 +193,7 @@ private:
     int32_t subMenuId_ = -1;
     RefPtr<FrameNode> subMenu_;
     RefPtr<FrameNode> content_ = nullptr;
+    RefPtr<FrameNode> label_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);

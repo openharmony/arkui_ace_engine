@@ -103,10 +103,8 @@ public:
         auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
         auto value = radioEventHub ? radioEventHub->GetValue() : "";
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
-        auto resultJson = JsonUtil::Create(true);
-        resultJson->Put("value", value.c_str());
-        resultJson->Put("group", group.c_str());
-        json->Put("value", resultJson->ToString().c_str());
+        json->Put("value", value.c_str());
+        json->Put("group", group.c_str());
     }
 
 private:
@@ -133,6 +131,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
+    void RemoveLastHotZoneRect() const;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -155,6 +154,7 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    bool isFirstAddhotZoneRect_ = true;
     
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

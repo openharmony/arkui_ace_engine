@@ -20,8 +20,9 @@
 
 namespace OHOS::Ace::NG {
 
-class  ACE_EXPORT ModelViewNG : public OHOS::Ace::ModelView {
+class ACE_EXPORT ModelViewNG : public OHOS::Ace::ModelView {
 public:
+    ModelViewNG();
     void Create(const std::string& src) override;
     void SetBackground(const std::string& value) override;
     void SetHandleCameraMove(bool value) override;
@@ -38,6 +39,17 @@ public:
     void AddCustomRender(const RefPtr<OHOS::Render3D::SVCustomRenderDescriptor>& customRender) override;
     void SetWidth(Dimension& width) override;
     void SetHeight(Dimension& height) override;
+
+private:
+    void PerformCameraUpdate();
+    void PerformLightUpdate();
+
+    // Camera and lights animations are done from the frontend with Animatable types.
+    WeakPtr<FrameNode> frameNode_;
+    OHOS::Render3D::Position cameraPosition_;
+    std::vector<RefPtr<OHOS::Render3D::SVLight>> lights_;
+    bool isFirstLightsUpdate_ = true;
+    int lightsIdx_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

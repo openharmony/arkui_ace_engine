@@ -26,7 +26,7 @@ public:
 
     inline static std::string GenerateImageKey(const ImageSourceInfo& src, const NG::SizeF& targetSize)
     {
-        return src.GetKey() + targetSize.ToString();
+        return src.GetKey() + "&size=" + targetSize.ToString();
     }
 
 private:

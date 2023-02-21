@@ -40,13 +40,13 @@ public:
     {}
     ~LoadingProgressPaintMethod() override = default;
 
-    RefPtr<Modifier> GetModifier(PaintWrapper* paintWrapper) override
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_RETURN(loadingProgressModifier_, nullptr);
         return loadingProgressModifier_;
     }
 
-    void UpdateModifier(PaintWrapper* paintWrapper) override
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
         CHECK_NULL_VOID(loadingProgressModifier_);
         auto pipeline = PipelineBase::GetCurrentContext();

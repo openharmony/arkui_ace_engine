@@ -38,6 +38,12 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
 
+RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
+{
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
+}
+
 bool DragDropManager::CheckDragDropProxy(int64_t id) const
 {
     return CURRENT_ID == id;
@@ -59,6 +65,11 @@ void DragDropManager::OnDragMove(float /* globalX */, float /* globalY */, const
 void DragDropManager::OnDragEnd(float /* globalX */, float /* globalY */, const std::string& /* extraInfo */)
 {
     GTEST_LOG_(INFO) << "OnDragEnd has called";
+}
+
+void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo)
+{
+    GTEST_LOG_(INFO) << "OnTextDragEnd has called";
 }
 
 void DragDropManager::onDragCancel()
