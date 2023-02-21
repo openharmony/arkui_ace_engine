@@ -473,4 +473,9 @@ void ImagePattern::EnableDrag()
     eventHub->SetOnDragStart(std::move(dragStart));
 }
 
+void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("draggable", draggable_ ? "true" : "false");
+}
+
 } // namespace OHOS::Ace::NG
