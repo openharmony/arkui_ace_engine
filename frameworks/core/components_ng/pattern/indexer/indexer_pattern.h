@@ -123,6 +123,7 @@ private:
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
+    RefPtr<Animator> bubbleAnimator_;
     bool isInputEventRegisted_ = false;
     bool isKeyEventRegisted_ = false;
     bool isTouch_ = false;

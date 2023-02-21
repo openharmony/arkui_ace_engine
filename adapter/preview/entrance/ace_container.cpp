@@ -223,13 +223,19 @@ void AceContainer::InitializeStageAppConfig(const std::string& assetPath, bool f
         pipelineContext_->SetMinPlatformVersion(stageAppInfo_->GetMinAPIVersion());
     }
 
-    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-    CHECK_NULL_VOID(declarativeFrontend);
     auto& bundleName = stageAppInfo_->GetBundleName();
     auto& compileMode = stageModuleInfo_->GetCompileMode();
     auto& moduleName = stageModuleInfo_->GetModuleName();
     bool isBundle = (compileMode != "esmodule");
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    CHECK_NULL_VOID(declarativeFrontend);
     declarativeFrontend->InitializeModuleSearcher(bundleName, moduleName, assetPath, isBundle);
+
+    auto formFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+    CHECK_NULL_VOID(formFrontend);
+    formFrontend->SetBundleName(bundleName);
+    formFrontend->SetModuleName(moduleName);
+    formFrontend->SetIsBundle(isBundle);
 }
 
 void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl)

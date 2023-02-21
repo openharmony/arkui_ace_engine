@@ -126,6 +126,10 @@ public:
     {
         return popupTextStyle_;
     }
+    const Color& GetPopupDefaultColor() const
+    {
+        return popupDefaultColor_;
+    }
     static constexpr double SLIP_BACKGROUND_OPACITY = 0.05;
     static constexpr double SLIP_PRESS_BACKGROUND_OPACITY = 0.1;
     static constexpr float TEXT_PADDING_LEFT = 12.0f;
@@ -141,6 +145,7 @@ protected:
     Color selectedBackgroundColor_;
     Color popupBackgroundColor_;
     Color popupSeparateColor_;
+    Color popupDefaultColor_;
     Dimension popupAreaSize_;
     Dimension hoverRadiusSize_;
     Dimension hoverBgAreaSize_;
@@ -178,6 +183,7 @@ private:
             indexerPattern->GetAttr<Color>("popup_background_color", Color(POPUP_BACKGROUND_COLOR));
         theme->popupSeparateColor_ =
             indexerPattern->GetAttr<Color>("popup_separator_color", Color(POPUP_SEPARATOR_COLOR));
+        theme->popupDefaultColor_ = indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR));
         theme->popupAreaSize_ =
             indexerPattern->GetAttr<Dimension>("popup_area_size", Dimension(POPUP_AREA_SIZE, DimensionUnit::VP));
         theme->hoverRadiusSize_ =

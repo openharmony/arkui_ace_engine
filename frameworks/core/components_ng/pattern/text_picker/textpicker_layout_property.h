@@ -37,6 +37,7 @@ public:
         value->propDefaultPickerItemHeight_ = CloneDefaultPickerItemHeight();
         value->propSelected_ = CloneSelected();
         value->propRange_ = CloneRange();
+        value->propValue_ = CloneValue();
         return value;
     }
 
@@ -46,6 +47,7 @@ public:
         ResetDefaultPickerItemHeight();
         ResetSelected();
         ResetRange();
+        ResetValue();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -55,6 +57,7 @@ public:
         json->Put("defaultPickerItemHeight", GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str());
         json->Put("selected", std::to_string(GetSelectedValue(0)).c_str());
         json->Put("range", GetTextRange().c_str());
+        json->Put("value", GetValueValue("").c_str());
     }
 
     std::string GetTextRange() const
@@ -78,6 +81,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, uint32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Range, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutProperty);
