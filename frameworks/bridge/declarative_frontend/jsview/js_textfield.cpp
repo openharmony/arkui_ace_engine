@@ -453,7 +453,21 @@ void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBackgroundColor(info);
+        if (info.Length() < 1) {
+            LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+            return;
+        }
+        Color backgroundColor;
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto themeManager = pipeline->GetThemeManager();
+            CHECK_NULL_VOID_NOLOG(themeManager);
+            auto theme = themeManager->GetTheme<TextFieldTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            backgroundColor = theme->GetBgColor();
+        }
+        ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
         return;
     }
     if (info.Length() < 1) {
