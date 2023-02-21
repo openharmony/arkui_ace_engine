@@ -105,6 +105,28 @@ public:
 
     void UpdateNextNodeDivider(bool needDivider);
 
+    void SetBgBlendColor(const Color& color)
+    {
+        bgBlendColor_ = color;
+    }
+
+    Color GetBgBlendColor() const
+    {
+        return bgBlendColor_;
+    }
+
+    void SetIsHover(bool isHover)
+    {
+        isHover_ = isHover;
+    }
+
+    bool IsHover() const
+    {
+        return isHover_;
+    }
+
+    void PlayBgColorAnimation(bool isHoverChange = true);
+
 private:
     void OnModifyDone() override;
 
@@ -131,6 +153,9 @@ private:
     RefPtr<SelectTheme> selectTheme_ = nullptr;
     // this option node's index in the menu
     int index_ = -1;
+
+    Color bgBlendColor_ = Color::TRANSPARENT;
+    bool isHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
 };
