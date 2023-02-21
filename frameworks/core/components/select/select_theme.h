@@ -78,6 +78,8 @@ public:
             theme->selectHideTime_ = 250; // unit is ms.
             theme->menuShowTime_ = 250;   // unit is ms.
             theme->menuHideTime_ = 250;   // unit is ms.
+            theme->hoverAnimationDuration_ = 250;
+            theme->pressAnimationDuration_ = 100;
             theme->titleLeftPadding_ = Dimension(16.0, DimensionUnit::VP);
             theme->titleTopPadding_ = Dimension(8.0, DimensionUnit::VP);
             theme->titleRightPadding_ = Dimension(8.0, DimensionUnit::VP);
@@ -213,6 +215,8 @@ public:
         theme->menuShowTime_ = menuShowTime_;
         theme->selectShowTime_ = selectShowTime_;
         theme->selectHideTime_ = selectHideTime_;
+        theme->hoverAnimationDuration_ = hoverAnimationDuration_;
+        theme->pressAnimationDuration_ = pressAnimationDuration_;
         theme->optionPadding_ = optionPadding_;
         theme->optionInterval_ = optionInterval_;
         theme->optionMinHeight_ = optionMinHeight_;
@@ -539,6 +543,16 @@ public:
         }
     }
 
+    int32_t GetHoverAnimationDuration() const
+    {
+        return hoverAnimationDuration_;
+    }
+
+    int32_t GetPressAnimationDuration() const
+    {
+        return pressAnimationDuration_;
+    }
+
     SelectTheme() = default;
 
     bool IsAllowScale() const
@@ -803,6 +817,8 @@ private:
     uint32_t selectShowTime_ = 0;
     uint32_t menuHideTime_ = 0;
     uint32_t selectHideTime_ = 0;
+    int32_t hoverAnimationDuration_ = 0;
+    int32_t pressAnimationDuration_ = 0;
 
     Edge optionPadding_;
 };
