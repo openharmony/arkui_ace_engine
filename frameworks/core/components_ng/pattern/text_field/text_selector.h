@@ -51,8 +51,8 @@ struct TextSelector {
 
     void Update(int32_t base, int32_t destination)
     {
-        baseOffset = std::min(base, destination);
-        destinationOffset = std::max(base, destination);
+        baseOffset = base;
+        destinationOffset = destination;
     }
 
     // Usually called when none is selected.
@@ -74,12 +74,12 @@ struct TextSelector {
 
     inline int32_t GetStart() const
     {
-        return std::min(baseOffset, destinationOffset);
+        return baseOffset;
     }
 
     inline int32_t GetEnd() const
     {
-        return std::max(baseOffset, destinationOffset);
+        return destinationOffset;
     }
 
     inline bool IsValid() const
