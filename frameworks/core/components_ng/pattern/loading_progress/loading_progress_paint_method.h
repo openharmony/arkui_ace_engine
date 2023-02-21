@@ -22,10 +22,16 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
+#include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+const int32_t REFRESH_STATE_FOLLOW_HAND = static_cast<int32_t>(RefreshAnimationState::FOLLOW_HAND);
+const int32_t REFRESH_STATE_FOLLOW_TO_RESYCLE = static_cast<int32_t>(RefreshAnimationState::FOLLOW_TO_RECYCLE);
+const int32_t REFRESH_STATE_RESYCLE = static_cast<int32_t>(RefreshAnimationState::RECYCLE);
+const int32_t REFRESH_STATE_FADEAWAY = static_cast<int32_t>(RefreshAnimationState::FADEAWAY);
+}
 class ACE_EXPORT LoadingProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(LoadingProgressPaintMethod, NodePaintMethod)
 public:
@@ -47,13 +53,31 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto progressTheme = pipeline->GetTheme<ProgressTheme>();
         CHECK_NULL_VOID(progressTheme);
-
         auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
-        if (paintProperty) {
-            color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
-        }
-        loadingProgressModifier_->SetDate(FULL_COUNT);
+        CHECK_NULL_VOID(paintProperty);
+        color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
         loadingProgressModifier_->SetColor(LinearColor(color_));
+        if (loadingProgressModifier_->GetOwner() == LoadingProgressOwner::SELF) {
+            loadingProgressModifier_->StartRecycle();
+            return;
+        }
+        auto loadingState =
+            paintProperty->GetRefreshAnimationState().value_or(static_cast<int32_t>(RefreshAnimationState::UNKNOWN));
+        switch (loadingState) {
+            case REFRESH_STATE_FOLLOW_HAND:
+                loadingProgressModifier_->ChangeRefreshFollowData(
+                    paintProperty->GetRefreshFollowRatio().value_or(0.0f));
+                break;
+            case REFRESH_STATE_FOLLOW_TO_RESYCLE:
+                loadingProgressModifier_->ChangeRefreshTansitionData(
+                    paintProperty->GetRefreshTransitionRatio().value_or(0.0f));
+                break;
+            case REFRESH_STATE_RESYCLE:
+            case REFRESH_STATE_FADEAWAY:
+                loadingProgressModifier_->StartRecycle();
+                break;
+            default:;
+        }
     }
 
 private:

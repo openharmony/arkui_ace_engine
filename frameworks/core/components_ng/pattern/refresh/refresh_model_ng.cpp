@@ -97,8 +97,8 @@ void RefreshModelNG::Pop()
     textLayoutProperty->UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
     textLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 
-    auto loadingProgressChild =
-        FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
+    auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(loadingProgressChild);
     refreshNode->AddChild(loadingProgressChild);
     auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
@@ -107,7 +107,6 @@ void RefreshModelNG::Pop()
     auto progressPaintProperty = loadingProgressChild->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue(Color::BLUE));
-    progressLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 void RefreshModelNG::SetRefreshing(bool isRefreshing)

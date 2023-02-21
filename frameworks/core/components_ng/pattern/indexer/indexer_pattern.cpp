@@ -668,17 +668,21 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     for (auto child : listNode->GetChildren()) {
         auto listItemNode = DynamicCast<FrameNode>(child);
         auto listItemProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
+        CHECK_NULL_VOID(listItemProperty);
         auto listItemContext = listItemNode->GetRenderContext();
-        if (currentIndex == clickIndex) {
-            listItemContext->UpdateBackgroundColor(Color(POPUP_LISTITEM_CLICKED_BG));
-        } else {
-            listItemContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        }
+        CHECK_NULL_VOID(listItemContext);
         auto textNode = DynamicCast<FrameNode>(listItemNode->GetFirstChild());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupTextColor());
+        if (currentIndex == clickIndex) {
+            textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupTextColor());
+            listItemContext->UpdateBackgroundColor(Color(POPUP_LISTITEM_CLICKED_BG));
+        } else {
+            textLayoutProperty->UpdateTextColor(indexerTheme->GetDefaultTextColor());
+            listItemContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
+        
         listItemNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         currentIndex++;
     }
@@ -915,19 +919,55 @@ void IndexerPattern::StartBubbleAppearAnimation(RefPtr<FrameNode> animationNode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    CHECK_NULL_VOID(animationNode);
-    auto renderContext = animationNode->GetRenderContext();
-    AnimationOption animationOption;
-    animationOption.SetDuration(INDEXER_BUBBLE_WAIT_DURATION);
-    animationOption.SetCurve(Curves::DECELE);
-    animationOption.SetOnFinishEvent([targetId = host->GetId(), popnodeId = animationNode->GetId(),
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto rendercontext = animationNode->GetRenderContext();
+    CHECK_NULL_VOID(rendercontext);
+    if (!bubbleAnimator_) {
+        bubbleAnimator_ = AceType::MakeRefPtr<Animator>(context);
+    }
+    if (!bubbleAnimator_->IsStopped()) {
+        bubbleAnimator_->Finish();
+    }
+    bubbleAnimator_->ClearInterpolators();
+    bubbleAnimator_->ClearAllListeners();
+    auto startTimeRatio = 1.0f * INDEXER_BUBBLE_ENTER_DURATION / INDEXER_BUBBLE_APPEAR_DURATION;
+    auto middleTimeRatio =
+        1.0f * (INDEXER_BUBBLE_WAIT_DURATION + INDEXER_BUBBLE_ENTER_DURATION) / INDEXER_BUBBLE_APPEAR_DURATION;
+    bubbleAnimator_->SetDuration(INDEXER_BUBBLE_APPEAR_DURATION);
+    auto originFrame = AceType::MakeRefPtr<Keyframe<float>>(0.0f, 0.0f);
+    originFrame->SetCurve(Curves::SHARP);
+    auto startFrame = AceType::MakeRefPtr<Keyframe<float>>(startTimeRatio, 1.0f);
+    startFrame->SetCurve(Curves::SHARP);
+    auto waitFrame = AceType::MakeRefPtr<Keyframe<float>>(middleTimeRatio, 1.0f);
+    waitFrame->SetCurve(Curves::LINEAR);
+    auto endFrame = AceType::MakeRefPtr<Keyframe<float>>(1.0f, 0.0f);
+    endFrame->SetCurve(Curves::SHARP);
+    auto animation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+    animation->AddKeyframe(originFrame);
+    animation->AddKeyframe(startFrame);
+    animation->AddKeyframe(waitFrame);
+    animation->AddKeyframe(endFrame);
+    animation->AddListener([targetId = host->GetId(), popnodeId = animationNode->GetId()](float opacity) {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto overlayManager = context->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto popupNode = overlayManager->GetIndexerPopup(targetId);
+        CHECK_NULL_VOID(popupNode);
+        auto rendercontext = popupNode->GetRenderContext();
+        CHECK_NULL_VOID(rendercontext);
+        rendercontext->UpdateOpacity(opacity);
+    });
+    bubbleAnimator_->AddInterpolator(animation);
+    bubbleAnimator_->AddStopListener([targetId = host->GetId(), popnodeId = animationNode->GetId(),
                                          id = Container::CurrentId(), weak = WeakClaim(this)] {
         ContainerScope scope(id);
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
         indexerPattern->RemoveBubbleNode(popnodeId, targetId);
     });
-    renderContext->OpacityAnimation(animationOption, 1.0f, 0.0f);
+    bubbleAnimator_->Play();
 }
 
 void IndexerPattern::RemoveBubbleNode(int32_t popnodeId, int32_t targetId) const
