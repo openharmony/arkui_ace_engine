@@ -687,6 +687,7 @@ DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
                 imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
+        LOGI("borderImage data ready %{public}s", sourceInfo.ToString().c_str());
         rosenRenderContext->bdImageLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
     return task;
@@ -705,6 +706,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
         }
         ctx->bdImage_ = ctx->bdImageLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bdImage_);
+        LOGI("borderImage load success %{public}s", sourceInfo.ToString().c_str());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBorderImage();
             ctx->RequestNextFrame();
