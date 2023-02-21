@@ -174,6 +174,7 @@ private:
     void HandleMouseEvent(bool isHover);
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
+    void PlayHoverAnimation(const Color& color);
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
@@ -206,6 +207,7 @@ private:
     double deltaSize_ = 0.0;
     RefPtr<PanEvent> panEvent_;
     bool pressed_ = false;
+    bool hoverd_ = false;
     double scrollDelta_ = 0.0;
     bool animationCreated_ = false;
     RefPtr<Animator> toController_;
