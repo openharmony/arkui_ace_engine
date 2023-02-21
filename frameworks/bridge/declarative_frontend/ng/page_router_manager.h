@@ -53,8 +53,6 @@ struct RouterPageInfo {
     std::string path;
 };
 
-using LoadNewPageUrlCallback = std::function<void()>;
-
 struct RouterTask {
     RouterAction action = RouterAction::PUSH;
     RouterPageInfo routerPageInfo;

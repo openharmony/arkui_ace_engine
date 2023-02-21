@@ -25,7 +25,8 @@ class ACE_EXPORT PageUrlChecker : public AceType {
     DECLARE_ACE_TYPE(PageUrlChecker, AceType)
 
 public:
-    virtual void LoadPageUrl(const std::string& url, const std::function<void()>& callback) = 0;
+    virtual void LoadPageUrl(const std::string& url, const std::function<void()>& callback,
+        const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) = 0;
 };
 } // namespace OHOS::Ace
 

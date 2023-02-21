@@ -82,11 +82,15 @@ public:
 
         auto resultCode = data.ReadInt32();
         if (resultCode == SILENT_INSTALL_SUCCESS) {
-            return (this->*handleOnActionEventFunc_)();
+            if (handleOnActionEventFunc_ != nullptr) {
+                return (this->*handleOnActionEventFunc_)();
+            }
         }
 
         if (resultCode < SILENT_INSTALL_SUCCESS) {
-            return (this->*handleOnErrorFunc_)(data);
+            if (handleOnErrorFunc_ != nullptr) {
+                return (this->*handleOnErrorFunc_)(data);
+            }
         }
 
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -155,9 +159,9 @@ public:
     {
         actionEventHandler_ = listener;
     }
-    void SetErrorEventHandler(std::function<void(int32_t, const std::string&)>&& listener)
+    void SetErrorEventHandler(const std::function<void(int32_t, const std::string&)>& listener)
     {
-        errorEventHandler_ = std::move(listener);
+        errorEventHandler_ = listener;
     }
 
 private:
@@ -182,7 +186,8 @@ sptr<AppExecFwk::IBundleMgr> PageUrlCheckerOhos::GetBundleManager()
     return iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
 }
 
-void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function<void()>& callback)
+void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function<void()>& callback,
+    const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack)
 {
     if (url.substr(0, SUB_STR_LENGTH) != "@bundle") {
         return;
@@ -212,6 +217,7 @@ void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function
             want.SetModuleName(moduleName);
             sptr<AtomicServiceStatusCallback> routerCallback = new AtomicServiceStatusCallback();
             routerCallback->SetActionEventHandler(callback);
+            routerCallback->SetErrorEventHandler(silentInstallErrorCallBack);
             if (bms->SilentInstall(want, appInfo->uid, routerCallback)) {
                 LOGI("Begin to silent install");
             }

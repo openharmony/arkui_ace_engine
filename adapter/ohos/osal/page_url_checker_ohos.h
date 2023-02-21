@@ -26,9 +26,11 @@ class PageUrlCheckerOhos : public PageUrlChecker {
     DECLARE_ACE_TYPE(PageUrlCheckerOhos, PageUrlChecker)
 
 public:
-    explicit PageUrlCheckerOhos(const std::shared_ptr<OHOS::AbilityRuntime::Context>& context) : context_(context) {}
+    explicit PageUrlCheckerOhos(
+        const std::shared_ptr<OHOS::AbilityRuntime::Context>& context) : context_(context) {}
     ~PageUrlCheckerOhos() = default;
-    void LoadPageUrl(const std::string& url, const std::function<void()>& callback) override;
+    void LoadPageUrl(const std::string& url, const std::function<void()>& callback,
+        const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) override;
 
 private:
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
