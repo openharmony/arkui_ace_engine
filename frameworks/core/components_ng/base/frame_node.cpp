@@ -218,8 +218,7 @@ void FrameNode::OnAttachToMainTree()
     UINode::OnAttachToMainTree();
     eventHub_->FireOnAppear();
     renderContext_->OnNodeAppear();
-    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
-        renderContext_->HasAnchor()) {
+    if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
@@ -241,7 +240,7 @@ void FrameNode::OnAttachToMainTree()
 void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
-    for (const auto& child: GetChildren()) {
+    for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
     }
 }
@@ -275,7 +274,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     bool contentOffsetChange = geometryNode_->GetContentOffset() != dirty->GetGeometryNode()->GetContentOffset();
 
     SetGeometryNode(dirty->GetGeometryNode());
-    if (frameSizeChange || frameOffsetChange || (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
+    if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
+        (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange)) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
         } else {
@@ -713,8 +713,7 @@ void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
     eventHub_->MarkModifyDone();
-    if (IsResponseRegion() || renderContext_->HasPosition() || renderContext_->HasOffset() ||
-        renderContext_->HasAnchor()) {
+    if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
             auto frameNode = AceType::DynamicCast<FrameNode>(parent);
