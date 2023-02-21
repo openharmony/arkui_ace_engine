@@ -191,11 +191,54 @@ void SkiaCanvasImage::DrawToRSCanvas(
     CHECK_NULL_VOID(image || GetCompressData());
     RSImage rsImage(&image);
     RSSamplingOptions options;
-    ClipRRect(canvas, dstRect, radiusXY);
-    if (DrawCompressedImage(canvas, srcRect, dstRect, radiusXY)) {
+#ifdef ENABLE_ROSEN_BACKEND
+    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
+    if (rsCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
         return;
     }
+    auto skCanvas = rsCanvas->ExportSkCanvas();
+    if (skCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+        return;
+    }
+    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
+    if (recordingCanvas == nullptr) {
+        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+        return;
+    }
+    SkPaint paint;
+    AddFilter(paint);
+    SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    if (radiusXY.size() == RADIUS_POINTS_SIZE) {
+        radii[SkRRect::kUpperLeft_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kUpperRight_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kLowerLeft_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetY(), 0.0f)));
+        radii[SkRRect::kLowerRight_Corner].set(
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetX(), 0.0f)),
+            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
+    }
+    recordingCanvas->ClipAdaptiveRRect(radii);
+    auto config = GetPaintConfig();
+    if (config.imageFit_ == ImageFit::TOP_LEFT) {
+        SkAutoCanvasRestore acr(recordingCanvas, true);
+        auto skSrcRect = SkRect::MakeXYWH(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetWidth(), srcRect.GetHeight());
+        auto skDstRect = SkRect::MakeXYWH(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetWidth(), dstRect.GetHeight());
+        recordingCanvas->concat(SkMatrix::MakeRectToRect(skSrcRect, skDstRect, SkMatrix::kFill_ScaleToFit));
+    }
+    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
+        GetCompressWidth(), GetCompressHeight());
+    auto data = GetCompressData();
+    recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
+#else
     canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
+#endif
 }
 
 bool SkiaCanvasImage::DrawCompressedImage(
