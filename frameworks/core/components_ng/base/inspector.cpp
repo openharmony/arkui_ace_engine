@@ -103,8 +103,10 @@ void GetInspectorChildren(
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
     auto node = AceType::DynamicCast<FrameNode>(parent);
-    RectF rect(node->GetTransformRelativeOffset().GetX(), node->GetTransformRelativeOffset().GetY(),
-        node->GetGeometryNode()->GetFrameRect().Width(), node->GetGeometryNode()->GetFrameRect().Height());
+    auto ctx = node->GetRenderContext();
+
+    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
+    rect.SetOffset(node->GetTransformRelativeOffset());
 #ifndef PREVIEW
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
 #else
