@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,9 @@
 
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 
+#include "dm/display_manager.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 #include "window.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
@@ -23,19 +26,15 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
-#include "dm/display_manager.h"
-#include "interfaces/inner_api/ace/viewport_config.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
-#include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/frame_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
-#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/frontend.h"
 #include "core/common/hdc_register.h"
 #include "core/common/text_field_manager.h"
@@ -113,9 +112,9 @@ void SubwindowOhos::InitContainer()
     container->InitializeSubContainer(parentContainerId_);
     ViewportConfig config;
     // create ace_view
-    auto flutterAceView =
-        Platform::FlutterAceView::CreateView(childContainerId_, false, container->GetSettings().usePlatformAsUIThread);
-    Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
+    auto* aceView =
+        Platform::AceViewOhos::CreateView(childContainerId_, false, container->GetSettings().usePlatformAsUIThread);
+    Platform::AceViewOhos::SurfaceCreated(aceView, window_);
 
     int32_t width = static_cast<int32_t>(window_->GetRequestRect().width_);
     int32_t height = static_cast<int32_t>(window_->GetRequestRect().height_);
@@ -123,8 +122,8 @@ void SubwindowOhos::InitContainer()
 
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
-    Platform::AceContainer::SetView(flutterAceView, config.Density(), width, height, window_, callback);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config.Orientation());
+    Platform::AceContainer::SetView(aceView, config.Density(), width, height, window_, callback);
+    Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -483,17 +482,14 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     auto container = Platform::DialogContainer::GetContainer(childContainerId_);
     CHECK_NULL_RETURN(container, false);
     // create ace_view
-    auto* flutterAceView = Platform::FlutterAceView::CreateView(childContainerId_, true, true);
-    Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow_);
+    auto* aceView = Platform::AceViewOhos::CreateView(childContainerId_, true, true);
+    Platform::AceViewOhos::SurfaceCreated(aceView, dialogWindow_);
     // set view
-    Platform::DialogContainer::SetView(flutterAceView, density, width, height, dialogWindow_);
+    Platform::DialogContainer::SetView(aceView, density, width, height, dialogWindow_);
     Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, dialogWindow_);
-    flutter::ViewportMetrics metrics;
-    metrics.physical_width = width;
-    metrics.physical_height = height;
-    metrics.device_pixel_ratio = density;
-    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+    ViewportConfig config(width, height, density);
+    Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+    Platform::AceViewOhos::SurfaceChanged(aceView, width, height, 0);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -566,15 +562,12 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
 
         auto container = Platform::DialogContainer::GetContainer(childContainerId);
         CHECK_NULL_VOID(container);
-        auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-        CHECK_NULL_VOID(flutterAceView);
-        if (flutterAceView->GetWidth() != width || flutterAceView->GetHeight() != height) {
-            flutter::ViewportMetrics metrics;
-            metrics.physical_width = width;
-            metrics.physical_height = height;
-            metrics.device_pixel_ratio = density;
-            Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-            Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+        auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+        CHECK_NULL_VOID(aceView);
+        if (aceView->GetWidth() != width || aceView->GetHeight() != height) {
+            ViewportConfig config(width, height, density);
+            Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+            Platform::AceViewOhos::SurfaceChanged(aceView, width, height, 0);
         }
 
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
