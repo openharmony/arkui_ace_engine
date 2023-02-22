@@ -230,7 +230,6 @@ private:
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
     int32_t scrollIndex_ = 0;
     bool scrollable_ = true;
-    bool drivenRender_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
 
