@@ -293,7 +293,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
                 auto title = AceType::DynamicCast<FrameNode>(titleNode);
                 CHECK_NULL_VOID(title);
 
-auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
+                auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
                 CHECK_NULL_VOID(textLayoutProperty);
                 MeasureContext context;
                 context.textContent = textLayoutProperty->GetContentValue();

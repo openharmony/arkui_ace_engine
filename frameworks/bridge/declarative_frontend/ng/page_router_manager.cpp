@@ -420,13 +420,6 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target, const std::stri
     std::string url = target.url;
     std::string pagePath = url + ".js";
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-    if (pagePath.empty()) {
-        LOGE("[Engine Log] this uri not support in route push.");
-        if (errorCallback != nullptr) {
-            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR);
-        }
-        return;
-    }
     if (errorCallback != nullptr) {
         errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
@@ -501,13 +494,6 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target, const std::s
     std::string url = target.url;
     std::string pagePath = url + ".js";
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-    if (pagePath.empty()) {
-        LOGE("[Engine Log] this uri not support in route push.");
-        if (errorCallback != nullptr) {
-            errorCallback("The uri of router is not exist.", Framework::ERROR_CODE_URI_ERROR_LITE);
-        }
-        return;
-    }
     if (errorCallback != nullptr) {
         errorCallback("", Framework::ERROR_CODE_NO_ERROR);
     }
@@ -598,10 +584,6 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         std::string url = target.url;
         std::string pagePath = target.url + ".js";
         LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-        if (pagePath.empty()) {
-            LOGE("[Engine Log] this uri not support in route push.");
-            return;
-        }
         auto pageInfo = FindPageInStack(url);
         if (pageInfo.second) {
             // find page in stack, pop to specified index.
