@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ContainerModalPattern::OnModifyDone() {}
 
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 {
