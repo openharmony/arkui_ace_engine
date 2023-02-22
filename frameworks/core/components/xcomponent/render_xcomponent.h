@@ -119,6 +119,7 @@ protected:
     bool positionChange_ = false;
     bool sizeChange_ = false;
     std::string id_;
+    Size initDrawSize_;
 
     RefPtr<RawRecognizer> touchRecognizer_;
 
