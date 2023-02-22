@@ -170,6 +170,12 @@ void RenderList::Update(const RefPtr<Component>& component)
     hasWidth_ = component_->GetHasWidth();
     isLaneList_ = (component_->GetLanes() != -1) || (component_->GetLaneConstrain() != std::nullopt);
     sticky_ = component_->GetSticky();
+    if (!vertical_ || scrollBar_->GetDisplayMode() != DisplayMode::OFF || chainAnimation_ ||
+        sticky_ != StickyStyle::NONE || isLaneList_ || !scrollable_->Available()) {
+        drivenRender_ = false;
+    } else {
+        drivenRender_ = true;
+    }
     MarkNeedLayout();
 }
 
@@ -713,6 +719,13 @@ void RenderList::PerformLayout()
     // Clear auto scrolling flags
     autoScrollingForItemMove_ = false;
     double currentTotalOffset = startIndexOffset_ - currentOffset_;
+
+    if (!NearEqual(currentTotalOffset, prevTotalOffset)) {
+        SetPaintState(true);
+    } else {
+        SetPaintState(false);
+    }
+
     if (!NearEqual(currentTotalOffset, prevTotalOffset)) {
         auto offset = Dimension((currentTotalOffset - prevTotalOffset) / dipScale_, DimensionUnit::VP);
         if (scrollable_ && scrollable_->Idle()) {

@@ -1867,4 +1867,27 @@ void RosenRenderContext::DumpInfo() const
     }
 }
 
+void RosenRenderContext::MarkContentChanged(bool isChanged)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkContentChanged(isChanged);
+}
+
+void RosenRenderContext::MarkDrivenRender(bool flag)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkDrivenRender(flag);
+}
+
+void RosenRenderContext::MarkDrivenRenderItemIndex(int32_t index)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkDrivenRenderItemIndex(index);
+}
+
+void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkDrivenRenderFramePaintState(flag);
+}
 } // namespace OHOS::Ace::NG

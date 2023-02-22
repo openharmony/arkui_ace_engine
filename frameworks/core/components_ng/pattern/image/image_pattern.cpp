@@ -476,6 +476,13 @@ void ImagePattern::EnableDrag()
     eventHub->SetOnDragStart(std::move(dragStart));
 }
 
+void ImagePattern::BeforeCreatePaintWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->MarkContentChanged(true);
+}
+
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("draggable", draggable_ ? "true" : "false");

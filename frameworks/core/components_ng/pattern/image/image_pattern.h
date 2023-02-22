@@ -80,6 +80,8 @@ public:
         draggable_ = draggable;
     }
 
+    void BeforeCreatePaintWrapper() override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

@@ -116,6 +116,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
     ProcessEvent(indexChanged, finalOffset, isJump);
     UpdateScrollBarOffset();
+
+    DrivenRender(dirty);
+
     return true;
 }
 
@@ -127,6 +130,10 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     CHECK_NULL_VOID(listEventHub);
 
     auto onScroll = listEventHub->GetOnScroll();
+    if (!NearZero(finalOffset) && !isJump) {
+        paintStateFlag_ = true;
+        isFramePaintStateValid_ = true;
+    }
     if (onScroll && !NearZero(finalOffset) && !isJump) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
@@ -175,6 +182,45 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
             onScrollStop();
         }
         scrollStop_ = false;
+    }
+}
+
+void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    auto stickyStyle = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
+    auto barDisplayMode = listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF);
+    auto chainAnimation = listLayoutProperty->GetChainAnimation().value_or(false);
+    if (axis != Axis::VERTICAL || barDisplayMode != DisplayMode::OFF ||
+        stickyStyle != V2::StickyStyle::NONE || chainAnimation || !scrollable_) {
+        drivenRender_ = false;
+    } else {
+        drivenRender_ = true;
+    }
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->MarkDrivenRender(drivenRender_);
+    if (drivenRender_ && isFramePaintStateValid_) {
+        // Mark items
+        int32_t indexStep = 0;
+        int32_t startIndex = itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
+        for (auto& pos : itemPosition_) {
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
+            CHECK_NULL_VOID(wrapper);
+            auto itemHost = wrapper->GetHostNode();
+            CHECK_NULL_VOID(itemHost);
+            auto itemRenderContext = itemHost->GetRenderContext();
+            CHECK_NULL_VOID(itemRenderContext);
+            itemRenderContext->MarkDrivenRenderItemIndex(startIndex + indexStep);
+            indexStep++;
+        }
+        renderContext->MarkDrivenRenderFramePaintState(paintStateFlag_);
+        isFramePaintStateValid_ = false;
     }
 }
 

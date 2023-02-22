@@ -209,6 +209,11 @@ public:
 
     void OnBackgroundColorUpdate(const Color& value) override;
 
+    void MarkContentChanged(bool isChanged) override;
+    void MarkDrivenRender(bool flag) override;
+    void MarkDrivenRenderItemIndex(int32_t index) override;
+    void MarkDrivenRenderFramePaintState(bool flag) override;
+
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
