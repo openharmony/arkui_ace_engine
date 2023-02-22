@@ -180,12 +180,13 @@ void RosenRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
     }
     // use physical pixel to store bitmap
     double viewScale = pipeline->GetViewScale();
-    if (lastLayoutSize_ != GetLayoutSize()) {
-        if (GetLayoutSize().IsInfinite()) {
+    auto layoutSize = GetLayoutSize();
+    if (lastLayoutSize_ != layoutSize) {
+        if (layoutSize.IsInfinite() || layoutSize.IsEmpty()) {
             return;
         }
         CreateBitmap(viewScale);
-        lastLayoutSize_ = GetLayoutSize();
+        lastLayoutSize_ = layoutSize;
     }
     if (!skCanvas_) {
         LOGE("skCanvas_ is null");
