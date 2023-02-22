@@ -599,7 +599,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
     // for atomic service
-    container->SetInstallationFree(hapModuleInfo ? hapModuleInfo->installationFree : false);
+    container->SetInstallationFree(false);
     if (hapModuleInfo->installationFree) {
         container->SetSharePanelCallback(
             [context = context_](const std::string& faBundleName, const std::string& faAbilityName,
