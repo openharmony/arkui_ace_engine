@@ -309,8 +309,9 @@ float TextFieldPattern::GetIconRightOffset()
 void TextFieldPattern::CreateSingleHandle()
 {
     RectF firstHandle;
-    OffsetF firstHandleOffset(caretRect_.GetX() + parentGlobalOffset_.GetX(),
-        (IsTextArea() ? textRect_.GetY() : contentRect_.GetY()) + parentGlobalOffset_.GetY());
+    auto firstHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
+    OffsetF firstHandleOffset(firstHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX(),
+        firstHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY());
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     firstHandle.SetOffset(firstHandleOffset);
     firstHandle.SetSize(handlePaintSize);
@@ -347,11 +348,10 @@ void TextFieldPattern::UpdateCaretByRightClick()
 
 bool TextFieldPattern::CaretPositionCloseToTouchPosition()
 {
-    auto fontSize = GetTextOrPlaceHolderFontSize();
-    auto xInRange = GreatOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() - fontSize) &&
-                    LessOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() + fontSize);
-    auto yInRange = GreatOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() - fontSize) &&
-                    LessOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + fontSize * 2.0f);
+    auto xInRange = GreatOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() - PreferredLineHeight()) &&
+                    LessOrEqual(lastTouchOffset_.GetX(), caretRect_.GetX() + PreferredLineHeight());
+    auto yInRange = GreatOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY()) &&
+                    LessOrEqual(lastTouchOffset_.GetY(), caretRect_.GetY() + PreferredLineHeight());
     return xInRange && yInRange;
 }
 
@@ -1260,7 +1260,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
-        renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetPressBgColorValue(Color()));
+        renderContext->AnimateHoverEffectBoard(true);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -1281,7 +1281,7 @@ void TextFieldPattern::ResetBackgroundColor()
     auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
     auto renderContext = GetHost()->GetRenderContext();
-    renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
+    renderContext->AnimateHoverEffectBoard(false);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -1832,13 +1832,13 @@ void TextFieldPattern::OnHover(bool isHover)
         if (isHover) {
             pipeline->SetMouseStyleHoldNode(frameId);
             pipeline->ChangeMouseStyle(frameId, HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
-            renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetHoverBgColorValue(Color()));
+            renderContext->AnimateHoverEffectBoard(true);
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
         }
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
-        renderContext->UpdateBackgroundColor(textfieldPaintProperty->GetBackgroundColorValue(Color()));
+        renderContext->AnimateHoverEffectBoard(false);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
