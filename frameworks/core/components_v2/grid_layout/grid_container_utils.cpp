@@ -34,7 +34,7 @@ RefPtr<GridSizeInfo> ParseBreakpoints(const BreakPoints& breakpoints)
 RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
 {
     if (!breakpoints) {
-        LOGI("user hasnt set breakpoint, use WindowSize and xs: 320vp, sm: 520vp, md: 840vp");
+        LOGI("user hasnt set breakpoint, use WindowSize and xs: 320vp, sm: 600vp, md: 840vp");
         return AceType::MakeRefPtr<GridSizeInfo>();
     }
     return ParseBreakpoints(*breakpoints);

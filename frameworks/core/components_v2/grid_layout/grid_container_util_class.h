@@ -70,7 +70,7 @@ enum class GridSizeType {
 struct GridSizeInfo : public Referenced {
     std::vector<Dimension> sizeInfo {
         Dimension(320, DimensionUnit::VP),
-        Dimension(520, DimensionUnit::VP),
+        Dimension(600, DimensionUnit::VP),
         Dimension(840, DimensionUnit::VP),
     };
 
@@ -135,7 +135,7 @@ public:
     DEFINE_COPY_CONSTRUCTOR_AND_COPY_OPERATOR_AND_COMPARE_OPERATOR_WITH_PROPERTIES(
         BreakPoints, (reference)(breakpoints))
     BreakPointsReference reference = BreakPointsReference::WindowSize;
-    std::vector<std::string> breakpoints { "320vp", "520vp", "840vp" };
+    std::vector<std::string> breakpoints { "320vp", "600vp", "840vp" };
 };
 
 } // namespace OHOS::Ace::V2
