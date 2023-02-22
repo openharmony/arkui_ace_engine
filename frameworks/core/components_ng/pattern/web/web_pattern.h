@@ -110,6 +110,11 @@ public:
         return webSrc_;
     }
 
+    void SetPopup(bool popup)
+    {
+        isPopup_ = popup;
+    }
+
     void SetWebData(const std::string& webData)
     {
         if (webData_ != webData) {
@@ -399,6 +404,7 @@ private:
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
+    bool isPopup_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
