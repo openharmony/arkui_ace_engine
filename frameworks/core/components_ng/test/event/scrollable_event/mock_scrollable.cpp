@@ -29,6 +29,13 @@ bool Scrollable::Idle() const
     return false;
 }
 
+bool Scrollable::IsStopped() const
+{
+    return true;
+}
+
+void Scrollable::StopScrollable() {}
+
 void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {}

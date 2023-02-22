@@ -142,16 +142,13 @@ int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minL
     if (lanes < 1) {
         return 1;
     }
-    if (!crossSizeOptional.has_value() || GreaterOrEqualToInfinity(crossSizeOptional.value())) {
-        return lanes;
-    }
-    auto crossSize = crossSizeOptional.value();
     // Case 1: lane length constrain is not set
     //      1.1: use [lanes] set by user if [lanes] is set
     //      1.2: set [lanes] to 1 if [lanes] is not set
-    if (!minLaneLength.has_value() || !maxLaneLength.has_value()) {
-        maxLaneLength = crossSize / lanes;
-        minLaneLength = crossSize / lanes;
+    if (!crossSizeOptional.has_value() || GreaterOrEqualToInfinity(crossSizeOptional.value()) ||
+        !minLaneLength.has_value() || !maxLaneLength.has_value()) {
+        maxLaneLength.reset();
+        minLaneLength.reset();
         return lanes;
     }
     // Case 2: lane length constrain is set --> need to calculate [lanes_] according to contraint.
@@ -164,6 +161,7 @@ int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minL
     //         if [minLaneLength_] is 40, [maxLaneLength_] is 60, list's width is 132, the [lanes_] is 3
     //         according to rule 1, then the width of lane will be 132 / 3 = 44 rather than 40,
     //         its [minLaneLength_].
+    auto crossSize = crossSizeOptional.value();
     ModifyLaneLength(minLaneLength, maxLaneLength, crossSize);
 
     // if minLaneLength is 40, maxLaneLength is 60
