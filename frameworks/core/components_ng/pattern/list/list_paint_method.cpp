@@ -73,19 +73,12 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
 
 void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    const auto& geometryNode = paintWrapper->GetGeometryNode();
-    auto frameSize = geometryNode->GetPaddingSize();
-    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
-    auto renderContext = paintWrapper->GetRenderContext();
-    if (!renderContext || renderContext->GetClipEdge().value_or(true)) {
-        auto clipRect = RSRect(paddingOffset.GetX(), paddingOffset.GetY(), frameSize.Width() + paddingOffset.GetX(),
-                    paddingOffset.GetY() + frameSize.Height());
-        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-    }
-
     if (!divider_.strokeWidth.IsValid()) {
         return;
     }
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    auto frameSize = geometryNode->GetPaddingSize();
+    OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
@@ -126,18 +119,9 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
+        painter->PaintDivider(paintWrapper, canvas);
         painter->PaintScrollBar(canvas);
         painter->PaintEdgeEffect(paintWrapper, canvas);
-    };
-    return paintFunc;
-}
-
-CanvasDrawFunction ListPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
-{
-    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto painter = weak.Upgrade();
-        CHECK_NULL_VOID(painter);
-        painter->PaintDivider(paintWrapper, canvas);
     };
     return paintFunc;
 }

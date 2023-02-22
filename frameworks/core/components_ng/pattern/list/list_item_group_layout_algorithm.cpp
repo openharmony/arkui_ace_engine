@@ -394,7 +394,6 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
 {
     CHECK_NULL_VOID(listLayoutProperty_);
     OffsetF selfOffset = layoutWrapper->GetGeometryNode()->GetPaddingOffset();
-    selfOffset = selfOffset - listLayoutProperty_->CreatePaddingAndBorder().Offset();
     float mainPos = GetMainAxisOffset(selfOffset, axis_);
     float headerMainSize = 0.0f;
     V2::StickyStyle sticky = listLayoutProperty_->GetStickyStyle().value_or(V2::StickyStyle::NONE);
