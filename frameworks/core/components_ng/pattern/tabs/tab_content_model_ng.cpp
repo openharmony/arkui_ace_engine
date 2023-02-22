@@ -201,7 +201,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(textNode);
     CHECK_NULL_VOID(imageNode);
 
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabContentNode->GetParent());
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
