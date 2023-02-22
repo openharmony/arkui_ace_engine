@@ -189,6 +189,7 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    bool drivenRender = false;
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
@@ -197,15 +198,15 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto chainAnimation = listLayoutProperty->GetChainAnimation().value_or(false);
     if (axis != Axis::VERTICAL || barDisplayMode != DisplayMode::OFF ||
         stickyStyle != V2::StickyStyle::NONE || chainAnimation || !scrollable_) {
-        drivenRender_ = false;
+        drivenRender = false;
     } else {
-        drivenRender_ = true;
+        drivenRender = true;
     }
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->MarkDrivenRender(drivenRender_);
-    if (drivenRender_ && isFramePaintStateValid_) {
+    renderContext->MarkDrivenRender(drivenRender);
+    if (drivenRender && isFramePaintStateValid_) {
         // Mark items
         int32_t indexStep = 0;
         int32_t startIndex = itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
