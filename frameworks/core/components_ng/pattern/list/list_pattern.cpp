@@ -115,7 +115,11 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
     ProcessEvent(indexChanged, finalOffset, isJump);
     UpdateScrollBarOffset();
-    return true;
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    return (listLayoutProperty && listLayoutProperty->GetDivider().has_value());
 }
 
 void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump)
