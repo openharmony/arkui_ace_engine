@@ -398,4 +398,9 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
         }
     }
 }
+
+void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("selectable", selectable_);
+}
 } // namespace OHOS::Ace::NG
