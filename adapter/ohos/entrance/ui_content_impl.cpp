@@ -1202,6 +1202,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
     LayoutInspector::SetCallback(instanceId_);
+
+    LOGI("Initialize UIContentImpl end.");
 }
 
 void UIContentImpl::Foreground()
