@@ -58,11 +58,8 @@ public:
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
-    void ReloadForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void DeleteForm(const std::string& compId);
-
-    void UpdateRuntime(const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
-
+    void ReloadForm();
 
 private:
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;

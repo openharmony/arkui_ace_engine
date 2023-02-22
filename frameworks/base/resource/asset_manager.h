@@ -50,6 +50,8 @@ public:
     {
         return false;
     }
+
+    virtual void Reload() {}
 };
 
 class AssetManager : public AceType {

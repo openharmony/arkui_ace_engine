@@ -43,13 +43,11 @@ FormRenderer::FormRenderer(
 void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f.", width_, height_);
-    HILOG_INFO("InitUIContent formSrc = %{public}s", formJsInfo.formSrc.c_str());
     SetAllowUpdate(allowUpdate_);
     uiContent_->SetFormWidth(width_);
     uiContent_->SetFormHeight(height_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormDate(formJsInfo.formData);
-
     uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
@@ -90,29 +88,19 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
         HILOG_ERROR("uiContent is null!");
         return;
     }
-
     ParseWant(want);
-
     InitUIContent(formJsInfo);
-
     SetRenderDelegate(proxy_);
-
     OnSurfaceCreate(formJsInfo);
 }
 
-void FormRenderer::ReloadForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRenderer::ReloadForm()
 {
-    HILOG_INFO("FormRenderer ReloadForm.");
-    if (formRendererDelegate_ == nullptr || formRendererDelegate_->AsObject() == nullptr) {
-        HILOG_ERROR("FormRenderer ReloadForm failed, formRendererDelegate null");
+    if (!uiContent_) {
+        HILOG_ERROR("uiContent_ is null");
+        return;
     }
-
-    formRendererDispatcherImpl_ = nullptr;
-    uiContent_->Destroy();
-    uiContent_ = nullptr;
-    runtime_.reset();
-    
-    HILOG_INFO("ReloadForm FormRenderer finish.");
+    uiContent_->ReloadForm();
 }
 
 bool FormRenderer::IsAllowUpdate()
@@ -160,20 +148,6 @@ void FormRenderer::Destroy()
     context_ = nullptr;
     runtime_ = nullptr;
     HILOG_INFO("Destroy FormRenderer finish.");
-}
-
-void FormRenderer::UpdateRuntime(const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
-{
-    HILOG_INFO("UpdateRuntime start.");
-    runtime_ = runtime;
-    auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_.get())).GetNativeEngine();
-    uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
-    formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_);
-
-    InitUIContent(formJsInfo);
-
-    OnSurfaceCreate(formJsInfo);
-
 }
 
 void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)

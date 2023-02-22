@@ -42,6 +42,7 @@ public:
     void HandleSurfaceChanged(int32_t width, int32_t height);
     void UpdatePageData(const std::string& dataList);
     void OnMediaFeatureUpdate();
+    void ClearEngineCache();
 
     void RunPage(int32_t pageId, const std::string& url, const std::string& params) override;
 

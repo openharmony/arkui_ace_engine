@@ -33,10 +33,7 @@ class ACE_EXPORT HapAssetProvider : public FlutterAssetProvider {
 
 public:
     HapAssetProvider() = default;
-    ~HapAssetProvider() override
-    {
-        AbilityBase::ExtractorUtil::DeleteExtractor(loadPath_);
-    }
+    ~HapAssetProvider() override = default;
 
     bool Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths);
 
@@ -49,6 +46,8 @@ public:
     void GetAssetList(const std::string& path, std::vector<std::string>& assetList) override;
 
     bool GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const override;
+
+    void Reload() override;
 
 private:
     mutable std::mutex mutex_;

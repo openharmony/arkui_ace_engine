@@ -56,15 +56,14 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
     formRenderer->AddForm(want, formJsInfo);
 }
 
-void FormRendererGroup::ReloadForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+void FormRendererGroup::ReloadForm()
 {
-    HILOG_INFO("ReloadForm.");
-    // for (auto& formRenderer : rendererMap_) {
-    //     HILOG_INFO("ReloadForm compId: %{public}s", formRenderer.first.c_str());
-    //     renderer->Destroy();
-    //     rendererMap_.erase(iter);
-    // }
-    // AddForm(want, formJsInfo);
+    auto iter = rendererMap_.begin();
+    while (iter != rendererMap_.end()) {
+        auto renderer = iter->second;
+        renderer->ReloadForm();
+        iter++;
+    }
 }
 
 void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -89,16 +88,6 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
     // should release the occupancy of resources of the context, runtime and ui content
     renderer->Destroy();
     rendererMap_.erase(iter);
-}
-
-void FormRendererGroup::UpdateRuntime(const std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
-{
-    HILOG_INFO("UpdateRuntime");
-    runtime_ = runtime;
-    for (auto& formRenderer : rendererMap_) {
-        HILOG_INFO("UpdateRuntime compId: %{public}s", formRenderer.first.c_str());
-        formRenderer.second->UpdateRuntime(runtime, formJsInfo);
-    }
 }
 }  // namespace Ace
 }  // namespace OHOS

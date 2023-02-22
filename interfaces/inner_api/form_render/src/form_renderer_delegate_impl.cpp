@@ -23,7 +23,7 @@ int32_t FormRendererDelegateImpl::OnSurfaceCreate(
     const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
     const AAFwk::Want& want)
 {
-    HILOG_INFO("%{public}s called.", __func__);
+    HILOG_DEBUG("%{public}s called.", __func__);
     if (!surfaceNode) {
         HILOG_ERROR("surface is invalid");
         return ERR_NULL_OBJECT;

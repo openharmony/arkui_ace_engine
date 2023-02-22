@@ -124,6 +124,7 @@ public:
     virtual void SetFormHeight(const float height) = 0;
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
+    virtual void ReloadForm() {};
 
     virtual void SetActionEventHandler(
         std::function<void(const std::string&)>&& actionCallback) = 0;
