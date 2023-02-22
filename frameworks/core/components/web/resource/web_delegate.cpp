@@ -2342,6 +2342,7 @@ void WebDelegate::InitWebViewWithSurface()
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
             bool isEnhanceSurface = delegate->isEnhanceSurface_;
             initArgs.is_enhance_surface = isEnhanceSurface;
+            initArgs.is_popup = delegate->isPopup_;
             std::string customScheme = delegate->GetCustomScheme();
             if (!customScheme.empty()) {
                 LOGI("custome scheme %{public}s", customScheme.c_str());

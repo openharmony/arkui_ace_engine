@@ -78,6 +78,11 @@ public:
         return declaration_->GetWebSrc();
     }
 
+    void SetPopup(bool popup)
+    {
+        isPopup_ = popup;
+    }
+
     void SetData(const std::string& data)
     {
         CHECK_NULL_VOID(declaration_);
@@ -932,6 +937,7 @@ private:
     OnDropFunc onDropId_;
     bool isPinchSmoothModeEnabled_ = false;
     PreKeyEventCallback onPreKeyEvent_;
+    bool isPopup_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -562,6 +562,17 @@ public:
         return controller;
     }
 
+    static bool ExistController(JSRef<JSObject>& controller)
+    {
+        for (auto iter = controller_map_.begin(); iter == controller_map_.end(); iter++) {
+            if (iter->second->Unwrap<void>() == controller->Unwrap<void>()) {
+                LOGI("exist popup controller");
+                return true;
+            }
+        }
+        return false;
+    }
+
     void SetWebController(const JSCallbackInfo& args)
     {
         LOGI("JSWebWindowNewHandler SetWebController");
@@ -1722,7 +1733,8 @@ void JSWeb::CreateInNewPipeline(
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
         };
-        NG::WebView::Create(dstSrc.value(), std::move(setIdCallback));
+        NG::WebView::Create(dstSrc.value(), std::move(setIdCallback),
+            JSWebWindowNewHandler::ExistController(controller));
 
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
@@ -1751,6 +1763,7 @@ void JSWeb::CreateInOldPipeline(
     webComponent = AceType::MakeRefPtr<WebComponent>(dstSrc.value());
     webComponent->SetSrc(dstSrc.value());
     if (setWebIdFunction->IsFunction()) {
+        webComponent->SetPopup(JSWebWindowNewHandler::ExistController(controller));
         CreateWithWebviewController(controller, setWebIdFunction, webComponent);
     } else {
         CreateWithWebController(controller, webComponent);

@@ -54,7 +54,8 @@ void WebView::Create(const std::string& src, const RefPtr<WebController>& webCon
     RegisterPipelineCallback(nodeId);
 }
 
-void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback)
+void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
+    bool popup)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -64,6 +65,7 @@ void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
+    webPattern->SetPopup(popup);
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
     RegisterPipelineCallback(nodeId);
 }

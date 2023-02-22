@@ -525,6 +525,10 @@ public:
     {
         blurReason_ = blurReason;
     }
+    void SetPopup(bool popup)
+    {
+        isPopup_ = popup;
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -658,6 +662,7 @@ private:
     bool forceDarkMode_ = false;
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
+    bool isPopup_ = false;
 #endif
 };
 
