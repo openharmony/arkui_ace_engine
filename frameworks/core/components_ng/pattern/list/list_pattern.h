@@ -210,6 +210,8 @@ private:
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
 
+    void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
+
     RefPtr<Animator> animator_;
     RefPtr<ListPositionController> positionController_;
     int32_t maxListItemIndex_ = 0;
@@ -230,6 +232,8 @@ private:
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
     int32_t scrollIndex_ = 0;
     bool scrollable_ = true;
+    bool paintStateFlag_ = false;
+    bool isFramePaintStateValid_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;

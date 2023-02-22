@@ -128,6 +128,11 @@ public:
     virtual void SetClipBoundsWithCommands(const std::string& commands) {};
     virtual void SetVisible(bool visible) {}
 
+    virtual void MarkContentChanged(bool isChanged) {}
+    virtual void MarkDrivenRender(bool flag) {}
+    virtual void MarkDrivenRenderItemIndex(int32_t index) {}
+    virtual void MarkDrivenRenderFramePaintState(bool flag) {}
+
     virtual RefPtr<Canvas> GetCanvas() = 0;
 
     virtual void Restore() = 0;
