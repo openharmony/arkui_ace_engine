@@ -309,6 +309,13 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
     }
     canvas.Translate(static_cast<float>(tx), static_cast<float>(ty));
     canvas.Scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
+
+    if (NearZero(scaleX) || NearZero(scaleViewBox) || NearZero(scaleY)) {
+        return;
+    }
+    RSRect clipRect(0.0f, 0.0f, static_cast<float>(layout_.Width() / scaleX / scaleViewBox),
+        static_cast<float>(layout_.Height() / scaleY / scaleViewBox));
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
 }
 
 void SvgDom::FitViewPort(const Size& layout)
