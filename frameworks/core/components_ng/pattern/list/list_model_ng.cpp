@@ -76,6 +76,11 @@ void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EdgeEffect, edgeEffect);
 }
 
+void ListModelNG::SetEditMode(bool editMode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, EditMode, editMode);
+}
+
 void ListModelNG::SetDivider(const V2::ItemDivider& divider)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider);

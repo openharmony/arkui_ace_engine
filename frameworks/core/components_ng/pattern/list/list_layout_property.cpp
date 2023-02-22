@@ -25,8 +25,8 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("listDirection", propListDirection_.value_or(Axis::VERTICAL) == Axis::VERTICAL
                                    ? "Axis.Vertical"
                                    : "Axis.Horizontal");
-    json->Put("editMode", "true");
-    json->Put("chainAnimation", "true");
+    json->Put("editMode", propEditMode_.value_or(false));
+    json->Put("chainAnimation", propChainAnimation_.value_or(false));
     if (propDivider_.has_value()) {
         auto divider = JsonUtil::Create(false);
         divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
@@ -38,9 +38,14 @@ void ListLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         auto divider = JsonUtil::Create(false);
         json->Put("divider", divider);
     }
-    json->Put("edgeEffect", propEdgeEffect_.value_or(EdgeEffect::SPRING) == EdgeEffect::SPRING
-                                ? "EdgeEffect.Spring"
-                                : "EdgeEffect.None");
+    auto edgeEffect = propEdgeEffect_.value_or(EdgeEffect::SPRING);
+    if (edgeEffect == EdgeEffect::SPRING) {
+        json->Put("edgeEffect", "EdgeEffect.Spring");
+    } else if (edgeEffect == EdgeEffect::FADE) {
+        json->Put("edgeEffect", "EdgeEffect.Fade");
+    } else {
+        json->Put("edgeEffect", "EdgeEffect.None");
+    }
     json->Put("lanes", std::to_string(propLanes_.value_or(0)).c_str());
     json->Put("laneMinLength", propLaneMinLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
     json->Put("laneMaxLength", propLaneMaxLength_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());

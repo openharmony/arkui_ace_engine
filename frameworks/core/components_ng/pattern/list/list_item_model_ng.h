@@ -29,8 +29,8 @@ public:
     void SetBorderRadius(const Dimension& borderRadius) override {}
     void SetType(const std::string& type) override {}
     void SetIsLazyCreating(bool isLazy) override {}
-    void SetSticky(V2::StickyMode stickyMode) override {}
-    void SetEditMode(uint32_t editMode) override {}
+    void SetSticky(V2::StickyMode stickyMode) override;
+    void SetEditMode(uint32_t editMode) override;
     void SetSelectable(bool selectable) override;
     void SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
         V2::SwipeEdgeEffect edgeEffect) override;

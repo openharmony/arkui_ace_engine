@@ -51,6 +51,7 @@ public:
         value->propListItemAlign_ = CloneListItemAlign();
         value->propCachedCount_ = CloneCachedCount();
         value->propStickyStyle_ = CloneStickyStyle();
+        value->propEditMode_ = CloneEditMode();
         return value;
     }
 
@@ -68,6 +69,7 @@ public:
         ResetListItemAlign();
         ResetCachedCount();
         ResetStickyStyle();
+        ResetEditMode();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -84,6 +86,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ChainAnimation, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

@@ -86,6 +86,8 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     int32_t GetStartIndex() const
