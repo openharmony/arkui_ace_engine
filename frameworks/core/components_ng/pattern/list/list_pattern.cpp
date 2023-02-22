@@ -132,8 +132,10 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     auto onScroll = listEventHub->GetOnScroll();
     if (!NearZero(finalOffset) && !isJump) {
         paintStateFlag_ = true;
-        isFramePaintStateValid_ = true;
+    } else {
+        paintStateFlag_ = false;
     }
+    isFramePaintStateValid_ = true;
     if (onScroll && !NearZero(finalOffset) && !isJump) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
