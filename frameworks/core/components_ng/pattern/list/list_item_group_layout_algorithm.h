@@ -144,6 +144,7 @@ private:
     void MeasureBackward(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
     void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
+    bool NeedMeasureItem() const;
 
     int32_t headerIndex_;
     int32_t footerIndex_;
