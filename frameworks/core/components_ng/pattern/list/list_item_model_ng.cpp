@@ -82,6 +82,16 @@ void ListItemModelNG::SetSwiperAction(
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EdgeEffect, edgeEffect);
 }
 
+void ListItemModelNG::SetSticky(V2::StickyMode stickyMode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StickyMode, stickyMode);
+}
+
+void ListItemModelNG::SetEditMode(uint32_t editMode)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EditMode, editMode);
+}
+
 void ListItemModelNG::SetSelectable(bool selectable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
