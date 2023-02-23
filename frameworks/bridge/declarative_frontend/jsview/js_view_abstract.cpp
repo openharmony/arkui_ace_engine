@@ -19,6 +19,7 @@
 #include <memory>
 #include <optional>
 #include <regex>
+#include <string>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -1861,19 +1862,20 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         Dimension left;
         if (ParseJsDimensionVp(object->GetProperty("left"), left)) {
-            leftDimen = left;
+            LOGE("ssr left %{public}lf", left.Value());
+            leftDimen = left.IsValid() ? left : Dimension();
         }
         Dimension right;
         if (ParseJsDimensionVp(object->GetProperty("right"), right)) {
-            rightDimen = right;
+            rightDimen = right.IsValid() ? right : Dimension();
         }
         Dimension top;
         if (ParseJsDimensionVp(object->GetProperty("top"), top)) {
-            topDimen = top;
+            topDimen = top.IsValid() ? top : Dimension();
         }
         Dimension bottom;
         if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom)) {
-            bottomDimen = bottom;
+            bottomDimen = bottom.IsValid() ? bottom : Dimension();
         }
         ViewAbstractModel::GetInstance()->SetBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
     } else {
@@ -2662,10 +2664,13 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         auto pluralStr = themeConstants->GetPluralString(resId->ToNumber<uint32_t>(), count);
         ReplaceHolder(pluralStr, params, 1);
         result = pluralStr;
+    } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
+    } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
     } else {
         return false;
     }
-
     return true;
 }
 
