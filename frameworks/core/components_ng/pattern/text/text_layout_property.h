@@ -91,6 +91,7 @@ public:
         }
         return V2::GetTextStyleInJson(font);
     }
+    std::string GetCopyOptionString() const;
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override

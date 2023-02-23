@@ -121,6 +121,16 @@ public:
                 V2::ConvertWrapAlignmentToStirng(property->GetAlignment().value_or(WrapAlignment::START)).c_str());
         }
         json->Put("constructor", jsonConstructor);
+        json->Put("space", SpaceToString().c_str());
+    }
+
+    std::string SpaceToString() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, Dimension().ToString());
+        auto layoutProperty = host->GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, Dimension().ToString());
+        return layoutProperty->GetSpaceValue(Dimension()).ToString();
     }
 
 private:

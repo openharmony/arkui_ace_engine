@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing.h"
@@ -2806,6 +2807,29 @@ Ace::FontStyle TextFieldPattern::GetItalicFontStyle() const
     return layoutProperty->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL);
 }
 
+std::string TextFieldPattern::GetShowPasswordIconString() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "false");
+    return layoutProperty->GetShowPasswordIconValue(false) ? "true" : "false";
+}
+
+std::string TextFieldPattern::GetInputStyleString() const
+{
+    auto paintProperty = GetLayoutProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, "TextInputStyle.Default");
+    std::string result = "TextInputStyle.Default";
+    switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
+        case InputStyle::INLINE:
+            result = "TextInputStyle.Inline";
+            break;
+        case InputStyle::DEFAULT:
+        default:
+            break;
+    }
+    return result;
+}
+
 FontWeight TextFieldPattern::GetFontWeight() const
 {
     auto theme = GetTheme();
@@ -2864,6 +2888,28 @@ void TextFieldPattern::SearchRequestKeyboard()
     }
 }
 
+std::string TextFieldPattern::GetCopyOptionString() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, "");
+    std::string copyOptionString = "CopyOptions.None";
+    switch (layoutProperty->GetCopyOptionsValue(CopyOptions::None)) {
+        case CopyOptions::InApp:
+            copyOptionString = "CopyOptions.InApp";
+            break;
+        case CopyOptions::Local:
+            copyOptionString = "CopyOptions.Local";
+            break;
+        case CopyOptions::Distributed:
+            copyOptionString = "CopyOptions.Distributed";
+            break;
+        case CopyOptions::None:
+        default:
+            break;
+    }
+    return copyOptionString;
+}
+
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("placeholder", GetPlaceHolder().c_str());
@@ -2882,6 +2928,9 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto maxLength = GetMaxLength();
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
     json->Put("inputFilter", GetInputFilter().c_str());
+    json->Put("copyOption", GetCopyOptionString().c_str());
+    json->Put("showPasswordIcon", GetCopyOptionString().c_str());
+    json->Put("style", GetInputStyleString().c_str());
 }
 
 } // namespace OHOS::Ace::NG

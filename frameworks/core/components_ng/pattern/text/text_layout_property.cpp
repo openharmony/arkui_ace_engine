@@ -17,6 +17,26 @@
 
 namespace OHOS::Ace::NG {
 
+std::string TextLayoutProperty::GetCopyOptionString() const
+{
+    std::string copyOptionString = "CopyOptions.None";
+    switch (GetCopyOptionValue(CopyOptions::None)) {
+        case CopyOptions::InApp:
+            copyOptionString = "CopyOptions.InApp";
+            break;
+        case CopyOptions::Local:
+            copyOptionString = "CopyOptions.Local";
+            break;
+        case CopyOptions::Distributed:
+            copyOptionString = "CopyOptions.Distributed";
+            break;
+        case CopyOptions::None:
+        default:
+            break;
+    }
+    return copyOptionString;
+}
+
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     LayoutProperty::ToJsonValue(json);
@@ -42,15 +62,9 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("decoration", jsonDecoration->ToString().c_str());
 
     json->Put("textCase", V2::ConvertWrapTextCaseToStirng(GetTextCase().value_or(TextCase::NORMAL)).c_str());
-    if (HasAdaptMinFontSize()) {
-        json->Put("minFontSize", GetAdaptMinFontSize().value().ToString().c_str());
-    }
-    if (HasAdaptMaxFontSize()) {
-        json->Put("maxFontSize", GetAdaptMaxFontSize().value().ToString().c_str());
-    }
-    if (HasLetterSpacing()) {
-        json->Put("letterSpacing", GetLetterSpacing().value().ToString().c_str());
-    }
+    json->Put("minFontSize", GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str());
+    json->Put("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str());
+    json->Put("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str());
     json->Put("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str());
     static const std::array<std::string, 6> TEXT_BASE_LINE_TO_STRING = {
         "textBaseline.ALPHABETIC",
@@ -69,6 +83,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put(
         "textOverflow", V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
     json->Put("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str());
+    json->Put("copyOption", GetCopyOptionString().c_str());
 }
 
 } // namespace OHOS::Ace::NG
