@@ -30,7 +30,7 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("sticky", "Sticky.None");
     }
-    auto editMode = propEditMode_.value_or(0);
+    auto editMode = propEditMode_.value_or(V2::EditMode::SHAM);
     if (editMode == V2::EditMode::NONE) {
         json->Put("editMode", "EditMode.None");
     } else if (editMode == V2::EditMode::MOVABLE) {
