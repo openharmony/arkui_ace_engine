@@ -61,6 +61,11 @@ void RefreshPattern::OnModifyDone()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    triggerLoadingDistance_ = static_cast<float>(
+        std::clamp(layoutProperty->GetIndicatorOffset().value_or(TRIGGER_LOADING_DISTANCE).ConvertToPx(), 0.0,
+            TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
     InitPanEvent(gestureHub);
     CheckCoordinationEvent();
     if (!progressChild_) {
@@ -299,7 +304,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
     }
     CHECK_NULL_VOID(progressChild_);
     scrollOffset_.SetY(GetScrollOffset(delta));
-    if (scrollOffset_.GetY() > TRIGGER_LOADING_DISTANCE.ConvertToPx()) {
+    if (scrollOffset_.GetY() > triggerLoadingDistance_) {
         auto refreshFollowRadio = GetFollowRatio();
         UpdateLoadingProgress(STATE_PROGRESS_DRAG, refreshFollowRadio);
         auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
@@ -320,6 +325,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
 
 void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
 {
+    CHECK_NULL_VOID(progressChild_);
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto scale = ratio;
@@ -327,7 +333,7 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
     switch (state) {
         case STATE_PROGRESS_LOADING:
             scale = 0.0f;
-            marginProperty.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx());
+            marginProperty.top = CalcLength(triggerLoadingDistance_);
             progressLayoutProperty->UpdateMargin(marginProperty);
             break;
         case STATE_PROGRESS_RECYCLE:
