@@ -85,8 +85,9 @@ bool RSAceView::HandleTouchEvent(const TouchEvent& touchEvent)
 
     LOGD("HandleTouchEvent touchEvent.x: %{public}lf, touchEvent.y: %{public}lf, touchEvent.size: %{public}lf",
         touchEvent.x, touchEvent.y, touchEvent.size);
+    auto event = touchEvent.UpdatePointers();
     if (touchEventCallback_) {
-        touchEventCallback_(touchEvent, nullptr);
+        touchEventCallback_(event, nullptr);
     }
 
     return true;
