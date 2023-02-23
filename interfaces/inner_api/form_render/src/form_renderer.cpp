@@ -40,8 +40,16 @@ FormRenderer::FormRenderer(
     formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_);
 }
 
-void FormRenderer::InitUIContent()
+void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
+    HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f.", width_, height_);
+    SetAllowUpdate(allowUpdate_);
+    uiContent_->SetFormWidth(width_);
+    uiContent_->SetFormHeight(height_);
+    uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
+    uiContent_->UpdateFormDate(formJsInfo.formData);
+    uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
+
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
         auto formRenderer = weak.lock();
         if (formRenderer) {
@@ -57,6 +65,21 @@ void FormRenderer::InitUIContent()
         }
     };
     uiContent_->SetErrorEventHandler(errorEventHandler);
+
+    auto rsSurfaceNode = uiContent_->GetFormRootNode();
+    if (rsSurfaceNode == nullptr) {
+        return;
+    }
+    rsSurfaceNode->SetBounds(0.0f, 0.0f, width_, height_);
+    uiContent_->Foreground();
+}
+
+void FormRenderer::ParseWant(const OHOS::AAFwk::Want& want)
+{
+    allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
+    width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
+    height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
+    proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
 }
 
 void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -65,35 +88,19 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
         HILOG_ERROR("uiContent is null!");
         return;
     }
+    ParseWant(want);
+    InitUIContent(formJsInfo);
+    SetRenderDelegate(proxy_);
+    OnSurfaceCreate(formJsInfo);
+}
 
-    SetAllowUpdate(want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true));
-    auto width = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 100.0f);
-    auto height = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 100.0f);
-
-    uiContent_->SetFormWidth(width);
-    uiContent_->SetFormHeight(height);
-    uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
-    uiContent_->UpdateFormDate(formJsInfo.formData);
-
-    uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
-    InitUIContent();
-
-    auto rsSurfaceNode = uiContent_->GetFormRootNode();
-    if (rsSurfaceNode == nullptr) {
+void FormRenderer::ReloadForm()
+{
+    if (!uiContent_) {
+        HILOG_ERROR("uiContent_ is null");
         return;
     }
-    rsSurfaceNode->SetBounds(0.0f, 0.0f, width, height);
-
-    sptr<IRemoteObject> proxy = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
-    SetRenderDelegate(proxy);
-
-    OHOS::AAFwk::Want newWant;
-    newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
-    if (formRendererDelegate_ == nullptr) {
-        return;
-    }
-    formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
-    uiContent_->Foreground();
+    uiContent_->ReloadForm();
 }
 
 bool FormRenderer::IsAllowUpdate()
@@ -141,6 +148,23 @@ void FormRenderer::Destroy()
     context_ = nullptr;
     runtime_ = nullptr;
     HILOG_INFO("Destroy FormRenderer finish.");
+}
+
+void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    if (!formRendererDispatcherImpl_) {
+        HILOG_ERROR("form renderer dispatcher is null!");
+        return;
+    }
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("form renderer delegate is null!");
+        return;
+    }
+    OHOS::AAFwk::Want newWant;
+    newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
+    auto rsSurfaceNode = uiContent_->GetFormRootNode();
+    HILOG_INFO("Form OnSurfaceCreate!");
+    formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
 }
 
 void FormRenderer::OnActionEvent(const std::string& action)

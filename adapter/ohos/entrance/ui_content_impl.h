@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
 #include "ability_info.h"
+#include "core/common/flutter/flutter_asset_manager.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
@@ -90,6 +91,7 @@ public:
     void UpdateFormDate(const std::string& data) override;
     void UpdateFormSharedImage(
         const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
+    void ReloadForm() override;
 
     void SetFormWidth(float width) override
     {

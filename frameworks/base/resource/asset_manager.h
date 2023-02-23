@@ -38,6 +38,8 @@ public:
     virtual void GetAssetList(const std::string& path, std::vector<std::string>& assetList) = 0;
 
     virtual bool IsValid() const = 0;
+
+    virtual void Reload() {}
 };
 
 class AssetManager : public AceType {

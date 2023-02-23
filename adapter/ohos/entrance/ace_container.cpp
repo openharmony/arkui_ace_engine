@@ -782,6 +782,19 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     return true;
 }
 
+void AceContainer::ClearEngineCache(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    if (!container->IsFormRender()) {
+        return;
+    }
+    auto formFrontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
+    CHECK_NULL_VOID(formFrontend);
+    formFrontend->ClearEngineCache();
+}
+
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);

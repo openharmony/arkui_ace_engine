@@ -92,6 +92,8 @@ public:
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
     void OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
         const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want);
+    void ResetForm();
+    void ReleaseForm();
 #endif
 
 private:
@@ -118,6 +120,7 @@ private:
     State state_ { State::WAITINGFORSIZE };
 #ifdef OHOS_STANDARD_SYSTEM
     int64_t runningCardId_ = -1;
+    std::string runningCompId_;
     AAFwk::Want wantCache_;
     bool hasCreated_ = false;
     std::shared_ptr<FormCallbackClient> formCallbackClient_;

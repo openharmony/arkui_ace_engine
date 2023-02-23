@@ -182,6 +182,8 @@ public:
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 
+    virtual void ClearCache() {}
+
     virtual std::string GetStacktraceMessage()
     {
         return "";

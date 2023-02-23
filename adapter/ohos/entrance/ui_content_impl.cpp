@@ -1219,6 +1219,16 @@ void UIContentImpl::Background()
     Platform::AceContainer::OnHide(instanceId_);
 }
 
+void UIContentImpl::ReloadForm()
+{
+    LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
+    Platform::AceContainer::ClearEngineCache(instanceId_);
+    Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
+        startUrl_, "");
+}
+
 void UIContentImpl::Focus()
 {
     LOGI("UIContentImpl: window focus");

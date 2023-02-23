@@ -228,7 +228,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin() || isUnique_) { // ArtTsCard
+    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
         InitGlobalObjectTemplate();
     }
 
@@ -645,6 +645,9 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
 
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 {
+    if (isUnique_ && localRuntime_) {
+        return localRuntime_;
+    }
     if (globalRuntime_) {
         return globalRuntime_;
     }
@@ -1762,6 +1765,11 @@ void JsiDeclarativeEngine::OnCompleteContinuation(int32_t code)
     CallAppFunc("onCompleteContinuation", argv);
 }
 
+void JsiDeclarativeEngine::ClearCache()
+{
+    JSNApi::CleanJSVMCache();
+}
+
 void JsiDeclarativeEngine::OnRemoteTerminated()
 {
     LOGI("JsiDeclarativeEngine OnRemoteTerminated");
@@ -1842,6 +1850,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
         return;
     }
     std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    localRuntime_ = arkRuntime;
     auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
     EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
     if (vm == nullptr) {
@@ -1900,7 +1909,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     isModulePreloaded_ = evalResult;
 
     globalRuntime_ = nullptr;
-    localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
 }
 // ArkTsCard end
