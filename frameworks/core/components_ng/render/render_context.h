@@ -229,6 +229,8 @@ public:
     virtual void OnPositionUpdate(const OffsetT<Dimension>& value) {}
     virtual void OnZIndexUpdate(int32_t value) {}
 
+    virtual void OnBackgroundColorUpdate(const Color& value) {}
+
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 
@@ -319,7 +321,6 @@ protected:
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     ShareId shareId_;
 
-    virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}

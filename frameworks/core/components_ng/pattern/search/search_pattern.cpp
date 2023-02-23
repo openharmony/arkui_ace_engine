@@ -32,6 +32,11 @@ constexpr int32_t BUTTON_INDEX = 4;
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
 constexpr Dimension UP_AND_DOWN_PADDING = 8.0_vp;
+constexpr float HOVER_OPACITY = 0.05f;
+constexpr float TOUCH_OPACITY = 0.1f;
+constexpr int32_t HOVER_TO_TOUCH_DURATION = 100;
+constexpr int32_t HOVER_DURATION = 250;
+constexpr int32_t TOUCH_DURATION = 250;
 } // namespace
 
 bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
@@ -95,6 +100,8 @@ void SearchPattern::OnModifyDone()
     InitMouseEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
+    InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
+    InitButtonTouchEvent(cancelButtonTouchListener_, CANCEL_BUTTON_INDEX);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -361,16 +368,46 @@ void SearchPattern::InitTouchEvent()
         auto touchType = info.GetTouches().front().GetTouchType();
         auto touchLocalPosition = info.GetTouches().front().GetLocalLocation();
         auto touchPoint = PointF(touchLocalPosition.GetX(), touchLocalPosition.GetY());
-        RectF rect(searchPattern->cancelButtonOffset_, searchPattern->cancelButtonSize_);
-        if (touchType == TouchType::DOWN && !rect.IsInRegion(touchPoint)) {
+        RectF cancelRect(searchPattern->cancelButtonOffset_, searchPattern->cancelButtonSize_);
+        RectF searchRect(searchPattern->buttonOffset_, searchPattern->buttonSize_);
+        if (touchType == TouchType::DOWN && !cancelRect.IsInRegion(touchPoint) && !searchRect.IsInRegion(touchPoint)) {
             searchPattern->OnTouchDown();
         }
-        if (touchType == TouchType::UP) {
+        if (touchType == TouchType::UP && !cancelRect.IsInRegion(touchPoint) && !searchRect.IsInRegion(touchPoint)) {
             searchPattern->OnTouchUp();
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
+}
+
+void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId)
+{
+    if (touchEvent) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto gesture = buttonFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetStateEffect(false);
+    auto touchTask = [weak = WeakClaim(this), childId](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
+            pattern->OnButtonTouchDown(childId);
+        }
+        if (touchType == TouchType::UP) {
+            pattern->OnButtonTouchUp(childId);
+        }
+    };
+    touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(touchEvent);
 }
 
 void SearchPattern::InitMouseEvent()
@@ -426,28 +463,58 @@ void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t
 
 void SearchPattern::OnTouchDown()
 {
-    isHover_ = false;
-    isTouch_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(theme);
-    auto touchColor = theme->GetTouchColor();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->BlendBgColor(touchColor);
+    if (isHover_) {
+        AnimateTouchAndHover(renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+    } else {
+        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION);
+    }
 }
 
 void SearchPattern::OnTouchUp()
 {
-    isTouch_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->ResetBlendBgColor();
+    if (isHover_) {
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+    } else {
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
+    }
+}
+
+void SearchPattern::OnButtonTouchDown(int32_t childId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (childId == CANCEL_BUTTON_INDEX ? isCancelButtonHover_ : isSearchButtonHover_) {
+        AnimateTouchAndHover(renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+    } else {
+        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION);
+    }
+}
+
+void SearchPattern::OnButtonTouchUp(int32_t childId)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (childId == CANCEL_BUTTON_INDEX ? isCancelButtonHover_ : isSearchButtonHover_) {
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+    } else {
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
+    }
 }
 
 void SearchPattern::HandleHoverEvent(bool isHover)
@@ -458,54 +525,63 @@ void SearchPattern::HandleHoverEvent(bool isHover)
         CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->ResetBlendBgColor();
+        renderContext->AnimateHoverEffectBoard(false);
     }
 }
 
-void SearchPattern::HandleMouseEvent(MouseInfo& info)
+void SearchPattern::HandleMouseEvent(const MouseInfo& info)
 {
-    if (isTouch_) {
-        return;
-    }
     const auto& mousePosition = info.GetLocalLocation();
     PointF mousePoint(mousePosition.GetX(), mousePosition.GetY());
-    RectF rect(cancelButtonOffset_, cancelButtonSize_);
-    isMouseInCancelButton_ = rect.IsInRegion(mousePoint);
+    RectF cancelRect(cancelButtonOffset_, cancelButtonSize_);
+    RectF searchRect(buttonOffset_, buttonSize_);
+    auto isMouseInCancelButton = cancelRect.IsInRegion(mousePoint);
+    auto isMouseInSearchButton = searchRect.IsInRegion(mousePoint);
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(theme);
-    auto hoverColor = theme->GetHoverColor();
-    if (isHover_ && !isMouseInCancelButton_) {
-        renderContext->BlendBgColor(hoverColor);
+    if (isHover_ && !isMouseInCancelButton && !isMouseInSearchButton) {
+        renderContext->AnimateHoverEffectBoard(true);
     } else {
-        renderContext->ResetBlendBgColor();
+        renderContext->AnimateHoverEffectBoard(false);
     }
 }
 
 void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
 {
+    if (childId == CANCEL_BUTTON_INDEX) {
+        isCancelButtonHover_ = isHover;
+    } else {
+        isSearchButtonHover_ = isHover;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
     CHECK_NULL_VOID(buttonFrameNode);
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(theme);
-    auto hoverColor = theme->GetHoverColor();
     if (isHover) {
-        renderContext->BlendBgColor(hoverColor);
+        AnimateTouchAndHover(renderContext, 0.0f, HOVER_OPACITY, HOVER_DURATION, Curves::FRICTION);
     } else {
-        renderContext->ResetBlendBgColor();
+        AnimateTouchAndHover(renderContext, HOVER_OPACITY, 0.0f, HOVER_DURATION, Curves::FRICTION);
     }
+}
+
+void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+    int32_t duration, const RefPtr<Curve>& curve)
+{
+    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
+    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
+    Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
+    Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
+    renderContext->OnBackgroundColorUpdate(highlightStart);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(duration);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
 void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
