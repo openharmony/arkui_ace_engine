@@ -23,8 +23,6 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-
-const Color DEFAULT_PLACEHOLD_COLOR = Color::GRAY;
 constexpr int32_t TEXTFIELD_INDEX = 0;
 constexpr int32_t IMAGE_INDEX = 1;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
@@ -516,10 +514,24 @@ void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    json->Put("value", textFieldPattern->GetTextEditingValue().text.c_str());
+    json->Put("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str());
+    json->Put("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str());
+    json->Put("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str());
+    auto textFontJson = JsonUtil::Create(true);
+    textFontJson->Put("fontSize", textFieldPattern->GetFontSize().c_str());
+    textFontJson->Put("fontStyle",
+        textFieldPattern->GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
+    textFontJson->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textFieldPattern->GetFontWeight()).c_str());
+    textFontJson->Put("fontFamily", textFieldPattern->GetFontFamily().c_str());
+    json->Put("textFont", textFontJson->ToString().c_str());
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto placeHoldColor = textFieldLayoutProperty->GetPlaceholderTextColor();
-    json->Put("placeholderColor", placeHoldColor.value_or(DEFAULT_PLACEHOLD_COLOR).ColorToString().c_str());
+    json->Put("copyOption",
+        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
+    textFieldLayoutProperty->HasCopyOptions();
 
     auto imageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
     CHECK_NULL_VOID(imageFrameNode);
