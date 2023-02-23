@@ -448,7 +448,37 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
         return;
     }
     if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
-        PushOhmUrl(target, params, mode, errorCallback);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        CHECK_NULL_VOID(pageUrlChecker);
+        auto instanceId = container->GetInstanceId();
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto callback =
+            [weak = AceType::WeakClaim(this), target, params, mode, errorCallback, taskExecutor, instanceId]() {
+                ContainerScope scope(instanceId);
+                auto pageRouterManager = weak.Upgrade();
+                CHECK_NULL_VOID(pageRouterManager);
+                taskExecutor->PostTask(
+                    [pageRouterManager, target, params, mode, errorCallback]() {
+                        pageRouterManager->PushOhmUrl(target, params, mode, errorCallback);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        auto silentInstallErrorCallBack = 
+            [errorCallback, taskExecutor, instanceId](
+                int32_t errorCode, const std::string& errorMsg) {
+                ContainerScope scope(instanceId);
+                taskExecutor->PostTask(
+                    [errorCallback, errorCode, errorMsg]() {
+                        errorCallback(errorMsg, errorCode);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }
     if (!manifestParser_) {
@@ -525,7 +555,37 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
         return;
     }
     if (target.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
-        ReplaceOhmUrl(target, params, mode, errorCallback);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        CHECK_NULL_VOID(pageUrlChecker);
+        auto instanceId = container->GetInstanceId();
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto callback =
+            [weak = AceType::WeakClaim(this), target, params, mode, errorCallback, taskExecutor, instanceId]() {
+                ContainerScope scope(instanceId);
+                auto pageRouterManager = weak.Upgrade();
+                CHECK_NULL_VOID(pageRouterManager);
+                taskExecutor->PostTask(
+                    [pageRouterManager, target, params, mode, errorCallback]() {
+                        pageRouterManager->ReplaceOhmUrl(target, params, mode, errorCallback);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        auto silentInstallErrorCallBack = 
+            [errorCallback, taskExecutor, instanceId](
+                int32_t errorCode, const std::string& errorMsg) {
+                ContainerScope scope(instanceId);
+                taskExecutor->PostTask(
+                    [errorCallback, errorCode, errorMsg]() {
+                        errorCallback(errorMsg, errorCode);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        pageUrlChecker->LoadPageUrl(target.url, callback, silentInstallErrorCallBack);
         return;
     }
     if (!manifestParser_) {
@@ -584,6 +644,10 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         std::string url = target.url;
         std::string pagePath = target.url + ".js";
         LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
+        if (pagePath.empty()) {
+            LOGE("[Engine Log] this uri not support in route push.");
+            return;
+        }
         auto pageInfo = FindPageInStack(url);
         if (pageInfo.second) {
             // find page in stack, pop to specified index.
