@@ -1862,7 +1862,6 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         Dimension left;
         if (ParseJsDimensionVp(object->GetProperty("left"), left)) {
-            LOGE("ssr left %{public}lf", left.Value());
             leftDimen = left.IsValid() ? left : Dimension();
         }
         Dimension right;
