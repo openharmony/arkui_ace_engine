@@ -102,10 +102,13 @@ public:
 
     bool GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const override;
 
+    void ReloadProvider();
+
 private:
     std::deque<RefPtr<AssetProvider>> providers_;
     std::vector<std::string> packagePath_;
     std::string appLibPathKey_;
+    std::string loadPath_;
 };
 
 } // namespace OHOS::Ace

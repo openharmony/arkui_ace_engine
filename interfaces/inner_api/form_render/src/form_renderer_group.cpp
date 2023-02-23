@@ -56,6 +56,16 @@ void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppEx
     formRenderer->AddForm(want, formJsInfo);
 }
 
+void FormRendererGroup::ReloadForm()
+{
+    auto iter = rendererMap_.begin();
+    while (iter != rendererMap_.end()) {
+        auto renderer = iter->second;
+        renderer->ReloadForm();
+        iter++;
+    }
+}
+
 void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_INFO("UpdateForm compId %{public}s.", std::to_string(formJsInfo.formId).c_str());

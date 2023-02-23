@@ -64,4 +64,11 @@ bool FlutterAssetManager::GetFileInfo(const std::string& fileName, MediaFileInfo
     return false;
 }
 
+void FlutterAssetManager::ReloadProvider()
+{
+    for (const auto& provider : providers_) {
+        provider->Reload();
+    }
+}
+
 } // namespace OHOS::Ace

@@ -326,6 +326,8 @@ public:
         }
     }
 
+    void ClearCache() override;
+
     const shared_ptr<JsValue>& GetRenderContext() const
     {
         return renderContext_;

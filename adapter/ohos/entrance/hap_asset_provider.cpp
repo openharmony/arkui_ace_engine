@@ -29,13 +29,20 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
     }
 
     bool newCreate = false;
-    std::string loadPath = AbilityBase::ExtractorUtil::GetLoadFilePath(hapPath);
-    runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath, newCreate);
+    loadPath_ = AbilityBase::ExtractorUtil::GetLoadFilePath(hapPath);
+    runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath_, newCreate);
     CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, false);
     assetBasePaths_ = assetBasePaths;
     hapPath_ = hapPath;
     LOGD("hapPath_:%{public}s", hapPath_.c_str());
     return true;
+}
+
+void HapAssetProvider::Reload()
+{
+    bool newCreate = false;
+    AbilityBase::ExtractorUtil::DeleteExtractor(loadPath_);
+    runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath_, newCreate);
 }
 
 bool HapAssetProvider::IsValid() const

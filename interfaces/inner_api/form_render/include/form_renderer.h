@@ -38,24 +38,31 @@ public:
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
-
+    void ReloadForm();
     void Destroy();
-    void OnActionEvent(const std::string& action);
-    void OnError(const std::string& code, const std::string& msg);
     void ResetRenderDelegate();
     void SetAllowUpdate(bool allowUpdate);
     bool IsAllowUpdate();
 
+    void OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void OnActionEvent(const std::string& action);
+    void OnError(const std::string& code, const std::string& msg);
+
 private:
-    void InitUIContent();
+    void InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void ParseWant(const OHOS::AAFwk::Want& want);
     void SetRenderDelegate(const sptr<IRemoteObject> &renderRemoteObj);
 
+    bool allowUpdate_ = true;
+    float width_ = 0.0f;
+    float height_ = 0.0f;
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
     sptr<FormRendererDispatcherImpl> formRendererDispatcherImpl_;
     sptr<IFormRendererDelegate> formRendererDelegate_;
     std::shared_ptr<UIContent> uiContent_;
     sptr<IRemoteObject::DeathRecipient> renderDelegateDeathRecipient_;
+    sptr<IRemoteObject> proxy_;
 };
 
 /**
