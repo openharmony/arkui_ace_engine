@@ -53,15 +53,15 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(Modifier);
 };
 
-class AnimatablePropertyBase : public virtual AceType {
-    DECLARE_ACE_TYPE(AnimatablePropertyBase, AceType);
+class PropertyBase : public virtual AceType {
+    DECLARE_ACE_TYPE(PropertyBase, AceType);
 
 public:
-    AnimatablePropertyBase() = default;
-    ~AnimatablePropertyBase() override = default;
+    PropertyBase() = default;
+    ~PropertyBase() override = default;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(AnimatablePropertyBase);
+    ACE_DISALLOW_COPY_AND_MOVE(PropertyBase);
 };
 
 struct DrawingContext {
@@ -71,12 +71,12 @@ struct DrawingContext {
 };
 
 template<typename T>
-class AnimatableProperty : public AnimatablePropertyBase {
-    DECLARE_ACE_TYPE(AnimatableProperty, AnimatablePropertyBase);
+class NormalProperty : public PropertyBase {
+    DECLARE_ACE_TYPE(Property, PropertyBase);
 
 public:
-    AnimatableProperty(const T& value) : value_(value) {}
-    ~AnimatableProperty() override = default;
+    explicit NormalProperty(const T& value) : value_(value) {}
+    ~NormalProperty() override = default;
 
     void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc)
     {
@@ -106,6 +106,17 @@ private:
     T value_;
     std::function<T()> getFunc_;
     std::function<void(const T&)> setFunc_;
+    ACE_DISALLOW_COPY_AND_MOVE(NormalProperty);
+};
+
+template<typename T>
+class AnimatableProperty : public NormalProperty<T> {
+    DECLARE_ACE_TYPE(AnimatableProperty, NormalProperty<T>);
+
+public:
+    explicit AnimatableProperty(const T& value) : NormalProperty<T>(value) {}
+    ~AnimatableProperty() override = default;
+private:
     ACE_DISALLOW_COPY_AND_MOVE(AnimatableProperty);
 };
 
@@ -117,18 +128,18 @@ public:
     ~ContentModifier() override = default;
     virtual void onDraw(DrawingContext& Context) = 0;
 
-    void AttachProperty(const RefPtr<AnimatablePropertyBase>& prop)
+    void AttachProperty(const RefPtr<PropertyBase>& prop)
     {
         attachedProperties_.push_back(prop);
     }
 
-    const std::vector<RefPtr<AnimatablePropertyBase>>& GetAttachedProperties()
+    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties()
     {
         return attachedProperties_;
     }
 
 private:
-    std::vector<RefPtr<AnimatablePropertyBase>> attachedProperties_;
+    std::vector<RefPtr<PropertyBase>> attachedProperties_;
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 
@@ -140,12 +151,12 @@ public:
     ~OverlayModifier() override = default;
     virtual void onDraw(DrawingContext& Context) = 0;
 
-    void AttachProperty(const RefPtr<AnimatablePropertyBase>& prop)
+    void AttachProperty(const RefPtr<PropertyBase>& prop)
     {
         attachedProperties_.push_back(prop);
     }
 
-    const std::vector<RefPtr<AnimatablePropertyBase>>& GetAttachedProperties()
+    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties()
     {
         return attachedProperties_;
     }
@@ -161,7 +172,7 @@ public:
     }
 
 private:
-    std::vector<RefPtr<AnimatablePropertyBase>> attachedProperties_;
+    std::vector<RefPtr<PropertyBase>> attachedProperties_;
     RectF rect_;
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifier);
 };
@@ -176,11 +187,13 @@ private:
         ACE_DISALLOW_COPY_AND_MOVE(classname);                    \
     };
 
-DECLARE_PROP_TYPED_CLASS(AnimatablePropertyBool, AnimatableProperty, bool);
+DECLARE_PROP_TYPED_CLASS(PropertyBool, NormalProperty, bool);
+DECLARE_PROP_TYPED_CLASS(PropertySizeF, NormalProperty, SizeF);
+DECLARE_PROP_TYPED_CLASS(PropertyOffsetF, NormalProperty, OffsetF);
+DECLARE_PROP_TYPED_CLASS(PropertyInt, NormalProperty, int32_t);
+DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
-DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
-DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
 
 } // namespace OHOS::Ace::NG
 

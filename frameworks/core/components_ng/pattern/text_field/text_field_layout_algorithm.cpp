@@ -77,15 +77,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto textfieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textfieldLayoutProperty);
     if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
-        if (LessOrEqual(layoutConstraint->minSize.Width(), 0.0f)) {
-            frameSize.SetWidth(std::clamp(textRect_.GetSize().Width() + pattern->GetHorizontalPaddingSum(),
-                pattern->GetHorizontalPaddingSum(), layoutConstraint->maxSize.Width()));
-        } else if (LessOrEqual(textRect_.Width(), 0.0f)) {
-            frameSize.SetWidth(layoutConstraint->minSize.Width());
-        } else {
-            frameSize.SetWidth(std::clamp(textRect_.Width() + pattern->GetHorizontalPaddingSum(),
-                layoutConstraint->minSize.Width(), layoutConstraint->maxSize.Width()));
-        }
+        frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
@@ -149,6 +141,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (!showPasswordIcon || !isPasswordType) {
         textRect_.SetSize(SizeF(static_cast<float>(paragraph_->GetLongestLine()), preferredHeight));
         imageRect_.Reset();
+        if (textFieldLayoutProperty->GetWidthAutoValue(false)) {
+            if (LessOrEqual(contentConstraint.minSize.Width(), 0.0f)) {
+                idealWidth = std::clamp(textRect_.GetSize().Width(), 0.0f, contentConstraint.maxSize.Width());
+            } else if (LessOrEqual(textRect_.Width(), 0.0f)) {
+                idealWidth = contentConstraint.minSize.Width();
+            } else {
+                idealWidth =
+                    std::clamp(textRect_.Width(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
+            }
+        }
         return SizeF(idealWidth, preferredHeight);
     }
     float imageSize = 0.0f;
@@ -206,13 +208,16 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
-    if ((pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
-            pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE || pattern->GetIsMousePressed() ||
-            (pattern->GetMouseStatus() == MouseStatus::MOVE && !pattern->GetIsMousePressed()) ||
-            pattern->GetMouseStatus() != MouseStatus::MOVE) &&
-        pattern->GetCaretUpdateType() != CaretUpdateType::DEL) {
+    auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
+                          pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
+    auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
+                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL;
+    auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
+                              pattern->GetIsMousePressed();
+    if (needToKeepTextRect) {
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
-    } else {
+    }
+    if (!pattern->IsTextArea() && !needToKeepTextRect) {
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft();

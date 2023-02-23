@@ -4311,7 +4311,9 @@ void WebDelegate::OnSelectPopupMenu(
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        // Not implement yet.
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->OnSelectPopupMenu(params, callback);
         return;
     }
     auto renderWeb = renderWeb_.Upgrade();

@@ -474,8 +474,6 @@ public:
     void OnCursorMoveDone();
     bool IsDisabled();
 
-    bool LastInputIsNewLine() const;
-    void OnHandleReverse(bool isReverse);
     bool GetIsMousePressed() const
     {
         return isMousePressed_;
@@ -484,6 +482,24 @@ public:
     {
         return mouseStatus_;
     }
+    void UpdateEditingValueToRecord();
+
+    // xts
+    std::string TextInputTypeToString() const;
+    std::string TextInputActionToString() const;
+    std::string GetPlaceholderFont() const;
+    RefPtr<TextFieldTheme> GetTheme() const;
+    std::string GetTextColor() const;
+    std::string GetCaretColor() const;
+    std::string GetPlaceholderColor() const;
+    std::string GetFontSize() const;
+    Ace::FontStyle GetItalicFontStyle() const;
+    FontWeight GetFontWeight() const;
+    std::string GetFontFamily() const;
+    TextAlign GetTextAlign() const;
+    std::string GetPlaceHolder() const;
+    uint32_t GetMaxLength() const;
+    std::string GetInputFilter() const;
 
 private:
     void HandleBlurEvent();
@@ -556,23 +572,6 @@ private:
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
-    // xts
-    std::string TextInputTypeToString() const;
-    std::string TextInputActionToString() const;
-    std::string GetPlaceholderFont() const;
-    RefPtr<TextFieldTheme> GetTheme() const;
-    std::string GetTextColor() const;
-    std::string GetCaretColor() const;
-    std::string GetPlaceholderColor() const;
-    std::string GetFontSize() const;
-    Ace::FontStyle GetItalicFontStyle() const;
-    FontWeight GetFontWeight() const;
-    std::string GetFontFamily() const;
-    TextAlign GetTextAlign() const;
-    std::string GetPlaceHolder() const;
-    uint32_t GetMaxLength() const;
-    std::string GetInputFilter() const;
-
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
@@ -643,7 +642,6 @@ private:
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
-    bool newLineInserted_ = false;
     bool isUsingMouse_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;

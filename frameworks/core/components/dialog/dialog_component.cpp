@@ -261,7 +261,7 @@ void DialogComponent::BuildTitle(const RefPtr<ColumnComponent>& column)
     titlePadding->SetChild(textBox);
     std::list<RefPtr<Component>> rowChildren;
     RefPtr<RowComponent> row;
-    if (deviceType_ == DeviceType::PHONE && !isMenu_) {
+    if (deviceType_ == DeviceType::PHONE) {
         row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, rowChildren);
     } else {
         row = AceType::MakeRefPtr<RowComponent>(FlexAlign::CENTER, FlexAlign::CENTER, rowChildren);
@@ -326,7 +326,7 @@ void DialogComponent::BuildMenu(const RefPtr<ColumnComponent>& column)
         auto rowItem = AceType::MakeRefPtr<FlexItemComponent>(
             1, 1, 0.0, BuildButton(*actionIter, menuSuccessId_[index], Edge::NONE, false));
         buttonRow->AppendChild(rowItem);
-        auto columnItem = AceType::MakeRefPtr<FlexItemComponent>(1, 1, 0.0, buttonRow);
+        auto columnItem = AceType::MakeRefPtr<FlexItemComponent>(0.0, 1, 0.0, buttonRow);
         column->AppendChild(columnItem);
         ++actionIter;
     }

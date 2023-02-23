@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -84,6 +85,11 @@ public:
         selected_ = -1;
     }
 
+    int32_t GetSelected() const
+    {
+        return selected_;
+    }
+
     void SetSelected(int32_t index);
 
     // set properties of text node
@@ -117,6 +123,33 @@ public:
     {
         return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
     }
+
+    // update selected option props
+    void UpdateSelectedProps(int32_t index);
+
+    void UpdateLastSelectedProps(int32_t index);
+
+    void SetBgBlendColor(const Color& color)
+    {
+        bgBlendColor_ = color;
+    }
+
+    Color GetBgBlendColor() const
+    {
+        return bgBlendColor_;
+    }
+
+    void SetIsHover(bool isHover)
+    {
+        isHover_ = isHover;
+    }
+
+    bool IsHover() const
+    {
+        return isHover_;
+    }
+
+    void PlayBgColorAnimation(bool isHoverChange = true);
 
 private:
     void OnModifyDone() override;
@@ -178,8 +211,6 @@ private:
 
     void ShowSelectMenu();
 
-    // update selected option props
-    void UpdateSelectedProps(int32_t index);
     // update text to selected option's text
     void UpdateText(int32_t index);
 
@@ -215,6 +246,9 @@ private:
     std::optional<int32_t> rowId_;
     std::optional<int32_t> textId_;
     std::optional<int32_t> spinnerId_;
+
+    Color bgBlendColor_ = Color::TRANSPARENT;
+    bool isHover_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };

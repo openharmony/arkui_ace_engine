@@ -78,6 +78,28 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    static std::string ConvertCopyOptionsToString(CopyOptions copyOptions)
+    {
+        std::string result;
+        switch (copyOptions) {
+            case CopyOptions::None:
+                result = "CopyOptions.None";
+                break;
+            case CopyOptions::InApp:
+                result = "CopyOptions.InApp";
+                break;
+            case CopyOptions::Local:
+                result = "CopyOptions.Local";
+                break;
+            case CopyOptions::Distributed:
+                result = "CopyOptions.Distributed";
+                break;
+            default:
+                LOGD("The input does not match any CopyOptions");
+        }
+        return result;
+    }
+
     enum class FocusChoice { SEARCH = 0, CANCEL_BUTTON, SEARCH_BUTTON };
 
 private:
@@ -97,12 +119,17 @@ private:
     // Init touch and hover event
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void OnTouchDown();
     void OnTouchUp();
+    void OnButtonTouchDown(int32_t childId);
+    void OnButtonTouchUp(int32_t childId);
     void HandleHoverEvent(bool isHover);
-    void HandleMouseEvent(MouseInfo& info);
+    void HandleMouseEvent(const MouseInfo& info);
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
+    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+        int32_t duration, const RefPtr<Curve>& curve);
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;
@@ -117,14 +144,16 @@ private:
     FocusChoice focusChoice_ = FocusChoice::SEARCH;
 
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<TouchEventImpl> searchButtonTouchListener_;
+    RefPtr<TouchEventImpl> cancelButtonTouchListener_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> searchButtonMouseEvent_;
     RefPtr<InputEvent> cancelButtonMouseEvent_;
 
     bool isHover_ = false;
-    bool isTouch_ = false;
-    bool isMouseInCancelButton_ = false;
+    bool isCancelButtonHover_ = false;
+    bool isSearchButtonHover_ = false;
 };
 
 } // namespace OHOS::Ace::NG

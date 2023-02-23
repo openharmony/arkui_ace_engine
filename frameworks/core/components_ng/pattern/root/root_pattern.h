@@ -60,7 +60,9 @@ public:
             CHECK_NULL_VOID(container);
             auto column = DynamicCast<FrameNode>(container->GetChildren().front());
             CHECK_NULL_VOID(column);
-            stage = DynamicCast<FrameNode>(column->GetChildren().back());
+            auto stack = DynamicCast<FrameNode>(column->GetChildren().back());
+            CHECK_NULL_VOID(stack);
+            stage = DynamicCast<FrameNode>(stack->GetChildren().front());
         } else {
             stage = DynamicCast<FrameNode>(rootNode->GetChildren().front());
         }

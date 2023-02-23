@@ -13,24 +13,32 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/event/input_event_hub.h"
+#include "frame_trace_adapter_impl.h"
 
-namespace OHOS::Ace::NG {
-InputEventHub::InputEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
+namespace OHOS::Ace {
+void FrameTraceAdapterFakeImpl::QuickExecute(std::function<void()> && func)
+{
+    return;
+}
 
-bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTestResult& result)
+void FrameTraceAdapterFakeImpl::SlowExecute(std::function<void()> && func)
+{
+    return;
+}
+
+bool FrameTraceAdapterFakeImpl::EnableFrameTrace(const std::string &traceTag)
 {
     return false;
 }
 
-bool InputEventHub::ProcessAxisTestHit(const OffsetF& coordinateOffset, AxisTestResult& onAxisResult)
+FrameTraceAdapter* FrameTraceAdapter::GetInstance()
+{
+    static FrameTraceAdapterFakeImpl instance;
+    return &instance;
+}
+
+bool FrameTraceAdapterFakeImpl::IsEnabled()
 {
     return false;
 }
-
-std::string InputEventHub::GetHoverEffectStr() const
-{
-    return "HoverEffect.Auto";
 }
-} // namespace OHOS::Ace::NG

@@ -28,6 +28,13 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr const char* HIT_TEST_MODE[] = {
+    "HitTestMode.Default",
+    "HitTestMode.Block",
+    "HitTestMode.Transparent",
+    "HitTestMode.None",
+};
+
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
 RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
@@ -470,5 +477,14 @@ bool GestureEventHub::ActLongClick()
     GestureEvent info;
     click(info);
     return true;
+}
+
+std::string GestureEventHub::GetHitTestModeStr() const
+{
+    auto mode = static_cast<int32_t>(hitTestMode_);
+    if (mode < 0 || mode >= static_cast<int32_t>(std::size(HIT_TEST_MODE))) {
+        return HIT_TEST_MODE[0];
+    }
+    return HIT_TEST_MODE[mode];
 }
 } // namespace OHOS::Ace::NG

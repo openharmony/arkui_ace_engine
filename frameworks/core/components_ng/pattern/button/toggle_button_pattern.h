@@ -41,7 +41,7 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
-        return MakeRefPtr<ButtonEventHub>();
+        return MakeRefPtr<ToggleButtonEventHub>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override

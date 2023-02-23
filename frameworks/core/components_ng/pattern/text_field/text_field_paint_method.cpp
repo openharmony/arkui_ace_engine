@@ -171,7 +171,8 @@ void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrap
     canvas.AttachBrush(brush);
     auto paintOffset = paintWrapper->GetContentOffset() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
     RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
-        paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
+        // add extra clip space for cases such as auto width
+        paintOffset.GetX() + paintWrapper->GetContentSize().Width() + CURSOR_WIDTH.ConvertToPx() * 2.0f,
         paintOffset.GetY() + paintWrapper->GetContentSize().Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     float caretHeight = textFieldPattern->GetCaretRect().Height();

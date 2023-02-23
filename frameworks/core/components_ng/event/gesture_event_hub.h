@@ -261,6 +261,8 @@ public:
 
     void OnContextAttached() {}
 
+    std::string GetHitTestModeStr() const;
+
     HitTestMode GetHitTestMode() const
     {
         return hitTestMode_;

@@ -32,11 +32,11 @@ constexpr float HALF = 0.5f;
 } // namespace
 
 SliderTipModifier::SliderTipModifier()
-    : tipFlag_(AceType::MakeRefPtr<AnimatablePropertyBool>(false)),
-      contentOffset_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF())),
-      bubbleSize_(AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF())),
-      bubbleOffset_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF())),
-      textOffset_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF()))
+    : tipFlag_(AceType::MakeRefPtr<PropertyBool>(false)),
+      contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
+      bubbleSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
+      bubbleOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
+      textOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF()))
 {
     AttachProperty(tipFlag_);
     AttachProperty(contentOffset_);
