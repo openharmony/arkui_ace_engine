@@ -216,6 +216,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     } else {
         textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
     }
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    textRenderContext->UpdateClipEdge(true);
     textLayoutProperty->UpdateContent(tabBarParam.GetText());
     textLayoutProperty->UpdateFontSize(tabTheme->GetSubTabTextDefaultFontSize());
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
