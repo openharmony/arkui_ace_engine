@@ -331,7 +331,7 @@ public:
 
     bool InSelectMode() const
     {
-        return selectionMode_ != SelectionMode::NONE;
+        return selectionMode_ != SelectionMode::NONE && !textSelector_.StartEqualToDest();
     }
 
     bool IsUsingMouse() const
@@ -524,6 +524,7 @@ private:
     void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
     void UpdateCaretByRightClick();
 
+    void AfterSelection();
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelectionLeft();
@@ -583,6 +584,8 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
     void ResetBackgroundColor();
+    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+        int32_t duration, const RefPtr<Curve>& curve);
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -643,6 +646,7 @@ private:
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
+    bool isOnHover_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

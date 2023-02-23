@@ -200,9 +200,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // Update content position.
     OffsetF contentOffset;
     if (pattern->IsTextArea()) {
-        contentOffset = OffsetF(pattern->GetUtilPadding().Offset());
-        content->SetOffset(contentOffset);
-        textRect_.SetOffset(contentOffset);
+        content->SetOffset(pattern->GetUtilPadding().Offset());
+        textRect_.SetOffset(pattern->GetTextRect().GetOffset());
         return;
     }
     contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
@@ -307,6 +306,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
         textStyle.SetTextAlign(layoutProperty->GetPlaceholderTextAlign().value());
     }
     textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+    textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText)

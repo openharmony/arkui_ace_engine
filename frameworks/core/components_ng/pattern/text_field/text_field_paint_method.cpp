@@ -60,10 +60,7 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
             clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(),
                 contentOffset.GetY() + contentSize.Height());
         } else {
-            clipInnerRect = RSRect(offset.GetX(), 0.0f,
-                textFieldPattern->NeedShowPasswordIcon() ? frameRect.Width()
-                                                         : contentSize.Width() + contentOffset.GetX(),
-                frameRect.Height());
+            clipInnerRect = RSRect(offset.GetX(), 0.0f, contentSize.Width() + contentOffset.GetX(), frameRect.Height());
         }
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         if (paragraph) {
@@ -79,6 +76,8 @@ CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* pa
             return;
         }
         CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
+        clipInnerRect = RSRect(offset.GetX(), 0.0f, frameRect.Width(), frameRect.Height());
+        canvas.ClipRect(clipInnerRect, RSClipOp::UNION);
         const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
         passwordIconImagePainter.DrawImage(canvas, iconRect.GetOffset(), iconRect.GetSize());
     };
