@@ -26,6 +26,7 @@
 #include "core/common/connect_server_manager.h"
 #include "core/common/container.h"
 #include "core/common/ace_engine.h"
+#include "core/common/container_scope.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
 #include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
@@ -84,6 +85,7 @@ void LayoutInspector::SetCallback(int32_t instanceId)
 void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 {
     LOGI("CreateLayoutInfo start");
+    ContainerScope sope(containerId);
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_VOID_NOLOG(container);
     std::string treeJsonStr;
