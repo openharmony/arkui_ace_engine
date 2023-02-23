@@ -264,7 +264,7 @@ void ScrollBar::SetGestureEvent()
         touchEvent_ = MakeRefPtr<TouchEventImpl>([weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
-            if (info.GetTouches().empty() || scrollBar->IsHover()) {
+            if (info.GetTouches().empty()) {
                 return;
             }
             auto touch = info.GetTouches().front();
@@ -273,7 +273,7 @@ void ScrollBar::SetGestureEvent()
                 bool inTouchRegion = scrollBar->InBarTouchRegion(point);
                 scrollBar->SetPressed(inTouchRegion);
                 scrollBar->SetDriving(inTouchRegion);
-                if (inTouchRegion) {
+                if (inTouchRegion && !scrollBar->IsHover()) {
                     scrollBar->PlayGrowAnimation();
                 }
                 if (scrollBar->scrollEndAnimator_ && !scrollBar->scrollEndAnimator_->IsStopped()) {
@@ -282,7 +282,7 @@ void ScrollBar::SetGestureEvent()
                 scrollBar->MarkNeedRender();
             }
             if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
-                if (scrollBar->IsPressed()) {
+                if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayShrinkAnimation();
                 }
                 scrollBar->SetPressed(false);
@@ -297,28 +297,35 @@ void ScrollBar::SetGestureEvent()
 
 void ScrollBar::SetMouseEvent()
 {
-    if (!mouseEvent_) {
-        mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
-            auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID_NOLOG(scrollBar);
-            Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-            bool inRegion = scrollBar->InBarActiveRegion(point);
-            if (inRegion && !scrollBar->IsHover()) {
-                scrollBar->PlayGrowAnimation();
-                scrollBar->SetHover(true);
-                if (scrollBar->scrollEndAnimator_ && !scrollBar->scrollEndAnimator_->IsStopped()) {
-                    scrollBar->scrollEndAnimator_->Stop();
-                }
-                scrollBar->MarkNeedRender();
-            }
-            if (scrollBar->IsHover() && !inRegion) {
-                scrollBar->PlayShrinkAnimation();
-                scrollBar->SetHover(false);
-                scrollBar->PlayBarEndAnimation();
-                scrollBar->MarkNeedRender();
-            }
-        });
+    if (mouseEvent_) {
+        return;
     }
+    mouseEvent_ = MakeRefPtr<InputEvent>([weak = WeakClaim(this)](MouseInfo& info) {
+        auto scrollBar = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(scrollBar);
+        Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+        bool inRegion = scrollBar->InBarActiveRegion(point);
+        if (inRegion && !scrollBar->IsHover()) {
+            if (!scrollBar->IsPressed()) {
+                scrollBar->PlayGrowAnimation();
+            }
+            scrollBar->SetHover(true);
+            if (scrollBar->scrollEndAnimator_ && !scrollBar->scrollEndAnimator_->IsStopped()) {
+                scrollBar->scrollEndAnimator_->Stop();
+            }
+            scrollBar->MarkNeedRender();
+        }
+        if (scrollBar->IsHover() && !inRegion) {
+            if (!scrollBar->IsPressed()) {
+                scrollBar->PlayShrinkAnimation();
+                if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
+                    scrollBar->PlayBarEndAnimation();
+                }
+            }
+            scrollBar->SetHover(false);
+            scrollBar->MarkNeedRender();
+        }
+    });
 }
 
 void ScrollBar::PlayAdaptAnimation(double activeSize, double activeMainOffset)
