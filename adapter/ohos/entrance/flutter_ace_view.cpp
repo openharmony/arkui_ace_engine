@@ -431,11 +431,11 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
 }
 
 void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation,
-    WindowSizeChangeReason type, const std::function<void()>& callback, const uint64_t syncId)
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     CHECK_NULL_VOID(view);
 
-    view->NotifySurfaceChanged(width, height, type, callback, syncId);
+    view->NotifySurfaceChanged(width, height, type, rsTransaction);
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGD("FlutterAceView::SurfaceChanged, GetPlatformView");
     if (platformView) {
@@ -452,10 +452,6 @@ void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t
     }
 
     LOGD("<<< FlutterAceView::SurfaceChanged, end");
-}
-
-void FlutterAceView::NotifyReleaseProcess()
-{
 }
 
 void FlutterAceView::SurfacePositionChanged(FlutterAceView* view, int32_t posX, int32_t posY)

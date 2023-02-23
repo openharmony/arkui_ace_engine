@@ -40,6 +40,7 @@ class Window;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 class RSSurfaceNode;
+class RSTransaction;
 }
 
 namespace AAFwk {
@@ -95,7 +96,7 @@ public:
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0) = 0;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
 
@@ -131,7 +132,6 @@ public:
         std::function<void(const std::string&)>&& actionCallback) = 0;
     virtual void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
-    virtual void NotifyReleaseProcess() = 0;
 };
 
 } // namespace OHOS::Ace

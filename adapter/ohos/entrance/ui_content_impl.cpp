@@ -1383,7 +1383,7 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-    const std::function<void()>& callback, const uint64_t syncId)
+    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
@@ -1392,9 +1392,8 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    NotifyReleaseProcess();
     taskExecutor->PostTask(
-        [config, container, reason, callback, syncId]() {
+        [config, container, reason, rsTransaction]() {
             container->SetWindowPos(config.Left(), config.Top());
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
@@ -1409,15 +1408,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             metrics.device_pixel_ratio = config.Density();
             Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-                static_cast<WindowSizeChangeReason>(reason), callback, syncId);
+                static_cast<WindowSizeChangeReason>(reason), rsTransaction);
             Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
         },
         TaskExecutor::TaskType::PLATFORM);
-}
-
-void UIContentImpl::NotifyReleaseProcess()
-{
-    Platform::FlutterAceView::NotifyReleaseProcess();
 }
 
 void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco)

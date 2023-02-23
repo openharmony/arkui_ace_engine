@@ -42,9 +42,8 @@ public:
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
     static void SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window);
     static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation,
-        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED, const std::function<void()>& callback = nullptr,
-        const uint64_t syncId = 0);
-    static void NotifyReleaseProcess();
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
     static void SurfacePositionChanged(FlutterAceView* view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
 
@@ -138,10 +137,10 @@ public:
 
 private:
     void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type,
-        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0)
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr)
     {
         if (viewChangeCallback_) {
-            viewChangeCallback_(width, height, type, callback, syncId);
+            viewChangeCallback_(width, height, type, rsTransaction);
         }
         width_ = width;
         height_ = height;

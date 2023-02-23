@@ -433,7 +433,7 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::function<void()>& callback, const uint64_t syncId)
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -456,7 +456,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     FlushWindowSizeChangeCallback(width, height, type);
 
 #ifdef ENABLE_ROSEN_BACKEND
-    StartWindowSizeChangeAnimate(width, height, type, callback, syncId);
+    StartWindowSizeChangeAnimate(width, height, type, rsTransaction);
 #else
     SetRootRect(width, height, 0.0);
 #endif
@@ -481,7 +481,7 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
 }
 
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::function<void()>& callback, const uint64_t syncId)
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!IsWindowSizeAnimationEnabled) {
@@ -509,7 +509,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
-            Rosen::RSTransaction::StartSyncTransactionForProcess();
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                rsTransaction->Begin();
+            }
+#endif
             LOGI("PipelineContext::Root node ROTATION animation, width = %{public}d, height = %{public}d", width,
                 height);
             AnimationOption option;
@@ -541,10 +545,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 });
             rotationAnimationCount_++;
             window_->SetDrawTextAsBitmap(true);
-            if (callback) {
-                callback();
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                rsTransaction->Commit();
             }
-            Rosen::RSTransaction::CloseSyncTransactionForProcess(syncId);
+#endif
             break;
         }
         case WindowSizeChangeReason::DRAG_START:

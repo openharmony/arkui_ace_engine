@@ -48,7 +48,7 @@ public:
 
     // override Rosen::IWindowChangeListener virtual callback function
     void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0) override;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) override;
     void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
 
     // override Rosen::IInputEventConsumer virtual callback function
@@ -88,7 +88,7 @@ public:
 
     // handle window Rosen::IWindowChangeListener
     void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0);
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr);
     void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true);
 
     // handle window Rosen::IOccupiedAreaChangeListener

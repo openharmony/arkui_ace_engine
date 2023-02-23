@@ -2135,7 +2135,7 @@ void PipelineContext::FlushPipelineImmediately()
 }
 
 void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::function<void()>& callback, const uint64_t syncId)
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!rootElement_ || !rootElement_->GetRenderNode() || !IsWindowSizeAnimationEnabled) {
@@ -2191,7 +2191,11 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
-            Rosen::RSTransaction::StartSyncTransactionForProcess();
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                rsTransaction->Begin();
+            }
+#endif
             LOGD("PipelineContext::Root node ROTATION animation, width = %{private}d, height = %{private}d", width,
                 height);
             AnimationOption option;
@@ -2222,11 +2226,10 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
 #ifdef ENABLE_ROSEN_BACKEND
             // to improve performance, duration rotation animation, draw text as bitmap
             Rosen::RSSystemProperties::SetDrawTextAsBitmap(true);
-#endif
-            if (callback) {
-                callback();
+            if (rsTransaction) {
+                rsTransaction->Commit();
             }
-            Rosen::RSTransaction::CloseSyncTransactionForProcess(syncId);
+#endif
             break;
         }
         case WindowSizeChangeReason::RESIZE:
@@ -2249,7 +2252,7 @@ void PipelineContext::NotifyWebPaint() const
 }
 
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
-    const std::function<void()>& callback, const uint64_t syncId)
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -2308,7 +2311,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         }
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    WindowSizeChangeAnimate(width, height, type, callback, syncId);
+    WindowSizeChangeAnimate(width, height, type, rsTransaction);
 #else
     SetRootSizeWithWidthHeight(width, height);
 #endif

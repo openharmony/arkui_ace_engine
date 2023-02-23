@@ -56,8 +56,8 @@ public:
     MOCK_METHOD0(OnHide, void());
     MOCK_METHOD1(WindowFocus, void(bool isFocus));
     MOCK_METHOD2(ShowContainerTitle, void(bool isShow, bool hasDeco));
-    MOCK_METHOD5(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::function<void()>& callback, const uint64_t syncId));
+    MOCK_METHOD4(OnSurfaceChanged, void(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction));
     MOCK_METHOD2(OnSurfacePositionChanged, void(int32_t posX, int32_t posY));
     MOCK_METHOD1(OnSurfaceDensityChanged, void(double density));
     MOCK_METHOD2(OnSystemBarHeightChanged, void(double statusBar, double navigationBar));

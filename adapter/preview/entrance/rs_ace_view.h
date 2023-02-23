@@ -109,12 +109,12 @@ public:
 
     void NotifySurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0)
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr)
     {
         width_ = width;
         height_ = height;
         if (viewChangeCallback_) {
-            viewChangeCallback_(width, height, type, callback, syncId);
+            viewChangeCallback_(width, height, type, rsTransaction);
         }
     }
 

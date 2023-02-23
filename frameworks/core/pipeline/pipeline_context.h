@@ -257,12 +257,12 @@ public:
 
     void OnSurfaceChanged(
         int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
-        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0) override;
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
     void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
-        const std::function<void()>& callback = nullptr, const uint64_t syncId = 0);
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
 
     void OnSurfaceDensityChanged(double density) override;
 

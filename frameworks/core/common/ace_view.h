@@ -25,6 +25,10 @@
 #include "core/common/platform_res_register.h"
 #include "core/common/platform_window.h"
 
+namespace OHOS::Rosen {
+class RSTransaction;
+}
+
 namespace OHOS::Ace {
 
 class AceView {
@@ -58,7 +62,7 @@ public:
     virtual void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) = 0;
 
     using ViewChangeCallback = std::function<void(int32_t width, int32_t height,
-        WindowSizeChangeReason type, const std::function<void()>& callback, const uint64_t syncId)>;
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction)>;
     virtual void RegisterViewChangeCallback(ViewChangeCallback&& callback) = 0;
 
     using ViewPositionChangeCallback = std::function<void(int32_t posX, int32_t posY)>;

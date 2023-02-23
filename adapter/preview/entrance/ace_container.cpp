@@ -354,7 +354,7 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterCardViewAccessibilityParamsCallback(cardViewParamsCallback);
 
     auto&& viewChangeCallback = [weak, id = instanceId_](int32_t width, int32_t height,
-        WindowSizeChangeReason type, const std::function<void()>& callback, const uint64_t syncId) {
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
@@ -363,8 +363,8 @@ void AceContainer::InitializeCallback()
         }
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height, type, callback, syncId]() {
-                context->OnSurfaceChanged(width, height, type, callback, syncId);
+            [context, width, height, type, rsTransaction]() {
+                context->OnSurfaceChanged(width, height, type, rsTransaction);
             },
             TaskExecutor::TaskType::UI);
     };
