@@ -307,6 +307,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
         textStyle.SetTextAlign(layoutProperty->GetPlaceholderTextAlign().value());
     }
     textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+    textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText)

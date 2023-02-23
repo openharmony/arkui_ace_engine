@@ -331,7 +331,7 @@ public:
 
     bool InSelectMode() const
     {
-        return selectionMode_ != SelectionMode::NONE;
+        return selectionMode_ != SelectionMode::NONE && !textSelector_.StartEqualToDest();
     }
 
     bool IsUsingMouse() const

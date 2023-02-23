@@ -480,9 +480,6 @@ void TextFieldPattern::UpdateSelectionOffset()
         }
         return;
     }
-    if (SelectOverlayIsOn()) {
-        return;
-    }
 }
 
 void TextFieldPattern::UpdateCaretPositionByTextEdit()
@@ -1544,11 +1541,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     lastTouchOffset_ = info.GetLocalLocation();
-    if (isMousePressed_) {
-        caretUpdateType_ = CaretUpdateType::PRESSED;
-    } else {
-        caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
-    }
+    caretUpdateType_ = isMousePressed_ ? CaretUpdateType::PRESSED : CaretUpdateType::LONG_PRESSED;
     selectionMode_ = SelectionMode::SELECT;
     isSingleHandle_ = false;
     isUsingMouse_ = false;

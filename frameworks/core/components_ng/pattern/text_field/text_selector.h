@@ -104,6 +104,11 @@ struct TextSelector {
         return std::max(firstHandle.Height(), secondHandle.Height());
     }
 
+    bool StartEqualToDest() const
+    {
+        return baseOffset == destinationOffset;
+    }
+
     std::string ToString()
     {
         std::string result;
