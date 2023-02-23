@@ -45,6 +45,7 @@ inline constexpr int32_t INDEXER_PRESS_IN_DURATION = 100;
 inline constexpr int32_t INDEXER_PRESS_OUT_DURATION = 100;
 inline constexpr int32_t INDEXER_SELECT_DURATION = 100;
 inline constexpr int32_t INDEXER_BUBBLE_WAIT_DURATION = 2000;
+inline constexpr int32_t INDEXER_BUBBLE_APPEAR_DURATION = 2600;
 inline constexpr uint32_t INDEXER_BUBBLE_MAXSIZE = 5;
 // data for list mode
 inline constexpr double INDEXER_LIST_ITEM_TEXT_SIZE = 12.0; // list mode, font size (FP)
