@@ -52,6 +52,11 @@ public:
     {
         return rsSurfaceNode_;
     }
+
+    bool FlushCustomAnimation(uint64_t timeStamp) override
+    {
+        return rsUIDirector_->RunningCustomAnimation(timeStamp);
+    }
 #endif
 
     void OnShow() override;
