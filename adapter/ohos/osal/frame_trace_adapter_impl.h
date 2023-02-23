@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_FRAME_TRACE_ADAPTER_IMPL_H
 
 #include <functional>
-#include "frame_trace.h"
 #include "base/thread/frame_trace_adapter.h"
 
 namespace OHOS::Ace {
@@ -28,6 +27,19 @@ public:
     void QuickExecute(std::function<void()>&& func) override;
     void SlowExecute(std::function<void()>&& func) override;
     bool EnableFrameTrace(const std::string&traceTag) override;
+    bool IsEnabled() override;
+
+private:
+    bool AccessFrameTrace();
+};
+
+class FrameTraceAdapterFakeImpl : public FrameTraceAdapter {
+public:
+    FrameTraceAdapterFakeImpl() = default;
+    ~FrameTraceAdapterFakeImpl() override = default;
+    void QuickExecute(std::function<void()>&& func) override;
+    void SlowExecute(std::function<void()>&& func) override;
+    bool EnableFrameTrace(const std::string& traceTag) override;
     bool IsEnabled() override;
 };
 }

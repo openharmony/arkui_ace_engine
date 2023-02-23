@@ -37,7 +37,6 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
 
     #base
-    "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/adapter/ohos/osal/ressched_report.cpp",
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -330,7 +329,6 @@ ohos_unittest("pipeline_context_test_ng") {
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
     "//foundation/window/window_manager/interfaces/innerkits",
     "//drivers/peripheral/display/interfaces/include",
-    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf",
     "//commonlibrary/c_utils/base/include",
     "$ace_root",
     "$ace_root/frameworks",
@@ -348,10 +346,18 @@ ohos_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/base/resource:ace_resource",
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$cjson_root:cjson",
-    "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf",
     "//third_party/googletest:gmock_main",
     "//third_party/googletest:gtest_main",
   ]
+
+  if (frame_trace_support) {
+    include_dirs += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf" ]
+    deps += [ "//foundation/resourceschedule/frame_aware_sched/interfaces/innerkits/frameintf:frame_trace_intf" ]
+    sources += [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_impl.cpp" ]
+  } else {
+    sources +=
+        [ "$ace_root/adapter/ohos/osal/frame_trace_adapter_fake_impl.cpp" ]
+  }
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
