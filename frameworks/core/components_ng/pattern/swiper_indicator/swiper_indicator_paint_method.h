@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_SWIPER_INDICATOR_PAINT_METHOD_H
 
 #include "core/components/common/properties/swiper_indicator.h"
+#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_paint_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -28,11 +29,21 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SwiperIndicatorPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwiperIndicatorPaintMethod, NodePaintMethod)
 public:
-    SwiperIndicatorPaintMethod(Axis axis, int32_t currentIndex, int32_t itemCount)
-        : axis_(axis), currentIndex_(currentIndex), itemCount_(itemCount) {};
+    explicit SwiperIndicatorPaintMethod(const RefPtr<SwiperIndicatorModifier>& swiperIndicatorModifier)
+        : swiperIndicatorModifier_(swiperIndicatorModifier)
+    {}
     ~SwiperIndicatorPaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(swiperIndicatorModifier_, nullptr);
+        return swiperIndicatorModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    void CalculatePointCenterX(const PaintWrapper* paintWrapper);
+    void CalculatePointCenterY(const PaintWrapper* paintWrapper);
+    void CalculatePointRadius(const PaintWrapper* paintWrapper);
 
     void SetCurrentIndex(int32_t index)
     {
@@ -69,23 +80,28 @@ public:
         hoverPoint_ = hoverPoint;
     }
 
-private:
-    void PaintContent(RSCanvas& canvas, const RefPtr<SwiperIndicatorPaintProperty>& paintProperty, SizeF contentSize);
-    void PaintMask(
-        RSCanvas& canvas, RefPtr<SwiperIndicatorPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
-    bool IsIndicatorPointHovered(float x, float y, float radius);
-    bool HasIndicatorHovered(double userSize, float indicatorSize, double zoomInScale, double indicatorPaddingPX);
-    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const Color& color, double radius,
-        double zoomInScale, bool hasIndicatorHovered);
-    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& center, const Color& color, double userSize,
-        double zoomInScale, bool hasIndicatorHovered);
+    void SetTurnPageRate(float turnPageRate)
+    {
+        turnPageRate_ = turnPageRate;
+    }
 
+private:
+    PointF hoverPoint_;
+
+    RefPtr<SwiperIndicatorModifier> swiperIndicatorModifier_;
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t itemCount_ = 0;
+    float turnPageRate_ = 0.0f;
     bool isHover_ = false;
     bool isPressed_ = false;
-    PointF hoverPoint_;
+    // Animatable properties for updating Modifier
+    LinearVector<float> vectorBlackPointCenterX_ = {};
+    float longPointLeftCenterX_ = 0.0f;
+    float longPointRightCenterX_ = 0.0f;
+    float centerY_ = 0.0f;
+    float pointRadius_ = 0.0f;
+    float hoverPointRadius_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPaintMethod);
 };

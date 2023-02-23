@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ public:
     {
         return false;
     }
-    
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<SwiperLayoutProperty>();
@@ -87,6 +87,27 @@ public:
         return MakeRefPtr<SwiperEventHub>();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        json->Put("indicatorStyle", GetIndicatorStyle().c_str());
+    }
+
+    std::string GetIndicatorStyle() const
+    {
+        JsonValue jsonValue;
+        jsonValue.Put("left", swiperParameters_.dimLeft.value_or(0.0_vp).ToString().c_str());
+        jsonValue.Put("top", swiperParameters_.dimTop.value_or(0.0_vp).ToString().c_str());
+        jsonValue.Put("right", swiperParameters_.dimRight.value_or(0.0_vp).ToString().c_str());
+        jsonValue.Put("bottom", swiperParameters_.dimBottom.value_or(0.0_vp).ToString().c_str());
+        jsonValue.Put("size", swiperParameters_.dimSize.value_or(6.0_vp).ToString().c_str());
+        jsonValue.Put("selectedColor",
+            swiperParameters_.selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());
+        jsonValue.Put(
+            "color", swiperParameters_.colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
+        return jsonValue.ToString();
+    }
+
     int32_t GetCurrentShownIndex() const
     {
         return currentIndex_;
@@ -105,6 +126,11 @@ public:
     int32_t GetCurrentIndex() const
     {
         return currentIndex_;
+    }
+
+    float GetTurnPageRate() const
+    {
+        return turnPageRate_;
     }
 
     void UpdateCurrentOffset(float offset);
@@ -250,6 +276,7 @@ private:
     float distance_ = 0.0f;
 
     float currentOffset_ = 0.0f;
+    float turnPageRate_ = 0.0f;
 
     bool moveDirection_ = false;
 
