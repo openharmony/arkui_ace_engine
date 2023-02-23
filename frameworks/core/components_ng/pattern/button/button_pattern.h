@@ -142,6 +142,7 @@ protected:
     void OnTouchUp();
     void HandleEnabled();
     void InitButtonLabel();
+    void AnimateTouchEffectBoard(float startOpacity, float endOpacity, int32_t duration, const RefPtr<Curve>& curve);
     Color clickedColor_;
 
 private:

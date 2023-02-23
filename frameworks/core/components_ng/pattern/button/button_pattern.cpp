@@ -25,6 +25,12 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float START_OPACITY = 0.0f;
+constexpr float END_OPACITY = 0.1f;
+constexpr int32_t DURATION = 100;
+} // namespace
+
 void ButtonPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -145,7 +151,7 @@ void ButtonPattern::OnTouchDown()
             return;
         }
         // for system default
-        renderContext->BlendBgColor(clickedColor_);
+        AnimateTouchEffectBoard(START_OPACITY, END_OPACITY, DURATION, Curves::SHARP);
     }
 }
 
@@ -161,7 +167,7 @@ void ButtonPattern::OnTouchUp()
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }
-        renderContext->ResetBlendBgColor();
+        AnimateTouchEffectBoard(END_OPACITY, START_OPACITY, DURATION, Curves::SHARP);
     }
 }
 
@@ -184,6 +190,25 @@ void ButtonPattern::HandleEnabled()
     } else {
         renderContext->ResetBlendBgColor();
     }
+}
+
+void ButtonPattern::AnimateTouchEffectBoard(
+    float startOpacity, float endOpacity, int32_t duration, const RefPtr<Curve>& curve)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
+    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
+    Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
+    Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
+    renderContext->OnBackgroundColorUpdate(highlightStart);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(duration);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
 } // namespace OHOS::Ace::NG

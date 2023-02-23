@@ -80,6 +80,9 @@ ohos_unittest("button_pattern_test_ng") {
     # mock
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
+    "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
+    "$ace_root/frameworks/core/animation/cubic_curve.cpp",
+    "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
