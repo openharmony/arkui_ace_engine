@@ -121,6 +121,8 @@ private:
     OffsetF arrowPosition_;
     SizeF selfSize_;
     RectF touchRegion_;
+    SizeF buttonRowSize_;
+    OffsetF buttonRowOffset_;
 
     Edge padding_;
     Edge margin_;
