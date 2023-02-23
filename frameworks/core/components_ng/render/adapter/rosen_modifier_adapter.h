@@ -41,6 +41,8 @@ using RSAnimationTimingCurve = Rosen::RSAnimationTimingCurve;
 template<typename T>
 using RSAnimatableProperty = Rosen::RSAnimatableProperty<T>;
 template<typename T>
+using RSProperty = Rosen::RSProperty<T>;
+template<typename T>
 using RSAnimatableArithmetic = Rosen::RSAnimatableArithmetic<T>;
 using RSContentStyleModifier = Rosen::RSContentStyleModifier;
 using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;

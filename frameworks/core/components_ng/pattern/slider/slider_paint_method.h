@@ -80,7 +80,7 @@ public:
         sliderTipModifier_->SetTextOffset(tipParameters_.textOffset_);
     }
 
-    RectF UpdateOverlayRect(PaintWrapper* paintWrapper)
+    RectF UpdateOverlayRect(PaintWrapper* paintWrapper) const
     {
         constexpr float HALF = 0.5;
         auto contentSize = paintWrapper->GetContentSize();
