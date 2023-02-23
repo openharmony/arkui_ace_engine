@@ -100,7 +100,6 @@ template("ace_ohos_standard_source_set") {
       "ability_base:want",
       "ability_runtime:ability_context_native",
       "ability_runtime:ability_manager",
-      "ability_runtime:extensionkit_native",
       "data_share:datashare_consumer",
       "eventhandler:libeventhandler",
       "form_fwk:fmskit_native",
