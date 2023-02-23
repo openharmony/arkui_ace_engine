@@ -86,10 +86,6 @@ AceViewOhos* AceViewOhos::CreateView(int32_t instanceId, bool useCurrentEventRun
         uiRunner                                  // io
     );
 
-    if (usePlatformThread) {
-        ContainerScope::SetScopeNotify([](int32_t id) { flutter::UIDartState::Current()->SetCurInstance(id); });
-    }
-
     auto* aceView = new AceViewOhos(instanceId, std::move(threadHost), std::move(taskRunners));
     if (aceView != nullptr) {
         aceView->IncRefCount();
@@ -101,7 +97,13 @@ AceViewOhos::AceViewOhos(int32_t id, flutter::ThreadHost threadHost, flutter::Ta
     : instanceId_(id), threadHost_(std::move(threadHost)), taskRunners_(std::move(taskRunners))
 {
     ioManager_ = std::make_unique<flutter::ShellIOManager>(nullptr, taskRunners_.GetIOTaskRunner());
-    flutter::UIDartState::Init(instanceId_, ioManager_->GetWeakPtr(), taskRunners);
+    taskRunners_.GetUITaskRunner()->PostTask(
+        [id = instanceId_, weakIoMgr = ioManager_->GetWeakPtr(), runners = taskRunners_] {
+            flutter::UIDartState::Init(id, weakIoMgr, runners);
+            if (runners.GetUITaskRunner() == runners.GetPlatformTaskRunner()) {
+                ContainerScope::SetScopeNotify([](int32_t id) { flutter::UIDartState::Current()->SetCurInstance(id); });
+            }
+        });
 }
 
 void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window)
@@ -111,12 +113,12 @@ void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Wind
     LOGD(">>> AceViewOhos::SurfaceCreated, pWnd:%{public}p", &(*window));
 }
 
-void AceViewOhos::SurfaceChanged(
-    AceViewOhos* view, int32_t width, int32_t height, int32_t orientation, WindowSizeChangeReason type)
+void AceViewOhos::SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     CHECK_NULL_VOID(view);
 
-    view->NotifySurfaceChanged(width, height, type);
+    view->NotifySurfaceChanged(width, height, type, rsTransaction);
 
     auto instanceId = view->GetInstanceId();
     auto container = Platform::AceContainer::GetContainer(instanceId);

@@ -19,8 +19,8 @@
 #include <memory>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/shell_io_manager.h"
+#include "flutter/shell/common/thread_host.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
 #include "wm/window.h"
@@ -43,7 +43,8 @@ public:
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
     static void SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window);
     static void SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,
-        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
     static void SurfacePositionChanged(AceViewOhos* view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
 
@@ -136,13 +137,17 @@ public:
     bool Dump(const std::vector<std::string>& params) override;
     const void* GetNativeWindowById(uint64_t textureId) override;
 
-    const flutter::TaskRunners& GetTaskRunners() const { return taskRunners_; }
+    const flutter::TaskRunners& GetTaskRunners() const
+    {
+        return taskRunners_;
+    }
 
 private:
-    void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type)
+    void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr)
     {
         if (viewChangeCallback_) {
-            viewChangeCallback_(width, height, type);
+            viewChangeCallback_(width, height, type, rsTransaction);
         }
         width_ = width;
         height_ = height;
@@ -181,8 +186,6 @@ private:
             surfaceDestroyCallback_();
         }
     }
-
-    void InitThreads(bool useCurrentEventRunner, bool usePlatformThread);
 
     TouchEventCallback touchEventCallback_;
     MouseEventCallback mouseEventCallback_;
