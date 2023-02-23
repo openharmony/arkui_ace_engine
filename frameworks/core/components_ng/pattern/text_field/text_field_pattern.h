@@ -542,6 +542,7 @@ private:
     void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
     void UpdateCaretByRightClick();
 
+    void AfterSelection();
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelectionLeft();
