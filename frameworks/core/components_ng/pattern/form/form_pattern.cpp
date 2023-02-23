@@ -400,7 +400,7 @@ void FormPattern::OnActionEvent(const std::string& action) const
     }
 
     auto type = actionType->GetString();
-    if (type != "router" && type != "message" && type != "background") {
+    if (type != "router" && type != "message" && type != "call") {
         LOGE("undefined event type");
         return;
     }

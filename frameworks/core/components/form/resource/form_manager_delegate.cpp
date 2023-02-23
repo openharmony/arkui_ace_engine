@@ -478,7 +478,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     }
 
     auto type = actionType->GetString();
-    if (type != "router" && type != "message" && type != "background") {
+    if (type != "router" && type != "message" && type != "call") {
         LOGE("undefined event type");
         return;
     }
@@ -497,7 +497,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
                 runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
         }
         return;
-    } else if (type == "background") {
+    } else if (type == "call") {
         AAFwk::Want want;
         if (!ParseAction(action, want)) {
             LOGE("Failed to parse want");
