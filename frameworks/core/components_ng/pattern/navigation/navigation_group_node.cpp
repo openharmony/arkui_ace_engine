@@ -62,6 +62,15 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     contentNode->AddChild(child);
 }
 
+const RefPtr<UINode> NavigationGroupNode::GetContentChildFromGroup()
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto navBar = AceType::DynamicCast<NavBarNode>(GetNavBarNode());
+    CHECK_NULL_RETURN(navBar, nullptr);
+    return navBar->GetNavBarContentNode();
+}
+
 void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     auto navBarNode = DynamicCast<NavBarNode>(GetNavBarNode());

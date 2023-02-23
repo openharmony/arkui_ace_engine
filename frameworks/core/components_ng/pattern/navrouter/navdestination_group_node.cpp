@@ -53,6 +53,11 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
     contentNode->AddChild(child);
 }
 
+const RefPtr<UINode> NavDestinationGroupNode::GetContentChildFromGroup()
+{
+    return GetContentNode();
+}
+
 void NavDestinationGroupNode::OnAttachToMainTree()
 {
     FrameNode::OnAttachToMainTree();
