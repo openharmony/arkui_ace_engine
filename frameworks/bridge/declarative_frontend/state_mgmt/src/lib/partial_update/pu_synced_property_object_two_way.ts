@@ -15,27 +15,29 @@
 
 /**
  * SynchedPropertyObjectTwoWayPU
+ * implementation of @Link and @Consume decorated variables of type class object
  * 
  * all definitions in this file are framework internal
  */
 class SynchedPropertyObjectTwoWayPU<C extends Object>
-  extends ObservedPropertyObjectAbstractPU<C>
-  implements ISinglePropertyChangeSubscriber<C> {
+  extends ObservedPropertyObjectAbstractPU<C> {
 
-  private linkedParentProperty_: ObservedPropertyObjectAbstract<C>;
+  private source_: ObservedPropertyObjectAbstract<C>;
   private changeNotificationIsOngoing_: boolean = false;
     
-  constructor(linkSource: ObservedPropertyObjectAbstract<C>,
+  constructor(source: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
     super(owningChildView, thisPropertyName);
-    if (linkSource) {
-      this.linkedParentProperty_ = linkSource;
+    if (source) {
       // register to the parent property
-      this.linkedParentProperty_.subscribeMe(this);
-  
-      // register to the ObservedObject
-      ObservedObject.addOwningProperty(this.linkedParentProperty_.get(), this);
+      this.source_ = source;
+      this.source_.subscribeMe(this);
+
+    // register to the ObservedObject
+    ObservedObject.addOwningProperty(this.source_.get(), this);
+    } else {
+      stateMgmtConsole.error(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor @Link/@Consume source must not be undefined. Application error!`);
     }
   }
 
@@ -45,43 +47,50 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
   */
   aboutToBeDeleted() {
     // unregister from parent of this link
-    if (this.linkedParentProperty_) {
-        this.linkedParentProperty_.unlinkSuscriber(this.id__());
+    if (this.source_) {
+        this.source_.unlinkSuscriber(this.id__());
     
         // unregister from the ObservedObject
-        ObservedObject.removeOwningProperty(this.linkedParentProperty_.getUnmonitored(), this);
+        ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
     }
     super.aboutToBeDeleted();
   }
 
-  private setObject(newValue: C): void {
-    if (!this.linkedParentProperty_) {
-        stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
-        return;
+  /**
+   * Called when sync peer ObservedPropertyObject or SynchedPropertyObjectTwoWay has chnaged value
+   * that peer can be in either parent or child component if 'this' is used for a @Link
+   * that peer can be in either acestor or descendant component if 'this' is used for a @Consume
+   * @param eventSource 
+   */
+  syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<C>) {
+    if (!this.changeNotificationIsOngoing_) {
+      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasChangedPU: contained ObservedObject '${eventSource.info()}' hasChanged'.`)
+      this.notifyPropertryHasChangedPU();
     }
-    this.linkedParentProperty_.set(newValue)
   }
 
-  // this object is subscriber to ObservedObject
-  // will call this cb function when property has changed
-  hasChanged(newValue: C): void {
-    if (!this.changeNotificationIsOngoing_) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: contained ObservedObject hasChanged'.`)
-      this.notifyHasChanged(this.getUnmonitored());
-    }
+  /**
+   * called when wrapped ObservedObject has changed poperty
+   * @param souceObject 
+   * @param changedPropertyName 
+   */
+  public objectPropertyHasChangedPU(souceObject: ObservedObject<C>, changedPropertyName : string) {
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: \
+        objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
+    this.notifyPropertryHasChangedPU();
   }
 
 
   public getUnmonitored(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${(this.linkedParentProperty_ ? JSON.stringify(this.linkedParentProperty_.getUnmonitored()) : "undefined")}' .`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${(this.source_ ? JSON.stringify(this.source_.getUnmonitored()) : "undefined")}' .`);
     // unmonitored get access , no call to otifyPropertyRead !
-    return (this.linkedParentProperty_ ? this.linkedParentProperty_.getUnmonitored() : undefined);
+    return (this.source_ ? this.source_.getUnmonitored() : undefined);
   }
 
   // get 'read through` from the ObservedProperty
   public get(): C {
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
-    this.notifyPropertyRead();
+    this.notifyPropertryHasBeenReadPU()
     return this.getUnmonitored();
   }
 
@@ -93,14 +102,25 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
     }
 
     stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${newValue}'.`);
-
-    ObservedObject.removeOwningProperty(this.getUnmonitored(), this);
     
     // avoid circular notifications @Link -> source @State -> other but also back to same @Link
     this.changeNotificationIsOngoing_ = true;
     this.setObject(newValue);
     ObservedObject.addOwningProperty(this.getUnmonitored(), this);
-    this.notifyHasChanged(newValue);
+    this.notifyPropertryHasChangedPU();
     this.changeNotificationIsOngoing_ = false;
+  }
+
+  private setObject(newValue: C): void {
+    if (!this.source_) {
+        stateMgmtConsole.warn(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: setObject, no linked parent property.`);
+        return;
+    }
+
+    let oldValueObject = this.getUnmonitored();
+    if (oldValueObject) {
+      ObservedObject.removeOwningProperty(oldValueObject, this);
+    }
+    this.source_.set(newValue)
   }
 }
