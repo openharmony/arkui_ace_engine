@@ -32,6 +32,16 @@ ModelAdapterWrapper::ModelAdapterWrapper(uint32_t key) : key_(key)
         CHECK_NULL_VOID(adapter);
         adapter->HandleCameraMove(event);
     });
+
+#if MULTI_ECS_UPDATE_AT_ONCE
+    RefPtr<PipelineBase> pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline) {
+        OHOS::Render3D::GraphicsManager::GetInstance().AttachContext(pipeline);
+    } else {
+        LOGE("MODEL_NG: pipeline context is null");
+    }
+#endif
 }
 
 void ModelAdapterWrapper::OnPaint(const RefPtr<ModelPaintProperty>& modelPaintProperty)
