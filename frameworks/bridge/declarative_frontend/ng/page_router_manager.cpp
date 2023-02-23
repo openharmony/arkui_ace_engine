@@ -613,7 +613,6 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         return;
     }
     LOGI("fail to find specified page to pop");
-    ExitToDesktop();
 }
 
 void PageRouterManager::BackCheckAlert(const RouterPageInfo& target, const std::string& params)
