@@ -68,7 +68,7 @@ void FormRendererGroup::ReloadForm()
 
 void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
-    HILOG_INFO("UpdateForm compId %{public}s.", std::to_string(formJsInfo.formId).c_str());
+    HILOG_INFO("UpdateForm formId %{public}s.", std::to_string(formJsInfo.formId).c_str());
     auto iter = rendererMap_.begin();
     while (iter!= rendererMap_.end()) {
         auto renderer = iter->second;
@@ -86,8 +86,29 @@ void FormRendererGroup::DeleteForm(const std::string& compId)
     }
     auto renderer = iter->second;
     // should release the occupancy of resources of the context, runtime and ui content
+    if (!renderer) {
+        HILOG_ERROR("DeleteForm compId %{public}s renderer is null.", compId.c_str());
+        return;
+    }
+
     renderer->Destroy();
     rendererMap_.erase(iter);
+}
+
+void FormRendererGroup::DeleteForm()
+{
+    HILOG_INFO("DeleteForm all compIds, size: %{public}zu", rendererMap_.size());
+    for (const auto &iter : rendererMap_) {
+        HILOG_INFO("DeleteForm compId %{public}s.", iter.first.c_str());
+        iter.second->Destroy();
+    }
+
+    rendererMap_.clear();
+}
+
+bool FormRendererGroup::IsEmpty()
+{
+    return rendererMap_.empty();
 }
 }  // namespace Ace
 }  // namespace OHOS
