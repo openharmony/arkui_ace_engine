@@ -23,8 +23,6 @@
 #include "base/memory/memory_monitor.h"
 #include "base/thread/frame_trace_adapter.h"
 
-static const std::string BG_THREAD_NAME = "ui";
-
 namespace OHOS::Ace {
 namespace {
 
