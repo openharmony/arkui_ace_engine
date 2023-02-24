@@ -1868,23 +1868,26 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
     std::optional<Dimension> bottomDimen;
     Dimension borderWidth;
     if (ParseJsDimensionVp(args, borderWidth)) {
+        if (borderWidth.IsNegative()) {
+            borderWidth.Reset();
+        }
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         Dimension left;
-        if (ParseJsDimensionVp(object->GetProperty("left"), left)) {
+        if (ParseJsDimensionVp(object->GetProperty("left"), left) && left.IsNonNegative()) {
             leftDimen = left;
         }
         Dimension right;
-        if (ParseJsDimensionVp(object->GetProperty("right"), right)) {
+        if (ParseJsDimensionVp(object->GetProperty("right"), right) && right.IsNonNegative()) {
             rightDimen = right;
         }
         Dimension top;
-        if (ParseJsDimensionVp(object->GetProperty("top"), top)) {
+        if (ParseJsDimensionVp(object->GetProperty("top"), top) && top.IsNonNegative()) {
             topDimen = top;
         }
         Dimension bottom;
-        if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom)) {
+        if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom) && bottom.IsNonNegative()) {
             bottomDimen = bottom;
         }
         ViewAbstractModel::GetInstance()->SetBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
