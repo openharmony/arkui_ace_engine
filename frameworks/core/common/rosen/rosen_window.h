@@ -39,8 +39,10 @@ private:
     void VsyncThreadMain();
 
     std::vector<AceVsyncCallback> vsyncCallbacks_;
+    std::vector<AceVsyncCallback> pendingVsyncCallbacks_;
     std::unique_ptr<std::thread> vsyncThread_ = nullptr;
     SemQueue<bool> vsyncRequests_;
+    std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace::Platform
