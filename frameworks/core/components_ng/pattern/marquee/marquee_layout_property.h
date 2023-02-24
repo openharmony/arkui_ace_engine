@@ -69,6 +69,7 @@ public:
         json->Put("start", propPlayerStatus_.value_or(true) ? "true" : "false");
         json->Put(
             "fromStart", propDirection_.value_or(MarqueeDirection::RIGHT) == MarqueeDirection::LEFT ? "true" : "false");
+        json->Put("allowScale", propAllowScale_.value_or(false) ? "true" : "false");
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlayerStatus, bool, PROPERTY_UPDATE_MEASURE);

@@ -500,6 +500,9 @@ public:
     std::string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     std::string GetInputFilter() const;
+    std::string GetCopyOptionString() const;
+    std::string GetShowPasswordIconString() const;
+    std::string GetInputStyleString() const;
 
 private:
     void HandleBlurEvent();
