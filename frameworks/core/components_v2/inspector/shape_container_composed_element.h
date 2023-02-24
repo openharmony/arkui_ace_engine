@@ -48,6 +48,7 @@ public:
     std::string GetStrokeWidth() const;
     std::unique_ptr<JsonValue> GetViewBox() const;
     std::unique_ptr<JsonValue> GetStrokeDashArray() const;
+    std::unique_ptr<JsonValue> GetMesh() const;
 
     AceType::IdType GetTargetTypeId() const override
     {
