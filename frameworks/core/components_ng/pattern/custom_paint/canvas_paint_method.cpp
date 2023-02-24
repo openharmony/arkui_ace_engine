@@ -249,7 +249,7 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     }
     auto cacheImage = imageCache_->GetCacheImage(src);
     if (cacheImage && cacheImage->imagePtr) {
-        return cacheImage->imagePtr->image();
+        return cacheImage->imagePtr;
     }
 
     CHECK_NULL_RETURN(context_, nullptr);
@@ -257,9 +257,7 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     auto image = Ace::ImageProvider::GetSkImage(src, context_);
     CHECK_NULL_RETURN(image, nullptr);
     auto rasterizedImage = image->makeRasterImage();
-    auto canvasImage = flutter::CanvasImage::Create();
-    canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
-    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(canvasImage));
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
     return rasterizedImage;
 }
 

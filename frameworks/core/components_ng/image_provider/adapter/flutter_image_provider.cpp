@@ -19,18 +19,11 @@
 #include <utility>
 
 #include "flutter/fml/memory/ref_counted.h"
-
-#include "base/log/ace_trace.h"
-#include "base/memory/referenced.h"
-#ifdef FLUTTER_2_5
-#include "ace_shell/shell/common/window_manager.h"
-#include "flutter/lib/ui/io_manager.h"
-#else
-#include "flutter/lib/ui/painting/image.h"
-#endif
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 
+#include "base/log/ace_trace.h"
+#include "base/memory/referenced.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
@@ -38,15 +31,12 @@
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/svg_image_object.h"
-#include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/components_ng/render/adapter/skia_image.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_compressor.h"
 #include "core/image/image_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#ifdef FLUTTER_2_5
-#include "core/components_ng/render/adapter/flutter_canvas_image.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -126,15 +116,13 @@ RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceIn
     CHECK_NULL_RETURN(cache, nullptr);
     auto cacheImage = cache->GetCacheImage(key);
     CHECK_NULL_RETURN_NOLOG(cacheImage, nullptr);
-#ifdef FLUTTER_2_5
-    auto canvasImage = cacheImage->imagePtr;
-#else
-    auto flutterCanvasImage = cacheImage->imagePtr;
-    auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
-    auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(canvasImage);
-    CHECK_NULL_RETURN(skiaCanvasImage, nullptr);
-    skiaCanvasImage->SetUniqueID(cacheImage->uniqueId);
-#endif
+
+    auto rawImage = cacheImage->imagePtr;
+    auto canvasImage = CanvasImage::Create(&rawImage);
+    auto skiaImage = DynamicCast<SkiaImage>(canvasImage);
+    CHECK_NULL_RETURN(skiaImage, nullptr);
+    skiaImage->SetUniqueID(cacheImage->uniqueId);
+
     if (canvasImage) {
         LOGD("[ImageCache][CanvasImage] succeed find canvas image from cache: %{public}s", key.c_str());
     }
@@ -168,21 +156,10 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
     }
     CHECK_NULL_VOID(image);
     // create gpu object
-    flutter::SkiaGPUObject<SkImage> skiaGpuObjSkImage({ image, flutterRenderTaskHolder->unrefQueue });
-#ifdef FLUTTER_2_5
-    auto canvasImage = CanvasImage::Create();
-    auto flutterImage = AceType::DynamicCast<NG::FlutterCanvasImage>(canvasImage);
-    if (flutterImage) {
-        flutterImage->SetImage(std::move(skiaGpuObjSkImage));
-    }
-#else
-    // create canvas image
-    auto flutterCanvasImage = flutter::CanvasImage::Create();
-    flutterCanvasImage->set_image(std::move(skiaGpuObjSkImage));
-    auto canvasImage = CanvasImage::Create(&flutterCanvasImage);
+    auto canvasImage = NG::CanvasImage::Create(&image);
     CHECK_NULL_VOID(canvasImage);
     ImageProvider::CacheCanvasImage(canvasImage, key);
-#endif
+
     // upload
     auto uploadTask = [key, sync](const RefPtr<CanvasImage>& canvasImage) {
         ImageProvider::SuccessCallback(canvasImage, key, sync);
@@ -243,7 +220,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
     // If want to dump draw command or gpu disabled, should use CPU image.
     callback(canvasImage);
 #else
-    auto skiaCanvasImage = DynamicCast<SkiaCanvasImage>(canvasImage);
+    auto skiaCanvasImage = DynamicCast<SkiaImage>(canvasImage);
     CHECK_NULL_VOID(skiaCanvasImage);
     // load compress cache
     if (data) {
@@ -256,7 +233,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
         auto stripped = ImageCompressor::StripFileHeader(skdata);
         LOGI("use astc cache %{public}s %{public}d×%{public}d", key.c_str(), dstWidth, dstHeight);
         skiaCanvasImage->SetCompressData(stripped, dstWidth, dstHeight);
-        skiaCanvasImage->ReplaceSkImage({ nullptr, flutterRenderTaskHolder->unrefQueue });
+        skiaCanvasImage->ReplaceSkImage(nullptr);
         callback(skiaCanvasImage);
         return;
     }
@@ -268,7 +245,7 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
     auto task = [callback, flutterRenderTaskHolder, skiaCanvasImage, id = Container::CurrentId(), src = key] {
         ContainerScope scope(id);
         CHECK_NULL_VOID(flutterRenderTaskHolder);
-        auto skImage = skiaCanvasImage->GetCanvasImage();
+        auto skImage = skiaCanvasImage->GetImage();
         CHECK_NULL_VOID(skImage);
         auto rasterizedImage = skImage->makeRasterImage();
         if (!rasterizedImage) {
@@ -291,9 +268,9 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
             if (compressData) {
                 // replace skImage of [CanvasImage] with [rasterizedImage]
                 skiaCanvasImage->SetCompressData(compressData, width, height);
-                skiaCanvasImage->ReplaceSkImage({ nullptr, flutterRenderTaskHolder->unrefQueue });
+                skiaCanvasImage->ReplaceSkImage(nullptr);
             } else {
-                skiaCanvasImage->ReplaceSkImage({ rasterizedImage, flutterRenderTaskHolder->unrefQueue });
+                skiaCanvasImage->ReplaceSkImage(rasterizedImage);
             }
             auto releaseTask = ImageCompressor::GetInstance()->ScheduleReleaseTask();
             if (flutterRenderTaskHolder->ioTaskRunner) {
@@ -320,15 +297,12 @@ void ImageProvider::CacheCanvasImage(const RefPtr<CanvasImage>& canvasImage, con
     auto pipelineCtx = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineCtx);
     CHECK_NULL_VOID(pipelineCtx->GetImageCache());
-#ifdef FLUTTER_2_5
-    pipelineCtx->GetImageCache()->CacheImage(key, std::make_shared<CachedImage>(canvasImage));
-#else
-    auto skiaCanvasImage = AceType::DynamicCast<SkiaCanvasImage>(canvasImage);
+
+    auto skiaCanvasImage = AceType::DynamicCast<SkiaImage>(canvasImage);
     CHECK_NULL_VOID_NOLOG(skiaCanvasImage);
-    auto cached = std::make_shared<Ace::CachedImage>(skiaCanvasImage->GetFlutterCanvasImage());
+    auto cached = std::make_shared<Ace::CachedImage>(skiaCanvasImage->GetImage());
     cached->uniqueId = skiaCanvasImage->GetUniqueID();
     pipelineCtx->GetImageCache()->CacheImage(key, cached);
-#endif
 }
 
 } // namespace OHOS::Ace::NG

@@ -241,7 +241,7 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
                     return;
                 }
 
-                auto canvasImage = flutter::CanvasImage::Create();
+                
                 APngAnimatedFrameInfo *frameInfo = player->DecodeFrameImage(index);
                 if (!frameInfo || !frameInfo->image) {
                     return;
@@ -251,13 +251,11 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
                 if (dstWidth > 0 && dstHeight > 0) {
                     skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
                 }
-
-                if (skImage) {
-                    canvasImage->set_image({skImage, player->unrefQueue_});
-                } else {
+                if (!skImage) {
                     LOGW("animated player cannot get the %{public}d skImage!", index);
                     return;
                 }
+                auto canvasImage = NG::CanvasImage::Create(&skImage);
 
                 taskExecutor->PostTask([callback = player->successCallback_, canvasImage,
                                                source = player->imageSource_] { callback(source, canvasImage); },

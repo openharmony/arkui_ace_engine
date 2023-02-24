@@ -37,6 +37,7 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/image/image_component.h"
 #include "core/components/transform/flutter_render_transform.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/flutter_scene_builder.h"
@@ -68,7 +69,7 @@ FlutterRenderBox::FlutterRenderBox()
         currentDartState->GetTaskRunners().GetIOTaskRunner());
 
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)] (
-        ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {
+        ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {
         auto renderBox = weak.Upgrade();
         if (!renderBox) {
             LOGE("renderBox upgrade fail when image load success. callback image source info: %{private}s",
@@ -192,9 +193,10 @@ void FlutterRenderBox::ImageObjFailed()
     MarkNeedLayout();
 }
 
-void FlutterRenderBox::ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image)
+void FlutterRenderBox::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image)
 {
-    image_ = image->image();
+    auto skiaImage = AceType::DynamicCast<NG::SkiaImage>(image);
+    image_ = skiaImage->GetImage();
     MarkNeedLayout();
 }
 

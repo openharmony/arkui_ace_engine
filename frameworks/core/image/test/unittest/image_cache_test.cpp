@@ -47,7 +47,7 @@ HWTEST_F(ImageCacheTest, MemoryCache001, TestSize.Level1)
      * @tc.expected: new item should at begin of cacheList_ and imagCache has right iters.
      */
     for (size_t i = 0; i < CACHE_FILES.size(); i++) {
-        imageCache->CacheImage(FILE_KEYS[i], std::make_shared<CachedImage>(flutter::CanvasImage::Create()));
+        imageCache->CacheImage(FILE_KEYS[i], std::make_shared<CachedImage>(nullptr));
         std::string frontKey = (imageCache->cacheList_).front().cacheKey;
         ASSERT_EQ(frontKey, FILE_KEYS[i]);
         ASSERT_EQ(frontKey, imageCache->imageCache_[FILE_KEYS[i]]->cacheKey);
@@ -57,7 +57,7 @@ HWTEST_F(ImageCacheTest, MemoryCache001, TestSize.Level1)
      * @tc.steps: step2. cache a image already in cache for example FILE_KEYS[3] e.t. "key4".
      * @tc.expected: the cached item should at begin of cacheList_ and imagCache has right iters.
      */
-    imageCache->CacheImage(FILE_KEYS[3], std::make_shared<CachedImage>(flutter::CanvasImage::Create()));
+    imageCache->CacheImage(FILE_KEYS[3], std::make_shared<CachedImage>(nullptr));
     ASSERT_EQ(imageCache->cacheList_.front().cacheKey, FILE_KEYS[3]);
     ASSERT_EQ(imageCache->imageCache_[FILE_KEYS[3]]->cacheKey, FILE_KEYS[3]);
 }
@@ -73,7 +73,7 @@ HWTEST_F(ImageCacheTest, MemoryCache002, TestSize.Level1)
      * @tc.steps: step1. cache images one by one.
      */
     for (size_t i = 0; i < CACHE_FILES.size(); i++) {
-        imageCache->CacheImage(FILE_KEYS[i], std::make_shared<CachedImage>(flutter::CanvasImage::Create()));
+        imageCache->CacheImage(FILE_KEYS[i], std::make_shared<CachedImage>(nullptr));
         std::string frontKey = (imageCache->cacheList_).front().cacheKey;
     }
     /**

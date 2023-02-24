@@ -92,6 +92,8 @@ public:
 
     virtual void ControlAnimation(bool play) {}
 
+    virtual void SetRawCompressData(void* dataPtr, int32_t w, int32_t h) {}
+
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;
 

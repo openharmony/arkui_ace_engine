@@ -14,18 +14,17 @@
  */
 
 #include "core/image/image_object.h"
-#include "core/image/image_compressor.h"
+
+#include "SkImage.h"
 
 #include "base/thread/background_task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components/image/render_image.h"
-#include "core/image/flutter_image_cache.h"
-
-#ifdef FLUTTER_2_5
-#include "core/components_ng/render/adapter/flutter_canvas_image.h"
 #include "core/components_ng/render/canvas_image.h"
-#endif
+#include "core/image/flutter_image_cache.h"
+#include "core/image/image_compressor.h"
 
 #ifdef APNG_IMAGE_SUPPORT
 #include "core/image/apng/apng_image_decoder.h"
@@ -40,13 +39,8 @@ std::string ImageObject::GenerateCacheKey(const ImageSourceInfo& srcInfo, Size t
            std::to_string(static_cast<int32_t>(targetImageSize.Height()));
 }
 
-
-
 RefPtr<ImageObject> ImageObject::BuildImageObject(
-    ImageSourceInfo source,
-    const RefPtr<PipelineBase> context,
-    const sk_sp<SkData>& skData,
-    bool useSkiaSvg)
+    ImageSourceInfo source, const RefPtr<PipelineBase> context, const sk_sp<SkData>& skData, bool useSkiaSvg)
 {
     // build svg image object.
     if (source.IsSvg()) {
@@ -73,7 +67,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
 #endif
     }
 
-    //if is png or apng check
+    // if is png or apng check
 #ifdef APNG_IMAGE_SUPPORT
     if (source.isPng()) {
         auto apngDecoder = AceType::MakeRefPtr<PNGImageDecoder>(skData);
@@ -137,14 +131,9 @@ Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
 }
 #endif
 
-void StaticImageObject::UploadToGpuForRender(
-    const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    const UploadSuccessCallback& successCallback,
-    const FailedCallback& failedCallback,
-    const Size& imageSize,
-    bool forceResize,
-    bool syncMode)
+void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
+    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder, const UploadSuccessCallback& successCallback,
+    const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode)
 {
     auto task = [context, renderTaskHolder, successCallback, failedCallback, imageSize, forceResize, skData = skData_,
                     imageSource = imageSource_, id = Container::CurrentId()]() mutable {
@@ -166,20 +155,16 @@ void StaticImageObject::UploadToGpuForRender(
             LOGI("other thread is uploading same image to gpu : %{public}s", imageSource.ToString().c_str());
             return;
         }
-#ifdef FLUTTER_2_5
+
         RefPtr<NG::CanvasImage> cachedFlutterImage;
-#else
-        fml::RefPtr<flutter::CanvasImage> cachedFlutterImage;
-#endif
         auto imageCache = pipelineContext->GetImageCache();
-        if (imageCache) {
-            auto cachedImage = imageCache->GetCacheImage(key);
-            LOGD("image cache valid");
-            if (cachedImage) {
-                LOGD("cached image found.");
-                cachedFlutterImage = cachedImage->imagePtr;
-            }
+        CHECK_NULL_VOID(imageCache);
+        auto cachedImage = imageCache->GetCacheImage(key);
+        if (cachedImage) {
+            auto skImage = cachedImage->imagePtr;
+            cachedFlutterImage = NG::CanvasImage::Create(&skImage);
         }
+
         // found cached image obj (can be rendered)
         if (cachedFlutterImage) {
             LOGD("get cached image success: %{public}s", key.c_str());
@@ -187,34 +172,24 @@ void StaticImageObject::UploadToGpuForRender(
             return;
         }
 
-        auto callback = [successCallback, imageSource, taskExecutor, imageCache,
-                imageSize, key, id = Container::CurrentId()]
-                (flutter::SkiaGPUObject<SkImage> image, sk_sp<SkData> compressData) {
-#ifdef FLUTTER_2_5
-            if (!image.skia_object() && !compressData.get()) {
-#else
-            if (!image.get() && !compressData.get()) {
-#endif
+        auto callback = [successCallback, imageSource, taskExecutor, imageCache, imageSize, key,
+                            id = Container::CurrentId()](
+                            sk_sp<SkImage> image, sk_sp<SkData> compressData) {
+
+            if (!image && !compressData.get()) {
                 ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, nullptr,
                     "Image data may be broken or absent in upload callback.");
             }
             ContainerScope scope(id);
-#ifdef FLUTTER_2_5
-            auto canvasImage = NG::CanvasImage::Create();
-            auto flutterImage = AceType::DynamicCast<NG::FlutterCanvasImage>(canvasImage);
-            if (flutterImage) {
-                flutterImage->SetImage(std::move(image));
-            }
-#else
-            auto canvasImage = flutter::CanvasImage::Create();
-            canvasImage->set_image(std::move(image));
+            sk_sp<SkImage> skImage = image;
+            auto canvasImage = NG::CanvasImage::Create(&skImage);
             int32_t width = static_cast<int32_t>(imageSize.Width() + 0.5);
             int32_t height = static_cast<int32_t>(imageSize.Height() + 0.5);
-            canvasImage->setCompress(std::move(compressData), width, height);
-#endif
+            canvasImage->SetRawCompressData(&compressData, width, height);
+
             if (imageCache) {
                 LOGD("cache image key: %{public}s", key.c_str());
-                imageCache->CacheImage(key, std::make_shared<CachedImage>(canvasImage));
+                imageCache->CacheImage(key, std::make_shared<CachedImage>(skImage));
             }
             ImageProvider::ProccessUploadResult(taskExecutor, imageSource, imageSize, canvasImage);
         };
@@ -273,8 +248,6 @@ bool StaticImageObject::CancelBackgroundTasks()
 {
     return uploadForPaintTask_ ? uploadForPaintTask_.Cancel(false) : false;
 }
-
-
 
 void PixelMapImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image)
 {

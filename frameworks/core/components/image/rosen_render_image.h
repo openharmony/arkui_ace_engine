@@ -61,7 +61,7 @@ public:
         UploadSuccessCallback uploadSuccessCallback, FailedCallback failedCallback, Size resizeTarget, bool forceResize,
         bool syncMode = false);
 
-    void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
+    void ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed(const std::string& errorMsg);
     bool NeedUploadImageObjToGpu();
@@ -131,7 +131,7 @@ private:
     RefPtr<ImageObject> imageObj_;
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
-    fml::RefPtr<flutter::CanvasImage> image_;
+    RefPtr<NG::CanvasImage> image_;
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     Size formerRawImageSize_;
     bool imageDataNotReady_ = false;

@@ -260,7 +260,7 @@ void CustomPaintPaintMethod::InitImageCallbacks()
     };
 
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-                                 ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {};
+                                 ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {};
 
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
 }

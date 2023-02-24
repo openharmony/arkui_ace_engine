@@ -132,11 +132,7 @@ void ImageProvider::ProccessUploadResult(
     const RefPtr<TaskExecutor>& taskExecutor,
     const ImageSourceInfo& imageInfo,
     const Size& imageSize,
-#ifdef FLUTTER_2_5
     const RefPtr<NG::CanvasImage>& canvasImage,
-#else
-    const fml::RefPtr<flutter::CanvasImage>& canvasImage,
-#endif
     const std::string& errorMsg)
 {
     std::lock_guard lock(uploadMutex_);
@@ -375,7 +371,7 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
 void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
     const sk_sp<SkImage>& image,
     const sk_sp<SkData>& data,
-    const std::function<void(flutter::SkiaGPUObject<SkImage>, sk_sp<SkData>)>&& callback,
+    const std::function<void(sk_sp<SkImage>, sk_sp<SkData>)>&& callback,
     const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const std::string src)
 {
@@ -385,11 +381,11 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
     }
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
-    callback({ image, renderTaskHolder->unrefQueue }, nullptr);
+    callback(image, nullptr);
 #else
     if (data && ImageCompressor::GetInstance()->CanCompress()) {
         LOGI("use astc cache %{public}s %{public}d * %{public}d", src.c_str(), image->width(), image->height());
-        callback({ image, renderTaskHolder->unrefQueue }, data);
+        callback(image, data);
         return;
     }
     auto task = [context, image, callback, renderTaskHolder, src] () {
@@ -400,19 +396,19 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
         ACE_DCHECK(!image->isTextureBacked());
         bool needRaster = ImageCompressor::GetInstance()->CanCompress();
         if (!needRaster) {
-            callback({ image, renderTaskHolder->unrefQueue }, nullptr);
+            callback(image, nullptr);
             return;
         } else {
             auto rasterizedImage = image->isLazyGenerated() ? image->makeRasterImage() : image;
             if (!rasterizedImage) {
                 LOGW("Rasterize image failed. callback.");
-                callback({ image, renderTaskHolder->unrefQueue }, nullptr);
+                callback(image, nullptr);
                 return;
             }
             SkPixmap pixmap;
             if (!rasterizedImage->peekPixels(&pixmap)) {
                 LOGW("Could not peek pixels of image for texture upload.");
-                callback({ rasterizedImage, renderTaskHolder->unrefQueue }, nullptr);
+                callback(rasterizedImage, nullptr);
                 return;
             }
             int32_t width = static_cast<int32_t>(pixmap.width());
@@ -431,7 +427,7 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
                         ImageCompressor::GetInstance()->ScheduleReleaseTask());
                 }
             }
-            callback({ image, renderTaskHolder->unrefQueue }, compressData);
+            callback(image, compressData);
             // Trigger purge cpu bitmap resource, after image upload to gpu.
             SkGraphics::PurgeResourceCache();
         }

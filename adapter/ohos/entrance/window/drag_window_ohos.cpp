@@ -29,6 +29,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -273,9 +274,9 @@ void DragWindowOhos::DrawImage(void* skImage)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(skImage);
-    fml::RefPtr<flutter::CanvasImage>* canvasImagePtr = reinterpret_cast<fml::RefPtr<flutter::CanvasImage>*>(skImage);
+    auto* canvasImagePtr = reinterpret_cast<RefPtr<NG::CanvasImage>*>(skImage);
     CHECK_NULL_VOID(canvasImagePtr);
-    fml::RefPtr<flutter::CanvasImage> canvasImage = *canvasImagePtr;
+    RefPtr<NG::SkiaImage> canvasImage = AceType::DynamicCast<NG::SkiaImage>(*canvasImagePtr);
     CHECK_NULL_VOID(canvasImage);
     auto surfaceNode = dragWindow_->GetSurfaceNode();
     rsUiDirector_ = Rosen::RSUIDirector::Create();
@@ -291,7 +292,7 @@ void DragWindowOhos::DrawImage(void* skImage)
     rsUiDirector_->SetRoot(rootNode_->GetId());
     auto canvasNode = std::static_pointer_cast<Rosen::RSCanvasNode>(rootNode_);
     auto skia = canvasNode->BeginRecording(width_, height_);
-    DrawSkImage(skia, canvasImage->image(), width_, height_);
+    DrawSkImage(skia, canvasImage->GetImage(), width_, height_);
     canvasNode->FinishRecording();
     rsUiDirector_->SendMessages();
 #endif

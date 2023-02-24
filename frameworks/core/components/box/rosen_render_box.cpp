@@ -23,6 +23,8 @@
 #include "third_party/skia/include/effects/SkGradientShader.h"
 #include "third_party/skia/include/utils/SkParsePath.h"
 
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "core/common/frontend.h"
 #include "core/common/rosen/rosen_convert_helper.h"
 #include "core/components/box/rosen_mask_painter.h"
@@ -34,6 +36,8 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/rosen_render_image.h"
+#include "core/components_ng/render/adapter/skia_image.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
@@ -68,7 +72,7 @@ RosenRenderBox::RosenRenderBox()
         currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
 
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-                                 ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {
+                                 ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {
         auto renderBox = weak.Upgrade();
         if (!renderBox) {
             LOGE("renderBox upgrade fail when image load success. callback image source info: %{private}s",
@@ -179,9 +183,10 @@ void RosenRenderBox::ImageObjFailed()
     MarkNeedLayout();
 }
 
-void RosenRenderBox::ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image)
+void RosenRenderBox::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image)
 {
-    image_ = image->image();
+    auto skiaImage = AceType::DynamicCast<NG::SkiaImage>(image);
+    image_ = skiaImage->GetImage();
     MarkNeedLayout();
 }
 

@@ -43,6 +43,7 @@
 #include "base/image/pixel_map.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_trace.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/linear_map.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/string_utils.h"
@@ -53,6 +54,7 @@
 #include "core/components/font/constants_converter.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_cache.h"
 #include "core/image/image_provider.h"
@@ -1415,7 +1417,7 @@ void RosenRenderCustomPaint::InitImageCallbacks()
     };
 
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-                                 ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {};
+                                 ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {};
 
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
 }
@@ -1888,7 +1890,7 @@ sk_sp<SkImage> RosenRenderCustomPaint::GetImage(const std::string& src)
     }
     auto cacheImage = imageCache_->GetCacheImage(src);
     if (cacheImage && cacheImage->imagePtr) {
-        return cacheImage->imagePtr->image();
+        return cacheImage->imagePtr;
     }
 
     auto context = GetContext().Upgrade();
@@ -1899,9 +1901,7 @@ sk_sp<SkImage> RosenRenderCustomPaint::GetImage(const std::string& src)
     auto image = ImageProvider::GetSkImage(src, context);
     if (image) {
         auto rasterizedImage = image->makeRasterImage();
-        auto canvasImage = flutter::CanvasImage::Create();
-        canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
-        imageCache_->CacheImage(src, std::make_shared<CachedImage>(canvasImage));
+        imageCache_->CacheImage(src, std::make_shared<CachedImage>(rasterizedImage));
         return rasterizedImage;
     }
 

@@ -23,14 +23,15 @@
 #include "third_party/skia/include/effects/SkImageFilters.h"
 
 #include "base/image/pixel_map.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
-
 #include "core/common/frontend.h"
 #include "core/components/align/render_align.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/image/image_component.h"
 #include "core/components/image/image_event.h"
 #include "core/components/text_overlay/text_overlay_component.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 #include "core/image/flutter_image_cache.h"
 #include "core/image/image_object.h"
 #include "core/pipeline/base/constants.h"
@@ -49,11 +50,11 @@ namespace {
 // | M31 M32 M33 M34 M35 | x | B | = | B' |
 // | M41 M42 M43 M44 M45 |   | A |   | A' |
 //                           | 1 |
-const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0,    0,  // red
-                                      0.30f, 0.59f, 0.11f, 0,    0,  // green
-                                      0.30f, 0.59f, 0.11f, 0,    0,  // blue
-                                      0,     0,     0,     1.0f, 0}; // alpha transparency
-}
+const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
+    0.30f, 0.59f, 0.11f, 0, 0,                                   // green
+    0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
+    0, 0, 0, 1.0f, 0 };                                          // alpha transparency
+} // namespace
 
 union SkColorEx {
     struct {
@@ -71,10 +72,8 @@ FlutterRenderImage::FlutterRenderImage()
         return;
     }
 
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
-        currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(),
-        currentDartState->GetTaskRunners().GetIOTaskRunner());
+    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
+        currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
     InitializeCallbacks();
 }
 
@@ -86,7 +85,7 @@ FlutterRenderImage::~FlutterRenderImage()
 void FlutterRenderImage::InitializeCallbacks()
 {
     imageObjSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-        ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
+                                   ImageSourceInfo info, const RefPtr<ImageObject>& imageObj) {
         LOGD("success info : %{public}s", info.ToString().c_str());
         auto renderImage = weak.Upgrade();
         if (!renderImage) {
@@ -130,8 +129,8 @@ void FlutterRenderImage::InitializeCallbacks()
         renderImage->ImageObjFailed(errorMsg);
     };
 
-    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)] (
-        ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {
+    uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
+                                 ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {
         LOGD("paint success info %{public}s", sourceInfo.ToString().c_str());
         auto renderImage = weak.Upgrade();
         if (!renderImage) {
@@ -148,7 +147,7 @@ void FlutterRenderImage::InitializeCallbacks()
             renderImage->sourceInfo_.ToString().c_str(), sourceInfo.ToString().c_str());
     };
 
-    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)] (CancelableTask task) {
+    onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {
         auto renderImage = weak.Upgrade();
         if (renderImage) {
             renderImage->SetFetchImageObjBackgroundTask(task);
@@ -205,9 +204,8 @@ void FlutterRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
     }
     // If image component size is finally decided, only need to layout itself.
     bool layoutSizeNotChanged = (previousLayoutSize_ == GetLayoutSize());
-    bool selfOnly =
-        (imageComponentSize_.IsValid() && !imageComponentSize_.IsInfinite() && layoutSizeNotChanged) ||
-        imageObj_->IsSvg();
+    bool selfOnly = (imageComponentSize_.IsValid() && !imageComponentSize_.IsInfinite() && layoutSizeNotChanged) ||
+                    imageObj_->IsSvg();
     MarkNeedLayout(selfOnly);
 }
 
@@ -228,17 +226,17 @@ void FlutterRenderImage::ImageObjFailed(const std::string& errorMsg)
     MarkNeedLayout();
 }
 
-void FlutterRenderImage::ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image)
+void FlutterRenderImage::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image)
 {
     LOGD("image data paint success.");
     static constexpr double precision = 0.5;
     int32_t dstWidth = static_cast<int32_t>(previousResizeTarget_.Width() + precision);
     int32_t dstHeight = static_cast<int32_t>(previousResizeTarget_.Height() + precision);
-    bool isTargetSource = ((dstWidth == image->width()) && (dstHeight == image->height()));
+    bool isTargetSource = ((dstWidth == image->GetWidth()) && (dstHeight == image->GetHeight()));
     if (!isTargetSource && (imageObj_->GetFrameCount() <= 1) && !background_) {
         LOGW("The size of returned image is not as expected, rejecting it. imageSrc: %{public}s,"
-            "expected: [%{public}d x %{public}d], get [%{public}d x %{public}d]",
-            imageObj_->GetSourceInfo().ToString().c_str(), dstWidth, dstHeight, image->width(), image->height());
+             "expected: [%{public}d x %{public}d], get [%{public}d x %{public}d]",
+            imageObj_->GetSourceInfo().ToString().c_str(), dstWidth, dstHeight, image->GetWidth(), image->GetHeight());
         return;
     }
     UpdateLoadSuccessState();
@@ -339,19 +337,11 @@ void FlutterRenderImage::FetchImageObject()
             break;
         }
         default: {
-            bool syncMode = (context->IsBuildingFirstPage() &&
-                             frontend->GetType() == FrontendType::JS_CARD &&
-                             sourceInfo_.GetSrcType() != SrcType::NETWORK) || syncMode_;
-            ImageProvider::FetchImageObject(
-                sourceInfo_,
-                imageObjSuccessCallback_,
-                uploadSuccessCallback_,
-                failedCallback_,
-                GetContext(),
-                syncMode,
-                useSkiaSvg_,
-                autoResize_,
-                renderTaskHolder_,
+            bool syncMode = (context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
+                                sourceInfo_.GetSrcType() != SrcType::NETWORK) ||
+                            syncMode_;
+            ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_,
+                failedCallback_, GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_,
                 onPostBackgroundTask_);
             break;
         }
@@ -396,8 +386,7 @@ void FlutterRenderImage::ProcessPixmapForPaint()
     }
     // Step1: Create SkPixmap
     auto imageInfo = MakeSkImageInfoFromPixelMap(pixmap);
-    SkPixmap imagePixmap(
-        imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
+    SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
     sk_sp<SkImage> skImage;
@@ -405,17 +394,12 @@ void FlutterRenderImage::ProcessPixmapForPaint()
         skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     } else {
 #ifndef GPU_DISABLED
-        skImage = SkImage::MakeCrossContextFromPixmap(
-            renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap,
-            true,
-            imagePixmap.colorSpace(),
-            true);
+        skImage = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
+            imagePixmap, true, imagePixmap.colorSpace(), true);
 #endif
     }
-    auto canvasImage = flutter::CanvasImage::Create();
-    canvasImage->set_image(flutter::SkiaGPUObject<SkImage>(skImage, renderTaskHolder_->unrefQueue));
-    image_ = canvasImage;
+
+    image_ = NG::CanvasImage::Create(&skImage);
     if (!VerifySkImageDataFromPixmap(pixmap)) {
         LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
             rawImageSize_.ToString().c_str());
@@ -444,13 +428,15 @@ void FlutterRenderImage::PerformLayoutSvgImage()
         if (!context) {
             return;
         }
-        context->GetTaskExecutor()->PostTask([weak = WeakClaim(this)] {
-            auto image = weak.Upgrade();
-            if (image) {
-                image->PerformLayoutSvgCustom();
-                image->MarkNeedRender();
-            }
-        }, TaskExecutor::TaskType::UI);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)] {
+                auto image = weak.Upgrade();
+                if (image) {
+                    image->PerformLayoutSvgCustom();
+                    image->MarkNeedRender();
+                }
+            },
+            TaskExecutor::TaskType::UI);
     }
 }
 
@@ -516,9 +502,8 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
     if (opacity_ != UINT8_MAX) {
         paint.paint()->setAlpha(opacity_);
     }
-    Rect paintRect = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) && !resizeCallLoadImage_)
-                             ? currentDstRect_
-                             : dstRect_;
+    Rect paintRect =
+        ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) && !resizeCallLoadImage_) ? currentDstRect_ : dstRect_;
     ApplyBorderRadius(offset, canvas, paintRect);
     if (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL) {
         if (renderAltImage_) {
@@ -555,8 +540,9 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
     ApplyBlur(paint);
     ApplyInterpolation(paint);
     sk_sp<SkColorSpace> colorSpace = SkColorSpace::MakeSRGB();
-    if (image_) {
-        colorSpace = image_->image()->refColorSpace();
+    auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
+    if (skImage && skImage->GetImage()) {
+        colorSpace = skImage->GetImage()->refColorSpace();
     }
 #ifdef USE_SYSTEM_SKIA
     paint.paint()->setColor4f(paint.paint()->getColor4f(), colorSpace.get());
@@ -566,8 +552,7 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
     CanvasDrawImageRect(paint, offset, canvas, paintRect);
 }
 
-void FlutterRenderImage::ApplyBorderRadius(
-    const Offset& offset, const ScopedCanvas& canvas, const Rect& paintRect)
+void FlutterRenderImage::ApplyBorderRadius(const Offset& offset, const ScopedCanvas& canvas, const Rect& paintRect)
 {
     if (GetBackgroundImageFlag()) {
         return;
@@ -578,13 +563,12 @@ void FlutterRenderImage::ApplyBorderRadius(
     // 2. when image loads fail;
     // 3. when there is a repeat to do;
     bool clipLayoutSize = sourceInfo_.IsSvg() || (imageRepeat_ != ImageRepeat::NO_REPEAT) ||
-        (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
+                          (imageLoadingStatus_ == ImageLoadingStatus::LOAD_FAIL);
     Rect clipRect = clipLayoutSize ? Rect(offset, GetLayoutSize()) : paintRect + offset;
 
     flutter::RRect rrect;
-    rrect.sk_rrect.setRectRadii(
-        SkRect::MakeXYWH(clipRect.Left() - imageRenderPosition_.GetX(), clipRect.Top() - imageRenderPosition_.GetY(),
-            clipRect.Width(), clipRect.Height()),
+    rrect.sk_rrect.setRectRadii(SkRect::MakeXYWH(clipRect.Left() - imageRenderPosition_.GetX(),
+                                    clipRect.Top() - imageRenderPosition_.GetY(), clipRect.Width(), clipRect.Height()),
         radii_);
     canvas->clipRRect(rrect, true);
 }
@@ -593,7 +577,7 @@ void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
 {
 #ifdef USE_SYSTEM_SKIA
     if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
-        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = {0};
+        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = { 0 };
         std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
         paint.paint()->setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(colorfiltermatrix));
         return;
@@ -611,7 +595,7 @@ void FlutterRenderImage::ApplyColorFilter(flutter::Paint& paint)
         SkColorSetARGB(color.GetAlpha(), color.GetRed(), color.GetGreen(), color.GetBlue()), SkBlendMode::kPlus));
 #else
     if (colorfilter_.size() == COLOR_FILTER_MATRIX_SIZE) {
-        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = {0};
+        float colorfiltermatrix[COLOR_FILTER_MATRIX_SIZE] = { 0 };
         std::copy(colorfilter_.begin(), colorfilter_.end(), colorfiltermatrix);
         paint.paint()->setColorFilter(SkColorFilters::Matrix(colorfiltermatrix));
         return;
@@ -658,28 +642,25 @@ void FlutterRenderImage::ApplyInterpolation(flutter::Paint& paint)
 }
 
 void FlutterRenderImage::CanvasDrawImageRect(
-    const flutter::Paint& paint,
-    const Offset& offset,
-    const ScopedCanvas& canvas,
-    const Rect& paintRect)
+    const flutter::Paint& paint, const Offset& offset, const ScopedCanvas& canvas, const Rect& paintRect)
 {
     if (GetBackgroundImageFlag()) {
         PaintBgImage(paint, offset, canvas);
         return;
     }
-    if (!image_ || !image_->image()) {
+    auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
+    if (!skImage || !skImage->GetImage()) {
         imageDataNotReady_ = true;
         LOGI("waiting for image data, rawImageSize_: %{public}s, image source: %{private}s",
             rawImageSize_.ToString().c_str(), sourceInfo_.ToString().c_str());
         return;
     }
-    bool isLoading = ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) ||
-                      (imageLoadingStatus_ == ImageLoadingStatus::UPDATING));
+    bool isLoading =
+        ((imageLoadingStatus_ == ImageLoadingStatus::LOADING) || (imageLoadingStatus_ == ImageLoadingStatus::UPDATING));
     Rect scaledSrcRect = isLoading ? currentSrcRect_ : srcRect_;
-    if (sourceInfo_.IsValid() &&
-        imageObj_ && (imageObj_->GetFrameCount() == 1) &&
+    if (sourceInfo_.IsValid() && imageObj_ && (imageObj_->GetFrameCount() == 1) &&
         sourceInfo_.GetSrcType() != SrcType::PIXMAP) {
-        Size sourceSize = (image_ ? Size(image_->width(), image_->height()) : Size());
+        Size sourceSize = (skImage ? Size(skImage->GetWidth(), skImage->GetHeight()) : Size());
         // calculate srcRect that matches the real image source size
         // note that gif doesn't do resize, so gif does not need to recalculate
         scaledSrcRect = RecalculateSrcRect(sourceSize);
@@ -698,33 +679,25 @@ void FlutterRenderImage::CanvasDrawImageRect(
         DrawImageOnCanvas(scaledSrcRect, realDstRect, canvas, paint, imageRenderPosition_);
         return;
     }
-    auto skSrcRect = SkRect::MakeXYWH(
-        scaledSrcRect.Left(), scaledSrcRect.Top(), scaledSrcRect.Width(), scaledSrcRect.Height());
-    auto skDstRect =
-        SkRect::MakeXYWH(realDstRect.Left() - imageRenderPosition_.GetX(),
-                         realDstRect.Top() - imageRenderPosition_.GetY(),
-                         realDstRect.Width(), realDstRect.Height());
-    canvas->canvas()->drawImageRect(image_->image(), skSrcRect, skDstRect, paint.paint());
+    auto skSrcRect =
+        SkRect::MakeXYWH(scaledSrcRect.Left(), scaledSrcRect.Top(), scaledSrcRect.Width(), scaledSrcRect.Height());
+    auto skDstRect = SkRect::MakeXYWH(realDstRect.Left() - imageRenderPosition_.GetX(),
+        realDstRect.Top() - imageRenderPosition_.GetY(), realDstRect.Width(), realDstRect.Height());
+    canvas->canvas()->drawImageRect(skImage->GetImage(), skSrcRect, skDstRect, paint.paint());
     LOGD("dstRect params: %{public}s", realDstRect.ToString().c_str());
     LOGD("scaledSrcRect params: %{public}s", scaledSrcRect.ToString().c_str());
 }
 
-void FlutterRenderImage::DrawImageOnCanvas(
-    const Rect& srcRect,
-    const Rect& dstRect,
-    const ScopedCanvas& canvas,
-    const flutter::Paint& paint,
-    const Offset& dstOffset) const
+void FlutterRenderImage::DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect, const ScopedCanvas& canvas,
+    const flutter::Paint& paint, const Offset& dstOffset) const
 {
-    auto skSrcRect = SkIRect::MakeXYWH(
-        Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Width()), Round(srcRect.Height()));
+    auto skSrcRect =
+        SkIRect::MakeXYWH(Round(srcRect.Left()), Round(srcRect.Top()), Round(srcRect.Width()), Round(srcRect.Height()));
     auto skDstRect = SkRect::MakeXYWH(
-        dstRect.Left() - dstOffset.GetX(),
-        dstRect.Top() - dstOffset.GetY(),
-        dstRect.Width(), dstRect.Height());
+        dstRect.Left() - dstOffset.GetX(), dstRect.Top() - dstOffset.GetY(), dstRect.Width(), dstRect.Height());
 
     // initialize a transform matrix
-    SkScalar scaleX =  skDstRect.width() / skSrcRect.width();
+    SkScalar scaleX = skDstRect.width() / skSrcRect.width();
     SkScalar skewX = 0;
     SkScalar transX = skDstRect.left();
     SkScalar skewY = 0;
@@ -739,10 +712,7 @@ void FlutterRenderImage::DrawImageOnCanvas(
         scaleX = -1 * scaleX;
         transX = skDstRect.left() + skDstRect.width();
     }
-    auto sampleMatrix = SkMatrix::MakeAll(
-        scaleX, skewX, transX,
-        skewY, scaleY, transY,
-        pers0, pers1, pers2);
+    auto sampleMatrix = SkMatrix::MakeAll(scaleX, skewX, transX, skewY, scaleY, transY, pers0, pers1, pers2);
 #if defined(USE_SYSTEM_SKIA)
     SkShader::TileMode xTileMode = SkShader::TileMode::kDecal_TileMode;
     SkShader::TileMode yTileMode = SkShader::TileMode::kDecal_TileMode;
@@ -778,9 +748,12 @@ void FlutterRenderImage::DrawImageOnCanvas(
             break;
     }
 #endif
-    auto imgShader = (skSrcRect.width() < image_->width() || skSrcRect.height() < image_->height()) ?
-                        image_->image()->makeSubset(skSrcRect)->makeShader(xTileMode, yTileMode, &sampleMatrix) :
-                        image_->image()->makeShader(xTileMode, yTileMode, &sampleMatrix);
+    auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
+    CHECK_NULL_VOID(skImage);
+    CHECK_NULL_VOID(skImage->GetImage());
+    auto imgShader = (skSrcRect.width() < skImage->GetWidth() || skSrcRect.height() < skImage->GetHeight())
+                         ? skImage->GetImage()->makeSubset(skSrcRect)->makeShader(xTileMode, yTileMode, &sampleMatrix)
+                         : skImage->GetImage()->makeShader(xTileMode, yTileMode, &sampleMatrix);
     SkPaint skPaint = *paint.paint();
     skPaint.setShader(imgShader);
     canvas->canvas()->drawPaint(skPaint);
@@ -788,14 +761,15 @@ void FlutterRenderImage::DrawImageOnCanvas(
 
 bool FlutterRenderImage::VerifySkImageDataFromPixmap(const RefPtr<PixelMap>& pixmap) const
 {
-    if (!image_ || !image_->image()) {
+    auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
+    if (!skImage || !skImage->GetImage()) {
         LOGE("image data made from pixmap is null");
         return false;
     }
-    if ((image_->width() <= 0 || image_->height() <= 0)) {
+    if ((image_->GetWidth() <= 0 || image_->GetHeight() <= 0)) {
         LOGE("image data made from pixmap is invalid, image data size: [%{public}d x %{public}d], pixmap size:"
              " [%{public}d x %{public}d]",
-            image_->width(), image_->height(), pixmap->GetWidth(), pixmap->GetHeight());
+            image_->GetWidth(), image_->GetHeight(), pixmap->GetWidth(), pixmap->GetHeight());
         return false;
     }
     return true;
@@ -821,16 +795,17 @@ void FlutterRenderImage::PaintBgImage(
     if (!GetBackgroundImageFlag()) {
         return;
     }
-    if (currentDstRectList_.empty() || !image_) {
+    auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
+    if (currentDstRectList_.empty() || !skImage) {
         return;
     }
 
     for (auto rect : currentDstRectList_) {
         auto realDstRect = rect + offset + boxMarginOffset_;
-        auto skSrcRect = SkRect::MakeXYWH(0.0, 0.0, image_->width(), image_->height());
+        auto skSrcRect = SkRect::MakeXYWH(0.0, 0.0, image_->GetWidth(), image_->GetHeight());
         auto skDstRect =
             SkRect::MakeXYWH(realDstRect.Left(), realDstRect.Top(), realDstRect.Width(), realDstRect.Height());
-        canvas->canvas()->drawImageRect(image_->image(), skSrcRect, skDstRect, paint.paint());
+        canvas->canvas()->drawImageRect(skImage->GetImage(), skSrcRect, skDstRect, paint.paint());
     }
 }
 
@@ -860,14 +835,9 @@ void FlutterRenderImage::UpLoadImageDataForPaint()
     }
 }
 
-void FlutterRenderImage::UploadImageObjToGpuForRender(
-    const RefPtr<ImageObject>& imageObj,
-    const WeakPtr<PipelineContext> context,
-    RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    UploadSuccessCallback uploadSuccessCallback,
-    FailedCallback failedCallback,
-    Size resizeTarget,
-    bool forceResize,
+void FlutterRenderImage::UploadImageObjToGpuForRender(const RefPtr<ImageObject>& imageObj,
+    const WeakPtr<PipelineContext> context, RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
+    UploadSuccessCallback uploadSuccessCallback, FailedCallback failedCallback, Size resizeTarget, bool forceResize,
     bool syncMode)
 {
     if (!imageObj) {
@@ -902,8 +872,7 @@ void FlutterRenderImage::UpdateData(const std::string& uri, const std::vector<ui
     if (!context) {
         return;
     }
-    auto ImageObj =
-        ImageObject::BuildImageObject(sourceInfo_, context, skData, useSkiaSvg_);
+    auto ImageObj = ImageObject::BuildImageObject(sourceInfo_, context, skData, useSkiaSvg_);
     ImageObjReady(ImageObj);
 }
 
@@ -1028,12 +997,7 @@ void FlutterRenderImage::PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLay
         skColor.valid = 1;
     }
     ImageProvider::GetSVGImageDOMAsyncFromData(
-        skData,
-        successCallback,
-        failedCallback,
-        GetContext(),
-        skColor.value,
-        onPostBackgroundTask_);
+        skData, successCallback, failedCallback, GetContext(), skColor.value, onPostBackgroundTask_);
     MarkNeedLayout();
 }
 
@@ -1086,8 +1050,7 @@ void FlutterRenderImage::UpdateLoadSuccessState()
     LOGD("update success state info: %{public}s", sourceInfo_.ToString().c_str());
     imageLoadingStatus_ = ImageLoadingStatus::LOAD_SUCCESS;
     auto currentFrameCount = imageObj_->GetFrameCount();
-    if ((!sourceInfo_.IsSvg() && currentFrameCount == 1) ||
-        (currentFrameCount > 1 && curSourceInfo_ != sourceInfo_)) {
+    if ((!sourceInfo_.IsSvg() && currentFrameCount == 1) || (currentFrameCount > 1 && curSourceInfo_ != sourceInfo_)) {
         FireLoadEvent(imageSizeForEvent_);
     }
     if (currentFrameCount > 1 && curSourceInfo_ != sourceInfo_) {
@@ -1169,10 +1132,11 @@ void FlutterRenderImage::ClearRenderObject()
 
 bool FlutterRenderImage::IsSourceWideGamut() const
 {
-    if (sourceInfo_.IsSvg() || !image_ || !image_->image()) {
+    auto skImage = AceType::DynamicCast<NG::SkiaImage>(image_);
+    if (sourceInfo_.IsSvg() || !skImage || !skImage->GetImage()) {
         return false;
     }
-    return ImageProvider::IsWideGamut(image_->image()->refColorSpace());
+    return ImageProvider::IsWideGamut(skImage->GetImage()->refColorSpace());
 }
 
 bool FlutterRenderImage::RetryLoading()
@@ -1208,20 +1172,10 @@ bool FlutterRenderImage::RetryLoading()
             sourceInfo_.ToString().c_str());
         return false;
     }
-    bool syncMode = context->IsBuildingFirstPage() &&
-                    frontend->GetType() == FrontendType::JS_CARD &&
+    bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
                     sourceInfo_.GetSrcType() != SrcType::NETWORK;
-    ImageProvider::FetchImageObject(
-        sourceInfo_,
-        imageObjSuccessCallback_,
-        uploadSuccessCallback_,
-        failedCallback_,
-        GetContext(),
-        syncMode,
-        useSkiaSvg_,
-        autoResize_,
-        renderTaskHolder_,
-        onPostBackgroundTask_);
+    ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
+        GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_, onPostBackgroundTask_);
     LOGW("Retry loading time: %{public}d, triggered by GetImageSize fail, imageSrc: %{private}s", retryCnt_,
         sourceInfo_.ToString().c_str());
     return true;
