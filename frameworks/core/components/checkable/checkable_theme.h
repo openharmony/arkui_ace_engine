@@ -140,21 +140,6 @@ public:
         return focusPaintPadding_;
     }
 
-    double GetHoverDuration() const
-    {
-        return hoverDuration_;
-    }
-
-    double GetHoverToTouchDuration() const
-    {
-        return hoverToTouchDuration_;
-    }
-
-    double GetTouchDuration() const
-    {
-        return touchDuration_;
-    }
-
 protected:
     CheckableTheme() = default;
 
@@ -177,9 +162,6 @@ protected:
     Dimension hoverRadius_;
     Dimension focusRadius_;
     Dimension focusPaintPadding_;
-    double hoverDuration_ = 0.0f;
-    double hoverToTouchDuration_ = 0.0f;
-    double touchDuration_ = 0.0f;
     double aspectRatio_ = 1.0;
     double radioInnerSizeRatio_ = 0.5;
     bool needFocus_ = true;
@@ -249,10 +231,6 @@ public:
             theme->hoverRadius_ = checkboxPattern->GetAttr<Dimension>("hover_border_radius", 0.0_vp);
             theme->focusRadius_ = checkboxPattern->GetAttr<Dimension>("focus_border_radius", 0.0_vp);
             theme->focusPaintPadding_ = checkboxPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
-            theme->hoverDuration_ = checkboxPattern->GetAttr<double>("hover_animation_duration", 0.0);
-            theme->hoverToTouchDuration_ = checkboxPattern->GetAttr<double>("hover_to_touch_animation_duration", 0.0);
-            theme->touchDuration_ = checkboxPattern->GetAttr<double>("touch_animation_duration", 0.0);
-            theme->colorAnimationDuration_ = checkboxPattern->GetAttr<double>("color_animation_duration", 0.0);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -277,15 +255,9 @@ public:
         return checkStroke_;
     }
 
-    double GetColorAnimationDuration() const
-    {
-        return colorAnimationDuration_;
-    }
-
 private:
     Dimension borderRadius_;
     Dimension checkStroke_;
-    double colorAnimationDuration_ = 0.0;
 };
 
 class SwitchTheme : public CheckableTheme {
@@ -347,10 +319,6 @@ public:
             theme->inactivePointColor_ = switchPattern->GetAttr<Color>("fg_color_unchecked", Color::RED);
             theme->clickEffectColor_ = switchPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->focusPaintPadding_ = switchPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
-            theme->hoverDuration_ = switchPattern->GetAttr<double>("hover_animation_duration", 0.0);
-            theme->hoverToTouchDuration_ = switchPattern->GetAttr<double>("hover_to_touch_animation_duration", 0.0);
-            theme->touchDuration_ = switchPattern->GetAttr<double>("touch_animation_duration", 0.0);
-            theme->colorAnimationDuration_ = switchPattern->GetAttr<double>("color_animation_duration", 0.0);
 
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
@@ -362,19 +330,10 @@ public:
             theme->hotZoneVerticalPadding_ = switchPattern->GetAttr<Dimension>(SWITCH_VERTICAL_PADDING, 13.0_vp);
         }
     };
-
     float GetRatio() const
     {
         return ratio_;
     }
-
-    double GetColorAnimationDuration() const
-    {
-        return colorAnimationDuration_;
-    }
-
-private:
-    double colorAnimationDuration_ = 0.0;
 };
 
 class RadioTheme : public CheckableTheme {
@@ -433,9 +392,6 @@ public:
             theme->hoverColor_ = radioPattern->GetAttr<Color>("hover_border_color", Color::RED);
             theme->clickEffectColor_ = radioPattern->GetAttr<Color>("click_effect_color", Color::RED);
             theme->focusPaintPadding_ = radioPattern->GetAttr<Dimension>("focus_paint_padding", 0.0_vp);
-            theme->hoverDuration_ = radioPattern->GetAttr<double>("hover_animation_duration", 0.0);
-            theme->hoverToTouchDuration_ = radioPattern->GetAttr<double>("hover_to_touch_animation_duration", 0.0);
-            theme->touchDuration_ = radioPattern->GetAttr<double>("touch_animation_duration", 0.0);
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }

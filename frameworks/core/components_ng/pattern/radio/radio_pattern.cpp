@@ -154,11 +154,6 @@ void RadioPattern::InitMouseEvent()
 void RadioPattern::HandleMouseEvent(bool isHover)
 {
     isHover_ = isHover;
-    if (isHover) {
-        touchHoverType_ = TouchHoverAnimationType::HOVER;
-    } else {
-        touchHoverType_ = TouchHoverAnimationType::NONE;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkNeedRenderOnly();
@@ -176,7 +171,7 @@ void RadioPattern::OnClick()
     } else {
         paintProperty->UpdateRadioCheck(false);
     }
-
+    
     if (!preCheck_ && !check) {
         paintProperty->UpdateRadioCheck(true);
         UpdateState();
@@ -185,25 +180,17 @@ void RadioPattern::OnClick()
 
 void RadioPattern::OnTouchDown()
 {
-    if (isHover_) {
-        touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
-    } else {
-        touchHoverType_ = TouchHoverAnimationType::PRESS;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    isTouch_ = true;
     host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::OnTouchUp()
 {
-    if (isHover_) {
-        touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
-    } else {
-        touchHoverType_ = TouchHoverAnimationType::NONE;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    isTouch_ = false;
     host->MarkNeedRenderOnly();
 }
 
