@@ -56,7 +56,10 @@ public:
     }
     virtual void RequestVsync(const std::shared_ptr<VsyncCallback>& vsyncCallback)
     {
-        vsyncCallbacks_.emplace_back(std::move(vsyncCallback));
+        {
+            std::unique_lock lock(mutex_);
+            pendingVsyncCallbacks_.emplace_back(std::move(vsyncCallback));
+        }
         if (vsyncThread_ == nullptr) {
             auto func = [this] { VsyncThreadMain(); };
             vsyncThread_ = std::make_unique<std::thread>(func);
@@ -79,17 +82,24 @@ public:
             }
 
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            {
+                std::unique_lock lock(mutex_);
+                vsyncCallbacks_.swap(pendingVsyncCallbacks_);
+            }
             int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::steady_clock::now().time_since_epoch()).count();
             for (auto& callback : vsyncCallbacks_) {
                 callback->onCallback(now);
             }
+            vsyncCallbacks_.clear();
         }
     }
     std::shared_ptr<RSSurfaceNode> surfaceNode_;
     std::vector<std::shared_ptr<VsyncCallback>> vsyncCallbacks_;
+    std::vector<std::shared_ptr<VsyncCallback>> pendingVsyncCallbacks_;
     std::unique_ptr<std::thread> vsyncThread_;
     Ace::SemQueue<bool> vsyncRequests_;
+    std::mutex mutex_;
 };
 
 } // namespace Rosen

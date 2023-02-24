@@ -48,7 +48,8 @@ void RSWindow::RequestFrame()
 
 void RSWindow::RegisterVsyncCallback(AceVsyncCallback&& callback)
 {
-    vsyncCallbacks_.emplace_back(std::move(callback));
+    std::unique_lock lock(mutex_);
+    pendingVsyncCallbacks_.emplace_back(std::move(callback));
 }
 
 void RSWindow::SetRootRenderNode(const RefPtr<RenderNode>& root)
@@ -60,16 +61,21 @@ void RSWindow::VsyncThreadMain()
     while (true) {
         bool next = false;
         vsyncRequests_.PopFront(next);
-        if (next == false) {
+        if (!next) {
             break;
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        {
+            std::unique_lock lock(mutex_);
+            vsyncCallbacks_.swap(pendingVsyncCallbacks_);
+        }
         int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();
         for (auto &callback : vsyncCallbacks_) {
             callback(now, 0);
         }
+        vsyncCallbacks_.clear();
     }
 }
 
