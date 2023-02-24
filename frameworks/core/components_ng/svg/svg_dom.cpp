@@ -296,10 +296,15 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
     }
     if (viewBox_.IsValid()) {
         if (svgSize_.IsValid() && !svgSize_.IsInfinite()) {
+            // center align viewBox to svg
             scaleViewBox = std::min(svgSize_.Width() / viewBox_.Width(), svgSize_.Height() / viewBox_.Height());
             tx = svgSize_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = svgSize_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
+            // center align svg to layout container
+            tx += layout_.Width() * half - svgSize_.Width() * half * scaleX;
+            ty += layout_.Height() * half - svgSize_.Height() * half * scaleY;
         } else if (!layout_.IsEmpty()) {
+            // no svg size, center align viewBox to layout container
             scaleViewBox = std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
             tx = layout_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = layout_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
