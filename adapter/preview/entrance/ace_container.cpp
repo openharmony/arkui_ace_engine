@@ -773,18 +773,10 @@ void AceContainer::SetView(
     CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
     CHECK_NULL_VOID(container);
-    if (container->IsUseNewPipeline()) {
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        auto rsWindow = new Rosen::Window(onRender);
-        auto window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
-        container->AttachView(std::move(window), view, density, width, height, onRender);
-        return;
-    }
-
-    auto platformWindow = PlatformWindow::Create(view);
-    CHECK_NULL_VOID(platformWindow);
-    auto window = std::make_unique<Window>(std::move(platformWindow));
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto rsWindow = new Rosen::Window(onRender);
+    auto window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, onRender);
 }
 #endif
@@ -913,6 +905,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, RSAceView* view, d
     pipelineContext_->SetWindowModal(windowModal_);
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
+    pipelineContext_->OnShow();
     InitializeCallback();
 
     auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
