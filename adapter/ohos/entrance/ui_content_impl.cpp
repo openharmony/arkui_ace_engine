@@ -283,9 +283,9 @@ void UIContentImpl::DestroyUIDirector()
 void UIContentImpl::DestroyCallback() const
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID_NOLOG(container);
     auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
 
