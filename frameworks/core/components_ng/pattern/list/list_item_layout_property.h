@@ -29,7 +29,11 @@ public:
 
     ~ListItemLayoutProperty() override = default;
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, V2::SwipeEdgeEffect, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EditMode, uint32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyMode, V2::StickyMode, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

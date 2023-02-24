@@ -72,6 +72,8 @@ public:
         return MakeRefPtr<ListItemEventHub>();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     void SetStartNode(const RefPtr<NG::UINode>& startNode);
 
     void SetEndNode(const RefPtr<NG::UINode>& endNode);

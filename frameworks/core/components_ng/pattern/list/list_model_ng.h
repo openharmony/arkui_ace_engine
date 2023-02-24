@@ -30,7 +30,7 @@ public:
     void SetListDirection(Axis axis) override;
     void SetScrollBar(DisplayMode scrollBar) override;
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
-    void SetEditMode(bool editMode) override {}
+    void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetChainAnimation(bool enableChainAnimation) override;
     void SetLanes(int32_t lanes) override;

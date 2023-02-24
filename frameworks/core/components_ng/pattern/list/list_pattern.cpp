@@ -805,4 +805,9 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         swiperItem_ = std::move(swiperItem);
     }
 }
+
+void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("multiSelectable", multiSelectable_);
+}
 } // namespace OHOS::Ace::NG
