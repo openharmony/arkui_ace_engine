@@ -43,6 +43,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
+        LayoutProperty::ToJsonValue(json);
         json->Put("resizeable", propResizeable_.value_or(false) ? "true" : "false");
     }
 
