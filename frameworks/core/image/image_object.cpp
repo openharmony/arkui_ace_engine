@@ -15,8 +15,6 @@
 
 #include "core/image/image_object.h"
 
-#include "SkImage.h"
-
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -132,10 +130,10 @@ Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
 #endif
 
 void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder, const UploadSuccessCallback& successCallback,
+    const UploadSuccessCallback& successCallback,
     const FailedCallback& failedCallback, const Size& imageSize, bool forceResize, bool syncMode)
 {
-    auto task = [context, renderTaskHolder, successCallback, failedCallback, imageSize, forceResize, skData = skData_,
+    auto task = [context, successCallback, failedCallback, imageSize, forceResize, skData = skData_,
                     imageSource = imageSource_, id = Container::CurrentId()]() mutable {
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
@@ -233,7 +231,7 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
         } else {
             image = ImageProvider::ResizeSkImage(rawImage, imageSource.GetSrc(), imageSize, forceResize);
         }
-        ImageProvider::UploadImageToGPUForRender(pipelineContext, image, stripped, callback, renderTaskHolder, key);
+        ImageProvider::UploadImageToGPUForRender(pipelineContext, image, stripped, callback, key);
         skData = nullptr;
     };
     if (syncMode) {

@@ -64,13 +64,6 @@ constexpr double FOCUS_RADIUS_Y = 4.0;
 
 RosenRenderBox::RosenRenderBox()
 {
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
-    }
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
-
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
                                  ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {
         auto renderBox = weak.Upgrade();
@@ -163,7 +156,7 @@ void RosenRenderBox::FetchImageData()
         }
         ImageSourceInfo inComingSource(borderSrc_, Dimension(-1), Dimension(-1), InternalResource::ResourceId::NO_ID);
         ImageProvider::FetchImageObject(inComingSource, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, GetContext(), false, false, true, renderTaskHolder_, onPostBackgroundTask_);
+            failedCallback_, GetContext(), false, false, true, onPostBackgroundTask_);
     }
 }
 
@@ -172,7 +165,7 @@ void RosenRenderBox::ImageObjReady(const RefPtr<ImageObject>& imageObj)
     imageObj_ = imageObj;
     if (imageObj_) {
         imageObj_->UploadToGpuForRender(
-            GetContext(), renderTaskHolder_, uploadSuccessCallback_, failedCallback_, Size(0, 0), false, false);
+            GetContext(), uploadSuccessCallback_, failedCallback_, Size(0, 0), false, false);
     }
 }
 
@@ -299,7 +292,7 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     }
     SkRRect outerRRect =
         SkRRect::MakeRect(SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom()));
-        SkRect focusRect = SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom());
+    SkRect focusRect = SkRect::MakeLTRB(paintSize.Left(), paintSize.Top(), paintSize.Right(), paintSize.Bottom());
     Color bgColor = pipeline->GetAppBgColor();
     if (backDecoration_) {
         if (backDecoration_->GetHasBorderImageSource() || backDecoration_->GetHasBorderImageGradient()) {
@@ -388,8 +381,8 @@ void RosenRenderBox::Paint(RenderContext& context, const Offset& offset)
     if (mask && mask->HasReady()) {
         SkPath skPath;
         if (mask_->IsPath()) {
-            if (!CreateSkPath(mask_->GetMaskPath()->GetBasicShape(),
-                mask_->GetMaskPath()->GetGeometryBoxType(), &skPath)) {
+            if (!CreateSkPath(
+                    mask_->GetMaskPath()->GetBasicShape(), mask_->GetMaskPath()->GetGeometryBoxType(), &skPath)) {
                 LOGE("CreateSkPath is failed.");
                 return;
             }
@@ -945,13 +938,15 @@ void RosenRenderBox::SetBackgroundPosition(const BackgroundImagePosition& positi
         rsNode->SetBgImagePositionX(position.GetSizeValueX());
     } else {
         rsNode->SetBgImagePositionX(position.GetSizeValueX() *
-            (paintSize_.Width() - rsNode->GetStagingProperties().GetBgImageWidth()) / PERCENT_TRANSLATE);
+                                    (paintSize_.Width() - rsNode->GetStagingProperties().GetBgImageWidth()) /
+                                    PERCENT_TRANSLATE);
     }
     if (position.GetSizeTypeX() == BackgroundImagePositionType::PX) {
         rsNode->SetBgImagePositionX(position.GetSizeValueX());
     } else {
         rsNode->SetBgImagePositionY(position.GetSizeValueY() *
-            (paintSize_.Height() - rsNode->GetStagingProperties().GetBgImageHeight()) / PERCENT_TRANSLATE);
+                                    (paintSize_.Height() - rsNode->GetStagingProperties().GetBgImageHeight()) /
+                                    PERCENT_TRANSLATE);
     }
 }
 
@@ -1070,12 +1065,10 @@ void RosenRenderBox::SyncDecorationToRSNode()
             border = backDecoration_->GetBorder();
         }
         if (backDecoration_->GetBorder().HasRadius()) {
-            cornerRadius.SetValues(
-                NormalizeToPx(backDecoration_->GetBorder().TopLeftRadius().GetX()),
+            cornerRadius.SetValues(NormalizeToPx(backDecoration_->GetBorder().TopLeftRadius().GetX()),
                 NormalizeToPx(backDecoration_->GetBorder().TopRightRadius().GetX()),
                 NormalizeToPx(backDecoration_->GetBorder().BottomRightRadius().GetX()),
-                NormalizeToPx(backDecoration_->GetBorder().BottomLeftRadius().GetX())
-            );
+                NormalizeToPx(backDecoration_->GetBorder().BottomLeftRadius().GetX()));
         }
         RosenDecorationPainter::PaintBoxShadows(backDecoration_->GetShadows(), rsNode);
         auto rosenBlurStyleValue = GetRosenBlurStyleValue(backDecoration_->GetBlurStyle());
@@ -1095,12 +1088,10 @@ void RosenRenderBox::SyncDecorationToRSNode()
             border = frontDecoration_->GetBorder();
         }
         if (frontDecoration_->GetBorder().HasRadius()) {
-            cornerRadius.SetValues(
-                NormalizeToPx(frontDecoration_->GetBorder().TopLeftRadius().GetX()),
+            cornerRadius.SetValues(NormalizeToPx(frontDecoration_->GetBorder().TopLeftRadius().GetX()),
                 NormalizeToPx(frontDecoration_->GetBorder().TopRightRadius().GetX()),
                 NormalizeToPx(frontDecoration_->GetBorder().BottomRightRadius().GetX()),
-                NormalizeToPx(frontDecoration_->GetBorder().BottomLeftRadius().GetX())
-            );
+                NormalizeToPx(frontDecoration_->GetBorder().BottomLeftRadius().GetX()));
         }
         if (frontDecoration_->GetBlurRadius().IsValid()) {
             float radius = NormalizeToPx(frontDecoration_->GetBlurRadius());
@@ -1187,13 +1178,11 @@ void RosenRenderBox::AnimateMouseHoverEnter()
         rsNode->SetScale(scaleBegin);
         Rosen::RSAnimationTimingProtocol protocol;
         protocol.SetDuration(HOVER_ANIMATION_DURATION);
-        RSNode::Animate(
-            protocol, SCALE_ANIMATION_TIMING_CURVE,
-            [rsNode, scaleEnd]() {
-                if (rsNode) {
-                    rsNode->SetScale(scaleEnd);
-                }
-            });
+        RSNode::Animate(protocol, SCALE_ANIMATION_TIMING_CURVE, [rsNode, scaleEnd]() {
+            if (rsNode) {
+                rsNode->SetScale(scaleEnd);
+            }
+        });
         isHoveredScale_ = true;
     } else if (hoverAnimationType_ == HoverAnimationType::BOARD) {
         ResetController(controllerExit_);
@@ -1231,13 +1220,11 @@ void RosenRenderBox::AnimateMouseHoverExit()
         }
         Rosen::RSAnimationTimingProtocol protocol;
         protocol.SetDuration(HOVER_ANIMATION_DURATION);
-        RSNode::Animate(
-            protocol, SCALE_ANIMATION_TIMING_CURVE,
-            [rsNode, scaleEnd]() {
-                if (rsNode) {
-                    rsNode->SetScale(scaleEnd);
-                }
-            });
+        RSNode::Animate(protocol, SCALE_ANIMATION_TIMING_CURVE, [rsNode, scaleEnd]() {
+            if (rsNode) {
+                rsNode->SetScale(scaleEnd);
+            }
+        });
         isHoveredScale_ = false;
     }
     if (hoverAnimationType_ == HoverAnimationType::BOARD || isHoveredBoard_) {

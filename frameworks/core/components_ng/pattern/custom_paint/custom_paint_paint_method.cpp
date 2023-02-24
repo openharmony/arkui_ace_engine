@@ -273,7 +273,7 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
     // get the ImageObject
     if (currentSource_ != loadingSource_) {
         ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, context_, true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+            failedCallback_, context_, true, true, true, onPostBackgroundTask_);
     }
 
     CHECK_NULL_VOID(skiaDom_);

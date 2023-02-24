@@ -31,7 +31,6 @@ public:
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const UploadSuccessCallback& successCallback,
         const FailedCallback& failedCallback,
         const Size& imageSize,
@@ -71,7 +70,6 @@ private:
 
 void AnimatedImageObject::UploadToGpuForRender(
     const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const UploadSuccessCallback& successCallback,
     const FailedCallback& failedCallback,
     const Size& imageSize,
@@ -91,8 +89,6 @@ void AnimatedImageObject::UploadToGpuForRender(
             imageSource_,
             successCallback,
             context,
-            renderTaskHolder->ioManager,
-            renderTaskHolder->unrefQueue,
             std::move(codec),
             dstWidth,
             dstHeight);

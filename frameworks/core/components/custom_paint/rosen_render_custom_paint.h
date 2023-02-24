@@ -153,7 +153,6 @@ private:
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     RefPtr<ImageObject> imageObj_ = nullptr;
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     CanvasImage canvasImage_;

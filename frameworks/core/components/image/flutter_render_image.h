@@ -74,7 +74,6 @@ public:
     static void UploadImageObjToGpuForRender(
         const RefPtr<ImageObject>& imageObj,
         const WeakPtr<PipelineContext> context,
-        RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         UploadSuccessCallback uploadSuccessCallback,
         FailedCallback failedCallback,
         Size resizeTarget,
@@ -163,7 +162,6 @@ private:
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     CancelableTask fetchImageObjTask_;
     bool backgroundTaskCanceled_ = false;

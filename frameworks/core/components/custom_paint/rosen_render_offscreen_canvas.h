@@ -96,7 +96,6 @@ private:
     std::unique_ptr<SkCanvas> cacheCanvas_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::map<std::string, setColorFunc> filterFunc_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     ImageSourceInfo loadingSource_;
     ImageSourceInfo currentSource_;
     ImageObjSuccessCallback imageObjSuccessCallback_;

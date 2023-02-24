@@ -17,7 +17,6 @@
 
 #include <cmath>
 
-#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
@@ -139,14 +138,6 @@ constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
 
 RosenRenderCustomPaint::RosenRenderCustomPaint()
 {
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
-    }
-
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
-
     InitImageCallbacks();
 }
 
@@ -1454,7 +1445,7 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
     // get the ImageObject
     if (currentSource_ != loadingSource_) {
         ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, GetContext(), true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+            failedCallback_, GetContext(), true, true, true, onPostBackgroundTask_);
     }
 
     // draw the svg
@@ -1500,10 +1491,6 @@ void RosenRenderCustomPaint::DrawSvgImage(const Offset& offset, const CanvasImag
 void RosenRenderCustomPaint::DrawImage(
     const Offset& offset, const CanvasImage& canvasImage, double width, double height)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     std::string::size_type tmp = canvasImage.src.find(".svg");
     if (tmp != std::string::npos) {
         DrawSvgImage(offset, canvasImage);
@@ -1541,10 +1528,6 @@ void RosenRenderCustomPaint::DrawImage(
 
 void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
@@ -1555,17 +1538,8 @@ void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Canva
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image;
-    if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    } else {
-#ifndef GPU_DISABLED
-        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-#endif
-    }
+    sk_sp<SkImage> image =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     if (!image) {
         LOGE("image is null");
         return;
@@ -1594,10 +1568,6 @@ void RosenRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Canva
 
 void RosenRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = GetContext().Upgrade();
     if (!context) {
         return;

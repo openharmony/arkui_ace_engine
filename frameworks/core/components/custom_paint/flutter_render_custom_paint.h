@@ -134,7 +134,6 @@ private:
     SkBitmap webglBitmap_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     Size lastLayoutSize_;
 };
 

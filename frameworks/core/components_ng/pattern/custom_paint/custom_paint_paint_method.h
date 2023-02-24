@@ -305,8 +305,6 @@ protected:
     std::unique_ptr<SkCanvas> skCanvas_;
     std::unique_ptr<SkCanvas> cacheCanvas_;
 
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
-
     sk_sp<SkSVGDOM> skiaDom_ = nullptr;
     Ace::CanvasImage canvasImage_;
 

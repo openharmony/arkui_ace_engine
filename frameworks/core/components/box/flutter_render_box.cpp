@@ -18,7 +18,6 @@
 #include <cmath>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
@@ -59,15 +58,6 @@ using namespace Flutter;
 
 FlutterRenderBox::FlutterRenderBox()
 {
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
-    }
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
-        currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(),
-        currentDartState->GetTaskRunners().GetIOTaskRunner());
-
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)] (
         ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {
         auto renderBox = weak.Upgrade();
@@ -172,7 +162,6 @@ void FlutterRenderBox::FetchImageData()
             false,
             false,
             true,
-            renderTaskHolder_,
             onPostBackgroundTask_);
     }
 }
@@ -181,7 +170,7 @@ void FlutterRenderBox::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
     if (imageObj_) {
-        imageObj_->UploadToGpuForRender(GetContext(), renderTaskHolder_, uploadSuccessCallback_, failedCallback_,
+        imageObj_->UploadToGpuForRender(GetContext(), uploadSuccessCallback_, failedCallback_,
             Size(0, 0), false, false);
     }
 }

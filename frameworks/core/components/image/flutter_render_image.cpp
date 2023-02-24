@@ -67,13 +67,6 @@ union SkColorEx {
 
 FlutterRenderImage::FlutterRenderImage()
 {
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
-    }
-
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
     InitializeCallbacks();
 }
 
@@ -341,8 +334,7 @@ void FlutterRenderImage::FetchImageObject()
                                 sourceInfo_.GetSrcType() != SrcType::NETWORK) ||
                             syncMode_;
             ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_,
-                failedCallback_, GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_,
-                onPostBackgroundTask_);
+                failedCallback_, GetContext(), syncMode, useSkiaSvg_, autoResize_, onPostBackgroundTask_);
             break;
         }
     }
@@ -389,16 +381,8 @@ void FlutterRenderImage::ProcessPixmapForPaint()
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixmap->GetPixels()), pixmap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> skImage;
-    if (!renderTaskHolder_->ioManager) {
-        skImage = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
-    } else {
-#ifndef GPU_DISABLED
-        skImage = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#endif
-    }
-
+    sk_sp<SkImage> skImage =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixmap));
     image_ = NG::CanvasImage::Create(&skImage);
     if (!VerifySkImageDataFromPixmap(pixmap)) {
         LOGE("pixmap paint failed due to SkImage data verification fail. rawImageSize: %{public}s",
@@ -829,23 +813,22 @@ void FlutterRenderImage::UpLoadImageDataForPaint()
         imageLoadingStatus_ = ImageLoadingStatus::LOADING;
         if (imageObj_) {
             previousResizeTarget_ = resizeTarget_;
-            FlutterRenderImage::UploadImageObjToGpuForRender(imageObj_, GetContext(), renderTaskHolder_,
-                uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_, syncMode_);
+            FlutterRenderImage::UploadImageObjToGpuForRender(imageObj_, GetContext(), uploadSuccessCallback_,
+                failedCallback_, resizeTarget_, forceResize_, syncMode_);
         }
     }
 }
 
 void FlutterRenderImage::UploadImageObjToGpuForRender(const RefPtr<ImageObject>& imageObj,
-    const WeakPtr<PipelineContext> context, RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-    UploadSuccessCallback uploadSuccessCallback, FailedCallback failedCallback, Size resizeTarget, bool forceResize,
-    bool syncMode)
+    const WeakPtr<PipelineContext> context, UploadSuccessCallback uploadSuccessCallback, FailedCallback failedCallback,
+    Size resizeTarget, bool forceResize, bool syncMode)
 {
     if (!imageObj) {
         LOGW("image object is null when try UploadImageObjToGpuForRender.");
         return;
     }
     imageObj->UploadToGpuForRender(
-        context, renderTaskHolder, uploadSuccessCallback, failedCallback, resizeTarget, forceResize, syncMode);
+        context, uploadSuccessCallback, failedCallback, resizeTarget, forceResize, syncMode);
 }
 
 void FlutterRenderImage::UpdateData(const std::string& uri, const std::vector<uint8_t>& memData)
@@ -1154,7 +1137,7 @@ bool FlutterRenderImage::RetryLoading()
 
     if (rawImageSizeUpdated_ && imageObj_) { // case when image size is ready, only have to do loading again
         imageObj_->UploadToGpuForRender(
-            GetContext(), renderTaskHolder_, uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_);
+            GetContext(), uploadSuccessCallback_, failedCallback_, resizeTarget_, forceResize_);
         LOGW("Retry loading time: %{public}d, trigger by LoadImage fail, imageSrc: %{private}s", retryCnt_,
             sourceInfo_.ToString().c_str());
         return true;
@@ -1175,7 +1158,7 @@ bool FlutterRenderImage::RetryLoading()
     bool syncMode = context->IsBuildingFirstPage() && frontend->GetType() == FrontendType::JS_CARD &&
                     sourceInfo_.GetSrcType() != SrcType::NETWORK;
     ImageProvider::FetchImageObject(sourceInfo_, imageObjSuccessCallback_, uploadSuccessCallback_, failedCallback_,
-        GetContext(), syncMode, useSkiaSvg_, autoResize_, renderTaskHolder_, onPostBackgroundTask_);
+        GetContext(), syncMode, useSkiaSvg_, autoResize_, onPostBackgroundTask_);
     LOGW("Retry loading time: %{public}d, triggered by GetImageSize fail, imageSrc: %{private}s", retryCnt_,
         sourceInfo_.ToString().c_str());
     return true;

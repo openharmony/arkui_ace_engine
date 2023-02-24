@@ -19,7 +19,6 @@
 #include <string>
 
 #include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/io_manager.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 
 #include "base/memory/ace_type.h"
@@ -34,20 +33,6 @@ class SkSVGDOM;
 namespace OHOS::Ace {
 
 class ImageObject;
-struct FlutterRenderTaskHolder : public virtual AceType {
-    DECLARE_ACE_TYPE(FlutterRenderTaskHolder, AceType);
-
-public:
-    FlutterRenderTaskHolder(fml::RefPtr<flutter::SkiaUnrefQueue> queue, fml::WeakPtr<flutter::IOManager> manager,
-        fml::RefPtr<fml::TaskRunner> taskRunner)
-        : unrefQueue(queue), ioManager(manager), ioTaskRunner(taskRunner)
-    {}
-
-    fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue;
-    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
-    fml::WeakPtr<flutter::IOManager> ioManager;
-    fml::RefPtr<fml::TaskRunner> ioTaskRunner;
-};
 
 class SvgDom;
 using ImageObjSuccessCallback = std::function<void(ImageSourceInfo, const RefPtr<ImageObject>)>;
@@ -89,13 +74,12 @@ public:
     // upload image data to gpu context for painting asynchronously.
     static void UploadImageToGPUForRender(const WeakPtr<PipelineBase> context, const sk_sp<SkImage>& image,
         const sk_sp<SkData>& data, const std::function<void(sk_sp<SkImage>, sk_sp<SkData>)>&& callback,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder, const std::string src);
+        const std::string src);
 
     // get out source image data asynchronously.
     static void FetchImageObject(const ImageSourceInfo& imageInfo, const ImageObjSuccessCallback& successCallback,
         const UploadSuccessCallback& uploadSuccessCallback, const FailedCallback& failedCallback,
         const WeakPtr<PipelineBase>& context, bool syncMode, bool useSkiaSvg, bool needAutoResize,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const OnPostBackgroundTask& onBackgroundTaskPostCallback = nullptr);
 
     static sk_sp<SkImage> ResizeSkImage(
@@ -132,7 +116,7 @@ public:
 
     static void ProccessLoadingResult(const RefPtr<TaskExecutor>& taskExecutor, const ImageSourceInfo& imageInfo,
         bool canStartUploadImageObj, const RefPtr<ImageObject>& imageObj, const RefPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder, const std::string& errorMsg = "");
+        const std::string& errorMsg = "");
 
     static bool TryUploadingImage(
         const std::string& key, const UploadSuccessCallback& successCallback, const FailedCallback& failedCallback);

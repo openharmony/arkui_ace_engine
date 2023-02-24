@@ -70,7 +70,6 @@ void ImageProvider::ProccessLoadingResult(
     bool canStartUploadImageObj,
     const RefPtr<ImageObject>& imageObj,
     const RefPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const std::string& errorMsg)
 {
     std::lock_guard lock(loadingImageMutex_);
@@ -98,7 +97,6 @@ void ImageProvider::ProccessLoadingResult(
                 bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());
                 obj->UploadToGpuForRender(
                     context,
-                    renderTaskHolder,
                     callback.uploadCallback,
                     callback.failedCallback,
                     obj->GetImageSize(),
@@ -165,10 +163,9 @@ void ImageProvider::FetchImageObject(
     bool syncMode,
     bool useSkiaSvg,
     bool needAutoResize,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const OnPostBackgroundTask& onBackgroundTaskPostCallback)
 {
-    auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg, renderTaskHolder,
+    auto task = [context, imageInfo, successCallback, failedCallback, useSkiaSvg,
                     uploadSuccessCallback, needAutoResize, id = Container::CurrentId(), syncMode]() mutable {
         ContainerScope scope(id);
         auto pipelineContext = context.Upgrade();
@@ -195,7 +192,7 @@ void ImageProvider::FetchImageObject(
                     "Image data may be broken or absent, please check if image file or image data is valid");
                 return;
             }
-            ProccessLoadingResult(taskExecutor, imageInfo, false, nullptr, pipelineContext, renderTaskHolder,
+            ProccessLoadingResult(taskExecutor, imageInfo, false, nullptr, pipelineContext,
                 "Image data may be broken or absent, please check if image file or image data is valid.");
             return;
         }
@@ -207,8 +204,7 @@ void ImageProvider::FetchImageObject(
                 imageInfo,
                 !needAutoResize && (imageObj->GetFrameCount() == 1),
                 imageObj,
-                pipelineContext,
-                renderTaskHolder);
+                pipelineContext);
         }
     };
     if (syncMode) {
@@ -372,13 +368,8 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
     const sk_sp<SkImage>& image,
     const sk_sp<SkData>& data,
     const std::function<void(sk_sp<SkImage>, sk_sp<SkData>)>&& callback,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const std::string src)
 {
-    if (!renderTaskHolder) {
-        LOGW("renderTaskHolder has been released.");
-        return;
-    }
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
     callback(image, nullptr);
@@ -388,11 +379,7 @@ void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> contex
         callback(image, data);
         return;
     }
-    auto task = [context, image, callback, renderTaskHolder, src] () {
-        if (!renderTaskHolder) {
-            LOGW("renderTaskHolder has been released.");
-            return;
-        }
+    auto task = [context, image, callback, src] () {
         ACE_DCHECK(!image->isTextureBacked());
         bool needRaster = ImageCompressor::GetInstance()->CanCompress();
         if (!needRaster) {

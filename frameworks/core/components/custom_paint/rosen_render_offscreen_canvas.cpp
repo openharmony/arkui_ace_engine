@@ -410,7 +410,7 @@ void RosenRenderOffscreenCanvas::DrawSvgImage(const CanvasImage& canvasImage)
     // get the ImageObject
     if (currentSource_ != loadingSource_) {
         ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, pipelineContext_, true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+            failedCallback_, pipelineContext_, true, true, true, onPostBackgroundTask_);
     }
 
     // draw the svg

@@ -28,13 +28,11 @@ APngImagePlayer::APngImagePlayer(
     ImageSourceInfo source,
     UploadSuccessCallback successCallback,
     const WeakPtr<PipelineBase>& weakContext,
-    const fml::WeakPtr<flutter::IOManager>& ioManager,
-    const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
     const RefPtr<PNGImageDecoder>& decoder,
     int32_t dstWidth,
     int32_t dstHeight)
-    : imageSource_(source), successCallback_(successCallback), context_(weakContext), ioManager_(ioManager),
-      unrefQueue_(gpuQueue), apngDecoder_(decoder), dstWidth_(dstWidth), dstHeight_(dstHeight)
+    : imageSource_(source), successCallback_(successCallback), context_(weakContext),
+      apngDecoder_(decoder), dstWidth_(dstWidth), dstHeight_(dstHeight)
 {
     LOGD("animated image frameCount_ : %{public}d, repetitionCount_ : %{public}d", frameCount_, repetitionCount_);
     auto context = context_.Upgrade();
@@ -241,7 +239,6 @@ void APngImagePlayer::RenderFrame(const int32_t &index)
                     return;
                 }
 
-                
                 APngAnimatedFrameInfo *frameInfo = player->DecodeFrameImage(index);
                 if (!frameInfo || !frameInfo->image) {
                     return;

@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/image_provider/adapter/flutter_image_provider.h"
+#include "core/components_ng/image_provider/image_provider.h"
 
 #include <mutex>
 #include <utility>
 
-#include "flutter/fml/memory/ref_counted.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 
@@ -129,13 +128,11 @@ RefPtr<CanvasImage> ImageProvider::QueryCanvasImageFromCache(const ImageSourceIn
     return canvasImage;
 }
 
-void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, const SizeF& targetSize,
-    const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize, bool sync)
+void ImageProvider::MakeCanvasImageHelper(
+    const WeakPtr<ImageObject>& objWp, const SizeF& targetSize, bool forceResize, bool sync)
 {
     auto obj = objWp.Upgrade();
-    CHECK_NULL_VOID(obj && renderTaskHolder);
-    auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
-    CHECK_NULL_VOID(flutterRenderTaskHolder);
+    CHECK_NULL_VOID(obj);
     CHECK_NULL_VOID_NOLOG(ImageProvider::PrepareImageData(obj));
     // resize image
     auto skiaImageData = DynamicCast<SkiaImageData>(obj->GetData());
@@ -165,7 +162,7 @@ void ImageProvider::MakeCanvasImageHelper(const WeakPtr<ImageObject>& objWp, con
         ImageProvider::SuccessCallback(canvasImage, key, sync);
     };
     ImageProvider::UploadImageToGPUForRender(
-        canvasImage, std::move(uploadTask), renderTaskHolder, key, targetSize, compressFileData, sync);
+        canvasImage, std::move(uploadTask), key, targetSize, compressFileData, sync);
 }
 
 void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const WeakPtr<ImageLoadingContext>& ctxWp,
@@ -179,43 +176,22 @@ void ImageProvider::MakeCanvasImage(const WeakPtr<ImageObject>& objWp, const Wea
         return;
     }
 
-    auto renderTaskHolder = CreateRenderTaskHolder();
-    CHECK_NULL_VOID(renderTaskHolder);
     if (sync) {
-        ImageProvider::MakeCanvasImageHelper(obj, targetSize, renderTaskHolder, forceResize, true);
+        ImageProvider::MakeCanvasImageHelper(obj, targetSize, forceResize, true);
     } else {
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([objWp, targetSize, renderTaskHolder, forceResize] {
-            MakeCanvasImageHelper(objWp, targetSize, renderTaskHolder, forceResize);
-        });
+        task.Reset([objWp, targetSize, forceResize] { MakeCanvasImageHelper(objWp, targetSize, forceResize); });
         tasks_[key].bgTask_ = task;
         ImageUtils::PostToBg(task);
     }
 }
 
-RefPtr<RenderTaskHolder> ImageProvider::CreateRenderTaskHolder()
-{
-    CHECK_NULL_RETURN(CheckThread(TaskExecutor::TaskType::UI), nullptr);
-#ifdef FLUTTER_2_5
-    int32_t id = Container::CurrentId();
-    auto currentState = flutter::ace::WindowManager::GetWindow(id);
-#else
-    auto* currentState = flutter::UIDartState::Current();
-#endif
-    CHECK_NULL_RETURN(currentState, nullptr);
-    return MakeRefPtr<FlutterRenderTaskHolder>(currentState->GetSkiaUnrefQueue(), currentState->GetIOManager(),
-        currentState->GetTaskRunners().GetIOTaskRunner());
-}
-
 void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
-    std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder,
-    const std::string& key, const SizeF& resizeTarget, const RefPtr<ImageData>& data, bool syncLoad)
+    std::function<void(RefPtr<CanvasImage>)>&& callback, const std::string& key, const SizeF& resizeTarget,
+    const RefPtr<ImageData>& data, bool syncLoad)
 {
-    CHECK_NULL_VOID(renderTaskHolder);
-    auto flutterRenderTaskHolder = DynamicCast<FlutterRenderTaskHolder>(renderTaskHolder);
-    CHECK_NULL_VOID(flutterRenderTaskHolder);
 #ifdef UPLOAD_GPU_DISABLED
     // If want to dump draw command or gpu disabled, should use CPU image.
     callback(canvasImage);
@@ -242,9 +218,8 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
         return;
     }
 
-    auto task = [callback, flutterRenderTaskHolder, skiaCanvasImage, id = Container::CurrentId(), src = key] {
+    auto task = [callback, skiaCanvasImage, id = Container::CurrentId(), src = key] {
         ContainerScope scope(id);
-        CHECK_NULL_VOID(flutterRenderTaskHolder);
         auto skImage = skiaCanvasImage->GetImage();
         CHECK_NULL_VOID(skImage);
         auto rasterizedImage = skImage->makeRasterImage();
@@ -272,10 +247,10 @@ void ImageProvider::UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasI
             } else {
                 skiaCanvasImage->ReplaceSkImage(rasterizedImage);
             }
+            auto taskExecutor = Container::CurrentTaskExecutor();
             auto releaseTask = ImageCompressor::GetInstance()->ScheduleReleaseTask();
-            if (flutterRenderTaskHolder->ioTaskRunner) {
-                flutterRenderTaskHolder->ioTaskRunner->PostDelayedTask(
-                    releaseTask, fml::TimeDelta::FromMilliseconds(ImageCompressor::releaseTimeMs));
+            if (taskExecutor) {
+                taskExecutor->PostDelayedTask(releaseTask, TaskExecutor::TaskType::UI, ImageCompressor::releaseTimeMs);
             } else {
                 ImageUtils::PostToBg(std::move(releaseTask));
             }
