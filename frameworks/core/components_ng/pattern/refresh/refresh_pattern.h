@@ -101,6 +101,7 @@ private:
     bool movedByScrollableComponent_ = false;
 
     bool isRefreshing_ = false;
+    float triggerLoadingDistance_ = 0.0f;
     RefPtr<FrameNode> progressChild_;
     WeakPtr<FrameNode> scrollableNode_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
