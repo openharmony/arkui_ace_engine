@@ -214,6 +214,49 @@ public:
         return arrowHeight_;
     }
 
+    float GetPopupAnimationOffset() const
+    {
+        return popupAnimationOffset_;
+    }
+
+    int32_t GetShowDuration() const
+    {
+        return popupAnimationShowDuration_;
+    }
+
+    int32_t GetCloseDuration() const
+    {
+        return popupAnimationCloseDuration_;
+    }
+    int32_t GetHoverAnimationDuration() const
+    {
+        return hoverAnimationDuration_;
+    }
+    int32_t GetHoverToPressAnimationDuration() const
+    {
+        return hoverToPressAnimationDuration_;
+    }
+
+    float GetOpacityStart() const
+    {
+        return opacityStart_;
+    }
+
+    float GetOpacityEnd() const
+    {
+        return opacityEnd_;
+    }
+
+    float GetHoverOpacity() const
+    {
+        return opacityHover_;
+    }
+
+    float GetPressOpacity() const
+    {
+        return opacityPress_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -242,6 +285,15 @@ private:
     Dimension focusPaintWidth_ = 2.0_vp;
     Dimension buttonMiniMumWidth = 72.0_vp;
     Dimension bubbleMiniMumHeight_ = 48.0_vp;
+    float popupAnimationOffset_ = 8.0f;
+    int32_t popupAnimationShowDuration_ = 250;
+    int32_t popupAnimationCloseDuration_ = 100;
+    int32_t hoverAnimationDuration_ = 250;
+    int32_t hoverToPressAnimationDuration_ = 100;
+    float opacityStart_ = 0.0f;
+    float opacityEnd_ = 1.0f;
+    float opacityHover_ = 0.05f;
+    float opacityPress_ = 0.1f;
 };
 
 } // namespace OHOS::Ace

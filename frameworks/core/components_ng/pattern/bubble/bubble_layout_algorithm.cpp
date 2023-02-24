@@ -154,6 +154,14 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     child->GetGeometryNode()->SetMarginFrameOffset(childOffset_);
     child->Layout();
+    auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(childLayoutWrapper);
+    const auto& columnChild = childLayoutWrapper->GetAllChildrenWithBuild();
+    if (columnChild.size() > 1 && !useCustom) {
+        auto buttonRow = columnChild.back();
+        buttonRowSize_ = buttonRow->GetGeometryNode()->GetMarginFrameSize();
+        buttonRowOffset_ = buttonRow->GetGeometryNode()->GetMarginFrameOffset() + childOffset_;
+    }
 }
 
 void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp)
