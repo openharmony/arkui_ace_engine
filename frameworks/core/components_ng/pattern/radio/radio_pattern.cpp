@@ -33,6 +33,7 @@ constexpr int DEFAULT_RADIO_ANIMATION_DURATION = 300;
 constexpr float DEFAULT_MID_TIME_SLOT = 0.5;
 constexpr float DEFAULT_END_TIME_SLOT = 1.0;
 constexpr float DEFAULT_SHRINK_TIME_SLOT = 0.9;
+constexpr int NUM_TWO = 2;
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()
@@ -161,7 +162,7 @@ void RadioPattern::HandleMouseEvent(bool isHover)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RadioPattern::OnClick()
@@ -176,7 +177,6 @@ void RadioPattern::OnClick()
     } else {
         paintProperty->UpdateRadioCheck(false);
     }
-
     if (!preCheck_ && !check) {
         paintProperty->UpdateRadioCheck(true);
         UpdateState();
@@ -192,7 +192,8 @@ void RadioPattern::OnTouchDown()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
+    isTouch_ = true;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RadioPattern::OnTouchUp()
@@ -204,7 +205,8 @@ void RadioPattern::OnTouchUp()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
+    isTouch_ = false;
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RadioPattern::UpdateState()
@@ -407,6 +409,7 @@ void RadioPattern::UpdateUIStatus(bool check)
     uiStatus_ = check ? UIStatus::SELECTED : UIStatus::UNSELECTED;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    //host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     host->MarkNeedRenderOnly();
 }
 
@@ -415,7 +418,7 @@ void RadioPattern::UpdateTotalScale(float scale)
     totalScale_ = scale;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RadioPattern::UpdatePointScale(float scale)
@@ -423,7 +426,7 @@ void RadioPattern::UpdatePointScale(float scale)
     pointScale_ = scale;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkNeedRenderOnly();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -511,8 +514,8 @@ void RadioPattern::AddHotZoneRect()
 {
     hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + NUM_TWO * hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + NUM_TWO * hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
@@ -527,5 +530,4 @@ void RadioPattern::RemoveLastHotZoneRect() const
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
 }
-
 } // namespace OHOS::Ace::NG

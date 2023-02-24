@@ -27,6 +27,9 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
+#include "core/components_ng/render/canvas.h"
 namespace OHOS::Ace::NG {
 enum class UIStatus {
     SELECTED = 0,
@@ -58,8 +61,7 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
-        RSCanvas canvas = context.canvas;
-        PaintRadio(canvas, isCheck_, size_, offset_);
+        PaintRadio(context);
     }
 
     void UpdateAnimatableProperty()
@@ -81,10 +83,31 @@ public:
         });
     }
 
+    void UpdateDate()
+    {
+        if (data_) {
+            // When the date update, the animation will repeat once.
+            auto temp = data_->Get() + 0.1;
+            data_->Set(temp);
+        }
+    }
+
     void InitializeParam();
-    void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const;
+    void PaintRadio(DrawingContext& context) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
 
+    void SetPointColor(const Color& pointColor)
+    {
+        pointColor_->Set(LinearColor(pointColor));
+    }
+    void SetactiveColor(const Color& activeColor)
+    {
+        activeColor_->Set(LinearColor(activeColor));
+    }
+    void SetinactiveColor(const Color& inactiveColor)
+    {
+        inactiveColor_->Set(LinearColor(inactiveColor));
+    }
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;
@@ -140,16 +163,17 @@ public:
     }
 
 private:
-    float shadowWidth_ = 0.0f;
-    float borderWidth_ = 0.0f;
-    Color pointColor_;
-    Color activeColor_;
-    Color inactiveColor_;
-    Color inactivePointColor_;
-    Color shadowColor_;
-    Color clickEffectColor_;
-    Color hoverColor_;
-    Dimension hotZoneHorizontalPadding_;
+    RefPtr<AnimatablePropertyFloat> data_;
+    RefPtr<AnimatablePropertyColor> pointColor_;
+    RefPtr<AnimatablePropertyColor> activeColor_;
+    RefPtr<AnimatablePropertyColor> inactiveColor_;
+    float shadowWidth_ = 1.5f;
+    float borderWidth_ = 1.5f;
+    Color inactivePointColor_ = Color::WHITE;
+    Color shadowColor_ = Color::RED;
+    Color clickEffectColor_ = Color::WHITE;
+    Color hoverColor_ = Color::WHITE;
+    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
@@ -161,7 +185,7 @@ private:
     SizeF hotZoneSize_;
     OffsetF offset_;
     SizeF size_;
-
+    RefPtr<RadioModifier> radioModifier_;
     RefPtr<PropertyFloat> totalScale_;
     RefPtr<PropertyFloat> pointScale_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;

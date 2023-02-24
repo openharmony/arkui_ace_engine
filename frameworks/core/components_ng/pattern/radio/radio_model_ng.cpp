@@ -61,4 +61,18 @@ void RadioModelNG::SetHeight(const Dimension& height) {}
 
 void RadioModelNG::SetPadding(const NG::PaddingPropertyF& args) {}
 
+void RadioModelNG::SetCheckedBackgroundColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color);
+}
+
+void RadioModelNG::SetUncheckedBorderColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color);
+}
+
+void RadioModelNG::SetIndicatorColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color);
+}
 } // namespace OHOS::Ace::NG
