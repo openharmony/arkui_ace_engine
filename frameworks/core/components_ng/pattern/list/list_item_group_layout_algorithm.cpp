@@ -93,6 +93,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = padding.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
     float crossSize = GetCrossAxisSize(size, axis_);
+    itemAlign_ = listLayoutProperty_->GetListItemAlign().value_or(V2::ListItemAlign::START);
 
     if (headerIndex_ >= 0 || footerIndex_ >= 0) {
         LayoutHeaderFooter(layoutWrapper, paddingOffset, crossSize);
@@ -152,6 +153,31 @@ void ListItemGroupLayoutAlgorithm::UpdateReferencePos(RefPtr<LayoutProperty> lay
     forwardLayout_ ? referencePos_ += offsetBeforeContent_ : referencePos_ -= offsetAfterContent_;
 }
 
+bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
+{
+    if (forwardLayout_ && headerIndex_ >= 0) {
+        if (GreatOrEqual(headerMainSize_, endPos_ - referencePos_)) {
+            return false;
+        }
+    }
+    if (forwardLayout_ && footerIndex_ >= 0) {
+        if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
+            return false;
+        }
+    }
+    if (!forwardLayout_ && headerIndex_ >= 0) {
+        if (GreatOrEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
+            return false;
+        }
+    }
+    if (!forwardLayout_ && footerIndex_ >= 0) {
+        if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
@@ -166,27 +192,10 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
-    } else {
-        if (forwardLayout_ && headerIndex_ >= 0) {
-            if (GreatOrEqual(headerMainSize_, endPos_ - referencePos_)) {
-                return;
-            }
-        }
-        if (forwardLayout_ && footerIndex_ >= 0) {
-            if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
-                return;
-            }
-        }
-        if (!forwardLayout_ && headerIndex_ >= 0) {
-            if (GreatOrEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
-                return;
-            }
-        }
-        if (!forwardLayout_ && footerIndex_ >= 0) {
-            if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
-                return;
-            }
-        }
+    } else if (!NeedMeasureItem()) {
+        layoutWrapper->RemoveAllChildInRenderTree();
+        itemPosition_.clear();
+        return;
     }
     LOGD("referencePos_ is %{public}f, startPos_: %{public}f, endPos_: %{public}f, forward:%{public}d",
         referencePos_, startPos_, endPos_, forwardLayout_);
@@ -295,16 +304,6 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
             currentStartPos = currentStartPos - spaceWidth_;
         }
     }
-
-    // Mark inactive in wrapper.
-    for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
-        if (GreatOrEqual(pos->second.second, startPos_ - referencePos_)) {
-            break;
-        }
-        LOGI("recycle item:%{public}d", pos->first);
-        layoutWrapper->RemoveChildInRenderTree(pos->first);
-        itemPosition_.erase(pos++);
-    }
 }
 
 void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
@@ -342,11 +341,26 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
         }
         totalMainSize_ -= delta;
     }
+}
 
+void ListItemGroupLayoutAlgorithm::CheckRecycle(
+    const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos, bool forwardLayout)
+{
     // Mark inactive in wrapper.
+    if (forwardLayout) {
+        for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
+            if (GreatOrEqual(pos->second.second, startPos - referencePos)) {
+                break;
+            }
+            LOGI("recycle item:%{public}d", pos->first);
+            layoutWrapper->RemoveChildInRenderTree(pos->first);
+            itemPosition_.erase(pos++);
+        }
+        return;
+    }
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
-        if (LessOrEqual(pos->second.first, endPos_ - (referencePos_ - totalMainSize_))) {
+        if (LessOrEqual(pos->second.first, endPos - (referencePos - totalMainSize_))) {
             break;
         }
         layoutWrapper->RemoveChildInRenderTree(pos->first);
@@ -392,7 +406,6 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
     float mainPos = GetMainAxisOffset(selfOffset, axis_);
     float headerMainSize = 0.0f;
     V2::StickyStyle sticky = listLayoutProperty_->GetStickyStyle().value_or(V2::StickyStyle::NONE);
-    itemAlign_ = listLayoutProperty_->GetListItemAlign().value_or(V2::ListItemAlign::START);
     if (headerIndex_ >= 0) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
         CHECK_NULL_VOID(wrapper);

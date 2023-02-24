@@ -117,6 +117,8 @@ public:
     }
 
     float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
+    void CheckRecycle(const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos,
+        bool forwardLayout);
 
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
@@ -142,6 +144,7 @@ private:
     void MeasureBackward(
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
     void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
+    bool NeedMeasureItem() const;
 
     int32_t headerIndex_;
     int32_t footerIndex_;
