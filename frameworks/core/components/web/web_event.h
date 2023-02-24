@@ -1247,6 +1247,22 @@ private:
     std::string url_;
     bool precomposed_;
 };
+
+class ACE_EXPORT AudioStateChangedEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(AudioStateChangedEvent, BaseEventInfo);
+
+public:
+    AudioStateChangedEvent(bool playing) : BaseEventInfo("AudioStateChangedEvent"), playing_(playing) {}
+    ~AudioStateChangedEvent() = default;
+
+    bool IsPlaying() const
+    {
+        return playing_;
+    }
+
+private:
+    bool playing_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_WEB_WEB_EVENT_H
