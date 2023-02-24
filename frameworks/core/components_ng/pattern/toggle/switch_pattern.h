@@ -59,23 +59,12 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
-        if (!switchModifier_) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            auto switchTheme = pipeline->GetTheme<SwitchTheme>();
-            auto paintProperty = host->GetPaintProperty<SwitchPaintProperty>();
-            auto isSelect = paintProperty->GetIsOnValue(false);
-            auto boardColor = isSelect ? paintProperty->GetSelectedColorValue(switchTheme->GetActiveColor())
-                                       : switchTheme->GetInactivePointColor();
-            switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(isSelect, boardColor, currentOffset_);
-        }
-        auto paintMethod = MakeRefPtr<SwitchPaintMethod>(switchModifier_);
-        paintMethod->SetIsSelect(isOnBeforeAnimate_.value_or(false));
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        paintMethod->SetEnabled(enabled);
-        paintMethod->SetMainDelta(currentOffset_);
-        paintMethod->SetIsHover(isHover_);
+        auto paintMethod = MakeRefPtr<SwitchPaintMethod>(currentOffset_, enabled, isTouch_, isHover_);
+        paintMethod->SetHotZoneOffset(hotZoneOffset_);
+        paintMethod->SetHotZoneSize(hotZoneSize_);
         return paintMethod;
     }
 
@@ -134,7 +123,6 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<CurveAnimation<double>> translate_;
     std::optional<bool> isOn_;
-    std::optional<bool> isOnBeforeAnimate_;
     bool changeFlag_ = false;
     float currentOffset_ = 0.0f;
 
@@ -151,9 +139,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-
-    RefPtr<SwitchModifier> switchModifier_;
-
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
 };
 } // namespace OHOS::Ace::NG

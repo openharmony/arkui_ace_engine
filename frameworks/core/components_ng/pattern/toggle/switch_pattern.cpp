@@ -30,9 +30,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr int32_t DEFAULT_DURATION = 200;
-} // namespace
 void SwitchPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -108,7 +105,6 @@ void SwitchPattern::OnModifyDone()
         isOn_ = switchPaintProperty->GetIsOnValue();
     }
     auto isOn = switchPaintProperty->GetIsOnValue();
-    isOnBeforeAnimate_ = isOn;
     if (isOn != isOn_.value()) {
         OnChange();
     }
@@ -177,8 +173,6 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
                 switchPattern->UpdateChangeEvent();
             }
         }
-        switchPattern->isOnBeforeAnimate_ = switchPattern->isOn_;
-        switchPattern->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
@@ -194,6 +188,7 @@ RefPtr<Curve> SwitchPattern::GetCurve() const
 
 int32_t SwitchPattern::GetDuration() const
 {
+    const int32_t DEFAULT_DURATION = 250;
     auto switchPaintProperty = GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(switchPaintProperty, DEFAULT_DURATION);
     return switchPaintProperty->GetDuration().value_or(DEFAULT_DURATION);
@@ -215,11 +210,10 @@ void SwitchPattern::OnChange()
     auto translateOffset = GetSwitchWidth();
     StopTranslateAnimation();
     changeFlag_ = true;
-    isOnBeforeAnimate_ = !isOn_.value();
     if (!isOn_.value()) {
-        PlayTranslateAnimation(0.0f, translateOffset);
+        PlayTranslateAnimation(0, translateOffset);
     } else {
-        PlayTranslateAnimation(translateOffset, 0.0f);
+        PlayTranslateAnimation(translateOffset, 0);
     }
 }
 
@@ -433,10 +427,10 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SwitchPattern::HandleMouseEvent(bool isHover)
 {
+    isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
-    isHover_ = isHover;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 

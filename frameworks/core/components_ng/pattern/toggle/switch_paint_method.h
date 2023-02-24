@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWITCH_SWITCH_PAINT_METHOD_H
 
-#include "core/components_ng/pattern/toggle/switch_modifier.h"
 #include "core/components_ng/pattern/toggle/switch_paint_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -28,34 +27,11 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SwitchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SwitchPaintMethod, NodePaintMethod)
 public:
-    explicit SwitchPaintMethod(const RefPtr<SwitchModifier>& switchModifier) : switchModifier_(switchModifier) {}
-
+    explicit SwitchPaintMethod(float mainDelta, bool enabled, bool isTouch, bool isHover)
+        : mainDelta_(mainDelta), enabled_(enabled), isTouch_(isTouch), isHover_(isHover) {};
     ~SwitchPaintMethod() override = default;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(switchModifier_, nullptr);
-        return switchModifier_;
-    }
-
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_VOID(switchModifier_);
-        switchModifier_->InitializeParam();
-        auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
-        if (paintProperty->HasSelectedColor()) {
-            switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
-        }
-        auto size = paintWrapper->GetContentSize();
-        auto offset = paintWrapper->GetContentOffset();
-        switchModifier_->SetSize(size);
-        switchModifier_->SetOffset(offset);
-        switchModifier_->SetEnabled(enabled_);
-        switchModifier_->SetIsSelect(isSelect_);
-        switchModifier_->SetIsHover(isHover_);
-        switchModifier_->SetMainDelta(mainDelta_);
-        switchModifier_->UpdateAnimatableProperty();
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
     {
@@ -67,46 +43,27 @@ public:
         hotZoneSize_ = hotZoneSize;
     }
 
-    void SetHoverPercent(float hoverPercent)
-    {
-        hoverPercent_ = hoverPercent;
-    }
-
-    void SetEnabled(bool enabled)
-    {
-        enabled_ = enabled;
-    }
-
-    void SetMainDelta(float mainDelta)
-    {
-        mainDelta_ = mainDelta;
-    }
-
-    void SetIsSelect(bool isSelect)
-    {
-        isSelect_ = isSelect;
-    }
-
-    void SetIsHover(bool isHover)
-    {
-        isHover_ = isHover;
-    }
-
 private:
+    void PaintContent(
+        RSCanvas& canvas, RefPtr<SwitchPaintProperty> paintProperty, SizeF contentSize, OffsetF contentOffset);
+
+    void DrawTouchBoard(RSCanvas& canvas, const OffsetF& offset) const;
+    void DrawHoverBoard(RSCanvas& canvas, const OffsetF& offset) const;
+    float GetSwitchWidth(const SizeF& contentSize) const;
     float mainDelta_ = 0.0f;
-    float hoverPercent_ = 0.0f;
+    float actualWidth_ = 0.0f;
+    float actualHeight_ = 0.0f;
+    float pointRadius_ = 0.0f;
     const Dimension radiusGap_ = 2.0_vp;
     bool enabled_ = true;
-    bool isSelect_ = true;
     Color clickEffectColor_ = Color::WHITE;
     Color hoverColor_ = Color::WHITE;
     Dimension hoverRadius_ = 8.0_vp;
 
+    bool isTouch_ = false;
     bool isHover_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-
-    RefPtr<SwitchModifier> switchModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintMethod);
 };

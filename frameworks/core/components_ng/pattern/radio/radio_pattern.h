@@ -52,20 +52,15 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (!radioModifier_) {
-            radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
-        }
-        auto paintMethod = MakeRefPtr<RadioPaintMethod>(radioModifier_);
-        paintMethod->SetTotalScale(totalScale_);
-        paintMethod->SetPointScale(pointScale_);
-        paintMethod->SetUIStatus(uiStatus_);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        paintMethod->SetEnabled(enabled);
-        paintMethod->SetTouchHoverAnimationType(touchHoverType_);
+        auto paintMethod =
+            MakeRefPtr<RadioPaintMethod>(enabled, isTouch_, isHover_, totalScale_, pointScale_, uiStatus_);
+        paintMethod->SetHotZoneOffset(hotZoneOffset_);
+        paintMethod->SetHotZoneSize(hotZoneSize_);
         return paintMethod;
     }
 
@@ -160,10 +155,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool isFirstAddhotZoneRect_ = true;
-    TouchHoverAnimationType touchHoverType_;
-
-    RefPtr<RadioModifier> radioModifier_;
-
+    
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };
 } // namespace OHOS::Ace::NG

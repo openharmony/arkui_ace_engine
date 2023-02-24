@@ -20,7 +20,6 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme_manager.h"
-#include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/render/drawing.h"
@@ -32,18 +31,29 @@ constexpr uint8_t ENABLED_ALPHA = 255;
 constexpr uint8_t DISABLED_ALPHA = 102;
 } // namespace
 
-RadioModifier::RadioModifier()
+CanvasDrawFunction RadioPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
 {
-    totalScale_ = AceType::MakeRefPtr<PropertyFloat>(1.0f);
-    pointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.5f);
-    animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
-
-    AttachProperty(totalScale_);
-    AttachProperty(pointScale_);
-    AttachProperty(animateTouchHoverColor_);
+    InitializeParam();
+    auto paintProperty = DynamicCast<RadioPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    bool checked = false;
+    if (paintProperty->HasRadioCheck()) {
+        checked = paintProperty->GetRadioCheckValue();
+    } else {
+        paintProperty->UpdateRadioCheck(false);
+    }
+    auto contentSize = paintWrapper->GetContentSize();
+    auto offset = paintWrapper->GetContentOffset();
+    auto paintFunc = [weak = WeakClaim(this), checked, contentSize, offset](RSCanvas& canvas) {
+        auto radio = weak.Upgrade();
+        if (radio) {
+            radio->PaintRadio(canvas, checked, contentSize, offset);
+        }
+    };
+    return paintFunc;
 }
 
-void RadioModifier::InitializeParam()
+void RadioPaintMethod::InitializeParam()
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -58,16 +68,18 @@ void RadioModifier::InitializeParam()
     clickEffectColor_ = radioTheme->GetClickEffectColor();
     hoverColor_ = radioTheme->GetHoverColor();
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
-    hoverDuration_ = radioTheme->GetHoverDuration();
-    hoverToTouchDuration_ = radioTheme->GetHoverToTouchDuration();
-    touchDuration_ = radioTheme->GetTouchDuration();
 }
 
-void RadioModifier::PaintRadio(
+void RadioPaintMethod::PaintRadio(
     RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& offset) const
 {
     OffsetF paintOffset = offset;
-    DrawTouchAndHoverBoard(canvas, contentSize, paintOffset);
+    if (isTouch_) {
+        LOGI("Touch effect is to be realized here");
+    }
+    if (isHover_) {
+        DrawHoverBoard(canvas, contentSize, paintOffset);
+    }
     float outCircleRadius = contentSize.Width() / 2;
     float centerX = paintOffset.GetX() + outCircleRadius;
     float centerY = paintOffset.GetY() + outCircleRadius;
@@ -84,17 +96,17 @@ void RadioModifier::PaintRadio(
             brush.SetColor(ToRSColor(activeColor_));
         }
         canvas.AttachBrush(brush);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get());
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_);
         // draw shadow
         if (!NearZero(pointScale_) && !NearEqual(pointScale_, 1.0)) {
             brush.SetColor(ToRSColor(shadowColor_));
             canvas.AttachBrush(brush);
-            canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get() + shadowWidth_);
+            canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_ + shadowWidth_);
         }
         // draw inner circle
         brush.SetColor(ToRSColor(pointColor_));
         canvas.AttachBrush(brush);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get());
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_);
     } else if (uiStatus_ == UIStatus::UNSELECTED) {
         if (!enabled_) {
             brush.SetColor(
@@ -112,14 +124,27 @@ void RadioModifier::PaintRadio(
     }
 }
 
-void RadioModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const
+void RadioPaintMethod::DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const
 {
     float outCircleRadius = contentSize.Width() / 2;
     float centerX = outCircleRadius + offset.GetX();
     float centerY = outCircleRadius + offset.GetY();
     outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx();
     RSBrush brush;
-    brush.SetColor(ToRSColor(Color(animateTouchHoverColor_->Get())));
+    brush.SetColor(ToRSColor(Color(clickEffectColor_)));
+    brush.SetAntiAlias(true);
+    canvas.AttachBrush(brush);
+    canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius);
+}
+
+void RadioPaintMethod::DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const
+{
+    float outCircleRadius = contentSize.Width() / 2;
+    float centerX = outCircleRadius + offset.GetX();
+    float centerY = outCircleRadius + offset.GetY();
+    outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx();
+    RSBrush brush;
+    brush.SetColor(ToRSColor(Color(hoverColor_)));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius);
