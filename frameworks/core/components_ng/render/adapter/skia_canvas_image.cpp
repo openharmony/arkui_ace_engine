@@ -32,12 +32,12 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 
-SkPixmap CloneSkPixmap(SkPixmap& srcPixmap)
+SkPixmap CloneSkPixmap(SkPixmap& srcPixmap, const std::unique_ptr<uint8_t[]>& dstPixels)
 {
+    // Media::PixelMap::Create only accepts BGRA ColorType pixmap, have to clone and change ColorType.
     SkImageInfo dstImageInfo = SkImageInfo::Make(srcPixmap.info().width(), srcPixmap.info().height(),
         SkColorType::kBGRA_8888_SkColorType, srcPixmap.alphaType());
-    auto dstPixels = std::make_unique<uint8_t[]>(srcPixmap.computeByteSize());
-    SkPixmap dstPixmap(dstImageInfo, dstPixels.release(), srcPixmap.rowBytes());
+    SkPixmap dstPixmap(dstImageInfo, dstPixels.get(), srcPixmap.rowBytes());
 
     SkBitmap dstBitmap;
     if (!dstBitmap.installPixels(dstPixmap)) {
@@ -169,7 +169,8 @@ RefPtr<PixelMap> SkiaCanvasImage::GetPixelMap()
     if (!rasterImage->peekPixels(&srcPixmap)) {
         return nullptr;
     }
-    SkPixmap newSrcPixmap = CloneSkPixmap(srcPixmap);
+    auto dstPixels = std::make_unique<uint8_t[]>(srcPixmap.computeByteSize());
+    SkPixmap newSrcPixmap = CloneSkPixmap(srcPixmap, dstPixels);
     const auto* addr = newSrcPixmap.addr32();
     auto width = static_cast<int32_t>(newSrcPixmap.width());
     auto height = static_cast<int32_t>(newSrcPixmap.height());
