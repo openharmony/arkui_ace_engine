@@ -47,6 +47,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
         PaintProperty::ToJsonValue(json);
         auto jsonConstructor = JsonUtil::Create(true);
         jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());
@@ -57,10 +61,10 @@ public:
         jsonConstructor->Put("direction",
             (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
         json->Put("constructor", jsonConstructor);
-        json->Put("blockColor", GetBlockColor().value_or(Color(0xffffffff)).ColorToString().c_str());
+        json->Put("blockColor", GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str());
         json->Put(
-            "trackBackgroundColor", GetTrackBackgroundColor().value_or(Color(0xafdbdbdb)).ColorToString().c_str());
-        json->Put("selectColor", GetSelectColor().value_or(Color(0xff007dff)).ColorToString().c_str());
+            "trackColor", GetTrackBackgroundColor().value_or(theme->GetTrackBgColor()).ColorToString().c_str());
+        json->Put("selectColor", GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str());
         json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
         json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
     }

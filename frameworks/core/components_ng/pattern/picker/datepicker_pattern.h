@@ -432,7 +432,7 @@ public:
     }
 
     void ShowTitle(int32_t titleId);
-
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
