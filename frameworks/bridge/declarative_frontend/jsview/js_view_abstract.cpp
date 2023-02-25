@@ -399,20 +399,19 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             LOGI("Empty popup.");
         }
     }
-
-#if defined(PREVIEW)
-    LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-         "emulator or a real device instead.");
-#else
     JSRef<JSVal> showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
+        bool showInSubBoolean = showInSubWindowValue->ToBoolean();
+#if defined(PREVIEW)
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+        showInSubBoolean = false;
+#endif
         if (popupParam) {
-            popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
+            popupParam->SetShowInSubWindow(showInSubBoolean);
         } else {
             LOGI("Empty popup.");
         }
     }
-#endif
 
     JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
     if (placementOnTopVal->IsBoolean()) {
@@ -584,15 +583,15 @@ void ParseCustomPopupParam(
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
     }
 
-#if defined(PREVIEW)
-    LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-         "emulator or a real device instead.");
-#else
     auto showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+        popupParam->SetShowInSubWindow(false);
+#else
         popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
-    }
 #endif
+    }
 
     auto autoCancelValue = popupObj->GetProperty("autoCancel");
     if (autoCancelValue->IsBoolean()) {
