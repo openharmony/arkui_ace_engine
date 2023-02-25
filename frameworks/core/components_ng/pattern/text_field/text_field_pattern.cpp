@@ -2222,6 +2222,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->UpdateChangeEvent(textEditingValue_.text);
+        parentFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
