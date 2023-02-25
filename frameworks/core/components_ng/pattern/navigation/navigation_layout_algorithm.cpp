@@ -35,7 +35,6 @@
 namespace OHOS::Ace::NG {
 
 constexpr Dimension WINDOW_WIDTH = 520.0_vp;
-constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
 
 namespace {
 
