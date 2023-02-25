@@ -710,7 +710,7 @@ bool TextFieldPattern::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetr
         next, extent, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
 
     if (textBoxes.empty()) {
-        LOGW("Box empty");
+        LOGD("Box empty");
         return false;
     }
 
@@ -726,7 +726,9 @@ bool TextFieldPattern::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetr
 bool TextFieldPattern::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result) const
 {
     auto text = textEditingValue_.text;
-    if (!paragraph_ || text.empty()) {
+    auto wideText = textEditingValue_.GetWideText();
+    if (!paragraph_ || wideText.empty() || textEditingValue_.caretPosition == 0 ||
+        textEditingValue_.caretPosition > static_cast<int32_t>(wideText.length())) {
         return false;
     }
 
@@ -752,12 +754,11 @@ bool TextFieldPattern::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetric
             prev, extent, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
     }
     if (boxes.empty()) {
-        LOGW("Empty box");
+        LOGD("Empty box");
         return false;
     }
 
     const auto& textBox = *boxes.begin();
-    auto wideText = textEditingValue_.GetWideText();
     auto lastStringBeforeCursor = wideText.substr(textEditingValue_.caretPosition - 1, 1);
     // Caret is within width of the downstream glyphs.
     if (lastStringBeforeCursor == WIDE_NEWLINE &&
@@ -2199,7 +2200,9 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         caretStart = textEditingValue_.caretPosition;
     }
     EditingValueFilter(valueToUpdate, result);
-
+    if (result.empty()) {
+        return;
+    }
     if (InSelectMode()) {
         textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) + result +
                                  textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
@@ -2207,8 +2210,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         textEditingValue_.text =
             textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
     }
-    textEditingValue_.CursorMoveToPosition(
-        caretStart + static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()));
+    textEditingValue_.CursorMoveToPosition(caretStart + static_cast<int32_t>(StringUtils::ToWstring(result).length()));
     SetEditingValueToProperty(textEditingValue_.text);
     UpdateEditingValueToRecord();
     caretUpdateType_ = CaretUpdateType::INPUT;
