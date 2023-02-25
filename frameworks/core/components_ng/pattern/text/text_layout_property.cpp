@@ -49,6 +49,9 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
     std::vector<std::string> fontFamilyVector =
         GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+    if (fontFamilyVector.empty()) {
+        fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
+    }
     std::string fontFamily = fontFamilyVector.at(0);
     for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
         fontFamily += ',' + fontFamilyVector.at(i);
