@@ -162,6 +162,7 @@ public:
     void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
+    void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
 
     void UpdateScrollBarOffset() override;
@@ -202,6 +203,9 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void FireOnScrollStart();
+    void FireOnScrollStop();
+    void CheckRestartSpring();
+    void StopAnimate();
 
     // multiSelectable
     void InitMouseEvent();
@@ -237,6 +241,7 @@ private:
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
+    bool scrollAbort_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
     std::list<WeakPtr<FrameNode>> itemGroupList_;
