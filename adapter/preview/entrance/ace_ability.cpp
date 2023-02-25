@@ -229,7 +229,7 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     auto controller = FlutterDesktopCreateWindow(
         runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
 
-    const auto &ctx = OHOS::Rosen::GlfwRenderContext::GetGlobal();
+    const auto& ctx = OHOS::Rosen::GlfwRenderContext::GetGlobal();
     if (ctx != nullptr) {
         ctx->InitFrom(FlutterDesktopGetWindow(controller));
     }
@@ -263,12 +263,6 @@ void AceAbility::InitEnv()
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
-    container->InitialStageModuleParser();
-    auto stageModuleInfo = container->GetStageModuleInfo();
-    // When the application is FA-model ArkTS project, stageModuleInfo == null, ;
-    if (runArgs_.aceVersion == AceVersion::ACE_2_0 && (!stageModuleInfo || stageModuleInfo->GetPartialUpdateFlag())) {
-        container->SetUseNewPipeline();
-    }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
@@ -318,12 +312,6 @@ void AceAbility::InitEnv()
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
-    container->InitialStageModuleParser();
-    auto stageModuleInfo = container->GetStageModuleInfo();
-    // When the application is FA-model ArkTS project, stageModuleInfo == null, ;
-    if (runArgs_.aceVersion == AceVersion::ACE_2_0 && (!stageModuleInfo || stageModuleInfo->GetPartialUpdateFlag())) {
-        container->SetUseNewPipeline();
-    }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
