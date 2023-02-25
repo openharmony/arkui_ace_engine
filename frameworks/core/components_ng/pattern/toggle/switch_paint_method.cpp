@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,14 +37,20 @@ constexpr uint8_t DISABLED_ALPHA = 102;
 
 SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float mainDelta)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto switchTheme = pipeline->GetTheme<SwitchTheme>();
+    CHECK_NULL_VOID(switchTheme);
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
     animateHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
+    animatePointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(switchTheme->GetPointColor()));
     mainDelta_ = AceType::MakeRefPtr<PropertyFloat>(mainDelta);
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     AttachProperty(animatableBoardColor_);
     AttachProperty(animateHoverColor_);
+    AttachProperty(animatePointColor_);
     AttachProperty(mainDelta_);
     AttachProperty(isSelect_);
     AttachProperty(isHover_);
@@ -58,12 +64,10 @@ void SwitchModifier::InitializeParam()
     CHECK_NULL_VOID(switchTheme);
     activeColor_ = switchTheme->GetActiveColor();
     inactiveColor_ = switchTheme->GetInactiveColor();
-    pointColor_ = switchTheme->GetPointColor();
     clickEffectColor_ = switchTheme->GetClickEffectColor();
     hoverColor_ = switchTheme->GetHoverColor();
     hoverRadius_ = switchTheme->GetHoverRadius();
     userActiveColor_ = activeColor_;
-    userPointColor_ = pointColor_;
     hoverDuration_ = switchTheme->GetHoverDuration();
     hoverToTouchDuration_ = switchTheme->GetHoverToTouchDuration();
     touchDuration_ = switchTheme->GetTouchDuration();
@@ -122,7 +126,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(roundRect);
 
-    brush.SetColor(ToRSColor(userPointColor_));
+    brush.SetColor(ToRSColor(animatePointColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 

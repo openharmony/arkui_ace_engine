@@ -67,6 +67,12 @@ public:
     void SetUserActiveColor(const Color& color)
     {
         userActiveColor_ = color;
+        animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
+    }
+
+    void SetPointColor(const Color& color)
+    {
+        animatePointColor_->Set(LinearColor(color));
     }
 
     void SetEnabled(bool enabled)
@@ -83,9 +89,11 @@ public:
 
     void SetIsSelect(bool isSelect)
     {
-        if (isSelect_) {
-            isSelect_->Set(isSelect);
+        if (!isSelect_ || (isSelect_->Get() == isSelect)) {
+            return;
         }
+        isSelect_->Set(isSelect);
+        UpdateAnimatableProperty();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
@@ -125,9 +133,7 @@ private:
     Color hoverColor_;
     Color activeColor_;
     Color inactiveColor_;
-    Color pointColor_;
     Color userActiveColor_;
-    Color userPointColor_;
     Dimension hoverRadius_ = 8.0_vp;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
@@ -141,6 +147,7 @@ private:
 
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animateHoverColor_;
+    RefPtr<AnimatablePropertyColor> animatePointColor_;
     RefPtr<PropertyFloat> mainDelta_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;

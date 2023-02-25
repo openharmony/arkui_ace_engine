@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,9 @@ public:
         if (paintProperty->HasSelectedColor()) {
             switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
         }
+        if (paintProperty->HasSwitchPointColor()) {
+            switchModifier_->SetPointColor(paintProperty->GetSwitchPointColor().value());
+        }
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
         switchModifier_->SetSize(size);
@@ -54,7 +57,6 @@ public:
         switchModifier_->SetIsSelect(isSelect_);
         switchModifier_->SetIsHover(isHover_);
         switchModifier_->SetMainDelta(mainDelta_);
-        switchModifier_->UpdateAnimatableProperty();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
