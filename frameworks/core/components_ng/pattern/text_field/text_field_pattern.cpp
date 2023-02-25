@@ -187,12 +187,12 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     auto textFieldLayoutAlgorithm = DynamicCast<TextFieldLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(textFieldLayoutAlgorithm, false);
     auto paragraph = textFieldLayoutAlgorithm->GetParagraph();
-    CHECK_NULL_RETURN(paragraph, false);
-    paragraph_ = paragraph;
+    if (paragraph) {
+        paragraph_ = paragraph;
+    }
     textRect_ = textFieldLayoutAlgorithm->GetTextRect();
     imageRect_ = textFieldLayoutAlgorithm->GetImageRect();
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
-    placeholderParagraphHeight_ = textFieldLayoutAlgorithm->GetPlaceholderParagraphHeight();
     auto textRectNotNeedToChange = UpdateCaretPosition();
     UpdateCaretInfoToController();
     if (mouseStatus_ == MouseStatus::RELEASED) {
@@ -269,7 +269,7 @@ bool TextFieldPattern::UpdateCaretPosition()
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
         if (GetEditingValue().text.empty()) {
             UpdateSelection(0);
-            SetCaretOffsetXForEmptyText();
+            SetCaretOffsetForEmptyTextOrPositionZero();
         }
         return true;
     } else if (caretUpdateType_ == CaretUpdateType::RIGHT_CLICK) {
@@ -415,7 +415,7 @@ void TextFieldPattern::UpdateCaretOffsetByEvent()
 {
     if (textEditingValue_.text.empty()) {
         UpdateSelection(0, 0);
-        SetCaretOffsetXForEmptyText();
+        SetCaretOffsetForEmptyTextOrPositionZero();
         return;
     }
     if (isMousePressed_) {
@@ -423,15 +423,13 @@ void TextFieldPattern::UpdateCaretOffsetByEvent()
         UpdateCaretPositionByMouseMovement();
         return;
     }
-    // set caret and text rect to basic padding if caret is at position 0 or text not exists
-    if (textEditingValue_.caretPosition == 0) {
-        caretRect_.SetLeft(textRect_.GetX());
-        caretRect_.SetTop(textRect_.GetY());
-        UpdateSelection(0, 0);
-        return;
-    }
     if (!InSelectMode()) {
         UpdateSelection(textEditingValue_.caretPosition);
+    }
+    // set caret and text rect to basic padding if caret is at position 0 or text not exists
+    if (textEditingValue_.caretPosition == 0) {
+        SetCaretOffsetForEmptyTextOrPositionZero();
+        return;
     }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
 }
@@ -488,12 +486,11 @@ void TextFieldPattern::UpdateCaretPositionByTextEdit()
 {
     if (textEditingValue_.text.empty()) {
         UpdateSelection(0);
-        SetCaretOffsetXForEmptyText();
+        SetCaretOffsetForEmptyTextOrPositionZero();
         return;
     }
     if (textEditingValue_.caretPosition == 0) {
-        caretRect_.SetLeft(textRect_.GetX());
-        caretRect_.SetTop(textRect_.GetY());
+        SetCaretOffsetForEmptyTextOrPositionZero();
         return;
     }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
@@ -522,15 +519,12 @@ int32_t TextFieldPattern::GetLineNumber(float offsetY)
     return lineNum;
 }
 
-void TextFieldPattern::SetCaretOffsetXForEmptyText()
+void TextFieldPattern::SetCaretOffsetForEmptyTextOrPositionZero()
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
-    caretRect_.SetLeft(textRect_.GetX());
-    caretRect_.SetTop(textRect_.GetY());
-    caretRect_.SetHeight(placeholderParagraphHeight_);
-    if (IsTextArea()) {
-        caretRect_.SetLeft(textRect_.GetX());
-    }
+    caretRect_.SetLeft(IsTextArea() ? contentRect_.Left() : textRect_.GetX());
+    caretRect_.SetTop(IsTextArea() ? textRect_.GetY() : contentRect_.Top());
+    caretRect_.SetHeight(PreferredLineHeight());
     switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
         case TextAlign::START:
             caretRect_.SetLeft(textRect_.GetX());
@@ -550,8 +544,7 @@ void TextFieldPattern::SetCaretOffsetXForEmptyText()
 void TextFieldPattern::UpdateCaretPositionByPressOffset()
 {
     if (GetEditingValue().text.empty()) {
-        SetCaretOffsetXForEmptyText();
-        caretRect_.SetTop(utilPadding_.Offset().GetY());
+        SetCaretOffsetForEmptyTextOrPositionZero();
         return;
     }
     UpdateCaretOffsetByLastTouchOffset();
@@ -1138,9 +1131,9 @@ void TextFieldPattern::HandleOnPaste()
         }
         value.text =
             value.GetValueBeforePosition(start) + StringUtils::ToString(pasteData) + value.GetValueAfterPosition(end);
-        textfield->UpdateEditingValue(value.text, start + static_cast<int32_t>(wData.length()));
-        LOGI("Paste value %{private}s", value.text.c_str());
-        textfield->UpdateSelection(start, start);
+        auto newCaretPosition = std::min(start, end) + static_cast<int32_t>(pasteData.length());
+        textfield->UpdateEditingValue(value.text, newCaretPosition);
+        textfield->UpdateSelection(newCaretPosition);
         textfield->SetEditingValueToProperty(value.text);
         textfield->SetInSelectMode(SelectionMode::NONE);
         textfield->SetCaretUpdateType(CaretUpdateType::INPUT);
@@ -2323,13 +2316,18 @@ void TextFieldPattern::EditingValueFilter(std::string& valueToUpdate, std::strin
     }
 }
 
-float TextFieldPattern::PreferredLineHeight()
+float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
 {
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0f);
     // check if util paragraph need to update
-    if (lineHeightMeasureUtilParagraph_ && !layoutProperty->GetPreferredLineHeightNeedToUpdateValue(true)) {
-        return static_cast<float>(lineHeightMeasureUtilParagraph_->GetHeight());
+    if (!isPlaceholder &&
+        (textLineHeightUtilParagraph_ && !layoutProperty->GetPreferredTextLineHeightNeedToUpdateValue(true))) {
+        return static_cast<float>(textLineHeightUtilParagraph_->GetHeight());
+
+    } else if (isPlaceholder && (placeholderLineHeightUtilParagraph_ &&
+                                    !layoutProperty->GetPreferredPlaceholderLineHeightNeedToUpdateValue(true))) {
+        return static_cast<float>(placeholderLineHeightUtilParagraph_->GetHeight());
     }
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, 0.0f);
@@ -2338,36 +2336,45 @@ float TextFieldPattern::PreferredLineHeight()
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(textFieldTheme, 0.0f);
     std::string textContent;
+    TextStyle textStyle;
     // use text or placeHolder value if exists, space otherwise
-    if (!layoutProperty->GetValueValue("").empty() || layoutProperty->GetPlaceholderValue("").empty()) {
-        TextFieldLayoutAlgorithm::UpdateTextStyle(
-            layoutProperty, textFieldTheme, lineHeightMeasureUtilTextStyle_, false);
-        textContent = layoutProperty->GetValueValue("a");
+    if (!isPlaceholder) {
+        TextFieldLayoutAlgorithm::UpdateTextStyle(layoutProperty, textFieldTheme, textStyle, false);
+        textContent = "a";
     } else {
-        TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(
-            layoutProperty, textFieldTheme, lineHeightMeasureUtilTextStyle_, false);
-        textContent = layoutProperty->GetPlaceholderValue("a");
+        TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(layoutProperty, textFieldTheme, textStyle, false);
+        textContent = "b";
     }
     RSParagraphStyle paraStyle;
     paraStyle.textDirection_ = ToRSTextDirection(TextFieldLayoutAlgorithm::GetTextDirection(textEditingValue_.text));
-    paraStyle.textAlign_ = ToRSTextAlign(lineHeightMeasureUtilTextStyle_.GetTextAlign());
-    paraStyle.maxLines_ = lineHeightMeasureUtilTextStyle_.GetMaxLines();
+    paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
+    paraStyle.maxLines_ = textStyle.GetMaxLines();
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
-    paraStyle.wordBreakType_ = ToRSWordBreakType(lineHeightMeasureUtilTextStyle_.GetWordBreak());
-    paraStyle.fontSize_ = lineHeightMeasureUtilTextStyle_.GetFontSize().ConvertToPx();
-    if (lineHeightMeasureUtilTextStyle_.GetTextOverflow() == TextOverflow::ELLIPSIS) {
+    paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
+    paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
+    if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = RSParagraphStyle::ELLIPSIS;
     }
     auto builder = RSParagraphBuilder::CreateRosenBuilder(paraStyle, RSFontCollection::GetInstance(false));
-    builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), lineHeightMeasureUtilTextStyle_));
-    StringUtils::TransformStrCase(
-        textEditingValue_.text, static_cast<int32_t>(lineHeightMeasureUtilTextStyle_.GetTextCase()));
+    builder->PushStyle(ToRSTextStyle(PipelineContext::GetCurrentContext(), textStyle));
+    StringUtils::TransformStrCase(textEditingValue_.text, static_cast<int32_t>(textStyle.GetTextCase()));
     builder->AddText(StringUtils::Str8ToStr16(textContent));
     builder->Pop();
-    lineHeightMeasureUtilParagraph_ = builder->Build();
-    lineHeightMeasureUtilParagraph_->Layout(std::numeric_limits<double>::infinity());
-    layoutProperty->UpdatePreferredLineHeightNeedToUpdate(false);
-    return static_cast<float>(lineHeightMeasureUtilParagraph_->GetHeight());
+    if (!isPlaceholder) {
+        textLineHeightUtilParagraph_ = builder->Build();
+        textLineHeightUtilParagraph_->Layout(std::numeric_limits<double>::infinity());
+        layoutProperty->UpdatePreferredTextLineHeightNeedToUpdate(false);
+        return static_cast<float>(textLineHeightUtilParagraph_->GetHeight());
+    }
+    placeholderLineHeightUtilParagraph_ = builder->Build();
+    placeholderLineHeightUtilParagraph_->Layout(std::numeric_limits<double>::infinity());
+    layoutProperty->UpdatePreferredPlaceholderLineHeightNeedToUpdate(false);
+    return static_cast<float>(placeholderLineHeightUtilParagraph_->GetHeight());
+}
+
+float TextFieldPattern::PreferredLineHeight()
+{
+    return PreferredTextHeight(textEditingValue_.text.empty());
 }
 
 void TextFieldPattern::OnCursorMoveDone()
