@@ -275,7 +275,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
 {
     float currentEndPos = startPos;
     float currentStartPos = 0.0f;
-    float endMainPos = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
+    overEndPos_ = overScrollFeature_ ? std::max(startPos + contentMainSize_, endMainPos_) : endMainPos_;
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
     do {
@@ -291,7 +291,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
+    } while (LessNotEqual(currentEndPos + chainOffset, overEndPos_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutForward");
@@ -345,7 +345,7 @@ void ListLayoutAlgorithm::LayoutBackward(
 {
     float currentStartPos = endPos;
     float currentEndPos = 0.0f;
-    float startMainPos = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
+    overStartPos_ = overScrollFeature_ ? std::min(endPos - contentMainSize_, startMainPos_) : startMainPos_;
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
@@ -361,7 +361,7 @@ void ListLayoutAlgorithm::LayoutBackward(
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
-    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
+    } while (GreatNotEqual(currentStartPos + chainOffset, overStartPos_));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutBackward");
@@ -509,7 +509,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
-    itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
+    itemGroup->SetListMainSize(overStartPos_, overEndPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
 }
 

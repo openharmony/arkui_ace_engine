@@ -181,6 +181,12 @@ bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
 void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
+    if (totalItemCount_ <= 0) {
+        totalMainSize_ = headerMainSize_ + footerMainSize_;
+        layoutWrapper->RemoveAllChildInRenderTree();
+        itemPosition_.clear();
+        return;
+    }
     int32_t startIndex = 0;
     int32_t endIndex = totalItemCount_ - 1;
     float startPos = headerMainSize_;
@@ -324,6 +330,10 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
         }
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
+    }
+
+    if (itemPosition_.empty()) {
+        return;
     }
 
     if (currentStartPos < headerMainSize_) {
