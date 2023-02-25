@@ -43,12 +43,6 @@ struct TextSelector {
     TextSelector() = default;
     TextSelector(int32_t base, int32_t destination) : baseOffset(base), destinationOffset(destination) {}
 
-    void TextUpdate(int32_t base, int32_t destination)
-    {
-        baseOffset = base;
-        destinationOffset = destination;
-    }
-
     void Update(int32_t base, int32_t destination)
     {
         baseOffset = base;
@@ -70,6 +64,16 @@ struct TextSelector {
     bool operator!=(const TextSelector& other) const
     {
         return !operator==(other);
+    }
+
+    inline int32_t GetTextStart() const
+    {
+        return std::min(baseOffset, destinationOffset);
+    }
+
+    inline int32_t GetTextEnd() const
+    {
+        return std::max(baseOffset, destinationOffset);
     }
 
     inline int32_t GetStart() const
