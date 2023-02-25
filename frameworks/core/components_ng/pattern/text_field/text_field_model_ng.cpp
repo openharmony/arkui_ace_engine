@@ -179,7 +179,7 @@ void TextFieldModelNG::SetPlaceholderFont(const Font& value)
     if (!value.fontFamilies.empty()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontFamily, value.fontFamilies);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredPlaceholderLineHeightNeedToUpdate, true);
 }
 
 void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
@@ -209,12 +209,12 @@ void TextFieldModelNG::SetMaxLines(uint32_t value)
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetFontWeight(FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontWeight, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetTextColor(const Color& value)
 {
@@ -223,12 +223,12 @@ void TextFieldModelNG::SetTextColor(const Color& value)
 void TextFieldModelNG::SetFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ItalicFontStyle, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 
 void TextFieldModelNG::SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError)

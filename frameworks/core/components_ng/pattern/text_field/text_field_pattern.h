@@ -573,7 +573,9 @@ private:
     void StartTwinkling();
     void StopTwinkling();
 
-    void SetCaretOffsetXForEmptyText();
+    float PreferredTextHeight(bool isPlaceholder);
+
+    void SetCaretOffsetForEmptyTextOrPositionZero();
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
 
@@ -606,8 +608,8 @@ private:
     RectF textRect_;
     RectF imageRect_;
     std::shared_ptr<RSParagraph> paragraph_;
-    TextStyle lineHeightMeasureUtilTextStyle_;
-    std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
+    std::shared_ptr<RSParagraph> textLineHeightUtilParagraph_;
+    std::shared_ptr<RSParagraph> placeholderLineHeightUtilParagraph_;
     TextStyle nextLineUtilTextStyle_;
     std::shared_ptr<RSParagraph> nextLineUtilParagraph_;
 
@@ -643,7 +645,6 @@ private:
     RectF caretRect_;
     bool cursorVisible_ = false;
     bool focusEventInitialized_ = false;
-    bool preferredLineHeightNeedToUpdate = true;
     bool isMousePressed_ = false;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
@@ -658,7 +659,6 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
-    float placeholderParagraphHeight_ = 0.0f;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
