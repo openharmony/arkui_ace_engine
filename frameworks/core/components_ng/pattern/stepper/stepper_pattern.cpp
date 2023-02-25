@@ -545,6 +545,10 @@ void StepperPattern::HandlingLeftButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
+    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
+    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
+        return;
+    }
     auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
     stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
     stepperHub->FirePreviousEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
@@ -559,6 +563,10 @@ void StepperPattern::HandlingRightButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
+    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
+    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
+        return;
+    }
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));
     auto labelStatus =
         stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");

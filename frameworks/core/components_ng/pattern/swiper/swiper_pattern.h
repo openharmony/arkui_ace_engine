@@ -133,6 +133,11 @@ public:
         return turnPageRate_;
     }
 
+    RefPtr<Animator> GetController()
+    {
+        return controller_;
+    }
+
     void UpdateCurrentOffset(float offset);
 
     int32_t TotalCount() const;
