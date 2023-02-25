@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
@@ -85,6 +86,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignStyle, NG::AlignStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionX, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionY, float, PROPERTY_UPDATE_MEASURE);
+
+private:
+    static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);
 };
 } // namespace OHOS::Ace::NG
 
