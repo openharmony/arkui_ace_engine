@@ -19,6 +19,7 @@
 #include <optional>
 #include <utility>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -282,6 +283,7 @@ void ViewAbstract::SetFlexBasis(const Dimension& value)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0f)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension());
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
