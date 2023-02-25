@@ -95,7 +95,7 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->ClearUserDefinedIdealSize(isWidth);
+    layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
 void ViewAbstract::SetMinWidth(const CalcLength& width)
