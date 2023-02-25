@@ -205,12 +205,12 @@ public:
         }
     }
 
-    void ClearUserDefinedIdealSize(bool isWidth)
+    void ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight)
     {
         if (!calcLayoutConstraint_) {
-            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+            return;
         }
-        if (calcLayoutConstraint_->ClearSelfIdealSize(isWidth)) {
+        if (calcLayoutConstraint_->ClearSelfIdealSize(clearWidth, clearHeight)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }
