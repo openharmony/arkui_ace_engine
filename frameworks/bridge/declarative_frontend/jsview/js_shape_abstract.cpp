@@ -86,6 +86,7 @@ void JSShapeAbstract::SetStroke(const JSCallbackInfo& info)
     }
     Color strokeColor;
     if (!ParseJsColor(info[0], strokeColor)) {
+        ShapeAbstractModel::GetInstance()->SetStroke(Color::TRANSPARENT);
         return;
     }
     ShapeAbstractModel::GetInstance()->SetStroke(strokeColor);
@@ -190,7 +191,7 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
         double result = std::strtod(value.c_str(), &pEnd);
 
         if (pEnd == value.c_str() || errno == ERANGE) {
-            lineWidth = Dimension(1.0, DimensionUnit::VP);
+            lineWidth = 1.0_vp;
         } else {
             lineWidth = Dimension(result, DimensionUnit::VP);
             if (pEnd != nullptr) {
@@ -214,9 +215,7 @@ void JSShapeAbstract::SetStrokeWidth(const JSCallbackInfo& info)
     } else if (!ParseJsDimensionVp(info[0], lineWidth)) {
         return;
     }
-    if (GreatOrEqual(lineWidth.Value(), 0.0)) {
-        ShapeAbstractModel::GetInstance()->SetStrokeWidth(lineWidth);
-    }
+    ShapeAbstractModel::GetInstance()->SetStrokeWidth(lineWidth);
 }
 
 void JSShapeAbstract::SetAntiAlias(bool antiAlias)
