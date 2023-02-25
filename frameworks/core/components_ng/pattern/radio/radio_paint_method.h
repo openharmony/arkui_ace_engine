@@ -74,45 +74,45 @@ public:
         radioModifier_->UpdateAnimatableProperty();
     }
 
-    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    void SetHotZoneOffset(const OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;
     }
 
-    void SetHotZoneSize(SizeF& hotZoneSize)
+    void SetHotZoneSize(const SizeF& hotZoneSize)
     {
         hotZoneSize_ = hotZoneSize;
     }
 
-    void SetEnabled(bool enabled)
+    void SetEnabled(const bool enabled)
     {
         enabled_ = enabled;
     }
 
-    void SetTotalScale(float totalScale)
+    void SetTotalScale(const float totalScale)
     {
         totalScale_ = totalScale;
     }
 
-    void SetPointScale(float pointScale)
+    void SetPointScale(const float pointScale)
     {
         pointScale_ = pointScale;
     }
 
-    void SetUIStatus(UIStatus& uiStatus)
+    void SetUIStatus(const UIStatus uiStatus)
     {
         uiStatus_ = uiStatus;
     }
 
-    void SetTouchHoverAnimationType(TouchHoverAnimationType& touchHoverType)
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
     {
         touchHoverType_ = touchHoverType;
     }
 
 private:
-    Color pointColor_ = Color::WHITE;
-    Color activeColor_ = Color::BLUE;
-    Color inactiveColor_ = Color::GRAY;
+    Color pointColor_ ;
+    Color activeColor_ ;
+    Color inactiveColor_;
     bool enabled_ = true;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;

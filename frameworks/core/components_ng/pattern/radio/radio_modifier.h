@@ -108,56 +108,56 @@ public:
     {
         inactiveColor_->Set(LinearColor(inactiveColor));
     }
-    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    void SetHotZoneOffset(const OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;
     }
 
-    void SetHotZoneSize(SizeF& hotZoneSize)
+    void SetHotZoneSize(const SizeF& hotZoneSize)
     {
         hotZoneSize_ = hotZoneSize;
     }
 
-    void SetEnabled(bool enabled)
+    void SetEnabled(const bool enabled)
     {
         enabled_ = enabled;
     }
 
-    void SetIsCheck(bool isCheck)
+    void SetIsCheck(const bool isCheck)
     {
         isCheck_ = isCheck;
     }
 
-    void SetTotalScale(float totalScale)
+    void SetTotalScale(const float totalScale)
     {
         if (totalScale_) {
             totalScale_->Set(totalScale);
         }
     }
 
-    void SetPointScale(float pointScale)
+    void SetPointScale(const float pointScale)
     {
         if (pointScale_) {
             pointScale_->Set(pointScale);
         }
     }
 
-    void SetOffset(OffsetF& offset)
+    void SetOffset(const OffsetF& offset)
     {
         offset_ = offset;
     }
 
-    void SetSize(SizeF& size)
+    void SetSize(const SizeF& size)
     {
         size_ = size;
     }
 
-    void SetUIStatus(UIStatus& uiStatus)
+    void SetUIStatus(const UIStatus uiStatus)
     {
         uiStatus_ = uiStatus;
     }
 
-    void SetTouchHoverAnimationType(TouchHoverAnimationType& touchHoverType)
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
     {
         touchHoverType_ = touchHoverType;
     }

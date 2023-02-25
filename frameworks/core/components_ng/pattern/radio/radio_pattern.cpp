@@ -409,7 +409,6 @@ void RadioPattern::UpdateUIStatus(bool check)
     uiStatus_ = check ? UIStatus::SELECTED : UIStatus::UNSELECTED;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    //host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     host->MarkNeedRenderOnly();
 }
 

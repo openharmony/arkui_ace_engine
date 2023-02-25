@@ -77,7 +77,6 @@ void RadioModifier::PaintRadio(DrawingContext& context) const
     auto canvas = context.canvas;
     auto contentSize = SizeF(context.width, context.height);
     auto paintOffset = OffsetF(0, 0);
-    //OffsetF paintOffset = offset;
     DrawTouchAndHoverBoard(canvas, contentSize, paintOffset);
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
     float centerX = paintOffset.GetX() + outCircleRadius;
