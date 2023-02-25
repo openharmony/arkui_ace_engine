@@ -322,6 +322,7 @@ void SelectPattern::BuildChild()
     auto row = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_VOID(row);
+    row->SetInternal();
     auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_VOID(rowProps);
     rowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
@@ -330,6 +331,7 @@ void SelectPattern::BuildChild()
     text_ =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(text_);
+    text_->SetInternal();
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
     InitTextProps(textProps, theme);
@@ -337,6 +339,7 @@ void SelectPattern::BuildChild()
     spinner_ = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(spinner_);
+    spinner_->SetInternal();
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
     InitSpinner(spinner_, iconTheme, theme);

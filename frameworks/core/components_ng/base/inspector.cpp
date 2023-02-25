@@ -137,6 +137,21 @@ void GetInspectorChildren(
     }
     jsonNodeArray->Put(jsonNode);
 }
+
+RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
+{
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto stageNode = pageNode->GetParent();
+    CHECK_NULL_RETURN(stageNode, nullptr);
+    auto stageParent = stageNode->GetParent();
+    CHECK_NULL_RETURN(stageParent, nullptr);
+    auto overlayNode = stageParent->GetChildren().back();
+    if (overlayNode->GetTag() == "stage") {
+        return nullptr;
+    }
+    LOGI("GetOverlayNode if overlay node has showed");
+    return overlayNode;
+}
 } // namespace
 
 std::string Inspector::GetInspectorNodeByKey(const std::string& key)
@@ -187,6 +202,10 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : pageRootNode->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
+    }
+    auto overlayNode = GetOverlayNode(pageRootNode);
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, pageId);
     }
     auto jsonNodeArray = JsonUtil::CreateArray(false);
     for (auto& uiNode : children) {
