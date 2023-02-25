@@ -65,11 +65,13 @@ void ExclusiveRecognizer::OnRejected()
         }
         if (recognizer->GetRefereeState() == RefereeState::FAIL) {
             LOGE("the %{public}s gesture recognizer already failed", AceType::TypeName(recognizer));
-            continue;
         }
-
-        LOGD("the %{public}s gesture recognizer call on reject", AceType::TypeName(recognizer));
-        recognizer->OnRejected();
+        if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+            auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+            group->ForceReject();
+        } else {
+            recognizer->OnRejected();
+        }
     }
 }
 
