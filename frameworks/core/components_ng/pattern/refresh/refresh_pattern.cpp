@@ -64,8 +64,8 @@ void RefreshPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     triggerLoadingDistance_ = static_cast<float>(
-        std::clamp(layoutProperty->GetIndicatorOffset().value_or(TRIGGER_LOADING_DISTANCE).ConvertToPx(), 0.0,
-            TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+        std::clamp(layoutProperty->GetIndicatorOffset().value_or(TRIGGER_LOADING_DISTANCE).ConvertToPx(),
+            -1.0f * TRIGGER_LOADING_DISTANCE.ConvertToPx(), TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
     InitPanEvent(gestureHub);
     CheckCoordinationEvent();
     if (!progressChild_) {
@@ -350,18 +350,12 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
     CHECK_NULL_VOID_NOLOG(progressContext);
     progressContext->UpdateOpacity(ratio);
 }
+
 float RefreshPattern::GetFollowRatio()
 {
-    auto refreshFollowRadio = scrollOffset_.GetY() / TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-
-    if (refreshFollowRadio > 1.0) {
-        refreshFollowRadio = 1.0f;
-    }
-
-    if (refreshFollowRadio < 0.0) {
-        refreshFollowRadio = 0.0f;
-    }
-    return refreshFollowRadio;
+    auto refreshFollowRadio = (scrollOffset_.GetY() - std::clamp(triggerLoadingDistance_, 0.0f,
+        static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) / TRIGGER_REFRESH_DISTANCE.ConvertToPx();
+    return std::clamp(static_cast<float>(refreshFollowRadio), 0.0f, 1.0f);
 }
 
 void RefreshPattern::TransitionPeriodAnimation()
