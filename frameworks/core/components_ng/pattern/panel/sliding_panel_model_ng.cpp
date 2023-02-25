@@ -160,6 +160,7 @@ void SlidingPanelModelNG::SetBackgroundColor(const Color& backgroundColor)
     CHECK_NULL_VOID(columnNode);
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
+        ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundColor, backgroundColor);
         renderContext->UpdateBackgroundColor(backgroundColor);
     }
 }
