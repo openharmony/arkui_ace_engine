@@ -19,7 +19,6 @@
 #include <memory>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/shell/common/shell_io_manager.h"
 #include "flutter/shell/common/thread_host.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
@@ -217,7 +216,6 @@ private:
     // TODO: still using flutter threads
     const flutter::ThreadHost threadHost_;
     const flutter::TaskRunners taskRunners_;
-    std::unique_ptr<flutter::ShellIOManager> ioManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceViewOhos);
 };

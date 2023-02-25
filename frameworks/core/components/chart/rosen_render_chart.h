@@ -16,13 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_ROSEN_RENDER_CHART_H
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/text/paragraph_builder.h"
+#include "third_party/skia/include/core/SkPaint.h"
+#include "third_party/skia/include/core/SkPath.h"
 
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"
 #include "core/components/chart/render_chart.h"
-#include "third_party/skia/include/core/SkPath.h"
 
 namespace OHOS::Ace {
 
@@ -57,29 +56,29 @@ private:
 
     void PaintLinearGraph(SkCanvas* canvas, const Rect& paintRect);
 
-    void PaintLineEdge(SkCanvas* canvas, SkPath& path, const SegmentInfo segmentInfo,
-        double thickness, bool drawGradient = false);
+    void PaintLineEdge(
+        SkCanvas* canvas, SkPath& path, const SegmentInfo segmentInfo, double thickness, bool drawGradient = false);
 
     void UpdateLineGradientPoint(const std::vector<LineInfo>& pointInfo, const MainChart& line, const Rect& paintRect);
 
-    void PaintLineGradient(SkCanvas* canvas, SkPath& path, const Rect& paintRect,
-        Color fillColor, const PointInfo& peekPoint);
+    void PaintLineGradient(
+        SkCanvas* canvas, SkPath& path, const Rect& paintRect, Color fillColor, const PointInfo& peekPoint);
 
-    int32_t PaintLine(uint32_t index, const std::vector<LineInfo>& line, SkPath& path,
-        const MainChart& data, const Rect& paintRect);
+    int32_t PaintLine(
+        uint32_t index, const std::vector<LineInfo>& line, SkPath& path, const MainChart& data, const Rect& paintRect);
 
-    void AddCubicPath(SkPath& path, const Rect& paintRect, const std::vector<LineInfo>& line,
-        uint32_t index, bool isEnd);
+    void AddCubicPath(
+        SkPath& path, const Rect& paintRect, const std::vector<LineInfo>& line, uint32_t index, bool isEnd);
 
     sk_sp<SkShader> CreateFillGradientShader(const Rect& paintRect, const Color& fillColor, double top);
 
-    void PaintBar(SkCanvas* canvas, SkPaint& paint, const std::vector<LineInfo>& barGroupData,
-        const Rect& paintRect, int32_t barGroupNum, int32_t barsAreaNum, int32_t barGroupIndex);
+    void PaintBar(SkCanvas* canvas, SkPaint& paint, const std::vector<LineInfo>& barGroupData, const Rect& paintRect,
+        int32_t barGroupNum, int32_t barsAreaNum, int32_t barGroupIndex);
 
     Rect GetBarsAreaPaintRect(const Rect& paintRect, int32_t barsAreaIndex);
 
-    Rect GetBarAreaPaintRect(const Rect& barsAreaPaintRect, int32_t barGroupIndex, int32_t barGroupNumber,
-        double barInterval);
+    Rect GetBarAreaPaintRect(
+        const Rect& barsAreaPaintRect, int32_t barGroupIndex, int32_t barGroupNumber, double barInterval);
 
     Offset CalculateControlA(const Offset& prev, const Offset& cur, const Offset& next);
 

@@ -15,7 +15,6 @@
 
 #include "core/components/plugin/plugin_element.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
 #ifdef OS_ACCOUNT_EXISTS
 #include "os_account_manager.h"
 #endif // OS_ACCOUNT_EXISTS
@@ -252,7 +251,6 @@ void PluginElement::RunPluginContainer()
     pluginSubContainerId_ = PluginManager::GetInstance().GetPluginSubContainerId();
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentContainerId);
-    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, parentContainerId);
     pluginSubContainer_->SetInstanceId(pluginSubContainerId_);
     pluginSubContainer_->Initialize();
     pluginSubContainer_->SetPluginComponent(component_);

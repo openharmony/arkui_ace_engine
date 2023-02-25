@@ -16,7 +16,6 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
 #include "flutter/fml/message_loop.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
@@ -96,21 +95,12 @@ AceViewOhos* AceViewOhos::CreateView(int32_t instanceId, bool useCurrentEventRun
 AceViewOhos::AceViewOhos(int32_t id, flutter::ThreadHost threadHost, flutter::TaskRunners taskRunners)
     : instanceId_(id), threadHost_(std::move(threadHost)), taskRunners_(std::move(taskRunners))
 {
-    ioManager_ = std::make_unique<flutter::ShellIOManager>(nullptr, taskRunners_.GetIOTaskRunner());
-    taskRunners_.GetUITaskRunner()->PostTask(
-        [id = instanceId_, weakIoMgr = ioManager_->GetWeakPtr(), runners = taskRunners_] {
-            flutter::UIDartState::Init(id, weakIoMgr, runners);
-            if (runners.GetUITaskRunner() == runners.GetPlatformTaskRunner()) {
-                ContainerScope::SetScopeNotify([](int32_t id) { flutter::UIDartState::Current()->SetCurInstance(id); });
-            }
-        });
 }
 
 void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window)
 {
     CHECK_NULL_VOID(window);
     CHECK_NULL_VOID(view);
-    LOGD(">>> AceViewOhos::SurfaceCreated, pWnd:%{public}p", &(*window));
 }
 
 void AceViewOhos::SurfaceChanged(AceViewOhos* view, int32_t width, int32_t height, int32_t orientation,

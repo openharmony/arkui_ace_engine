@@ -15,7 +15,6 @@
 
 #include "core/components/track/flutter_render_scale_ring_track.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/effects/Sk1DPathEffect.h"
 
 #include "core/components/theme/theme_constants.h"

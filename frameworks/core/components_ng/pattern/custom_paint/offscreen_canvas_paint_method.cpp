@@ -87,9 +87,6 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
     skCanvas_ = std::make_unique<SkCanvas>(canvasCache_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     InitFilterFunc();
     InitImageCallbacks();
 }
@@ -442,9 +439,6 @@ void OffscreenCanvasPaintMethod::ImageObjFailed()
 void OffscreenCanvasPaintMethod::DrawImage(
     PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     std::string::size_type tmp = canvasImage.src.find(".svg");
     if (tmp != std::string::npos) {
         DrawSvgImage(paintWrapper, canvasImage);
@@ -493,9 +487,6 @@ void OffscreenCanvasPaintMethod::DrawImage(
 
 void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     // get skImage form pixelMap
     auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());

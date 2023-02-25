@@ -16,9 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_FLUTTER_RENDER_CLOCK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CLOCK_FLUTTER_RENDER_CLOCK_H
 
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/image.h"
-
 #include "core/components/clock/render_clock.h"
 #include "core/pipeline/layers/offset_layer.h"
 

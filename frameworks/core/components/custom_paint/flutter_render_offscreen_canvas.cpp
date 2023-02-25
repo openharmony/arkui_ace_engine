@@ -352,10 +352,6 @@ void FlutterRenderOffscreenCanvas::InitImagePaint()
 
 void FlutterRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, double width, double height)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;
@@ -404,10 +400,6 @@ void FlutterRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, dou
 
 void FlutterRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;
@@ -621,10 +613,6 @@ void FlutterRenderOffscreenCanvas::ResetTransform()
 
 void FlutterRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;

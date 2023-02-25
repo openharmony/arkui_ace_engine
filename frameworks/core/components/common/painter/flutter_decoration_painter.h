@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_FLUTTER_DECORATION_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_FLUTTER_DECORATION_PAINTER_H
 
-#include "flutter/lib/ui/ui_dart_state.h"
-
 #include <math.h>
 
 #include "base/memory/ace_type.h"

@@ -18,7 +18,6 @@
 #include <cmath>
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-#include "flutter/lib/ui/text/font_collection.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "third_party/bounds_checking_function/include/securec.h"
@@ -134,9 +133,6 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
 
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     auto width = pattern.GetImageWidth();
     auto height = pattern.GetImageHeight();
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)

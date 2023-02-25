@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_SPAN_FLUTTER_RENDER_TEXT_SPAN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_SPAN_FLUTTER_RENDER_TEXT_SPAN_H
 
-#include "flutter/lib/ui/text/paragraph_builder.h"
+#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 
 #include "core/components/text_span/render_text_span.h"
 #include "core/gestures/gesture_type.h"

@@ -15,9 +15,9 @@
 
 #include "core/components/calendar/rosen_render_calendar.h"
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/text/paragraph_builder.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
+#include "flutter/third_party/txt/src/txt/paragraph_style.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
@@ -205,9 +205,9 @@ void RosenRenderCalendar::DrawWeekAndDates(SkCanvas* canvas, Offset offset)
     double dailyRowSpace = 0.0;
     static const Dimension dateOffset = 4.0_vp;
     double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_;
-    if (rowCount_ == 5) {   // five line calendar
+    if (rowCount_ == 5) { // five line calendar
         dailyRowSpace = dailyFiveRowSpace_;
-    } else if (rowCount_ == 6) {    // six line calendar
+    } else if (rowCount_ == 6) { // six line calendar
         dailyRowSpace = dailySixRowSpace_;
     }
     for (int32_t row = 0; row < rowCount_; row++) {
@@ -260,7 +260,7 @@ void RosenRenderCalendar::DrawFocusedArea(
         type_ == CalendarType::SIMPLE
             ? Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_, y + focusedAreaRadius_)
             : Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
-                y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
+                  y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;
     canvas->drawCircle(bgCircleStart.GetX(), bgCircleStart.GetY(), focusedAreaRadius_, paint);
 }

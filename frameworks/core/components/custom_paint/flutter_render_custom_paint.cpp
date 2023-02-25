@@ -17,7 +17,6 @@
 
 #include <cmath>
 
-#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "third_party/bounds_checking_function/include/securec.h"
@@ -1385,10 +1384,6 @@ void FlutterRenderCustomPaint::UpdateLineDash(SkPaint& paint)
 void FlutterRenderCustomPaint::DrawImage(
     const Offset& offset, const CanvasImage& canvasImage, double width, double height)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
@@ -1431,10 +1426,6 @@ void FlutterRenderCustomPaint::DrawImage(
 
 void FlutterRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
@@ -1482,10 +1473,6 @@ void FlutterRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Can
 
 void FlutterRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = GetContext().Upgrade();
     if (!context) {
         return;

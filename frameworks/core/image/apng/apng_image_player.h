@@ -18,9 +18,6 @@
 
 #include <unordered_map>
 
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/image.h"
-
 #include "base/memory/ace_type.h"
 #include "core/animation/animator.h"
 #include "apng_image_animation.h"

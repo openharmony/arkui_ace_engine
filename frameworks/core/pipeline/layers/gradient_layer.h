@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_LAYERS_GRADIENT_LAYER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_LAYERS_GRADIENT_LAYER_H
 
-#include "flutter/lib/ui/dart_wrapper.h"
-
 #include "base/geometry/point.h"
 #include "base/geometry/rect.h"
 #include "core/components/common/properties/color.h"

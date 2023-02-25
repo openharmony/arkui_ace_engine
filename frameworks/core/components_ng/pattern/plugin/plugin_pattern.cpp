@@ -20,7 +20,6 @@
 #ifdef OS_ACCOUNT_EXISTS
 #include "os_account_manager.h"
 #endif // OS_ACCOUNT_EXISTS
-#include "flutter/lib/ui/ui_dart_state.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
@@ -205,10 +204,6 @@ void PluginPattern::CreatePluginSubContainer()
 
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
-    auto currentDartState = flutter::UIDartState::Current();
-    if (currentDartState) {
-        currentDartState->AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
-    }
     pluginSubContainer_->Initialize();
     pluginSubContainer_->SetPluginPattern(WeakClaim(this));
     pluginSubContainer_->SetPluginNode(GetHost());

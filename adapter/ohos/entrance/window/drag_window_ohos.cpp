@@ -15,10 +15,7 @@
 
 #include "drag_window_ohos.h"
 
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/image.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
-#include "fml/memory/ref_ptr.h"
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/offset.h"

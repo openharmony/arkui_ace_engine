@@ -18,6 +18,7 @@
 
 #include "experimental/svg/model/SkSVGDOM.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
+#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
 
 #include "base/geometry/ng/offset_t.h"

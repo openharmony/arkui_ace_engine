@@ -17,8 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/image.h"
 
 #include "core/components/image/render_image.h"
 #include "core/image/image_provider.h"

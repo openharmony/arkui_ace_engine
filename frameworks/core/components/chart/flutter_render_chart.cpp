@@ -15,12 +15,12 @@
 
 #include "core/components/chart/flutter_render_chart.h"
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "third_party/skia/include/effects/Sk1DPathEffect.h"
 #include "third_party/skia/include/effects/SkGradientShader.h"
+#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
+#include "flutter/third_party/txt/src/txt/paragraph_style.h"
+#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 
 #include "base/utils/string_utils.h"
 #include "core/components/calendar/flutter_render_calendar.h"
@@ -651,8 +651,8 @@ Rect FlutterRenderChart::GetBarAreaPaintRect(
     auto barAreaWidth = (1 - barInterval) * barsAreaPaintRect.Width() / barGroupNumber;
     auto barAreaHeight = barsAreaPaintRect.Height();
     // After leaving the interval, the left border of the barArea area is obtained
-    auto barAreaLeft = barsAreaPaintRect.Left() + barInterval / 2 * barsAreaPaintRect.Width() +
-                       barGroupIndex * barAreaWidth;
+    auto barAreaLeft =
+        barsAreaPaintRect.Left() + barInterval / 2 * barsAreaPaintRect.Width() + barGroupIndex * barAreaWidth;
     Rect barAreaRect = Rect(barAreaLeft, barsAreaPaintRect.Top(), barAreaWidth, barAreaHeight);
     return barAreaRect;
 }

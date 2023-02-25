@@ -15,8 +15,8 @@
 
 #include "core/components/calendar/flutter_render_calendar.h"
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/text/paragraph_builder.h"
+#include "flutter/third_party/txt/src/txt/paragraph.h"
+#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 
 #include "base/i18n/localization.h"
 #include "base/utils/string_utils.h"
@@ -146,7 +146,6 @@ void FlutterRenderCalendar::Paint(RenderContext& context, const Offset& offset)
         }
         DrawWeekAndDates(canvas, offset);
     }
-
 }
 
 void FlutterRenderCalendar::PerformLayout()
@@ -220,9 +219,9 @@ void FlutterRenderCalendar::DrawWeekAndDates(ScopedCanvas& canvas, Offset offset
     double dailyRowSpace = 0.0;
     static const Dimension dateOffset = 4.0_vp;
     double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_;
-    if (rowCount_ == 5) {   // five line calendar
+    if (rowCount_ == 5) { // five line calendar
         dailyRowSpace = dailyFiveRowSpace_;
-    } else if (rowCount_ == 6) {    // six line calendar
+    } else if (rowCount_ == 6) { // six line calendar
         dailyRowSpace = dailySixRowSpace_;
     }
     for (int32_t row = 0; row < rowCount_; row++) {
@@ -273,7 +272,7 @@ void FlutterRenderCalendar::DrawFocusedArea(
         type_ == CalendarType::SIMPLE
             ? Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_, y + focusedAreaRadius_)
             : Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
-                y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
+                  y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;
     canvas->drawCircle(bgCircleStart.GetX(), bgCircleStart.GetY(), focusedAreaRadius_, paint, paintData);
 }
@@ -411,15 +410,14 @@ void FlutterRenderCalendar::SetNonFocusStyle(
     SkColor lunarTextColor;
     if (day.month.month != currentMonth_.month) {
         dateTextColor = nonCurrentMonthDayColor_;
-        lunarTextColor = day.markLunarDay ? SkColorSetA(markLunarColor_, WEEKEND_TRANSPARENT)
-                                          : nonCurrentMonthLunarColor_;
+        lunarTextColor =
+            day.markLunarDay ? SkColorSetA(markLunarColor_, WEEKEND_TRANSPARENT) : nonCurrentMonthLunarColor_;
     } else if (IsToday(day)) {
         dateTextColor = todayDayColor_;
         lunarTextColor = todayLunarColor_;
     } else if (IsOffDay(day)) {
         dateTextColor = weekendDayColor_;
-        lunarTextColor =
-            day.markLunarDay ? markLunarColor_ : weekendLunarColor_;
+        lunarTextColor = day.markLunarDay ? markLunarColor_ : weekendLunarColor_;
     } else {
         dateTextColor = dayColor_;
         lunarTextColor = day.markLunarDay ? markLunarColor_ : lunarColor_;
@@ -452,13 +450,12 @@ void FlutterRenderCalendar::DrawTouchedArea(RenderContext& context, Offset offse
     double dailyRowSpace = rowCount_ == 5 ? dailyFiveRowSpace_ : dailySixRowSpace_;
     double dayNumberStartY = topPadding_ + weekHeight_ + weekAndDayRowSpace_ + NormalizeToPx(dateOffset);
     double x = textDirection_ == TextDirection::LTR ? column * (dayWidth_ + colSpace_)
-                                                               : (totalWeek - column - 1) * (dayWidth_ + colSpace_);
+                                                    : (totalWeek - column - 1) * (dayWidth_ + colSpace_);
     double y = (touchIndex_ / 7.0) * (dayHeight_ + dailyRowSpace) + dayNumberStartY;
     Offset circleCenter = Offset(x - (focusedAreaRadius_ * 2 - dayWidth_) / 2 + focusedAreaRadius_,
         y - NormalizeToPx(1.0_vp) + focusedAreaRadius_);
     Offset bgCircleStart = offset + circleCenter;
-    canvas->drawCircle(
-        bgCircleStart.GetX(), bgCircleStart.GetY(), focusedAreaRadius_, paint, paintData);
+    canvas->drawCircle(bgCircleStart.GetX(), bgCircleStart.GetY(), focusedAreaRadius_, paint, paintData);
 }
 
 void FlutterRenderCalendar::DrawCardCalendar(
