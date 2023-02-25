@@ -239,6 +239,8 @@ private:
     float currentDelta_ = 0.0f;
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
+    float overStartPos_ = 0.0f;
+    float overEndPos_ = 0.0f;
 
     float spaceWidth_ = 0.0f;
     bool overScrollFeature_ = false;
