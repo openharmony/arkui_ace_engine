@@ -28,7 +28,7 @@ struct DividerInfo {
     float crossSize;
     float startMargin;
     float endMargin;
-    float halfSpaceWidth;
+    float space;
     float mainPadding;
     float crossPadding;
     bool isVertical;
