@@ -83,7 +83,7 @@ void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::
 
 void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInfo& info)
 {
-    HandleKeyboardStatus(info.GetKeyboardStatus());
+    LOGI("[OnTextChangedListenerImpl] KeyboardStatus status: %{public}d", info.GetKeyboardStatus());
     HandleFunctionKey(info.GetFunctionKey());
 }
 

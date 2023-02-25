@@ -229,21 +229,21 @@ HWTEST_F(TextFieldLayoutPropertyTestNg, FontSize001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PreferredLineHeightNeedToUpdate001
- * @tc.desc: Update PreferredLineHeightNeedToUpdate layout property
+ * @tc.name: PreferredTextLineHeightNeedToUpdate001
+ * @tc.desc: Update PreferredTextLineHeightNeedToUpdate layout property
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldLayoutPropertyTestNg, PreferredLineHeightNeedToUpdate001, TestSize.Level1)
+HWTEST_F(TextFieldLayoutPropertyTestNg, PreferredTextLineHeightNeedToUpdate001, TestSize.Level1)
 {
     auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
     EXPECT_TRUE(textFieldLayoutProperty);
     if (!textFieldLayoutProperty) {
         return;
     }
-    EXPECT_FALSE(textFieldLayoutProperty->HasPreferredLineHeightNeedToUpdate());
-    textFieldLayoutProperty->UpdatePreferredLineHeightNeedToUpdate(true);
-    if (textFieldLayoutProperty->HasPreferredLineHeightNeedToUpdate()) {
-        EXPECT_TRUE(textFieldLayoutProperty->GetPreferredLineHeightNeedToUpdate().value());
+    EXPECT_FALSE(textFieldLayoutProperty->HasPreferredTextLineHeightNeedToUpdate());
+    textFieldLayoutProperty->UpdatePreferredTextLineHeightNeedToUpdate(true);
+    if (textFieldLayoutProperty->HasPreferredTextLineHeightNeedToUpdate()) {
+        EXPECT_TRUE(textFieldLayoutProperty->GetPreferredTextLineHeightNeedToUpdate().value());
     }
 }
 
