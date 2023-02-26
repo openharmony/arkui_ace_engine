@@ -36,7 +36,7 @@ namespace OHOS::Ace::NG {
 namespace {
 #ifndef OS_ACCOUNT_EXISTS
 constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
-#endif  // OS_ACCOUNT_EXISTS
+#endif                                       // OS_ACCOUNT_EXISTS
 
 ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 {
@@ -205,7 +205,10 @@ void PluginPattern::CreatePluginSubContainer()
 
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
-    flutter::UIDartState::Current()->AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
+    auto currentDartState = flutter::UIDartState::Current();
+    if (currentDartState) {
+        currentDartState->AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
+    }
     pluginSubContainer_->Initialize();
     pluginSubContainer_->SetPluginPattern(WeakClaim(this));
     pluginSubContainer_->SetPluginNode(GetHost());
@@ -469,7 +472,7 @@ std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& wea
         pluginPattern->FireOnErrorEvent("1", "Bms get bundleName failed!");
         return packagePathStr;
     }
-    if (bundleInfo.hapModuleInfos[0].hapPath.empty()) {
+    if (bundleInfo.hapModuleInfos.empty() || bundleInfo.hapModuleInfos[0].hapPath.empty()) {
         if (strList.size() == 1) {
             if (bundleInfo.moduleResPaths.size() == 1) {
                 info.moduleResPath = bundleInfo.moduleResPaths[0];
