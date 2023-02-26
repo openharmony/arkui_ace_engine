@@ -21,12 +21,6 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-    const Color DEFAULT_CHECKEDBACKGROUND_COLOR(0xFF007DFF);
-    const Color DEFAULT_UNCHECKEDBORDERCOLOR_COLOR(0x66182431);
-    const Color DEFAULT_INDICATORCOLOR_COLOR = Color::WHITE;
-} // namespace
-
 class RadioPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(RadioPaintProperty, PaintProperty)
 
@@ -56,15 +50,18 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto radioTheme = pipeline->GetTheme<RadioTheme>();
         PaintProperty::ToJsonValue(json);
         json->Put("checked", GetRadioCheck().value_or(false) ? "true" : "false");
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("checkedBackgroundColor",
-            GetRadioCheckedBackgroundColor().value_or(DEFAULT_CHECKEDBACKGROUND_COLOR).ColorToString().c_str());
+            GetRadioCheckedBackgroundColor().value_or(radioTheme->GetActiveColor()).ColorToString().c_str());
         jsonValue->Put("uncheckedBorderColor",
-            GetRadioUncheckedBorderColor().value_or(DEFAULT_UNCHECKEDBORDERCOLOR_COLOR).ColorToString().c_str());
+            GetRadioUncheckedBorderColor().value_or(radioTheme->GetInactiveColor()).ColorToString().c_str());
         jsonValue->Put("indicatorColor",
-            GetRadioIndicatorColor().value_or(DEFAULT_INDICATORCOLOR_COLOR).ColorToString().c_str());
+            GetRadioIndicatorColor().value_or(radioTheme->GetPointColor()).ColorToString().c_str());
         json->Put("radioStyle", jsonValue->ToString().c_str());
     }
 

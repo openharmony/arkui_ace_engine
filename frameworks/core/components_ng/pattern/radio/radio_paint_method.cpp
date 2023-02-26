@@ -35,16 +35,17 @@ constexpr float CALC_RADIUS = 2.0f;
 
 RadioModifier::RadioModifier()
 {
-    data_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
-    AttachProperty(data_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
 
-    pointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::WHITE));
+    pointColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(radioTheme->GetPointColor()));
     AttachProperty(pointColor_);
 
-    activeColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::BLUE));
+    activeColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(radioTheme->GetActiveColor()));
     AttachProperty(activeColor_);
 
-    inactiveColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::GRAY));
+    inactiveColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(radioTheme->GetInactiveColor()));
     AttachProperty(inactiveColor_);
     totalScale_ = AceType::MakeRefPtr<PropertyFloat>(1.0f);
     pointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.5f);
@@ -53,6 +54,8 @@ RadioModifier::RadioModifier()
     AttachProperty(totalScale_);
     AttachProperty(pointScale_);
     AttachProperty(animateTouchHoverColor_);
+    
+    InitializeParam();
 }
 
 void RadioModifier::InitializeParam()

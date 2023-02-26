@@ -52,10 +52,12 @@ public:
             paintProperty->UpdateRadioCheck(false);
         }
 
-        activeColor_ = paintProperty->GetRadioCheckedBackgroundColor().value_or(Color(Color::BLUE));
-        inactiveColor_ = paintProperty->GetRadioUncheckedBorderColor().value_or(Color(Color::GRAY));
-        pointColor_ = paintProperty->GetRadioIndicatorColor().value_or(Color(Color::WHITE));
-        radioModifier_->UpdateDate();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto radioTheme = pipeline->GetTheme<RadioTheme>();
+        activeColor_ = paintProperty->GetRadioCheckedBackgroundColor().value_or(Color(radioTheme->GetActiveColor()));
+        inactiveColor_ = paintProperty->GetRadioUncheckedBorderColor().value_or(Color(radioTheme->GetInactiveColor()));
+        pointColor_ = paintProperty->GetRadioIndicatorColor().value_or(Color(radioTheme->GetPointColor()));
 
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();

@@ -162,7 +162,7 @@ void RadioPattern::HandleMouseEvent(bool isHover)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::OnClick()
@@ -193,7 +193,7 @@ void RadioPattern::OnTouchDown()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = true;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::OnTouchUp()
@@ -206,7 +206,7 @@ void RadioPattern::OnTouchUp()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::UpdateState()
@@ -417,7 +417,7 @@ void RadioPattern::UpdateTotalScale(float scale)
     totalScale_ = scale;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::UpdatePointScale(float scale)
@@ -425,7 +425,7 @@ void RadioPattern::UpdatePointScale(float scale)
     pointScale_ = scale;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)

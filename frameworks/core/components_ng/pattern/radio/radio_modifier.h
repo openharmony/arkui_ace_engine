@@ -83,15 +83,6 @@ public:
         });
     }
 
-    void UpdateDate()
-    {
-        if (data_) {
-            // When the date update, the animation will repeat once.
-            auto temp = data_->Get() + 0.1;
-            data_->Set(temp);
-        }
-    }
-
     void InitializeParam();
     void PaintRadio(DrawingContext& context) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
@@ -163,7 +154,6 @@ public:
     }
 
 private:
-    RefPtr<AnimatablePropertyFloat> data_;
     RefPtr<AnimatablePropertyColor> pointColor_;
     RefPtr<AnimatablePropertyColor> activeColor_;
     RefPtr<AnimatablePropertyColor> inactiveColor_;
