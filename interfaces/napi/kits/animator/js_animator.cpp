@@ -253,6 +253,9 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
         LOGE("animator is null");
         return nullptr;
     }
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
+    }
     animator->Play();
     napi_value result = nullptr;
     napi_get_null(env, &result);
@@ -309,6 +312,9 @@ static napi_value JSReverse(napi_env env, napi_callback_info info)
         LOGE("animator is null");
         return nullptr;
     }
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
+    }
     animator->Reverse();
     napi_value result;
     napi_get_null(env, &result);
@@ -362,6 +368,9 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
     });
     animator->AddInterpolator(animation);
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
+    }
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;
