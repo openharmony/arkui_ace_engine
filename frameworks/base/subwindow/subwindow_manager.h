@@ -74,6 +74,7 @@ public:
     void CloseMenu();
     void ClearMenu();
     void ClearMenuNG();
+    RefPtr<NG::FrameNode> ShowDialogNG(const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode);
 
     void SetHotAreas(const std::vector<Rect>& rects);
 
@@ -89,6 +90,8 @@ public:
         const std::set<std::string>& dialogCallbacks);
     void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
+    
+    void HideWindow();
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();

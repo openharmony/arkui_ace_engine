@@ -145,6 +145,16 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.closeAnimation = closeAnimation;
         }
 
+        auto showInSubWindowValue = constructorArg->GetProperty("showInSubWindow");
+        if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+            LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+                 "emulator or a real device instead.");
+#else
+            instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+#endif
+        }
+
         info.SetReturnValue(instance);
     } else {
         LOGE("JSView creation with invalid arguments.");
@@ -382,7 +392,12 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
                 this->isShown_ = isShown;
             }
         };
-        dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+
+        if (dialogProperties_.isShowInSubWindow) {
+            dialog_ = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties_, customNode);
+        } else {
+            dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+        }
         return;
     }
 
@@ -426,7 +441,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         auto container = Container::Current();
         auto currentId = Container::CurrentId();
         CHECK_NULL_VOID(container);
-        if (container->IsSubContainer()) {
+        if (container->IsSubContainer() && !dialogProperties_.isShowInSubWindow) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
             container = AceEngine::Get().GetContainer(currentId);
         }
@@ -492,8 +507,7 @@ bool JSCustomDialogController::ParseAnimation(
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc), id = Container::CurrentId()]() {
-            ContainerScope scope(id);
+        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CustomDialog.onFinish");
             func->Execute();
