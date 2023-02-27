@@ -24,24 +24,10 @@ if (is_standard_system) {
 
 build_component_ng("window_scene") {
   sources = [
-    # container
     "scene/container/window_extension.cpp",
     "scene/container/window_pattern.cpp",
-    "scene/container/window_scene.cpp",
-
-    # host
     "scene/host/host_window_extension.cpp",
     "scene/host/host_window_pattern.cpp",
-    "scene/host/host_window_scene_model.cpp",
-    "scene/host/host_window_scene.cpp",
-
-    # root
-    "root/root_scene_model.cpp",
-    "root/root_scene.cpp",
-
-    # screen
-    "screen/screen_model.cpp",
-    "screen/screen_pattern.cpp",
   ]
 
   if (is_standard_system) {
@@ -61,7 +47,6 @@ build_component_ng("window_scene") {
       "ipc:ipc_core",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
-      "window_manager:screen_session"
     ]
   }
 }

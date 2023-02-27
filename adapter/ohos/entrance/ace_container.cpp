@@ -1451,21 +1451,6 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityRuntimeCo
     return runtimeContext_.lock();
 }
 
-sptr<IRemoteObject> AceContainer::GetAbilityToken()
-{
-    auto context = runtimeContext_.lock();
-    if (!context) {
-        LOGE("runtimeContext is null.");
-        return nullptr;
-    }
-    return context->GetToken();
-}
-
-std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
-{
-    return runtimeContext_.lock();
-}
-
 // ArkTsCard start
 std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t instanceId)
 {
