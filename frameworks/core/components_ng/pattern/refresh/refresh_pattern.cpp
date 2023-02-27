@@ -48,6 +48,7 @@ constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
 constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
 constexpr float DEFAULT_FRICTION = 64.0f;
 constexpr float HALF = 0.5f;
+constexpr float TWO = 2.0f;
 constexpr int32_t STATE_PROGRESS_LOADING = 1;
 constexpr int32_t STATE_PROGRESS_RECYCLE = 2;
 constexpr int32_t STATE_PROGRESS_DRAG = 3;
@@ -328,7 +329,7 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
     CHECK_NULL_VOID(progressChild_);
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
-    auto scale = ratio;
+    auto scale = std::clamp(ratio, 0.0f, 1.0f);
     MarginProperty marginProperty;
     switch (state) {
         case STATE_PROGRESS_LOADING:
@@ -343,12 +344,14 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
             break;
         default:;
     }
-    progressLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx() * HALF * (1 + scale)),
-            CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx() * HALF * (1 + scale))));
+    progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
+        CalcLength(
+            LOADING_PROGRESS_SIZE.ConvertToPx() * (std::sqrt(TWO) * HALF + (1.0 - std::sqrt(TWO) * HALF) * scale)),
+        CalcLength(
+            LOADING_PROGRESS_SIZE.ConvertToPx() * (std::sqrt(TWO) * HALF + (1.0 - std::sqrt(TWO) * HALF) * scale))));
     auto progressContext = progressChild_->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(progressContext);
-    progressContext->UpdateOpacity(ratio);
+    progressContext->UpdateOpacity(scale);
 }
 
 float RefreshPattern::GetFollowRatio()
