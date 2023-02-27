@@ -48,6 +48,10 @@
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 
+namespace OHOS::Rosen {
+class RSTransaction;
+}
+
 namespace OHOS::Ace {
 
 class Frontend;
@@ -153,7 +157,8 @@ public:
     virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
 
     virtual void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) = 0;
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,10 @@
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/platform_window.h"
+
+namespace OHOS::Rosen {
+class RSTransaction;
+}
 
 namespace OHOS::Ace {
 
@@ -57,7 +61,8 @@ public:
     using CardViewAccessibilityParamsCallback = std::function<void(const std::string& key, bool focus)>;
     virtual void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) = 0;
 
-    using ViewChangeCallback = std::function<void(int32_t width, int32_t height, WindowSizeChangeReason type)>;
+    using ViewChangeCallback = std::function<void(int32_t width, int32_t height,
+        WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction)>;
     virtual void RegisterViewChangeCallback(ViewChangeCallback&& callback) = 0;
 
     using ViewPositionChangeCallback = std::function<void(int32_t posX, int32_t posY)>;

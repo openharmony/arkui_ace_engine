@@ -108,12 +108,13 @@ public:
     void ProcessIdleEvent(int64_t deadline);
 
     void NotifySurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED)
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr)
     {
         width_ = width;
         height_ = height;
         if (viewChangeCallback_) {
-            viewChangeCallback_(width, height, type);
+            viewChangeCallback_(width, height, type, rsTransaction);
         }
     }
 

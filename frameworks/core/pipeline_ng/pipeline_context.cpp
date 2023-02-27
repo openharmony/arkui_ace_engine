@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "render_service_client/core/transaction/rs_transaction.h"
 #endif
 
 #include <algorithm>
@@ -431,7 +432,8 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
     return fullScreenManager_;
 }
 
-void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -454,7 +456,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     FlushWindowSizeChangeCallback(width, height, type);
 
 #ifdef ENABLE_ROSEN_BACKEND
-    StartWindowSizeChangeAnimate(width, height, type);
+    StartWindowSizeChangeAnimate(width, height, type, rsTransaction);
 #else
     SetRootRect(width, height, 0.0);
 #endif
@@ -478,7 +480,8 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
     }
 }
 
-void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
+void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!IsWindowSizeAnimationEnabled) {
@@ -506,6 +509,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                rsTransaction->Begin();
+            }
+#endif
             LOGI("PipelineContext::Root node ROTATION animation, width = %{public}d, height = %{public}d", width,
                 height);
             AnimationOption option;
@@ -537,6 +545,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 });
             rotationAnimationCount_++;
             window_->SetDrawTextAsBitmap(true);
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                rsTransaction->Commit();
+            }
+#endif
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
