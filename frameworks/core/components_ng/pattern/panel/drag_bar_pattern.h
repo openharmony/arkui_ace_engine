@@ -61,7 +61,6 @@ public:
         auto paintMethod = MakeRefPtr<DragBarPaintMethod>();
         paintMethod->SetIconOffset(iconOffset_);
         paintMethod->SetScaleWidth(scaleWidth_);
-        paintMethod->SetScaleIcon(scaleIcon_);
         return paintMethod;
     }
 
@@ -119,7 +118,6 @@ private:
     OffsetF downPoint_;
     float dragRangeX_ = 0.0f;
     float dragRangeY_ = 0.0f;
-    float scaleIcon_ = 1.0f;
     float scaleWidth_ = 1.0f;
 
     PanelMode showMode_ = PanelMode::HALF;
