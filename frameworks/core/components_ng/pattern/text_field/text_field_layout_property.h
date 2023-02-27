@@ -53,6 +53,7 @@ public:
         ResetShowPasswordIcon();
         ResetCopyOptions();
         ResetLastValue();
+        ResetNeedFireOnChangeWhenCreate();
         ResetWidthAuto();
     }
 
@@ -102,6 +103,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredNewLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PreferredLineHeightNeedToUpdate, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LastValue, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedFireOnChangeWhenCreate, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowPasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HidePasswordSourceInfo, ImageSourceInfo, PROPERTY_UPDATE_MEASURE);
@@ -122,6 +124,7 @@ protected:
         value->propShowPasswordIcon_ = CloneShowPasswordIcon();
         value->propCopyOptions_ = CloneCopyOptions();
         value->propLastValue_ = CloneLastValue();
+        value->propNeedFireOnChangeWhenCreate_ = CloneNeedFireOnChangeWhenCreate();
         value->propWidthAuto_ = CloneWidthAuto();
     }
 
