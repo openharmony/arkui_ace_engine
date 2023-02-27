@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_base.h"
 
 #define private public
 #define protected public
@@ -192,7 +193,8 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest001, TestSize.
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(1);
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    loadingProgressModifier.DrawRing(context, 1.0f, 2.0f);
+    RingParam ringParam;
+    loadingProgressModifier.DrawRing(context, ringParam);
 }
 
 /**
@@ -214,7 +216,8 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    loadingProgressModifier.DrawOrbit(context, 1.0f, 2.0f);
+    CometParam cometParam;
+    loadingProgressModifier.DrawOrbit(context, cometParam, 1.0f, 2.0f);
     /**
      * @tc.cases: case2. date > 0 && date >= COUNT.
      */
@@ -224,7 +227,7 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    loadingProgressModifier.DrawOrbit(context, 50.0f, 2.0f);
+    loadingProgressModifier.DrawOrbit(context, cometParam, 50.0f, 2.0f);
     /**
      * @tc.cases: case3. date <= 0.
      */
@@ -234,6 +237,6 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    loadingProgressModifier.DrawOrbit(context, .0f, 2.0f);
+    loadingProgressModifier.DrawOrbit(context, cometParam, .0f, 2.0f);
 }
 } // namespace OHOS::Ace::NG

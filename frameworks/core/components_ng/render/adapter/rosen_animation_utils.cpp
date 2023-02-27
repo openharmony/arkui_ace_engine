@@ -57,4 +57,14 @@ void AnimationUtils::Animate(
     Rosen::RSNode::Animate(
         timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback);
 }
+
+void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    Rosen::RSNode::AddKeyFrame(fraction, NativeCurveHelper::ToNativeCurve(curve), callback);
+}
+
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback)
+{
+    Rosen::RSNode::AddKeyFrame(fraction, callback);
+}
 } // namespace OHOS::Ace

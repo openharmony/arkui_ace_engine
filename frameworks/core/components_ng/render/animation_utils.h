@@ -34,6 +34,8 @@ public:
     static bool CloseImplicitAnimation();
     static void Animate(const AnimationOption& option, const PropertyCallback& callback,
         const FinishCallback& finishCallback = nullptr);
+    static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback);
+    static void AddKeyFrame(float fraction, const PropertyCallback& callback);
 };
 } // namespace OHOS::Ace
 
