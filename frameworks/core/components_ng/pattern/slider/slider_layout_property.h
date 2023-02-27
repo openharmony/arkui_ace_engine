@@ -56,9 +56,9 @@ public:
                               : theme->GetInsetTrackThickness())
                 .ToString().c_str());
         static const std::array<std::string, 3> SLIDER_MODE_TO_STRING = {
-            "SliderMode.OUTSET",
-            "SliderMode.INSET",
-            "SliderMode.CAPSULE",
+            "SliderStyle.OutSet",
+            "SliderStyle.InSet",
+            "SliderStyle.Capsule",
         };
         // should be in constructor
         json->Put("style",
