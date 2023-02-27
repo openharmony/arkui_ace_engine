@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_ROOT_SCENE_H
 
+#include <event_handler.h>
+
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -38,6 +40,10 @@ public:
     void Disconnect() override {}
 
 private:
+    void RegisterInputEventListener();
+
+    std::shared_ptr<AppExecFwk::EventHandler> eventHandler_;
+
     ACE_DISALLOW_COPY_AND_MOVE(RootScene);
 };
 

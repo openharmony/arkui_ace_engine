@@ -38,6 +38,8 @@ protected:
     void OnAttachToFrameNode() override;
 
 private:
+    void UpdateDisplayInfo();
+
     sptr<Rosen::ScreenSession> screenSession_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScreenPattern);

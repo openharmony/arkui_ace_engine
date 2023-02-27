@@ -56,6 +56,9 @@ build_component_ng("window_scene") {
     ]
 
     external_deps = [
+      "eventhandler:libeventhandler",
+      "input:libmmi-client",
+      "ipc:ipc_core",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
       "window_manager:screen_session"
