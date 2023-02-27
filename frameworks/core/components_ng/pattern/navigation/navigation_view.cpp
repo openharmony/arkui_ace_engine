@@ -58,8 +58,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
-
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
