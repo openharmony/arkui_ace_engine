@@ -34,7 +34,7 @@ public:
     static void Create(const std::string& webData);
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
     static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
-        SetHapPathCallback&& setHapPathCallback);
+        SetHapPathCallback&& setHapPathCallback, bool popup = false);
     static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);
     static void SetOnPageStart(OnWebAsyncFunc&& onPageStart);
     static void SetOnPageFinish(OnWebAsyncFunc&& onPageEnd);
