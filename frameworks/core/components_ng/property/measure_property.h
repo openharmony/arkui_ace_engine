@@ -107,16 +107,18 @@ public:
         return true;
     }
 
-    bool ClearSize(bool isWidth)
+    bool ClearSize(bool clearWidth, bool clearHeight)
     {
-        if (isWidth && width_.has_value()) {
+        bool changed = false;
+        if (clearWidth && width_.has_value()) {
             width_.reset();
-            return true;
-        } else if (!isWidth && height_.has_value()) {
-            height_.reset();
-            return true;
+            changed = true;
         }
-        return false;
+        if (clearHeight && height_.has_value()) {
+            height_.reset();
+            changed = true;
+        }
+        return changed;
     }
 
     std::string ToString() const
@@ -167,10 +169,10 @@ struct MeasureProperty {
         return true;
     }
 
-    bool ClearSelfIdealSize(bool isWidth)
+    bool ClearSelfIdealSize(bool clearWidth, bool clearHeight)
     {
         if (selfIdealSize.has_value()) {
-            return selfIdealSize->ClearSize(isWidth);
+            return selfIdealSize->ClearSize(clearWidth, clearHeight);
         }
         return false;
     }

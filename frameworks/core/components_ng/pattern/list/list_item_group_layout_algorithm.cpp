@@ -93,6 +93,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = padding.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
     float crossSize = GetCrossAxisSize(size, axis_);
+    itemAlign_ = listLayoutProperty_->GetListItemAlign().value_or(V2::ListItemAlign::START);
 
     if (headerIndex_ >= 0 || footerIndex_ >= 0) {
         LayoutHeaderFooter(layoutWrapper, paddingOffset, crossSize);
@@ -152,9 +153,40 @@ void ListItemGroupLayoutAlgorithm::UpdateReferencePos(RefPtr<LayoutProperty> lay
     forwardLayout_ ? referencePos_ += offsetBeforeContent_ : referencePos_ -= offsetAfterContent_;
 }
 
+bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
+{
+    if (forwardLayout_ && headerIndex_ >= 0) {
+        if (GreatOrEqual(headerMainSize_, endPos_ - referencePos_)) {
+            return false;
+        }
+    }
+    if (forwardLayout_ && footerIndex_ >= 0) {
+        if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
+            return false;
+        }
+    }
+    if (!forwardLayout_ && headerIndex_ >= 0) {
+        if (GreatOrEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
+            return false;
+        }
+    }
+    if (!forwardLayout_ && footerIndex_ >= 0) {
+        if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void ListItemGroupLayoutAlgorithm::MeasureListItem(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
+    if (totalItemCount_ <= 0) {
+        totalMainSize_ = headerMainSize_ + footerMainSize_;
+        layoutWrapper->RemoveAllChildInRenderTree();
+        itemPosition_.clear();
+        return;
+    }
     int32_t startIndex = 0;
     int32_t endIndex = totalItemCount_ - 1;
     float startPos = headerMainSize_;
@@ -166,27 +198,10 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
-    } else {
-        if (forwardLayout_ && headerIndex_ >= 0) {
-            if (GreatOrEqual(headerMainSize_, endPos_ - referencePos_)) {
-                return;
-            }
-        }
-        if (forwardLayout_ && footerIndex_ >= 0) {
-            if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
-                return;
-            }
-        }
-        if (!forwardLayout_ && headerIndex_ >= 0) {
-            if (GreatOrEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
-                return;
-            }
-        }
-        if (!forwardLayout_ && footerIndex_ >= 0) {
-            if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
-                return;
-            }
-        }
+    } else if (!NeedMeasureItem()) {
+        layoutWrapper->RemoveAllChildInRenderTree();
+        itemPosition_.clear();
+        return;
     }
     LOGD("referencePos_ is %{public}f, startPos_: %{public}f, endPos_: %{public}f, forward:%{public}d",
         referencePos_, startPos_, endPos_, forwardLayout_);
@@ -317,6 +332,10 @@ void ListItemGroupLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper,
             currentStartPos, currentEndPos);
     }
 
+    if (itemPosition_.empty()) {
+        return;
+    }
+
     if (currentStartPos < headerMainSize_) {
         auto delta = headerMainSize_ - currentStartPos;
         for (auto& pos : itemPosition_) {
@@ -398,7 +417,6 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
     float mainPos = GetMainAxisOffset(selfOffset, axis_);
     float headerMainSize = 0.0f;
     V2::StickyStyle sticky = listLayoutProperty_->GetStickyStyle().value_or(V2::StickyStyle::NONE);
-    itemAlign_ = listLayoutProperty_->GetListItemAlign().value_or(V2::ListItemAlign::START);
     if (headerIndex_ >= 0) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
         CHECK_NULL_VOID(wrapper);

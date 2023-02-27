@@ -45,7 +45,7 @@ constexpr char FORM_EVENT_ON_ERROR[] = "onFormError";
 constexpr char FORM_ADAPTOR_RESOURCE_NAME[] = "formAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
-constexpr int32_t RENDER_DEAD_CODE = 16501005;
+constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 } // namespace
 
@@ -57,11 +57,7 @@ FormManagerDelegate::~FormManagerDelegate()
 void FormManagerDelegate::ReleasePlatformResource()
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    LOGI("FormManagerDelegate destroy.");
-    if (runningCardId_ > 0) {
-        auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
-        clientInstance->RemoveForm(formCallbackClient_, runningCardId_);
-    }
+    ReleaseForm();
 #else
     Stop();
     Release();
@@ -108,7 +104,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     if (runningCardId_ > 0) {
         LOGI("Add new form, delete old form:%{public}s.", std::to_string(runningCardId_).c_str());
         AppExecFwk::FormMgr::GetInstance().DeleteForm(runningCardId_, AppExecFwk::FormHostClient::GetInstance());
-        runningCardId_ = -1;
+        ResetForm();
     }
 
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
@@ -184,6 +180,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     clientInstance->AddForm(formCallbackClient_, formJsInfo);
 
     runningCardId_ = formJsInfo.formId;
+    runningCompId_ = std::to_string(info.index);
     if (info.id == formJsInfo.formId) {
         LOGI("Added form already exist, trigger FormUpdate immediately.");
     }
@@ -478,7 +475,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
     }
 
     auto type = actionType->GetString();
-    if (type != "router" && type != "message" && type != "background") {
+    if (type != "router" && type != "message" && type != "call") {
         LOGE("undefined event type");
         return;
     }
@@ -497,7 +494,7 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
                 runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
         }
         return;
-    } else if (type == "background") {
+    } else if (type == "call") {
         AAFwk::Want want;
         if (!ParseAction(action, want)) {
             LOGE("Failed to parse want");
@@ -614,6 +611,28 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
+void FormManagerDelegate::ResetForm()
+{
+    runningCardId_ = -1;
+    runningCompId_.clear();
+}
+
+void FormManagerDelegate::ReleaseForm()
+{
+    LOGI("FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
+        runningCardId_, runningCompId_.c_str());
+    if (runningCardId_ <= 0) {
+        return;
+    }
+
+    if (!runningCompId_.empty()) {
+        OHOS::AppExecFwk::FormMgr::GetInstance().StopRenderingForm(runningCardId_, runningCompId_);
+    }
+
+    auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    clientInstance->RemoveForm(formCallbackClient_, runningCardId_);
+}
+
 void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo &formJsInfo)
 {
     if (formJsInfo.formId != runningCardId_) {

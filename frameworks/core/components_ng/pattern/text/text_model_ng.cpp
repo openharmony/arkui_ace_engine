@@ -71,6 +71,7 @@ void TextModelNG::SetFontSize(const Dimension& value)
 {
     if (!value.IsValid()) {
         LOGE("FontSize value is not valid");
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension());
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);

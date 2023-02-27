@@ -100,6 +100,7 @@ void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
 
 void TabsModelNG::SetTabBarWidth(const Dimension& tabBarWidth)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarWidth, tabBarWidth);
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
@@ -112,6 +113,7 @@ void TabsModelNG::SetTabBarWidth(const Dimension& tabBarWidth)
 
 void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, BarHeight, tabBarHeight);
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());

@@ -314,21 +314,11 @@ void JSImageAnimator::ParseImages(const JSRef<JSVal>& image, ImageProperties& im
     if (!ParseJsMedia(jsObjImage->GetProperty("src"), imageProperties.src)) {
         LOGE("parse image property src failed!");
     }
-    if (!ParseJsDimensionVp(jsObjImage->GetProperty("width"), imageProperties.width)) {
-        LOGW("parse image property width failed!");
-    }
-    if (!ParseJsDimensionVp(jsObjImage->GetProperty("height"), imageProperties.height)) {
-        LOGW("parse image property height failed!");
-    }
-    if (!ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top)) {
-        LOGW("parse image property top failed!");
-    }
-    if (!ParseJsDimensionVp(jsObjImage->GetProperty("left"), imageProperties.left)) {
-        LOGW("parse image property left failed!");
-    }
-    if (!ParseJsInt32(jsObjImage->GetProperty("duration"), imageProperties.duration)) {
-        LOGW("parse image property duration failed!");
-    }
+    ParseJsDimensionVp(jsObjImage->GetProperty("width"), imageProperties.width);
+    ParseJsDimensionVp(jsObjImage->GetProperty("height"), imageProperties.height);
+    ParseJsDimensionVp(jsObjImage->GetProperty("top"), imageProperties.top);
+    ParseJsDimensionVp(jsObjImage->GetProperty("left"), imageProperties.left);
+    ParseJsInt32(jsObjImage->GetProperty("duration"), imageProperties.duration);
 }
 
 } // namespace OHOS::Ace::Framework

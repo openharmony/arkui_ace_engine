@@ -2349,6 +2349,7 @@ void WebDelegate::InitWebViewWithSurface()
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
             bool isEnhanceSurface = delegate->isEnhanceSurface_;
             initArgs.is_enhance_surface = isEnhanceSurface;
+            initArgs.is_popup = delegate->isPopup_;
             if (!delegate->hapPath_.empty()) {
                 initArgs.web_engine_args_to_add.push_back(
                     std::string("--user-hap-path=").append(delegate->hapPath_));

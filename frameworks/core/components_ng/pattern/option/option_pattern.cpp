@@ -285,7 +285,8 @@ void OptionPattern::SetFontSize(const Dimension& value)
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateFontSize(value);
+    CHECK_NULL_VOID(selectTheme_);
+    props->UpdateFontSize(value.IsNegative() ? selectTheme_->GetMenuFontSize() : value);
 }
 
 void OptionPattern::SetItalicFontStyle(const Ace::FontStyle& value)

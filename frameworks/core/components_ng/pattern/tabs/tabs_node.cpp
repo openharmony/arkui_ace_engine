@@ -43,6 +43,11 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child)
     }
 }
 
+const RefPtr<UINode> TabsNode::GetContentChildFromGroup()
+{
+    return GetChildren().back();
+}
+
 void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     FrameNode::ToJsonValue(json);

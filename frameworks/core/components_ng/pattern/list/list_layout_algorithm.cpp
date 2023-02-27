@@ -128,10 +128,15 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
 }
 
-float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis)
+float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const
 {
+    if (GetItemPosition().empty()) {
+        return 0.0f;
+    }
     float maxCrossSize = 0.0f;
-    for (const auto& pos : itemPosition_) {
+    float crossSize = 0.0f;
+    float prevPos = GetItemPosition().begin()->second.startPos;
+    for (const auto& pos : GetItemPosition()) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
         if (!wrapper) {
             continue;
@@ -140,7 +145,13 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
         if (!getGeometryNode) {
             continue;
         }
-        maxCrossSize = std::max(maxCrossSize, getGeometryNode->GetMarginFrameSize().CrossSize(axis));
+        if (NearEqual(prevPos, pos.second.startPos)) {
+            crossSize += getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+        } else {
+            crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+        }
+        prevPos = pos.second.startPos;
+        maxCrossSize = std::max(crossSize, maxCrossSize);
     }
     return maxCrossSize;
 }
@@ -190,13 +201,14 @@ void ListLayoutAlgorithm::MeasureList(
     if (jumpIndex_) {
         LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
-        jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
+            jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
             LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
             if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
         } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BUTTON) {
+            jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
             LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), endMainPos_);
             if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, GetEndPosition());

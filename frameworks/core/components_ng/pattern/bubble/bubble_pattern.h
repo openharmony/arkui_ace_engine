@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/bubble//bubble_event_hub.h"
@@ -92,14 +93,17 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     RefPtr<FrameNode> GetButtonRowNode();
+    RefPtr<PopupTheme> GetPopupTheme();
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
-    void HandleTouchDown(const Offset& clickPosition);
+    void HandleTouchUp(const Offset& clickPosition);
     void RegisterButtonOnHover();
     void RegisterButtonOnTouch();
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
     void PopBubble();
+    void Animation(RefPtr<RenderContext>& renderContext, const Color& endColor,
+        int32_t duration, const RefPtr<Curve>& curve);
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
@@ -107,6 +111,7 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     bool mouseEventInitFlag_ = false;
     bool touchEventInitFlag_ = false;
+    bool isHover_ = false;
 
     OffsetF childOffset_;
     OffsetF arrowPosition_;

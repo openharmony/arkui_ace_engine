@@ -19,6 +19,7 @@
 #include <optional>
 #include <utility>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -94,7 +95,7 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->ClearUserDefinedIdealSize(isWidth);
+    layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
 void ViewAbstract::SetMinWidth(const CalcLength& width)
@@ -282,6 +283,7 @@ void ViewAbstract::SetFlexBasis(const Dimension& value)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0f)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension());
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
@@ -383,7 +385,12 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
         return;
     }
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(value);
+    if (Negative(value.Value())) {
+        borderWidth.SetBorderWidth(Dimension(0));
+        LOGW("border width is negative, reset to 0");
+    } else {
+        borderWidth.SetBorderWidth(value);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
 }
 

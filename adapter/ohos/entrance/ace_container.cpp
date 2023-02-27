@@ -233,7 +233,6 @@ void AceContainer::InitializeFrontend()
             RefPtr<Framework::JsEngine> jsEngine;
             if (GetSettings().usingSharedRuntime) {
                 jsEngine = loader.CreateJsEngineUsingSharedRuntime(instanceId_, sharedRuntime_);
-                LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
             } else {
                 jsEngine = loader.CreateJsEngine(instanceId_);
             }
@@ -593,11 +592,14 @@ void AceContainer::InitializeCallback()
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
 
     auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](
-                                    int32_t width, int32_t height, WindowSizeChangeReason type) {
+                                    int32_t width, int32_t height, WindowSizeChangeReason type,
+                                    const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height, type]() { context->OnSurfaceChanged(width, height, type); },
+            [context, width, height, type, rsTransaction]() {
+                context->OnSurfaceChanged(width, height, type, rsTransaction);
+            },
             TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
@@ -769,6 +771,19 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     LOGD("RunPage content=[%{private}s]", content.c_str());
     front->RunPage(pageId, content, params);
     return true;
+}
+
+void AceContainer::ClearEngineCache(int32_t instanceId)
+{
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId);
+    if (!container->IsFormRender()) {
+        return;
+    }
+    auto formFrontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
+    CHECK_NULL_VOID(formFrontend);
+    formFrontend->ClearEngineCache();
 }
 
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)

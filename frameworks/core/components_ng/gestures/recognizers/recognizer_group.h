@@ -61,7 +61,7 @@ public:
     {
         remainChildOnResetStatus_ = true;
     }
-
+    const std::list<RefPtr<NGGestureRecognizer>>& GetGroupRecognizer();
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId) override;

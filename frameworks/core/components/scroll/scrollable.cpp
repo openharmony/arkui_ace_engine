@@ -338,7 +338,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     }
     ExecuteScrollBegin(mainDelta);
     ExecuteScrollFrameBegin(mainDelta, ScrollState::SCROLL);
-    auto source = info.GetSourceDevice() == SourceType::MOUSE ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
+    auto source = info.GetInputEventType() == InputEventType::AXIS ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     moved_ = UpdateScrollPosition(mainDelta, source);
 }
 
@@ -556,7 +556,8 @@ void Scrollable::ProcessSpringMotion(double position)
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
-        if (!UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING)) {
+        moved_ = UpdateScrollPosition(position - currentPos_, SCROLL_FROM_ANIMATION_SPRING);
+        if (!moved_) {
             springController_->Stop();
         } else if (!touchUp_) {
             if (scrollTouchUpCallback_) {

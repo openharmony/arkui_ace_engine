@@ -135,11 +135,14 @@ private:
     RefPtr<PictureAnimation<int32_t>> CreatePictureAnimation(int32_t size);
     void UpdateEventCallback();
     std::string ImagesToString() const;
+    void AdaptSelfSize();
+    void SetShowingIndex(int32_t index);
 
     RefPtr<Animator> animator_;
     std::vector<ImageProperties> images_;
     Animator::Status status_ = Animator::Status::IDLE;
     int32_t durationTotal_ = 0;
+    int32_t nowImageIndex_ = 0;
     uint64_t repeatCallbackId_ = 0;
     uint64_t stopCallbackId_ = 0;
     bool isReverse_ = false;

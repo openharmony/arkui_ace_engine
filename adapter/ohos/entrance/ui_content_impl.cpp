@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -283,9 +283,9 @@ void UIContentImpl::DestroyUIDirector()
 void UIContentImpl::DestroyCallback() const
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_VOID_NOLOG(container);
     auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
     pipelineContext->SetNextFrameLayoutCallback(nullptr);
 }
 
@@ -1202,6 +1202,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         }
     }
     LayoutInspector::SetCallback(instanceId_);
+
+    LOGI("Initialize UIContentImpl end.");
 }
 
 void UIContentImpl::Foreground()
@@ -1220,6 +1222,17 @@ void UIContentImpl::Background()
 {
     LOGI("UIContentImpl: window background");
     Platform::AceContainer::OnHide(instanceId_);
+}
+
+void UIContentImpl::ReloadForm()
+{
+    LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
+    flutterAssetManager->ReloadProvider();
+    Platform::AceContainer::ClearEngineCache(instanceId_);
+    Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
+        startUrl_, "");
 }
 
 void UIContentImpl::Focus()
@@ -1369,7 +1382,8 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
     LOGI("UIContentImpl: UpdateConfiguration called End, name:%{public}s", config->GetName().c_str());
 }
 
-void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason)
+void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
 {
     LOGI("UIContentImpl: UpdateViewportConfig %{public}s", config.ToString().c_str());
     SystemProperties::SetResolution(config.Density());
@@ -1379,7 +1393,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [config, container, reason]() {
+        [config, container, reason, rsTransaction]() {
             container->SetWindowPos(config.Left(), config.Top());
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
@@ -1394,7 +1408,7 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             metrics.device_pixel_ratio = config.Density();
             Platform::FlutterAceView::SetViewportMetrics(aceView, metrics);
             Platform::FlutterAceView::SurfaceChanged(aceView, config.Width(), config.Height(), config.Orientation(),
-                static_cast<WindowSizeChangeReason>(reason));
+                static_cast<WindowSizeChangeReason>(reason), rsTransaction);
             Platform::FlutterAceView::SurfacePositionChanged(aceView, config.Left(), config.Top());
         },
         TaskExecutor::TaskType::PLATFORM);

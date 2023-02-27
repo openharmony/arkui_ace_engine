@@ -47,9 +47,12 @@ public:
 
     bool GetFileInfo(const std::string& fileName, MediaFileInfo& fileInfo) const override;
 
+    void Reload() override;
+
 private:
     mutable std::mutex mutex_;
     std::string hapPath_;
+    std::string loadPath_;
     std::shared_ptr<AbilityBase::Extractor> runtimeExtractor_;
     std::vector<std::string> assetBasePaths_;
 };

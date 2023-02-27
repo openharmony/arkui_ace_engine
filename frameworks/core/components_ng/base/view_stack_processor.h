@@ -269,6 +269,8 @@ public:
     // Returns implicit animation option.
     const AnimationOption& GetImplicitAnimationOption() const;
 
+    RefPtr<UINode> GetNewUINode();
+
 private:
     ViewStackProcessor();
 

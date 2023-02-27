@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,8 @@ public:
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
     static void SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen::Window> window);
     static void SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation,
-        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
     static void SurfacePositionChanged(FlutterAceView* view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(FlutterAceView* view, const flutter::ViewportMetrics& metrics);
 
@@ -135,10 +136,11 @@ public:
     void InitIOManager(RefPtr<TaskExecutor> taskExecutor);
 
 private:
-    void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type)
+    void NotifySurfaceChanged(int width, int height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr)
     {
         if (viewChangeCallback_) {
-            viewChangeCallback_(width, height, type);
+            viewChangeCallback_(width, height, type, rsTransaction);
         }
         width_ = width;
         height_ = height;

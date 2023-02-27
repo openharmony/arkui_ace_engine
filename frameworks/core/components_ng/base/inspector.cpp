@@ -83,11 +83,19 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
                 return;
             }
         } else {
+#ifndef PREVIEW
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
             if (!frameNode->IsInternal()) {
                 children.emplace_back(uiNode);
                 return;
             }
+#else
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+            if (!frameNode->GetViewId().empty()) {
+                children.emplace_back(uiNode);
+                return;
+            }
+#endif
         }
     }
 
@@ -111,15 +119,15 @@ void GetInspectorChildren(
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
 #else
     auto strRec = std::to_string(rect.Left())
-                 .append(",")
-                 .append(std::to_string(rect.Top()))
-                 .append(",")
-                 .append(std::to_string(rect.Width()))
-                 .append(",")
-                 .append(std::to_string(rect.Height()));
+                  .append(",")
+                  .append(std::to_string(rect.Top()))
+                  .append(",")
+                  .append(std::to_string(rect.Width()))
+                  .append(",")
+                  .append(std::to_string(rect.Height()));
     jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
     jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
-    jsonNode->Put("debugLine", node->GetDebugLine().c_str());
+    jsonNode->Put("$viewID", node->GetViewId().c_str());
 #endif
     auto jsonObject = JsonUtil::Create(false);
     parent->ToJsonValue(jsonObject);
@@ -136,6 +144,21 @@ void GetInspectorChildren(
         jsonNode->Put(INSPECTOR_CHILDREN, jsonChildrenArray);
     }
     jsonNodeArray->Put(jsonNode);
+}
+
+RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
+{
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto stageNode = pageNode->GetParent();
+    CHECK_NULL_RETURN(stageNode, nullptr);
+    auto stageParent = stageNode->GetParent();
+    CHECK_NULL_RETURN(stageParent, nullptr);
+    auto overlayNode = stageParent->GetChildren().back();
+    if (overlayNode->GetTag() == "stage") {
+        return nullptr;
+    }
+    LOGI("GetOverlayNode if overlay node has showed");
+    return overlayNode;
 }
 } // namespace
 
@@ -187,6 +210,10 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : pageRootNode->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
+    }
+    auto overlayNode = GetOverlayNode(pageRootNode);
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, pageId);
     }
     auto jsonNodeArray = JsonUtil::CreateArray(false);
     for (auto& uiNode : children) {

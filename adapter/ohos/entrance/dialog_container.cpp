@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,11 +130,14 @@ void DialogContainer::InitializeViewChangeCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
     auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](
-        int32_t width, int32_t height, WindowSizeChangeReason type) {
+        int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height, type]() { context->OnSurfaceChanged(width, height, type); },
+            [context, width, height, type, rsTransaction]() {
+                context->OnSurfaceChanged(width, height, type, rsTransaction);
+            },
             TaskExecutor::TaskType::UI);
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);

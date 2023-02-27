@@ -20,6 +20,8 @@
 #include <unordered_set>
 #include <vector>
 
+#include "core/components_ng/base/group_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
@@ -45,6 +47,7 @@ private:
     bool OperateGeneralComponent(
         int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent);
     RefPtr<Component> GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root);
+    RefPtr<NG::UINode> GetNewFrameNodeWithJsCode(const std::unique_ptr<JsonValue>& root);
     RefPtr<V2::InspectorComposedElement> GetInspectorElementById(NodeId nodeId);
     const WeakPtr<Element>& GetRootElement();
     void GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);

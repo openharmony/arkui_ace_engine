@@ -116,6 +116,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
     ProcessEvent(indexChanged, finalOffset, isJump);
     UpdateScrollBarOffset();
+    CheckRestartSpring();
+
+    DrivenRender(dirty);
+
     return true;
 }
 
@@ -127,6 +131,12 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
     CHECK_NULL_VOID(listEventHub);
 
     auto onScroll = listEventHub->GetOnScroll();
+    if (!NearZero(finalOffset) && !isJump) {
+        paintStateFlag_ = true;
+    } else {
+        paintStateFlag_ = false;
+    }
+    isFramePaintStateValid_ = true;
     if (onScroll && !NearZero(finalOffset) && !isJump) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
@@ -171,10 +181,51 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
 
     if (scrollStop_) {
         auto onScrollStop = listEventHub->GetOnScrollStop();
-        if (onScrollStop) {
+        if (!scrollAbort_ && onScrollStop) {
             onScrollStop();
         }
         scrollStop_ = false;
+        scrollAbort_ = false;
+    }
+}
+
+void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    bool drivenRender = false;
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    auto stickyStyle = listLayoutProperty->GetStickyStyle().value_or(V2::StickyStyle::NONE);
+    auto barDisplayMode = listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF);
+    auto chainAnimation = listLayoutProperty->GetChainAnimation().value_or(false);
+    if (axis != Axis::VERTICAL || barDisplayMode != DisplayMode::OFF ||
+        stickyStyle != V2::StickyStyle::NONE || chainAnimation || !scrollable_) {
+        drivenRender = false;
+    } else {
+        drivenRender = true;
+    }
+
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->MarkDrivenRender(drivenRender);
+    if (drivenRender && isFramePaintStateValid_) {
+        // Mark items
+        int32_t indexStep = 0;
+        int32_t startIndex = itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
+        for (auto& pos : itemPosition_) {
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
+            CHECK_NULL_VOID(wrapper);
+            auto itemHost = wrapper->GetHostNode();
+            CHECK_NULL_VOID(itemHost);
+            auto itemRenderContext = itemHost->GetRenderContext();
+            CHECK_NULL_VOID(itemRenderContext);
+            itemRenderContext->MarkDrivenRenderItemIndex(startIndex + indexStep);
+            indexStep++;
+        }
+        renderContext->MarkDrivenRenderFramePaintState(paintStateFlag_);
+        isFramePaintStateValid_ = false;
     }
 }
 
@@ -347,18 +398,31 @@ void ListPattern::FireOnScrollStart()
     onScrollStart();
 }
 
+void ListPattern::FireOnScrollStop()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(hub);
+    auto onScrollStop = hub->GetOnScrollStop();
+    CHECK_NULL_VOID_NOLOG(onScrollStop);
+    onScrollStop();
+}
+
 bool ListPattern::OnScrollCallback(float offset, int32_t source)
 {
     if (source == SCROLL_FROM_START) {
-        FireOnScrollStart();
         ProcessDragStart(offset);
         auto item = swiperItem_.Upgrade();
         if (item) {
             item->SwiperReset();
         }
         if (animator_ && !animator_->IsStopped()) {
+            FireOnScrollStop();
+            scrollAbort_ = true;
             animator_->Stop();
         }
+        FireOnScrollStart();
         return true;
     }
     auto scrollBar = GetScrollBar();
@@ -406,6 +470,19 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
         return list->GetMainContentSize() - (list->endMainPos_ - list->startMainPos_);
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
+}
+
+void ListPattern::CheckRestartSpring()
+{
+    if (!ScrollableIdle() || !IsOutOfBoundary()) {
+        return;
+    }
+    auto edgeEffect = GetScrollEdgeEffect();
+    if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
+        return;
+    }
+    FireOnScrollStart();
+    edgeEffect->ProcessScrollOver(0);
 }
 
 void ListPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -472,13 +549,18 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
 {
     LOGI("AnimateTo:%f, duration:%f", position, duration);
     if (!IsScrollableStopped()) {
+        scrollAbort_ = true;
         StopScrollable();
     }
     if (!animator_) {
         animator_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());
     }
     if (!animator_->IsStopped()) {
+        scrollAbort_ = true;
         animator_->Stop();
+    }
+    if (scrollAbort_) {
+        FireOnScrollStop();
     }
     animator_->ClearInterpolators();
 
@@ -489,14 +571,31 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         list->SetScrollState(SCROLL_FROM_JUMP);
         list->UpdateCurrentOffset(list->GetTotalOffset() - value, SCROLL_FROM_JUMP);
     });
+    animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
+        auto list = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(list);
+        list->scrollStop_ = true;
+    });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(static_cast<int32_t>(duration));
     animator_->Play();
+    FireOnScrollStart();
+}
+
+void ListPattern::StopAnimate()
+{
+    if (!IsScrollableStopped()) {
+        StopScrollable();
+    }
+    if (animator_ && !animator_->IsStopped()) {
+        animator_->Stop();
+    }
 }
 
 void ListPattern::ScrollTo(float position)
 {
     LOGI("ScrollTo:%{public}f", position);
+    StopAnimate();
     SetScrollState(SCROLL_FROM_JUMP);
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
 }
@@ -504,6 +603,7 @@ void ListPattern::ScrollTo(float position)
 void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
 {
     LOGI("ScrollToIndex:%{public}d", index);
+    StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         jumpIndex_ = index;
         scrollIndexAlignment_ = align;
@@ -524,10 +624,18 @@ void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
 bool ListPattern::ScrollPage(bool reverse)
 {
     LOGI("ScrollPage:%{public}d", reverse);
+    StopAnimate();
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     SetScrollState(SCROLL_FROM_JUMP);
     UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
     return true;
+}
+
+void ListPattern::ScrollBy(float offset)
+{
+    StopAnimate();
+    SetScrollState(SCROLL_FROM_JUMP);
+    UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
 Offset ListPattern::GetCurrentOffset() const
@@ -800,5 +908,10 @@ void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem)
         }
         swiperItem_ = std::move(swiperItem);
     }
+}
+
+void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("multiSelectable", multiSelectable_);
 }
 } // namespace OHOS::Ace::NG

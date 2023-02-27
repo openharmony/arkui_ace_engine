@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_badge.h"
 
+#include "base/geometry/dimension.h"
 #include "base/log/ace_trace.h"
 #include "core/components/badge/badge_component.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -90,7 +91,7 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
                 LOGE("Get badge theme error");
                 return;
             }
-            if (badgeSize.IsNonNegative()) {
+            if (badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeCircleSize = badgeSize;
             } else {
                 badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();

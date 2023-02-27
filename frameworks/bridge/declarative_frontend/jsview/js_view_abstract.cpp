@@ -19,6 +19,7 @@
 #include <memory>
 #include <optional>
 #include <regex>
+#include <string>
 #include <vector>
 
 #include "base/geometry/dimension.h"
@@ -399,20 +400,19 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             LOGI("Empty popup.");
         }
     }
-
-#if defined(PREVIEW)
-    LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-         "emulator or a real device instead.");
-#else
     JSRef<JSVal> showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
+        bool showInSubBoolean = showInSubWindowValue->ToBoolean();
+#if defined(PREVIEW)
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+        showInSubBoolean = false;
+#endif
         if (popupParam) {
-            popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
+            popupParam->SetShowInSubWindow(showInSubBoolean);
         } else {
             LOGI("Empty popup.");
         }
     }
-#endif
 
     JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
     if (placementOnTopVal->IsBoolean()) {
@@ -584,15 +584,15 @@ void ParseCustomPopupParam(
         popupParam->SetEnableArrow(enableArrowValue->ToBoolean());
     }
 
-#if defined(PREVIEW)
-    LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
-         "emulator or a real device instead.");
-#else
     auto showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+        popupParam->SetShowInSubWindow(false);
+#else
         popupParam->SetShowInSubWindow(showInSubWindowValue->ToBoolean());
-    }
 #endif
+    }
 
     auto autoCancelValue = popupObj->GetProperty("autoCancel");
     if (autoCancelValue->IsBoolean()) {
@@ -2677,10 +2677,13 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::string& res
         auto pluralStr = themeConstants->GetPluralString(resId->ToNumber<uint32_t>(), count);
         ReplaceHolder(pluralStr, params, 1);
         result = pluralStr;
+    } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        result = std::to_string(themeConstants->GetDouble(resId->ToNumber<uint32_t>()));
+    } else if (type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        result = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
     } else {
         return false;
     }
-
     return true;
 }
 

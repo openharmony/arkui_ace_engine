@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.h"
 
-#include "frameworks/base/geometry/rect.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/pipeline_ng/ui_task_scheduler.h"
@@ -70,26 +69,30 @@ bool AbilityComponentPattern::OnDirtyLayoutWrapperSwap(
 
 void AbilityComponentPattern::UpdateWindowRect()
 {
+    if (!hasConnectionToAbility_) {
+        LOGW("AbilityComponent has not be connected");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto size = host->GetGeometryNode()->GetFrameSize();
     auto offset = host->GetTransformRelativeOffset();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto rect = pipeline->GetDisplayWindowRectInfo();
+    Rect rect = pipeline->GetDisplayWindowRectInfo();
+    rect = Rect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
 
-    LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f", offset.GetX(), offset.GetY(), size.Width(),
-        size.Height());
-    rect.SetRect(offset.GetX() + rect.Left(), offset.GetY() + rect.Top(), size.Width(), size.Height());
-    CHECK_NULL_VOID_NOLOG(adapter_);
-    adapter_->UpdateRect(rect);
+    if (adapter_ && rect != lastRect_) {
+        LOGI("ConnectExtension: %{public}f %{public}f %{public}f %{public}f",
+            offset.GetX(), offset.GetY(), size.Width(), size.Height());
+        adapter_->UpdateRect(rect);
+        lastRect_ = rect;
+    }
 }
 
 void AbilityComponentPattern::OnAreaChangedInner()
 {
-    if (hasConnectionToAbility_) {
         UpdateWindowRect();
-    }
 }
 
 } // namespace OHOS::Ace::NG

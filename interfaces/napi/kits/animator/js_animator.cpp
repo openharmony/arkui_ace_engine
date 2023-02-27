@@ -368,6 +368,9 @@ static napi_value SetOnframe(napi_env env, napi_callback_info info)
         napi_call_function(env, nullptr, onframe, 1, &valueNapi, &ret);
     });
     animator->AddInterpolator(animation);
+    if (!animator->HasScheduler()) {
+        animator->AttachSchedulerOnContainer();
+    }
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     return undefined;

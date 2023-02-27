@@ -44,10 +44,10 @@ bool ListPositionController::AnimateTo(const Dimension& position, float duration
             LOGW("not support percent dimension now");
             return false;
         }
-        if (NearZero(duration)) {
-            listPattern->ScrollTo(position.ConvertToPx());
-        } else {
+        if (Positive(duration)) {
             listPattern->AnimateTo(position.ConvertToPx(), duration, curve);
+        } else {
+            listPattern->ScrollTo(position.ConvertToPx());
         }
         return true;
     }
@@ -60,12 +60,8 @@ void ListPositionController::ScrollBy(double pixelX, double pixelY, bool smooth)
     CHECK_NULL_VOID(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_VOID(listPattern);
-    listPattern->SetScrollState(SCROLL_FROM_JUMP);
-    if (listPattern->GetAxis() == Axis::VERTICAL) {
-        listPattern->UpdateCurrentOffset(static_cast<float>(-pixelY), SCROLL_FROM_JUMP);
-    } else {
-        listPattern->UpdateCurrentOffset(static_cast<float>(-pixelX), SCROLL_FROM_JUMP);
-    }
+    auto offset = listPattern->GetAxis() == Axis::VERTICAL ? pixelY : pixelX;
+    listPattern->ScrollBy(static_cast<float>(offset));
 }
 
 Axis ListPositionController::GetScrollDirection() const

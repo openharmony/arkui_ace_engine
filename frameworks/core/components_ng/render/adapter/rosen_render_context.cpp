@@ -689,6 +689,7 @@ DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
                 imageSourceInfo.ToString().c_str(), sourceInfo.ToString().c_str());
             return;
         }
+        LOGI("borderImage data ready %{public}s", sourceInfo.ToString().c_str());
         rosenRenderContext->bdImageLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
     return task;
@@ -707,6 +708,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
         }
         ctx->bdImage_ = ctx->bdImageLoadingCtx_->MoveCanvasImage();
         CHECK_NULL_VOID(ctx->bdImage_);
+        LOGI("borderImage load success %{public}s", sourceInfo.ToString().c_str());
         if (ctx->GetHost()->GetGeometryNode()->GetFrameSize().IsPositive()) {
             ctx->PaintBorderImage();
             ctx->RequestNextFrame();
@@ -1867,4 +1869,27 @@ void RosenRenderContext::DumpInfo() const
     }
 }
 
+void RosenRenderContext::MarkContentChanged(bool isChanged)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkContentChanged(isChanged);
+}
+
+void RosenRenderContext::MarkDrivenRender(bool flag)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkDrivenRender(flag);
+}
+
+void RosenRenderContext::MarkDrivenRenderItemIndex(int32_t index)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkDrivenRenderItemIndex(index);
+}
+
+void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkDrivenRenderFramePaintState(flag);
+}
 } // namespace OHOS::Ace::NG

@@ -59,6 +59,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #if defined(PREVIEW)
@@ -228,7 +229,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin() || isUnique_) { // ArtTsCard
+    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
         InitGlobalObjectTemplate();
     }
 
@@ -645,6 +646,9 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
 
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 {
+    if (isUnique_ && localRuntime_) {
+        return localRuntime_;
+    }
     if (globalRuntime_) {
         return globalRuntime_;
     }
@@ -1210,9 +1214,32 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
         LOGE("fail to find abc file");
         return false;
     }
+
+#if !defined(PREVIEW)
     if (LoadJsWithModule(urlName.value())) {
         return true;
     }
+#else
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto delegate = engineInstance_->GetDelegate();
+    if (!assetPath_.empty() && !isBundle_) {
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        arkRuntime->SetBundleName(bundleName_);
+        arkRuntime->SetAssetPath(assetPath_);
+        arkRuntime->SetBundle(isBundle_);
+        arkRuntime->SetModuleName(moduleName_);
+        std::vector<uint8_t> content;
+        if (!delegate->GetAssetContent("modules.abc", content)) {
+            LOGE("GetAssetContent \"%{public}s\" failed.", urlName.value().c_str());
+            return false;
+        }
+        if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), urlName.value())) {
+            LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.value().c_str());
+            return false;
+        }
+        return true;
+    }
+#endif
     return ExecuteAbc(urlName.value());
 }
 
@@ -1253,6 +1280,20 @@ RefPtr<Component> JsiDeclarativeEngine::GetNewComponentWithJsCode(const std::str
     auto component = ViewStackProcessor::GetInstance()->GetNewComponent();
     return component;
 }
+
+bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, const std::string& viewID)
+{
+    std::string dest;
+    if (!Base64Util::Decode(jsCode, dest)) {
+        return false;
+    }
+    NG::ViewStackProcessor::GetInstance()->ClearStack();
+    NG::ViewStackProcessor::GetInstance()->PushKey(viewID);
+    bool result = engineInstance_->InitAceModule((uint8_t*)dest.data(), dest.size());
+    NG::ViewStackProcessor::GetInstance()->PopKey();
+    return result;
+}
+
 #endif
 
 void JsiDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
@@ -1552,8 +1593,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s, state: %{public}d",
-        packageName.c_str(), static_cast<int32_t>(state));
+    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s, state: %{public}d", packageName.c_str(),
+        static_cast<int32_t>(state));
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
         LOGE("update app state failed, runtime is null.");
@@ -1768,6 +1809,11 @@ void JsiDeclarativeEngine::OnCompleteContinuation(int32_t code)
     CallAppFunc("onCompleteContinuation", argv);
 }
 
+void JsiDeclarativeEngine::ClearCache()
+{
+    JSNApi::CleanJSVMCache();
+}
+
 void JsiDeclarativeEngine::OnRemoteTerminated()
 {
     LOGI("JsiDeclarativeEngine OnRemoteTerminated");
@@ -1848,6 +1894,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
         return;
     }
     std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    localRuntime_ = arkRuntime;
     auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
     EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
     if (vm == nullptr) {
@@ -1906,7 +1953,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     isModulePreloaded_ = evalResult;
 
     globalRuntime_ = nullptr;
-    localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
 }
 // ArkTsCard end

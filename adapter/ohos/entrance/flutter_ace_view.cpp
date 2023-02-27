@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -430,12 +430,12 @@ void FlutterAceView::SurfaceCreated(FlutterAceView* view, OHOS::sptr<OHOS::Rosen
     LOGD("<<< FlutterAceView::SurfaceCreated, end");
 }
 
-void FlutterAceView::SurfaceChanged(
-    FlutterAceView* view, int32_t width, int32_t height, int32_t orientation, WindowSizeChangeReason type)
+void FlutterAceView::SurfaceChanged(FlutterAceView* view, int32_t width, int32_t height, int32_t orientation,
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     CHECK_NULL_VOID(view);
 
-    view->NotifySurfaceChanged(width, height, type);
+    view->NotifySurfaceChanged(width, height, type, rsTransaction);
     auto platformView = view->GetShellHolder()->GetPlatformView();
     LOGD("FlutterAceView::SurfaceChanged, GetPlatformView");
     if (platformView) {

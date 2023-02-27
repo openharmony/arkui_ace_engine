@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "render_service_client/core/transaction/rs_transaction.h"
 #endif
 
 #include <algorithm>
@@ -79,18 +80,14 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {
-#ifndef PREVIEW
     window_->OnHide();
-#endif
 }
 
 PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {
-#ifndef PREVIEW
     window_->OnHide();
-#endif
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
@@ -197,6 +194,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     taskScheduler_.StartRecordFrameInfo(GetCurrentFrameInfo(recvTime, nanoTimestamp));
     taskScheduler_.FlushTask();
     taskScheduler_.FinishRecordFrameInfo();
+    TryCallNextFrameLayoutCallback();
     auto hasAninmation = window_->FlushCustomAnimation(nanoTimestamp);
     if (hasAninmation) {
         RequestFrame();
@@ -434,7 +432,8 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
     return fullScreenManager_;
 }
 
-void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -457,7 +456,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     FlushWindowSizeChangeCallback(width, height, type);
 
 #ifdef ENABLE_ROSEN_BACKEND
-    StartWindowSizeChangeAnimate(width, height, type);
+    StartWindowSizeChangeAnimate(width, height, type, rsTransaction);
 #else
     SetRootRect(width, height, 0.0);
 #endif
@@ -481,7 +480,8 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY)
     }
 }
 
-void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
+void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!IsWindowSizeAnimationEnabled) {
@@ -509,6 +509,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                rsTransaction->Begin();
+            }
+#endif
             LOGI("PipelineContext::Root node ROTATION animation, width = %{public}d, height = %{public}d", width,
                 height);
             AnimationOption option;
@@ -540,6 +545,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
                 });
             rotationAnimationCount_++;
             window_->SetDrawTextAsBitmap(true);
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                rsTransaction->Commit();
+            }
+#endif
             break;
         }
         case WindowSizeChangeReason::DRAG_START:
@@ -601,8 +611,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
         SetRootRect(rootSize.Width(), rootSize.Height(), 0);
     } else if (positionY > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0) {
         SetRootRect(rootSize.Width(), rootSize.Height(), -offsetFix);
-    } else if (positionY + height > rootSize.Height() - keyboardHeight &&
-               positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) {
+    } else if ((positionY + height > rootSize.Height() - keyboardHeight &&
+                   positionY < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
+               NearZero(rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
         SetRootRect(rootSize.Width(), rootSize.Height(), -height - offsetFix / 2.0f);
     }
 }

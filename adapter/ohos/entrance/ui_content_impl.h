@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
 #include "ability_info.h"
+#include "core/common/flutter/flutter_asset_manager.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
@@ -29,6 +30,7 @@
 namespace OHOS {
 
 class Window;
+class RSTransaction;
 
 } // namespace OHOS
 
@@ -66,7 +68,8 @@ public:
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
-    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
+    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
@@ -90,6 +93,7 @@ public:
     void UpdateFormDate(const std::string& data) override;
     void UpdateFormSharedImage(
         const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
+    void ReloadForm() override;
 
     void SetFormWidth(float width) override
     {

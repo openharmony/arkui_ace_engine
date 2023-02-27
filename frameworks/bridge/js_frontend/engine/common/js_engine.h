@@ -182,6 +182,8 @@ public:
 
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 
+    virtual void ClearCache() {}
+
     virtual std::string GetStacktraceMessage()
     {
         return "";
@@ -245,11 +247,6 @@ public:
         needUpdate_ = needUpdate;
     }
 
-    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
-    {
-        return nullptr;
-    }
-
     NativeEngine* GetNativeEngine()
     {
         return nativeEngine_;
@@ -271,6 +268,16 @@ public:
 #endif
 
 #if defined(PREVIEW)
+    virtual RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
+    {
+        return nullptr;
+    }
+
+    virtual bool ExecuteJsForFastPreview(const std::string& jsCode, const std::string& viewID)
+    {
+        return true;
+    }
+    
     virtual void ReplaceJSContent(const std::string& url, const std::string componentName)
     {
         LOGE("Ark does not support replaceJSContent");

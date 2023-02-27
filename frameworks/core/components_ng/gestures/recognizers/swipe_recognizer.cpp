@@ -180,6 +180,9 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     Offset moveDistance = event.GetOffset() - touchPoints_[event.id].GetOffset();
     touchPoints_[event.id] = event;
+    if (NearZero(moveDistance.GetX()) && NearZero(moveDistance.GetY())) {
+        return;
+    }
     double newAngle = ComputeAngle(moveDistance.GetX(), moveDistance.GetY());
     if (CheckAngle(newAngle)) {
         prevAngle_ = newAngle;

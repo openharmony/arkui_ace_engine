@@ -13,27 +13,32 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/panel/sliding_panel_node.h"
+#include "frame_trace_adapter_impl.h"
 
-namespace OHOS::Ace::NG {
-
-void SlidingPanelNode::AddChildToGroup(const RefPtr<UINode>& child)
+namespace OHOS::Ace {
+void FrameTraceAdapterFakeImpl::QuickExecute(std::function<void()> && func)
 {
-    if (columnChildren_.find(child->GetId()) != columnChildren_.end()) {
-        LOGW("Child has already exist.");
-        return;
-    }
-
-    columnChildren_.emplace(child->GetId());
-    auto columnNode = GetChildren().back();
-    if (columnNode) {
-        child->MountToParent(columnNode);
-    }
+    return;
 }
 
-const RefPtr<UINode> SlidingPanelNode::GetContentChildFromGroup()
+void FrameTraceAdapterFakeImpl::SlowExecute(std::function<void()> && func)
 {
-    return GetChildren().back();
+    return;
 }
 
-} // namespace OHOS::Ace::NG
+bool FrameTraceAdapterFakeImpl::EnableFrameTrace(const std::string &traceTag)
+{
+    return false;
+}
+
+FrameTraceAdapter* FrameTraceAdapter::GetInstance()
+{
+    static FrameTraceAdapterFakeImpl instance;
+    return &instance;
+}
+
+bool FrameTraceAdapterFakeImpl::IsEnabled()
+{
+    return false;
+}
+}

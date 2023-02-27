@@ -59,6 +59,13 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child)
     contentNode->AddChild(child);
 }
 
+const RefPtr<UINode> NavBarNode::GetContentChildFromGroup()
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return GetNavBarContentNode();
+}
+
 std::string NavBarNode::GetTitleString() const
 {
     auto title = DynamicCast<FrameNode>(GetTitle());

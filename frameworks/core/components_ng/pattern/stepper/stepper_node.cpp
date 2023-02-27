@@ -48,4 +48,10 @@ void StepperNode::AddChildToGroup(const RefPtr<UINode>& child)
     }
 }
 
+const RefPtr<UINode> StepperNode::GetContentChildFromGroup()
+{
+    int32_t swiperId = GetSwiperId();
+    return GetChildAtIndex(GetChildIndexById(swiperId));
+}
+
 } // namespace OHOS::Ace::NG

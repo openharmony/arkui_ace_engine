@@ -445,7 +445,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest005, TestSize.Level1)
 
 /**
  * @tc.name: BubblePatternTest006
- * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchDown.
+ * @tc.desc: Test bubble pattern InitTouchEvent HandleTouchEvent HandleTouchUp.
  * @tc.type: FUNC
  */
 HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
@@ -493,7 +493,7 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest006, TestSize.Level1)
     bubblePaintProperty->UpdateAutoCancel(BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_TRUE);
     bubblePattern->targetNodeId_ = targetId;
     bubblePattern->touchRegion_ = RectF(OffsetF(50, 50), SizeF(100, 100));
-    bubblePattern->HandleTouchDown(Offset(100.0, 100.0));
+    bubblePattern->HandleTouchUp(Offset(100.0, 100.0));
 }
 
 /**
