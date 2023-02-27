@@ -1064,6 +1064,7 @@ void TextFieldPattern::HandleOnCopy()
         LOGW("Nothing to select");
         return;
     }
+    LOGI("On copy, text selector %{public}s", textSelector_.ToString().c_str());
     auto value = GetEditingValue().GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd());
     if (value.empty()) {
         LOGW("Copy value is empty");
@@ -1106,10 +1107,6 @@ void TextFieldPattern::HandleOnPaste()
         CHECK_NULL_VOID_NOLOG(textfield);
         auto layoutProperty = textfield->GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) == CopyOptions::None) {
-            LOGW("Copy option not allowed");
-            return;
-        }
         auto value = textfield->GetEditingValue();
         auto valueLength = textfield->GetEditingValue().GetWideText().length();
         int32_t start = 0;
@@ -1626,7 +1623,7 @@ void TextFieldPattern::ShowSelectOverlay(
         selectInfo.isUsingMouse = pattern->IsUsingMouse();
         selectInfo.rightClickOffset = pattern->GetRightClickOffset();
         selectInfo.singleLineHeight = pattern->PreferredLineHeight();
-        selectInfo.menuInfo.showCopy = !pattern->GetEditingValue().text.empty();
+        selectInfo.menuInfo.showCopy = !pattern->GetEditingValue().text.empty() && pattern->AllowCopy();
         selectInfo.menuInfo.showCut = !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showCopyAll = !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showPaste = hasData;
@@ -1665,6 +1662,13 @@ void TextFieldPattern::ShowSelectOverlay(
         pattern->SetSelectOverlay(pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo));
     };
     clipboard_->HasData(hasDataCallback);
+}
+
+bool TextFieldPattern::AllowCopy()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None;
 }
 
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* /*node*/)

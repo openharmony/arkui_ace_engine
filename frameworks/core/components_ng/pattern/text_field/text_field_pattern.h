@@ -473,6 +473,7 @@ public:
     void ProcessInnerPadding();
     void OnCursorMoveDone();
     bool IsDisabled();
+    bool AllowCopy();
 
     bool GetIsMousePressed() const
     {
