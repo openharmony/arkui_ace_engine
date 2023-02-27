@@ -193,10 +193,11 @@ double TextPickerPattern::CalculateHeight()
     if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
         auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
         if (context->NormalizeToPx(defaultPickerItemHeightValue) <= 0) {
+            height = pickerTheme->GetDividerSpacing().ConvertToPx();
             return height;
         }
         if (defaultPickerItemHeightValue.Unit() == DimensionUnit::PERCENT) {
-            height = pickerTheme->GetGradientHeight().ConvertToPx() * defaultPickerItemHeightValue.ConvertToPx();
+            height = pickerTheme->GetGradientHeight().ConvertToPx() * defaultPickerItemHeightValue.Value();
         } else {
             height = context->NormalizeToPx(defaultPickerItemHeightValue);
         }
