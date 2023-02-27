@@ -27,6 +27,9 @@ public:
     HostWindowExtension(const std::string& bundleName, const std::string& abilityName);
     ~HostWindowExtension() override;
 
+    void OnWindowShow() override;
+    void OnWindowHide() override;
+
 protected:
     /**
      * Whether this extension has starting page.

@@ -54,6 +54,16 @@ HostWindowExtension::HostWindowExtension(const std::string& bundleName, const st
 
 HostWindowExtension::~HostWindowExtension()
 {
+    RequestExtensionSessionDestruction();
+}
+
+void HostWindowExtension::OnWindowShow()
+{
+    RequestExtensionSessionActivation();
+}
+
+void HostWindowExtension::OnWindowHide()
+{
     RequestExtensionSessionBackground();
 }
 
