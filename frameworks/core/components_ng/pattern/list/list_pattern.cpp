@@ -50,7 +50,6 @@ void ListPattern::OnModifyDone()
 {
     if (!isInitialized_) {
         jumpIndex_ = GetLayoutProperty<ListLayoutProperty>()->GetInitialIndex().value_or(0);
-        isInitialized_ = true;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -99,6 +98,8 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     lastOffset_ = currentOffset_;
     currentOffset_ = currentOffset_ - finalOffset;
     currentDelta_ = 0.0f;
+    float prevStartOffset = startMainPos_;
+    float prevEndOffset = endMainPos_ - contentMainSize_;
     contentMainSize_ = listLayoutAlgorithm->GetContentMainSize();
     startMainPos_ = listLayoutAlgorithm->GetStartPosition();
     endMainPos_ = listLayoutAlgorithm->GetEndPosition();
@@ -114,13 +115,15 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    ProcessEvent(indexChanged, finalOffset, isJump);
+    ProcessEvent(indexChanged, finalOffset, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
     CheckRestartSpring();
+    isInitialized_ = true;
     return true;
 }
 
-void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump)
+void ListPattern::ProcessEvent(
+    bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -150,22 +153,18 @@ void ListPattern::ProcessEvent(bool indexChanged, float finalOffset, bool isJump
 
     auto onReachStart = listEventHub->GetOnReachStart();
     if (onReachStart && (startIndex_ == 0)) {
-        float lastStartPos = startMainPos_ - (currentOffset_ - lastOffset_);
-        bool scrollUpToStart = GreatNotEqual(lastStartPos, 0.0) && LessOrEqual(startMainPos_, 0.0);
-        bool scrollDownToStart = LessNotEqual(lastStartPos, 0.0) && GreatOrEqual(startMainPos_, 0.0);
-        bool jumpToStart = isJump && NearZero(startMainPos_);
-        if (scrollUpToStart || scrollDownToStart || jumpToStart) {
+        bool scrollUpToStart = Positive(prevStartOffset) && NonPositive(startMainPos_);
+        bool scrollDownToStart = (Negative(prevStartOffset) || !isInitialized_) && NonNegative(startMainPos_);
+        if (scrollUpToStart || scrollDownToStart) {
             onReachStart();
         }
     }
     auto onReachEnd = listEventHub->GetOnReachEnd();
     if (onReachEnd && (endIndex_ == maxListItemIndex_)) {
-        float lastEndPos = endMainPos_ - (currentOffset_ - lastOffset_);
-        float mainSize = GetMainContentSize();
-        bool scrollUpToEnd = GreatNotEqual(lastEndPos, mainSize) && LessOrEqual(endMainPos_, mainSize);
-        bool scrollDownToEnd = LessNotEqual(lastEndPos, mainSize) && GreatOrEqual(endMainPos_, mainSize);
-        bool jumpToEnd = isJump && NearEqual(endMainPos_, mainSize);
-        if (scrollUpToEnd || scrollDownToEnd || jumpToEnd) {
+        float endOffset = endMainPos_ - contentMainSize_;
+        bool scrollUpToEnd = (Positive(prevEndOffset) || !isInitialized_) && NonPositive(endOffset);
+        bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
+        if (scrollUpToEnd || scrollDownToEnd) {
             onReachEnd();
         }
     }
