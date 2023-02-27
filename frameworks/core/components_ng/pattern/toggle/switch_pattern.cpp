@@ -136,7 +136,7 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     CHECK_NULL_VOID(host);
     auto curve = GetCurve();
     if (!curve) {
-        curve = Curves::LINEAR;
+        curve = Curves::FAST_OUT_SLOW_IN;
     }
 
     // If animation is still running, stop it before play new animation.

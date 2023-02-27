@@ -39,8 +39,18 @@ public:
         auto dividerRenderProperty = DynamicCast<DividerRenderProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_RETURN(dividerRenderProperty, nullptr);
         dividerColor_ = dividerRenderProperty->GetDividerColor().value_or(theme->GetColor());
-        lineCap_ = dividerRenderProperty->GetLineCap();
+        lineCap_ = dividerRenderProperty->GetLineCap().value_or(LineCap::BUTT);
         auto offset = paintWrapper->GetContentOffset();
+        if (lineCap_ == LineCap::SQUARE || lineCap_ == LineCap::ROUND) {
+            dividerLength_ += constrainStrokeWidth_;
+            if (vertical_) {
+                auto offsetY = offset.GetY();
+                offset.SetY(offsetY - constrainStrokeWidth_ / 2);
+            } else {
+                auto offsetX = offset.GetX();
+                offset.SetX(offsetX - constrainStrokeWidth_ / 2);
+            }
+        }
         lineCap_ = lineCap_ == LineCap::BUTT ? LineCap::SQUARE : lineCap_;
         DividerPainter dividerPainter(constrainStrokeWidth_, dividerLength_, vertical_, dividerColor_, lineCap_);
         return [dividerPainter, offset](RSCanvas& canvas) { dividerPainter.DrawLine(canvas, offset); };
@@ -51,8 +61,8 @@ private:
     float dividerLength_;
     bool vertical_ = false;
 
-    std::optional<Color> dividerColor_;
-    std::optional<LineCap> lineCap_;
+    Color dividerColor_;
+    LineCap lineCap_;
     ACE_DISALLOW_COPY_AND_MOVE(DividerPaintMethod);
 };
 } // namespace OHOS::Ace::NG

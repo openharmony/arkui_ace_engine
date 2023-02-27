@@ -603,6 +603,8 @@ private:
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
 
+    bool IsSearchParentNode();
+
     RectF frameRect_;
     RectF contentRect_;
     RectF textRect_;

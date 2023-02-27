@@ -46,6 +46,7 @@ public:
             auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>(THEME_PATTERN_DIVIDER, nullptr);
             if (pattern) {
                 theme->color_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
+                theme->stokeWidth_ = pattern->GetAttr<Dimension>("divider_stroke_width", 1.0_vp);
             } else {
                 LOGW("find pattern of divider fail");
             }
@@ -60,11 +61,17 @@ public:
         return color_;
     }
 
+    const Dimension& GetStokeWidth() const
+    {
+        return stokeWidth_;
+    }
+
 protected:
     DividerTheme() = default;
 
 private:
     Color color_;
+    Dimension stokeWidth_;
 };
 
 } // namespace OHOS::Ace
