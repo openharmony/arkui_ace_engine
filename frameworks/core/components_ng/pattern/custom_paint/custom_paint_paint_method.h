@@ -236,8 +236,9 @@ public:
 
     void FlushPipelineImmediately()
     {
-        if (context_) {
-            context_->FlushPipelineImmediately();
+        auto context = context_.Upgrade();
+        if (context) {
+            context->FlushPipelineImmediately();
         }
     }
 
@@ -294,7 +295,7 @@ protected:
     Shadow shadow_;
     std::unique_ptr<txt::Paragraph> paragraph_;
 
-    RefPtr<PipelineBase> context_;
+    WeakPtr<PipelineBase> context_;
 
     SkPath skPath_;
     SkPath skPath2d_;
