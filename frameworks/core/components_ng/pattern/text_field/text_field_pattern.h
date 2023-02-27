@@ -560,6 +560,7 @@ private:
     void HandleOnCut();
 
     void FireEventHubOnChange(const std::string& text);
+    void FireOnChangeIfNeeded();
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
