@@ -30,7 +30,7 @@ namespace OHOS::Ace {
 namespace {
 #ifndef OS_ACCOUNT_EXISTS
 constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
-#endif                                       // OS_ACCOUNT_EXISTS
+#endif  // OS_ACCOUNT_EXISTS
 
 ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 {
@@ -92,6 +92,7 @@ void PluginElement::Update()
     }
 
     GetRenderNode()->Update(component_);
+    loadFailState_ = false;
     RunPluginContainer();
     if (pluginManagerBridge_) {
         pluginManagerBridge_->AddPlugin(GetContext(), info);
@@ -121,6 +122,9 @@ void PluginElement::InitEvent(const RefPtr<PluginComponent>& component)
 
 void PluginElement::HandleOnCompleteEvent() const
 {
+    if (loadFailState_) {
+        return;
+    }
     if (!onCompleteEvent_) {
         LOGE("could not find available event handle");
         return;
@@ -128,13 +132,13 @@ void PluginElement::HandleOnCompleteEvent() const
     onCompleteEvent_("");
 }
 
-void PluginElement::HandleOnErrorEvent(const std::string code, const std::string msg) const
+void PluginElement::HandleOnErrorEvent(const std::string& code, const std::string& msg)
 {
+    loadFailState_ = true;
     if (!onErrorEvent_) {
         LOGE("could not find available event handle");
         return;
     }
-
     auto json = JsonUtil::Create(true);
     json->Put("errcode", code.c_str());
     json->Put("msg", msg.c_str());
@@ -298,18 +302,18 @@ std::string PluginElement::GetPackagePathByAbsolutePath(
         packagePathStr = info.pluginName.substr(0, posAssets);
         size_t posModule = info.pluginName.find("/", posAssets + assets.size());
         if (posModule != std::string::npos) {
-            info.moduleName =
+            info.abilityName =
                 info.pluginName.substr(posAssets + assets.size(), posModule - (posAssets + assets.size()));
             info.source = info.pluginName.substr(posModule);
         } else {
-            info.moduleName = "/";
+            info.abilityName = "/";
             info.source = info.pluginName.substr(posAssets + assets.size());
         }
     } else {
         size_t pos = info.pluginName.rfind("/");
         packagePathStr = info.pluginName.substr(0, pos + 1);
         info.source = info.pluginName.substr(pos + 1);
-        info.moduleName = "/";
+        info.abilityName = "/";
     }
     return packagePathStr;
 }
@@ -348,16 +352,17 @@ void PluginElement::GetModuleNameByWant(const WeakPtr<PluginElement>& weak, Requ
     }
     if (strList.size() == 1) {
         if (info.pluginName.rfind(".js") != std::string::npos) {
-            info.moduleName = "default";
             info.source = info.pluginName;
         } else {
-            info.moduleName = info.pluginName;
+            info.abilityName = info.pluginName;
         }
     } else {
         if (strList[0].rfind(".js") != std::string::npos) {
-            info.source = strList[1];
+            info.source = strList[0];
+        } else {
+            info.abilityName = strList[0];
         }
-        info.moduleName = strList[0];
+        info.moduleName = strList[1];
     }
 }
 
@@ -413,10 +418,23 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
             packagePathStr = abilityInfo.applicationInfo.codePath + "/" + abilityInfo.package + "/";
             info.moduleResPath = abilityInfo.resourcePath;
         }
-    } else {
-        packagePathStr = bundleInfo.hapModuleInfos[0].hapPath;
+        return packagePathStr;
     }
-
+    if (info.moduleName == "default" || info.moduleName.empty()) {
+        info.moduleResPath = bundleInfo.hapModuleInfos[0].resourcePath;
+        packagePathStr = bundleInfo.hapModuleInfos[0].hapPath;
+        return packagePathStr;
+    }
+    for (const auto& hapModuleInfo : bundleInfo.hapModuleInfos) {
+        if (info.moduleName == hapModuleInfo.moduleName) {
+            info.moduleResPath = hapModuleInfo.resourcePath;
+            packagePathStr = hapModuleInfo.hapPath;
+            return packagePathStr;
+        }
+    }
+    LOGE("Bms get hapInfo failed!");
+    pluginElement->HandleOnErrorEvent(
+        "1", "Bms get hapPath failed! Cannot find hap according to BundleName and ModuleName!");
     return packagePathStr;
 }
 
@@ -461,14 +479,14 @@ void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefP
         return;
     }
 
-    if (packagePathStr.rfind(".hap")) {
+    if (packagePathStr.rfind(".hap") != std::string::npos) {
         std::string sub = packagePathStr.substr(1, packagePathStr.size() - 5) + "/";
         ReplaceAll(info.source, sub, "");
         container->RunDecompressedPlugin(
-            packagePathStr, info.moduleName, info.source, info.moduleResPath, plugin->GetData());
+            packagePathStr, info.abilityName, info.source, info.moduleResPath, plugin->GetData());
     } else {
         // the hap is decompressed
-        container->RunPlugin(packagePathStr, info.moduleName, info.source, info.moduleResPath, plugin->GetData());
+        container->RunPlugin(packagePathStr, info.abilityName, info.source, info.moduleResPath, plugin->GetData());
     }
 }
 } // namespace OHOS::Ace
