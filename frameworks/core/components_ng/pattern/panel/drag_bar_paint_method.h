@@ -40,14 +40,8 @@ public:
         scaleWidth_ = scaleWidth;
     }
 
-    void SetScaleIcon(float scaleIcon)
-    {
-        scaleIcon_ = scaleIcon;
-    }
-
 protected:
     OffsetF iconOffset_;
-    float scaleIcon_ = 1.0f;
     float scaleWidth_ = 1.0f;
 
 private:

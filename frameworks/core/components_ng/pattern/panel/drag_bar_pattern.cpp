@@ -31,8 +31,7 @@ constexpr Dimension MAX_DRAG_X = 10.0_vp;
 constexpr Dimension MAX_DRAG_Y = 4.0_vp;
 constexpr float DRAG_X_RATIO = 0.4;
 constexpr float DRAG_Y_RATIO = 0.2;
-constexpr float SCALE_ICON = 1.15;
-constexpr float SCALE_WIDTH = 1.5 / SCALE_ICON;
+constexpr float SCALE = 1.5;
 constexpr int32_t DOWN_DURATION = 150;
 constexpr int32_t RESET_DURATION = 250;
 constexpr int32_t STYLE_DURATION = 200;
@@ -98,12 +97,11 @@ void DragBarPattern::InitProps()
 
     if (!barTouchAnimator_) {
         barTouchAnimator_ = AceType::MakeRefPtr<Animator>(host->GetContext());
-        auto touchAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0, SCALE_ICON, Curves::SHARP);
+        auto touchAnimation = AceType::MakeRefPtr<CurveAnimation<float>>(1.0, SCALE, Curves::SHARP);
         touchAnimation->AddListener([weak = AceType::WeakClaim(this)](float value) {
             auto dragBar = weak.Upgrade();
             if (dragBar) {
-                dragBar->scaleIcon_ = value;
-                dragBar->scaleWidth_ = 1.0 + (value - 1.0) / (SCALE_ICON - 1.0) * (SCALE_WIDTH - 1.0);
+                dragBar->scaleWidth_ = value;
                 dragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             }
         });
