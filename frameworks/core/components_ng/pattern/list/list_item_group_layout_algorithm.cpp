@@ -93,6 +93,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = padding.top.value_or(0.0f);
     auto paddingOffset = OffsetF(left, top);
     float crossSize = GetCrossAxisSize(size, axis_);
+    CHECK_NULL_VOID(listLayoutProperty_);
     itemAlign_ = listLayoutProperty_->GetListItemAlign().value_or(V2::ListItemAlign::START);
 
     if (headerIndex_ >= 0 || footerIndex_ >= 0) {
@@ -192,7 +193,9 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     float startPos = headerMainSize_;
     float endPos = totalMainSize_ - footerMainSize_;
     if (!itemPosition_.empty()) {
-        startPos = itemPosition_.begin()->second.first;
+        if (itemPosition_.begin()->first > 0) {
+            startPos = itemPosition_.begin()->second.first;
+        }
         endPos = itemPosition_.rbegin()->second.second;
         startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
@@ -411,7 +414,6 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
 void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapper,
     const OffsetF& paddingOffset, float crossSize)
 {
-    CHECK_NULL_VOID(listLayoutProperty_);
     OffsetF selfOffset = layoutWrapper->GetGeometryNode()->GetPaddingOffset();
     selfOffset = selfOffset - listLayoutProperty_->CreatePaddingAndBorder().Offset();
     float mainPos = GetMainAxisOffset(selfOffset, axis_);
