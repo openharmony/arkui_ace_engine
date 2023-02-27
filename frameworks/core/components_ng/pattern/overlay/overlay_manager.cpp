@@ -705,6 +705,11 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     LOGI("OverlayManager::CloseDialog");
+    if (dialogNode->IsRemoving()) {
+        // already in close animation
+        return;
+    }
+    dialogNode->MarkRemoving();
     CloseDialogAnimation(dialogNode);
     BlurDialog();
 }
