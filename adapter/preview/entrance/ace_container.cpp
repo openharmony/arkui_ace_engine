@@ -63,6 +63,7 @@
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -77,8 +78,8 @@ const char LOCALE_KEY[] = "locale";
 
 std::once_flag AceContainer::onceFlag_;
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type)
-    : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type)
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context)
+    : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type), context_(context)
 {
     ThemeConstants::InitDeviceType();
 
@@ -90,23 +91,37 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type)
     taskExecutor_ = taskExecutor;
 }
 
-void AceContainer::InitialStageModuleParser()
-{
-    const char* configFilename = "module.json";
-    std::string appConfig;
-    if (!Framework::GetAssetContentImpl(assetManager_, configFilename, appConfig)) {
-        LOGE("Can not load the application config of stage model.");
-        return;
-    }
-    auto stageModuleParser = AceType::MakeRefPtr<StageModuleParser>();
-    stageModuleParser->Parse(appConfig);
-    stageAppInfo_ = stageModuleParser->GetAppInfo();
-    stageModuleInfo_ = stageModuleParser->GetModuleInfo();
-}
-
 void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
+    auto stageContext = AceType::DynamicCast<StageContext>(context_);
+    auto faContext = AceType::DynamicCast<FaContext>(context_);
+    bool useNewPipe = true;
+    if (stageContext) {
+        auto appInfo = stageContext->GetAppInfo();
+        CHECK_NULL_VOID(appInfo);
+        auto hapModuleInfo = stageContext->GetHapModuleInfo();
+        CHECK_NULL_VOID(hapModuleInfo);
+        auto compatibleVersion = appInfo->GetMinAPIVersion();
+        auto targetVersion = appInfo->GetTargetAPIVersion();
+        auto releaseType = appInfo->GetApiReleaseType();
+        bool enablePartialUpdate = hapModuleInfo->GetPartialUpdateFlag();
+        useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage("", compatibleVersion, targetVersion,
+            releaseType, !enablePartialUpdate);
+    } else if (faContext) {
+        auto appInfo = faContext->GetAppInfo();
+        CHECK_NULL_VOID(appInfo);
+        auto compatibleVersion = appInfo->GetMinAPIVersion();
+        auto targetVersion = appInfo->GetTargetAPIVersion();
+        auto releaseType = appInfo->GetApiReleaseType();
+        useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFA("", compatibleVersion, targetVersion, releaseType);
+    } else if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
+        useNewPipe = false;
+    }
+    LOGI("Using %{public}s pipeline context ...", (useNewPipe ? "new" : "old"));
+    if (useNewPipe) {
+        SetUseNewPipeline();
+    }
     if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
         InitializeFrontend();
     }
@@ -213,16 +228,19 @@ void AceContainer::RunNativeEngineLoop()
 
 void AceContainer::InitializeStageAppConfig(const std::string& assetPath, bool formsEnabled)
 {
-    CHECK_NULL_VOID(stageAppInfo_);
-    CHECK_NULL_VOID(stageModuleInfo_);
+    auto stageContext = AceType::DynamicCast<StageContext>(context_);
+    CHECK_NULL_VOID(stageContext);
+    auto appInfo = stageContext->GetAppInfo();
+    CHECK_NULL_VOID(appInfo);
+    auto hapModuleInfo = stageContext->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
     if (pipelineContext_ && !formsEnabled) {
-        LOGI("Set MinPlatformVersion to %{public}d", stageAppInfo_->GetMinAPIVersion());
-        pipelineContext_->SetMinPlatformVersion(stageAppInfo_->GetMinAPIVersion());
+        LOGI("Set MinPlatformVersion to %{public}d", appInfo->GetMinAPIVersion());
+        pipelineContext_->SetMinPlatformVersion(appInfo->GetMinAPIVersion());
     }
-
-    auto& bundleName = stageAppInfo_->GetBundleName();
-    auto& compileMode = stageModuleInfo_->GetCompileMode();
-    auto& moduleName = stageModuleInfo_->GetModuleName();
+    auto& bundleName = appInfo->GetBundleName();
+    auto& compileMode = hapModuleInfo->GetCompileMode();
+    auto& moduleName = hapModuleInfo->GetModuleName();
     bool isBundle = (compileMode != "esmodule");
     auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
     CHECK_NULL_VOID(declarativeFrontend);
@@ -424,7 +442,8 @@ void AceContainer::InitializeCallback()
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs)
 {
-    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type);
+    auto context = Context::CreateContext(runArgs.projectModel == ProjectModel::STAGE, runArgs.appResourcesPath);
+    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, context);
     AceEngine::Get().AddContainer(aceContainer->GetInstanceId(), aceContainer);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);

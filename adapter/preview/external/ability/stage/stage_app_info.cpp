@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-#include "adapter/preview/osal/stage_module_parser.h"
+#include "adapter/preview/external/ability/stage/stage_app_info.h"
 
 namespace OHOS::Ace {
-
-void StageAppInfo::AppInfoParse(const std::unique_ptr<JsonValue>& root)
+void StageAppInfo::Parse(const std::unique_ptr<JsonValue>& root)
 {
     if (!root) {
         LOGE("The information of stage model application is null.");
@@ -102,65 +101,4 @@ uint32_t StageAppInfo::GetVersionCode() const
 {
     return versionCode_;
 }
-
-StageModuleParser::StageModuleParser()
-    : stageAppInfo_(Referenced::MakeRefPtr<StageAppInfo>()),
-      stageModuleInfo_(Referenced::MakeRefPtr<StageModuleInfo>())
-{}
-
-void StageModuleInfo::ModuleInfoParse(const std::unique_ptr<JsonValue>& root)
-{
-    if (!root) {
-        LOGE("The information of stage model application is null.");
-        return;
-    }
-    compileMode_ = root->GetString("compileMode");
-    moduleName_ = root->GetString("name");
-    auto metaData = root->GetValue("metadata");
-    if (metaData && metaData->IsArray()) {
-        for (auto index = 0; index < metaData->GetArraySize(); ++index) {
-            auto item = metaData->GetArrayItem(index);
-            if (item && item->GetString("name") == "ArkTSPartialUpdate") {
-                isPartialUpdate_ = (item->GetString("value", "true") != "false");
-            }
-        }
-    }
-}
-
-const std::string& StageModuleInfo::GetCompileMode() const
-{
-    return compileMode_;
-}
-
-const std::string& StageModuleInfo::GetModuleName() const
-{
-    return moduleName_;
-}
-
-bool StageModuleInfo::GetPartialUpdateFlag() const
-{
-    return isPartialUpdate_;
-}
-
-void StageModuleParser::Parse(const std::string& contents)
-{
-    auto rootJson = JsonUtil::ParseJsonString(contents);
-    if (!rootJson || !rootJson->IsValid()) {
-        LOGE("The module config of stage application is illegal.");
-        return;
-    }
-    stageAppInfo_->AppInfoParse(rootJson->GetValue("app"));
-    stageModuleInfo_->ModuleInfoParse(rootJson->GetValue("module"));
-}
-
-const RefPtr<StageAppInfo>& StageModuleParser::GetAppInfo() const
-{
-    return stageAppInfo_;
-}
-
-const RefPtr<StageModuleInfo>& StageModuleParser::GetModuleInfo() const
-{
-    return stageModuleInfo_;
-}
-
 } // namespace OHOS::Ace

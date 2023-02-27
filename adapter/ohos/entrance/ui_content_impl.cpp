@@ -846,9 +846,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (hapModuleInfo) {
         metaData = hapModuleInfo->metadata;
     }
+    bool closeArkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
+    });
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
-            apiCompatibleVersion, apiTargetVersion, apiReleaseType, metaData);
+            apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     LOGI("UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
          "useNewPipe: %{public}d",
         apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
