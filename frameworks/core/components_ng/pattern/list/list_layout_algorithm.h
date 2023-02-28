@@ -173,6 +173,11 @@ public:
         chainInterval_ = interval;
     }
 
+    bool IsCrossMatchChild() const
+    {
+        return crossMatchChild_;
+    }
+
     float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -251,6 +256,7 @@ private:
     float estimateOffset_ = 0.0f;
 
     bool mainSizeIsDefined_ = false;
+    bool crossMatchChild_ = false;
     float contentMainSize_ = 0.0f;
     float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
