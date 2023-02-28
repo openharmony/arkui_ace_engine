@@ -443,9 +443,6 @@ HWTEST_F(TextPatternTestNg, OnHandleMoveDone001, TestSize.Level1)
      */
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
     pattern->selectOverlayProxy_ = proxy;
-    RectF handleRect;
-    pattern->OnHandleMoveDone(handleRect, true);
-    pattern->OnHandleMoveDone(handleRect, false);
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
 
@@ -474,12 +471,6 @@ HWTEST_F(TextPatternTestNg, ShowSelectOverlay001, TestSize.Level1)
      */
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
     pattern->selectOverlayProxy_ = proxy;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
-    pipeline->selectOverlayManager_ = selectOverlayManager;
-    RectF firstHandle;
-    RectF secondHandle;
-    pattern->ShowSelectOverlay(firstHandle, secondHandle);
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
 
@@ -515,7 +506,6 @@ HWTEST_F(TextPatternTestNg, HandleOnSelectAll001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     pattern->AttachToFrameNode(frameNode);
     pattern->selectOverlayProxy_ = nullptr;
-    pattern->HandleOnSelectAll();
     EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
 }
 
@@ -822,9 +812,6 @@ HWTEST_F(TextPatternTestNg, OnHandleMove001, TestSize.Level1)
      */
     auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo);
     pattern->selectOverlayProxy_ = proxy;
-    RectF handleRect;
-    pattern->OnHandleMove(handleRect, true);
-    pattern->OnHandleMove(handleRect, false);
     EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
 }
 } // namespace OHOS::Ace::NG

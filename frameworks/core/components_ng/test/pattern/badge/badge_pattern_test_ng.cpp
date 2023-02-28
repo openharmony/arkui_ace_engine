@@ -255,16 +255,19 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest002, TestSize.Level1)
     LayoutConstraintF LayoutConstraintVaildWidth;
     LayoutConstraintVaildWidth.selfIdealSize.SetSize(SizeF(1000000, FULL_SCREEN_HEIGHT));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildWidth);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
 
     LayoutConstraintF LayoutConstraintVaildHeight;
     LayoutConstraintVaildHeight.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, 1000000));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildHeight);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
 
     LayoutConstraintF LayoutConstraintVaildSize;
     LayoutConstraintVaildSize.selfIdealSize.SetSize(SizeF(1000000, 1000000));
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildSize);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
 
     LayoutConstraintF parentLayoutConstraint;
