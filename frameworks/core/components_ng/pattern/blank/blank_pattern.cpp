@@ -25,66 +25,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-void BlankPattern::OnMountToParentDone()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->HasMinSize()) {
-        return;
-    }
-    auto parent = GetParentFrameNode(frameNode);
-    CHECK_NULL_VOID(parent);
-    if (parent->GetTag() == V2::FLEX_ETS_TAG) {
-        auto flexParent = DynamicCast<FrameNode>(parent);
-        CHECK_NULL_VOID(flexParent);
-        auto flexLayoutProperty = flexParent->GetLayoutProperty<FlexLayoutProperty>();
-        CHECK_NULL_VOID(flexLayoutProperty);
-        auto flexDirection = flexLayoutProperty->GetFlexDirectionValue(FlexDirection::ROW);
-        if (flexDirection == FlexDirection::ROW || flexDirection == FlexDirection::ROW_REVERSE) {
-            if (layoutProperty->GetHeightValue() > layoutProperty->GetMinSizeValue()) {
-                layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(layoutProperty->GetHeightValue()), std::nullopt));
-            } else {
-                layoutProperty->UpdateCalcMinSize(
-                    CalcSize(CalcLength(layoutProperty->GetMinSizeValue()), std::nullopt));
-            }
-        } else {
-            if (layoutProperty->GetHeightValue() > layoutProperty->GetMinSizeValue()) {
-                layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(layoutProperty->GetHeightValue())));
-            } else {
-                layoutProperty->UpdateCalcMinSize(
-                    CalcSize(std::nullopt, CalcLength(layoutProperty->GetMinSizeValue())));
-            }
-        }
-    } else if (parent->GetTag() == V2::ROW_ETS_TAG) {
-        if (layoutProperty->GetHeightValue() > layoutProperty->GetMinSizeValue()) {
-            layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(layoutProperty->GetHeightValue()), std::nullopt));
-        } else {
-            layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(layoutProperty->GetMinSizeValue()), std::nullopt));
-        }
-    } else if (parent->GetTag() == V2::COLUMN_ETS_TAG) {
-        if (layoutProperty->GetHeightValue() > layoutProperty->GetMinSizeValue()) {
-            layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(layoutProperty->GetHeightValue())));
-        } else {
-            layoutProperty->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(layoutProperty->GetMinSizeValue())));
-        }
-    }
-}
-
-RefPtr<FrameNode> BlankPattern::GetParentFrameNode(RefPtr<FrameNode> frameNode)
-{
-    auto parent = frameNode->GetParent();
-    CHECK_NULL_RETURN(parent, nullptr);
-    while (parent) {
-        if (parent->GetTag() == V2::FLEX_ETS_TAG || parent->GetTag() == V2::ROW_ETS_TAG ||
-            parent->GetTag() == V2::COLUMN_ETS_TAG) {
-            break;
-        }
-        parent = parent->GetParent();
-    }
-    return DynamicCast<FrameNode>(parent);
-}
 
 std::string BlankPattern::GetColorString() const
 {
@@ -98,4 +38,5 @@ void BlankPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("color", GetColorString().c_str());
 }
+
 } // namespace OHOS::Ace::NG
