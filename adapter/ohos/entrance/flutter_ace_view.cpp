@@ -238,6 +238,10 @@ void FlutterAceView::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>&
 {
     CHECK_NULL_VOID_NOLOG(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
+    if (SystemProperties::GetDebugEnabled()) {
+        ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
+            touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
+    }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);
         LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
