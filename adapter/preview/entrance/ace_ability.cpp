@@ -237,6 +237,7 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     EventDispatcher::GetInstance().Initialize();
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
     aceAbility->SetGlfwWindowController(ctx);
+    aceAbility->SetFlutterWindowControllerRef(controller);
     return aceAbility;
 }
 #endif
@@ -408,6 +409,9 @@ void AceAbility::RunEventLoop()
 void AceAbility::RunEventLoop()
 {
     while (controller_ != nullptr && !controller_->WindowShouldClose() && loopRunning_) {
+        if (windowControllerRef_) {
+            FlutterDesktopWaitForEvents(windowControllerRef_);
+        }
         controller_->WaitForEvents();
 
 #ifdef USE_GLFW_WINDOW
