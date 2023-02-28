@@ -511,6 +511,7 @@ private:
     void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void ParseAppendValue(KeyCode keycode, std::string& appendElement);
     void HandleDirectionalKey(const KeyEvent& keyEvent);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);

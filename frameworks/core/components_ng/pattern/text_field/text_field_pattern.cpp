@@ -958,7 +958,9 @@ void TextFieldPattern::HandleDirectionalKey(const KeyEvent& keyEvent)
 
 bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
 {
+    LOGI("HandleKeyEvent, action %{public}d, code %{public}d", keyEvent.action, keyEvent.code);
     if (keyEvent.action == KeyAction::DOWN) {
+        std::string appendElement;
         if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
             keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
             if (keyboard_ != TextInputType::MULTILINE) {
@@ -966,6 +968,8 @@ bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
             }
         } else if (keyEvent.IsDirectionalKey()) {
             HandleDirectionalKey(keyEvent);
+        } else if (keyEvent.IsNumberKey()) {
+            appendElement = keyEvent.ConvertCodeToString();
         } else if (keyEvent.IsLetterKey()) {
             if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
                 keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
@@ -989,10 +993,43 @@ bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
             } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
                        keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
                 HandleOnCut();
+            } else {
+                appendElement = keyEvent.ConvertCodeToString();
             }
+        }
+        if (keyEvent.code == KeyCode::KEY_DEL) {
+#if defined (PREVIEW)
+            DeleteBackward(1);
+#else
+            DeleteForward(1);
+#endif
+            return true;
+        }
+        if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
+#if defined (PREVIEW)
+            DeleteForward(1);
+#else
+            DeleteBackward(1);
+#endif
+            return true;
+        }
+        ParseAppendValue(keyEvent.code, appendElement);
+        if (!appendElement.empty()) {
+            InsertValue(appendElement);
         }
     }
     return true;
+}
+
+void TextFieldPattern::ParseAppendValue(KeyCode keycode, std::string& appendElement)
+{
+    switch (keycode) {
+        case KeyCode::KEY_SPACE:
+            appendElement = " ";
+            break;
+        default:
+            break;
+    }
 }
 
 void TextFieldPattern::HandleOnUndoAction()
@@ -2191,6 +2228,7 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
+    LOGD("Insert value '%{public}s'", insertValue.c_str());
     auto originLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
     if (originLength >= GetMaxLength()) {
         LOGW("Max length reached");
