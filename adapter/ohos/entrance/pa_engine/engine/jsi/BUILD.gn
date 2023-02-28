@@ -58,6 +58,7 @@ template("js_pa_engine_ark") {
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
     deps = [
+      "$ability_runtime_napi_path/inner/napi_ability_common:napi_ability_common",
       "$ability_runtime_napi_path/inner/napi_common:napi_common",
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
