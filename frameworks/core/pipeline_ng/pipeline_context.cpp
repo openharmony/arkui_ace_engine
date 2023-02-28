@@ -1271,14 +1271,16 @@ void PipelineContext::SetContainerWindow(bool isShow)
         if (windowPattern_) {
             auto rsUIDirector = windowPattern_->GetRSUIDirector();
             if (rsUIDirector) {
-                rsUIDirector->SetContainerWindow(isShow); // set container window show state to render service
+                // set container window show state to render service
+                rsUIDirector->SetContainerWindow(isShow, density_);
             }
         } else {
             auto rsWindow = static_cast<RosenWindow*>(GetWindow());
             if (rsWindow) {
                 auto rsUIDirector = rsWindow->GetRsUIDirector();
                 if (rsUIDirector) {
-                    rsUIDirector->SetContainerWindow(isShow, density_); // set container window show state to render service
+                    // set container window show state to render service
+                    rsUIDirector->SetContainerWindow(isShow, density_);
                 }
             }
         }

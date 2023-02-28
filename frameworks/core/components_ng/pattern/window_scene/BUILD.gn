@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -16,8 +16,8 @@ import("//foundation/arkui/ace_engine/frameworks/core/components_ng/components.g
 if (is_standard_system) {
   config("ohos_window_scene_config") {
     include_dirs = [
-      "//foundation/window/window_manager/interfaces/innerkits",
-      "//foundation/window/window_manager/wm",
+      "$window_manager_path/interfaces/innerkits",
+      "$window_manager_path/wm",
     ]
   }
 }
@@ -48,10 +48,10 @@ build_component_ng("window_scene") {
     configs = [ ":ohos_window_scene_config" ]
 
     deps = [
-      "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
-      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
-      "//foundation/window/window_manager/wm:libwm",
-      "//foundation/window/window_manager/dm:libdm",
+      "$ace_root/interfaces/inner_api/ace:ace_uicontent",
+      "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+      "$window_manager_path/wm:libwm",
+      "$window_manager_path/dm:libdm",
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
     ]
 

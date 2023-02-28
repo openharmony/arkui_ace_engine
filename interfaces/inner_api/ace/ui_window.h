@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,8 @@ public:
         AbilityRuntime::Context* context = nullptr) = 0;
 
     // for lifecycle
-    virtual void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) = 0;
+    virtual void RegisterSessionStageStateListener(
+        const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) = 0;
 
     virtual void Connect() = 0;
     virtual void Foreground() = 0;

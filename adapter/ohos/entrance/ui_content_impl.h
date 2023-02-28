@@ -49,7 +49,7 @@ public:
 
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
-    void Initialize(OHOS::Ace::NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) override;
+    void Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -59,7 +59,6 @@ public:
 
     // distribute
     void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) override;
-    void Restore(OHOS::Ace::NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage) override;
     std::string GetContentInfo() const override;
     void DestroyUIDirector() override;
 
@@ -71,7 +70,7 @@ public:
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction) override;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
@@ -123,7 +122,6 @@ private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
-    void InitializeSubWindow(bool isDialog = false);
     void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;

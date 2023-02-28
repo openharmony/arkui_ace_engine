@@ -81,6 +81,8 @@ jsoncpp_root = "//third_party/jsoncpp"
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
 ark_toolchain_path = "//arkcompiler/toolchain"
+window_manager_path = "//foundation/window/window_manager"
+graphic_standard_path = "//foundation/graphic/graphic_2d"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"

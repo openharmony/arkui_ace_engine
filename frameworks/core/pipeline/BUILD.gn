@@ -77,7 +77,7 @@ template("ace_core_pipeline_source_set") {
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
       deps += [
-        "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_uicontent",
+        "$ace_root/interfaces/inner_api/ace:ace_uicontent",
       ]
     }
 

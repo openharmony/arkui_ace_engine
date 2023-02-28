@@ -80,7 +80,7 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
-    virtual void Initialize(OHOS::Ace::NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) = 0;
+    virtual void Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -90,7 +90,6 @@ public:
 
     // distribute
     virtual void Restore(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage) = 0;
-    virtual void Restore(OHOS::Ace::NG::WindowPattern* windowPattern, const std::string& contentInfo, NativeValue* storage) = 0;
     virtual std::string GetContentInfo() const = 0;
     virtual void DestroyUIDirector() = 0;
 
@@ -102,7 +101,7 @@ public:
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
     virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction) = 0;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
 
