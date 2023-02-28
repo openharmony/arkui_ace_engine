@@ -15,8 +15,10 @@
 
 #include "core/components_ng/base/inspector.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -76,7 +78,7 @@ TouchEvent GetUpPoint(const TouchEvent& downPoint)
 
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId)
 {
-    if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+    if (AceType::InstanceOf<NG::FrameNode>(uiNode) || AceType::InstanceOf<SpanNode>(uiNode)) {
         if (uiNode->GetTag() == "stage") {
         } else if (uiNode->GetTag() == "page") {
             if (uiNode->GetPageId() != pageId) {
@@ -85,7 +87,8 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
         } else {
 #ifndef PREVIEW
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-            if (!frameNode->IsInternal()) {
+            auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
+            if ((frameNode && !frameNode->IsInternal()) || spanNode) {
                 children.emplace_back(uiNode);
                 return;
             }
@@ -104,9 +107,48 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
     }
 }
 
+void GetSpanInspector(
+    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId)
+{
+    // span rect follows parent text size
+    auto spanParentNode = parent->GetParent();
+    CHECK_NULL_VOID_NOLOG(spanParentNode);
+    auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
+    CHECK_NULL_VOID_NOLOG(node);
+    auto jsonNode = JsonUtil::Create(false);
+    auto jsonObject = JsonUtil::Create(false);
+    parent->ToJsonValue(jsonObject);
+    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
+    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
+    jsonNode->Put(INSPECTOR_ID, parent->GetId());
+    auto ctx = node->GetRenderContext();
+    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
+    rect.SetOffset(node->GetTransformRelativeOffset());
+#ifndef PREVIEW
+    jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+#else
+    auto strRec = std::to_string(rect.Left())
+                      .append(",")
+                      .append(std::to_string(rect.Top()))
+                      .append(",")
+                      .append(std::to_string(rect.Width()))
+                      .append(",")
+                      .append(std::to_string(rect.Height()));
+    jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
+    jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
+    jsonNode->Put("$viewID", node->GetViewId().c_str());
+#endif
+    jsonNodeArray->Put(jsonNode);
+}
+
 void GetInspectorChildren(
     const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId, bool isActive)
 {
+    // Span is a special case in Inspector since span inherits from UINode
+    if (AceType::InstanceOf<SpanNode>(parent)) {
+        GetSpanInspector(parent, jsonNodeArray, pageId);
+        return;
+    }
     auto jsonNode = JsonUtil::Create(false);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
@@ -123,12 +165,12 @@ void GetInspectorChildren(
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
 #else
     auto strRec = std::to_string(rect.Left())
-                  .append(",")
-                  .append(std::to_string(rect.Top()))
-                  .append(",")
-                  .append(std::to_string(rect.Width()))
-                  .append(",")
-                  .append(std::to_string(rect.Height()));
+                      .append(",")
+                      .append(std::to_string(rect.Top()))
+                      .append(",")
+                      .append(std::to_string(rect.Width()))
+                      .append(",")
+                      .append(std::to_string(rect.Height()));
     jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
     jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
     jsonNode->Put("$viewID", node->GetViewId().c_str());
