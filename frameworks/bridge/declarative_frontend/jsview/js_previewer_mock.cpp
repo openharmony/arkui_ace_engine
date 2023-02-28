@@ -475,4 +475,36 @@ void JSVideoController::JSBind(BindingTarget globalObj)
 
 void JSVideoController::Mock(const JSCallbackInfo& info) {}
 
+void JSPlugin::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
+        LOGE("plugin create error, info is invalid.");
+        return;
+    }
+    CreateMockComponent("PluginComponent");
+}
+
+void JSPlugin::Mock(const JSCallbackInfo& info) {}
+
+void JSPlugin::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSPlugin>::Declare("PluginComponent");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSPlugin>::StaticMethod("create", &JSPlugin::Create, opt);
+    JSClass<JSPlugin>::StaticMethod("size", &JSPlugin::Mock, opt);
+    JSClass<JSPlugin>::StaticMethod("width", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("height", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onComplete", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onError", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onAppear", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onDisAppear", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onTouch", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onKeyEvent", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onDeleteEvent", &JSPlugin::Mock);
+    JSClass<JSPlugin>::StaticMethod("onClick", &JSPlugin::Mock);
+
+    JSClass<JSPlugin>::Inherit<JSViewAbstract>();
+    JSClass<JSPlugin>::Bind<>(globalObj);
+}
+
 } // namespace OHOS::Ace::Framework
