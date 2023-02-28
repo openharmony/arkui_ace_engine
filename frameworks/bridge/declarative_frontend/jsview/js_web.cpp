@@ -564,7 +564,7 @@ public:
 
     static bool ExistController(JSRef<JSObject>& controller)
     {
-        for (auto iter = controller_map_.begin(); iter == controller_map_.end(); iter++) {
+        for (auto iter = controller_map_.begin(); iter != controller_map_.end(); iter++) {
             if (iter->second->Unwrap<void>() == controller->Unwrap<void>()) {
                 LOGI("exist popup controller");
                 return true;
