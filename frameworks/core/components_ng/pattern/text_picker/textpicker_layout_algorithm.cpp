@@ -46,7 +46,12 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(pickerNode);
     auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     isDefaultPickerItemHeight_ = layoutProperty->HasDefaultPickerItemHeight();
+    auto defaultPickerItemHeightValue = layoutProperty->GetDefaultPickerItemHeightValue();
+    if (LessOrEqual(defaultPickerItemHeightValue.Value(), 0.0)) {
+        isDefaultPickerItemHeight_ = false;
+    }
 
     if (isDefaultPickerItemHeight_) {
         pickerHeight = static_cast<float>(defaultPickerItemHeight_ * TEXT_PICKER_CHILD_SIZE);
