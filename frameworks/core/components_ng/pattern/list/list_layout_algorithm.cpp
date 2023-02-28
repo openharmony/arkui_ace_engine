@@ -116,6 +116,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto crossSize = contentIdealSize.CrossSize(axis);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
         contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis), axis);
+        crossMatchChild_ = true;
     }
     contentIdealSize.SetMainSize(contentMainSize_, axis);
     AddPaddingToSize(padding, contentIdealSize);

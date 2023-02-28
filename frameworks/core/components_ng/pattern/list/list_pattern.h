@@ -231,6 +231,7 @@ private:
     float contentMainSize_ = 0.0f;
 
     float currentDelta_ = 0.0f;
+    bool crossMatchChild_ = false;
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
