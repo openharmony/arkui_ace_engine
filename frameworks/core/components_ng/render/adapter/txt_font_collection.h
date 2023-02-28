@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_FONT_COLLECTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_FONT_COLLECTION_H
 
+#include <mutex>
+
 #include "txt/font_collection.h"
 
 #include "base/memory/ace_type.h"
@@ -28,7 +30,10 @@ class ACE_EXPORT TxtFontCollection : public FontCollection {
     DECLARE_ACE_TYPE(TxtFontCollection, FontCollection)
 public:
     explicit TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection);
+    TxtFontCollection();
     ~TxtFontCollection() override = default;
+
+    static RefPtr<FontCollection> GetInstance();
 
     const std::shared_ptr<txt::FontCollection>& GetRawFontCollection()
     {
@@ -37,6 +42,7 @@ public:
 
 private:
     std::shared_ptr<txt::FontCollection> collection_;
+    sk_sp<txt::DynamicFontManager> dynamicFontManager_;
 };
 
 } // namespace OHOS::Ace::NG

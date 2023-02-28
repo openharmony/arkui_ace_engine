@@ -23,13 +23,12 @@
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
-#include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -182,9 +181,9 @@ void AceContainer::DestroyView()
 {
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID_NOLOG(aceView_);
-    auto flutterAceView = static_cast<FlutterAceView*>(aceView_);
-    if (flutterAceView) {
-        flutterAceView->DecRefCount();
+    auto aceView = static_cast<AceViewOhos*>(aceView_);
+    if (aceView) {
+        aceView->DecRefCount();
     }
     aceView_ = nullptr;
 }
@@ -1030,12 +1029,9 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     auto instanceId = aceView_->GetInstanceId();
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
     if (!isSubContainer_) {
-        auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
-        ACE_DCHECK(state != nullptr);
-        flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
-        if (GetSettings().usePlatformAsUIThread) {
-            ContainerScope::SetScopeNotify([](int32_t id) { flutter::UIDartState::Current()->SetCurInstance(id); });
-        }
+        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        ACE_DCHECK(aceView != nullptr);
+        flutterTaskExecutor->InitOtherThreads(aceView->GetTaskRunners());
     }
     ContainerScope scope(instanceId);
     if (type_ == FrontendType::DECLARATIVE_JS) {

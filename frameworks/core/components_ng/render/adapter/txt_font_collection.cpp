@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,34 +15,35 @@
 
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 
-#ifdef FLUTTER_2_5
-#include "ace_shell/shell/common/window_manager.h"
-#else
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "flutter/lib/ui/window/window.h"
-#endif
-
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
+RefPtr<FontCollection> TxtFontCollection::GetInstance()
+{
+    static RefPtr<TxtFontCollection> instance = AceType::MakeRefPtr<TxtFontCollection>();
+    return instance;
+}
+
 RefPtr<FontCollection> FontCollection::Current()
 {
-#ifdef FLUTTER_2_5
-    int32_t id = Container::CurrentId();
-    auto window = flutter::ace::WindowManager::GetWindow(id);
-    CHECK_NULL_RETURN(window, nullptr);
-    return AceType::MakeRefPtr<TxtFontCollection>(window->GetFontCollection());
-#else
-    CHECK_NULL_RETURN(flutter::UIDartState::Current(), nullptr);
-    auto window = flutter::UIDartState::Current()->window();
-    CHECK_NULL_RETURN(window, nullptr);
-    CHECK_NULL_RETURN(window->client(), nullptr);
-    auto& fontCollection = window->client()->GetFontCollection();
-    return AceType::MakeRefPtr<TxtFontCollection>(fontCollection.GetFontCollection());
-#endif
+    return TxtFontCollection::GetInstance();
+}
+
+TxtFontCollection::TxtFontCollection()
+{
+    collection_ = std::make_shared<txt::FontCollection>();
+    collection_->SetupDefaultFontManager();
+    dynamicFontManager_ = sk_make_sp<txt::DynamicFontManager>();
+    collection_->SetDynamicFontManager(dynamicFontManager_);
+    if (collection_) {
+        std::string emptyLocale;
+        // 0x4e2d is unicode for '中'.
+        collection_->MatchFallbackFont(0x4e2d, emptyLocale);
+        collection_->GetMinikinFontCollectionForFamilies({ "sans-serif" }, emptyLocale);
+    }
 }
 
 TxtFontCollection::TxtFontCollection(const std::shared_ptr<txt::FontCollection>& fontCollection)

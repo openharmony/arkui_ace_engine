@@ -19,7 +19,7 @@
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
-#include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "base/log/frame_report.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
@@ -31,7 +31,6 @@
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 #include <functional>
@@ -270,9 +269,9 @@ void DialogContainer::DestroyView()
 {
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID_NOLOG(aceView_);
-    auto* flutterAceView = static_cast<FlutterAceView*>(aceView_);
-    if (flutterAceView) {
-        flutterAceView->DecRefCount();
+    auto* aceView = static_cast<AceViewOhos*>(aceView_);
+    if (aceView) {
+        aceView->DecRefCount();
     }
     aceView_ = nullptr;
 }
@@ -318,12 +317,9 @@ void DialogContainer::AttachView(std::unique_ptr<Window> window, AceView* view, 
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-    auto* state = flutter::UIDartState::Current()->GetStateById(instanceId);
-    ACE_DCHECK(state != nullptr);
-    flutterTaskExecutor->InitOtherThreads(state->GetTaskRunners());
-    if (GetSettings().usePlatformAsUIThread) {
-        ContainerScope::SetScopeNotify([](int32_t id) { flutter::UIDartState::Current()->SetCurInstance(id); });
-    }
+    auto* aceView = static_cast<AceViewOhos*>(aceView_);
+    ACE_DCHECK(aceView != nullptr);
+    flutterTaskExecutor->InitOtherThreads(aceView->GetTaskRunners());
     ContainerScope scope(instanceId);
     // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
     flutterTaskExecutor->InitJsThread(false);
