@@ -279,6 +279,20 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects)
     }
 }
 
+RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
+    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        LOGI("Subwindow is null, add a new one.");
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow->ShowDialogNG(dialogProps, customNode);
+}
+
 void SubwindowManager::AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow)
 {
     if (!subwindow) {
@@ -355,5 +369,13 @@ void SubwindowManager::ShowActionMenu(
     auto subwindow = GetOrCreateSubWindow();
     CHECK_NULL_VOID(subwindow);
     subwindow->ShowActionMenu(title, button, std::move(callback));
+}
+
+void SubwindowManager::HideWindow()
+{
+    auto subwindow = GetCurrentWindow();
+    if (subwindow) {
+        subwindow->HideWindow();
+    }
 }
 } // namespace OHOS::Ace

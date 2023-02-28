@@ -129,19 +129,29 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option = dialogPattern->GetCloseAnimation().value_or(option);
     auto onFinish = option.GetOnFinishEvent();
 
-    option.SetOnFinishEvent(
-        [rootWk = rootNodeWeak_, nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId(), onFinish] {
-            ContainerScope scope(id);
-            auto root = rootWk.Upgrade();
-            auto node = nodeWk.Upgrade();
-            CHECK_NULL_VOID(root && node);
-            if (onFinish != nullptr) {
-                onFinish();
-            }
+    auto dialogLayoutProp = dialogPattern->GetLayoutProperty<DialogLayoutProperty>();
+    bool isShowInSubWindow = false;
+    if (dialogLayoutProp) {
+        isShowInSubWindow = dialogLayoutProp->GetShowInSubWindowValue(false);
+    }
 
-            root->RemoveChild(node);
-            root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        });
+    option.SetOnFinishEvent([rootWk = rootNodeWeak_, nodeWk = WeakClaim(RawPtr(node)), id = Container::CurrentId(),
+                                onFinish, isShowInSubWindow] {
+        ContainerScope scope(id);
+        auto root = rootWk.Upgrade();
+        auto node = nodeWk.Upgrade();
+        CHECK_NULL_VOID(root && node);
+        if (onFinish != nullptr) {
+            onFinish();
+        }
+
+        root->RemoveChild(node);
+        root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+        if (isShowInSubWindow) {
+            SubwindowManager::GetInstance()->HideWindow();
+        }
+    });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
     ctx->OpacityAnimation(option, theme->GetOpacityEnd(), theme->GetOpacityStart());

@@ -438,6 +438,21 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
         rosenRect.posX_, rosenRect.posY_, rosenRect.width_, rosenRect.height_);
 }
 
+RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
+    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+{
+    LOGI("SubwindowOhos::ShowDialogNG");
+    ShowWindow();
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, nullptr);
+    ContainerScope scope(childContainerId_);
+    return overlay->ShowDialog(dialogProps, customNode);
+}
+
 void SubwindowOhos::GetToastDialogWindowProperty(
     int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const
 {

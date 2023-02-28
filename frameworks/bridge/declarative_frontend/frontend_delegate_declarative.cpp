@@ -74,15 +74,8 @@ const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
 {
     auto currentId = Container::CurrentId();
-    if (Container::Current()->IsSubContainer()) {
-        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
-    }
     ContainerScope scope(currentId);
-    auto container = AceEngine::Get().GetContainer(currentId);
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     context->GetTaskExecutor()->PostTask(
@@ -1348,8 +1341,10 @@ void FrontendDelegateDeclarative::ShowToast(const std::string& message, int32_t 
     int32_t durationTime = std::clamp(duration, TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::IsCurrentUseNewPipeline()) {
-        auto task = [durationTime, message, bottom, isRightToLeft](const RefPtr<NG::OverlayManager>& overlayManager) {
+        auto task = [durationTime, message, bottom, isRightToLeft, containerId = Container::CurrentId()](
+                        const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
+            ContainerScope scope(containerId);
             LOGI("Begin to show toast message %{public}s, duration is %{public}d", message.c_str(), durationTime);
             overlayManager->ShowToast(message, durationTime, bottom, isRightToLeft);
         };

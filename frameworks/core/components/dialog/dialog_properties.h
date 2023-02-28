@@ -134,6 +134,7 @@ struct DialogProperties {
     std::optional<Color> maskColor;
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
+    bool isShowInSubWindow = false;
 
     // These ids is used for AlertDialog of declarative.
     EventMarker primaryId;   // first button's callback.
