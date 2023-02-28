@@ -35,17 +35,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        SliderContentModifier::Parameters paintParameters { trackThickness_, blockDiameter_, sliderLength_,
-            borderBlank_, stepRatio_, valueRatio_, hotBlockShadowWidth_, hotFlag_, mouseHoverFlag_, mousePressedFlag_ };
-        if (!sliderContentModifier_) {
-            sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>();
-        }
+        SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter_, sliderLength_, borderBlank_,
+            stepRatio_, valueRatio_, hotBlockShadowWidth_, hotFlag_, mouseHoverFlag_, mousePressedFlag_ };
         SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
         if (!sliderTipModifier_ && bubbleFlag_) {
             sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>();
         }
-        return MakeRefPtr<SliderPaintMethod>(
-            sliderContentModifier_, paintParameters, sliderTipModifier_, paragraph_, tipParameters);
+        return MakeRefPtr<SliderPaintMethod>(sliderTipModifier_, paintParameters, paragraph_, tipParameters);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -137,7 +133,6 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
 
-    RefPtr<SliderContentModifier> sliderContentModifier_;
     // tip Parameters
     bool bubbleFlag_ = false;
     RefPtr<Paragraph> paragraph_;
