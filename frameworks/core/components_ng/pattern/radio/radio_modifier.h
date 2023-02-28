@@ -19,6 +19,8 @@
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
@@ -27,8 +29,6 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paint_wrapper.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
 #include "core/components_ng/render/canvas.h"
 namespace OHOS::Ace::NG {
 enum class UIStatus {

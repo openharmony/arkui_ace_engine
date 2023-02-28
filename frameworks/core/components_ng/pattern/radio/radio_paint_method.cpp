@@ -77,7 +77,7 @@ void RadioModifier::InitializeParam()
 
 void RadioModifier::PaintRadio(DrawingContext& context) const
 {
-    auto canvas = context.canvas;
+    auto& canvas = context.canvas;
     auto contentSize = SizeF(context.width, context.height);
     OffsetF paintOffset;
     DrawTouchAndHoverBoard(canvas, contentSize, paintOffset);
