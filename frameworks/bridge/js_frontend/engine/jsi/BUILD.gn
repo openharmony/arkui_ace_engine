@@ -50,10 +50,7 @@ template("js_engine_ark") {
     part_name = ace_engine_part
     defines += invoker.defines
 
-    configs = [
-      "$ace_root:ace_config",
-      "//arkcompiler/ets_runtime:ark_jsruntime_public_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     sources = [
       "ark_js_runtime.cpp",
@@ -87,6 +84,7 @@ template("js_engine_ark") {
       defines += [ "BUILT_IN_JS_ENGINE" ]
     }
 
+    external_deps = []
     deps = []
     if (defined(config.build_for_preview) && config.build_for_preview) {
       deps += [
@@ -104,10 +102,10 @@ template("js_engine_ark") {
         "//foundation/arkui/napi/native_engine/impl/ark:ace_napi_impl_ark",
       ]
       deps += [ "//third_party/jsframework:ark_build" ]
-      external_deps = [ "napi:ace_napi" ]
+      external_deps += [ "napi:ace_napi" ]
     } else {
       deps += [ "//third_party/jsframework:ark_build" ]
-      external_deps = [
+      external_deps += [
         "multimedia_image_framework:image",
         "multimedia_image_framework:image_native",
         "napi:ace_napi",
@@ -121,9 +119,9 @@ template("js_engine_ark") {
     deps += [ "//foundation/arkui/napi:ace_napi_ark" ]
     if (defined(config.build_for_ios) && config.build_for_ios) {
       # static library for ios platform
-      deps += [ "//arkcompiler/ets_runtime:libark_jsruntime_static" ]
+      external_deps += [ "ets_runtime:libark_jsruntime_static" ]
     } else {
-      deps += [ "//arkcompiler/ets_runtime:libark_jsruntime" ]
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
   }
 }

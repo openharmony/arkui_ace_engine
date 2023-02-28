@@ -109,10 +109,11 @@ bool ArkJSRuntime::StartDebugger()
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
 #elif defined(ANDROID_PLATFORM)
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
-#elif defined(IOS_PLATFORM)
-        ret = JSNApi::StartDebugger(vm_, isDebugMode_, instanceId_, debuggerPostTask_);
 #endif
     }
+#if defined(IOS_PLATFORM)
+    ret = JSNApi::StartDebugger(nullptr, vm_, isDebugMode_, instanceId_, debuggerPostTask_);
+#endif
 #endif
     return ret;
 }
