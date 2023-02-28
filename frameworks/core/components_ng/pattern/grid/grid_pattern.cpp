@@ -733,4 +733,12 @@ void GridPattern::UpdateScrollBarOffset()
     Size mainSize = { viewScopeSize.Width(), viewScopeSize.Height() };
     UpdateScrollBarRegion(offset, estimatedHeight, mainSize);
 }
+
+RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
+{
+    auto property = MakeRefPtr<ScrollablePaintProperty>();
+    // default "scrollBar" attribute of Grid is BarState.Off
+    property->UpdateScrollBarMode(NG::DisplayMode::OFF);
+    return property;
+}
 } // namespace OHOS::Ace::NG
