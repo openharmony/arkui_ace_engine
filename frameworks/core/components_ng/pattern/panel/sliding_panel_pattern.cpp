@@ -669,6 +669,7 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("miniHeight", layoutProperty->GetMiniHeight().value_or(miniHeight_).ToString().c_str());
     json->Put("halfHeight", layoutProperty->GetHalfHeight().value_or(halfHeight_).ToString().c_str());
     json->Put("fullHeight", layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str());
+    json->Put(
+        "backgroundMask", layoutProperty->GetBackgroundColor().value_or(Color::TRANSPARENT).ColorToString().c_str());
 }
-
 } // namespace OHOS::Ace::NG
