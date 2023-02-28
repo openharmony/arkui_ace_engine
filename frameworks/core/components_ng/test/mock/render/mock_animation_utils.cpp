@@ -28,4 +28,8 @@ bool AnimationUtils::CloseImplicitAnimation()
 void AnimationUtils::Animate(
     const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
 {}
+
+void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback) {}
+
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback) {}
 } // namespace OHOS::Ace
