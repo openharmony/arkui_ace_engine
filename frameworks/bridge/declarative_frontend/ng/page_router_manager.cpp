@@ -61,10 +61,55 @@ void ExitToDesktop()
 
 } // namespace
 
+void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target, const std::string& params)
+{
+    RouterPageInfo info { target.url };
+    info.path = info.url + ".js";
+    LOGD("router.Push pagePath = %{private}s", info.url.c_str());
+    RouterOptScope scope(this);
+    LoadPage(GenerateNextPageId(), info, params);
+}
+
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url };
+
+    if (info.url.substr(0, SUB_STR_LENGTH) == "@bundle") {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pageUrlChecker = container->GetPageUrlChecker();
+        CHECK_NULL_VOID(pageUrlChecker);
+        auto instanceId = container->GetInstanceId();
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        auto callback =
+            [weak = AceType::WeakClaim(this), info, params, taskExecutor, instanceId]() {
+                ContainerScope scope(instanceId);
+                auto pageRouterManager = weak.Upgrade();
+                CHECK_NULL_VOID(pageRouterManager);
+                taskExecutor->PostTask(
+                    [pageRouterManager, info, params]() {
+                        pageRouterManager->LoadOhmUrl(info, params);
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        auto silentInstallErrorCallBack =
+            [taskExecutor, instanceId](
+                int32_t errorCode, const std::string& errorMsg) {
+                ContainerScope scope(instanceId);
+                taskExecutor->PostTask(
+                    [errorCode, errorMsg]() {
+                        LOGE("Run page error = %{public}d, errorMsg = %{public}s", errorCode, errorMsg.c_str());
+                    },
+                    TaskExecutor::TaskType::JS);
+            };
+
+        pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
+        return;
+    }
+
     if (!info.url.empty()) {
         info.path = manifestParser_->GetRouter()->GetPagePath(url);
     } else {
@@ -468,7 +513,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
                     TaskExecutor::TaskType::JS);
             };
 
-        auto silentInstallErrorCallBack = 
+        auto silentInstallErrorCallBack =
             [errorCallback, taskExecutor, instanceId](
                 int32_t errorCode, const std::string& errorMsg) {
                 ContainerScope scope(instanceId);
@@ -577,7 +622,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
                     TaskExecutor::TaskType::JS);
             };
 
-        auto silentInstallErrorCallBack = 
+        auto silentInstallErrorCallBack =
             [errorCallback, taskExecutor, instanceId](
                 int32_t errorCode, const std::string& errorMsg) {
                 ContainerScope scope(instanceId);
@@ -648,10 +693,6 @@ void PageRouterManager::StartBack(const RouterPageInfo& target, const std::strin
         std::string url = target.url;
         std::string pagePath = target.url + ".js";
         LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-        if (pagePath.empty()) {
-            LOGE("[Engine Log] this uri not support in route push.");
-            return;
-        }
         auto pageInfo = FindPageInStack(url);
         if (pageInfo.second) {
             // find page in stack, pop to specified index.
