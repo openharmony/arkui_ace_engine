@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/refresh/refresh_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_layout_property.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
@@ -40,7 +41,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr float PERCENT = 0.01; // Percent
-constexpr float FOLLOW_TO_RECYCLE_DURATION = 100;
+constexpr float FOLLOW_TO_RECYCLE_DURATION = 600;
 constexpr float LOADING_EXIT_DURATION = 350;
 constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
@@ -201,6 +202,7 @@ void RefreshPattern::LoadingProgressReset()
 {
     CHECK_NULL_VOID(progressChild_);
     UpdateLoadingProgress(STATE_PROGRESS_LOADING, 0.0f);
+    ResetLoadingProgressColor();
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
@@ -376,7 +378,7 @@ void RefreshPattern::TransitionPeriodAnimation()
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     pipeline->FlushUITasks();
 
-    auto curve = AceType::MakeRefPtr<CubicCurve>(0.6f, 0.2f, 1.0f, 1.0f);
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
     AnimationOption option;
     option.SetDuration(FOLLOW_TO_RECYCLE_DURATION);
     option.SetCurve(curve);
@@ -393,12 +395,6 @@ void RefreshPattern::TransitionPeriodAnimation()
     marginProperty.top = CalcLength(distance);
     progressLayoutProperty->UpdateMargin(marginProperty);
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    pipeline->FlushUITasks();
-    AnimationUtils::CloseImplicitAnimation();
-
-    AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);
-    progressPaintProperty->UpdateRefreshTransitionRatio(1.0f);
-    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
 }
@@ -512,4 +508,18 @@ float RefreshPattern::GetScrollOffset(float delta)
     return scrollOffset;
 }
 
+void RefreshPattern::ResetLoadingProgressColor()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
+    CHECK_NULL_VOID(progressChild_);
+    auto paintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateColor(theme->GetProgressColor());
+    progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG
