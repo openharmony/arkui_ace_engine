@@ -54,7 +54,7 @@ void TabController::SetIndex(int32_t index)
 {
     // There can be different tab at the same index
     if ((index_ == index && !Container::IsCurrentUsePartialUpdate()) ||  index < 0) {
-        LOGI("SetIndex: Input index is not valid, %{public}d, %{public}d", index_, index);
+        LOGD("SetIndex: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     indexDefined_ = true;
@@ -71,7 +71,7 @@ void TabController::SetIndex(int32_t index)
 void TabController::SetInitialIndex(int32_t index)
 {
     if (initialIndex_ == index || index < 0) {
-        LOGI("SetInitialIndex: Input index is not valid, %{public}d, %{public}d", initialIndex_, index);
+        LOGD("SetInitialIndex: Input index is not valid, %{public}d, %{public}d", initialIndex_, index);
         return;
     }
     initialIndex_ = index;
@@ -80,7 +80,7 @@ void TabController::SetInitialIndex(int32_t index)
 void TabController::SetIndexWithoutChangeContent(int32_t index)
 {
     if (index_ == index || index < 0) {
-        LOGI("SetIndexWithoutChangeContent: Input index is not valid, %{public}d, %{public}d", index_, index);
+        LOGD("SetIndexWithoutChangeContent: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     indexDefined_ = true;
@@ -90,7 +90,7 @@ void TabController::SetIndexWithoutChangeContent(int32_t index)
 void TabController::SetPendingIndex(int32_t index)
 {
     if (pendingIndex_ == index || index < 0) {
-        LOGI("SetPendingIndex: Input index is not valid, %{public}d, %{public}d", pendingIndex_, index);
+        LOGD("SetPendingIndex: Input index is not valid, %{public}d, %{public}d", pendingIndex_, index);
         return;
     }
     pendingIndex_ = index;
@@ -100,11 +100,11 @@ void TabController::SetPendingIndex(int32_t index)
 void TabController::SetIndexByController(int32_t index, bool blockEvent)
 {
     if (index_ == index || index < 0) {
-        LOGI("SetIndexByController: Input index is not valid, %{public}d, %{public}d", index_, index);
+        LOGD("SetIndexByController: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     if (index >= totalCount_) {
-        LOGI("index is large than total, %{public}d, %{public}d", index, totalCount_);
+        LOGD("index is large than total, %{public}d, %{public}d", index, totalCount_);
         SetPendingIndex(index);
         return;
     }
@@ -154,7 +154,7 @@ void TabController::SetIndicatorByScrollContent(double percent, int32_t newIndex
 void TabController::SetIndexByScrollContent(int32_t index)
 {
     if (index_ == index || index < 0) {
-        LOGI("SetIndexByScrollContent: Input index is not valid, %{public}d, %{public}d", index_, index);
+        LOGD("SetIndexByScrollContent: Input index is not valid, %{public}d, %{public}d", index_, index);
         return;
     }
     indexDefined_ = true;
