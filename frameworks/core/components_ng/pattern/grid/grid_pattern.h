@@ -49,10 +49,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<ScrollablePaintProperty>();
-    }
+    RefPtr<PaintProperty> CreatePaintProperty() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
