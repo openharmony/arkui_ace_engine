@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace {
 namespace {
-constexpr int NUM_TWO = 2;
+constexpr int FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO = 2;
 } // namespace
 
 std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
@@ -281,8 +281,8 @@ void JSRadio::SetPadding(const Dimension& topDimen, const Dimension& leftDimen)
         auto height = radioComponent->GetHeight();
         radioComponent->SetHeight(height);
         radioComponent->SetWidth(width);
-        box->SetHeight(height + topDimen * NUM_TWO);
-        box->SetWidth(width + leftDimen * NUM_TWO);
+        box->SetHeight(height + topDimen * FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO);
+        box->SetWidth(width + leftDimen * FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO);
         radioComponent->SetHotZoneVerticalPadding(topDimen);
         radioComponent->SetHorizontalPadding(leftDimen);
     }

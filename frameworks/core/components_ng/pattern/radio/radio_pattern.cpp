@@ -33,7 +33,7 @@ constexpr int DEFAULT_RADIO_ANIMATION_DURATION = 300;
 constexpr float DEFAULT_MID_TIME_SLOT = 0.5;
 constexpr float DEFAULT_END_TIME_SLOT = 1.0;
 constexpr float DEFAULT_SHRINK_TIME_SLOT = 0.9;
-constexpr int NUM_TWO = 2;
+constexpr int FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO = 2;
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()
@@ -513,8 +513,10 @@ void RadioPattern::AddHotZoneRect()
 {
     hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + NUM_TWO * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + NUM_TWO * hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO *
+        hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO *
+        hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));

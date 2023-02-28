@@ -157,13 +157,13 @@ private:
     RefPtr<AnimatablePropertyColor> pointColor_;
     RefPtr<AnimatablePropertyColor> activeColor_;
     RefPtr<AnimatablePropertyColor> inactiveColor_;
-    float shadowWidth_ = 1.5f;
-    float borderWidth_ = 1.5f;
+    float shadowWidth_ ;
+    float borderWidth_ ;
     Color inactivePointColor_ = Color::WHITE;
     Color shadowColor_ = Color::RED;
     Color clickEffectColor_ = Color::WHITE;
-    Color hoverColor_ = Color::WHITE;
-    Dimension hotZoneHorizontalPadding_ = 11.0_vp;
+    Color hoverColor_ ;
+    Dimension hotZoneHorizontalPadding_;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
