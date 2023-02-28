@@ -134,13 +134,11 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             InitializeBubble();
         }
         FireChangeEvent(SliderChangeMode::Click);
-        mousePressedFlag_ = true;
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
         if (bubbleFlag_) {
             bubbleFlag_ = false;
         }
-        mousePressedFlag_ = false;
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -504,6 +502,7 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
     auto mouseToCenterDistanceY = static_cast<float>(std::abs(info.GetLocalLocation().GetY() - circleCenter_.GetY()));
     float mouseToCenterDistance = std::max(mouseToCenterDistanceX, mouseToCenterDistanceY);
     mouseHoverFlag_ = LessOrEqual(mouseToCenterDistance, blockHotSize_ * HALF);
+    mousePressedFlag_ = info.GetButton() == MouseButton::LEFT_BUTTON;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
