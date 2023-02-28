@@ -393,7 +393,7 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
         return packagePathStr;
     }
 
-    if (bundleInfo.hapModuleInfos[0].hapPath.empty()) {
+    if (bundleInfo.hapModuleInfos.empty() || bundleInfo.hapModuleInfos[0].hapPath.empty()) {
         if (strList.size() == 1) {
             if (bundleInfo.moduleResPaths.size() == 1) {
                 info.moduleResPath = bundleInfo.moduleResPaths[0];

@@ -13,18 +13,28 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
+namespace {
+int32_t g_id = 0;
+}
 
 int32_t Container::CurrentId()
 {
-    return 0;
+    return g_id;
 }
 
 RefPtr<Container> Container::GetActive()
 {
     RefPtr<Container> activeContainer;
     return activeContainer;
+}
+
+void Container::UpdateCurrent(int32_t id)
+{
+    g_id = id;
 }
 } // namespace OHOS::Ace
