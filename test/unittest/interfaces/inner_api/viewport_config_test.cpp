@@ -22,7 +22,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-
 class ViewportConfigTest : public testing::Test {
 public:
     static void SetUpTestCase();
@@ -85,5 +84,4 @@ HWTEST_F(ViewportConfigTest, ViewportConfigTest002, TestSize.Level1)
     auto toString = viewConfig.ToString();
     ASSERT_EQ(toString, "Viewport config: size: (0, 1) orientation: 0 density: 1.000000 position: (0, 0)");
 }
-
 } // namespace OHOS::Ace

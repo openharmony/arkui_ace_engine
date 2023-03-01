@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("bubble_pattern_test_ng") {
   module_out_path = "$pattern_test_output_path/bubble"
@@ -42,7 +42,7 @@ ohos_unittest("bubble_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/flex/mock_flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_overlay_manager.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",

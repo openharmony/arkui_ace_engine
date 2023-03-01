@@ -15,6 +15,9 @@ import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
+# ======================= common constants =================================================================
+ace_mock = "//foundation/arkui/ace_engine/test/mock"
+
 # ======================= unittest cases output directory ==================================================
 pattern_test_output_path = "ace_engine/NewFrameworkBackendComponents"
 gestures_test_output_path = "ace_engine/NewFrameworkBackendGestures"
@@ -22,6 +25,8 @@ event_test_output_path = "ace_engine/NewFrameworkBackendEvent"
 base_test_outout_path = "ace_engine/NewFrameworkInfrastructure"
 syntax_test_output_path = "ace_engine/NewFrameworkSyntaxNodes"
 image_test_output_path = "ace_engine/NewFrameworkImageResourceLoading"
+basic_test_output_path = "ace_engine/FrameworkBasicAbility"
+interface_test_output_path = "ace_engine/FrameworkInterfaces"
 
 # ======================== common template =================================================================
 test_pattern_sources = [
@@ -103,10 +108,16 @@ test_pattern_sources = [
 ]
 
 test_pattern_deps = [
-  "$ace_root:ace_unittest_log",
   "$ace_root/frameworks/core/components/theme:build_theme_code",
+  "$ace_root/test/unittest:ace_unittest_log",
   "$cjson_root:cjson_static",
   "//third_party/googletest:gmock_main",
 ]
 
-test_configs = [ "$ace_root:ace_unittest_config" ]
+test_base_deps = [
+  "$ace_root/test/unittest:ace_unittest_log",
+  "$cjson_root:cjson_static",
+  "//third_party/googletest:gmock_main",
+]
+
+test_configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

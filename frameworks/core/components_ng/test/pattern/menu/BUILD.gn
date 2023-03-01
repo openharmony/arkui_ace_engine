@@ -117,7 +117,6 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
-    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_dump_log.cpp",
@@ -137,7 +136,8 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/unittest/mock_overlay_manager.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_layout_algorithm.cpp",
@@ -151,14 +151,15 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
   ]
 
   deps = [
-    "$ace_root:ace_test_log",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
   ]
 
   configs = [
-    "$ace_root:ace_unittest_config",
-    "$ace_root:ace_test_coverage_config",
+    "$ace_root/test/unittest:ace_unittest_config",
+
     "//commonlibrary/c_utils/base:utils_config",
   ]
 }

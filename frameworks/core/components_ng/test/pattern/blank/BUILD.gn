@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("blank_pattern_test_ng") {
   module_out_path = "$pattern_test_output_path/blank"

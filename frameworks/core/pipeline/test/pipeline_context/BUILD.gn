@@ -256,10 +256,7 @@ ohos_unittest("PipelineContextTest") {
       "resmgr:resourcemanager",
     ]
   } else {
-    configs += [
-      "$ace_root:ace_test_coverage_config",
-      "//third_party/curl:curl_config",
-    ]
+    configs += [ "//third_party/curl:curl_config" ]
     deps += [ "//third_party/curl:curl" ]
     external_deps = [
       "eventhandler:libeventhandler",

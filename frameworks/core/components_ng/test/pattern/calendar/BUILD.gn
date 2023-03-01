@@ -31,8 +31,6 @@ ohos_unittest("calendar_pattern_test_ng") {
     ":config_calendar_test",
     "$ace_root:ace_config",
   ]
-
-  configs += [ "$ace_root:ace_test_coverage_config" ]
 }
 
 config("config_calendar_test") {

@@ -25,47 +25,19 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-
 const std::string TEST_STRING = "Ace Unittest";
 const std::string TEST_KEY = "JsonObjectTypeTest";
 const std::string TEST_FALSE_KEY = "FalseKey";
-
 } // namespace
 
-class JsonUtilsTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() const override;
-    void TearDown() const override;
-};
-
-void JsonUtilsTest::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "JsonUtilsTest SetUpTestCase";
-}
-
-void JsonUtilsTest::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "JsonUtilsTest TearDownTestCase";
-}
-
-void JsonUtilsTest::SetUp()
-{
-    GTEST_LOG_(INFO) << "JsonUtilsTest SetUp";
-}
-
-void JsonUtilsTest::TearDown()
-{
-    GTEST_LOG_(INFO) << "JsonUtilsTest TearDown";
-}
+class JsonUtilTest : public testing::Test {};
 
 /**
- * @tc.name: JsonUtilsTest001
+ * @tc.name: JsonUtilTest001
  * @tc.desc: Check json util function for bool type value
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest001, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with bool value.
@@ -85,11 +57,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest002
+ * @tc.name: JsonUtilTest002
  * @tc.desc: Check json util function for bool type value
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest002, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with bool value.
@@ -109,11 +81,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest003
+ * @tc.name: JsonUtilTest003
  * @tc.desc: Check json util function for signed integer
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest003, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with signed integer.
@@ -138,11 +110,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest004
+ * @tc.name: JsonUtilTest004
  * @tc.desc: Check json util function for unsigned integer
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest004, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with unsigned integer.
@@ -167,11 +139,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest005
+ * @tc.name: JsonUtilTest005
  * @tc.desc: Check json util function for decimal number
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest005, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with decimal number.
@@ -196,11 +168,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest006
+ * @tc.name: JsonUtilTest006
  * @tc.desc: Check json util function for string
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest006, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with string.
@@ -220,11 +192,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest007
+ * @tc.name: JsonUtilTest007
  * @tc.desc: Check json util function for empty string
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest007, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with empty string.
@@ -244,11 +216,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest008
+ * @tc.name: JsonUtilTest008
  * @tc.desc: Check json util function for JsonObject
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest008, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with JsonObject.
@@ -271,11 +243,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest009
+ * @tc.name: JsonUtilTest009
  * @tc.desc: Check json util function for incorrect JsonObject
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest009, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with incorrect JsonObject.
@@ -296,11 +268,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest010
+ * @tc.name: JsonUtilTest010
  * @tc.desc: Check json util function for array
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest010, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with array.
@@ -324,11 +296,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest011
+ * @tc.name: JsonUtilTest011
  * @tc.desc: Check json util function for empty array
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest011, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with empty array.
@@ -348,11 +320,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest012
+ * @tc.name: JsonUtilTest012
  * @tc.desc: Check json util function for empty test string
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest012, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the empty test string.
@@ -370,11 +342,11 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsonUtilsTest013
+ * @tc.name: JsonUtilTest013
  * @tc.desc: Check json util function for illegal type value
  * @tc.type: FUNC
  */
-HWTEST_F(JsonUtilsTest, JsonUtilsTest013, TestSize.Level1)
+HWTEST_F(JsonUtilTest, JsonUtilTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. construct the test string with illegal type value.
@@ -390,5 +362,4 @@ HWTEST_F(JsonUtilsTest, JsonUtilsTest013, TestSize.Level1)
     EXPECT_FALSE(illegalValue->IsValid());
     EXPECT_TRUE(illegalValue->IsNull());
 }
-
 } // namespace OHOS::Ace

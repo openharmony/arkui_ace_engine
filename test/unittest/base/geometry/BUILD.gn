@@ -12,16 +12,10 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-if (is_standard_system) {
-  module_output_path = "ace_engine/frameworkbasicability/geometry"
-} else {
-  module_output_path = "ace_engine_full/frameworkbasicability/geometry"
-}
-
-ohos_unittest("GeometryTest") {
-  module_out_path = module_output_path
+ohos_unittest("geometry_test") {
+  module_out_path = "$basic_test_output_path/geometry"
 
   sources = [
     # deps
@@ -33,10 +27,11 @@ ohos_unittest("GeometryTest") {
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
-    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/base/mock_ace_trace.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
 
     # test target
     "$ace_root/frameworks/base/geometry/animatable_dimension.cpp",
@@ -59,22 +54,10 @@ ohos_unittest("GeometryTest") {
     "transform_util_test.cpp",
   ]
 
-  include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "$ace_root",
-    "//third_party/googletest/googlemock/include",
-  ]
-
-  configs = [ "$ace_root:ace_test_config" ]
-
   deps = [
-    "$ace_root:ace_test_log",
-    "$cjson_root:cjson",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$cjson_root:cjson_static",
     "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
-
-  external_deps = [ "c_utils:utils" ]
-
-  part_name = ace_engine_part
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

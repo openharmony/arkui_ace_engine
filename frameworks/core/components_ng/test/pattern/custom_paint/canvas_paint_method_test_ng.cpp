@@ -17,11 +17,11 @@
 #include <sys/types.h>
 
 #include "gtest/gtest.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
-#include "core/common/test/mock/mock_container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"

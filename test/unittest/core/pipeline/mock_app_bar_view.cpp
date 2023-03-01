@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,22 @@
  * limitations under the License.
  */
 
-#include <cstdint>
+#include "core/components_ng/pattern/app_bar/app_bar_view.h"
 
-#include "core/common/container.h"
-
-namespace OHOS::Ace {
-namespace {
-int32_t g_id = 0;
-}
-
-int32_t Container::CurrentId()
+namespace OHOS::Ace::NG {
+RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
 {
-    return g_id;
+    return nullptr;
 }
 
-RefPtr<Container> Container::GetActive()
+RefPtr<FrameNode> AppBarView::BuildBarTitle()
 {
-    RefPtr<Container> activeContainer;
-    return activeContainer;
+    return nullptr;
 }
 
-void Container::UpdateCurrent(int32_t id)
+RefPtr<FrameNode> AppBarView::BuildIconButton(
+    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton)
 {
-    g_id = id;
+    return nullptr;
 }
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG

@@ -1,0 +1,86 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+group("unittest") {
+  testonly = true
+  deps = []
+  if (!is_asan) {
+    deps += [
+      "base:base_unittest",
+      "core:core_unittest",
+      "interfaces:interfaces_unittest",
+    ]
+  }
+}
+
+# unittest config
+config("ace_unittest_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$root_out_dir/arkui/framework",
+  ]
+  cflags_cc = []
+  defines = []
+
+  if (is_standard_system && !use_mingw_win && !use_mac && !use_linux) {
+    cflags_cc += [
+      "-Wno-thread-safety-attributes",
+      "-Wno-thread-safety-analysis",
+      "-Wno-non-c-typedef-for-linkage",
+    ]
+    defines += [ "OHOS_STANDARD_SYSTEM" ]
+  }
+
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+  ]
+
+  cflags_cc += [ "-fvisibility-inlines-hidden" ]
+  ldflags = [ "-Wl,-gc-sections" ]
+
+  if (ace_engine_feature_enable_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags += [ "--coverage" ]
+  }
+
+  defines += [ "ACE_UNITTEST" ]
+}
+
+# ace unittest log
+ohos_source_set("ace_unittest_log") {
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  sources = [ "$ace_root/adapter/ohos/osal/log_wrapper.cpp" ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  configs = [ ":ace_unittest_config" ]
+}
+
+# ace unittest trace
+ohos_source_set("ace_unittest_trace") {
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+  sources = [
+    "$ace_root/adapter/ohos/osal/ace_trace.cpp",
+    "$ace_root/frameworks/base/log/ace_trace.cpp",
+  ]
+  deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
+  external_deps = [ "hitrace_native:hitrace_meter" ]
+  configs = [ ":ace_unittest_config" ]
+}

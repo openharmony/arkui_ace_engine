@@ -150,7 +150,6 @@ ohos_unittest("navigation_pattern_test_ng") {
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
-    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/bar_item_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/bar_item_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/bar_item_pattern.cpp",
@@ -181,6 +180,7 @@ ohos_unittest("navigation_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
 
     # NavigationGroupNode
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
@@ -235,7 +235,7 @@ ohos_unittest("navigation_pattern_test_ng") {
 
   configs = [
     "$ace_root:ace_config",
-    "$ace_root:ace_test_coverage_config",
+
     "$ace_root:ace_test_config",
     "$ace_flutter_engine_root:flutter_config",
     "$ace_flutter_engine_root/skia:skia_config",
