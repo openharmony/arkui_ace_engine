@@ -73,6 +73,7 @@ public:
     bool ExecuteJsBin(const std::string& fileName) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
+    void RunFullGC() override;
 
     shared_ptr<JsValue> NewNumber(double d) override;
     shared_ptr<JsValue> NewInt32(int32_t value) override;

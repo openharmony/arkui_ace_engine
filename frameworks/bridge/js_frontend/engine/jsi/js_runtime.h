@@ -62,6 +62,7 @@ public:
     // Get the global object.
     virtual shared_ptr<JsValue> GetGlobal() = 0;
     virtual void RunGC() = 0;
+    virtual void RunFullGC() {}
 
     virtual shared_ptr<JsValue> NewNumber(double d) = 0;
     virtual shared_ptr<JsValue> NewInt32(int32_t value) = 0;

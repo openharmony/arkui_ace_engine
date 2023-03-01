@@ -180,6 +180,8 @@ public:
 
     virtual void RunGarbageCollection() = 0;
 
+    virtual void RunFullGarbageCollection() {}
+
     virtual void DumpHeapSnapshot(bool isPrivate) {}
 
     virtual void ClearCache() {}
