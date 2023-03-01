@@ -71,7 +71,7 @@ double GetQuality(const std::string& args, const double quality)
 } // namespace
 
 OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
-    const RefPtr<PipelineBase> context, int32_t width, int32_t height)
+    const WeakPtr<PipelineBase> context, int32_t width, int32_t height)
 {
     antiAlias_ = true;
     context_ = context;
@@ -569,8 +569,9 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     double left, double top, double width, double height)
 {
     double viewScale = 1.0;
-    CHECK_NULL_RETURN(context_, std::unique_ptr<Ace::ImageData>());
-    viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, std::unique_ptr<Ace::ImageData>());
+    viewScale = context->GetViewScale();
 
     // copy the bitmap to tempCanvas
     auto imageInfo =
@@ -883,7 +884,9 @@ void OffscreenCanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArg
 
 void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
 {
-    double viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX, param.skewX * viewScale,
         param.scaleY * viewScale, param.translateY, 0, 0, 1);
@@ -892,14 +895,15 @@ void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
 
 std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const double quality)
 {
-    CHECK_NULL_RETURN(context_, UNSUPPORTED);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, UNSUPPORTED);
     std::string mimeType = GetMimeType(type);
     double qua = GetQuality(type, quality);
     SkBitmap tempCache;
     tempCache.allocPixels(SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
         (mimeType == IMAGE_JPEG) ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kUnpremul_SkAlphaType));
     SkCanvas tempCanvas(tempCache);
-    double viewScale = context_->GetViewScale();
+    double viewScale = context->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
 #ifdef USE_SYSTEM_SKIA_S
