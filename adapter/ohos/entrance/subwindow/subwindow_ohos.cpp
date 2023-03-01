@@ -272,12 +272,14 @@ void SubwindowOhos::HideWindow()
         rootNode->SetIsDefaultHasFocused(false);
     }
 
-    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
-    auto parentWindowName = parentContainer->GetWindowName();
-    sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
-    CHECK_NULL_VOID(parentWindow);
-    parentWindow->RequestFocus();
+    if (window_->IsFocused()) {
+        auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+        CHECK_NULL_VOID(parentContainer);
+        auto parentWindowName = parentContainer->GetWindowName();
+        sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
+        CHECK_NULL_VOID(parentWindow);
+        parentWindow->RequestFocus();
+    }
 
     OHOS::Rosen::WMError ret = window_->Hide();
 
