@@ -110,10 +110,10 @@ public:
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
 
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+    PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
+    PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend);
 
     ~PipelineContext() override;

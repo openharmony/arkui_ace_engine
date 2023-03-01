@@ -53,8 +53,8 @@ class KeyEvent;
 class AxisEvent;
 } // namespace MMI
 
-namespace Ace::NG {
-class WindowPattern;
+namespace Ace {
+class Window;
 }
 
 } // namespace OHOS
@@ -80,7 +80,7 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
-    virtual void Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) = 0;
+    virtual void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;

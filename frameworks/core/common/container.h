@@ -35,10 +35,6 @@
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/pipeline/pipeline_base.h"
 
-namespace OHOS::AbilityRuntime {
-class Context;
-}
-
 namespace OHOS::Ace {
 
 using PageTask = std::function<void()>;
@@ -260,8 +256,6 @@ public:
         return context ? context->GetWindow() : nullptr;
     }
 
-    RefPtr<NG::WindowPattern> GetWindowPattern();
-
     virtual bool IsUseStageModel() const
     {
         return false;
@@ -293,11 +287,6 @@ public:
     const RefPtr<PageUrlChecker>& GetPageUrlChecker()
     {
         return pageUrlChecker_;
-    }
-
-    virtual std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityRuntimeContext()
-    {
-        return nullptr;
     }
 
 protected:

@@ -18,10 +18,15 @@
 
 #include <memory>
 
+#include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_page.h"
 #include "core/common/platform_window.h"
+
+namespace OHOS::Rosen {
+class RSUIDirector;
+}
 
 namespace OHOS::Ace {
 
@@ -34,7 +39,43 @@ public:
     explicit Window(std::unique_ptr<PlatformWindow> platformWindow);
     virtual ~Window() = default;
 
+    uint32_t GetWindowId() const
+    {
+        return windowId_;
+    }
+
+    const std::string& GetWindowName() const
+    {
+        return windowName_;
+    }
+
+    void SetWindowRect(Rect rect)
+    {
+        windowRect_ = rect;
+    }
+
+    Rect GetWindowRect() const
+    {
+        return windowRect_;
+    }
+
+    bool IsDecorEnable() const
+    {
+        return false;
+    }
+
+    bool IsFocused() const
+    {
+        return true;
+    }
+
     virtual void RequestFrame();
+
+    virtual void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) {}
+
+    virtual void SetInstanceId(int32_t instanceId) {}
+
+    virtual void Init() {}
 
     virtual void Destroy()
     {
@@ -53,7 +94,12 @@ public:
     virtual bool FlushCustomAnimation(uint64_t timeStamp)
     {
         return false;
-    };
+    }
+
+    virtual std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
+    {
+        return nullptr;
+    }
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
@@ -84,7 +130,7 @@ public:
         windowRectImpl_ = std::move(callback);
     }
 
-    Rect GetCurrentWindowRect() const
+    virtual Rect GetCurrentWindowRect() const
     {
         Rect rect;
         if (windowRectImpl_) {
@@ -100,7 +146,8 @@ public:
         return 0.0f;
     }
 
-    uint64_t GetLastRequestVsyncTime() const {
+    uint64_t GetLastRequestVsyncTime() const
+    {
         return lastRequestVsyncTime_;
     }
 
@@ -116,6 +163,11 @@ protected:
     std::list<struct VsyncCallback> callbacks_;
 
     uint64_t lastRequestVsyncTime_ = 0;
+
+    // window properties
+    std::string windowName_ = "window";
+    uint32_t windowId_ = 100;
+    Rect windowRect_;
 
 private:
     std::function<Rect()> windowRectImpl_;

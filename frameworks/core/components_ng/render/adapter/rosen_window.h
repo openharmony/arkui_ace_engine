@@ -43,7 +43,7 @@ public:
 
     void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
-    std::shared_ptr<OHOS::Rosen::RSUIDirector> GetRsUIDirector() const
+    std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const override
     {
         return rsUIDirector_;
     }

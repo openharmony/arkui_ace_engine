@@ -56,8 +56,6 @@ HostWindowPattern::HostWindowPattern()
 void HostWindowPattern::RegisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
-    auto lifecycleListener = std::make_shared<LifecycleListener>(WeakClaim(this));
-    session_->RegisterLifecycleListener(lifecycleListener);
 }
 
 void HostWindowPattern::InitContent()

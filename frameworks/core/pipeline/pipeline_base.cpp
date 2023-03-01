@@ -29,7 +29,6 @@
 #include "core/common/thread_checker.h"
 #include "core/common/window.h"
 #include "core/components/custom_paint/render_custom_paint.h"
-#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
 
@@ -37,9 +36,9 @@ namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
 
-PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
+    : window_(window), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId)
 {
     CHECK_NULL_VOID(frontend);
@@ -61,34 +60,10 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     window_->SetVsyncCallback(vsyncCallback);
 }
 
-PipelineBase::PipelineBase(const RefPtr<NG::WindowPattern>& windowPattern, RefPtr<TaskExecutor> taskExecutor,
-    RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : windowPattern_(windowPattern), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
-      weakFrontend_(frontend), instanceId_(instanceId)
-{
-    CHECK_NULL_VOID(frontend);
-    frontendType_ = frontend->GetType();
-    eventManager_ = AceType::MakeRefPtr<EventManager>();
-    windowManager_ = AceType::MakeRefPtr<WindowManager>();
-    eventManager_->SetInstanceId(instanceId);
-    imageCache_ = ImageCache::Create();
-    fontManager_ = FontManager::Create();
-    auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
-                               const uint64_t nanoTimestamp, const uint32_t frameCount) {
-        ContainerScope scope(instanceId);
-        auto context = weak.Upgrade();
-        if (context) {
-            context->OnVsyncEvent(nanoTimestamp, frameCount);
-        }
-    };
-    ACE_DCHECK(windowPattern_);
-    windowPattern_->SetVsyncCallback(vsyncCallback);
-}
-
-PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId,
     RefPtr<PlatformResRegister> platformResRegister)
-    : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
+    : window_(window), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId), platformResRegister_(std::move(platformResRegister))
 {
     CHECK_NULL_VOID(frontend);
@@ -130,18 +105,9 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return (ts.tv_sec * secToNanosec + ts.tv_nsec);
 }
 
-RefPtr<NG::WindowPattern> PipelineBase::GetWindowPattern()
-{
-    return windowPattern_;
-}
-
 void PipelineBase::RequestFrame()
 {
-    if (windowPattern_) {
-        windowPattern_->RequestFrame();
-    } else {
-        window_->RequestFrame();
-    }
+    window_->RequestFrame();
 }
 
 RefPtr<Frontend> PipelineBase::GetFrontend() const
@@ -590,9 +556,6 @@ void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
 
 Rect PipelineBase::GetCurrentWindowRect() const
 {
-    if (windowPattern_) {
-        return windowPattern_->GetWindowRect();
-    }
     if (window_) {
         return window_->GetCurrentWindowRect();
     }
@@ -633,12 +596,7 @@ void PipelineBase::Destroy()
     }
     fontManager_.Reset();
     themeManager_.Reset();
-    if (windowPattern_) {
-        windowPattern_->Destroy();
-        windowPattern_.Reset();
-    } else {
-        window_->Destroy();
-    }
+    window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
     LOGI("PipelineBase::Destroy end.");

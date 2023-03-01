@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
 #include "ability_info.h"
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
@@ -25,14 +24,7 @@
 #include "native_engine/native_engine.h"
 #include "wm/window.h"
 
-#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
-
-namespace OHOS {
-
-class Window;
-class RSTransaction;
-
-} // namespace OHOS
+#include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
 
@@ -49,7 +41,7 @@ public:
 
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
-    void Initialize(NG::WindowPattern* windowPattern, const std::string& url, NativeValue* storage) override;
+    void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -119,14 +111,14 @@ public:
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage,
+        const std::shared_ptr<Window>& aceWindow = nullptr);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
-    NG::WindowPattern* windowPattern_ = nullptr;
     std::string startUrl_;
     int32_t instanceId_ = -1;
     OHOS::sptr<OHOS::Rosen::IWindowDragListener> dragWindowListener_ = nullptr;

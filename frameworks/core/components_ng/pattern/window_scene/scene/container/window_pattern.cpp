@@ -19,6 +19,7 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "session/container/include/session_stage.h"
 
+#include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
@@ -30,7 +31,11 @@ constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 
 float GetDisplayRefreshRate()
 {
+#ifdef PREVIEW
+    return 30.0f;
+#else
     return 60.0f;
+#endif
 }
 } // namespace
 
@@ -38,7 +43,7 @@ namespace OHOS::Ace::NG {
 
 class SizeChangeListener : public Rosen::ISizeChangeListener {
 public:
-    SizeChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
+    explicit SizeChangeListener(int32_t instanceId) : instanceId_(instanceId) {}
     virtual ~SizeChangeListener() = default;
 
     void OnSizeChange(Rosen::WSRect rect, Rosen::SizeChangeReason reason) override
@@ -46,7 +51,7 @@ public:
         ContainerScope scope(instanceId_);
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
-        auto window = container->GetWindowPattern();
+        auto window = static_cast<WindowPattern*>(container->GetWindow());
         CHECK_NULL_VOID(window);
         window->SetWindowRect(Rect(rect.posX_, rect.posY_, rect.width_, rect.height_));
 
@@ -71,12 +76,6 @@ private:
     int32_t instanceId_ = -1;
 };
 
-WindowPattern::WindowPattern()
-{}
-
-WindowPattern::~WindowPattern()
-{}
-
 WindowPattern::WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context,
     const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode) : surfaceNode_(surfaceNode), context_(context)
 {}
@@ -92,7 +91,7 @@ void WindowPattern::Init()
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
             CHECK_NULL_VOID(container);
-            auto window = container->GetWindowPattern();
+            auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
             window->OnVsync(static_cast<uint64_t>(nanoTimestamp), 0);
             auto pipeline = container->GetPipelineContext();
@@ -135,7 +134,7 @@ void WindowPattern::LoadContent(const std::string& contentUrl, NativeEngine* eng
 {
     uiContent_ = UIContent::Create(context_.get(), engine);
     CHECK_NULL_VOID(uiContent_);
-    uiContent_->Initialize(this, contentUrl, storage);
+    uiContent_->Initialize(shared_from_this(), contentUrl, storage);
 }
 
 void WindowPattern::UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason)
@@ -157,31 +156,25 @@ void WindowPattern::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 
 void WindowPattern::RequestFrame()
 {
-    if (!onShow_) {
-        LOGD("window is not show, stop request frame");
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(onShow_);
     CHECK_RUN_ON(UI);
-    if (isRequestVsync_) {
-        return;
-    }
+    CHECK_NULL_VOID_NOLOG(!isRequestVsync_);
+
     LOGD("request next vsync");
     RequestVsync(vsyncCallback_);
+    lastRequestVsyncTime_ = GetSysTimestamp();
     isRequestVsync_ = true;
+
     auto taskExecutor = taskExecutor_.Upgrade();
-    if (taskExecutor) {
-        taskExecutor->PostDelayedTask(
-            [id = instanceId_]() {
-                ContainerScope scope(id);
-                auto container = Container::Current();
-                CHECK_NULL_VOID(container);
-                auto pipeline = container->GetPipelineContext();
-                if (pipeline) {
-                    pipeline->OnIdle(0);
-                }
-            },
-            TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);
-    }
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask([id = instanceId_]() {
+        ContainerScope scope(id);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->OnIdle(0);
+    }, TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);
 }
 
 void WindowPattern::RecordFrameTime(uint64_t timeStamp, const std::string& name)
@@ -208,16 +201,6 @@ void WindowPattern::RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vs
     Rosen::VsyncStation::GetInstance().RequestVsync(vsyncCallback);
 }
 
-void WindowPattern::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
-{
-    isRequestVsync_ = false;
-    for (auto& callback : callbacks_) {
-        if (callback) {
-            callback(nanoTimestamp, frameCount);
-        }
-    }
-}
-
 void WindowPattern::OnShow()
 {
     onShow_ = true;
@@ -230,6 +213,16 @@ void WindowPattern::OnHide()
     onShow_ = false;
     rsUIDirector_->GoBackground();
     rsUIDirector_->SendMessages();
+}
+
+void WindowPattern::SetDrawTextAsBitmap(bool useBitmap)
+{
+    Rosen::RSSystemProperties::SetDrawTextAsBitmap(useBitmap);
+}
+
+float WindowPattern::GetRefreshRate() const
+{
+    return GetDisplayRefreshRate();
 }
 
 void WindowPattern::RegisterSessionStageStateListener(

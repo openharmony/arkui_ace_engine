@@ -464,9 +464,7 @@ template("declarative_js_engine") {
       }
 
       if (defined(config.window_scene_support) && config.window_scene_support) {
-        deps += [
-          "$window_manager_path/window_scene/session:scene_session",
-        ]
+        deps += [ "$window_manager_path/window_scene/session:scene_session" ]
       }
     }
   }

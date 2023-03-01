@@ -19,7 +19,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container_scope.h"
-#include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
 namespace OHOS::Ace {
 
@@ -73,12 +72,6 @@ bool Container::Dump(const std::vector<std::string>& params, std::vector<std::st
     tip.append(AceType::TypeName(this));
     info.emplace_back(tip);
     return true;
-}
-
-RefPtr<NG::WindowPattern> Container::GetWindowPattern()
-{
-    auto context = GetPipelineContext();
-    return context ? context->GetWindowPattern() : nullptr;
 }
 
 } // namespace OHOS::Ace

@@ -64,20 +64,14 @@ using SharePanelCallback = std::function<void(const std::string& faBundleName, c
     const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
     const std::string& abilityName)>;
 
-namespace NG {
-class WindowPattern;
-}
-
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
 public:
     PipelineBase() = default;
-    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+    PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineBase(const RefPtr<NG::WindowPattern>& windowPattern, RefPtr<TaskExecutor> taskExecutor,
-        RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+    PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId, RefPtr<PlatformResRegister> platformResRegister);
     ~PipelineBase() override;
 
@@ -413,8 +407,6 @@ public:
     {
         return window_.get();
     }
-
-    RefPtr<NG::WindowPattern> GetWindowPattern();
 
     RefPtr<AssetManager> GetAssetManager() const
     {
@@ -839,8 +831,7 @@ protected:
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
-    std::unique_ptr<Window> window_;
-    RefPtr<NG::WindowPattern> windowPattern_;
+    std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     WeakPtr<Frontend> weakFrontend_;

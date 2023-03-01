@@ -20,7 +20,7 @@
 
 #include "ui_window.h"
 
-#include "base/thread/task_executor.h"
+#include "core/common/window.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Rosen {
@@ -33,17 +33,18 @@ enum class WindowSizeChangeReason : uint32_t;
 
 namespace OHOS::Ace::NG {
 
-class WindowPattern : public UIWindow, public Pattern {
+class WindowPattern : public UIWindow, public Pattern, public Window,
+                      public std::enable_shared_from_this<WindowPattern> {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
 public:
-    WindowPattern();
+    WindowPattern() = default;
     WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context,
         const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
-    ~WindowPattern();
+    virtual ~WindowPattern() = default;
 
-    void Init();
-    void Destroy();
+    void Init() override;
+    void Destroy() override;
 
     void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
         AbilityRuntime::Context* context = nullptr) override;
@@ -55,81 +56,47 @@ public:
         return surfaceNode_;
     }
 
-    uint32_t GetWindowId() const
+    Rect GetCurrentWindowRect() const override
     {
-        return windowId_;
+        return GetWindowRect();
     }
 
-    const std::string& GetWindowName() const
-    {
-        return windowName_;
-    }
-
-    uint32_t GetWindowFlags() const
-    {
-        return windowFlags_;
-    }
-
-    void SetWindowRect(Rect rect)
-    {
-        windowRect_ = rect;
-    }
-
-    Rect GetWindowRect() const
-    {
-        return windowRect_;
-    }
-
-    bool IsDecorEnable() const
-    {
-        return false;
-    }
-
-    bool IsFocused() const
-    {
-        return true;
-    }
-
-    void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor)
+    void SetTaskExecutor(const RefPtr<TaskExecutor>& taskExecutor) override
     {
         taskExecutor_ = taskExecutor;
     }
 
-    void SetInstanceId(int32_t instanceId)
+    void SetInstanceId(int32_t instanceId) override
     {
         instanceId_ = instanceId;
     }
 
-    using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
+    void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
 
-    void SetVsyncCallback(AceVsyncCallback&& callback)
-    {
-        callbacks_.push_back(std::move(callback));
-    }
+    void SetRootFrameNode(const RefPtr<NG::FrameNode>& root) override;
 
-    virtual void SetRootFrameNode(const RefPtr<NG::FrameNode>& root);
-
-    std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const
+    std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector() const override
     {
         return rsUIDirector_;
     }
 
-    void RecordFrameTime(uint64_t timeStamp, const std::string& name);
+    void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
-    void FlushTasks();
+    void FlushTasks() override;
 
-    bool FlushCustomAnimation(uint64_t timeStamp);
+    bool FlushCustomAnimation(uint64_t timeStamp) override;
 
-    void OnShow();
-    void OnHide();
+    void OnShow() override;
+    void OnHide() override;
 
-    void RequestFrame();
+    void SetDrawTextAsBitmap(bool useBitmap) override;
+
+    float GetRefreshRate() const override;
+
+    void RequestFrame() override;
 
     void RequestVsync(const std::shared_ptr<Rosen::VsyncCallback>& vsyncCallback);
 
-    void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
-
-    // for lifecycle
     void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override;
     void RegisterSizeChangeListener(const std::shared_ptr<Rosen::ISizeChangeListener>& listener);
 
@@ -144,19 +111,9 @@ protected:
     std::unique_ptr<UIContent> uiContent_;
     std::shared_ptr<AbilityRuntime::Context> context_;
 
-    // for lifecycle
     sptr<Rosen::SessionStage> sessionStage_;
 
-    // window properties
-    std::string windowName_ = "example";
-    uint32_t windowId_ = 100;
-    uint32_t windowFlags_;
-    Rect windowRect_;
-
 private:
-    bool isRequestVsync_ = false;
-    bool onShow_ = true;
-    std::list<AceVsyncCallback> callbacks_;
     std::recursive_mutex mutex_;
 
     WeakPtr<TaskExecutor> taskExecutor_;
