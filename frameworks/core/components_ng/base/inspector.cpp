@@ -94,7 +94,7 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
             }
 #else
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
-            if (!frameNode->GetDebugLine().empty()) {
+            if (AceType::InstanceOf<SpanNode>(uiNode) || !frameNode->GetDebugLine().empty()) {
                 children.emplace_back(uiNode);
                 return;
             }
