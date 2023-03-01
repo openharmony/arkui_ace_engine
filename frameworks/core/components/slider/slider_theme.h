@@ -101,6 +101,7 @@ public:
                     pattern->GetAttr<Dimension>("inset_hot_block_shadow_width", INSET_HOT_BLOCK_SHADOW_WIDTH);
                 theme->focusSideDistance_ =
                     pattern->GetAttr<Dimension>("focus_side_distance", FOCUS_SIDE_DISTANCE);
+                theme->layoutMaxLength_ = pattern->GetAttr<Dimension>("slider_max_length", .0_vp);
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -224,6 +225,10 @@ public:
         return focusSideDistance_;
     }
 
+    Dimension GetLayoutMaxLength() const
+    {
+        return layoutMaxLength_;
+    }
 protected:
     SliderTheme() = default;
 
@@ -258,6 +263,7 @@ private:
 
     // others
     Dimension focusSideDistance_;
+    Dimension layoutMaxLength_;
 };
 
 } // namespace OHOS::Ace
