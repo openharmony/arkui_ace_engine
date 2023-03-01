@@ -109,37 +109,29 @@ void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintW
     brush.SetAntiAlias(true);
     brush.SetColor(theme->GetSelectedColor().GetValue());
     canvas.AttachBrush(brush);
-    auto startOffset =
-        std::min(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
-    auto endOffset =
-        std::max(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
     auto paintOffset = paintWrapper->GetContentOffset() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
-    RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
-        paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
-        paintOffset.GetY() + paintWrapper->GetContentSize().Height());
-    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     auto textBoxes = textFieldPattern->GetTextBoxes();
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
-    switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
-        case InputStyle::DEFAULT:
-            // for default style, selection height is equal to the content height
-            for (const auto& textBox : textBoxes) {
-                canvas.DrawRect(RSRect(
-                    textBox.rect_.GetLeft() + (isTextArea ? paintWrapper->GetContentOffset().GetX() : textRect.GetX()),
-                    textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : paintWrapper->GetContentOffset().GetY()),
-                    textBox.rect_.GetRight() + (isTextArea ? paintWrapper->GetContentOffset().GetX() : textRect.GetX()),
-                    textBox.rect_.GetBottom() +
-                        (isTextArea ? textRect.GetY() : paintWrapper->GetContentOffset().GetY())));
-            }
-            break;
-        case InputStyle::INLINE:
-            // for inline style, selection height is equal to the frame height
-            canvas.DrawRect(RSRect(startOffset, textFieldPattern->GetFrameRect().GetY(), endOffset,
-                textFieldPattern->GetFrameRect().GetY() + textFieldPattern->GetFrameRect().Height()));
-            break;
-        default:
-            LOGE("Unsupported style");
+    auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
+    if (inputStyle == InputStyle::DEFAULT) {
+        RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
+            paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
+            paintOffset.GetY() + paintWrapper->GetContentSize().Height());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+        // for default style, selection height is equal to the content height
+        for (const auto& textBox : textBoxes) {
+            canvas.DrawRect(RSRect(
+                textBox.rect_.GetLeft() + (isTextArea ? paintWrapper->GetContentOffset().GetX() : textRect.GetX()),
+                textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : paintWrapper->GetContentOffset().GetY()),
+                textBox.rect_.GetRight() + (isTextArea ? paintWrapper->GetContentOffset().GetX() : textRect.GetX()),
+                textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : paintWrapper->GetContentOffset().GetY())));
+        }
+    } else {
+        auto theOnlyBox = *textBoxes.begin();
+        // for inline style, selection height is equal to the frame height
+        canvas.DrawRect(RSRect(theOnlyBox.rect_.GetLeft() + textRect.GetX(), 0.0f,
+            theOnlyBox.rect_.GetRight() + textRect.GetX(), textFieldPattern->GetFrameRect().Height()));
     }
 
     canvas.Restore();
