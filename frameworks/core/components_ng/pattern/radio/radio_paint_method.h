@@ -45,59 +45,76 @@ public:
     {
         CHECK_NULL_VOID(radioModifier_);
         auto paintProperty = DynamicCast<RadioPaintProperty>(paintWrapper->GetPaintProperty());
-        if (paintProperty->GetRadioCheck().has_value()) {
-            radioModifier_->SetIsCheck(paintProperty->GetRadioCheckValue());
+        bool checked = false;
+        if (paintProperty->HasRadioCheck()) {
+            checked = paintProperty->GetRadioCheckValue();
+        } else {
+            paintProperty->UpdateRadioCheck(false);
         }
+
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto radioTheme = pipeline->GetTheme<RadioTheme>();
+        activeColor_ = paintProperty->GetRadioCheckedBackgroundColor().value_or(Color(radioTheme->GetActiveColor()));
+        inactiveColor_ = paintProperty->GetRadioUncheckedBorderColor().value_or(Color(radioTheme->GetInactiveColor()));
+        pointColor_ = paintProperty->GetRadioIndicatorColor().value_or(Color(radioTheme->GetPointColor()));
 
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
         radioModifier_->InitializeParam();
+        radioModifier_->SetPointColor(pointColor_);
+        radioModifier_->SetactiveColor(activeColor_);
+        radioModifier_->SetinactiveColor(inactiveColor_);
         radioModifier_->SetSize(size);
         radioModifier_->SetOffset(offset);
         radioModifier_->SetEnabled(enabled_);
         radioModifier_->SetTotalScale(totalScale_);
         radioModifier_->SetPointScale(pointScale_);
+        radioModifier_->SetIsCheck(checked);
         radioModifier_->SetUIStatus(uiStatus_);
         radioModifier_->SetTouchHoverAnimationType(touchHoverType_);
         radioModifier_->UpdateAnimatableProperty();
     }
 
-    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    void SetHotZoneOffset(const OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;
     }
 
-    void SetHotZoneSize(SizeF& hotZoneSize)
+    void SetHotZoneSize(const SizeF& hotZoneSize)
     {
         hotZoneSize_ = hotZoneSize;
     }
 
-    void SetEnabled(bool enabled)
+    void SetEnabled(const bool enabled)
     {
         enabled_ = enabled;
     }
 
-    void SetTotalScale(float totalScale)
+    void SetTotalScale(const float totalScale)
     {
         totalScale_ = totalScale;
     }
 
-    void SetPointScale(float pointScale)
+    void SetPointScale(const float pointScale)
     {
         pointScale_ = pointScale;
     }
 
-    void SetUIStatus(UIStatus& uiStatus)
+    void SetUIStatus(const UIStatus uiStatus)
     {
         uiStatus_ = uiStatus;
     }
 
-    void SetTouchHoverAnimationType(TouchHoverAnimationType& touchHoverType)
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
     {
         touchHoverType_ = touchHoverType;
     }
 
 private:
+    Color pointColor_ ;
+    Color activeColor_ ;
+    Color inactiveColor_;
     bool enabled_ = true;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;

@@ -33,6 +33,7 @@ constexpr int DEFAULT_RADIO_ANIMATION_DURATION = 300;
 constexpr float DEFAULT_MID_TIME_SLOT = 0.5;
 constexpr float DEFAULT_END_TIME_SLOT = 1.0;
 constexpr float DEFAULT_SHRINK_TIME_SLOT = 0.9;
+constexpr int FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO = 2;
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()
@@ -176,7 +177,6 @@ void RadioPattern::OnClick()
     } else {
         paintProperty->UpdateRadioCheck(false);
     }
-
     if (!preCheck_ && !check) {
         paintProperty->UpdateRadioCheck(true);
         UpdateState();
@@ -192,6 +192,7 @@ void RadioPattern::OnTouchDown()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    isTouch_ = true;
     host->MarkNeedRenderOnly();
 }
 
@@ -204,6 +205,7 @@ void RadioPattern::OnTouchUp()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    isTouch_ = false;
     host->MarkNeedRenderOnly();
 }
 
@@ -511,8 +513,10 @@ void RadioPattern::AddHotZoneRect()
 {
     hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO *
+        hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO *
+        hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));
@@ -527,5 +531,4 @@ void RadioPattern::RemoveLastHotZoneRect() const
     CHECK_NULL_VOID(host);
     host->RemoveLastHotZoneRect();
 }
-
 } // namespace OHOS::Ace::NG

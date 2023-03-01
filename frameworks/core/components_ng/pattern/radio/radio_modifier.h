@@ -19,6 +19,8 @@
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/modifier.h"
@@ -27,6 +29,7 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_ng/render/canvas.h"
 namespace OHOS::Ace::NG {
 enum class UIStatus {
     SELECTED = 0,
@@ -58,8 +61,7 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
-        RSCanvas canvas = context.canvas;
-        PaintRadio(canvas, isCheck_, size_, offset_);
+        PaintRadio(context);
     }
 
     void UpdateAnimatableProperty()
@@ -82,69 +84,81 @@ public:
     }
 
     void InitializeParam();
-    void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const;
+    void PaintRadio(DrawingContext& context) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
 
-    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    void SetPointColor(const Color& pointColor)
+    {
+        pointColor_->Set(LinearColor(pointColor));
+    }
+    void SetactiveColor(const Color& activeColor)
+    {
+        activeColor_->Set(LinearColor(activeColor));
+    }
+    void SetinactiveColor(const Color& inactiveColor)
+    {
+        inactiveColor_->Set(LinearColor(inactiveColor));
+    }
+    void SetHotZoneOffset(const OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;
     }
 
-    void SetHotZoneSize(SizeF& hotZoneSize)
+    void SetHotZoneSize(const SizeF& hotZoneSize)
     {
         hotZoneSize_ = hotZoneSize;
     }
 
-    void SetEnabled(bool enabled)
+    void SetEnabled(const bool enabled)
     {
         enabled_ = enabled;
     }
 
-    void SetIsCheck(bool isCheck)
+    void SetIsCheck(const bool isCheck)
     {
         isCheck_ = isCheck;
     }
 
-    void SetTotalScale(float totalScale)
+    void SetTotalScale(const float totalScale)
     {
         if (totalScale_) {
             totalScale_->Set(totalScale);
         }
     }
 
-    void SetPointScale(float pointScale)
+    void SetPointScale(const float pointScale)
     {
         if (pointScale_) {
             pointScale_->Set(pointScale);
         }
     }
 
-    void SetOffset(OffsetF& offset)
+    void SetOffset(const OffsetF& offset)
     {
         offset_ = offset;
     }
 
-    void SetSize(SizeF& size)
+    void SetSize(const SizeF& size)
     {
         size_ = size;
     }
 
-    void SetUIStatus(UIStatus& uiStatus)
+    void SetUIStatus(const UIStatus uiStatus)
     {
         uiStatus_ = uiStatus;
     }
 
-    void SetTouchHoverAnimationType(TouchHoverAnimationType& touchHoverType)
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
     {
         touchHoverType_ = touchHoverType;
     }
 
 private:
-    float shadowWidth_ = 0.0f;
-    float borderWidth_ = 0.0f;
-    Color pointColor_;
-    Color activeColor_;
-    Color inactiveColor_;
+    RefPtr<AnimatablePropertyColor> pointColor_;
+    RefPtr<AnimatablePropertyColor> activeColor_;
+    RefPtr<AnimatablePropertyColor> inactiveColor_;
+    float shadowWidth_ = 1.5f;
+    float borderWidth_ = 1.5f;
     Color inactivePointColor_;
     Color shadowColor_;
     Color clickEffectColor_;
@@ -161,7 +175,7 @@ private:
     SizeF hotZoneSize_;
     OffsetF offset_;
     SizeF size_;
-
+    RefPtr<RadioModifier> radioModifier_;
     RefPtr<PropertyFloat> totalScale_;
     RefPtr<PropertyFloat> pointScale_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;

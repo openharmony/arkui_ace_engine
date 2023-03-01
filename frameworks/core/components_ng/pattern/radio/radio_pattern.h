@@ -163,7 +163,6 @@ private:
     TouchHoverAnimationType touchHoverType_;
 
     RefPtr<RadioModifier> radioModifier_;
-
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };
 } // namespace OHOS::Ace::NG
