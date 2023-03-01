@@ -60,7 +60,9 @@ void DragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) con
     auto barRightPoint = paintProperty->GetBarRightPoint().value_or(POINT_R_INITIAL);
     auto dragOffset = paintProperty->GetDragOffset().value_or(OffsetF());
     auto opacity = paintProperty->GetOpacity().value_or(OPACITY);
-    auto panelMode = paintProperty->GetPanelModeValue(PanelMode::HALF);
+    auto panelMode = panelMode_ == PanelMode::FULL   ? PanelMode::FULL
+                     : panelMode_ == PanelMode::MINI ? PanelMode::MINI
+                                                     : PanelMode::HALF;
     // paint offset
     auto paintOffset = paintWrapper->GetContentOffset();
     auto pipeline = PipelineContext::GetCurrentContext();
