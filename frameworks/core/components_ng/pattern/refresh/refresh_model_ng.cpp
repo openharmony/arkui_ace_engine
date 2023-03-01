@@ -103,10 +103,6 @@ void RefreshModelNG::Pop()
     refreshNode->AddChild(loadingProgressChild);
     auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
-
-    auto progressPaintProperty = loadingProgressChild->GetPaintProperty<LoadingProgressPaintProperty>();
-    CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateColor(layoutProperty->GetProgressColorValue(Color::BLUE));
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 void RefreshModelNG::SetRefreshing(bool isRefreshing)

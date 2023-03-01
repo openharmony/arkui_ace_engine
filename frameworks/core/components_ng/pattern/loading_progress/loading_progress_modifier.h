@@ -40,6 +40,7 @@ public:
     void StartRecycleRingAnimation();
     void StartRecycleCometAnimation();
     void StartCometTailAnimation();
+    void StartTransToRecycleAnimation();
     void SetColor(LinearColor color)
     {
         if (color_) {
@@ -50,8 +51,6 @@ public:
     void DrawCustomStyle(DrawingContext& context);
     void RefreshRecycle(DrawingContext& context, Color& color, float scale);
     void ChangeRefreshFollowData(float refreshFollowRatio);
-    void ChangeRefreshTansitionData(float refreshTransitionRatio);
-    void ChangeRefreshFadeAwayData(float refreshTransitionRatio);
     float CorrectNormalize(float originData);
 
     LoadingProgressOwner GetOwner()
