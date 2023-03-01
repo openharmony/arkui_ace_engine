@@ -504,6 +504,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "WebController", JSWebController::JSBind },
     { "Video", JSVideo::JSBind },
     { "VideoController", JSVideoController::JSBind },
+    { "PluginComponent", JSPlugin::JSBind },
     
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
