@@ -763,6 +763,10 @@ void JsiDeclarativeEngine::Destroy()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     engineInstance_->DestroyAllRootViewHandle();
+    if (isUnique_) {
+        RunFullGarbageCollection();
+    }
+
     if (!runtime_ && nativeEngine_ != nullptr) {
 #if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
@@ -1674,6 +1678,13 @@ void JsiDeclarativeEngine::RunGarbageCollection()
 {
     if (engineInstance_ && engineInstance_->GetJsRuntime()) {
         engineInstance_->GetJsRuntime()->RunGC();
+    }
+}
+
+void JsiDeclarativeEngine::RunFullGarbageCollection()
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->RunFullGC();
     }
 }
 

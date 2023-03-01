@@ -289,6 +289,8 @@ public:
 
     void RunGarbageCollection() override;
 
+    void RunFullGarbageCollection() override;
+
     void DumpHeapSnapshot(bool isPrivate) override;
 
     std::string GetStacktraceMessage() override;
