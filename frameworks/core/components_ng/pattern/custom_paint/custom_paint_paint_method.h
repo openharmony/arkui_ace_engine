@@ -236,7 +236,7 @@ public:
 
     void FlushPipelineImmediately()
     {
-        auto context = AceType::DynamicCast<PipelineContext>(context_);
+        auto context = AceType::DynamicCast<PipelineContext>(context_.Upgrade());
         if (context) {
             context->FlushPipelineImmediately();
         }
@@ -295,7 +295,7 @@ protected:
     Shadow shadow_;
     std::unique_ptr<txt::Paragraph> paragraph_;
 
-    RefPtr<PipelineBase> context_;
+    WeakPtr<PipelineBase> context_;
 
     SkPath skPath_;
     SkPath skPath2d_;
