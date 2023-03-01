@@ -26,11 +26,11 @@ void TextPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintWrappe
     CHECK_NULL_VOID(paragraph_);
     const auto& selection = textPattern->GetTextSelector();
     auto textValue = textPattern->GetTextForDisplay();
-    if (textValue.empty() || selection.GetStart() == selection.GetEnd()) {
+    if (textValue.empty() || selection.GetTextStart() == selection.GetTextEnd()) {
         return;
     }
     std::vector<Rect> selectedRects;
-    paragraph_->GetRectsForRange(selection.GetStart(), selection.GetEnd(), selectedRects);
+    paragraph_->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
     if (selectedRects.empty()) {
         return;
     }

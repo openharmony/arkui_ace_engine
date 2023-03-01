@@ -162,10 +162,10 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     if (isFirstHandle) {
         auto start =
             paragraph_->GetHandlePositionForClick(Offset(localOffsetX, localOffsetY + handleRect.Height() / 2));
-        textSelector_.TextUpdate(start, textSelector_.destinationOffset);
+        textSelector_.Update(start, textSelector_.destinationOffset);
     } else {
         auto end = paragraph_->GetHandlePositionForClick(Offset(localOffsetX, localOffsetY + handleRect.Height() / 2));
-        textSelector_.TextUpdate(textSelector_.baseOffset, end);
+        textSelector_.Update(textSelector_.baseOffset, end);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -210,11 +210,11 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
 void TextPattern::HandleOnCopy()
 {
     CHECK_NULL_VOID(clipboard_);
-    if (textSelector_.IsValid() && textSelector_.GetStart() == textSelector_.GetEnd()) {
+    if (textSelector_.IsValid() && textSelector_.GetTextStart() == textSelector_.GetTextEnd()) {
         LOGW("Nothing to select");
         return;
     }
-    auto value = GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd());
+    auto value = GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (value.empty()) {
         LOGW("Copy value is empty");
         return;
@@ -453,7 +453,7 @@ void TextPattern::HandlePanStart(const GestureEvent& info)
             CHECK_NULL_VOID(manager);
             dragDropProxy_ = manager->CreateTextDragDropProxy();
             CHECK_NULL_VOID(dragDropProxy_);
-            dragDropProxy_->OnTextDragStart(GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd()));
+            dragDropProxy_->OnTextDragStart(GetSelectedText(textSelector_.GetTextStart(), textSelector_.GetTextEnd()));
         }
     }
 #endif
@@ -462,10 +462,10 @@ void TextPattern::HandlePanStart(const GestureEvent& info)
 bool TextPattern::IsDraggable(const Offset& offset)
 {
     if (copyOption_ != CopyOptions::None && draggable_ &&
-        GreatNotEqual(textSelector_.GetEnd(), textSelector_.GetStart())) {
+        GreatNotEqual(textSelector_.GetTextEnd(), textSelector_.GetTextStart())) {
         // Determine if the pan location is in the selected area
         std::vector<Rect> selectedRects;
-        paragraph_->GetRectsForRange(textSelector_.GetStart(), textSelector_.GetEnd(), selectedRects);
+        paragraph_->GetRectsForRange(textSelector_.GetTextStart(), textSelector_.GetTextEnd(), selectedRects);
         if (selectedRects.empty()) {
             return false;
         } else {
