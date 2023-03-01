@@ -2347,6 +2347,8 @@ void WebDelegate::InitWebViewWithSurface()
             initArgs.web_engine_args_to_add.push_back(
                 std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
+            initArgs.web_engine_args_to_add.push_back(std::string("--user-api-version=").append(
+                std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion())));
             bool isEnhanceSurface = delegate->isEnhanceSurface_;
             initArgs.is_enhance_surface = isEnhanceSurface;
             initArgs.is_popup = delegate->isPopup_;

@@ -213,6 +213,7 @@ void AceAbility::OnStart(const Want& want)
         CapabilityRegistry::Register();
         AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(abilityContext->GetApplicationInfo()->apiTargetVersion);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         ImageCache::SetImageCacheFilePath(cacheDir);

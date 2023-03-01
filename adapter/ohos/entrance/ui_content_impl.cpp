@@ -831,6 +831,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         CapabilityRegistry::Register();
