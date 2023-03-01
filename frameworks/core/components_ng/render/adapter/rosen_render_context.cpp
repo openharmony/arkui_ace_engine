@@ -405,6 +405,23 @@ void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
     isBackBlurChanged_ = true;
 }
 
+void RosenRenderContext::UpdateSphericalEffect(float radio)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSpherizeDegree(radio);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::UpdatePixelStretchEffect(PixStretchEffectOption& option)
+{
+
+}
+
+void RosenRenderContext::UpdateLightupEffect(float radio)
+{
+
+}
+
 void RosenRenderContext::OnOpacityUpdate(double opacity)
 {
     CHECK_NULL_VOID(rsNode_);

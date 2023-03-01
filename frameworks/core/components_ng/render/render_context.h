@@ -157,7 +157,9 @@ public:
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const BlurStyleOption& blurStyle) {}
-
+    virtual void UpdateSphericalEffect(float radio) {}
+    virtual void UpdatePixelStretchEffect(PixStretchEffectOption& option) {}
+    virtual void UpdateLightupEffect(float radio) {}
     virtual void ClipWithRect(const RectF& rectF) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
