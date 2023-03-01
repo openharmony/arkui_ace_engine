@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,26 @@ void CheckBoxModelNG::SetSelect(bool isSelected)
 void CheckBoxModelNG::SetSelectedColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color);
+}
+
+void CheckBoxModelNG::SetUnSelectedColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color);
+}
+
+void CheckBoxModelNG::SetCheckMarkColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkColor, color);
+}
+
+void CheckBoxModelNG::SetCheckMarkSize(const Dimension& size)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkSize, size);
+}
+
+void CheckBoxModelNG::SetCheckMarkWidth(const Dimension& width)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxCheckMarkWidth, width);
 }
 
 void CheckBoxModelNG::SetOnChange(ChangeEvent&& onChange)

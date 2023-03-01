@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,10 @@ public:
     {
         CHECK_NULL_VOID(checkboxModifier_);
         checkboxModifier_->InitializeParam();
+        CHECK_NULL_VOID(paintWrapper);
+        auto size = paintWrapper->GetContentSize();
+        auto offset = paintWrapper->GetContentOffset();
+        float strokePaintSize = size.Width();
         auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
         if (paintProperty->GetCheckBoxSelect().has_value()) {
             checkboxModifier_->SetIsSelect(paintProperty->GetCheckBoxSelectValue());
@@ -50,13 +54,28 @@ public:
         if (paintProperty->HasCheckBoxSelectedColor()) {
             checkboxModifier_->SetUserActiveColor(paintProperty->GetCheckBoxSelectedColorValue());
         }
-        auto size = paintWrapper->GetContentSize();
-        auto offset = paintWrapper->GetContentOffset();
+        if (paintProperty->HasCheckBoxUnSelectedColor()) {
+            checkboxModifier_->SetInActiveColor(paintProperty->GetCheckBoxUnSelectedColorValue());
+        }
+        if (paintProperty->HasCheckBoxCheckMarkColor()) {
+            checkboxModifier_->SetPointColor(paintProperty->GetCheckBoxCheckMarkColorValue());
+        }
+        if (paintProperty->HasCheckBoxCheckMarkSize()) {
+            if (paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx() >= 0) {
+                strokePaintSize = paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx();
+            } else {
+                paintProperty->UpdateCheckBoxCheckMarkSize(Dimension(strokePaintSize));
+            }
+        }
+        checkboxModifier_->SetStrokeSize(strokePaintSize);
+        if (paintProperty->HasCheckBoxCheckMarkWidth()) {
+            checkboxModifier_->SetStrokeWidth(paintProperty->GetCheckBoxCheckMarkWidthValue().ConvertToPx());
+        }
+        
         checkboxModifier_->SetSize(size);
         checkboxModifier_->SetOffset(offset);
         checkboxModifier_->SetEnabled(enabled_);
         checkboxModifier_->SetIsHover(isHover_);
-        checkboxModifier_->UpdateAnimatableProperty();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
