@@ -16,6 +16,26 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+static const std::array<std::string, 6> TEXT_BASE_LINE_TO_STRING = {
+    "textBaseline.ALPHABETIC",
+    "textBaseline.IDEOGRAPHIC",
+    "textBaseline.TOP",
+    "textBaseline.BOTTOM",
+    "textBaseline.MIDDLE",
+    "textBaseline.HANGING",
+};
+
+inline std::unique_ptr<JsonValue> CovertShadowToJson(const Shadow& shadow)
+{
+    auto jsonShadow = JsonUtil::Create(true);
+    jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+    jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+    jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+    jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+    return jsonShadow;
+}
+} // namespace
 
 std::string TextLayoutProperty::GetCopyOptionString() const
 {
@@ -69,14 +89,6 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("maxFontSize", GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str());
     json->Put("letterSpacing", GetLetterSpacing().value_or(Dimension()).ToString().c_str());
     json->Put("lineHeight", GetLineHeight().value_or(0.0_vp).ToString().c_str());
-    static const std::array<std::string, 6> TEXT_BASE_LINE_TO_STRING = {
-        "textBaseline.ALPHABETIC",
-        "textBaseline.IDEOGRAPHIC",
-        "textBaseline.TOP",
-        "textBaseline.BOTTOM",
-        "textBaseline.MIDDLE",
-        "textBaseline.HANGING",
-    };
     json->Put("textBaseline",
         TEXT_BASE_LINE_TO_STRING.at(static_cast<int32_t>(GetTextBaseline().value_or(TextBaseline::ALPHABETIC)))
             .c_str());
@@ -86,6 +98,10 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put(
         "textOverflow", V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
     json->Put("maxLines", std::to_string(GetMaxLines().value_or(UINT32_MAX)).c_str());
+    auto jsonShadow = CovertShadowToJson(GetTextShadow().value_or(Shadow()));
+    json->Put("textShadow", jsonShadow);
+    json->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
+        GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
     json->Put("copyOption", GetCopyOptionString().c_str());
 }
 

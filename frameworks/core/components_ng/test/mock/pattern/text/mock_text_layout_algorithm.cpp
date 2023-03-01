@@ -79,4 +79,9 @@ std::list<RefPtr<SpanItem>>&& TextLayoutAlgorithm::GetSpanItemChildren()
 {
     return std::move(spanItemChildren_);
 }
+
+std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
+{
+    return std::optional<TextStyle>(TextStyle());
+}
 } // namespace OHOS::Ace::NG

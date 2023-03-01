@@ -82,6 +82,11 @@ void TextModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
 }
 
+void TextModelNG::SetTextShadow(const Shadow& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value);
+}
+
 void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ItalicFontStyle, value);
@@ -152,6 +157,11 @@ void TextModelNG::SetAdaptMaxFontSize(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value);
 }
 
+void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, value);
+}
+
 void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
     LOGE("no support OnClick");
@@ -205,5 +215,4 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
-
 } // namespace OHOS::Ace::NG

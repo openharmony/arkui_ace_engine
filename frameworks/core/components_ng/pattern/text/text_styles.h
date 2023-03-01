@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextShadow, Shadow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
@@ -44,6 +45,7 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLength, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
 };
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,

@@ -33,6 +33,7 @@ public:
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
+    static void SetTextShadow(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
@@ -47,6 +48,7 @@ public:
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void SetHeightAdaptivePolicy(int32_t value);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);

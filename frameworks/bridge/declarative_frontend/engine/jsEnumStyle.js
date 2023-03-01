@@ -41,6 +41,7 @@ var TextAlign;
   TextAlign[TextAlign["Start"] = 0] = "Start";
   TextAlign[TextAlign["Center"] = 1] = "Center";
   TextAlign[TextAlign["End"] = 2] = "End";
+  TextAlign[TextAlign["Justify"] = 3] = "Justify";
 })(TextAlign || (TextAlign = {}));
 
 var DataPanelType;
@@ -232,9 +233,10 @@ var Alignment;
 
 var TextOverflow;
 (function (TextOverflow) {
-  TextOverflow[TextOverflow["Clip"] = 0] = "Clip";
-  TextOverflow[TextOverflow["Ellipsis"] = 1] = "Ellipsis";
-  TextOverflow[TextOverflow["None"] = 2] = "None";
+  TextOverflow[TextOverflow["None"] = 0] = "None";
+  TextOverflow[TextOverflow["Clip"] = 1] = "Clip";
+  TextOverflow[TextOverflow["Ellipsis"] = 2] = "Ellipsis";
+  TextOverflow[TextOverflow["Marquee"] = 3] = "Marquee";
 })(TextOverflow || (TextOverflow = {}));
 
 var TextDecorationType;
@@ -1015,3 +1017,10 @@ class BottomTabBarStyle {
     this.text = text;
   }
 }
+
+var TextHeightAdaptivePolicy;
+(function (TextHeightAdaptivePolicy) {
+  TextHeightAdaptivePolicy[TextHeightAdaptivePolicy["MAX_LINES_FIRST"] = 0] = "MAX_LINES_FIRST";
+  TextHeightAdaptivePolicy[TextHeightAdaptivePolicy["MIN_FONT_SIZE_FIRST"] = 1] = "MIN_FONT_SIZE_FIRST";
+  TextHeightAdaptivePolicy[TextHeightAdaptivePolicy["LAYOUT_CONSTRAINT_FIRST"] = 2] = "LAYOUT_CONSTRAINT_FIRST";
+})(TextHeightAdaptivePolicy || (TextHeightAdaptivePolicy = {}));

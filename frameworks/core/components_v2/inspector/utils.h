@@ -283,9 +283,10 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
     inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
     {
         static const LinearEnumMapNode<TextOverflow, std::string> textOverflowTable[] = {
+            { TextOverflow::NONE, "TextOverflow.None" },
             { TextOverflow::CLIP, "TextOverflow.Clip" },
             { TextOverflow::ELLIPSIS, "TextOverflow.Ellipsis" },
-            { TextOverflow::NONE, "TextOverflow.None" },
+            { TextOverflow::MARQUEE, "TextOverflow.Marquee" },
         };
 
         auto index = BinarySearchFindIndex(textOverflowTable, ArraySize(textOverflowTable), textOverflow);
@@ -383,6 +384,19 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
     }
 
     std::string GetTextStyleInJson(const TextStyle& textStyle);
+
+    inline std::string ConvertWrapTextHeightAdaptivePolicyToString(TextHeightAdaptivePolicy heightAdaptivePolicy)
+    {
+        static const LinearEnumMapNode<TextHeightAdaptivePolicy, std::string> heightAdaptivePolicytTable[] = {
+            { TextHeightAdaptivePolicy::MAX_LINES_FIRST, "TextHeightAdaptivePolicy.MAX_LINES_FIRST" },
+            { TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, "TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST" },
+            { TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST, "TextHeightAdaptivePolicy.LAYOUT_CONSTRAINT_FIRST" },
+        };
+
+        auto index = BinarySearchFindIndex(
+            heightAdaptivePolicytTable, ArraySize(heightAdaptivePolicytTable), heightAdaptivePolicy);
+        return index < 0 ? "TextHeightAdaptivePolicy.MAX_LINES_FIRST" : heightAdaptivePolicytTable[index].value;
+    }
 
 } // namespace OHOS::Ace::V2
 

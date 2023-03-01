@@ -27,6 +27,7 @@ public:
     void Create(const std::string& content) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void SetTextShadow(const Shadow& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -41,6 +42,7 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
+    void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     // TODO: add extra event for text.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
     void SetRemoteMessage(std::function<void()>&& event) override;

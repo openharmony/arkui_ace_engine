@@ -29,6 +29,8 @@ using FinishCallback = std::function<void()>;
 
 class AnimationUtils {
 public:
+    class Animation;
+
     static void OpenImplicitAnimation(
         const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback);
     static bool CloseImplicitAnimation();
@@ -36,6 +38,10 @@ public:
         const FinishCallback& finishCallback = nullptr);
     static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback);
     static void AddKeyFrame(float fraction, const PropertyCallback& callback);
+
+    static std::shared_ptr<AnimationUtils::Animation> StartAnimation(const AnimationOption& option,
+        const PropertyCallback& callback, const FinishCallback& finishCallback = nullptr);
+    static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);
 };
 } // namespace OHOS::Ace
 
