@@ -40,12 +40,19 @@ public:
         scaleWidth_ = scaleWidth;
     }
 
+    void SetPanelMode(PanelMode panelMode)
+    {
+        panelMode_ = panelMode;
+    }
+
 protected:
     OffsetF iconOffset_;
     float scaleWidth_ = 1.0f;
 
 private:
     void Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
+
+    PanelMode panelMode_ = PanelMode::HALF;
 
     ACE_DISALLOW_COPY_AND_MOVE(DragBarPaintMethod);
 };

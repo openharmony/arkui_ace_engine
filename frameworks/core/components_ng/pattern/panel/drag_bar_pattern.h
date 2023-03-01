@@ -61,6 +61,7 @@ public:
         auto paintMethod = MakeRefPtr<DragBarPaintMethod>();
         paintMethod->SetIconOffset(iconOffset_);
         paintMethod->SetScaleWidth(scaleWidth_);
+        paintMethod->SetPanelMode(showMode_);
         return paintMethod;
     }
 
