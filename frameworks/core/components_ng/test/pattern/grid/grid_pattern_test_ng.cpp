@@ -24,6 +24,7 @@
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/pipeline/base/constants.h"
@@ -51,9 +52,85 @@ const std::string GRID_DIRECTION_COLUMN_REVERSE = "GridDirection.ColumnReverse";
 const std::string GRID_SCROLL_BAR_AUTO = "BarState.Auto";
 const std::string GRID_SCROLL_BAR_OFF = "BarState.Off";
 const std::string GRID_SCROLL_BAR_ON = "BarState.On";
+const std::string GRID_TEMPLATE_ILLEGAL = "abcd1234 *&^%$";
+const std::string GRID_TEMPLATE_ROW = "1fr 1fr 1fr";
+const std::string GRID_TEMPLATE_COLUMN = "1fr 1fr";
+const int32_t GRID_CACHED_COUNT = 5;
+const std::string SCROLL_BAR_WIDTH = "10px";
+const std::string SCROLL_BAR_COLOR = "#909090";
 } // namespace
 
-class GridPatternTestNg : public testing::Test {};
+struct GridTestProperty {
+    std::optional<std::string> rowsTemplate;
+    std::optional<std::string> columnsTemplate;
+    std::optional<Dimension> rowsGap;
+    std::optional<Dimension> columnsGap;
+    std::optional<int32_t> cachedCount;
+    std::optional<FlexDirection> gridDirection;
+    std::optional<int32_t> maxCount;
+    std::optional<int32_t> minCount;
+    std::optional<int32_t> cellLength;
+    std::optional<bool> editable;
+    std::optional<int32_t> scrollBarMode;
+    std::optional<std::string> scrollBarWidth;
+    std::optional<std::string> scrollBarColor;
+};
+
+class GridPatternTestNg : public testing::Test {
+public:
+    static RefPtr<FrameNode> CreateGridParagraph(const GridTestProperty& gridTestProperty);
+};
+
+RefPtr<FrameNode> GridPatternTestNg::CreateGridParagraph(const GridTestProperty& gridTestProperty)
+{
+    GridModelNG grid;
+    RefPtr<V2::GridPositionController> positionController;
+    RefPtr<ScrollProxy> scrollBarProxy = grid.CreateScrollBarProxy();
+    grid.Create(positionController, scrollBarProxy);
+
+    if (gridTestProperty.rowsTemplate.has_value()) {
+        grid.SetRowsTemplate(gridTestProperty.rowsTemplate.value());
+    }
+    if (gridTestProperty.columnsTemplate.has_value()) {
+        grid.SetColumnsTemplate(gridTestProperty.columnsTemplate.value());
+    }
+    if (gridTestProperty.rowsGap.has_value()) {
+        grid.SetRowsGap(gridTestProperty.rowsGap.value());
+    }
+    if (gridTestProperty.columnsGap.has_value()) {
+        grid.SetColumnsGap(gridTestProperty.columnsGap.value());
+    }
+    if (gridTestProperty.cachedCount.has_value()) {
+        grid.SetCachedCount(gridTestProperty.cachedCount.value());
+    }
+    if (gridTestProperty.gridDirection.has_value()) {
+        grid.SetLayoutDirection(gridTestProperty.gridDirection.value());
+    }
+    if (gridTestProperty.maxCount.has_value()) {
+        grid.SetMaxCount(gridTestProperty.maxCount.value());
+    }
+    if (gridTestProperty.minCount.has_value()) {
+        grid.SetMinCount(gridTestProperty.minCount.value());
+    }
+    if (gridTestProperty.cellLength.has_value()) {
+        grid.SetCellLength(gridTestProperty.cellLength.value());
+    }
+    if (gridTestProperty.editable.has_value()) {
+        grid.SetEditable(gridTestProperty.editable.value());
+    }
+    if (gridTestProperty.scrollBarMode.has_value()) {
+        grid.SetScrollBarMode(gridTestProperty.scrollBarMode.value());
+    }
+    if (gridTestProperty.scrollBarWidth.has_value()) {
+        grid.SetScrollBarWidth(gridTestProperty.scrollBarWidth.value());
+    }
+    if (gridTestProperty.scrollBarColor.has_value()) {
+        grid.SetScrollBarColor(gridTestProperty.scrollBarColor.value());
+    }
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    return AceType::DynamicCast<FrameNode>(element);
+}
 
 /**
  * @tc.name: GridTest001
@@ -1000,5 +1077,83 @@ HWTEST_F(GridPatternTestNg, GridTest018, TestSize.Level1)
     layoutWrapper->Layout();
     EXPECT_FALSE(layoutWrapper->GetOrCreateChildByIndex(9, false)->IsActive());
     EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(0, false)->IsActive());
+}
+
+/**
+ * @tc.name: GridTest019
+ * @tc.desc: Test all the properties of grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GridTestProperty and set properties of grid.
+     */
+    GridTestProperty gridTestProperty;
+    gridTestProperty.rowsTemplate = std::make_optional(GRID_TEMPLATE_ROW);
+    gridTestProperty.columnsTemplate = std::make_optional(GRID_TEMPLATE_COLUMN);
+    gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
+    gridTestProperty.columnsGap = std::make_optional(GRID_COLUMNS_GAP);
+    gridTestProperty.cachedCount = std::make_optional(GRID_CACHED_COUNT);
+    gridTestProperty.gridDirection = std::make_optional(FlexDirection::ROW);
+    gridTestProperty.maxCount = std::make_optional(GRID_MAX_COUNT);
+    gridTestProperty.minCount = std::make_optional(GRID_MIN_COUNT);
+    gridTestProperty.cellLength = std::make_optional(GRID_CELL_LENGTH);
+    gridTestProperty.editable = std::make_optional(true);
+    gridTestProperty.scrollBarMode = std::make_optional(static_cast<int32_t>(NG::DisplayMode::ON));
+    gridTestProperty.scrollBarWidth = std::make_optional(SCROLL_BAR_WIDTH);
+    gridTestProperty.scrollBarColor = std::make_optional(SCROLL_BAR_COLOR);
+
+    /**
+     * @tc.steps: step2. create grid frameNode and get GridLayoutProperty.
+     * @tc.expected: step2. get GridLayoutProperty success.
+     */
+    RefPtr<FrameNode> frameNode = CreateGridParagraph(gridTestProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. compare grid properties and expected value.
+     * @tc.expected: step3. grid properties equals expected value.
+     */
+    EXPECT_EQ(layoutProperty->GetRowsTemplate(), GRID_TEMPLATE_ROW);
+    EXPECT_EQ(layoutProperty->GetColumnsTemplate(), GRID_TEMPLATE_COLUMN);
+    EXPECT_EQ(layoutProperty->GetRowsGap(), GRID_ROWS_GAP);
+    EXPECT_EQ(layoutProperty->GetColumnsGap(), GRID_COLUMNS_GAP);
+    EXPECT_EQ(layoutProperty->GetCachedCount(), GRID_CACHED_COUNT);
+    EXPECT_EQ(layoutProperty->GetGridDirection(), FlexDirection::ROW);
+    EXPECT_EQ(layoutProperty->GetMaxCount(), GRID_MAX_COUNT);
+    EXPECT_EQ(layoutProperty->GetMinCount(), GRID_MIN_COUNT);
+    EXPECT_EQ(layoutProperty->GetCellLength(), GRID_CELL_LENGTH);
+    EXPECT_EQ(layoutProperty->GetEditable(), true);
+
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetScrollBarMode(), NG::DisplayMode::ON);
+    EXPECT_EQ(paintProperty->GetScrollBarWidth(), StringUtils::StringToDimensionWithUnit(SCROLL_BAR_WIDTH));
+    EXPECT_EQ(paintProperty->GetScrollBarColor(), Color::FromString(SCROLL_BAR_COLOR));
+
+    /**
+     * @tc.steps: step4. change grid row/column template properties to test illegal template.
+     */
+    gridTestProperty.rowsTemplate = std::make_optional(GRID_TEMPLATE_ILLEGAL);
+    gridTestProperty.columnsTemplate = std::make_optional(GRID_TEMPLATE_ILLEGAL);
+
+    /**
+     * @tc.steps: step5. create grid frameNode and get GridLayoutProperty again.
+     * @tc.expected: step5. get GridLayoutProperty success again.
+     */
+    frameNode = CreateGridParagraph(gridTestProperty);
+    ASSERT_NE(frameNode, nullptr);
+    layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step6. compare grid properties and expected value after change.
+     * @tc.expected: step6. grid properties equals expected value after change.
+     */
+    EXPECT_EQ(layoutProperty->GetRowsTemplate(), "");
+    EXPECT_EQ(layoutProperty->GetColumnsTemplate(), "");
 }
 } // namespace OHOS::Ace::NG
