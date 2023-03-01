@@ -110,11 +110,16 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
     appBarRow->AddChild(BuildIconButton(
         InternalResource::ResourceId::APP_BAR_FA_SVG,
         [pipeline, appBarTheme](GestureEvent& info) {
+#ifdef PREVIEW
+            LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
+                 "emulator or a real device instead.");
+#else
             if (pipeline && appBarTheme) {
                 pipeline->FireSharePanelCallback(appBarTheme->GetServiceBundleName(),
                     appBarTheme->GetServiceAbilityName(), appBarTheme->GetServiceModuleName(),
                     appBarTheme->GetServiceHostPkgName(), appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
             }
+#endif
         }, false));
     return appBarRow;
 }

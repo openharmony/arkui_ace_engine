@@ -107,7 +107,9 @@ void AceContainer::Initialize()
         auto compatibleVersion = appInfo->GetMinAPIVersion();
         auto targetVersion = appInfo->GetTargetAPIVersion();
         auto releaseType = appInfo->GetApiReleaseType();
+        labelId_ = appInfo->GetLabelId();
         bool enablePartialUpdate = hapModuleInfo->GetPartialUpdateFlag();
+        installationFree_ = hapModuleInfo->IsInstallationFree();
         useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage("", compatibleVersion, targetVersion,
             releaseType, !enablePartialUpdate);
     } else if (faContext) {
@@ -927,6 +929,11 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, RSAceView* view, d
     pipelineContext_->SetWindowModal(windowModal_);
     pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
     pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
+    if (installationFree_) {
+        LOGD("installationFree:%{public}d, labelId:%{public}d", installationFree_, labelId_);
+        pipelineContext_->SetInstallationFree(installationFree_);
+        pipelineContext_->SetAppLabelId(labelId_);
+    }
     pipelineContext_->OnShow();
     InitializeCallback();
 

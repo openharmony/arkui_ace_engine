@@ -24,6 +24,7 @@ void StageHapModuleInfo::Parse(const std::unique_ptr<JsonValue>& root)
     }
     compileMode_ = root->GetString("compileMode");
     moduleName_ = root->GetString("name");
+    installationFree_ = root->GetBool("installationFree");
     auto metaData = root->GetValue("metadata");
     if (metaData && metaData->IsArray()) {
         for (auto index = 0; index < metaData->GetArraySize(); ++index) {
@@ -48,5 +49,10 @@ const std::string& StageHapModuleInfo::GetModuleName() const
 bool StageHapModuleInfo::GetPartialUpdateFlag() const
 {
     return isPartialUpdate_;
+}
+
+bool StageHapModuleInfo::IsInstallationFree() const
+{
+    return installationFree_;
 }
 } // namespace OHOS::Ace
