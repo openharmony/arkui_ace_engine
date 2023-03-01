@@ -255,7 +255,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     // load resourceConfig
     currentConfigResourceData_ = JsonUtil::CreateArray(true);
     frontendDelegate_->LoadResourceConfiguration(mediaResourceFileMap_, currentConfigResourceData_);
-
+    isEngineInstanceInitialized_ = true;
     return true;
 }
 
@@ -646,23 +646,44 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
 
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 {
+    auto jsRuntime = InnerGetCurrentRuntime();
+    if (jsRuntime) {
+        return jsRuntime;
+    }
+
+    // ArkTsCard
     if (isUnique_ && localRuntime_) {
         return localRuntime_;
     }
+
+    // Preload
     if (globalRuntime_) {
         return globalRuntime_;
     }
+
+    return localRuntime_;
+}
+
+shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::InnerGetCurrentRuntime()
+{
     auto engine = EngineHelper::GetCurrentEngine();
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {
         LOGE("jsiEngine is null");
-        return localRuntime_;
+        return nullptr;
     }
+
     auto engineInstance = jsiEngine->GetEngineInstance();
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
-        return localRuntime_;
+        return nullptr;
     }
+
+    if (!engineInstance->IsEngineInstanceInitialized()) {
+        LOGI("engineInstance is not Initialized");
+        return nullptr;
+    }
+
     return engineInstance->GetJsRuntime();
 }
 
