@@ -327,7 +327,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest005, TestSize.Level1)
      * @tc.steps: step1. create and get marquee frameNode.
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     frameNode->MarkDirtyNode();
 
     /**
@@ -430,7 +430,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest006, TestSize.Level1)
      * @tc.steps: step1. create and get marquee frameNode.
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
     frameNode->MarkDirtyNode();
 
     /**
@@ -530,7 +530,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest007, TestSize.Level1)
      * @tc.steps: step1. create and get marquee frameNode.
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
@@ -673,7 +673,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest008, TestSize.Level1)
      * @tc.steps: step1. create and get marquee frameNode.
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
@@ -789,7 +789,7 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest009, TestSize.Level1)
      * @tc.steps: step1. create and get marquee frameNode.
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MARQUEE_COMPONENT_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+        V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
 
     /**
      * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
