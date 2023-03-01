@@ -40,7 +40,10 @@ float GetDisplayRefreshRate()
 } // namespace
 
 namespace OHOS::Ace {
+
+#ifdef ENABLE_ROSEN_BACKEND
 std::mutex FormRenderWindow::globalMutex_;
+#endif
 
 FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : taskExecutor_(taskExecutor), id_(id)
