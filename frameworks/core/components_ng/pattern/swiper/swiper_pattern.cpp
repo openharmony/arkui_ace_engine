@@ -97,9 +97,13 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    OnIndexChange();
-
     InitSwiperIndicator();
+    if (isInit_) {
+        isInit_ = false;
+    } else {
+        OnIndexChange();
+    }
+
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();

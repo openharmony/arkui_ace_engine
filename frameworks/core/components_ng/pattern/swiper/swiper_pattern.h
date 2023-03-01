@@ -284,6 +284,7 @@ private:
     float turnPageRate_ = 0.0f;
 
     bool moveDirection_ = false;
+    bool isInit_ = true;
 
     Axis direction_ = Axis::HORIZONTAL;
 
