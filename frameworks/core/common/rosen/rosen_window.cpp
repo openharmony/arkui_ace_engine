@@ -14,6 +14,7 @@
  */
 
 #include "rosen_window.h"
+#include <chrono>
 
 #include "base/log/log.h"
 
@@ -70,7 +71,7 @@ void RSWindow::VsyncThreadMain()
             std::unique_lock lock(mutex_);
             vsyncCallbacks_.swap(pendingVsyncCallbacks_);
         }
-        int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+        int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();
         for (auto &callback : vsyncCallbacks_) {
             callback(now, 0);

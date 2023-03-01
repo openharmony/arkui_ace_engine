@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_WINDOW_PREVIEWER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_WINDOW_PREVIEWER_H
 
+#include <chrono>
 #include <condition_variable>
 #include <functional>
 #include <mutex>
@@ -86,7 +87,7 @@ public:
                 std::unique_lock lock(mutex_);
                 vsyncCallbacks_.swap(pendingVsyncCallbacks_);
             }
-            int64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
+            int64_t now = std::chrono::duration_cast<std::chrono::nanoseconds>(
                 std::chrono::steady_clock::now().time_since_epoch()).count();
             for (auto& callback : vsyncCallbacks_) {
                 callback->onCallback(now);
