@@ -120,6 +120,9 @@ float GridRowLayoutAlgorithm::MeasureChildren(LayoutWrapper* layoutWrapper, doub
             continue;
         }
         auto gridCol = AceType::DynamicCast<GridColLayoutProperty>(child->GetLayoutProperty());
+        if (!gridCol) {
+            continue;
+        }
         gridCol->UpdateSizeType(sizeType);
 
         /* Measure child */
