@@ -43,23 +43,21 @@ interface Type<T> extends Function {
 *   obsObj = ObservedObject.createNew<ClassA[]>([])
 */
 const Observed: (obj) => any = function () {
-  let object_creation_ongoing__ = 0;
-  return function Observed(target: any): any {
-    stateMgmtConsole.debug(`@Observed: define ${target.name} extended`);
-    const Observed = class extends target {
-      constructor(...args) {
-        object_creation_ongoing__ += 1;
-        super(...args);
-        object_creation_ongoing__ -= 1;
-        if (object_creation_ongoing__ == 0) {
-          return ObservedObject.createNew(this, null);
-        } else {
-          return this;
+    return function Observed(target: any): any {
+      const IS_PROXIED = Symbol('___is_proxied___');
+      stateMgmtConsole.debug(`@Observed: define ${target.name} extended`);
+      const Observed = class extends target {
+        constructor(...args) {
+          super(...args);
+          let isProxied = this.IS_PROXIED;
+          Object.defineProperty(this, IS_PROXIED, {value: true});
+          return isProxied
+            ? this 
+            : ObservedObject.createNew(this, null);
         }
-      }
-    };
-    return Observed;
-  }
+      };
+      return Observed;
+    }
 }()
 
 

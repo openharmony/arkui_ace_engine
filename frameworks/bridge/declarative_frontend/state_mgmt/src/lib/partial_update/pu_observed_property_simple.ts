@@ -70,7 +70,7 @@ class ObservedPropertySimplePU<T> extends ObservedPropertySimpleAbstractPU<T> {
 
   public getUnmonitored(): T {
     stateMgmtConsole.debug(`ObservedPropertySimple[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
-    // unmonitored get access , no call to otifyPropertyRead !
+    // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
     return this.wrappedValue_;
   }
 

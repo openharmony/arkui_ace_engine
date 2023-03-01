@@ -91,7 +91,6 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   }
 
   protected notifyHasChanged(newValue: T) {
-    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
@@ -115,7 +114,6 @@ abstract class ObservedPropertyAbstract<T> extends SubscribedAbstractProperty<T>
   }
 
   protected notifyPropertyRead() {
-    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: propertyRead.`)
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
