@@ -29,7 +29,7 @@ public:
     static void JsAutoPlay(bool autoPlay);
     static void JsControls(bool controls);
     static void JsLoop(bool loop);
-    static void JsObjectFit(int32_t objectFit);
+    static void JsObjectFit(const JSCallbackInfo& info);
 
     static void JsOnStart(const JSCallbackInfo& args);
     static void JsOnPause(const JSCallbackInfo& args);
