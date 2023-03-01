@@ -134,8 +134,8 @@ bool ArkJSRuntime::ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t siz
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
     bool ret = JSNApi::ExecuteModuleBuffer(vm_, buffer, size, filePath);
-    LOGE(
-        "ArkJSRuntime::EvaluateJsCode after JSNApi::Execute %{public}p, filePath = %{public}s", this, filePath.c_str());
+    LOGI("ArkJSRuntime::EvaluateJsCode after JSNApi::Execute %{public}p, filePath = %{public}s",
+        this, filePath.c_str());
     HandleUncaughtException();
     return ret;
 }
@@ -264,10 +264,13 @@ bool ArkJSRuntime::HasPendingException()
 void ArkJSRuntime::HandleUncaughtException()
 {
     if (uncaughtErrorHandler_ == nullptr) {
+        LOGE("uncaughtErrorHandler is null.");
         return;
     }
+
     Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
     if (!exception.IsEmpty() && !exception->IsHole()) {
+        LOGI("HandleUncaughtException catch exception.");
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
         uncaughtErrorHandler_(errorPtr, shared_from_this());
