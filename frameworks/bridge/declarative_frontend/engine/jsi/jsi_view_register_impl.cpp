@@ -211,6 +211,13 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
             CHECK_NULL_VOID(pluginContainer);
             pageNode = pluginContainer->GetPluginNode().Upgrade();
             CHECK_NULL_VOID(pageNode);
+            pluginContainer->SetDeclarativeOnUpdateWithValueParamsCallback(
+                [weak = Referenced::WeakClaim(view)](const std::string& params) {
+                    auto view = weak.Upgrade();
+                    if (view && !params.empty()) {
+                        view->ExecuteUpdateWithValueParams(params);
+                    }
+                });
         } else
 #endif
         {
