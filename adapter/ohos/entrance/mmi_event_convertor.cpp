@@ -318,4 +318,33 @@ void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     }
 }
 
+std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const NG::OffsetF& offsetF, const TouchEvent& point)
+{
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
+
+    OHOS::MMI::PointerEvent::PointerItem item;
+    item.SetWindowX(static_cast<int32_t>(point.x - offsetF.GetX()));
+    item.SetWindowY(static_cast<int32_t>(point.y - offsetF.GetY()));
+    item.SetDisplayX(static_cast<int32_t>(point.screenX));
+    item.SetDisplayY(static_cast<int32_t>(point.screenY));
+    item.SetPointerId(point.id);
+    pointerEvent->AddPointerItem(item);
+
+    int32_t sourceType = MMI::PointerEvent::SOURCE_TYPE_UNKNOWN;
+    auto sourceTypeIter = SOURCE_TYPE_MAP.find(point.sourceType);
+    if (sourceTypeIter != SOURCE_TYPE_MAP.end()) {
+        sourceType = sourceTypeIter->second;
+    }
+    pointerEvent->SetSourceType(sourceType);
+
+    int32_t pointerAction = OHOS::MMI::PointerEvent::POINTER_ACTION_UNKNOWN;
+    auto pointerActionIter = TOUCH_TYPE_MAP.find(point.type);
+    if (pointerActionIter != TOUCH_TYPE_MAP.end()) {
+        pointerAction = pointerActionIter->second;
+    }
+    pointerEvent->SetPointerAction(pointerAction);
+    pointerEvent->SetPointerId(point.id);
+    return pointerEvent;
+}
+
 } // namespace OHOS::Ace::Platform

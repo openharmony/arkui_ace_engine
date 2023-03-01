@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 
+#include "pointer_event.h"
 #include "session/host/include/session.h"
 
 #include "core/components_ng/event/event_hub.h"
@@ -31,6 +32,7 @@ public:
     ~HostWindowPattern() override = default;
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 
 protected:
     void OnAttachToFrameNode() override;

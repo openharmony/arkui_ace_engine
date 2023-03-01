@@ -25,10 +25,10 @@
 #include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "render_service_client/core/transaction/rs_transaction.h"
 #endif
 
 #include <algorithm>
@@ -740,6 +740,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         etsCardTouchEventCallback_(point);
     }
 
+    if (uiExtensionCallback_) {
+        uiExtensionCallback_(point);
+    }
+
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
@@ -804,6 +808,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         etsCardTouchEventCallback_ = nullptr;
+        uiExtensionCallback_ = nullptr;
     }
 
     hasIdleTasks_ = true;

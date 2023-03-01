@@ -464,6 +464,7 @@ template("declarative_js_engine") {
       }
 
       if (defined(config.window_scene_support) && config.window_scene_support) {
+        sources += [ "jsview/js_ui_extension.cpp" ]
         deps += [ "$window_manager_path/window_scene/session:scene_session" ]
       }
     }

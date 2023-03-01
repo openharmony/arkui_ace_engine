@@ -493,6 +493,9 @@ ACE_EXPORT extern const char MODEL_ETS_TAG[];
 // window scene
 ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[];
 
-} // namespace OHOS::Ace::V2
+// ui_extension_component
+ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_TAG[];
+ACE_EXPORT extern const char UI_EXTENSION_COMPONENT_ETS_TAG[];
 
+} // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

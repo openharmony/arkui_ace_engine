@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "pointer_event.h"
 #include "ui_window.h"
 
 #include "core/common/window.h"
@@ -28,12 +29,15 @@ class RSUIDirector;
 struct VsyncCallback;
 class SessionStage;
 class ISizeChangeListener;
+class IPointerEventListener;
 enum class WindowSizeChangeReason : uint32_t;
-}
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
 
-class WindowPattern : public UIWindow, public Pattern, public Window,
+class WindowPattern : public UIWindow,
+                      public Pattern,
+                      public Window,
                       public std::enable_shared_from_this<WindowPattern> {
     DECLARE_ACE_TYPE(WindowPattern, Pattern);
 
@@ -100,8 +104,11 @@ public:
     void RegisterSessionStageStateListener(const std::shared_ptr<Rosen::ISessionStageStateListener>& listener) override;
     void RegisterSizeChangeListener(const std::shared_ptr<Rosen::ISizeChangeListener>& listener);
 
-    void Connect()  override;
-    void Foreground()  override;
+    void RegisterPointerEventListener(const std::shared_ptr<Rosen::IPointerEventListener>& listener);
+    void ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
+
+    void Connect() override;
+    void Foreground() override;
     void Background() override;
     void Disconnect() override;
 
