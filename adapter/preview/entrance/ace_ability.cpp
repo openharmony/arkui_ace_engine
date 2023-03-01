@@ -412,7 +412,7 @@ void AceAbility::RunEventLoop()
         if (windowControllerRef_) {
             FlutterDesktopWaitForEvents(windowControllerRef_);
         }
-        controller_->WaitForEvents();
+        controller_->PollEvents();
 
 #ifdef USE_GLFW_WINDOW
         int32_t width;
