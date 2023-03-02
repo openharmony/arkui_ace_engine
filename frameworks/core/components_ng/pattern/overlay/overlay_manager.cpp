@@ -249,8 +249,6 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
 
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateOpacity(1.0);
-    context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
