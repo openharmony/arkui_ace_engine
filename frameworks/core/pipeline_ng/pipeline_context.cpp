@@ -25,10 +25,10 @@
 #include "core/event/touch_event.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/transaction/rs_transaction.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "render_service_client/core/transaction/rs_transaction.h"
 #endif
 
 #include <algorithm>
@@ -405,6 +405,12 @@ void PipelineContext::SetupSubRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+
+    if (stageNode) {
+        auto stageRenderContext = stageNode->GetRenderContext();
+        CHECK_NULL_VOID(stageRenderContext);
+        stageRenderContext->UpdateBackgroundColor(appBgColor_);
+    }
 }
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
