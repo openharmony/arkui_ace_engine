@@ -128,7 +128,13 @@ enum class AceAction : uint32_t {
     ACTION_CLEAR_ACCESSIBILITY_FOCUS,
     ACTION_NEXT_AT_MOVEMENT_GRANULARITY,
     ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY,
-    ACTION_SET_TEXT
+    ACTION_SET_TEXT,
+    ACTION_COPY,
+    ACTION_PASTE,
+    ACTION_CUT,
+    ACTION_SELECT,
+    ACTION_SET_SELECTION,
+    ACTION_CLEAR_SELECTION,
 };
 
 struct AccessibilityValue {
@@ -155,6 +161,8 @@ struct AceCollectionInfo {
 struct AceCollectionItemInfo {
     int32_t row = 0;
     int32_t column = 0;
+    int32_t rowSpan = 0;
+    int32_t columnSpan = 0;
 };
 
 bool CheckBetterRect(const Rect& nodeRect, int direction, const Rect& itemRect, const Rect& tempBest);

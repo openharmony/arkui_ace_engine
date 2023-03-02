@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ const char ACCESSIBILITY_CLEAR_FOCUS_EVENT[] = "accessibilityclearfocus";
 const char TEXT_CHANGE_EVENT[] = "textchange";
 const char PAGE_CHANGE_EVENT[] = "pagechange";
 const char SCROLL_END_EVENT[] = "scrollend";
-const char SCROLL_START_EVENT [] = "scrollstart";
+const char SCROLL_START_EVENT[] = "scrollstart";
 const char MOUSE_HOVER_ENTER[] = "mousehoverenter";
 const char MOUSE_HOVER_EXIT[] = "mousehoverexit";
 const char IMPORTANT_YES[] = "yes";
@@ -597,23 +597,51 @@ void FillEventInfo(const RefPtr<AccessibilityNode>& node, AccessibilityEventInfo
     eventInfo.SetLatestContent(node->GetText());
 }
 
-void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
+static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
-    auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
-    if (gestureEventHub) {
-        nodeInfo.SetClickable(gestureEventHub->IsClickable());
-        if (gestureEventHub->IsClickable()) {
-            AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
-            nodeInfo.AddAction(action);
-        }
-        nodeInfo.SetLongClickable(gestureEventHub->IsLongClickable());
-        if (gestureEventHub->IsLongClickable()) {
-            AccessibleAction action(ACCESSIBILITY_ACTION_LONG_CLICK, "ace");
-            nodeInfo.AddAction(action);
-        }
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID_NOLOG(accessibilityProperty);
+
+    nodeInfo.SetContent(accessibilityProperty->GetText());
+    if (accessibilityProperty->HasRange()) {
+        RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
+        nodeInfo.SetRange(rangeInfo);
     }
-    if (nodeInfo.IsFocusable()) {
-        AccessibleAction action(ACCESSIBILITY_ACTION_FOCUS, "ace");
+    nodeInfo.SetHint(accessibilityProperty->GetHintText());
+    nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
+    nodeInfo.SetSelected(accessibilityProperty->IsSelected());
+    nodeInfo.SetPassword(accessibilityProperty->IsPassword());
+    nodeInfo.SetScrollable(accessibilityProperty->IsScrollable());
+    nodeInfo.SetEditable(accessibilityProperty->IsEditable());
+    nodeInfo.SetPluraLineSupported(accessibilityProperty->IsMultiLine());
+    nodeInfo.SetDeletable(accessibilityProperty->IsDeletable());
+    nodeInfo.SetHinting(accessibilityProperty->IsHint());
+    nodeInfo.SetCurrentIndex(accessibilityProperty->GetCurrentIndex());
+    nodeInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
+    nodeInfo.SetEndIndex(accessibilityProperty->GetEndIndex());
+    nodeInfo.SetLiveRegion(accessibilityProperty->GetLiveRegion());
+    nodeInfo.SetContentInvalid(accessibilityProperty->GetContentInvalid());
+    nodeInfo.SetError(accessibilityProperty->GetErrorText());
+    nodeInfo.SetSelectedBegin(accessibilityProperty->GetTextSelectionStart());
+    nodeInfo.SetSelectedEnd(accessibilityProperty->GetTextSelectionEnd());
+    nodeInfo.SetInputType(static_cast<int>(accessibilityProperty->GetTextInputType()));
+    nodeInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
+
+    GridInfo gridInfo(accessibilityProperty->GetCollectionInfo().rows,
+        accessibilityProperty->GetCollectionInfo().columns, (nodeInfo.IsPluraLineSupported() ? 0 : 1));
+    nodeInfo.SetGrid(gridInfo);
+
+    int32_t row = accessibilityProperty->GetCollectionItemInfo().row;
+    int32_t column = accessibilityProperty->GetCollectionItemInfo().column;
+    int32_t rowSpan = accessibilityProperty->GetCollectionItemInfo().rowSpan;
+    int32_t columnSpan = accessibilityProperty->GetCollectionItemInfo().columnSpan;
+    GridItemInfo gridItemInfo(row, rowSpan, column, columnSpan, false, nodeInfo.IsSelected());
+    nodeInfo.SetGridItem(gridItemInfo);
+
+    accessibilityProperty->ResetSupportAction();
+    auto supportAceActions = accessibilityProperty->GetSupportAction();
+    for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
+        AccessibleAction action(ConvertAceAction(*it), "ace");
         nodeInfo.AddAction(action);
     }
 }
@@ -630,7 +658,6 @@ void UpdateAccessibilityElementInfo(
         nodeInfo.AddChild(child);
     }
 
-    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
     nodeInfo.SetComponentType(node->GetTag());
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
@@ -638,7 +665,6 @@ void UpdateAccessibilityElementInfo(
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
     nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
-    nodeInfo.SetContent(accessibilityProperty->GetText());
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
         auto left = node->GetTransformRelativeOffset().GetX() + commonProperty.windowLeft;
@@ -649,17 +675,13 @@ void UpdateAccessibilityElementInfo(
         nodeInfo.SetRectInScreen(bounds);
     }
 
-    if (accessibilityProperty->HasRange()) {
-        RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
-        nodeInfo.SetRange(rangeInfo);
-    }
-
     nodeInfo.SetWindowId(commonProperty.windowId);
     nodeInfo.SetPageId(node->GetPageId());
     nodeInfo.SetPagePath(commonProperty.pagePath);
     nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
 
-    UpdateSupportAction(node, nodeInfo);
+    nodeInfo.SetComponentResourceId(node->GetInspectorId().value_or(""));
+    UpdateAccessibilityElementInfo(node, nodeInfo);
 }
 
 // focus move search
@@ -805,6 +827,61 @@ void ClearAccessibilityFocus(const RefPtr<NG::FrameNode>& root, int32_t focusNod
     auto oldFocusNode = GetInspectorById(root, focusNodeId);
     CHECK_NULL_VOID_NOLOG(oldFocusNode);
     oldFocusNode->GetRenderContext()->UpdateAccessibilityFocus(false);
+}
+
+inline string GetSupportAction(const std::unordered_set<AceAction> supportAceActions)
+{
+    std::string actionForDump;
+    for (const auto& action : supportAceActions) {
+        if (!actionForDump.empty()) {
+            actionForDump.append(",");
+        }
+        actionForDump.append(std::to_string(static_cast<int32_t>(action)));
+    }
+    return actionForDump;
+}
+
+static void DumpAccessibilityPropertyNG(
+    const RefPtr<NG::FrameNode> frameNode, const RefPtr<NG::AccessibilityProperty> accessibilityProperty)
+{
+    accessibilityProperty->ResetSupportAction();
+    const auto& supportAceActions = accessibilityProperty->GetSupportAction();
+
+    DumpLog::GetInstance().AddDesc("checked: ", BoolToString(accessibilityProperty->IsChecked()));
+    DumpLog::GetInstance().AddDesc("selected: ", BoolToString(accessibilityProperty->IsSelected()));
+    DumpLog::GetInstance().AddDesc("checkable: ", BoolToString(accessibilityProperty->IsCheckable()));
+    DumpLog::GetInstance().AddDesc("scrollable: ", BoolToString(accessibilityProperty->IsScrollable()));
+    DumpLog::GetInstance().AddDesc("hint text: ", accessibilityProperty->GetHintText());
+    DumpLog::GetInstance().AddDesc("editable: ", BoolToString(accessibilityProperty->IsEditable()));
+    DumpLog::GetInstance().AddDesc("error text: ", accessibilityProperty->GetErrorText());
+    DumpLog::GetInstance().AddDesc("js component id: ", frameNode->GetInspectorId().value_or(""));
+
+    DumpLog::GetInstance().AddDesc("accessibility hint: ", BoolToString(accessibilityProperty->IsHint()));
+    DumpLog::GetInstance().AddDesc("max text length: ", accessibilityProperty->GetTextLengthLimit());
+    DumpLog::GetInstance().AddDesc("text selection start: ", accessibilityProperty->GetTextSelectionStart());
+    DumpLog::GetInstance().AddDesc("text selection end: ", accessibilityProperty->GetTextSelectionEnd());
+    DumpLog::GetInstance().AddDesc("is multi line: ", BoolToString(accessibilityProperty->IsMultiLine()));
+    DumpLog::GetInstance().AddDesc("is password: ", BoolToString(accessibilityProperty->IsPassword()));
+    DumpLog::GetInstance().AddDesc(
+        "text input type: ", ConvertInputTypeToString(accessibilityProperty->GetTextInputType()));
+    DumpLog::GetInstance().AddDesc("min value: ", accessibilityProperty->GetAccessibilityValue().min);
+    DumpLog::GetInstance().AddDesc("max value: ", accessibilityProperty->GetAccessibilityValue().max);
+    DumpLog::GetInstance().AddDesc("current value: ", accessibilityProperty->GetAccessibilityValue().current);
+    DumpLog::GetInstance().AddDesc("collection info rows: ", accessibilityProperty->GetCollectionInfo().rows);
+    DumpLog::GetInstance().AddDesc("collection info columns: ", accessibilityProperty->GetCollectionInfo().columns);
+    DumpLog::GetInstance().AddDesc("collection item info, row: ", accessibilityProperty->GetCollectionItemInfo().row);
+    DumpLog::GetInstance().AddDesc(
+        "collection item info, column: ", accessibilityProperty->GetCollectionItemInfo().column);
+    DumpLog::GetInstance().AddDesc(
+        "collection item info, rowSpan: ", accessibilityProperty->GetCollectionItemInfo().rowSpan);
+    DumpLog::GetInstance().AddDesc(
+        "collection item info, columnSpan: ", accessibilityProperty->GetCollectionItemInfo().columnSpan);
+    DumpLog::GetInstance().AddDesc("support action: ", GetSupportAction(supportAceActions));
+    DumpLog::GetInstance().AddDesc("deletable: ", accessibilityProperty->IsDeletable());
+    DumpLog::GetInstance().AddDesc("current index: ", accessibilityProperty->GetCurrentIndex());
+    DumpLog::GetInstance().AddDesc("begin index: ", accessibilityProperty->GetBeginIndex());
+    DumpLog::GetInstance().AddDesc("end index: ", accessibilityProperty->GetEndIndex());
+    DumpLog::GetInstance().AddDesc("collection item counts: ", accessibilityProperty->GetCollectionItemCounts());
 }
 
 } // namespace
@@ -1062,37 +1139,9 @@ void JsAccessibilityManager::DumpHandleEvent(const std::vector<std::string>& par
         TaskExecutor::TaskType::UI);
 }
 
-void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params)
+void JsAccessibilityManager::DumpProperty(const RefPtr<AccessibilityNode> node)
 {
-    CHECK_NULL_VOID_NOLOG(DumpLog::GetInstance().GetDumpFile());
-    if (params.empty()) {
-        DumpLog::GetInstance().Print("Error: params cannot be empty!");
-        return;
-    }
-    if (params.size() != PROPERTY_DUMP_PARAM_LENGTH) {
-        DumpLog::GetInstance().Print("Error: params length is illegal!");
-        return;
-    }
-    if (params[0] != DUMP_ORDER && params[0] != DUMP_INSPECTOR) {
-        DumpLog::GetInstance().Print("Error: not accessibility dump order!");
-        return;
-    }
-
-    auto node = GetAccessibilityNodeFromPage(StringUtils::StringToInt(params[1]));
-    if (!node) {
-        DumpLog::GetInstance().Print("Error: can't find node with ID " + params[1]);
-        return;
-    }
-
     const auto& supportAceActions = node->GetSupportAction();
-    std::string actionForDump;
-    for (const auto& action : supportAceActions) {
-        if (!actionForDump.empty()) {
-            actionForDump.append(",");
-        }
-        actionForDump.append(std::to_string(static_cast<int32_t>(action)));
-    }
-
     const auto& charValue = node->GetChartValue();
 
     DumpLog::GetInstance().AddDesc("ID: ", node->GetNodeId());
@@ -1136,9 +1185,99 @@ void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params
     DumpLog::GetInstance().AddDesc("chart has value: ", BoolToString(charValue && !charValue->empty()));
     DumpLog::GetInstance().AddDesc("accessibilityGroup: ", BoolToString(node->GetAccessible()));
     DumpLog::GetInstance().AddDesc("accessibilityImportance: ", node->GetImportantForAccessibility());
-    DumpLog::GetInstance().AddDesc("support action: ", actionForDump);
-
+    DumpLog::GetInstance().AddDesc("support action: ", GetSupportAction(supportAceActions));
     DumpLog::GetInstance().Print(0, node->GetTag(), node->GetChildList().size());
+}
+
+void JsAccessibilityManager::DumpPropertyNG(const std::vector<std::string>& params)
+{
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_VOID(ngPipeline);
+    auto windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
+    auto windowTop = GetWindowTop(ngPipeline->GetWindowId());
+
+    auto stageManager = ngPipeline->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto page = stageManager->GetLastPage();
+    CHECK_NULL_VOID(page);
+    auto pageId = page->GetPageId();
+
+    auto rootNode = ngPipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto nodeID = StringUtils::StringToInt(params[1]);
+    auto frameNode = GetInspectorById(rootNode, nodeID);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+
+    std::vector<int32_t> children;
+    for (const auto& item : frameNode->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId);
+    }
+
+    std::string ids;
+    for (auto child : children) {
+        if (!ids.empty()) {
+            ids.append(",");
+        }
+        ids.append(std::to_string(child));
+    }
+
+    DumpLog::GetInstance().AddDesc("ID: ", frameNode->GetAccessibilityId());
+    DumpLog::GetInstance().AddDesc("parent ID: ", GetParentId(frameNode));
+    DumpLog::GetInstance().AddDesc("child IDs: ", ids);
+    DumpLog::GetInstance().AddDesc("component type: ", frameNode->GetTag());
+    DumpLog::GetInstance().AddDesc("text: ", accessibilityProperty->GetText());
+    DumpLog::GetInstance().AddDesc("width: ", frameNode->GetGeometryNode()->GetFrameRect().Width());
+    DumpLog::GetInstance().AddDesc("height: ", frameNode->GetGeometryNode()->GetFrameRect().Height());
+    DumpLog::GetInstance().AddDesc("left: ", frameNode->GetTransformRelativeOffset().GetX() + windowLeft);
+    DumpLog::GetInstance().AddDesc("top: ", frameNode->GetTransformRelativeOffset().GetY() + windowTop);
+
+    auto focusHub = frameNode->GetFocusHub();
+    DumpLog::GetInstance().AddDesc("enabled: ", BoolToString(focusHub ? focusHub->IsEnabled() : true));
+    DumpLog::GetInstance().AddDesc("focusable: ", BoolToString(focusHub ? focusHub->IsFocusable() : false));
+    DumpLog::GetInstance().AddDesc("focused: ", BoolToString(focusHub ? focusHub->IsCurrentFocus() : false));
+
+    auto gestureEventHub = frameNode->GetEventHub<NG::EventHub>()->GetGestureEventHub();
+    DumpLog::GetInstance().AddDesc(
+        "clickable: ", BoolToString(gestureEventHub ? gestureEventHub->IsClickable() : false));
+    DumpLog::GetInstance().AddDesc(
+        "long clickable: ", BoolToString(gestureEventHub ? gestureEventHub->IsLongClickable() : false));
+    DumpAccessibilityPropertyNG(frameNode, accessibilityProperty);
+    DumpLog::GetInstance().Print(0, frameNode->GetTag(), children.size());
+}
+
+void JsAccessibilityManager::DumpProperty(const std::vector<std::string>& params)
+{
+    CHECK_NULL_VOID_NOLOG(DumpLog::GetInstance().GetDumpFile());
+    if (params.empty()) {
+        DumpLog::GetInstance().Print("Error: params cannot be empty!");
+        return;
+    }
+    if (params.size() != PROPERTY_DUMP_PARAM_LENGTH) {
+        DumpLog::GetInstance().Print("Error: params length is illegal!");
+        return;
+    }
+    if (params[0] != DUMP_ORDER && params[0] != DUMP_INSPECTOR) {
+        DumpLog::GetInstance().Print("Error: not accessibility dump order!");
+        return;
+    }
+
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_VOID(pipeline);
+
+    if (!AceType::InstanceOf<NG::PipelineContext>(pipeline)) {
+        auto node = GetAccessibilityNodeFromPage(StringUtils::StringToInt(params[1]));
+        if (!node) {
+            DumpLog::GetInstance().Print("Error: can't find node with ID " + params[1]);
+            return;
+        }
+        DumpProperty(node);
+    } else {
+        DumpPropertyNG(params);
+    }
 }
 
 static void DumpTreeNG(
@@ -1187,7 +1326,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, NodeId nodeID)
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         auto rootNode = ngPipeline->GetRootElement();
         CHECK_NULL_VOID(rootNode);
-        nodeID = rootNode -> GetAccessibilityId();
+        nodeID = rootNode->GetAccessibilityId();
         auto windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         auto windowTop = GetWindowTop(ngPipeline->GetWindowId());
         auto page = ngPipeline->GetStageManager()->GetLastPage();
@@ -1524,7 +1663,10 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(
     }
 
     auto node = GetInspectorById(rootNode, nodeId);
-    CHECK_NULL_VOID(node);
+    if (!node) {
+        info.SetValidElement(false);
+        return;
+    }
     RefPtr<NG::FrameNode> resultNode;
     if (focusType == FOCUS_TYPE_ACCESSIBILITY) {
         resultNode = FindAccessibilityFocus(node);
@@ -1685,7 +1827,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int32_t elementId, ActionType actio
         case ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD:
             return true;
         default:
-             break;
+            break;
     }
 
     return result;
@@ -2056,7 +2198,10 @@ void JsAccessibilityManager::FocusMoveSearchNG(
     CHECK_NULL_VOID(rootNode);
 
     auto node = GetInspectorById(rootNode, elementId);
-    CHECK_NULL_VOID(node);
+    if (!node) {
+        info.SetValidElement(false);
+        return;
+    }
     std::list<RefPtr<NG::FrameNode>> nodeList;
     Framework::AddFocusableNode(nodeList, rootNode);
 

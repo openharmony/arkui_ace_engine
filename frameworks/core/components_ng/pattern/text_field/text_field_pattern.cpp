@@ -2326,6 +2326,9 @@ bool TextFieldPattern::FilterWithRegex(
         LOGI("Error text %{private}s", errorText.c_str());
         textFieldEventHub->FireOnInputFilterError(errorText);
     }
+    auto textFieldAccessibilityProperty = GetHost()->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    CHECK_NULL_RETURN(textFieldAccessibilityProperty, false);
+    textFieldAccessibilityProperty->SetErrorText(errorText);
     return !errorText.empty();
 }
 
