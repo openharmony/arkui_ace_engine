@@ -438,11 +438,22 @@ template("declarative_js_engine") {
     include_dirs += uicast_configs.uicast_root_include
 
     external_deps = []
-    if (defined(config.build_for_ios) && config.build_for_ios) {
-      # static library for ios platform
-      external_deps += [ "ets_runtime:libark_jsruntime_static" ]
+
+    # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
+    if (is_cross_platform_build) {
+      configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      } else {
+        deps += [ "$ark_ets_path:libark_jsruntime" ]
+      }
     } else {
-      external_deps += [ "ets_runtime:libark_jsruntime" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        # static library for ios platform
+        external_deps += [ "ets_runtime:libark_jsruntime_static" ]
+      } else {
+        external_deps += [ "ets_runtime:libark_jsruntime" ]
+      }
     }
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
