@@ -285,7 +285,15 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         PaintFocusState();
         return true;
     }
-    return false;
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, false);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+
+    return textFieldPattern->HandleKeyEvent(event);
 }
 
 void SearchPattern::PaintFocusState()
@@ -580,6 +588,16 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
     option.SetCurve(curve);
     AnimationUtils::Animate(
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+}
+
+bool SearchPattern::HandleInputChildOnFocus() const
+{
+#if !defined(PREVIEW)
+    return false;
+#endif
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+    return true;
 }
 
 void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

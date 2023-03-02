@@ -43,6 +43,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
@@ -808,14 +809,23 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-    caretUpdateType_ = CaretUpdateType::EVENT;
-    CloseSelectOverlay();
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+    bool focusEventConsumed = false;
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        auto searchPattern = parentFrameNode->GetPattern<SearchPattern>();
+        CHECK_NULL_VOID(searchPattern);
+        focusEventConsumed = searchPattern->HandleInputChildOnFocus();
+    }
+    if (!focusEventConsumed) {
+        auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+        UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
+        caretUpdateType_ = CaretUpdateType::EVENT;
+        CloseSelectOverlay();
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                          : PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
@@ -998,7 +1008,7 @@ bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
             }
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
-#if defined (PREVIEW)
+#if defined(PREVIEW)
             DeleteBackward(1);
 #else
             DeleteForward(1);
@@ -1006,7 +1016,7 @@ bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
             return true;
         }
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
-#if defined (PREVIEW)
+#if defined(PREVIEW)
             DeleteForward(1);
 #else
             DeleteBackward(1);
