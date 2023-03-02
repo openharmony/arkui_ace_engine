@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,26 @@ void CheckBoxGroupModelNG::SetSelectAll(bool isSelected)
 void CheckBoxGroupModelNG::SetSelectedColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, color);
+}
+
+void CheckBoxGroupModelNG::SetUnSelectedColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, color);
+}
+
+void CheckBoxGroupModelNG::SetCheckMarkColor(const Color& color)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, color);
+}
+
+void CheckBoxGroupModelNG::SetCheckMarkSize(const Dimension& size)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, size);
+}
+
+void CheckBoxGroupModelNG::SetCheckMarkWidth(const Dimension& width)
+{
+    ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, width);
 }
 
 void CheckBoxGroupModelNG::SetOnChange(GroupChangeEvent&& onChange)

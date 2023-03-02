@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,10 @@ public:
         const std::string& tagName) override;
     void SetSelect(bool isSelected) override;
     void SetSelectedColor(const Color& color) override;
+    void SetUnSelectedColor(const Color& color) override;
+    void SetCheckMarkColor(const Color& color) override;
+    void SetCheckMarkSize(const Dimension& size) override;
+    void SetCheckMarkWidth(const Dimension& width) override;
     void SetOnChange(ChangeEvent&& onChange) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;

@@ -75,6 +75,19 @@ public:
     void SetUserActiveColor(const Color& color)
     {
         userActiveColor_ = color;
+        animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactivePointColor_));
+    }
+
+    void SetInActiveColor(const Color& color)
+    {
+        inactiveColor_ = color;
+        animatableBorderColor_->Set(isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
+    }
+
+    void SetPointColor(const Color& color)
+    {
+        pointColor_ = color;
+        animatableCheckColor_->Set(isSelect_->Get() ? LinearColor(pointColor_) : LinearColor(Color::TRANSPARENT));
     }
 
     void SetEnabled(bool enabled)
@@ -89,9 +102,11 @@ public:
 
     void SetIsSelect(bool isSelect)
     {
-        if (isSelect_) {
-            isSelect_->Set(isSelect);
+        if (!isSelect_ || (isSelect_->Get() == isSelect)) {
+            return;
         }
+        isSelect_->Set(isSelect);
+        UpdateAnimatableProperty();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
@@ -126,10 +141,23 @@ public:
         }
     }
 
+    void SetStrokeWidth(float value)
+    {
+        if (checkStroke_) {
+            checkStroke_->Set(value);
+        }
+    }
+
+    void SetStrokeSize(float value)
+    {
+        if (strokeSize_) {
+            strokeSize_->Set(value);
+        }
+    }
+
 private:
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
-    float checkStroke_ = 0.0f;
     Color pointColor_;
     Color activeColor_;
     Color inactiveColor_;
@@ -160,6 +188,8 @@ private:
     RefPtr<AnimatablePropertyColor> animatableBorderColor_;
     RefPtr<AnimatablePropertyColor> animatableShadowColor_;
     RefPtr<AnimatablePropertyColor> animateHoverColor_;
+    RefPtr<AnimatablePropertyFloat> checkStroke_;
+    RefPtr<AnimatablePropertyFloat> strokeSize_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
 

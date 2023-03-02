@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -529,4 +529,61 @@ void CheckBoxGroupPattern::AddHotZoneRect()
     host->AddHotZoneRect(hotZoneRegion);
 }
 
+void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    paintParameters.borderWidth = checkBoxTheme->GetBorderWidth().ConvertToPx();
+    paintParameters.borderRadius = checkBoxTheme->GetBorderRadius().ConvertToPx();
+    paintParameters.checkStroke = checkBoxTheme->GetCheckStroke().ConvertToPx();
+    paintParameters.pointColor = checkBoxTheme->GetPointColor();
+    paintParameters.activeColor = checkBoxTheme->GetActiveColor();
+    paintParameters.inactiveColor = checkBoxTheme->GetInactiveColor();
+    paintParameters.inactivePointColor = checkBoxTheme->GetInactivePointColor();
+    paintParameters.shadowColor = checkBoxTheme->GetShadowColor();
+    paintParameters.clickEffectColor = checkBoxTheme->GetClickEffectColor();
+    paintParameters.hoverColor = checkBoxTheme->GetHoverColor();
+    paintParameters.hoverRadius = checkBoxTheme->GetHoverRadius();
+    paintParameters.hotZoneHorizontalPadding = checkBoxTheme->GetHotZoneHorizontalPadding();
+    paintParameters.hotZoneVerticalPadding = checkBoxTheme->GetHotZoneVerticalPadding();
+    paintParameters.shadowWidth = checkBoxTheme->GetShadowWidth();
+    paintParameters.checkMarkPaintSize = checkBoxTheme->GetDefaultWidth().ConvertToPx();
+    paintParameters.uiStatus = UIStatus::UNSELECTED;
+    paintParameters.status = CheckBoxGroupPaintProperty::SelectStatus::NONE;
+}
+
+void CheckBoxGroupPattern::UpdateModifierParam(CheckBoxGroupModifier::Parameters& paintParameters)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto contentSize = geometryNode->GetContentSize();
+
+    if (paintProperty->HasCheckBoxGroupSelectedColor()) {
+        paintParameters.activeColor = paintProperty->GetCheckBoxGroupSelectedColorValue();
+    }
+    if (paintProperty->HasCheckBoxGroupUnSelectedColor()) {
+        paintParameters.inactiveColor = paintProperty->GetCheckBoxGroupUnSelectedColorValue();
+    }
+    if (paintProperty->HasCheckBoxGroupCheckMarkColor()) {
+        paintParameters.pointColor = paintProperty->GetCheckBoxGroupCheckMarkColorValue();
+    }
+    if (paintProperty->HasCheckBoxGroupCheckMarkSize()) {
+        if (paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx() >= 0) {
+            paintParameters.checkMarkPaintSize = paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx();
+        } else {
+            paintParameters.checkMarkPaintSize = contentSize.Width();
+            paintProperty->UpdateCheckBoxGroupCheckMarkSize(Dimension(contentSize.Width()));
+        }
+    }
+    if (paintProperty->HasCheckBoxGroupCheckMarkWidth()) {
+        paintParameters.checkStroke = static_cast<float>(
+            paintProperty->GetCheckBoxGroupCheckMarkWidthValue().ConvertToPx());
+    }
+}
 } // namespace OHOS::Ace::NG

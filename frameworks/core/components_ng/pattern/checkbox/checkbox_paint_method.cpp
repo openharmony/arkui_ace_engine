@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,16 +40,26 @@ constexpr float CHECK_MARK_MIDDLE_X_POSITION = 0.44f;
 constexpr float CHECK_MARK_MIDDLE_Y_POSITION = 0.68f;
 constexpr float CHECK_MARK_END_X_POSITION = 0.76f;
 constexpr float CHECK_MARK_END_Y_POSITION = 0.33f;
+constexpr float CHECKBOX_DOUBLE_RATIO = 2.0f;
+constexpr float CHECKBOX_LENGTH_ZERO = 0.0f;
 } // namespace
 
 CheckBoxModifier::CheckBoxModifier(
     bool isSelect, const Color& boardColor, const Color& checkColor, const Color& borderColor, const Color& shadowColor)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(checkBoxTheme);
+    
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
     animatableCheckColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(checkColor));
     animatableBorderColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(borderColor));
     animatableShadowColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(shadowColor));
-
+    checkStroke_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(
+        checkBoxTheme->GetCheckStroke().ConvertToPx()));
+    strokeSize_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(
+        checkBoxTheme->GetWidth().ConvertToPx()));
     animateHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
@@ -59,6 +69,8 @@ CheckBoxModifier::CheckBoxModifier(
     AttachProperty(animatableBorderColor_);
     AttachProperty(animatableShadowColor_);
     AttachProperty(animateHoverColor_);
+    AttachProperty(checkStroke_);
+    AttachProperty(strokeSize_);
     AttachProperty(isSelect_);
     AttachProperty(isHover_);
 }
@@ -71,7 +83,6 @@ void CheckBoxModifier::InitializeParam()
     CHECK_NULL_VOID(checkBoxTheme);
     borderWidth_ = checkBoxTheme->GetBorderWidth().ConvertToPx();
     borderRadius_ = checkBoxTheme->GetBorderRadius().ConvertToPx();
-    checkStroke_ = checkBoxTheme->GetCheckStroke().ConvertToPx();
     pointColor_ = checkBoxTheme->GetPointColor();
     activeColor_ = checkBoxTheme->GetActiveColor();
     inactiveColor_ = checkBoxTheme->GetInactiveColor();
@@ -127,8 +138,8 @@ void CheckBoxModifier::DrawHoverBoard(RSCanvas& canvas, const SizeF& size, const
     brush.SetAntiAlias(true);
     float originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
     float originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();
-    float endX = size.Width() + originX + 2 * hotZoneHorizontalPadding_.ConvertToPx();
-    float endY = size.Height() + originY + 2 * hotZoneVerticalPadding_.ConvertToPx();
+    float endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * hotZoneHorizontalPadding_.ConvertToPx();
+    float endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
     canvas.DrawRoundRect(rrect);
@@ -136,8 +147,8 @@ void CheckBoxModifier::DrawHoverBoard(RSCanvas& canvas, const SizeF& size, const
 
 void CheckBoxModifier::DrawBorder(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
 {
-    float originX = origin.GetX() + borderWidth_ / 2.0;
-    float originY = origin.GetY() + borderWidth_ / 2.0;
+    float originX = origin.GetX() + borderWidth_ / CHECKBOX_DOUBLE_RATIO;
+    float originY = origin.GetY() + borderWidth_ / CHECKBOX_DOUBLE_RATIO;
     float endX = originX + paintSize.Width() - borderWidth_;
     float endY = originY + paintSize.Height() - borderWidth_;
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, borderRadius_, borderRadius_);
@@ -160,22 +171,30 @@ void CheckBoxModifier::DrawBackboard(
 void CheckBoxModifier::DrawCheck(
     RSCanvas& canvas, const OffsetF& origin, RSPen& pen, RSPen& shadowPen, const SizeF& paintSize) const
 {
+    if (strokeSize_->Get() == CHECKBOX_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_LENGTH_ZERO) {
+        return;
+    }
     RSPath path;
     float originX = origin.GetX();
     float originY = origin.GetY();
+    float strokeSize = strokeSize_->Get();
     const Offset start =
-        Offset(paintSize.Width() * CHECK_MARK_START_X_POSITION, paintSize.Height() * CHECK_MARK_START_Y_POSITION);
+        Offset(strokeSize * CHECK_MARK_START_X_POSITION, strokeSize * CHECK_MARK_START_Y_POSITION);
     const Offset middle =
-        Offset(paintSize.Width() * CHECK_MARK_MIDDLE_X_POSITION, paintSize.Height() * CHECK_MARK_MIDDLE_Y_POSITION);
+        Offset(strokeSize * CHECK_MARK_MIDDLE_X_POSITION, strokeSize * CHECK_MARK_MIDDLE_Y_POSITION);
     const Offset end =
-        Offset(paintSize.Width() * CHECK_MARK_END_X_POSITION, paintSize.Height() * CHECK_MARK_END_Y_POSITION);
-    path.MoveTo(originX + start.GetX(), originY + start.GetY());
-    path.LineTo(originX + middle.GetX(), originY + middle.GetY());
-    path.MoveTo(originX + middle.GetX(), originY + middle.GetY());
-    path.LineTo(originX + end.GetX(), originY + end.GetY());
+        Offset(strokeSize * CHECK_MARK_END_X_POSITION, strokeSize * CHECK_MARK_END_Y_POSITION);
+    path.MoveTo(originX + start.GetX() + (paintSize.Width() - strokeSize) / CHECKBOX_DOUBLE_RATIO,
+        originY + start.GetY() + (paintSize.Height() - strokeSize) / CHECKBOX_DOUBLE_RATIO);
+    path.LineTo(originX + middle.GetX() + (paintSize.Width() - strokeSize) / CHECKBOX_DOUBLE_RATIO,
+        originY + middle.GetY() + (paintSize.Height() - strokeSize) / CHECKBOX_DOUBLE_RATIO);
+    path.MoveTo(originX + middle.GetX() + (paintSize.Width() - strokeSize) / CHECKBOX_DOUBLE_RATIO,
+        originY + middle.GetY() + (paintSize.Height() - strokeSize) / CHECKBOX_DOUBLE_RATIO);
+    path.LineTo(originX + end.GetX() + (paintSize.Width() - strokeSize) / CHECKBOX_DOUBLE_RATIO,
+        originY + end.GetY() + (paintSize.Height() - strokeSize) / CHECKBOX_DOUBLE_RATIO);
     shadowPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    shadowPen.SetWidth(checkStroke_ + shadowWidth_.ConvertToPx() * 2);
-    pen.SetWidth(checkStroke_);
+    shadowPen.SetWidth(checkStroke_->Get() + shadowWidth_.ConvertToPx() * CHECKBOX_DOUBLE_RATIO);
+    pen.SetWidth(checkStroke_->Get());
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas.AttachPen(shadowPen);
     canvas.DrawPath(path);
