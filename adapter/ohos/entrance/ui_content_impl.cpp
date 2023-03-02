@@ -662,7 +662,7 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
     aceResCfg.SetColorMode(SystemProperties::GetColorMode());
     aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
     if (isFormRender_) {
-        resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_;
+        resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
         hapPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap";
     }
     LOGI("CommonInitializeForm resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());

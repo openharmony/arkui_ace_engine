@@ -174,26 +174,30 @@ void JSImage::Create(const JSCallbackInfo& info)
     CHECK_NULL_VOID(context);
 
     std::string src;
-    auto noPixMap = ParseJsMedia(info[0], src);
-
+    bool noPixMap = true;
     RefPtr<PixelMap> pixMap = nullptr;
-#if defined(PIXEL_MAP_SUPPORTED)
-    if (!noPixMap) {
+    if (info[0]->IsString()) {
+        src = info[0]->ToString();
         if (context->IsFormRender()) {
-            LOGE("Not supported pixMap when form render");
-        } else {
-            pixMap = CreatePixelMapFromNapiValue(info[0]);
+            SrcType srcType = ImageSourceInfo::ResolveURIType(src);
+            bool notSupport = (
+                srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+            if (notSupport) {
+                LOGE("Not supported src : %{public}s when form render", src.c_str());
+                src.clear();
+            }
         }
-    }
+    } else {
+        noPixMap = ParseJsMedia(info[0], src);
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (!noPixMap) {
+            if (context->IsFormRender()) {
+                LOGE("Not supported pixMap when form render");
+            } else {
+                pixMap = CreatePixelMapFromNapiValue(info[0]);
+            }
+        }
 #endif
-    if (context->IsFormRender()) {
-        SrcType srcType = ImageSourceInfo::ResolveURIType(src);
-        bool notSupport = (
-            srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
-        if (notSupport) {
-            LOGE("Not supported src : %{public}s when form render", src.c_str());
-            src.clear();
-        }
     }
 
     ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
