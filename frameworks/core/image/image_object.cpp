@@ -156,11 +156,12 @@ void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& contex
 
         RefPtr<NG::CanvasImage> cachedFlutterImage;
         auto imageCache = pipelineContext->GetImageCache();
-        CHECK_NULL_VOID(imageCache);
-        auto cachedImage = imageCache->GetCacheImage(key);
-        if (cachedImage) {
-            auto skImage = cachedImage->imagePtr;
-            cachedFlutterImage = NG::CanvasImage::Create(&skImage);
+        if (imageCache) {
+            auto cachedImage = imageCache->GetCacheImage(key);
+            if (cachedImage) {
+                auto skImage = cachedImage->imagePtr;
+                cachedFlutterImage = NG::CanvasImage::Create(&skImage);
+            }
         }
 
         // found cached image obj (can be rendered)
