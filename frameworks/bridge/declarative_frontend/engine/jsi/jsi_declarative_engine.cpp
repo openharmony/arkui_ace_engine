@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
+#include <mutex>
 #include <optional>
 #include <regex>
 #include <unistd.h>
@@ -85,6 +86,7 @@ const std::string MERGE_SOURCEMAPS_PATH = "sourceMaps.map";
 const std::string FORM_ES_MODULE_PATH = "ets/widgets.abc";
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
+std::mutex loadFormMutex_;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -1074,9 +1076,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
         }
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
-        if (!runtime->ExecuteModuleBufferForForm(content.data(), content.size(), abcPath)) {
-            LOGE("ExecuteCardAbc ExecuteModuleBufferForForm \"%{public}s\" failed.", fileName.c_str());
-            return false;
+        {
+            std::lock_guard<std::mutex> lock(loadFormMutex_);
+            if (!runtime->ExecuteModuleBufferForForm(content.data(), content.size(), abcPath)) {
+                LOGE("ExecuteCardAbc ExecuteModuleBufferForForm \"%{public}s\" failed.", fileName.c_str());
+                return false;
+            }
         }
         return true;
     } else {
