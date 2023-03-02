@@ -136,11 +136,6 @@ public:
         rootViewMap_.emplace(pageId, value);
     }
 
-    bool IsEngineInstanceInitialized()
-    {
-        return isEngineInstanceInitialized_;
-    }
-
     void RegisterFaPlugin(); // load ReatureAbility plugin
 
 #if defined(PREVIEW)
@@ -184,7 +179,6 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
     static bool IsPlugin();
-    static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
 
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
@@ -208,7 +202,6 @@ private:
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
     bool usingSharedRuntime_ = false;
-    bool isEngineInstanceInitialized_ = false;
     int32_t instanceId_ = 0;
     static bool isModulePreloaded_;
     static bool isModuleInitialized_;
