@@ -83,6 +83,7 @@ ohos_unittest("navigation_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.cpp",
