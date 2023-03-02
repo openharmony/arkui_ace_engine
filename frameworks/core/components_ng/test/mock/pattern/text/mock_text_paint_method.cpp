@@ -16,14 +16,25 @@
 #include "core/components_ng/pattern/text/text_paint_method.h"
 
 namespace OHOS::Ace::NG {
-CanvasDrawFunction TextPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
+TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset,
+    RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier)
+    : pattern_(pattern), paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset),
+      textContentModifier_(textContentModifier), textOverlayModifier_(textOverlayModifier)
 {
-    return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto textPaint = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(textPaint);
-        textPaint->PaintSelection(canvas, paintWrapper);
-    };
+    (void)baselineOffset_;
 }
 
-void TextPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintWrapper) {}
+RefPtr<Modifier> TextPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
+{
+    return textContentModifier_;
+}
+
+void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper) {}
+
+RefPtr<Modifier> TextPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
+{
+    return textOverlayModifier_;
+}
+
+void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper) {}
 } // namespace OHOS::Ace::NG

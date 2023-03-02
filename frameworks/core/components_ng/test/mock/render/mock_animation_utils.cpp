@@ -16,6 +16,8 @@
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace {
+class AnimationUtils::Animation {};
+
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
 {}
@@ -32,4 +34,12 @@ void AnimationUtils::Animate(
 void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback) {}
 
 void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback) {}
+
+std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(
+    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
+{
+    return std::make_shared<AnimationUtils::Animation>();
+}
+
+void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation) {}
 } // namespace OHOS::Ace

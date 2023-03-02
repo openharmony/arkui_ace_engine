@@ -556,6 +556,7 @@ bool TextPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     baselineOffset_ = textLayoutAlgorithm->GetBaselineOffset();
     contentRect_ = dirty->GetGeometryNode()->GetContentRect();
     contentOffset_ = dirty->GetGeometryNode()->GetContentOffset();
+    textStyle_ = textLayoutAlgorithm->GetTextStyle();
     return true;
 }
 

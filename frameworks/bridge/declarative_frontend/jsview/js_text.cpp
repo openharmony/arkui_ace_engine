@@ -63,11 +63,13 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
-const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::LEFT,
-    TextAlign::RIGHT, TextAlign::JUSTIFY };
-
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
+    TextAlign::LEFT, TextAlign::RIGHT };
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -111,6 +113,51 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
         return;
     }
     TextModel::GetInstance()->SetTextColor(textColor);
+}
+
+void JSText::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsNumber() && !info[0]->IsObject()) {
+        LOGE("info[0] not is Object or Number");
+        return;
+    }
+    int32_t shadowStyle = 0;
+    if (ParseJsInteger<int32_t>(info[0], shadowStyle)) {
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        Shadow shadow = Shadow::CreateShadow(style);
+        TextModel::GetInstance()->SetTextShadow(shadow);
+        return;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        info.ReturnSelf();
+        return;
+    }
+    double radius = 0.0;
+    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    Shadow shadow;
+    shadow.SetBlurRadius(radius);
+    Dimension offsetX;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+        shadow.SetOffsetX(offsetX.Value());
+    }
+    Dimension offsetY;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+        shadow.SetOffsetY(offsetY.Value());
+    }
+    Color color;
+    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
+        shadow.SetColor(color);
+    }
+    TextModel::GetInstance()->SetTextShadow(shadow);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
@@ -296,6 +343,15 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
     info.SetReturnValue(info.This());
 }
 
+void JSText::SetHeightAdaptivePolicy(int32_t value)
+{
+    if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+        LOGE("Text: HeightAdaptivePolicy(%d) expected positive number", value);
+        return;
+    }
+    TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
+}
+
 void JSText::JsOnClick(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -469,6 +525,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("width", &JSText::SetWidth);
     JSClass<JSText>::StaticMethod("height", &JSText::SetHeight);
     JSClass<JSText>::StaticMethod("fontColor", &JSText::SetTextColor, opt);
+    JSClass<JSText>::StaticMethod("textShadow", &JSText::SetTextShadow, opt);
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
@@ -484,6 +541,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("textCase", &JSText::SetTextCase, opt);
     JSClass<JSText>::StaticMethod("baselineOffset", &JSText::SetBaselineOffset, opt);
     JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
+    JSClass<JSText>::StaticMethod("heightAdaptivePolicy", &JSText::SetHeightAdaptivePolicy);
     JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSText>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);

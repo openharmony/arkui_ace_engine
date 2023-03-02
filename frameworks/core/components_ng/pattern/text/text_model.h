@@ -37,6 +37,7 @@ public:
     virtual void Create(const std::string& content) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void SetTextShadow(const Shadow& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
@@ -51,6 +52,7 @@ public:
     virtual void SetLetterSpacing(const Dimension& value) = 0;
     virtual void SetAdaptMinFontSize(const Dimension& value) = 0;
     virtual void SetAdaptMaxFontSize(const Dimension& value) = 0;
+    virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) = 0;
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};

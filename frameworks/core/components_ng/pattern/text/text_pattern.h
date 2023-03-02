@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_PATTERN_H
 
+#include <optional>
 #include <string>
 
 #include "base/geometry/dimension.h"
@@ -27,8 +28,10 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
+#include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
@@ -45,7 +48,14 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextPaintMethod>(WeakClaim(this), paragraph_, baselineOffset_);
+        if (!textContentModifier_) {
+            textContentModifier_ = MakeRefPtr<TextContentModifier>(textStyle_);
+        }
+        if (!textOverlayModifier_) {
+            textOverlayModifier_ = MakeRefPtr<TextOverlayModifier>();
+        }
+        return MakeRefPtr<TextPaintMethod>(
+            WeakClaim(this), paragraph_, baselineOffset_, textContentModifier_, textOverlayModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -121,6 +131,11 @@ public:
         return baselineOffset_;
     }
 
+    RefPtr<TextContentModifier> GetContentModifier()
+    {
+        return textContentModifier_;
+    }
+
     void OnVisibleChange(bool isVisible) override;
 
 private:
@@ -171,6 +186,10 @@ private:
     bool mouseEventInitialized_ = false;
     bool panEventInitialized_ = false;
     bool draggable_ = false;
+    std::optional<TextStyle> textStyle_;
+
+    RefPtr<TextContentModifier> textContentModifier_;
+    RefPtr<TextOverlayModifier> textOverlayModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };

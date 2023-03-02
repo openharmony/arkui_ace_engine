@@ -198,9 +198,10 @@ enum class WhiteSpace {
 };
 
 enum class TextOverflow {
+    NONE,
     CLIP,
     ELLIPSIS,
-    NONE,
+    MARQUEE,
 };
 
 enum class TextDirection {
@@ -216,6 +217,12 @@ enum class TextDecoration {
     OVERLINE,
     LINE_THROUGH,
     INHERIT,
+};
+
+enum class TextHeightAdaptivePolicy {
+    MAX_LINES_FIRST,
+    MIN_FONT_SIZE_FIRST,
+    LAYOUT_CONSTRAINT_FIRST,
 };
 
 enum class MarqueeDirection {

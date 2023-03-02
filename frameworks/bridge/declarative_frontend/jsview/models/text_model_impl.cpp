@@ -66,6 +66,8 @@ void TextModelImpl::SetTextColor(const Color& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetTextShadow(const Shadow& value) {}
+
 void TextModelImpl::SetItalicFontStyle(Ace::FontStyle value)
 {
     auto component = GetComponent();
@@ -202,6 +204,8 @@ void TextModelImpl::SetAdaptMaxFontSize(const Dimension& value)
     textStyle.SetAdaptMaxFontSize(value);
     component->SetTextStyle(textStyle);
 }
+
+void TextModelImpl::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {}
 
 void TextModelImpl::OnSetWidth()
 {
