@@ -462,6 +462,10 @@ template("declarative_js_engine") {
           "multimedia_image_framework:image_native",
         ]
       }
+
+      if (defined(config.window_scene_support) && config.window_scene_support) {
+        deps += [ "$window_manager_path/window_scene/session:scene_session" ]
+      }
     }
   }
 }

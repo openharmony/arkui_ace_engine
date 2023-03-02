@@ -325,6 +325,21 @@ void UIContentImpl::Restore(OHOS::Rosen::Window* window, const std::string& cont
     LOGI("Restore UIContentImpl done.");
 }
 
+void UIContentImpl::Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage)
+{
+    if (aceWindow && StringUtils::StartWith(aceWindow->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+        CommonInitialize(nullptr, url, storage, aceWindow);
+        return;
+    }
+    if (aceWindow) {
+        CommonInitialize(nullptr, url, storage, aceWindow);
+    }
+    LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
+    Platform::AceContainer::RunPage(
+        instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(), startUrl_, "");
+    LOGI("Initialize UIContentImpl done");
+}
+
 std::string UIContentImpl::GetContentInfo() const
 {
     LOGI("UIContent GetContentInfo");
@@ -805,19 +820,22 @@ std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
 }
 // ArkTSCard end
 
-void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
+void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage,
+    const std::shared_ptr<Window>& aceWindow)
 {
     ACE_FUNCTION_TRACE();
     window_ = window;
     startUrl_ = contentInfo;
-    CHECK_NULL_VOID(window_);
-    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
-        InitializeSubWindow(window_, true);
-        return;
-    }
-    if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_PREFIX)) {
-        InitializeSubWindow(window_);
-        return;
+    if (!aceWindow) {
+        CHECK_NULL_VOID(window_);
+        if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+            InitializeSubWindow(window_, true);
+            return;
+        }
+        if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_PREFIX)) {
+            InitializeSubWindow(window_);
+            return;
+        }
     }
     auto context = context_.lock();
     CHECK_NULL_VOID(context);
@@ -1081,13 +1099,22 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                 }),
             false, false, useNewPipe);
     CHECK_NULL_VOID(container);
-    container->SetWindowName(window_->GetWindowName());
-    container->SetWindowId(window_->GetWindowId());
+    if (aceWindow) {
+        container->SetWindowName(aceWindow->GetWindowName());
+        container->SetWindowId(aceWindow->GetWindowId());
+    } else {
+        container->SetWindowName(window_->GetWindowName());
+        container->SetWindowId(window_->GetWindowId());
+    }
     auto token = context->GetToken();
     container->SetToken(token);
     container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context));
     // Mark the relationship between windowId and containerId, it is 1:1
-    SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
+    if (aceWindow) {
+        SubwindowManager::GetInstance()->AddContainerId(aceWindow->GetWindowId(), instanceId_);
+    } else {
+        SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
+    }
     AceEngine::Get().AddContainer(instanceId_, container);
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
@@ -1137,20 +1164,28 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
             });
     }
 
-    if (window_->IsDecorEnable()) {
-        LOGI("Container modal is enabled.");
-        container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+    if (aceWindow) {
+        if (aceWindow->IsDecorEnable()) {
+            LOGI("Container modal is enabled.");
+            container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+        }
+    } else {
+        if (window_->IsDecorEnable()) {
+            LOGI("Container modal is enabled.");
+            container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+        }
+        dragWindowListener_ = new DragWindowListener(instanceId_);
+        window_->RegisterDragListener(dragWindowListener_);
+        occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
+        window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
     }
-
-    dragWindowListener_ = new DragWindowListener(instanceId_);
-    window_->RegisterDragListener(dragWindowListener_);
-    occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
-    window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
 
     // create ace_view
     auto aceView =
         Platform::AceViewOhos::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
-    Platform::AceViewOhos::SurfaceCreated(aceView, window_);
+    if (!aceWindow) {
+        Platform::AceViewOhos::SurfaceCreated(aceView, window_);
+    }
     if (!useNewPipe) {
         Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
@@ -1174,13 +1209,24 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         // set view
         Platform::AceContainer::SetView(aceView, density, 0, 0, window_, callback);
     } else {
-        Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
+        if (aceWindow) {
+            Platform::AceContainer::SetView(aceView, density, 0, 0, aceWindow);
+        } else {
+            Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
+        }
     }
 
-    // after frontend initialize
-    if (window_->IsFocused()) {
-        LOGI("UIContentImpl: focus again");
-        Focus();
+    if (aceWindow) {
+        if (aceWindow->IsFocused()) {
+            LOGI("UIContentImpl: focus again");
+            Focus();
+        }
+    } else {
+        // after frontend initialize
+        if (window_->IsFocused()) {
+            LOGI("UIContentImpl: focus again");
+            Focus();
+        }
     }
 
     Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);

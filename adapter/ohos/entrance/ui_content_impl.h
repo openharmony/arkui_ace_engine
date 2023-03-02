@@ -17,22 +17,14 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_UI_CONTENT_IMPL_H
 
 #include "ability_info.h"
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
-
-#include "base/utils/macros.h"
 #include "wm/window.h"
 
-namespace OHOS {
-
-class Window;
-class RSTransaction;
-
-} // namespace OHOS
+#include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
 
@@ -49,6 +41,7 @@ public:
 
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -69,7 +62,7 @@ public:
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
     void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
-        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction) override;
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
@@ -118,7 +111,8 @@ public:
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage,
+        const std::shared_ptr<Window>& aceWindow = nullptr);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;

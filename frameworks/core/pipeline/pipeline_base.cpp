@@ -36,9 +36,9 @@ namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
 
-PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
+    : window_(window), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId)
 {
     CHECK_NULL_VOID(frontend);
@@ -60,10 +60,10 @@ PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> 
     window_->SetVsyncCallback(vsyncCallback);
 }
 
-PipelineBase::PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId,
     RefPtr<PlatformResRegister> platformResRegister)
-    : window_(std::move(window)), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
+    : window_(window), taskExecutor_(std::move(taskExecutor)), assetManager_(std::move(assetManager)),
       weakFrontend_(frontend), instanceId_(instanceId), platformResRegister_(std::move(platformResRegister))
 {
     CHECK_NULL_VOID(frontend);

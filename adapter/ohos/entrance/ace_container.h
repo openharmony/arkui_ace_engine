@@ -317,6 +317,8 @@ public:
         sptr<OHOS::Rosen::Window> rsWindow, UIEnvCallback callback = nullptr);
     static void SetViewNew(
         AceView* view, double density, int32_t width, int32_t height, sptr<OHOS::Rosen::Window> rsWindow);
+    static void SetView(AceView* view, double density, int32_t width, int32_t height,
+        const std::shared_ptr<Window>& window);
     static void SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiWindow);
     static sptr<OHOS::Rosen::Window> GetUIWindow(int32_t instanceId);
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
@@ -403,13 +405,15 @@ public:
     void GetImageDataFromAshmem(
         const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
+    std::shared_ptr<AbilityRuntime::Context> GetAbilityRuntimeContext();
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
     void InitializeTask();
     void InitWindowCallback();
 
-    void AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
+    void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);
     sptr<OHOS::Rosen::Window> GetUIWindowInner() const;

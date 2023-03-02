@@ -706,14 +706,14 @@ void AceContainer::SetView(AceView* view, double density, int32_t width, int32_t
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
 
-    std::unique_ptr<Window> window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+    auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
 #else
     auto platformWindow = PlatformWindow::Create(view);
     CHECK_NULL_VOID(platformWindow);
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+    auto window = std::make_shared<Window>(std::move(platformWindow));
 #endif
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
-    container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), callback);
+    container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), callback);
 }
 
 void AceContainer::SetViewNew(
@@ -727,14 +727,31 @@ void AceContainer::SetViewNew(
     CHECK_NULL_VOID(taskExecutor);
     AceContainer::SetUIWindow(view->GetInstanceId(), rsWindow);
 
-    std::unique_ptr<Window> window;
     if (container->isFormRender_) {
-        auto window = std::make_unique<FormRenderWindow>(taskExecutor, view->GetInstanceId());
-        container->AttachView(std::move(window), view, density, width, height, view->GetInstanceId(), nullptr);
+        auto window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
+        container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
-        window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
-        container->AttachView(std::move(window), view, density, width, height, rsWindow->GetWindowId(), nullptr);
+        auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
+        container->AttachView(window, view, density, width, height, rsWindow->GetWindowId(), nullptr);
     }
+#endif
+}
+
+void AceContainer::SetView(
+    AceView* view, double density, int32_t width, int32_t height, const std::shared_ptr<Window>& window)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    CHECK_NULL_VOID(view);
+    auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    CHECK_NULL_VOID(window);
+    window->SetTaskExecutor(taskExecutor);
+    window->SetInstanceId(view->GetInstanceId());
+    window->Init();
+
+    container->AttachView(window, view, density, width, height, window->GetWindowId(), nullptr);
 #endif
 }
 
@@ -1022,7 +1039,7 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     flutterAssetManager->SetLibPath("default", libPath);
 }
 
-void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, double density, int32_t width,
+void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width,
     int32_t height, int32_t windowId, UIEnvCallback callback)
 {
     aceView_ = view;
@@ -1051,11 +1068,11 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, AceView* view, dou
     if (useNewPipeline_) {
         LOGI("New pipeline version creating...");
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
-            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+            window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     } else {
         pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
-            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+            window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
     }
 
@@ -1419,6 +1436,11 @@ sptr<IRemoteObject> AceContainer::GetToken()
     }
     LOGE("fail to get Token");
     return nullptr;
+}
+
+std::shared_ptr<AbilityRuntime::Context> AceContainer::GetAbilityRuntimeContext()
+{
+    return runtimeContext_.lock();
 }
 
 // ArkTsCard start

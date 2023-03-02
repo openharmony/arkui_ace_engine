@@ -1,0 +1,53 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("$ace_root/frameworks/core/components_ng/components.gni")
+
+if (is_standard_system) {
+  config("ohos_window_scene_config") {
+    include_dirs = [
+      "$window_manager_path/interfaces/innerkits",
+      "$window_manager_path/wm",
+    ]
+  }
+}
+
+build_component_ng("window_scene") {
+  sources = [
+    "scene/container/window_extension.cpp",
+    "scene/container/window_pattern.cpp",
+    "scene/host/host_window_extension.cpp",
+    "scene/host/host_window_pattern.cpp",
+  ]
+
+  if (is_standard_system) {
+    configs = [ ":ohos_window_scene_config" ]
+
+    deps = [
+      "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
+      "$ace_root/interfaces/inner_api/ace:ace_uicontent",
+      "$graphic_standard_path/rosen/modules/render_service_client:librender_service_client",
+      "$window_manager_path/dm:libdm",
+      "$window_manager_path/wm:libwm",
+    ]
+
+    external_deps = [
+      "eventhandler:libeventhandler",
+      "input:libmmi-client",
+      "ipc:ipc_core",
+      "window_manager:scene_session",
+      "window_manager:scene_session_manager",
+    ]
+  }
+}

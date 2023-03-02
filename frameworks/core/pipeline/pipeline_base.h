@@ -69,9 +69,9 @@ class ACE_EXPORT PipelineBase : public AceType {
 
 public:
     PipelineBase() = default;
-    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+    PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+    PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId, RefPtr<PlatformResRegister> platformResRegister);
     ~PipelineBase() override;
 
@@ -831,7 +831,7 @@ protected:
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
-    std::unique_ptr<Window> window_;
+    std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     WeakPtr<Frontend> weakFrontend_;

@@ -134,10 +134,10 @@ void ThreadStuckTask(int32_t seconds)
 
 } // namespace
 
-PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
           (std::move(platformResRegister))),
       timeProvider_(g_defaultTimeProvider)
 {
@@ -158,9 +158,9 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
-PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
+PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend)
-    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, 0),
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, 0),
       timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());

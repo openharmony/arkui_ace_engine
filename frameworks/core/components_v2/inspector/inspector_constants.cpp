@@ -479,4 +479,7 @@ const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 ACE_EXPORT extern const char MODEL_COMPONENT_TAG[] = "ModelComponent";
 ACE_EXPORT extern const char MODEL_ETS_TAG[] = "Model";
 
+// window scene
+ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
+
 } // namespace OHOS::Ace::V2
