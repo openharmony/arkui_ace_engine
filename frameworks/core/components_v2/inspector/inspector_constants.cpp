@@ -361,11 +361,11 @@ const char GRIDCONTAINER_ETS_TAG[] = "GridContainer";
 
 // gridCol
 const char GRID_COL_COMPONENT_TAG[] = "GridColComponent";
-const char GRID_COL_ETS_TAG[] = "GridColComponent";
+const char GRID_COL_ETS_TAG[] = "GridCol";
 
 // gridRow
 const char GRID_ROW_COMPONENT_TAG[] = "GridRowComponent";
-const char GRID_ROW_ETS_TAG[] = "GridRowComponent";
+const char GRID_ROW_ETS_TAG[] = "GridRow";
 
 // relativeContainer
 const char RELATIVE_CONTAINER_COMPONENT_TAG[] = "RelativeContainerComponent";
