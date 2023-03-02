@@ -66,6 +66,7 @@ public:
     void ClearMenuNG() override;
     RefPtr<NG::FrameNode> ShowDialogNG(
         const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
+    void HideSubWindowNG() override;
 
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
@@ -92,12 +93,13 @@ public:
         isToastWindow_ = isToastWindow;
     }
 
-    void HideWindow() override;
+    void UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId);
 
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);
     void ShowWindow();
+    void HideWindow();
 
     // Convert Rect to Rosen::Rect
     void RectConverter(const Rect& rect, Rosen::Rect& rosenRect);

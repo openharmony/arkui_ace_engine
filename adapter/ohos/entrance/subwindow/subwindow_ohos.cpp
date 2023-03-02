@@ -184,7 +184,6 @@ bool SubwindowOhos::CancelPopup(const std::string& id)
 
 void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
 {
-    ShowWindow();
     popupTargetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -192,6 +191,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    ShowWindow();
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
@@ -323,13 +323,13 @@ void SubwindowOhos::ClearMenu()
 void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
 {
     LOGI("SubwindowOhos::ShowMenuNG");
-    ShowWindow();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
+    ShowWindow();
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
@@ -443,15 +443,32 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
 {
     LOGI("SubwindowOhos::ShowDialogNG");
-    ShowWindow();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_RETURN(aceContainer, nullptr);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_RETURN(context, nullptr);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
+    ShowWindow();
     ContainerScope scope(childContainerId_);
     return overlay->ShowDialog(dialogProps, customNode);
+}
+
+void SubwindowOhos::HideSubWindowNG()
+{
+    LOGI("SubwindowOhos::HideDialogNG");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsDialogContainer()) {
+        if (IsToastWindow()) {
+            Platform::DialogContainer::HideWindow(Container::CurrentId());
+        } else {
+            Platform::DialogContainer::CloseWindow(Container::CurrentId());
+            Platform::DialogContainer::DestroyContainer(Container::CurrentId());
+        }
+    } else {
+        HideWindow();
+    }
 }
 
 void SubwindowOhos::GetToastDialogWindowProperty(
@@ -495,6 +512,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     dialogWindow_->SetUIContent("", nullptr, nullptr, false);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(dialogWindow_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
+    ContainerScope scope(childContainerId_);
 
     auto container = Platform::DialogContainer::GetContainer(childContainerId_);
     CHECK_NULL_RETURN(container, false);
@@ -524,7 +542,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     }
 #endif
 
-    auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->SetupRootElement();
     LOGI("SubwindowOhos::InitToastDialogView end");
@@ -576,16 +594,8 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
             subwindowOhos->SetIsToastWindow(true);
         }
         childContainerId = subwindowOhos->GetChildContainerId();
-
-        auto container = Platform::DialogContainer::GetContainer(childContainerId);
-        CHECK_NULL_VOID(container);
-        auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
-        CHECK_NULL_VOID(aceView);
-        if (aceView->GetWidth() != width || aceView->GetHeight() != height) {
-            ViewportConfig config(width, height, density);
-            Platform::AceViewOhos::SetViewportMetrics(aceView, config);
-            Platform::AceViewOhos::SurfaceChanged(aceView, width, height, 0);
-        }
+        ContainerScope scope(childContainerId);
+        subwindowOhos->UpdateAceView(width, height, density, childContainerId);
 
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
         Platform::DialogContainer::ShowToast(childContainerId, message, duration, bottom);
@@ -628,6 +638,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
             return;
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
+        ContainerScope scope(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
         Platform::DialogContainer::ShowDialog(childContainerId, title, message, buttons, autoCancel,
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
@@ -669,6 +680,7 @@ void SubwindowOhos::ShowActionMenu(
             return;
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
+        ContainerScope scope(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
         Platform::DialogContainer::ShowActionMenu(childContainerId, title, button,
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)));
@@ -679,5 +691,18 @@ void SubwindowOhos::ShowActionMenu(
         return;
     }
     LOGI("SubwindowOhos::ShowActionMenu end");
+}
+
+void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId)
+{
+    auto container = Platform::DialogContainer::GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    CHECK_NULL_VOID(aceView);
+    if (aceView->GetWidth() != width || aceView->GetHeight() != height) {
+        ViewportConfig config(width, height, density);
+        Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+        Platform::AceViewOhos::SurfaceChanged(aceView, width, height, 0);
+    }
 }
 } // namespace OHOS::Ace

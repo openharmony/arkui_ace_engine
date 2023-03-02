@@ -289,6 +289,11 @@ public:
         return pageUrlChecker_;
     }
 
+    virtual bool IsDialogContainer() const
+    {
+        return false;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;

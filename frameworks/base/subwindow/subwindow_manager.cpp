@@ -22,6 +22,7 @@
 
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "core/common/ace_page.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
@@ -371,11 +372,18 @@ void SubwindowManager::ShowActionMenu(
     subwindow->ShowActionMenu(title, button, std::move(callback));
 }
 
-void SubwindowManager::HideWindow()
+void SubwindowManager::HideSubWindowNG()
 {
-    auto subwindow = GetCurrentWindow();
+    RefPtr<Subwindow> subwindow;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsDialogContainer()) {
+        subwindow = GetCurrentDialogWindow();
+    } else {
+        subwindow = GetCurrentWindow();
+    }
     if (subwindow) {
-        subwindow->HideWindow();
+        subwindow->HideSubWindowNG();
     }
 }
 } // namespace OHOS::Ace
