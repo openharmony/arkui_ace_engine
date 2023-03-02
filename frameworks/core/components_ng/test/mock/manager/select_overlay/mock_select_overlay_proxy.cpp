@@ -30,4 +30,6 @@ void SelectOverlayProxy::UpdateSecondSelectHandleInfo(const SelectHandleInfo& in
 void SelectOverlayProxy::UpdateFirstAndSecondHandleInfo(
     const SelectHandleInfo& firstInfo, const SelectHandleInfo& secondInfo) const
 {}
+
+void SelectOverlayProxy::SetSelectInfo(const std::string& selectInfo) const {}
 } // namespace OHOS::Ace::NG

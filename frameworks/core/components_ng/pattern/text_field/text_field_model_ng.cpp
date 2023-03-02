@@ -296,6 +296,14 @@ void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOption);
 }
 
+void TextFieldModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFielePattern = frameNode->GetPattern<TextFieldPattern>();
+    textFielePattern->SetMenuOptionItems(std::move(menuOptionsItems));
+}
+
 void TextFieldModelNG::AddDragFrameNodeToManager() const
 {
     auto pipeline = PipelineContext::GetCurrentContext();

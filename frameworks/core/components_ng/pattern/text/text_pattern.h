@@ -136,6 +136,16 @@ public:
         return textContentModifier_;
     }
 
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
+    {
+        menuOptionItems_ = std::move(menuOptionItems);
+    }
+
+    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
+    {
+        return std::move(menuOptionItems_);
+    }
+
     void OnVisibleChange(bool isVisible) override;
 
 private:
@@ -171,6 +181,7 @@ private:
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::string textForDisplay_;
+    std::vector<MenuOptionsParam> menuOptionItems_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;

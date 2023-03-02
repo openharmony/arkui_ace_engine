@@ -311,7 +311,7 @@ void TextContentModifier::SetFontSize(const Dimension& value)
 
 void TextContentModifier::SetFontWeight(const FontWeight& value)
 {
-    fontWeight_ = value;
+    fontWeight_ = ConvertFontWeight(value);
     CHECK_NULL_VOID(fontWeightFloat_);
     fontWeightFloat_->Set(static_cast<int>(ConvertFontWeight(value)));
 }
