@@ -505,12 +505,13 @@ public:
     std::string GetShowPasswordIconString() const;
     std::string GetInputStyleString() const;
 
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+
 private:
     void HandleBlurEvent();
     bool HasFocus() const;
     void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
-    bool HandleKeyEvent(const KeyEvent& keyEvent);
     void ParseAppendValue(KeyCode keycode, std::string& appendElement);
     void HandleDirectionalKey(const KeyEvent& keyEvent);
     void HandleTouchEvent(const TouchEventInfo& info);
