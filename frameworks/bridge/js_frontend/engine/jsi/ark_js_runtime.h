@@ -169,11 +169,6 @@ public:
         return undefined;
     }
 
-    void SetAssetPath(const std::string& assetPath)
-    {
-        panda::JSNApi::SetAssetPath(vm_, assetPath);
-    }
-
     bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
 
     void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
