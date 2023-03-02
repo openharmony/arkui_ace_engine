@@ -53,8 +53,6 @@ const std::string GRID_SCROLL_BAR_AUTO = "BarState.Auto";
 const std::string GRID_SCROLL_BAR_OFF = "BarState.Off";
 const std::string GRID_SCROLL_BAR_ON = "BarState.On";
 const std::string GRID_TEMPLATE_ILLEGAL = "abcd1234 *&^%$";
-const std::string GRID_TEMPLATE_ROW = "1fr 1fr 1fr";
-const std::string GRID_TEMPLATE_COLUMN = "1fr 1fr";
 const int32_t GRID_CACHED_COUNT = 5;
 const std::string SCROLL_BAR_WIDTH = "10px";
 const std::string SCROLL_BAR_COLOR = "#909090";
@@ -78,13 +76,15 @@ struct GridTestProperty {
 
 class GridPatternTestNg : public testing::Test {
 public:
-    static RefPtr<FrameNode> CreateGridParagraph(const GridTestProperty& gridTestProperty);
+    static RefPtr<FrameNode> CreateGrid(
+        const GridTestProperty& gridTestProperty, const int32_t girdItemCount = 0);
 };
 
-RefPtr<FrameNode> GridPatternTestNg::CreateGridParagraph(const GridTestProperty& gridTestProperty)
+RefPtr<FrameNode> GridPatternTestNg::CreateGrid(
+    const GridTestProperty& gridTestProperty, const int32_t girdItemCount)
 {
     GridModelNG grid;
-    RefPtr<V2::GridPositionController> positionController;
+    RefPtr<ScrollControllerBase> positionController = grid.CreatePositionController();
     RefPtr<ScrollProxy> scrollBarProxy = grid.CreateScrollBarProxy();
     grid.Create(positionController, scrollBarProxy);
 
@@ -128,6 +128,12 @@ RefPtr<FrameNode> GridPatternTestNg::CreateGridParagraph(const GridTestProperty&
         grid.SetScrollBarColor(gridTestProperty.scrollBarColor.value());
     }
 
+    GridItemModelNG gridItem;
+    for (int32_t i = 0; i < girdItemCount; ++i) {
+        gridItem.Create();
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
 }
@@ -140,50 +146,36 @@ RefPtr<FrameNode> GridPatternTestNg::CreateGridParagraph(const GridTestProperty&
 HWTEST_F(GridPatternTestNg, GridTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create grid node and initialize width, height, properties.
-     */
-    RefPtr<V2::GridPositionController> positionController;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
-    GridModelNG grid;
-    grid.Create(positionController, scrollBarProxy);
-    grid.SetColumnsTemplate("1fr 1fr 1fr");
-    grid.SetRowsTemplate("1fr 1fr 1fr");
+     * @tc.steps: step1. Set grid properties.
+    */
+    GridTestProperty gridTestProperty;
+    gridTestProperty.rowsTemplate = std::make_optional("1fr 1fr 1fr");
+    gridTestProperty.columnsTemplate = std::make_optional("1fr 1fr 1fr");
 
     /**
-     * @tc.steps: step2. Create the child nodes gridItem of the grid.
-     */
-    GridItemModelNG gridItem;
-    const int32_t itemCount = 9;
-    for (int32_t i = 0; i < itemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
+     * @tc.steps: step2. Create grid and gridItem.
+    */
+    const int32_t gridItemCount = 9;
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, gridItemCount);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step3. Get grid frameNode and set layoutConstraint.
+     * @tc.steps: step3. Set layoutConstraint.
      * @tc.expected: step3. related function is called.
      */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(frameNode, nullptr);
+    OptionalSizeF size(800.0f, 800.0f);
     LayoutConstraintF constraint;
-    OptionalSizeF size;
-    constexpr float defaultWidth = 800.0f;
-    size.SetWidth(defaultWidth);
-    size.SetHeight(defaultWidth);
     constraint.UpdateIllegalSelfIdealSizeWithCheck(size);
-
-    /**
-     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
-     */
     layoutWrapper->Measure(constraint);
     layoutWrapper->Layout();
 
     /**
-     * @tc.steps: step5. When setting fixed rows and columns, check the status of child nodes in the grid.
-     * @tc.expected: step3. All child nodes are active.
+     * @tc.steps: step4. When setting fixed rows and columns, check the status of child nodes in the grid.
+     * @tc.expected: step4. All child nodes are active.
      */
-    for (int32_t i = 0; i < itemCount; ++i) {
+    for (int32_t i = 0; i < gridItemCount; ++i) {
         EXPECT_TRUE(layoutWrapper->GetOrCreateChildByIndex(i, false)->IsActive());
     }
 }
@@ -196,37 +188,27 @@ HWTEST_F(GridPatternTestNg, GridTest001, TestSize.Level1)
 HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create grid node and initialize width, height, properties.
+     * @tc.steps: step1. Set grid properties.
      */
-    GridModelNG grid;
-    RefPtr<V2::GridPositionController> positionController;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
-    grid.Create(positionController, scrollBarProxy);
+    GridTestProperty gridTestProperty;
+    gridTestProperty.columnsTemplate = std::make_optional("1fr 1fr");
+    gridTestProperty.columnsGap = std::make_optional(GRID_COLUMNS_GAP);
 
     /**
-     * @tc.steps: step2. initialize ColumnsTemplate, ColumnsGap and MultiSelectable properties.
-     */
-    grid.SetColumnsTemplate("1fr 1fr");
-    grid.SetColumnsGap(GRID_COLUMNS_GAP);
-    grid.SetMultiSelectable(true);
+     * @tc.steps: step2. Create grid and gridItem.
+    */
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step2. Create the child nodes gridItem of the grid.
-     */
-    GridItemModelNG gridItem;
-    const int32_t itemCount = 10;
-    for (int32_t i = 0; i < itemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-
-    /**
-     * @tc.steps: step3. Get grid frameNode and set layoutConstraint.
+     * @tc.steps: step3. Set layoutConstraint.
      * @tc.expected: step3. related function is called.
      */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
     LayoutConstraintF constraint;
     constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
 
@@ -248,7 +230,6 @@ HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
     const Offset offset1(20.0, 25.0);
     info.SetLocalLocation(offset1);
 
-    auto pattern = frameNode->GetPattern<GridPattern>();
     pattern->HandleMouseEventWithoutKeyboard(info);
     EXPECT_EQ(pattern->mouseStartOffset_, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
     EXPECT_EQ(pattern->mouseEndOffset_, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
@@ -292,61 +273,59 @@ HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
 HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create grid node and initialize width, height, properties.
+     * @tc.steps: step1. Set grid properties.
      */
-    GridModelNG grid;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
-    RefPtr<V2::GridPositionController> positionController;
-    grid.Create(positionController, scrollBarProxy);
+    GridTestProperty gridTestProperty;
+    gridTestProperty.rowsTemplate = std::make_optional("1fr 1fr");
+    gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
+    gridTestProperty.scrollBarColor = std::make_optional(SCROLL_BAR_COLOR);
 
     /**
-     * @tc.steps: step2. initialize RowsTemplate, RowsGap and MultiSelectable properties.
-     */
-    grid.SetRowsTemplate("1fr 1fr");
-    grid.SetRowsGap(GRID_ROWS_GAP);
-    grid.SetMultiSelectable(true);
+     * @tc.steps: step2. Create grid and gridItem.
+    */
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Set layoutConstraint.
+     * @tc.expected: step3. related function is called.
      */
-    GridItemModelNG gridItem;
-    const int32_t itemCount = 10;
-    for (int32_t i = 0; i < itemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-
-    /**
-     * @tc.steps: step4. Get grid frameNode and set layoutConstraint.
-     * @tc.expected: step4. related function is called.
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     LayoutConstraintF constraint;
     constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step5. Call the measure and layout function of grid to calculate the size and layout.
-     * @tc.expected: step5. Check size after layout.
+     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
+     * @tc.expected: step4. Check size after layout.
      */
     layoutWrapper->Measure(constraint);
     layoutWrapper->Layout();
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step6. get grid pattern to call OnModifyDone function.
-     * @tc.expected: step6. Check whether the updated properties and parameters are correct.
+     * @tc.steps: step5. Call OnModifyDone function.
+     * @tc.expected: step5. Check whether the updated properties and parameters are correct.
      */
-    auto pattern = frameNode->GetPattern<GridPattern>();
     pattern->OnModifyDone();
-    EXPECT_EQ(pattern->multiSelectable_, true);
-    EXPECT_EQ(pattern->isMouseEventInit_, true);
-    EXPECT_EQ(pattern->isConfigScrollable_, true);
+    EXPECT_TRUE(pattern->multiSelectable_);
+    EXPECT_TRUE(pattern->isMouseEventInit_);
+    EXPECT_TRUE(pattern->isConfigScrollable_);
 
     /**
-     * @tc.steps: step7. Call the AddScrollEvent function to add a scroll position callback event.
-     * @tc.expected: step7. Call and check the return value of the callback function.
+     * @tc.steps: step5. Change MultiSelectable and Call OnModifyDone  function.
+     * @tc.expected: step5. Check whether the updated properties and parameters are correct.
+     */
+    pattern->SetMultiSelectable(false);
+    pattern->OnModifyDone();
+    EXPECT_FALSE(pattern->multiSelectable_);
+    EXPECT_FALSE(pattern->isMouseEventInit_);
+
+    /**
+     * @tc.steps: step6. Call the AddScrollEvent function to add a scroll position callback event.
+     * @tc.expected: step6. Call and check the return value of the callback function.
      */
     pattern->AddScrollEvent();
     EXPECT_NE(pattern->scrollableEvent_, nullptr);
@@ -356,8 +335,8 @@ HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
     EXPECT_EQ(ret, true);
 
     /**
-     * @tc.steps: step8. When isConfigScrollable_ is false, call related functions.
-     * @tc.expected: step8. Check the return value of the related function.
+     * @tc.steps: step7. When isConfigScrollable_ is false, call related functions.
+     * @tc.expected: step7. Check the return value of the related function.
      */
     pattern->isConfigScrollable_ = false;
     ret = pattern->AnimateTo(GRID_POSITION, GRID_DURATION, Curves::LINEAR);
@@ -368,8 +347,8 @@ HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
     EXPECT_EQ(ret, false);
 
     /**
-     * @tc.steps: step9. When isConfigScrollable_ is true, call AnimateTo functions.
-     * @tc.expected: step9. Check the return value and related parameters.
+     * @tc.steps: step8. When isConfigScrollable_ is true, call AnimateTo functions.
+     * @tc.expected: step8. Check the return value and related parameters.
      */
     pattern->ScrollPage(false);
     pattern->isConfigScrollable_ = true;
@@ -378,8 +357,8 @@ HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
     EXPECT_EQ(ret, true);
 
     /**
-     * @tc.steps: step10. When offsetEnd_ and reachStart_ are true, call OnScrollCallback functions.
-     * @tc.expected: step10. Check whether the return value is correct.
+     * @tc.steps: step9. When offsetEnd_ and reachStart_ are true, call OnScrollCallback functions.
+     * @tc.expected: step9. Check whether the return value is correct.
      */
     pattern->gridLayoutInfo_.offsetEnd_ = true;
     pattern->gridLayoutInfo_.reachStart_ = true;
@@ -401,71 +380,58 @@ HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
 HWTEST_F(GridPatternTestNg, GridTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create grid node and initialize width, height, properties.
+     * @tc.steps: step1. Set grid properties.
      */
-    GridModelNG grid;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
-    auto positionController = grid.CreatePositionController();
-    grid.Create(positionController, scrollBarProxy);
+    GridTestProperty gridTestProperty;
+    gridTestProperty.columnsGap = std::make_optional(GRID_COLUMNS_GAP);
+    gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
+    gridTestProperty.gridDirection = std::make_optional(FlexDirection::ROW);
+    gridTestProperty.maxCount = std::make_optional(GRID_MAX_COUNT);
+    gridTestProperty.minCount = std::make_optional(GRID_MIN_COUNT);
+    gridTestProperty.cellLength = std::make_optional(GRID_CELL_LENGTH);
 
     /**
-     * @tc.steps: step2. initialize properties such as ColumnsGap, RowsGap, LayoutDirection, MaxCount, MinCount,
-     * CellLength and MultiSelectable.
-     */
-    grid.SetColumnsGap(GRID_COLUMNS_GAP);
-    grid.SetRowsGap(GRID_ROWS_GAP);
-    grid.SetMultiSelectable(true);
-    grid.SetLayoutDirection(FlexDirection::ROW);
-    grid.SetMaxCount(GRID_MAX_COUNT);
-    grid.SetMinCount(GRID_MIN_COUNT);
-    grid.SetCellLength(GRID_CELL_LENGTH);
+     * @tc.steps: step2. Create grid and gridItem.
+    */
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Set layoutConstraint.
+     * @tc.expected: step3. related function is called.
      */
-    GridItemModelNG gridItem;
-    const int32_t itemCount = 10;
-    for (int32_t i = 0; i < itemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-
-    /**
-     * @tc.steps: step4. Get grid frameNode and set layoutConstraint.
-     * @tc.expected: step4. related function is called.
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     LayoutConstraintF constraint;
     constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step5. Call the measure and layout function of grid to calculate the size and layout.
-     * @tc.expected: step5. Check size after layout.
+     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
+     * @tc.expected: step4. Check size after layout.
      */
     layoutWrapper->Measure(constraint);
     layoutWrapper->Layout();
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step6. Get grid layout properties.
-     * @tc.expected: step6. Check whether the updated properties is correct.
+     * @tc.steps: step5. Get grid layout properties.
+     * @tc.expected: step5. Check whether the updated properties is correct.
      */
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     auto layoutDirectionStr = layoutProperty->GetGridDirectionStr();
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_ROW);
 
     /**
-     * @tc.steps: step7. Get the pattern to call the related functions in the positionController.
+     * @tc.steps: step6. Get the pattern to call the related functions in the positionController.
      */
-    auto pattern = frameNode->GetPattern<GridPattern>();
     EXPECT_NE(pattern->positionController_, nullptr);
 
     /**
-     * @tc.steps: step8. When Axis is VERTICAL and ScrollEdgeType is SCROLL_TOP, call the related functions in
+     * @tc.steps: step7. When Axis is VERTICAL and ScrollEdgeType is SCROLL_TOP, call the related functions in
      * positionController.
-     * @tc.expected: step8. Check whether the return value is correct.
+     * @tc.expected: step7. Check whether the return value is correct.
      */
     pattern->gridLayoutInfo_.axis_ = Axis::VERTICAL;
     ScrollEdgeType scrollEdgeType = ScrollEdgeType::SCROLL_TOP;
@@ -475,9 +441,9 @@ HWTEST_F(GridPatternTestNg, GridTest004, TestSize.Level1)
     EXPECT_EQ(axis, Axis::VERTICAL);
 
     /**
-     * @tc.steps: step9. When Axis is HORIZONTAL and ScrollEdgeType is SCROLL_RIGHT, call the related functions in
+     * @tc.steps: step8. When Axis is HORIZONTAL and ScrollEdgeType is SCROLL_RIGHT, call the related functions in
      * positionController.
-     * @tc.expected: step9. Check whether the return value is correct.
+     * @tc.expected: step8. Check whether the return value is correct.
      */
     pattern->gridLayoutInfo_.axis_ = Axis::HORIZONTAL;
     scrollEdgeType = ScrollEdgeType::SCROLL_RIGHT;
@@ -487,8 +453,8 @@ HWTEST_F(GridPatternTestNg, GridTest004, TestSize.Level1)
     EXPECT_EQ(axis, Axis::HORIZONTAL);
 
     /**
-     * @tc.steps: step10. When Axis is NONE, call the related functions in positionController.
-     * @tc.expected: step10. Check whether the return value is correct.
+     * @tc.steps: step9. When Axis is NONE, call the related functions in positionController.
+     * @tc.expected: step9. Check whether the return value is correct.
      */
     pattern->gridLayoutInfo_.axis_ = Axis::NONE;
     auto offset = pattern->positionController_->GetCurrentOffset();
@@ -503,57 +469,45 @@ HWTEST_F(GridPatternTestNg, GridTest004, TestSize.Level1)
 HWTEST_F(GridPatternTestNg, GridTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create grid node and initialize width, height, properties.
+     * @tc.steps: step1. Set grid properties.
      */
-    GridModelNG grid;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
-    auto positionController = grid.CreatePositionController();
-    grid.Create(positionController, scrollBarProxy);
+    GridTestProperty gridTestProperty;
+    gridTestProperty.columnsGap = std::make_optional(GRID_COLUMNS_GAP);
+    gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
+    gridTestProperty.gridDirection = std::make_optional(FlexDirection::ROW_REVERSE);
+    gridTestProperty.maxCount = std::make_optional(GRID_MAX_COUNT);
+    gridTestProperty.minCount = std::make_optional(GRID_MIN_COUNT);
+    gridTestProperty.cellLength = std::make_optional(GRID_CELL_LENGTH);
+    gridTestProperty.scrollBarMode = std::make_optional(static_cast<int32_t>(NG::DisplayMode::AUTO));
 
     /**
-     * @tc.steps: step2. initialize properties such as ColumnsGap, RowsGap, LayoutDirection, MaxCount, MinCount,
-     * ScrollBarMode, CellLength and MultiSelectable.
-     */
-    grid.SetColumnsGap(GRID_COLUMNS_GAP);
-    grid.SetRowsGap(GRID_ROWS_GAP);
-    grid.SetMultiSelectable(true);
-    grid.SetLayoutDirection(FlexDirection::ROW_REVERSE);
-    grid.SetMaxCount(GRID_MAX_COUNT);
-    grid.SetMinCount(GRID_MIN_COUNT);
-    grid.SetCellLength(GRID_CELL_LENGTH);
-    grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::AUTO));
+     * @tc.steps: step2. Create grid and gridItem.
+    */
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Set layoutConstraint.
+     * @tc.expected: step3. related function is called.
      */
-    GridItemModelNG gridItem;
-    const int32_t itemCount = 10;
-    for (int32_t i = 0; i < itemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-
-    /**
-     * @tc.steps: step4. Get grid frameNode and set layoutConstraint.
-     * @tc.expected: step4. related function is called.
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     LayoutConstraintF constraint;
     constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step5. Call the measure and layout function of grid to calculate the size and layout.
-     * @tc.expected: step5. Check size after layout.
+     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
+     * @tc.expected: step4. Check size after layout.
      */
     layoutWrapper->Measure(constraint);
     layoutWrapper->Layout();
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step6. Get grid layout properties.
-     * @tc.expected: step6. Check whether the updated properties is correct.
+     * @tc.steps: step5. Get grid layout properties.
+     * @tc.expected: step5. Check whether the updated properties is correct.
      */
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
@@ -569,57 +523,45 @@ HWTEST_F(GridPatternTestNg, GridTest005, TestSize.Level1)
 HWTEST_F(GridPatternTestNg, GridTest006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create grid node and initialize width, height, properties.
+     * @tc.steps: step1. Set grid properties.
      */
-    GridModelNG grid;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
-    auto positionController = grid.CreatePositionController();
-    grid.Create(positionController, scrollBarProxy);
+    GridTestProperty gridTestProperty;
+    gridTestProperty.columnsGap = std::make_optional(GRID_COLUMNS_GAP);
+    gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
+    gridTestProperty.gridDirection = std::make_optional(FlexDirection::COLUMN);
+    gridTestProperty.maxCount = std::make_optional(GRID_MAX_COUNT);
+    gridTestProperty.minCount = std::make_optional(GRID_MIN_COUNT);
+    gridTestProperty.cellLength = std::make_optional(GRID_CELL_LENGTH);
+    gridTestProperty.scrollBarMode = std::make_optional(static_cast<int32_t>(NG::DisplayMode::ON));
 
     /**
-     * @tc.steps: step2. initialize properties such as ColumnsGap, RowsGap, LayoutDirection, MaxCount, MinCount,
-     * ScrollBarMode, CellLength and MultiSelectable.
-     */
-    grid.SetColumnsGap(GRID_COLUMNS_GAP);
-    grid.SetRowsGap(GRID_ROWS_GAP);
-    grid.SetMultiSelectable(true);
-    grid.SetLayoutDirection(FlexDirection::COLUMN);
-    grid.SetMaxCount(GRID_MAX_COUNT);
-    grid.SetMinCount(GRID_MIN_COUNT);
-    grid.SetCellLength(GRID_CELL_LENGTH);
-    grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::ON));
+     * @tc.steps: step2. Create grid and gridItem.
+    */
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Set layoutConstraint.
+     * @tc.expected: step3. related function is called.
      */
-    GridItemModelNG gridItem;
-    const int32_t itemCount = 10;
-    for (int32_t i = 0; i < itemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-
-    /**
-     * @tc.steps: step4. Get grid frameNode and set layoutConstraint.
-     * @tc.expected: step4. related function is called.
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     LayoutConstraintF constraint;
     constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step5. Call the measure and layout function of grid to calculate the size and layout.
-     * @tc.expected: step5. Check size after layout.
+     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
+     * @tc.expected: step4. Check size after layout.
      */
     layoutWrapper->Measure(constraint);
     layoutWrapper->Layout();
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step6. Get grid layout properties.
-     * @tc.expected: step6. Check whether the updated properties is correct.
+     * @tc.steps: step5. Get grid layout properties.
+     * @tc.expected: step5. Check whether the updated properties is correct.
      */
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
@@ -635,57 +577,45 @@ HWTEST_F(GridPatternTestNg, GridTest006, TestSize.Level1)
 HWTEST_F(GridPatternTestNg, GridTest007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create grid node and initialize width, height, properties.
+     * @tc.steps: step1. Set grid properties.
      */
-    GridModelNG grid;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
-    auto positionController = grid.CreatePositionController();
-    grid.Create(positionController, scrollBarProxy);
+    GridTestProperty gridTestProperty;
+    gridTestProperty.columnsGap = std::make_optional(GRID_COLUMNS_GAP);
+    gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
+    gridTestProperty.gridDirection = std::make_optional(FlexDirection::COLUMN_REVERSE);
+    gridTestProperty.maxCount = std::make_optional(GRID_MAX_COUNT);
+    gridTestProperty.minCount = std::make_optional(GRID_MIN_COUNT);
+    gridTestProperty.cellLength = std::make_optional(GRID_CELL_LENGTH);
+    gridTestProperty.scrollBarMode = std::make_optional(static_cast<int32_t>(NG::DisplayMode::OFF));
 
     /**
-     * @tc.steps: step2. initialize properties such as ColumnsGap, RowsGap, LayoutDirection, MaxCount, MinCount,
-     * ScrollBarMode, CellLength and MultiSelectable.
-     */
-    grid.SetColumnsGap(GRID_COLUMNS_GAP);
-    grid.SetRowsGap(GRID_ROWS_GAP);
-    grid.SetMultiSelectable(true);
-    grid.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
-    grid.SetMaxCount(GRID_MAX_COUNT);
-    grid.SetMinCount(GRID_MIN_COUNT);
-    grid.SetCellLength(GRID_CELL_LENGTH);
-    grid.SetScrollBarMode(static_cast<int32_t>(NG::DisplayMode::OFF));
+     * @tc.steps: step2. Create grid and gridItem.
+    */
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Set layoutConstraint.
+     * @tc.expected: step3. related function is called.
      */
-    GridItemModelNG gridItem;
-    const int32_t itemCount = 10;
-    for (int32_t i = 0; i < itemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-
-    /**
-     * @tc.steps: step4. Get grid frameNode and set layoutConstraint.
-     * @tc.expected: step4. related function is called.
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     LayoutConstraintF constraint;
     constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step5. Call the measure and layout function of grid to calculate the size and layout.
-     * @tc.expected: step5. Check size after layout.
+     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
+     * @tc.expected: step4. Check size after layout.
      */
     layoutWrapper->Measure(constraint);
     layoutWrapper->Layout();
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step6. Get grid layout properties.
-     * @tc.expected: step6. Check whether the updated properties is correct.
+     * @tc.steps: step5. Get grid layout properties.
+     * @tc.expected: step5. Check whether the updated properties is correct.
      */
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
@@ -693,11 +623,11 @@ HWTEST_F(GridPatternTestNg, GridTest007, TestSize.Level1)
     EXPECT_EQ(layoutDirectionStr, GRID_DIRECTION_COLUMN_REVERSE);
 
     /**
-     * @tc.steps: step7. Get grid EventHub to call related function.
-     * @tc.expected: step7. Check whether the related parameters is correct.
+     * @tc.steps: step6. Get grid EventHub to call related function.
+     * @tc.expected: step6. Check whether the related parameters is correct.
      */
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    EXPECT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub, nullptr);
     GestureEvent info;
     info.globalPoint_.SetX(1.0f);
     info.globalPoint_.SetY(1.0f);
@@ -723,58 +653,41 @@ HWTEST_F(GridPatternTestNg, GridTest007, TestSize.Level1)
 HWTEST_F(GridPatternTestNg, GridTest008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create grid node and initialize width, height, properties.
+     * @tc.steps: step1. Set grid properties.
      */
-    GridModelNG grid;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
-    auto positionController = grid.CreatePositionController();
-    grid.Create(positionController, scrollBarProxy);
+    GridTestProperty gridTestProperty;
+    gridTestProperty.rowsTemplate = std::make_optional("1fr 2fr");
+    gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
+    gridTestProperty.editable = std::make_optional(true);
 
     /**
-     * @tc.steps: step2. initialize properties such as RowsTemplate, RowsGap, Editable and MultiSelectable.
-     */
-    grid.SetRowsTemplate("1fr 2fr");
-    grid.SetRowsGap(GRID_ROWS_GAP);
-    grid.SetMultiSelectable(true);
-    grid.SetEditable(true);
+     * @tc.steps: step2. Create grid and gridItem.
+    */
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMultiSelectable(true);
 
     /**
-     * @tc.steps: step3. Create the child nodes gridItem of the grid.
+     * @tc.steps: step3. Set layoutConstraint.
+     * @tc.expected: step3. related function is called.
      */
-    GridItemModelNG gridItem;
-    const int32_t itemCount = 10;
-    for (int32_t i = 0; i < itemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-
-    /**
-     * @tc.steps: step4. Get grid frameNode and set layoutConstraint.
-     * @tc.expected: step4. related function is called.
-     */
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper();
     LayoutConstraintF constraint;
     constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step5. Call the measure and layout function of grid to calculate the size and layout.
-     * @tc.expected: step5. Check size after layout.
+     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
+     * @tc.expected: step4. Check size after layout.
      */
     layoutWrapper->Measure(constraint);
     layoutWrapper->Layout();
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step6. Get grid pattern to call ComputeSelectedZone function.
-     */
-    auto pattern = frameNode->GetPattern<GridPattern>();
-    EXPECT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step7. When setting different startOffset and endOffset, call the ComputeSelectedZone function.
-     * @tc.expected: step7. Check whether the return value is correct.
+     * @tc.steps: step5. When setting different startOffset and endOffset, call the ComputeSelectedZone function.
+     * @tc.expected: step5. Check whether the return value is correct.
      */
     OffsetF startOffset1(1.0f, 0.0f);
     OffsetF endOffset1(1.0f, 0.0f);
@@ -807,9 +720,9 @@ RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, 
     /**
      * @tc.steps: step1. Create grid node and initialize width, height, properties.
      */
-    RefPtr<V2::GridPositionController> positionController;
-    RefPtr<ScrollBarProxy> scrollBarProxy;
     GridModelNG grid;
+    RefPtr<V2::GridPositionController> positionController;
+    RefPtr<ScrollProxy> scrollBarProxy = grid.CreateScrollBarProxy();
     grid.Create(positionController, scrollBarProxy);
     grid.SetColumnsTemplate("1fr 1fr 1fr");
 
@@ -1090,8 +1003,8 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
      * @tc.steps: step1. create GridTestProperty and set properties of grid.
      */
     GridTestProperty gridTestProperty;
-    gridTestProperty.rowsTemplate = std::make_optional(GRID_TEMPLATE_ROW);
-    gridTestProperty.columnsTemplate = std::make_optional(GRID_TEMPLATE_COLUMN);
+    gridTestProperty.rowsTemplate = std::make_optional("1fr 1fr 1fr");
+    gridTestProperty.columnsTemplate = std::make_optional("1fr 1fr");
     gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
     gridTestProperty.columnsGap = std::make_optional(GRID_COLUMNS_GAP);
     gridTestProperty.cachedCount = std::make_optional(GRID_CACHED_COUNT);
@@ -1108,7 +1021,7 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
      * @tc.steps: step2. create grid frameNode and get GridLayoutProperty.
      * @tc.expected: step2. get GridLayoutProperty success.
      */
-    RefPtr<FrameNode> frameNode = CreateGridParagraph(gridTestProperty);
+    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -1117,8 +1030,8 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
      * @tc.steps: step3. compare grid properties and expected value.
      * @tc.expected: step3. grid properties equals expected value.
      */
-    EXPECT_EQ(layoutProperty->GetRowsTemplate(), GRID_TEMPLATE_ROW);
-    EXPECT_EQ(layoutProperty->GetColumnsTemplate(), GRID_TEMPLATE_COLUMN);
+    EXPECT_EQ(layoutProperty->GetRowsTemplate(), "1fr 1fr 1fr");
+    EXPECT_EQ(layoutProperty->GetColumnsTemplate(), "1fr 1fr");
     EXPECT_EQ(layoutProperty->GetRowsGap(), GRID_ROWS_GAP);
     EXPECT_EQ(layoutProperty->GetColumnsGap(), GRID_COLUMNS_GAP);
     EXPECT_EQ(layoutProperty->GetCachedCount(), GRID_CACHED_COUNT);
@@ -1144,7 +1057,7 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
      * @tc.steps: step5. create grid frameNode and get GridLayoutProperty again.
      * @tc.expected: step5. get GridLayoutProperty success again.
      */
-    frameNode = CreateGridParagraph(gridTestProperty);
+    frameNode = CreateGrid(gridTestProperty);
     ASSERT_NE(frameNode, nullptr);
     layoutProperty = frameNode->GetLayoutProperty<GridLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -1155,5 +1068,92 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
      */
     EXPECT_EQ(layoutProperty->GetRowsTemplate(), "");
     EXPECT_EQ(layoutProperty->GetColumnsTemplate(), "");
+}
+
+/**
+ * @tc.name: GridTest020
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap function of grid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create grid.
+    */
+    GridModelNG grid;
+    RefPtr<ScrollControllerBase> positionController = grid.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = grid.CreateScrollBarProxy();
+    grid.Create(positionController, scrollBarProxy);
+    /**
+     * @tc.steps: step2. Set grid properties.
+     */
+    grid.SetMultiSelectable(true);
+    grid.SetSupportAnimation(true);
+    grid.SetOnScrollToIndex([](const BaseEventInfo*) {});
+    grid.SetOnItemDragStart([](const ItemDragInfo&, int32_t) {});
+    grid.SetOnItemDragEnter([](const ItemDragInfo) {});
+    grid.SetOnItemDragMove([](const ItemDragInfo&, int32_t, int32_t) {});
+    grid.SetOnItemDragLeave([](const ItemDragInfo&, int32_t) {});
+    grid.SetOnItemDrop([](const ItemDragInfo&, int32_t, int32_t, bool) {});
+
+    /**
+     * @tc.steps: step3. Get frameNode.
+     * @tc.expected: step3. Check whether the updated properties and parameters are correct.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->multiSelectable_);
+    EXPECT_TRUE(pattern->supportAnimation_);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->onScrollToIndex_, nullptr);
+    EXPECT_NE(eventHub->onItemDragStart_, nullptr);
+    EXPECT_NE(eventHub->onItemDragEnter_, nullptr);
+    EXPECT_NE(eventHub->onItemDragMove_, nullptr);
+    EXPECT_NE(eventHub->onItemDragLeave_, nullptr);
+    EXPECT_NE(eventHub->onItemDrop_, nullptr);
+}
+
+/**
+ * @tc.name: GridTest021
+ * @tc.desc: Test all the properties of gridItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create gridItem and Set properties.
+    */
+    GridItemModelNG gridItem;
+    gridItem.Create([](int32_t) {}, false);
+    gridItem.SetRowStart(1);
+    gridItem.SetRowEnd(2);
+    gridItem.SetColumnStart(1);
+    gridItem.SetColumnEnd(2);
+    gridItem.SetForceRebuild(true);
+    gridItem.SetSelectable(false);
+    gridItem.SetOnSelect([](bool) {});
+
+    /**
+     * @tc.steps: step2. Get frameNode and properties.
+     * @tc.expected: step2. Check properties is correct.
+    */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<GridItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetRowStart(), 1);
+    EXPECT_EQ(layoutProperty->GetRowEnd(), 2);
+    EXPECT_EQ(layoutProperty->GetColumnStart(), 1);
+    EXPECT_EQ(layoutProperty->GetColumnEnd(), 2);
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_TRUE(pattern->forceRebuild_);
+    EXPECT_FALSE(pattern->selectable_);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->onSelect_, nullptr);
 }
 } // namespace OHOS::Ace::NG
