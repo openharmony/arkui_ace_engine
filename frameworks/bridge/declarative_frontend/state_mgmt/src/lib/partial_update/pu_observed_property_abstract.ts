@@ -29,11 +29,12 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
   }
 
   protected notifyPropertyRead() {
-    stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+    stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertryHasBeenReadPU`);
   }
 
   protected notifyPropertryHasBeenReadPU() {
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: propertyHasBeenReadPU.`)
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
@@ -46,6 +47,7 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
   } 
 
   protected notifyPropertryHasChangedPU() {
+    stateMgmtConsole.debug(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU.`)
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {

@@ -66,7 +66,8 @@ class SynchedPropertyNesedObjectPU<C extends Object>
   }
 
   public getUnmonitored(): C {
-    // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
+    // stateMgmtConsole.debug(`SynchedPropertyNesedObject[${this.id()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
+    // unmonitored get access , no call to otifyPropertyRead !
     return this.obsObject_;
   }
 

@@ -1703,17 +1703,20 @@ class DistributedStorage {
 *   obsObj = ObservedObject.createNew<ClassA[]>([])
 */
 const Observed = function () {
+    let object_creation_ongoing__ = 0;
     return function Observed(target) {
-        const IS_PROXIED = Symbol('___is_proxied___');
         
         const Observed = class extends target {
             constructor(...args) {
+                object_creation_ongoing__ += 1;
                 super(...args);
-                let isProxied = this.IS_PROXIED;
-                Object.defineProperty(this, IS_PROXIED, { value: true });
-                return isProxied
-                    ? this
-                    : ObservedObject.createNew(this, null);
+                object_creation_ongoing__ -= 1;
+                if (object_creation_ongoing__ == 0) {
+                    return ObservedObject.createNew(this, null);
+                }
+                else {
+                    return this;
+                }
             }
         };
         return Observed;
@@ -2025,6 +2028,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         this.subscribers_.delete(subscriberId);
     }
     notifyHasChanged(newValue) {
+        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2047,6 +2051,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         });
     }
     notifyPropertyRead() {
+        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2237,6 +2242,7 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
         return true;
     }
     get() {
+        
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
@@ -2910,10 +2916,11 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.dependentElementIds_ = new Set();
     }
     notifyPropertyRead() {
-        stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
+        stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertryHasBeenReadPU`);
     }
     notifyPropertryHasBeenReadPU() {
+        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2925,6 +2932,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.recordDependentUpdate();
     }
     notifyPropertryHasChangedPU() {
+        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -3135,7 +3143,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     */
     setValueInternal(newValue) {
         if (typeof newValue !== 'object') {
-            stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+            stateMgmtConsole.error(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
             return false;
         }
         if (newValue == this.wrappedValue_) {
@@ -3165,7 +3173,8 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
         return this.wrappedValue_;
     }
     getUnmonitored() {
-        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
+        
+        // unmonitored get access , no call to otifyPropertyRead !
         return this.wrappedValue_;
     }
     set(newValue) {
@@ -3243,7 +3252,7 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
+        // unmonitored get access , no call to otifyPropertyRead !
         return this.wrappedValue_;
     }
     get() {
@@ -3536,11 +3545,13 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         this.notifyPropertryHasChangedPU();
     }
     getUnmonitored() {
-        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
+        
+        // unmonitored get access , no call to otifyPropertyRead !
         return (this.source_ ? this.source_.getUnmonitored() : undefined);
     }
     // get 'read through` from the ObservedProperty
     get() {
+        
         this.notifyPropertryHasBeenReadPU();
         return this.getUnmonitored();
     }
@@ -3638,7 +3649,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
+        // unmonitored get access , no call to otifyPropertyRead !
         return this.wrappedValue_;
     }
     // get 'read through` from the ObservedProperty
@@ -3806,7 +3817,8 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
         this.notifyPropertryHasChangedPU();
     }
     getUnmonitored() {
-        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
+        // 
+        // unmonitored get access , no call to otifyPropertyRead !
         return this.obsObject_;
     }
     // get 'read through` from the ObservedProperty
