@@ -23,7 +23,6 @@ ohos_unittest("click_event_test_ng") {
     # inner
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
-    "$ace_root/frameworks/base/log/dump_log.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
@@ -63,6 +62,7 @@ ohos_unittest("click_event_test_ng") {
   ]
 
   deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

@@ -24,6 +24,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 
@@ -36,7 +37,8 @@ void PurgeMallocCache()
 #endif
 }
 
-#ifdef ACE_MEMORY_MONITOR
+bool MemoryMonitor::isEnable_ = SystemProperties::GetIsUseMemoryMonitor();
+
 class MemoryMonitorImpl : public MemoryMonitor {
 public:
     void Add(void* ptr) final
@@ -90,6 +92,10 @@ public:
 
     void Dump() const final
     {
+        if (!IsEnable()) {
+            DumpLog::GetInstance().Print(0, "Set `persist.ace.memorymonitor.enabled = 1` to enable this feature");
+            return;
+        }
         std::lock_guard<std::mutex> lock(mutex_);
         std::string out = "total = " + std::to_string(total_) + ", count = " + std::to_string(count_);
         DumpLog::GetInstance().Print(0, out);
@@ -126,6 +132,5 @@ MemoryMonitor& MemoryMonitor::GetInstance()
     static MemoryMonitorImpl instance;
     return instance;
 }
-#endif // ACE_MEMORY_MONITOR
 
 } // namespace OHOS::Ace
