@@ -30,6 +30,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 
@@ -169,15 +170,35 @@ void JSImage::Create(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    std::string src;
-    auto noPixMap = ParseJsMedia(info[0], src);
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
 
+    std::string src;
+    bool noPixMap = true;
     RefPtr<PixelMap> pixMap = nullptr;
+    if (info[0]->IsString()) {
+        src = info[0]->ToString();
+        if (context->IsFormRender()) {
+            SrcType srcType = ImageSourceInfo::ResolveURIType(src);
+            bool notSupport = (
+                srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+            if (notSupport) {
+                LOGE("Not supported src : %{public}s when form render", src.c_str());
+                src.clear();
+            }
+        }
+    } else {
+        noPixMap = ParseJsMedia(info[0], src);
 #if defined(PIXEL_MAP_SUPPORTED)
-    if (!noPixMap) {
-        pixMap = CreatePixelMapFromNapiValue(info[0]);
-    }
+        if (!noPixMap) {
+            if (context->IsFormRender()) {
+                LOGE("Not supported pixMap when form render");
+            } else {
+                pixMap = CreatePixelMapFromNapiValue(info[0]);
+            }
+        }
 #endif
+    }
 
     ImageModel::GetInstance()->Create(src, noPixMap, pixMap);
 }

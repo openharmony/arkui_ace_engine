@@ -97,6 +97,8 @@ CanvasDrawFunction CanvasPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 
 void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
     SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     if (lastLayoutSize_ != frameSize) {
@@ -108,7 +110,7 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
         return;
     }
 
-    auto viewScale = context_->GetViewScale();
+    auto viewScale = context->GetViewScale();
     skCanvas_->scale(viewScale, viewScale);
 
     for (const auto& task : tasks_) {
@@ -126,7 +128,9 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
 
 void CanvasPaintMethod::CreateBitmap(SizeF frameSize)
 {
-    auto viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto viewScale = context->GetViewScale();
     auto imageInfo = SkImageInfo::Make(frameSize.Width() * viewScale, frameSize.Height() * viewScale,
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     canvasCache_.reset();
@@ -252,9 +256,9 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
         return cacheImage->imagePtr->image();
     }
 
-    CHECK_NULL_RETURN(context_, nullptr);
-
-    auto image = Ace::ImageProvider::GetSkImage(src, context_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto image = Ace::ImageProvider::GetSkImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
     auto rasterizedImage = image->makeRasterImage();
     auto canvasImage = flutter::CanvasImage::Create();
@@ -267,8 +271,9 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     double left, double top, double width, double height)
 {
     double viewScale = 1.0;
-    CHECK_NULL_RETURN(context_, nullptr);
-    viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    viewScale = context->GetViewScale();
     // copy the bitmap to tempCanvas
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
@@ -577,7 +582,9 @@ void CanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
 
 void CanvasPaintMethod::SetTransform(const TransformParam& param)
 {
-    double viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
         param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);

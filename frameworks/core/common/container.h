@@ -258,6 +258,16 @@ public:
         return nullptr;
     }
 
+    bool IsFRSCardContainer() const
+    {
+        return isFRSCardContainer_;
+    }
+
+    void SetIsFRSCardContainer(bool isFRSCardContainer)
+    {
+        isFRSCardContainer_ = isFRSCardContainer;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -265,6 +275,7 @@ protected:
     bool useNewPipeline_ = false;
     std::mutex stateMutex_;
     Frontend::State state_ = Frontend::State::UNDEFINED;
+    bool isFRSCardContainer_ = false;
 
 private:
     std::string moduleName_;

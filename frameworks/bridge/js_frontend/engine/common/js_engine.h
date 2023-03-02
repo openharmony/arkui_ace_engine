@@ -175,9 +175,16 @@ public:
 
     virtual void JsCallback(const std::string& callbackId, const std::string& args) = 0;
 
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
+
     virtual void RunGarbageCollection() = 0;
 
+    virtual void RunFullGarbageCollection() {}
+
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+
+    virtual void ClearCache() {}
 
     virtual std::string GetStacktraceMessage()
     {

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_CONTENT_H
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -31,12 +32,14 @@ class Context;
 namespace AppExecFwk {
 class Configuration;
 class Ability;
+class FormAshmem;
 }
 
 namespace Rosen {
 class Window;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
+class RSSurfaceNode;
 }
 
 namespace AAFwk {
@@ -56,10 +59,14 @@ class NativeValue;
 
 namespace OHOS::Ace {
 
+#ifndef ACE_EXPORT
 #define ACE_EXPORT __attribute__((visibility("default")))
+#endif
 
 class ACE_EXPORT UIContent {
 public:
+    static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime,
+                                             bool isFormRender);
     static std::unique_ptr<UIContent> Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime);
     static std::unique_ptr<UIContent> Create(OHOS::AppExecFwk::Ability* ability);
     static void ShowDumpHelp(std::vector<std::string>& info);
@@ -105,6 +112,24 @@ public:
 
     virtual void SetAppWindowTitle(const std::string& title) = 0;
     virtual void SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pixelMap) = 0;
+
+    // ArkTS Form
+    virtual std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() = 0;
+
+    virtual void UpdateFormDate(const std::string& data) = 0;
+    virtual void UpdateFormSharedImage(
+        const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) {}
+
+    virtual void SetFormWidth(const float width) = 0;
+    virtual void SetFormHeight(const float height) = 0;
+    virtual float GetFormWidth() = 0;
+    virtual float GetFormHeight() = 0;
+    virtual void ReloadForm() {};
+
+    virtual void SetActionEventHandler(
+        std::function<void(const std::string&)>&& actionCallback) = 0;
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
 };
 
 } // namespace OHOS::Ace

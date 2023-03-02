@@ -82,8 +82,8 @@ void ArkJSRuntime::Reset()
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
+            vm_ = nullptr;
         }
-        vm_ = nullptr;
     }
     for (auto data : dataList_) {
         delete data;
@@ -129,6 +129,17 @@ shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::str
     return NewUndefined();
 }
 
+bool ArkJSRuntime::ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    bool ret = JSNApi::ExecuteModuleBuffer(vm_, buffer, size, filePath);
+    LOGI("ArkJSRuntime::EvaluateJsCode after JSNApi::Execute %{public}p, filePath = %{public}s",
+        this, filePath.c_str());
+    HandleUncaughtException();
+    return ret;
+}
+
 bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath, bool needUpdate)
 {
     JSExecutionScope executionScope(vm_);
@@ -158,6 +169,13 @@ void ArkJSRuntime::RunGC()
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
     JSNApi::TriggerGC(vm_);
+}
+
+void ArkJSRuntime::RunFullGC()
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    JSNApi::TriggerGC(vm_, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewInt32(int32_t value)
@@ -253,10 +271,13 @@ bool ArkJSRuntime::HasPendingException()
 void ArkJSRuntime::HandleUncaughtException()
 {
     if (uncaughtErrorHandler_ == nullptr) {
+        LOGE("uncaughtErrorHandler is null.");
         return;
     }
+
     Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
     if (!exception.IsEmpty() && !exception->IsHole()) {
+        LOGI("HandleUncaughtException catch exception.");
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
         uncaughtErrorHandler_(errorPtr, shared_from_this());
