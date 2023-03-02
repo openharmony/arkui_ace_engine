@@ -111,6 +111,7 @@ test_pattern_deps = [
   "$ace_root/frameworks/core/components/theme:build_theme_code",
   "$ace_root/test/unittest:ace_unittest_log",
   "$cjson_root:cjson_static",
+  "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   "//third_party/googletest:gmock_main",
 ]
 

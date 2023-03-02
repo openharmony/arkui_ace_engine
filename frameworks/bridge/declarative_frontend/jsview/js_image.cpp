@@ -178,7 +178,7 @@ void JSImage::Create(const JSCallbackInfo& info)
     std::string moduleName;
     std::string src;
     auto noPixMap = ParseJsMedia(info[0], src);
-    if (context->IsFormRender()) {
+    if (context->IsFormRender() && info[0]->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (
             srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);

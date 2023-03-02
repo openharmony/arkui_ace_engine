@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,10 @@
 #include <vector>
 
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/data_panel_model_impl.h"
+#include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
 namespace OHOS::Ace {
@@ -45,11 +48,18 @@ DataPanelModel* DataPanelModel::GetInstance()
 namespace OHOS::Ace::Framework {
 
 constexpr size_t MAX_COUNT = 9;
+
 void JSDataPanel::JSBind(BindingTarget globalObj)
 {
     JSClass<JSDataPanel>::Declare("DataPanel");
     JSClass<JSDataPanel>::StaticMethod("create", &JSDataPanel::Create);
     JSClass<JSDataPanel>::StaticMethod("closeEffect", &JSDataPanel::CloseEffect);
+
+    JSClass<JSDataPanel>::StaticMethod("valueColors", &JSDataPanel::ValueColors);
+    JSClass<JSDataPanel>::StaticMethod("trackBackgroundColor", &JSDataPanel::TrackBackground);
+    JSClass<JSDataPanel>::StaticMethod("strokeWidth", &JSDataPanel::StrokeWidth);
+    JSClass<JSDataPanel>::StaticMethod("trackShadow", &JSDataPanel::ShadowOption);
+
     JSClass<JSDataPanel>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSDataPanel>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSDataPanel>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -127,4 +137,147 @@ void JSDataPanel::CloseEffect(const JSCallbackInfo& info)
     DataPanelModel::GetInstance()->SetEffect(isCloseEffect);
 }
 
+void JSDataPanel::ValueColors(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsArray() || info[0]->IsEmpty()) {
+        return;
+    }
+
+    std::vector<OHOS::Ace::NG::Gradient> valueColors;
+    auto paramArray = JSRef<JSArray>::Cast(info[0]);
+    size_t length = paramArray->Length();
+    for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
+        auto item = paramArray->GetValueAt(i);
+        OHOS::Ace::NG::Gradient gradient;
+        if (!ConvertGradientColor(item, gradient)) {
+            LOGE("Convert gradient color failed.");
+            return;
+        }
+        valueColors.push_back(gradient);
+    }
+    DataPanelModel::GetInstance()->SetValueColors(valueColors);
+}
+
+void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    Color color;
+    if (!ParseJsColor(info[0], color)) {
+        LOGE("args can not set backgroundColor");
+        return;
+    }
+
+    DataPanelModel::GetInstance()->SetTrackBackground(color);
+}
+
+void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    Dimension strokeWidthDimension;
+    if (!ParseJsDimensionVp(info[0], strokeWidthDimension)) {
+        strokeWidthDimension = theme->GetThickness();
+    }
+
+    if (strokeWidthDimension.IsNegative() || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
+        strokeWidthDimension = theme->GetThickness();
+    }
+    DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+}
+
+void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("toggle ShadowOption error, info is non-valid");
+        return;
+    }
+
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
+    JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
+    JSRef<JSVal> jsOffsetY = paramObject->GetProperty("offsetY");
+
+    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    double radius = 0.0;
+    if (!ParseJsDouble(jsRadius, radius)) {
+        radius = theme->GetTrackShadowRadiu().ConvertToVp();
+    }
+
+    double offsetX = 0.0;
+    if (!ParseJsDouble(jsOffsetX, offsetX)) {
+        offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
+    }
+
+    double offsetY = 0.0;
+    if (!ParseJsDouble(jsOffsetY, offsetY)) {
+        offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
+    }
+
+    std::vector<OHOS::Ace::NG::Gradient> shadowColors;
+    auto colors = paramObject->GetProperty("colors");
+    if (!colors->IsEmpty() && colors->IsArray()) {
+        auto colorsArray = JSRef<JSArray>::Cast(colors);
+        for (size_t i = 0; i < colorsArray->Length(); i++) {
+            auto item = colorsArray->GetValueAt(i);
+            OHOS::Ace::NG::Gradient gradient;
+            if (!ConvertGradientColor(item, gradient)) {
+                LOGE("Convert gradient color failed.");
+                return;
+            }
+            shadowColors.push_back(gradient);
+        }
+    }
+
+    OHOS::Ace::NG::DataPanelShadow shadow;
+    shadow.radius = radius;
+    shadow.offsetX = offsetX;
+    shadow.offsetY = offsetY;
+    shadow.colors = shadowColors;
+    DataPanelModel::GetInstance()->SetShadowOption(shadow);
+}
+
+bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient)
+{
+    if (itemParam->IsObject()) {
+        JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(itemParam)->Unwrap<JSLinearGradient>();
+        if (!jsLinearGradient) {
+            LOGE("JSDataPanel::jsLinearGradient is null.");
+            return false;
+        }
+
+        size_t colorLength = jsLinearGradient->GetGradient().size();
+        for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
+            OHOS::Ace::NG::GradientColor gradientColor;
+            gradientColor.SetColor(jsLinearGradient->GetGradient().at(colorIndex).first);
+            gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+            gradient.AddColor(gradientColor);
+        }
+    } else {
+        Color color;
+        if (!ParseJsColor(itemParam, color)) {
+            return false;
+        }
+        OHOS::Ace::NG::GradientColor gradientColorStart;
+        gradientColorStart.SetColor(color);
+        gradientColorStart.SetDimension(Dimension(0.0));
+        gradient.AddColor(gradientColorStart);
+        OHOS::Ace::NG::GradientColor gradientColorEnd;
+        gradientColorEnd.SetColor(color);
+        gradientColorEnd.SetDimension(Dimension(1.0));
+        gradient.AddColor(gradientColorEnd);
+    }
+    return true;
+}
 } // namespace OHOS::Ace::Framework

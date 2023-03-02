@@ -279,11 +279,18 @@ public:
 
     void HandleConfirm(const JSCallbackInfo& args)
     {
-        if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
+        std::string privateKeyFile;
+        std::string certChainFile;
+        if (args.Length() == 1 && args[0]->IsString()) {
+            privateKeyFile = args[0]->ToString();
+        } else if (args.Length() == 2 && args[0]->IsString() && args[1]->IsString()) {
+            privateKeyFile = args[0]->ToString();
+            certChainFile = args[1]->ToString();
+        } else {
+            LOGE("HandleConfirm error, args is invalid");
             return;
         }
-        std::string privateKeyFile = args[0]->ToString();
-        std::string certChainFile = args[1]->ToString();
+
         if (result_) {
             result_->HandleConfirm(privateKeyFile, certChainFile);
         }

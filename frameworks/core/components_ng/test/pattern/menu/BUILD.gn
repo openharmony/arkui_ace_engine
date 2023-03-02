@@ -144,6 +144,7 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # self
+    "$ace_root/frameworks/core/components_ng/pattern/menu/menu_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
@@ -158,6 +159,7 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson_static",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 

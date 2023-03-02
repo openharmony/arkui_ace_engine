@@ -118,6 +118,7 @@ const char DATA_PANEL_LOADING_COLOR_START[] = "loading_fg_color_start";
 const char DATA_PANEL_LOADING_COLOR_END[] = "loading_fg_color_end";
 const char DATA_PANEL_PROGRESS_COLOR_START[] = "progress_fg_color_start";
 const char DATA_PANEL_PROGRESS_COLOR_END[] = "progress_fg_color_end";
+const char DATA_PANEL_TRACK_SHADOW_RADIU[] = "track_shadow_radiu";
 
 // pattern attributes for toggle
 const char DIALOG_CONTENT_TOP_PADDING[] = "dialog_content_top_padding";

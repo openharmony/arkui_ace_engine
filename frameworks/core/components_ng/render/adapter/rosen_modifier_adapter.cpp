@@ -95,6 +95,7 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
     CONVERT_PROP(property, PropertyFloat, float);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyFloat, float);
     CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyColor, LinearColor);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorColor, GradientArithmetic);
     LOGE("ConvertToRSProperty failed!");
     return nullptr;
 }

@@ -180,6 +180,7 @@ ohos_unittest("refresh_pattern_test_ng") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 

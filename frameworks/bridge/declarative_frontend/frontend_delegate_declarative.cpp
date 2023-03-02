@@ -19,6 +19,8 @@
 #include <regex>
 #include <string>
 
+#include "uicast_interface/uicast_context_impl.h"
+
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
@@ -27,8 +29,8 @@
 #include "base/resource/ace_res_config.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/utils/utils.h"
 #include "base/utils/measure_util.h"
+#include "base/utils/utils.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/page_router_manager.h"
@@ -40,11 +42,11 @@
 #include "core/common/thread_checker.h"
 #include "core/components/dialog/dialog_component.h"
 #include "core/components/toast/toast_component.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/ace_engine.h"
-#include "uicast_interface/uicast_context_impl.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -70,7 +72,7 @@ const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 // helper function to run OverlayManager task
-// ensures that the task runs in main window instead of subWindow
+// ensures that the task runs in subwindow instead of main Window
 void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task)
 {
     auto currentId = Container::CurrentId();
@@ -1371,16 +1373,13 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
-        auto context = DynamicCast<NG::PipelineContext>(pipelineContext);
-        auto overlayManager = context ? context->GetOverlayManager() : nullptr;
-        taskExecutor_->PostTask(
-            [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-                auto overlayManager = weak.Upgrade();
-                CHECK_NULL_VOID(overlayManager);
-                overlayManager->ShowDialog(
-                    dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
-            },
-            TaskExecutor::TaskType::UI);
+
+        auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
+            CHECK_NULL_VOID(overlayManager);
+            LOGI("Begin to show dialog ");
+            overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+        };
+        MainWindowOverlay(std::move(task));
         return;
     }
     std::unordered_map<std::string, EventMarker> callbackMarkers;

@@ -19,6 +19,7 @@
 #include "core/animation/bilateral_spring_adapter.h"
 #include "core/animation/simple_spring_chain.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -82,6 +83,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<ListEventHub>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ListAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;

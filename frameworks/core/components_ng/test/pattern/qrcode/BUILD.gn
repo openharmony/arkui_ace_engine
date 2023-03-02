@@ -103,6 +103,7 @@ ohos_unittest("qrcode_pattern_test_ng") {
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
     "//foundation/arkui/ace_engine/frameworks/core/components/qrcode:qrcodegen",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 

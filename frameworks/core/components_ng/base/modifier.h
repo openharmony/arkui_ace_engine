@@ -23,13 +23,13 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/render/adapter/gradient_arithmetic.h"
 #include "core/components_ng/render/adapter/linear_vector.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-
 class Modifier : public virtual AceType {
     DECLARE_ACE_TYPE(Modifier, AceType);
 
@@ -196,6 +196,7 @@ DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorFloat, AnimatableProperty, LinearVector<float>);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, GradientArithmetic);
 
 } // namespace OHOS::Ace::NG
 

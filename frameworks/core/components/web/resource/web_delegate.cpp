@@ -27,10 +27,12 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
 #include "core/components/web/web_event.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 #endif
@@ -558,6 +560,7 @@ WebDelegate::~WebDelegate()
     if (nweb_) {
         nweb_->OnDestroy();
     }
+    UnregisterSurfacePositionChangedCallback();
 }
 
 void WebDelegate::ReleasePlatformResource()
@@ -1517,6 +1520,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         return false;
     }
     context_ = context;
+    RegisterSurfacePositionChangedCallback();
     auto pipelineContext = context.Upgrade();
     if (!pipelineContext) {
         LOGE("fail to call WebDelegate::Create due to context is null");
@@ -2466,6 +2470,10 @@ void WebDelegate::Resize(const double& width, const double& height)
             auto delegate = weak.Upgrade();
             if (delegate && delegate->nweb_ && !delegate->window_) {
                 delegate->nweb_->Resize(width, height);
+                double offsetX = 0;
+                double offsetY = 0;
+                delegate->UpdateScreenOffSet(offsetX, offsetY);
+                delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -4515,4 +4523,90 @@ void WebDelegate::SetSurface(const sptr<Surface>& surface)
     surface_ = surface;
 }
 #endif
+
+void WebDelegate::UpdateScreenOffSet(double& offsetX, double& offsetY)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        offsetX += webPattern->GetHost()->GetTransformRelativeOffset().GetX();
+        offsetY += webPattern->GetHost()->GetTransformRelativeOffset().GetY();
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto windowOffset = context->GetDisplayWindowRectInfo().GetOffset();
+        offsetX += windowOffset.GetX();
+        offsetY += windowOffset.GetY();
+        return;
+    }
+    auto renderWeb = renderWeb_.Upgrade();
+    CHECK_NULL_VOID(renderWeb);
+    offsetX += renderWeb->GetGlobalOffset().GetX();
+    offsetY += renderWeb->GetGlobalOffset().GetY();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto windowOffset = context->GetDisplayWindowRectInfo().GetOffset();
+    offsetX += windowOffset.GetX();
+    offsetY += windowOffset.GetY();
+    WindowMode windowMode = context->GetWindowManager()->GetWindowMode();
+    if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+        offsetX += CONTAINER_BORDER_WIDTH.ConvertToPx();
+        offsetY += CONTAINER_TITLE_HEIGHT.ConvertToPx();
+    }
+}
+
+void WebDelegate::RegisterSurfacePositionChangedCallback()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pipelineContext = DynamicCast<NG::PipelineContext>(context_.Upgrade());
+        CHECK_NULL_VOID(pipelineContext);
+        if (callbackId_ <= 0) {
+            callbackId_ = pipelineContext->RegisterSurfacePositionChangedCallback(
+                [weak = WeakClaim(this)](int32_t posX, int32_t posY) {
+                    auto delegate = weak.Upgrade();
+                    if (delegate && delegate->nweb_ && !delegate->window_) {
+                        double offsetX = 0;
+                        double offsetY = 0;
+                        delegate->UpdateScreenOffSet(offsetX, offsetY);
+                        delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
+                    }
+                }
+            );
+        }
+        return;
+    }
+    auto pipelineContext = DynamicCast<PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(pipelineContext);
+    if (callbackId_ <= 0) {
+        callbackId_ = pipelineContext->RegisterSurfacePositionChangedCallback(
+            [weak = WeakClaim(this)](int32_t posX, int32_t posY) {
+                auto delegate = weak.Upgrade();
+                if (delegate && delegate->nweb_ && !delegate->window_) {
+                    double offsetX = 0;
+                    double offsetY = 0;
+                    delegate->UpdateScreenOffSet(offsetX, offsetY);
+                    delegate->nweb_->SetScreenOffSet(offsetX, offsetY);
+                }
+            }
+        );
+    }
+}
+
+void WebDelegate::UnregisterSurfacePositionChangedCallback()
+{
+    if (callbackId_ <= 0) {
+        LOGE("callbackId_ = %{public}d", callbackId_);
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto pipelineContext = DynamicCast<NG::PipelineContext>(context_.Upgrade());
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UnregisterSurfacePositionChangedCallback(callbackId_);
+        callbackId_ = 0;
+        return;
+    }
+    auto pipelineContext = DynamicCast<PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UnregisterSurfacePositionChangedCallback(callbackId_);
+    callbackId_ = 0;
+}
 } // namespace OHOS::Ace

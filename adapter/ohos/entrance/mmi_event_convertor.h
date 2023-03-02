@@ -19,6 +19,7 @@
 #include "key_event.h"
 #include "pointer_event.h"
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/log/log.h"
 #include "base/utils/macros.h"
 #include "core/event/axis_event.h"
@@ -27,6 +28,25 @@
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::Platform {
+namespace {
+const std::unordered_map<SourceType, int32_t> SOURCE_TYPE_MAP = {
+    { SourceType::TOUCH, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN },
+    { SourceType::TOUCH_PAD, MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD },
+    { SourceType::MOUSE, MMI::PointerEvent::SOURCE_TYPE_MOUSE },
+};
+
+const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
+    { TouchType::CANCEL, MMI::PointerEvent::POINTER_ACTION_CANCEL },
+    { TouchType::DOWN, MMI::PointerEvent::POINTER_ACTION_DOWN },
+    { TouchType::MOVE, MMI::PointerEvent::POINTER_ACTION_MOVE },
+    { TouchType::UP, MMI::PointerEvent::POINTER_ACTION_UP },
+    { TouchType::PULL_DOWN, MMI::PointerEvent::POINTER_ACTION_PULL_DOWN },
+    { TouchType::PULL_MOVE, MMI::PointerEvent::POINTER_ACTION_PULL_MOVE },
+    { TouchType::PULL_UP, MMI::PointerEvent::POINTER_ACTION_PULL_UP },
+    { TouchType::PULL_IN_WINDOW, MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW },
+    { TouchType::PULL_OUT_WINDOW, MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW },
+};
+} // namespace
 
 template<typename E>
 void GetEventDevice(int32_t sourceType, E& event)
@@ -48,6 +68,8 @@ void GetEventDevice(int32_t sourceType, E& event)
 }
 
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const NG::OffsetF& offsetF, const TouchEvent& point);
 
 void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, MouseEvent& events);
 

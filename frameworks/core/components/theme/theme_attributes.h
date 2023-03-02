@@ -121,6 +121,7 @@ extern const char DATA_PANEL_LOADING_COLOR_START[];
 extern const char DATA_PANEL_LOADING_COLOR_END[];
 extern const char DATA_PANEL_PROGRESS_COLOR_START[];
 extern const char DATA_PANEL_PROGRESS_COLOR_END[];
+extern const char DATA_PANEL_TRACK_SHADOW_RADIU[];
 
 // pattern attributes for dialog
 extern const char DIALOG_CONTENT_TOP_PADDING[];

@@ -148,8 +148,10 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
         root->RemoveChild(node);
         root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 
-        if (isShowInSubWindow) {
-            SubwindowManager::GetInstance()->HideWindow();
+        auto container = Container::Current();
+        CHECK_NULL_VOID_NOLOG(container);
+        if (container->IsDialogContainer() || (container->IsSubContainer() && isShowInSubWindow)) {
+            SubwindowManager::GetInstance()->HideSubWindowNG();
         }
     });
     auto ctx = node->GetRenderContext();
@@ -358,6 +360,13 @@ void OverlayManager::PopToast(int32_t toastId)
                 rootNode->RemoveChild(toastUnderPop);
                 overlayManager->toastMap_.erase(toastId);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+
+                auto container = Container::Current();
+                CHECK_NULL_VOID_NOLOG(container);
+                if (container->IsDialogContainer()) {
+                    // hide window when toast show in subwindow.
+                    SubwindowManager::GetInstance()->HideSubWindowNG();
+                }
             },
             TaskExecutor::TaskType::UI);
     });
