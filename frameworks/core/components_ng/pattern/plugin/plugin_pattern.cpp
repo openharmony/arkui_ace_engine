@@ -48,6 +48,7 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
     return ERR_OK;
 #endif // OS_ACCOUNT_EXISTS
 }
+constexpr char JS_EXT[] = ".js";
 } // namespace
 
 PluginPattern::~PluginPattern()
@@ -85,12 +86,12 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     info.width = Dimension(size.Width());
     info.height = Dimension(size.Height());
     layoutProperty->UpdateRequestPluginInfo(info);
-    data_ = layoutProperty->GetData().value_or("");
-
+    auto data = layoutProperty->GetData().value_or("");
     if (info.bundleName != pluginInfo_.bundleName || info.abilityName != pluginInfo_.abilityName ||
         info.moduleName != pluginInfo_.moduleName || info.pluginName != pluginInfo_.pluginName ||
-        info.dimension != pluginInfo_.dimension) {
+        info.dimension != pluginInfo_.dimension || data_ != data) {
         pluginInfo_ = info;
+        data_ = data;
         LOGI(" pluginInfo_ = info; pluginInfo_.width:: %{public}lf, pluginInfo_.height:: %{public}lf",
             pluginInfo_.width.Value(), pluginInfo_.height.Value());
     } else {
@@ -356,8 +357,8 @@ void PluginPattern::SplitString(const std::string& str, char tag, std::vector<st
 std::string PluginPattern::GetPackagePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
 {
     std::string packagePathStr;
-    size_t pos = info.pluginName.rfind(".js");
-    if (info.pluginName.front() == '/' && pos != std::string::npos) {
+    size_t pos = info.pluginName.rfind(JS_EXT);
+    if (info.pluginName.front() == '/' && pos != std::string::npos && info.pluginName.substr(pos) == JS_EXT) {
         packagePathStr = GetPackagePathByAbsolutePath(weak, info);
     } else {
         packagePathStr = GetPackagePathByWant(weak, info);
@@ -425,13 +426,15 @@ void PluginPattern::GetAbilityNameByWant(const WeakPtr<PluginPattern>& weak, Req
         return;
     }
     if (strList.size() == 1) {
-        if (info.pluginName.rfind(".js") != std::string::npos) {
+        auto pos = info.pluginName.rfind(JS_EXT);
+        if (pos != std::string::npos && (strList[0].substr(pos) == JS_EXT)) {
             info.source = info.pluginName;
         } else {
             info.abilityName = info.pluginName;
         }
     } else {
-        if (strList[0].rfind(".js") != std::string::npos) {
+        auto pos = strList[0].rfind(JS_EXT);
+        if (pos != std::string::npos && (strList[0].substr(pos) == JS_EXT)) {
             info.source = strList[0];
         } else {
             info.abilityName = strList[0];

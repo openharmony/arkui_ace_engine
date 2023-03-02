@@ -38,6 +38,8 @@ class PluginFrontendDelegate : public FrontendDelegate {
     DECLARE_ACE_TYPE(PluginFrontendDelegate, FrontendDelegate);
 
 public:
+    using onPluginUpdateWithValueParams = std::function<void(const std::string&)>;
+
     PluginFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor, const LoadJsCallback& loadCallback,
         const JsMessageDispatcherSetterCallback& transferCallback, const EventCallback& asyncEventCallback,
         const EventCallback& syncEventCallback, const UpdatePageCallback& updatePageCallback,
@@ -227,6 +229,20 @@ public:
 
     void UpdatePlugin(const std::string& content);
 
+    void SetDeclarativeOnUpdateWithValueParamsCallback(onPluginUpdateWithValueParams&& callback)
+    {
+        if (callback) {
+            onPluginUpdateWithValueParams_ = callback;
+        }
+    }
+
+    void FireDeclarativeOnUpdateWithValueParamsCallback(const std::string& params) const
+    {
+        if (onPluginUpdateWithValueParams_) {
+            onPluginUpdateWithValueParams_(params);
+        }
+    }
+
 private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);
@@ -306,6 +322,7 @@ private:
     OnActiveCallBack onActive_;
     OnInactiveCallBack onInactive_;
     OnMemoryLevelCallBack onMemoryLevel_;
+    onPluginUpdateWithValueParams onPluginUpdateWithValueParams_;
     OnStartContinuationCallBack onStartContinuationCallBack_;
     OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
     OnRemoteTerminatedCallBack onRemoteTerminatedCallBack_;
