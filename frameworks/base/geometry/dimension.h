@@ -114,6 +114,11 @@ public:
         return NonNegative(value_);
     }
 
+    bool IsNonPositive() const
+    {
+        return NonPositive(value_);
+    }
+
     bool IsNegative() const
     {
         return !NonNegative(value_);

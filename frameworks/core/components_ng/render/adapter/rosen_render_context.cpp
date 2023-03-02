@@ -414,12 +414,20 @@ void RosenRenderContext::UpdateSphericalEffect(float radio)
 
 void RosenRenderContext::UpdatePixelStretchEffect(PixStretchEffectOption& option)
 {
-
+    CHECK_NULL_VOID(rsNode_);
+    Rosen::Vector4f pixStretchVector;
+    pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
+        static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
+        static_cast<float>(option.bottom.ConvertToPx()));
+    rsNode_->SetPixelStretch(pixStretchVector);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::UpdateLightupEffect(float radio)
 {
-
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetLightUpEffectDegree(radio);
+    RequestNextFrame();
 }
 
 void RosenRenderContext::OnOpacityUpdate(double opacity)

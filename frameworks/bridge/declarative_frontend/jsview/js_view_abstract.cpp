@@ -1643,12 +1643,14 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom)) {
         return;
     }
-
     PixStretchEffectOption option;
-    option.left = left;
-    option.right = right;
-    option.top = top;
-    option.bottom = bottom;
+    if ((left.IsNonNegative() && right.IsNonNegative() && top.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && right.IsNonPositive() && top.IsNonPositive() && bottom.IsNonPositive())) {
+        option.left = left;
+        option.right = right;
+        option.top = top;
+        option.bottom = bottom;
+    }
     ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
 }
 
@@ -4090,6 +4092,9 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
+    JSClass<JSViewAbstract>::StaticMethod("lightupEffect", &JSViewAbstract::JsLightupEffect);
+    JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
+    JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
     JSClass<JSViewAbstract>::StaticMethod("border", &JSViewAbstract::JsBorder);
     JSClass<JSViewAbstract>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
     JSClass<JSViewAbstract>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
