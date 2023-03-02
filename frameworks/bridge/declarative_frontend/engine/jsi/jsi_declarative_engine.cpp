@@ -649,7 +649,7 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 {
     auto jsRuntime = InnerGetCurrentRuntime();
-    if (jsRuntime) {
+    if (isUnique_ && jsRuntime) {
         return jsRuntime;
     }
 
@@ -663,7 +663,7 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
         return globalRuntime_;
     }
 
-    return localRuntime_;
+    return jsRuntime == nullptr ? localRuntime_ : jsRuntime;
 }
 
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::InnerGetCurrentRuntime()
@@ -681,7 +681,7 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::InnerGetCurrentRuntime()
         return nullptr;
     }
 
-    if (!engineInstance->IsEngineInstanceInitialized()) {
+    if (isUnique_ && !engineInstance->IsEngineInstanceInitialized()) {
         LOGI("engineInstance is not Initialized");
         return nullptr;
     }
