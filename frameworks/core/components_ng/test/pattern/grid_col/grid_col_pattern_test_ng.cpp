@@ -55,57 +55,71 @@ void GridColPatternTestNg::TearDownTestCase()
  */
 HWTEST_F(GridColPatternTestNg, GridColDefault001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create gridCol and Set properties.
+    */
     GridColModelNG gridColModelNG;
     gridColModelNG.Create();
+    auto testVal = AceType::MakeRefPtr<V2::GridContainerSize>(7);
+    gridColModelNG.SetSpan(testVal);
+    gridColModelNG.SetOffset(testVal);
+    gridColModelNG.SetOrder(testVal);
+
+    /**
+     * @tc.steps: step2. Get frameNode, layoutProperty.
+     * @tc.expected: step2. Verify properties is correct.
+    */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<GridColLayoutProperty>();
-    EXPECT_NE(layoutProperty, nullptr);
-
-    auto span = layoutProperty->GetSpan();
-    EXPECT_TRUE(span.has_value());
-    auto offset = layoutProperty->GetOffset();
-    EXPECT_TRUE(offset.has_value());
-    auto order = layoutProperty->GetOrder();
-    EXPECT_TRUE(order.has_value());
-
-    constexpr int32_t testVal = 7;
-    layoutProperty->UpdateSpan(V2::GridContainerSize(testVal));
-    EXPECT_EQ(layoutProperty->GetSpanValue().xs, testVal);
-    layoutProperty->UpdateOffset(V2::GridContainerSize(testVal));
-    EXPECT_EQ(layoutProperty->GetOffsetValue().md, testVal);
-    layoutProperty->UpdateOrder(V2::GridContainerSize(testVal));
-    EXPECT_EQ(layoutProperty->GetOrderValue().lg, testVal);
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetSpan(), *testVal);
+    EXPECT_EQ(layoutProperty->GetOffset(), *testVal);
+    EXPECT_EQ(layoutProperty->GetOrder(), *testVal);
 
     // rubbish code for coverity
     auto clone = layoutProperty->Clone();
     clone.Reset();
     auto json = JsonUtil::Create(true);
     layoutProperty->ToJsonValue(json);
+    EXPECT_NE(json->ToString(), "");
 }
 
 /**
  * @tc.name: GridColDefault002
- * @tc.desc: Test GridCol's properties.
+ * @tc.desc: Test GetPropValue function.
  * @tc.type: FUNC
  */
 HWTEST_F(GridColPatternTestNg, GridColDefault002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create gridCol and get frameNode, layoutProperty.
+    */
     GridColModelNG gridColModelNG;
-    RefPtr<V2::GridContainerSize> spanVal = AceType::MakeRefPtr<V2::GridContainerSize>(1);
-    RefPtr<V2::GridContainerSize> offsetVal = AceType::MakeRefPtr<V2::GridContainerSize>(0);
-    RefPtr<V2::GridContainerSize> orderVal = AceType::MakeRefPtr<V2::GridContainerSize>(0);
-    gridColModelNG.Create(spanVal, offsetVal, orderVal);
+    gridColModelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<GridColLayoutProperty>();
-    EXPECT_NE(layoutProperty, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
 
-    auto span = layoutProperty->GetSpan();
-    EXPECT_TRUE(span.has_value());
-    auto offset = layoutProperty->GetOffset();
-    EXPECT_TRUE(offset.has_value());
-    auto order = layoutProperty->GetOrder();
-    EXPECT_TRUE(order.has_value());
+    /**
+     * @tc.steps: step2. Verify GetPropValue func.
+    */
+    int32_t propValue;
+    const V2::GridContainerSize prop = V2::GridContainerSize(7);
+    propValue = layoutProperty->GetPropValue(prop, V2::GridSizeType::XS);
+    EXPECT_EQ(propValue, prop.xs);
+    propValue = layoutProperty->GetPropValue(prop, V2::GridSizeType::SM);
+    EXPECT_EQ(propValue, prop.sm);
+    propValue = layoutProperty->GetPropValue(prop, V2::GridSizeType::MD);
+    EXPECT_EQ(propValue, prop.md);
+    propValue = layoutProperty->GetPropValue(prop, V2::GridSizeType::LG);
+    EXPECT_EQ(propValue, prop.lg);
+    propValue = layoutProperty->GetPropValue(prop, V2::GridSizeType::XL);
+    EXPECT_EQ(propValue, prop.xl);
+    propValue = layoutProperty->GetPropValue(prop, V2::GridSizeType::XXL);
+    EXPECT_EQ(propValue, prop.xxl);
+    propValue = layoutProperty->GetPropValue(prop, V2::GridSizeType::UNDEFINED);
+    EXPECT_EQ(propValue, prop.xs);
 }
 } // namespace OHOS::Ace::NG
