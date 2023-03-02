@@ -746,6 +746,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         etsCardTouchEventCallback_(point);
     }
 
+    if (uiExtensionCallback_) {
+        uiExtensionCallback_(point);
+    }
+
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
@@ -810,6 +814,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
         etsCardTouchEventCallback_ = nullptr;
+        uiExtensionCallback_ = nullptr;
     }
 
     hasIdleTasks_ = true;

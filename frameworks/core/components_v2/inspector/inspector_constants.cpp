@@ -476,10 +476,14 @@ const char POPUP_ETS_TAG[] = "Popup";
 const char REMOTE_WINDOW_ETS_TAG[] = "RemoteWindow";
 
 // Model
-ACE_EXPORT extern const char MODEL_COMPONENT_TAG[] = "ModelComponent";
-ACE_EXPORT extern const char MODEL_ETS_TAG[] = "Model";
+const char MODEL_COMPONENT_TAG[] = "ModelComponent";
+const char MODEL_ETS_TAG[] = "Model";
 
 // window scene
-ACE_EXPORT extern const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
+const char WINDOW_SCENE_ETS_TAG[] = "WindowScene";
+
+// ui_extension_component
+const char UI_EXTENSION_COMPONENT_TAG[] = "UIExtensionComponent";
+const char UI_EXTENSION_COMPONENT_ETS_TAG[] = "UIExtensionComponent";
 
 } // namespace OHOS::Ace::V2

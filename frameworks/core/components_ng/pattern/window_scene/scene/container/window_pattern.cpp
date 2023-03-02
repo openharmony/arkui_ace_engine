@@ -60,32 +60,52 @@ public:
         config.SetSize(rect.width_, rect.height_);
         // TODO: get display density
         config.SetDensity(1.5);
-        LOGI("OnSizeChange window rect: [%{public}d, %{public}d, %{public}u, %{public}u]",
-            rect.posX_, rect.posY_, rect.width_, rect.height_);
+        LOGI("OnSizeChange window rect: [%{public}d, %{public}d, %{public}u, %{public}u]", rect.posX_, rect.posY_,
+            rect.width_, rect.height_);
         window->UpdateViewportConfig(config, SESSION_TO_WINDOW_MAP.at(reason));
     }
 
 private:
     const std::map<Rosen::SizeChangeReason, Rosen::WindowSizeChangeReason> SESSION_TO_WINDOW_MAP {
-        { Rosen::SizeChangeReason::SHOW,     Rosen::WindowSizeChangeReason::UNDEFINED },
-        { Rosen::SizeChangeReason::HIDE,     Rosen::WindowSizeChangeReason::HIDE      },
-        { Rosen::SizeChangeReason::MAXIMIZE, Rosen::WindowSizeChangeReason::MAXIMIZE  },
-        { Rosen::SizeChangeReason::RECOVER,  Rosen::WindowSizeChangeReason::RECOVER   },
-        { Rosen::SizeChangeReason::ROTATION, Rosen::WindowSizeChangeReason::ROTATION  },
+        { Rosen::SizeChangeReason::SHOW, Rosen::WindowSizeChangeReason::UNDEFINED },
+        { Rosen::SizeChangeReason::HIDE, Rosen::WindowSizeChangeReason::HIDE },
+        { Rosen::SizeChangeReason::MAXIMIZE, Rosen::WindowSizeChangeReason::MAXIMIZE },
+        { Rosen::SizeChangeReason::RECOVER, Rosen::WindowSizeChangeReason::RECOVER },
+        { Rosen::SizeChangeReason::ROTATION, Rosen::WindowSizeChangeReason::ROTATION },
     };
     int32_t instanceId_ = -1;
 };
 
-WindowPattern::WindowPattern(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode) : surfaceNode_(surfaceNode), context_(context)
+class PointerEventListener : public Rosen::IPointerEventListener {
+public:
+    explicit PointerEventListener(int32_t instanceId) : instanceId_(instanceId) {}
+    virtual ~PointerEventListener() = default;
+
+    void OnPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override
+    {
+        ContainerScope scope(instanceId_);
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto window = static_cast<WindowPattern*>(container->GetWindow());
+        CHECK_NULL_VOID(window);
+        window->ProcessPointerEvent(pointerEvent);
+    }
+
+private:
+    int32_t instanceId_ = -1;
+};
+
+WindowPattern::WindowPattern(
+    const std::shared_ptr<AbilityRuntime::Context>& context, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+    : surfaceNode_(surfaceNode), context_(context)
 {}
 
 void WindowPattern::Init()
 {
     int64_t refreshPeriod = static_cast<int64_t>(ONE_SECOND_IN_NANO / GetDisplayRefreshRate());
     vsyncCallback_ = std::make_shared<Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [weakTask = taskExecutor_, instanceId = instanceId_, refreshPeriod]
-        (int64_t nanoTimestamp) {
+    vsyncCallback_->onCallback = [weakTask = taskExecutor_, instanceId = instanceId_, refreshPeriod](
+                                     int64_t nanoTimestamp) {
         auto onVsync = [instanceId, nanoTimestamp, refreshPeriod] {
             ContainerScope scope(instanceId);
             // use container to get window can make sure the window is valid
@@ -112,13 +132,13 @@ void WindowPattern::Init()
     rsUIDirector_->SetRSSurfaceNode(GetSurfaceNode());
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
     rsUIDirector_->Init();
-    rsUIDirector_->SetUITaskRunner([taskExecutor = taskExecutor_.Upgrade(), instanceId = instanceId_]
-        (const std::function<void()>& task) {
-        ContainerScope scope(instanceId);
-        if (taskExecutor) {
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
-        }
-    });
+    rsUIDirector_->SetUITaskRunner(
+        [taskExecutor = taskExecutor_.Upgrade(), instanceId = instanceId_](const std::function<void()>& task) {
+            ContainerScope scope(instanceId);
+            if (taskExecutor) {
+                taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+            }
+        });
 }
 
 void WindowPattern::Destroy()
@@ -129,8 +149,8 @@ void WindowPattern::Destroy()
     callbacks_.clear();
 }
 
-void WindowPattern::LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
-    AbilityRuntime::Context* context)
+void WindowPattern::LoadContent(
+    const std::string& contentUrl, NativeEngine* engine, NativeValue* storage, AbilityRuntime::Context* context)
 {
     uiContent_ = UIContent::Create(context_.get(), engine);
     CHECK_NULL_VOID(uiContent_);
@@ -167,14 +187,16 @@ void WindowPattern::RequestFrame()
 
     auto taskExecutor = taskExecutor_.Upgrade();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask([id = instanceId_]() {
-        ContainerScope scope(id);
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto pipeline = container->GetPipelineContext();
-        CHECK_NULL_VOID(pipeline);
-        pipeline->OnIdle(0);
-    }, TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);
+    taskExecutor->PostDelayedTask(
+        [id = instanceId_]() {
+            ContainerScope scope(id);
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto pipeline = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->OnIdle(0);
+        },
+        TaskExecutor::TaskType::UI, IDLE_TASK_DELAY_MILLISECOND);
 }
 
 void WindowPattern::RecordFrameTime(uint64_t timeStamp, const std::string& name)
@@ -238,11 +260,24 @@ void WindowPattern::RegisterSizeChangeListener(const std::shared_ptr<Rosen::ISiz
     sessionStage_->RegisterSizeChangeListener(listener);
 }
 
+void WindowPattern::RegisterPointerEventListener(const std::shared_ptr<Rosen::IPointerEventListener>& listener)
+{
+    CHECK_NULL_VOID(sessionStage_);
+    sessionStage_->RegisterPointerEventListener(listener);
+}
+
+void WindowPattern::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->ProcessPointerEvent(pointerEvent);
+}
+
 void WindowPattern::Connect()
 {
-    auto listener = std::make_shared<SizeChangeListener>(instanceId_);
-    RegisterSizeChangeListener(listener);
-
+    auto sizeChangeListener = std::make_shared<SizeChangeListener>(instanceId_);
+    auto pointerListener = std::make_shared<PointerEventListener>(instanceId_);
+    RegisterSizeChangeListener(sizeChangeListener);
+    RegisterPointerEventListener(pointerListener);
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Connect();
 }

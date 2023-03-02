@@ -24,7 +24,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
 class LifecycleListener : public Rosen::ILifecycleListener {
 public:
     LifecycleListener(const WeakPtr<HostWindowPattern>& hostWindowPattern) : hostWindowPattern_(hostWindowPattern) {}
@@ -63,8 +62,8 @@ void HostWindowPattern::InitContent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    contentNode_ = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    contentNode_ = FrameNode::CreateFrameNode(
+        V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
     CHECK_NULL_VOID(session_);
@@ -78,8 +77,8 @@ void HostWindowPattern::InitContent()
     if (!HasStartingPage()) {
         host->AddChild(contentNode_);
     } else {
-        startingNode_ = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        startingNode_ = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
         startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(0xffffffff));
         host->AddChild(startingNode_);
@@ -124,16 +123,14 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
     auto windowRect = geometryNode->GetFrameRect();
-    Rosen::WSRect rect = {
-        .posX_ = std::round(windowRect.GetX()),
+    Rosen::WSRect rect = { .posX_ = std::round(windowRect.GetX()),
         .posY_ = std::round(windowRect.GetY()),
         .width_ = std::round(windowRect.Width()),
-        .height_ = std::round(windowRect.Height())
-    };
+        .height_ = std::round(windowRect.Height()) };
 
     CHECK_NULL_RETURN(session_, false);
-    LOGI("update session rect: [%{public}d, %{public}d, %{public}d, %{public}d]",
-        rect.posX_, rect.posY_, rect.width_, rect.height_);
+    LOGI("update session rect: [%{public}d, %{public}d, %{public}d, %{public}d]", rect.posX_, rect.posY_, rect.width_,
+        rect.height_);
     session_->UpdateRect(rect, Rosen::SizeChangeReason::SHOW);
     return false;
 }
@@ -150,4 +147,12 @@ void HostWindowPattern::OnAttachToFrameNode()
     renderContext->SetClipToBounds(true);
 }
 
+void HostWindowPattern::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(session_);
+    auto errCode = session_->TransferPointerEvent(pointerEvent);
+    if (errCode != Rosen::WSError::WS_OK) {
+        LOGE("DispatchPointerEvent failed, errCode=%{public}d", static_cast<int>(errCode));
+    }
+}
 } // namespace OHOS::Ace::NG

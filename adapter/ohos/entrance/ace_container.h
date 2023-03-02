@@ -20,7 +20,6 @@
 #include <memory>
 #include <mutex>
 
-#include "ability_context.h"
 #include "native_engine/native_reference.h"
 #include "native_engine/native_value.h"
 

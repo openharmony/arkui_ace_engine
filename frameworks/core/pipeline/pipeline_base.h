@@ -778,6 +778,11 @@ public:
         etsCardTouchEventCallback_ = std::move(callback);
     }
 
+    void AddUIExtensionCallback(std::function<void(const TouchEvent&)>&& callback)
+    {
+        uiExtensionCallback_ = std::move(callback);
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -858,6 +863,7 @@ protected:
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
     std::function<void(const TouchEvent&)> etsCardTouchEventCallback_;
+    std::function<void(const TouchEvent&)> uiExtensionCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;

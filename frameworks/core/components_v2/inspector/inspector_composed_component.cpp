@@ -338,6 +338,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { XCOMPONENT_TAG, XCOMPONENT_ETS_TAG },
     { JS_VIEW_COMPONENT_TAG, JS_VIEW_ETS_TAG },
     { RELATIVE_CONTAINER_COMPONENT_TAG, RELATIVE_CONTAINER_ETS_TAG },
+    { UI_EXTENSION_COMPONENT_TAG, UI_EXTENSION_COMPONENT_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;
