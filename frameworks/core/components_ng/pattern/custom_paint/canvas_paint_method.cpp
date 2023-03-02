@@ -168,8 +168,6 @@ void CanvasPaintMethod::ImageObjFailed()
 void CanvasPaintMethod::DrawImage(
     PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
     std::string::size_type tmp = canvasImage.src.find(".svg");
     if (tmp != std::string::npos) {
         DrawSvgImage(paintWrapper, canvasImage);
@@ -203,25 +201,12 @@ void CanvasPaintMethod::DrawImage(
 
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     // get skImage form pixelMap
     auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image;
-    if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    } else {
-#ifndef GPU_DISABLED
-        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-#endif
-    }
+    sk_sp<SkImage> image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
     InitImagePaint();
     InitPaintBlend(imagePaint_);
@@ -253,7 +238,7 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     }
     auto cacheImage = imageCache_->GetCacheImage(src);
     if (cacheImage && cacheImage->imagePtr) {
-        return cacheImage->imagePtr->image();
+        return cacheImage->imagePtr;
     }
 
     auto context = context_.Upgrade();
@@ -261,9 +246,7 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     auto image = Ace::ImageProvider::GetSkImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
     auto rasterizedImage = image->makeRasterImage();
-    auto canvasImage = flutter::CanvasImage::Create();
-    canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
-    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(canvasImage));
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
     return rasterizedImage;
 }
 

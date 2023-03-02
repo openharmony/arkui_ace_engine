@@ -92,7 +92,6 @@ public:
 
     virtual void UploadToGpuForRender(
         const WeakPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const UploadSuccessCallback& successCallback,
         const FailedCallback& failedCallback,
         const Size& imageSize,
@@ -206,7 +205,6 @@ public:
 
     void UploadToGpuForRender(
         const WeakPtr<PipelineBase>& context,
-        const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         const UploadSuccessCallback& successCallback,
         const FailedCallback& failedCallback,
         const Size& imageSize,

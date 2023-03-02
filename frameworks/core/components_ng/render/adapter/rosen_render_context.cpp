@@ -54,6 +54,7 @@
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/canvas.h"
@@ -309,7 +310,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 
 void RosenRenderContext::PaintBackground()
 {
-    auto image = DynamicCast<SkiaCanvasImage>(bgImage_);
+    auto image = DynamicCast<NG::SkiaImage>(bgImage_);
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
 
     auto rosenImage = std::make_shared<Rosen::RSImage>();
@@ -318,7 +319,7 @@ void RosenRenderContext::PaintBackground()
         rosenImage->SetCompressData(
             compressData, image->GetUniqueID(), image->GetCompressWidth(), image->GetCompressHeight());
     } else {
-        rosenImage->SetImage(image->GetCanvasImage());
+        rosenImage->SetImage(image->GetImage());
     }
     rosenImage->SetImageRepeat(static_cast<int>(GetBackgroundImageRepeat().value_or(ImageRepeat::NO_REPEAT)));
     rsNode_->SetBgImage(rosenImage);
@@ -666,7 +667,7 @@ void RosenRenderContext::PaintBorderImage()
                                        ? (*layoutProperty->GetBorderWidthProperty())
                                        : BorderWidthProperty();
 
-        auto image = DynamicCast<SkiaCanvasImage>(ctx->bdImage_)->GetCanvasImage();
+        auto image = DynamicCast<SkiaImage>(ctx->bdImage_)->GetImage();
         CHECK_NULL_VOID(image);
         RSImage rsImage(&image);
         RSCanvas rsCanvas(&canvas);

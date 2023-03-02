@@ -22,9 +22,9 @@ build_component_ng("render_ng") {
     "adapter/form_render_window.cpp",
     "adapter/pixelmap_image.cpp",
     "adapter/skia_canvas.cpp",
-    "adapter/skia_canvas_image.cpp",
     "adapter/skia_color_filter.cpp",
     "adapter/skia_decoration_painter.cpp",
+    "adapter/skia_image.cpp",
     "adapter/skia_paint.cpp",
     "adapter/svg_canvas_image.cpp",
     "adapter/txt_font_collection.cpp",
@@ -52,7 +52,6 @@ build_component_ng("render_ng") {
 
   if (enable_ng_build) {
     sources += [
-      "adapter/flutter_canvas_image.cpp",
       "adapter/flutter_node.cpp",
       "adapter/flutter_render_context.cpp",
       "adapter/flutter_window.cpp",

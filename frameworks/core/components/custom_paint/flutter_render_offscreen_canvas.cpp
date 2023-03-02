@@ -47,11 +47,11 @@ namespace OHOS::Ace {
 namespace {
 constexpr double HANGING_PERCENT = 0.8;
 template<typename T, typename N>
-    N ConvertEnumToSkEnum(T key, const LinearEnumMapNode<T, N>* map, size_t length, N defaultValue)
-    {
-        int64_t index = BinarySearchFindIndex(map, length, key);
-        return index != -1 ? map[index].value : defaultValue;
-    }
+N ConvertEnumToSkEnum(T key, const LinearEnumMapNode<T, N>* map, size_t length, N defaultValue)
+{
+    int64_t index = BinarySearchFindIndex(map, length, key);
+    return index != -1 ? map[index].value : defaultValue;
+}
 
 constexpr double DEFAULT_QUALITY = 0.92;
 constexpr int32_t MAX_LENGTH = 2048 * 2048;
@@ -104,14 +104,14 @@ const LinearEnumMapNode<CompositeOperation, SkBlendMode> SK_BLEND_MODE_TABLE[] =
 constexpr size_t BLEND_MODE_SIZE = ArraySize(SK_BLEND_MODE_TABLE);
 } // namespace
 
-FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<PipelineBase>& context,
-    int32_t width, int32_t height)
+FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(
+    const WeakPtr<PipelineBase>& context, int32_t width, int32_t height)
 {
     pipelineContext_ = context;
     width_ = width;
     height_ = height;
-    auto imageInfo = SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType,
-        SkAlphaType::kOpaque_SkAlphaType);
+    auto imageInfo =
+        SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
     skBitmap_.allocPixels(imageInfo);
     cacheBitmap_.allocPixels(imageInfo);
     skBitmap_.eraseColor(SK_ColorTRANSPARENT);
@@ -119,42 +119,12 @@ FlutterRenderOffscreenCanvas::FlutterRenderOffscreenCanvas(const WeakPtr<Pipelin
     skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
 
-    auto pipelineContext = context.Upgrade();
-    if (pipelineContext) {
-        pipelineContext->GetTaskExecutor()->PostTask(
-            [weak = WeakClaim(this), width, height]() {
-                auto currentDartState = flutter::UIDartState::Current();
-                if (!currentDartState) {
-                    return;
-                }
-                auto flutterRenderOffscreenCanvas = weak.Upgrade();
-                if (!flutterRenderOffscreenCanvas) {
-                    LOGE("flutterRenderOffscreenCanvas is null");
-                    return;
-                }
-
-                flutterRenderOffscreenCanvas->SetRenderTaskHolder(
-                    MakeRefPtr<FlutterRenderTaskHolder>(
-                        currentDartState->GetSkiaUnrefQueue(),
-                        currentDartState->GetIOManager(),
-                        currentDartState->GetTaskRunners().GetIOTaskRunner()));
-            },
-            TaskExecutor::TaskType::UI);
-    }
-
     InitFilterFunc();
-}
-void FlutterRenderOffscreenCanvas::SetRenderTaskHolder(const RefPtr<FlutterRenderTaskHolder> renderTaskHolder)
-{
-#ifndef GPU_DISABLED
-    renderTaskHolder_ = renderTaskHolder;
-#endif
 }
 
 void FlutterRenderOffscreenCanvas::AddRect(const Rect& rect)
 {
-    SkRect skRect = SkRect::MakeLTRB(rect.Left(), rect.Top(),
-        rect.Right(), rect.Bottom());
+    SkRect skRect = SkRect::MakeLTRB(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
     skPath_.addRect(skRect);
 }
 
@@ -322,7 +292,7 @@ void FlutterRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
     if (imageData.data.empty()) {
         return;
     }
-    uint32_t* data = new (std::nothrow)uint32_t[imageData.data.size()];
+    uint32_t* data = new (std::nothrow) uint32_t[imageData.data.size()];
     if (data == nullptr) {
         return;
     }
@@ -341,7 +311,7 @@ void FlutterRenderOffscreenCanvas::PutImageData(const ImageData& imageData)
 
 void FlutterRenderOffscreenCanvas::SetPaintImage()
 {
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     matrix[0] = matrix[6] = matrix[12] = matrix[18] = 1.0f;
 #ifdef USE_SYSTEM_SKIA
     imagePaint_.setColorFilter(SkColorFilter::MakeMatrixFilterRowMajor255(matrix));
@@ -382,18 +352,14 @@ void FlutterRenderOffscreenCanvas::InitImagePaint()
 
 void FlutterRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, double width, double height)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;
     }
 
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                        ? ImageProvider::GetSkImage(canvasImage.src, context, Size(width, height))
-                        : ImageProvider::GetSkImage(canvasImage.src, context);
+                     ? ImageProvider::GetSkImage(canvasImage.src, context, Size(width, height))
+                     : ImageProvider::GetSkImage(canvasImage.src, context);
     if (!image) {
         LOGE("image is null");
         return;
@@ -418,10 +384,8 @@ void FlutterRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, dou
             break;
         }
         case 2: {
-            SkRect dstRect =
-                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            SkRect srcRect =
-                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
             break;
         }
@@ -436,10 +400,6 @@ void FlutterRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, dou
 
 void FlutterRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;
@@ -450,17 +410,8 @@ void FlutterRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image;
-    if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    } else {
-#ifndef GPU_DISABLED
-        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-#endif
-    }
+    sk_sp<SkImage> image =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     if (!image) {
         LOGE("image is null");
         return;
@@ -480,10 +431,8 @@ void FlutterRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const
             break;
         }
         case 2: {
-            SkRect dstRect =
-                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            SkRect srcRect =
-                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
             break;
         }
@@ -496,8 +445,8 @@ void FlutterRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const
     }
 }
 
-std::unique_ptr<ImageData> FlutterRenderOffscreenCanvas::GetImageData(double left, double top,
-    double width, double height)
+std::unique_ptr<ImageData> FlutterRenderOffscreenCanvas::GetImageData(
+    double left, double top, double width, double height)
 {
     double viewScale = 1.0;
     auto pipeline = pipelineContext_.Upgrade();
@@ -568,7 +517,7 @@ std::string FlutterRenderOffscreenCanvas::ToDataURL(const std::string& type, con
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
 #ifdef USE_SYSTEM_SKIA_S
-    //The return value of the dual framework interface has no alpha
+    // The return value of the dual framework interface has no alpha
     tempCanvas.drawImage(skBitmap_.asImage(), 0.0f, 0.0f);
 #else
     tempCanvas.drawBitmap(skBitmap_, 0.0f, 0.0f);
@@ -614,10 +563,10 @@ std::string FlutterRenderOffscreenCanvas::ToDataURL(const std::string& type, con
 
 void FlutterRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradient& gradient)
 {
-    SkPoint beginPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetBeginOffset().GetX()),
-        SkDoubleToScalar(gradient.GetBeginOffset().GetY()));
-    SkPoint endPoint = SkPoint::Make(SkDoubleToScalar(gradient.GetEndOffset().GetX()),
-        SkDoubleToScalar(gradient.GetEndOffset().GetY()));
+    SkPoint beginPoint = SkPoint::Make(
+        SkDoubleToScalar(gradient.GetBeginOffset().GetX()), SkDoubleToScalar(gradient.GetBeginOffset().GetY()));
+    SkPoint endPoint = SkPoint::Make(
+        SkDoubleToScalar(gradient.GetEndOffset().GetX()), SkDoubleToScalar(gradient.GetEndOffset().GetY()));
     SkPoint pts[2] = { beginPoint, endPoint };
     std::vector<GradientColor> gradientColors = gradient.GetColors();
     std::stable_sort(gradientColors.begin(), gradientColors.end(),
@@ -645,8 +594,8 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(SkPaint& paint, const Gradi
             skShader = SkGradientShader::MakeRadial(
                 endPoint, gradient.GetOuterRadius(), colors, pos, gradientColors.size(), mode);
         } else {
-            skShader = SkGradientShader::MakeTwoPointConical(beginPoint, gradient.GetInnerRadius(),
-                endPoint, gradient.GetOuterRadius(), colors, pos, gradientColors.size(), mode);
+            skShader = SkGradientShader::MakeTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
+                gradient.GetOuterRadius(), colors, pos, gradientColors.size(), mode);
         }
     }
     paint.setShader(skShader);
@@ -664,10 +613,6 @@ void FlutterRenderOffscreenCanvas::ResetTransform()
 
 void FlutterRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;
@@ -676,8 +621,8 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkP
     auto width = pattern.GetImageWidth();
     auto height = pattern.GetImageHeight();
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                        ? ImageProvider::GetSkImage(pattern.GetImgSrc(), context, Size(width, height))
-                        : ImageProvider::GetSkImage(pattern.GetImgSrc(), context);
+                     ? ImageProvider::GetSkImage(pattern.GetImgSrc(), context, Size(width, height))
+                     : ImageProvider::GetSkImage(pattern.GetImgSrc(), context);
     if (!image) {
         LOGE("image is null");
         return;
@@ -716,8 +661,7 @@ void FlutterRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkP
 #endif
             } },
     };
-    auto operatorIter =
-        BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
+    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
         staticPattern[operatorIter].value(image, paint);
     }
@@ -767,8 +711,7 @@ void FlutterRenderOffscreenCanvas::StrokeRect(Rect rect)
 {
     SkPaint paint = GetStrokePaint();
     paint.setAntiAlias(antiAlias_);
-    SkRect skRect = SkRect::MakeLTRB(rect.Left(), rect.Top(),
-        rect.Right(), rect.Bottom());
+    SkRect skRect = SkRect::MakeLTRB(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
     if (HasShadow()) {
         SkPath path;
         path.addRect(skRect);
@@ -860,13 +803,13 @@ void FlutterRenderOffscreenCanvas::SetAntiAlias(bool isEnabled)
 bool FlutterRenderOffscreenCanvas::HasShadow() const
 {
     return !(NearZero(shadow_.GetOffset().GetX()) && NearZero(shadow_.GetOffset().GetY()) &&
-         NearZero(shadow_.GetBlurRadius()));
+             NearZero(shadow_.GetBlurRadius()));
 }
 
 bool FlutterRenderOffscreenCanvas::HasImageShadow() const
 {
     return !(NearZero(imageShadow_.GetOffset().GetX()) && NearZero(imageShadow_.GetOffset().GetY()) &&
-         NearZero(imageShadow_.GetBlurRadius()));
+             NearZero(imageShadow_.GetBlurRadius()));
 }
 
 void FlutterRenderOffscreenCanvas::Path2DAddPath(const PathArgs& args)
@@ -908,17 +851,16 @@ void FlutterRenderOffscreenCanvas::Path2DArc(const PathArgs& args)
     double x = args.para1;
     double y = args.para2;
     double r = args.para3;
-    auto rect = SkRect::MakeLTRB(x - r, y - r,
-        x + r, y + r);
+    auto rect = SkRect::MakeLTRB(x - r, y - r, x + r, y + r);
     double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
     double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (!NearZero(args.para6)) {
-        sweepAngle = endAngle > startAngle ?
-            (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
+        sweepAngle =
+            endAngle > startAngle ? (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
     } else {
-        sweepAngle = endAngle > startAngle ?
-            sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
+        sweepAngle =
+            endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
@@ -988,8 +930,7 @@ void FlutterRenderOffscreenCanvas::Path2DEllipse(const PathArgs& args)
             sweepAngle += FULL_CIRCLE_ANGLE;
         }
     }
-    auto rect = SkRect::MakeLTRB(x - rx, y - ry,
-        x + rx, y + ry);
+    auto rect = SkRect::MakeLTRB(x - rx, y - ry, x + rx, y + ry);
 
     if (!NearZero(rotation)) {
         SkMatrix matrix;
@@ -1244,8 +1185,8 @@ void FlutterRenderOffscreenCanvas::PaintText(const std::string& text, double x, 
     paragraph_->Paint(skCanvas_.get(), dx, dy);
 }
 
-double FlutterRenderOffscreenCanvas::GetAlignOffset(const std::string& text,
-    TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
+double FlutterRenderOffscreenCanvas::GetAlignOffset(
+    const std::string& text, TextAlign align, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double x = 0.0;
     switch (align) {
@@ -1293,8 +1234,8 @@ void FlutterRenderOffscreenCanvas::InitCachePaint()
         ConvertEnumToSkEnum(globalState_.GetType(), SK_BLEND_MODE_TABLE, BLEND_MODE_SIZE, SkBlendMode::kSrcOver));
 }
 
-bool FlutterRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, bool isStroke,
-    const PaintState& state, bool hasShadow)
+bool FlutterRenderOffscreenCanvas::UpdateOffParagraph(
+    const std::string& text, bool isStroke, const PaintState& state, bool hasShadow)
 {
     using namespace Constants;
     txt::ParagraphStyle style;
@@ -1326,8 +1267,7 @@ bool FlutterRenderOffscreenCanvas::UpdateOffParagraph(const std::string& text, b
     return true;
 }
 
-void FlutterRenderOffscreenCanvas::UpdateTextStyleForeground(
-    bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
+void FlutterRenderOffscreenCanvas::UpdateTextStyleForeground(bool isStroke, txt::TextStyle& txtStyle, bool hasShadow)
 {
     using namespace Constants;
     if (!isStroke) {
@@ -1371,8 +1311,8 @@ void FlutterRenderOffscreenCanvas::UpdateTextStyleForeground(
     }
 }
 
-double FlutterRenderOffscreenCanvas::GetBaselineOffset(TextBaseline baseline,
-    std::unique_ptr<txt::Paragraph>& paragraph)
+double FlutterRenderOffscreenCanvas::GetBaselineOffset(
+    TextBaseline baseline, std::unique_ptr<txt::Paragraph>& paragraph)
 {
     double y = 0.0;
     switch (baseline) {
@@ -1406,14 +1346,13 @@ void FlutterRenderOffscreenCanvas::LineTo(double x, double y)
 }
 void FlutterRenderOffscreenCanvas::BezierCurveTo(const BezierCurveParam& param)
 {
-    skPath_.cubicTo(SkDoubleToScalar(param.cp1x), SkDoubleToScalar(param.cp1y),
-        SkDoubleToScalar(param.cp2x), SkDoubleToScalar(param.cp2y),
-        SkDoubleToScalar(param.x), SkDoubleToScalar(param.y));
+    skPath_.cubicTo(SkDoubleToScalar(param.cp1x), SkDoubleToScalar(param.cp1y), SkDoubleToScalar(param.cp2x),
+        SkDoubleToScalar(param.cp2y), SkDoubleToScalar(param.x), SkDoubleToScalar(param.y));
 }
 void FlutterRenderOffscreenCanvas::QuadraticCurveTo(const QuadraticCurveParam& param)
 {
-    skPath_.quadTo(SkDoubleToScalar(param.cpx), SkDoubleToScalar(param.cpy),
-        SkDoubleToScalar(param.x), SkDoubleToScalar(param.y));
+    skPath_.quadTo(
+        SkDoubleToScalar(param.cpx), SkDoubleToScalar(param.cpy), SkDoubleToScalar(param.x), SkDoubleToScalar(param.y));
 }
 void FlutterRenderOffscreenCanvas::Ellipse(const EllipseParam& param)
 {
@@ -1545,8 +1484,8 @@ void FlutterRenderOffscreenCanvas::TranspareCmdToPath(const RefPtr<CanvasPath2D>
 
 bool FlutterRenderOffscreenCanvas::IsPointInPathByColor(double x, double y, SkPath& path, SkColor colorMatch)
 {
-    auto imageInfo = SkImageInfo::Make(width_, height_, SkColorType::kRGBA_8888_SkColorType,
-        SkAlphaType::kOpaque_SkAlphaType);
+    auto imageInfo =
+        SkImageInfo::Make(width_, height_, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
     SkBitmap skBitmap;
     skBitmap.allocPixels(imageInfo);
     std::unique_ptr<SkCanvas> skCanvas = std::make_unique<SkCanvas>(skBitmap);
@@ -1592,36 +1531,16 @@ bool FlutterRenderOffscreenCanvas::IsPointInStroke(const RefPtr<CanvasPath2D>& p
 
 void FlutterRenderOffscreenCanvas::InitFilterFunc()
 {
-    filterFunc_["grayscale"] = [&](const std::string& percentage) {
-        SetGrayFilter(percentage);
-    };
-    filterFunc_["sepia"] = [&](const std::string& percentage) {
-        SetSepiaFilter(percentage);
-    };
-    filterFunc_["invert"] = [&](const std::string& percentage) {
-        SetInvertFilter(percentage);
-    };
-    filterFunc_["opacity"] = [&](const std::string& percentage) {
-        SetOpacityFilter(percentage);
-    };
-    filterFunc_["brightness"] = [&](const std::string& percentage) {
-        SetBrightnessFilter(percentage);
-    };
-    filterFunc_["contrast"] = [&](const std::string& percentage) {
-        SetContrastFilter(percentage);
-    };
-    filterFunc_["blur"] = [&](const std::string& percentage) {
-        SetBlurFilter(percentage);
-    };
-    filterFunc_["drop-shadow"] = [&](const std::string& percentage) {
-        SetDropShadowFilter(percentage);
-    };
-    filterFunc_["saturate"] = [&](const std::string& percentage) {
-        SetSaturateFilter(percentage);
-    };
-    filterFunc_["hue-rotate"] = [&](const std::string& percentage) {
-        SetHueRotateFilter(percentage);
-    };
+    filterFunc_["grayscale"] = [&](const std::string& percentage) { SetGrayFilter(percentage); };
+    filterFunc_["sepia"] = [&](const std::string& percentage) { SetSepiaFilter(percentage); };
+    filterFunc_["invert"] = [&](const std::string& percentage) { SetInvertFilter(percentage); };
+    filterFunc_["opacity"] = [&](const std::string& percentage) { SetOpacityFilter(percentage); };
+    filterFunc_["brightness"] = [&](const std::string& percentage) { SetBrightnessFilter(percentage); };
+    filterFunc_["contrast"] = [&](const std::string& percentage) { SetContrastFilter(percentage); };
+    filterFunc_["blur"] = [&](const std::string& percentage) { SetBlurFilter(percentage); };
+    filterFunc_["drop-shadow"] = [&](const std::string& percentage) { SetDropShadowFilter(percentage); };
+    filterFunc_["saturate"] = [&](const std::string& percentage) { SetSaturateFilter(percentage); };
+    filterFunc_["hue-rotate"] = [&](const std::string& percentage) { SetHueRotateFilter(percentage); };
 }
 
 bool FlutterRenderOffscreenCanvas::GetFilterType(std::string& filterType, std::string& filterParam)
@@ -1634,7 +1553,7 @@ bool FlutterRenderOffscreenCanvas::GetFilterType(std::string& filterType, std::s
     filterType = paramData.substr(0, index);
     filterParam = paramData.substr(index + 1);
     size_t endeIndex = filterParam.find(")");
-    if (endeIndex  == std::string::npos) {
+    if (endeIndex == std::string::npos) {
         return false;
     }
     filterParam.erase(endeIndex, 1);
@@ -1660,7 +1579,7 @@ double FlutterRenderOffscreenCanvas::PxStrToDouble(const std::string& str)
         std::istringstream iss(result);
         iss >> ret;
     }
-    return  ret;
+    return ret;
 }
 
 double FlutterRenderOffscreenCanvas::BlurStrToDouble(const std::string& str)
@@ -1681,9 +1600,9 @@ double FlutterRenderOffscreenCanvas::BlurStrToDouble(const std::string& str)
         iss >> ret;
     }
     if (str.find("rem") != std::string::npos) {
-        return  ret * 15;
+        return ret * 15;
     }
-    return  ret;
+    return ret;
 }
 
 void FlutterRenderOffscreenCanvas::SetGrayFilter(const std::string& percent)
@@ -1701,7 +1620,7 @@ void FlutterRenderOffscreenCanvas::SetGrayFilter(const std::string& percent)
     }
     float otherColor = percentNum / 3;
     float primColor = 1 - 2 * otherColor;
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     matrix[0] = matrix[6] = matrix[12] = primColor;
     matrix[1] = matrix[2] = matrix[5] = matrix[7] = matrix[10] = matrix[11] = otherColor;
     matrix[18] = 1.0f;
@@ -1721,7 +1640,7 @@ void FlutterRenderOffscreenCanvas::SetSepiaFilter(const std::string& percent)
     if (percentNum > 1) {
         percentNum = 1;
     }
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     matrix[0] = 1.0f - percentNum * 0.6412f;
     matrix[1] = percentNum * 0.7044f;
     matrix[2] = percentNum * 0.1368f;
@@ -1746,7 +1665,7 @@ void FlutterRenderOffscreenCanvas::SetInvertFilter(const std::string& filterPara
         percentage = percentage / 100;
     }
 
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     matrix[0] = matrix[6] = matrix[12] = 1.0 - 2.0 * percentage;
     matrix[4] = matrix[9] = matrix[14] = percentage;
     matrix[18] = 1.0f;
@@ -1764,7 +1683,7 @@ void FlutterRenderOffscreenCanvas::SetOpacityFilter(const std::string& filterPar
         percentage = percentage / 100;
     }
 
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     matrix[0] = matrix[6] = matrix[12] = 1.0f;
     matrix[18] = percentage;
     SetColorFilter(matrix);
@@ -1784,7 +1703,7 @@ void FlutterRenderOffscreenCanvas::SetBrightnessFilter(const std::string& percen
     if (percentage < 0) {
         return;
     }
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     matrix[0] = matrix[6] = matrix[12] = percentage;
     matrix[18] = 1.0f;
     SetColorFilter(matrix);
@@ -1801,7 +1720,7 @@ void FlutterRenderOffscreenCanvas::SetContrastFilter(const std::string& percent)
         percentage = percentage / 100;
     }
 
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     matrix[0] = matrix[6] = matrix[12] = percentage;
     matrix[4] = matrix[9] = matrix[14] = 0.5f * (1 - percentage);
     matrix[18] = 1;
@@ -1837,7 +1756,7 @@ void FlutterRenderOffscreenCanvas::SetSaturateFilter(const std::string& filterPa
         percentage = percentage / 100;
     }
     double N = percentage;
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     matrix[0] = 0.3086f * (1 - N) + N;
     matrix[1] = matrix[11] = 0.6094f * (1 - N);
     matrix[2] = matrix[7] = 0.0820f * (1 - N);
@@ -1877,7 +1796,7 @@ void FlutterRenderOffscreenCanvas::SetHueRotateFilter(const std::string& filterP
         degree -= 360;
     }
 
-    float matrix[20] = {0};
+    float matrix[20] = { 0 };
     int32_t type = degree / 120;
     float N = (degree - 120 * type) / 120;
     switch (type) {

@@ -18,10 +18,12 @@
 
 #include "include/core/SkPath.h"
 
+#include "base/memory/referenced.h"
 #include "core/components/box/render_box.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border_edge.h"
 #include "core/components/common/properties/border_image.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_object.h"
 #include "core/image/image_provider.h"
 #include "core/pipeline/base/rosen_render_context.h"
@@ -171,7 +173,7 @@ private:
     bool CreatePath(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath);
     bool CreateRect(const RefPtr<BasicShape>& basicShape, const Size& size, const Offset& position, SkPath* skPath);
 
-    void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
+    void ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed();
 
@@ -190,7 +192,6 @@ private:
     OnPostBackgroundTask onPostBackgroundTask_;
 
     RefPtr<ImageObject> imageObj_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     UploadSuccessCallback uploadSuccessCallback_;
     double dipScale_ = 0.0;

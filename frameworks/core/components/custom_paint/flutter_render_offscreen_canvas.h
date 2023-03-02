@@ -95,7 +95,6 @@ private:
     std::unique_ptr<SkCanvas> cacheCanvas_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::map<std::string, setColorFunc> filterFunc_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     void UpdatePaintShader(SkPaint& paint, const Gradient& gradient);
     void UpdatePaintShader(const Pattern& pattern, SkPaint& paint);
     void PaintText(const std::string& text, double x, double y, bool isStroke, bool hasShadow = false);
@@ -142,7 +141,6 @@ private:
     double BlurStrToDouble(const std::string& str);
     bool IsPercentStr(std::string& percentStr);
     void SetColorFilter(float matrix[20]);
-    void SetRenderTaskHolder(const RefPtr<FlutterRenderTaskHolder> renderTaskHolder);
 };
 } // namespace OHOS::Ace
 

@@ -15,8 +15,6 @@
 
 #include "core/components/font/rosen_font_loader.h"
 
-#include "flutter/lib/ui/text/font_collection.h"
-
 #include "base/network/download_manager.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"

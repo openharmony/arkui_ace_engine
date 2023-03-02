@@ -15,8 +15,6 @@
 
 #include "core/components/search/flutter_render_search.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
-
 #include "core/pipeline/base/scoped_canvas_state.h"
 
 namespace OHOS::Ace {

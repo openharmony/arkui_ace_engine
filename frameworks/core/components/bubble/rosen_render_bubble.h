@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 
 #include "core/components/bubble/render_bubble.h"

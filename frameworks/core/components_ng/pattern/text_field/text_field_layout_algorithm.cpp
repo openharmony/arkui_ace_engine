@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 
-#include <unicode/uchar.h>
+#include "unicode/uchar.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"

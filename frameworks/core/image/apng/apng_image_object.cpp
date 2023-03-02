@@ -19,7 +19,6 @@
 namespace OHOS::Ace {
 void ApngImageObject::UploadToGpuForRender(
     const WeakPtr<PipelineBase>& context,
-    const RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
     const UploadSuccessCallback& successCallback,
     const FailedCallback& failedCallback,
     const Size& imageSize,
@@ -40,8 +39,6 @@ void ApngImageObject::UploadToGpuForRender(
                 imageSource_,
                 successCallback,
                 context,
-                renderTaskHolder->ioManager,
-                renderTaskHolder->unrefQueue,
                 apngDecoder_,
                 dstWidth,
                 dstHeight);

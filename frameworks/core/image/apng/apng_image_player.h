@@ -18,9 +18,6 @@
 
 #include <unordered_map>
 
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/image.h"
-
 #include "base/memory/ace_type.h"
 #include "core/animation/animator.h"
 #include "apng_image_animation.h"
@@ -98,8 +95,6 @@ public:
         ImageSourceInfo source,
         UploadSuccessCallback successCallback,
         const WeakPtr<PipelineBase>& weakContext,
-        const fml::WeakPtr<flutter::IOManager>& ioManager,
-        const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
         const RefPtr<PNGImageDecoder>& decoder,
         int32_t dstWidth = -1,
         int32_t dstHeight = -1);
@@ -128,10 +123,6 @@ private:
     UploadSuccessCallback successCallback_;
     WeakPtr<PipelineBase> context_;
 
-    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
-    fml::WeakPtr<flutter::IOManager> ioManager_;
-
-    fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue_;
     const RefPtr<PNGImageDecoder> apngDecoder_;
     int32_t frameCount_;
     int32_t repetitionCount_;

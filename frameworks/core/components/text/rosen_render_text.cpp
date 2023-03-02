@@ -17,10 +17,10 @@
 
 #include <cmath>
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/third_party/icu/source/common/unicode/uchar.h"
+#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "unicode/uchar.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
@@ -95,12 +95,12 @@ void RosenRenderText::Paint(RenderContext& context, const Offset& offset)
             case VerticalAlign::TOP:
                 break;
             case VerticalAlign::BOTTOM:
-                newY = offset.GetY() + (GetLayoutSize().Height() - textRealHeight)
-                    - std::max(NormalizeToPx(textStyle_.GetBaselineOffset()), 0.0);
+                newY = offset.GetY() + (GetLayoutSize().Height() - textRealHeight) -
+                       std::max(NormalizeToPx(textStyle_.GetBaselineOffset()), 0.0);
                 break;
             case VerticalAlign::CENTER:
-                newY = offset.GetY() - NormalizeToPx(textStyle_.GetBaselineOffset())
-                    + (GetLayoutSize().Height() - textRealHeight) / 2.0;
+                newY = offset.GetY() - NormalizeToPx(textStyle_.GetBaselineOffset()) +
+                       (GetLayoutSize().Height() - textRealHeight) / 2.0;
                 break;
             default:
                 break;
@@ -390,7 +390,8 @@ Size RosenRenderText::GetSize()
         height + std::fabs(NormalizeToPx(textStyle_.GetBaselineOffset())), GetLayoutParam().GetMaxSize().Height());
     const auto& VerticalAlign = textStyle_.GetTextVerticalAlign();
     if (((VerticalAlign == VerticalAlign::TOP || VerticalAlign == VerticalAlign::CENTER ||
-        VerticalAlign == VerticalAlign::BOTTOM)) && text_->GetDeclarationHeight().IsValid()) {
+            VerticalAlign == VerticalAlign::BOTTOM)) &&
+        text_->GetDeclarationHeight().IsValid()) {
         heightFinal = GetLayoutParam().GetMaxSize().Height();
     }
 

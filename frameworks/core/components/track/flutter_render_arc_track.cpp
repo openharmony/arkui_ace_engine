@@ -15,12 +15,13 @@
 
 #include "core/components/track/flutter_render_arc_track.h"
 
+#include "flutter/lib/ui/painting/path.h"
+#include "third_party/skia/include/core/SkClipOp.h"
+#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
+#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+
 #include "core/components/font/flutter_font_collection.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
-#include "flutter/lib/ui/painting/path.h"
-#include "flutter/lib/ui/text/paragraph_builder.h"
-#include "flutter/third_party/txt/src/txt/paragraph_txt.h"
-#include "third_party/skia/include/core/SkClipOp.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -61,8 +62,8 @@ bool ShouldHighLight(const double start, const double interval, const double per
     return false;
 }
 
-void SetTextStyle(const ScopedCanvas& canvas, const RenderRingInfo& trackInfo,
-    const std::string markedText, const Color markedColor, const Rect dataRegion)
+void SetTextStyle(const ScopedCanvas& canvas, const RenderRingInfo& trackInfo, const std::string markedText,
+    const Color markedColor, const Rect dataRegion)
 {
     if (!canvas) {
         LOGE("Paint canvas is null");
@@ -91,8 +92,8 @@ void SetTextStyle(const ScopedCanvas& canvas, const RenderRingInfo& trackInfo,
         canvas->canvas(), pathStartVertexX - txtStyle.font_size, pathStartVertexY + EDGE + HEIGHT_OFFSET * 2);
 }
 
-void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo,
-    const std::string markedText, const Color markedColor, const Rect dataRegion)
+void DrawIndicator(RenderContext& context, const RenderRingInfo& trackInfo, const std::string markedText,
+    const Color markedColor, const Rect dataRegion)
 {
     ScopedCanvas canvas = ScopedCanvas::Create(context);
     if (!canvas) {
@@ -133,8 +134,8 @@ void FlutterRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
 {
     RenderRingInfo data = paintData_;
     Rect dataRegion_;
-    dataRegion_ = Rect(offset.GetX() + 20, offset.GetY() + 2,
-        GetLayoutSize().Width() - 40, GetLayoutSize().Height() - 4);
+    dataRegion_ =
+        Rect(offset.GetX() + 20, offset.GetY() + 2, GetLayoutSize().Width() - 40, GetLayoutSize().Height() - 4);
     // now depend on box to clip
     if (data.center.GetX() < 0.0 || data.center.GetY() < 0.0) {
         data.center = Offset(GetLayoutSize().Width() / 2, GetLayoutSize().Height() / 2);
@@ -144,8 +145,7 @@ void FlutterRenderArcTrack::Paint(RenderContext& context, const Offset& offset)
     }
     data.center += offset;
     if (!showIndicator_) {
-        data.startDegree =
-            leftToRight_ ? paintData_.startDegree : paintData_.startDegree + paintData_.sweepDegree;
+        data.startDegree = leftToRight_ ? paintData_.startDegree : paintData_.startDegree + paintData_.sweepDegree;
         data.sweepDegree = leftToRight_ ? paintData_.sweepDegree : -1 * paintData_.sweepDegree;
         // draw background
         data.color = GetBackgroundColor();

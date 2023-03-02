@@ -22,6 +22,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 #include "core/components_ng/render/adapter/skia_paint.h"
 
 namespace OHOS::Ace::NG {
@@ -174,9 +175,9 @@ void SkiaCanvas::DrawImage(
     CHECK_NULL_VOID(rawCanvas_);
     auto skiaPaint = AceType::DynamicCast<SkiaPaint>(paint);
     CHECK_NULL_VOID(skiaPaint);
-    auto skiaImage = AceType::DynamicCast<SkiaCanvasImage>(image);
+    auto skiaImage = AceType::DynamicCast<SkiaImage>(image);
     CHECK_NULL_VOID(skiaImage);
-    auto imageObj = skiaImage->GetCanvasImage();
+    auto imageObj = skiaImage->GetImage();
     CHECK_NULL_VOID(imageObj);
 #ifdef FLUTTER_2_5
     rawCanvas_->drawImageRect(imageObj, ToSkRect(srcRect), ToSkRect(dstRect), skiaPaint->GetSamplingOptions(),

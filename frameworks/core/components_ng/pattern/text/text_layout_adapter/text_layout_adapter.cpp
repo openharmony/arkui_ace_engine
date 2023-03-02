@@ -14,7 +14,8 @@
  */
 
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
-#include <unicode/uchar.h>
+
+#include "unicode/uchar.h"
 
 namespace OHOS::Ace::NG {
 bool TextLayoutadapter::IsLeftToRight(int32_t charOfShowingText)

@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_FLUTTER_RENDER_TEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_FLUTTER_RENDER_TEXT_H
 
-#include "flutter/lib/ui/text/paragraph_builder.h"
-
 #include "core/components/text/render_text.h"
 #include "core/components/text_span/render_text_span.h"
 

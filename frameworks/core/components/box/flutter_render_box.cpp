@@ -18,7 +18,6 @@
 #include <cmath>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
@@ -37,6 +36,7 @@
 #include "core/components/flex/render_flex.h"
 #include "core/components/image/image_component.h"
 #include "core/components/transform/flutter_render_transform.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 #include "core/pipeline/base/flutter_render_context.h"
 #include "core/pipeline/base/scoped_canvas_state.h"
 #include "core/pipeline/layers/flutter_scene_builder.h"
@@ -58,17 +58,8 @@ using namespace Flutter;
 
 FlutterRenderBox::FlutterRenderBox()
 {
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
-    }
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
-        currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(),
-        currentDartState->GetTaskRunners().GetIOTaskRunner());
-
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)] (
-        ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {
+        ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {
         auto renderBox = weak.Upgrade();
         if (!renderBox) {
             LOGE("renderBox upgrade fail when image load success. callback image source info: %{private}s",
@@ -171,7 +162,6 @@ void FlutterRenderBox::FetchImageData()
             false,
             false,
             true,
-            renderTaskHolder_,
             onPostBackgroundTask_);
     }
 }
@@ -180,7 +170,7 @@ void FlutterRenderBox::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
     imageObj_ = imageObj;
     if (imageObj_) {
-        imageObj_->UploadToGpuForRender(GetContext(), renderTaskHolder_, uploadSuccessCallback_, failedCallback_,
+        imageObj_->UploadToGpuForRender(GetContext(), uploadSuccessCallback_, failedCallback_,
             Size(0, 0), false, false);
     }
 }
@@ -192,9 +182,10 @@ void FlutterRenderBox::ImageObjFailed()
     MarkNeedLayout();
 }
 
-void FlutterRenderBox::ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image)
+void FlutterRenderBox::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image)
 {
-    image_ = image->image();
+    auto skiaImage = AceType::DynamicCast<NG::SkiaImage>(image);
+    image_ = skiaImage->GetImage();
     MarkNeedLayout();
 }
 
