@@ -89,7 +89,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(node && overlayManager);
             ContainerScope scope(id);
-            overlayManager->FocusDialog(node);
+            overlayManager->FocusOverlayNode(node);
 
             if (onFinish != nullptr) {
                 onFinish();
@@ -179,7 +179,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(menu && overlayManager);
         ContainerScope scope(id);
-        overlayManager->FocusDialog(menu);
+        overlayManager->FocusOverlayNode(menu);
     });
 
     bool isSelectMenu = false;
@@ -606,7 +606,7 @@ void OverlayManager::HideMenuInSubWindow(int32_t targetId)
     auto node = menuMap_[targetId];
     CHECK_NULL_VOID(node);
     PopMenuAnimation(node);
-    BlurDialog();
+    BlurOverlayNode();
 }
 
 void OverlayManager::HideMenuInSubWindow()
@@ -634,7 +634,7 @@ void OverlayManager::HideMenu(int32_t targetId)
     if (onHideMenuCallback_) {
         onHideMenuCallback_();
     }
-    BlurDialog();
+    BlurOverlayNode();
 }
 
 void OverlayManager::HideAllMenus()
@@ -721,7 +721,7 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     }
     dialogNode->MarkRemoving();
     CloseDialogAnimation(dialogNode);
-    BlurDialog();
+    BlurOverlayNode();
 }
 
 bool OverlayManager::RemoveOverlay()
@@ -762,9 +762,9 @@ bool OverlayManager::RemoveOverlay()
     return false;
 }
 
-void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
+void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& dialogNode)
 {
-    LOGI("OverlayManager::FocusDialog when dialog show");
+    LOGI("OverlayManager::FocusOverlayNode when dialog show");
     CHECK_NULL_VOID(dialogNode);
     auto focusHub = dialogNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -777,12 +777,13 @@ void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(false);
     pageFocusHub->LostFocus();
 }
 
-void OverlayManager::BlurDialog()
+void OverlayManager::BlurOverlayNode()
 {
-    LOGI("OverlayManager::BlurDialog");
+    LOGI("OverlayManager::BlurOverlayNode");
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
@@ -791,6 +792,7 @@ void OverlayManager::BlurDialog()
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(true);
     pageFocusHub->RequestFocus();
 }
 
