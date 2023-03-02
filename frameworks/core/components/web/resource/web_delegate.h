@@ -599,6 +599,9 @@ private:
     std::string GetCustomScheme();
     void InitWebViewWithSurface();
     Size GetEnhanceSurfaceSize(const Size& drawSize);
+    void UpdateScreenOffSet(double& offsetX, double& offsetY);
+    void RegisterSurfacePositionChangedCallback();
+    void UnregisterSurfacePositionChangedCallback();
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -623,6 +626,7 @@ private:
     OHOS::NWeb::NWebCookieManager* cookieManager_ = nullptr;
     sptr<Rosen::Window> window_;
     bool isCreateWebView_ = false;
+    int32_t callbackId_ = 0;
 
     EventCallbackV2 onPageFinishedV2_;
     EventCallbackV2 onPageStartedV2_;
