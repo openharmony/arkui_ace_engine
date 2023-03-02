@@ -60,6 +60,7 @@ void SliderPattern::OnModifyDone()
     valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
     InitTouchEvent(gestureHub);
+    InitClickEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
     auto focusHub = hub->GetFocusHub();
@@ -133,7 +134,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             bubbleFlag_ = true;
             InitializeBubble();
         }
-        FireChangeEvent(SliderChangeMode::Click);
+        FireChangeEvent(SliderChangeMode::Begin);
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
         if (bubbleFlag_) {
@@ -141,6 +142,25 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (clickListener_) {
+        return;
+    }
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleClickEvent();
+    };
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener_);
+}
+
+void SliderPattern::HandleClickEvent()
+{
+    FireChangeEvent(SliderChangeMode::Click);
 }
 
 void SliderPattern::InitializeBubble()
@@ -296,7 +316,6 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
-        pattern->FireChangeEvent(SliderChangeMode::Begin);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -459,7 +478,6 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     value_ = nextValue;
     valueRatio_ = (value_ - min) / (max - min);
     LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
-    FireChangeEvent(SliderChangeMode::Click);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }
@@ -508,9 +526,6 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
 
 void SliderPattern::FireChangeEvent(int32_t mode)
 {
-    if (mode != SliderChangeMode::End) {
-        CHECK_NULL_VOID(valueChangeFlag_);
-    }
     auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);

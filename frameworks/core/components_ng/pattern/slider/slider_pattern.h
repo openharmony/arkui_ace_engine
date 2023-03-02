@@ -90,6 +90,8 @@ private:
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClickEvent();
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
@@ -129,6 +131,7 @@ private:
     float blockHotSize_ = 0.0f;
 
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<ClickEvent> clickListener_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
