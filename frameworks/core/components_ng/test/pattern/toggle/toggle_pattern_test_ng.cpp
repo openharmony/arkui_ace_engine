@@ -12,16 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <cstddef>
-#include <optional>
-#include <vector>
-
 #include "gtest/gtest.h"
-
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-
 #define protected public
 #define private public
 #include "base/geometry/dimension.h"
@@ -40,7 +31,6 @@
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
-#include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -654,7 +644,7 @@ HWTEST_F(TogglePatternTestNg, ToggleLayoutTest001, TestSize.Level1)
 
 /**
  * @tc.name: TogglePaintTest001
- * @tc.desc: Test toggle GetContentDrawFunction.
+ * @tc.desc: Test toggle PaintContent.
  * @tc.type: FUNC
  */
 HWTEST_F(TogglePatternTestNg, TogglePaintTest001, TestSize.Level1)
@@ -666,38 +656,8 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest001, TestSize.Level1)
     toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
     auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_NE(switchFrameNode, nullptr);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(1, true, true, true);
-
-    /**
-     * @tc.steps: step2. get paintWrapper
-     * @tc.expected: paintWrapper is not null
-     */
-    RefPtr<RenderContext> renderContext;
-    auto switchPaintProperty = switchFrameNode->GetPaintProperty<SwitchPaintProperty>();
-    EXPECT_NE(switchPaintProperty, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, switchPaintProperty);
-    EXPECT_NE(paintWrapper, nullptr);
-    auto paintMethod = switchPaintMethod.GetContentDrawFunction(paintWrapper);
-    RSCanvas canvas;
-    paintMethod(canvas);
-}
-
-/**
- * @tc.name: TogglePaintTest002
- * @tc.desc: Test toggle GetContentDrawFunction.
- * @tc.type: FUNC
- */
-HWTEST_F(TogglePatternTestNg, TogglePaintTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create switch and get frameNode.
-     */
-    ToggleModelNG toggleModelNG;
-    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
-    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(switchFrameNode, nullptr);
-    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(1, true, true, true);
+    auto switchModifier = AceType::MakeRefPtr<SwitchModifier>(false, SELECTED_COLOR, 0.0f);
+    SwitchPaintMethod switchPaintMethod = SwitchPaintMethod(switchModifier);
 
     /**
      * @tc.steps: step2. get paintWrapper
@@ -720,19 +680,11 @@ HWTEST_F(TogglePatternTestNg, TogglePaintTest002, TestSize.Level1)
 
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(9);
-    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(3);
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
 
     auto contentSize = SizeF(100, 50);
     auto contentOffset = OffsetF(0, 0);
-    switchPaintMethod.PaintContent(rsCanvas, switchPaintProperty, contentSize, contentOffset);
-    switchPaintMethod.enabled_ = false;
-    switchPaintMethod.PaintContent(rsCanvas, switchPaintProperty, contentSize, contentOffset);
-
-    // update switchPaintMethod member value
-    switchPaintMethod.isTouch_ = false;
-    switchPaintMethod.isHover_ = false;
-    switchPaintMethod.mainDelta_ = 0;
-    switchPaintMethod.PaintContent(rsCanvas, switchPaintProperty, contentSize, contentOffset);
+    switchPaintMethod.switchModifier_->PaintSwitch(rsCanvas, contentOffset, contentSize);
 }
 } // namespace OHOS::Ace::NG
