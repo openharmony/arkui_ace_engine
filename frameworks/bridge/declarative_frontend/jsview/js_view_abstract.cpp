@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -1597,6 +1598,72 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
         }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
+}
+
+void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsNumber()) {
+        LOGE("The arg is not a number");
+        return;
+    }
+    auto radio = info[0]->ToNumber<float>();
+    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0f, 1.0f));
+}
+
+void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to be a object");
+        return;
+    }
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
+    Dimension left;
+    if (!ParseJsDimensionVp(jsObject->GetProperty("left"), left)) {
+        return;
+    }
+    Dimension right;
+    if (!ParseJsDimensionVp(jsObject->GetProperty("right"), right)) {
+        return;
+    }
+    Dimension top;
+    if (!ParseJsDimensionVp(jsObject->GetProperty("top"), top)) {
+        return;
+    }
+    Dimension bottom;
+    if (!ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom)) {
+        return;
+    }
+
+    PixStretchEffectOption option;
+    option.left = left;
+    option.right = right;
+    option.top = top;
+    option.bottom = bottom;
+    ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
+}
+
+void JSViewAbstract::JsLightupEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        LOGE("The arg is wrong,it is supposed to be a number!");
+        return;
+    }
+    auto radio = info[0]->ToNumber<float>();
+    ViewAbstractModel::GetInstance()->SetLightupEffect(std::clamp(radio, 0.0f, 1.0f));
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
