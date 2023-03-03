@@ -501,12 +501,13 @@ public:
     uint32_t GetMaxLength() const;
     std::string GetInputFilter() const;
 
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+
 private:
     void HandleBlurEvent();
     bool HasFocus() const;
     void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
-    bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleDirectionalKey(const KeyEvent& keyEvent);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
@@ -598,6 +599,8 @@ private:
     void OnImageDataReady(bool checkHidePasswordIcon);
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
+
+    bool IsSearchParentNode();
 
     RectF frameRect_;
     RectF contentRect_;
