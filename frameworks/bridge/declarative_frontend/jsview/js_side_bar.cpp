@@ -385,11 +385,11 @@ void JSSideBar::JsControlButtonForNG(const JSCallbackInfo& info)
             NG::SideBarContainerView::SetControlButtonHeight(controlButtonHeight);
         }
 
-        if (!left->IsNull() && left->IsNumber()) {
+        if (!left->IsNull() && left->IsNumber() && GreatOrEqual(left->ToNumber<double>(), 0.0)) {
             NG::SideBarContainerView::SetControlButtonLeft(Dimension(left->ToNumber<double>(), DimensionUnit::VP));
         }
 
-        if (!top->IsNull() && top->IsNumber()) {
+        if (!top->IsNull() && top->IsNumber() && GreatOrEqual(top->ToNumber<double>(), 0.0)) {
             NG::SideBarContainerView::SetControlButtonTop(Dimension(top->ToNumber<double>(), DimensionUnit::VP));
         }
 
