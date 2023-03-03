@@ -17,6 +17,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ohos_unittest("side_bar_pattern_test_ng") {
   module_out_path = "$pattern_test_output_path/side_bar"
 
+  include_dirs =
+      [ "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include" ]
+
   sources = [
     # inner
     "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
@@ -29,6 +32,14 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/svg_canvas_image.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/image/mock_icon_theme.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
 
@@ -36,6 +47,7 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_view.cpp",
+    "side_bar_layout_test_ng.cpp",
     "side_bar_pattern_test_ng.cpp",
   ]
 

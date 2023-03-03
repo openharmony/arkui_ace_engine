@@ -31,6 +31,8 @@ constexpr float RATIO_ZERO = 0.0f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
+constexpr int32_t SIDEBAR_DURATION = 500;
+const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -80,7 +82,6 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
 
 void SideBarContainerPattern::OnModifyDone()
 {
-    CreateAnimation();
     InitSideBar();
 
     auto host = GetHost();
@@ -183,10 +184,78 @@ void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEv
     auto clickTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->DoSideBarAnimation();
+        pattern->DoAnimation();
     };
     controlButtonClickEvent_ = MakeRefPtr<ClickEvent>(std::move(clickTask));
     gestureHub->AddClickEvent(controlButtonClickEvent_);
+}
+
+void SideBarContainerPattern::UpdateAnimDir()
+{
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+
+    switch (sideBarStatus_) {
+        case SideBarStatus::HIDDEN:
+            if (sideBarPosition == SideBarPosition::START) {
+                animDir_ = SideBarAnimationDirection::LTR;
+            } else {
+                animDir_ = SideBarAnimationDirection::RTL;
+            }
+            break;
+        case SideBarStatus::SHOW:
+            if (sideBarPosition == SideBarPosition::START) {
+                animDir_ = SideBarAnimationDirection::RTL;
+            } else {
+                animDir_ = SideBarAnimationDirection::LTR;
+            }
+            break;
+        default:
+            break;
+    }
+}
+
+void SideBarContainerPattern::DoAnimation()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    UpdateAnimDir();
+
+    AnimationOption option = AnimationOption();
+    option.SetDuration(SIDEBAR_DURATION);
+    option.SetCurve(SIDEBAR_CURVE);
+    option.SetFillMode(FillMode::FORWARDS);
+
+    auto sideBarStatus = sideBarStatus_;
+    sideBarStatus_ = SideBarStatus::CHANGING;
+    UpdateControlButtonIcon();
+
+    auto weak = AceType::WeakClaim(this);
+    auto context = PipelineContext::GetCurrentContext();
+    context->OpenImplicitAnimation(option, option.GetCurve(), [weak, sideBarStatus]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            if (sideBarStatus == SideBarStatus::HIDDEN) {
+                pattern->SetSideBarStatus(SideBarStatus::SHOW);
+                pattern->FireChangeEvent(true);
+                pattern->UpdateControlButtonIcon();
+            } else {
+                pattern->SetSideBarStatus(SideBarStatus::HIDDEN);
+                pattern->FireChangeEvent(false);
+                pattern->UpdateControlButtonIcon();
+            }
+        }
+    });
+    if (animDir_ == SideBarAnimationDirection::LTR) {
+        currentOffset_ = 0.0f;
+    } else {
+        currentOffset_ = -realSideBarWidth_;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    context->FlushUITasks();
+    context->CloseImplicitAnimation();
 }
 
 void SideBarContainerPattern::DoSideBarAnimation()
@@ -427,7 +496,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
     auto autoHide_ = layoutProperty->GetAutoHide().value_or(true);
     if (autoHide_) {
-        DoSideBarAnimation();
+        DoAnimation();
     }
 }
 
