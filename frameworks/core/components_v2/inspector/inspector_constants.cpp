@@ -245,6 +245,9 @@ const char BLANK_ETS_TAG[] = "Blank";
 const char BUTTON_COMPONENT_TAG[] = "ButtonComponent";
 const char BUTTON_ETS_TAG[] = "Button";
 
+// recycle
+const char RECYCLE_VIEW_ETS_TAG[] = "__Recycle__";
+
 // common view
 const char COMMON_VIEW_ETS_TAG[] = "__Common__";
 // option

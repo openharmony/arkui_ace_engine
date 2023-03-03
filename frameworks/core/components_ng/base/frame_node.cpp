@@ -531,6 +531,7 @@ void FrameNode::SetActive(bool active)
             parent->MarkNeedSyncRenderTree();
         }
     }
+    UINode::SetActive(active);
 }
 
 void FrameNode::SetGeometryNode(const RefPtr<GeometryNode>& node)

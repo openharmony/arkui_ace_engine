@@ -308,6 +308,7 @@ public:
     RefPtr<AceType> CreateViewNode() override;
 
     static void Create(const JSCallbackInfo& info);
+    static void CreateRecycle(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
 
     static void ConstructorCallback(const JSCallbackInfo& args);
@@ -376,6 +377,32 @@ public:
     {
         jsViewFunction_->ExecuteInitiallyProvidedValue(jsonData);
     }
+    void SetRecycleCustomNode(const RefPtr<NG::CustomNodeBase>& recycleNode)
+    {
+        recycleCustomNode_ = recycleNode;
+    }
+
+    RefPtr<NG::CustomNodeBase> GetCachedRecycleNode()
+    {
+        auto node = RefPtr<NG::CustomNodeBase>(recycleCustomNode_);
+        recycleCustomNode_.Reset();
+        return node;
+    }
+
+    void ResetRecycleCustomNode()
+    {
+        recycleCustomNode_.Reset();
+    }
+
+    const std::string& GetRecycleCustomNodeName()
+    {
+        return recycleCustomNodeName_;
+    }
+
+    void SetRecycleCustomNodeName(const std::string& recycleCustomNodeName)
+    {
+        recycleCustomNodeName_ = recycleCustomNodeName;
+    }
 
 private:
     void MarkNeedUpdate() override;
@@ -399,6 +426,13 @@ private:
     JSRef<JSObject> jsViewObject_;
 
     std::string jsViewName;
+    // Restore the custom node related to the JSView object
+    // If the JSView object is GC by engine, this CustomNode will abe deleted
+    // If the JSView object is hold by RecycleManager, this CustomNode will be reused
+    RefPtr<NG::CustomNodeBase> recycleCustomNode_;
+
+    // Store the recycle nodes name as key
+    std::string recycleCustomNodeName_;
 };
 
 } // namespace OHOS::Ace::Framework

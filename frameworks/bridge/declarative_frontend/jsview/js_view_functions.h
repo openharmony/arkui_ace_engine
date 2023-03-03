@@ -30,6 +30,11 @@ class ComposedElement;
 
 namespace OHOS::Ace::Framework {
 
+enum class ViewAppearType {
+    INIT_CREATION = 0,
+    RECYCLE_UPDATE,
+};
+
 class JSView;
 
 class ViewFunctions : public AceType {
@@ -50,7 +55,7 @@ public:
     void ExecuteRerender();
     void ExecuteReload(bool deep);
     void ExecuteForceNodeRerender(int32_t elemId);
-    void ExecuteAppear();
+    void ExecuteAppear(ViewAppearType type = ViewAppearType::INIT_CREATION);
     void ExecuteDisappear();
     void ExecuteMeasure(NG::LayoutWrapper* layoutWrapper);
     void ExecuteLayout(NG::LayoutWrapper* layoutWrapper);
@@ -63,6 +68,7 @@ public:
     void ExecuteHide();
     void ExecuteInitiallyProvidedValue(const std::string& jsonData);
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
+    void ExecuteRecycle(const std::string& viewName);
 #ifdef UICAST_COMPONENT_SUPPORTED
     void ExecuteCreateChildView(const std::string& jsonData);
     void ExecuteRouterHandle(const std::string& jsonData);
@@ -108,6 +114,7 @@ private:
     JSWeak<JSFunc> jsBackPressFunc_;
     JSWeak<JSFunc> jsUpdateWithValueParamsFunc_;
     JSWeak<JSFunc> jsSetInitiallyProvidedValueFunc_;
+    JSWeak<JSFunc> jsRecycleFunc_;
 #ifdef UICAST_COMPONENT_SUPPORTED
     JSWeak<JSFunc> jsCreateChildViewFunc_;
     JSWeak<JSFunc> jsRouterHandleFunc_;

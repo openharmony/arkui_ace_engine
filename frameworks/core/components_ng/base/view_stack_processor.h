@@ -173,6 +173,12 @@ public:
     // Clear the key pushed to the stack
     void PopKey();
 
+    // Prevent predict mark dirty when creating predict node
+    void SetPredict(bool predict)
+    {
+        predict_ = predict;
+    };
+
     // Check whether the current node is in the corresponding polymorphic style state.
     // When the polymorphic style is not set on the front end, it returns true regardless of the current node state;
     // When the polymorphic style is set on the front end, true is returned only if the current node state is the same
@@ -305,6 +311,8 @@ private:
 
     std::string viewKey_;
     std::stack<size_t> keyStack_;
+
+    bool predict_ = false;
 
     std::stack<int32_t> parentIdStack_;
 

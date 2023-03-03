@@ -97,6 +97,7 @@
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
 #include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
+#include "bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
@@ -526,6 +527,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
+    { "__Recycle__", JSRecycleView::JSBind },
 #ifdef PREVIEW
     { "FormComponent", JSForm::JSBind },
     { "XComponent", JSXComponent::JSBind },

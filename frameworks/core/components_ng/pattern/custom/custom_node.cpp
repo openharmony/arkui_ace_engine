@@ -60,6 +60,9 @@ void CustomNode::Render()
         }
         renderFunction_ = nullptr;
     }
+    {
+        FireRecycleRenderFunc();
+    }
 }
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)

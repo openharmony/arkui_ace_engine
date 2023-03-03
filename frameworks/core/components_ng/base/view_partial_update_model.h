@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "frameworks/core/components_ng/pattern/custom/custom_node_base.h"
 
 namespace OHOS::Ace {
 
@@ -39,6 +40,7 @@ struct NodeInfoPU {
     std::function<void(NG::LayoutWrapper*)> layoutFunc;
     std::function<void(bool)> reloadFunc;
     std::function<void(int32_t)> nodeUpdateFunc;
+    std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;

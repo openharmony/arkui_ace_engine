@@ -200,6 +200,19 @@ void ViewFunctions::ExecuteForceNodeRerender(int32_t elemId)
     }
 }
 
+void ViewFunctions::ExecuteRecycle(const std::string& viewName)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteRecycle");
+    auto func = jsRecycleFunc_.Lock();
+    if (!func->IsEmpty()) {
+        auto recycleNodeName = JSRef<JSVal>::Make(ToJSValue(viewName));
+        func->Call(jsObject_.Lock(), 1, &recycleNodeName);
+    } else {
+        LOGE("the recycle func is null");
+    }
+}
+
 #else
 
 void ViewFunctions::ExecuteLayout(NG::LayoutWrapper* layoutWrapper) {}
@@ -248,6 +261,13 @@ void ViewFunctions::InitViewFunctions(
             jsForceRerenderNodeFunc_ = JSRef<JSFunc>::Cast(jsForceRerenderNodeFunc);
         } else {
             LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
+        }
+
+        JSRef<JSVal> jsRecycleFunc = jsObject->GetProperty("recycleJSView");
+        if (jsRecycleFunc->IsFunction()) {
+            jsRecycleFunc_ = JSRef<JSFunc>::Cast(jsRecycleFunc);
+        } else {
+            LOGD("View is not a recycle node");
         }
     }
 
@@ -399,9 +419,17 @@ void ViewFunctions::ExecuteRender()
     jsRenderResult_ = func->Call(jsThis);
 }
 
-void ViewFunctions::ExecuteAppear()
+void ViewFunctions::ExecuteAppear(ViewAppearType type)
 {
-    ExecuteFunction(jsAppearFunc_, "aboutToAppear");
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    if (jsAppearFunc_.IsEmpty()) {
+        LOGD("View doesn't have aboutToAppear method!");
+        return;
+    }
+    ACE_SCOPED_TRACE("%s", "aboutToAppear");
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    auto appearType = JSRef<JSVal>::Make(ToJSValue(type));
+    jsAppearFunc_.Lock()->Call(jsObject, 1, &appearType);
 }
 
 void ViewFunctions::ExecuteDisappear()

@@ -54,6 +54,8 @@ build_component_ng("pattern_ng") {
     "checkboxgroup/checkboxgroup_paint_property.cpp",
     "checkboxgroup/checkboxgroup_pattern.cpp",
     "common_view/common_view.cpp",
+    "recycle_view/recycle_view_model_ng.cpp",
+    "recycle_view/recycle_dummy_node.cpp",
     "container_modal/container_modal_pattern.cpp",
     "container_modal/container_modal_view.cpp",
     "counter/counter_model_ng.cpp",
