@@ -51,9 +51,6 @@ RefPtr<UINode> ViewStackProcessor::GetMainElementNode() const
 
 void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)
 {
-#ifdef PREVIEW
-    element->SetViewId(viewKey_);
-#endif
     if (ShouldPopImmediately()) {
         Pop();
     }

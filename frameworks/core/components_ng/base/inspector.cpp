@@ -79,6 +79,15 @@ TouchEvent GetUpPoint(const TouchEvent& downPoint)
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId)
 {
     if (AceType::InstanceOf<NG::FrameNode>(uiNode) || AceType::InstanceOf<SpanNode>(uiNode)) {
+#ifdef PREVIEW
+        // Set ViewId for the fast preview.
+        auto parent = uiNode->GetParent();
+        if (parent && parent->GetTag() == "JsView") {
+            uiNode->SetViewId(std::to_string(parent->GetId()));
+        } else {
+            uiNode->SetViewId(parent->GetViewId());
+        }
+#endif
         if (uiNode->GetTag() == "stage") {
         } else if (uiNode->GetTag() == "page") {
             if (uiNode->GetPageId() != pageId) {
