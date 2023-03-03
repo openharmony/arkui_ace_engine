@@ -57,10 +57,12 @@ public:
         AnimationUtils::Animate(option, [&]() {
             animatableBoardColor_->Set(
                 isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactivePointColor_));
-            animatableCheckColor_->Set(isSelect_->Get() ? LinearColor(pointColor_) : LinearColor(Color::TRANSPARENT));
+            animatableCheckColor_->Set(
+                isSelect_->Get() ? LinearColor(pointColor_) : LinearColor(pointColor_.BlendOpacity(0)));
             animatableBorderColor_->Set(
                 isSelect_->Get() ? LinearColor(Color::TRANSPARENT) : LinearColor(inactiveColor_));
-            animatableShadowColor_->Set(isSelect_->Get() ? LinearColor(shadowColor_) : LinearColor(Color::TRANSPARENT));
+            animatableShadowColor_->Set(
+                isSelect_->Get() ? LinearColor(shadowColor_) : LinearColor(shadowColor_.BlendOpacity(0)));
         });
     }
 

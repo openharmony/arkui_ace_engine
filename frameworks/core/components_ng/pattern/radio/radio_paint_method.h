@@ -70,6 +70,7 @@ public:
         radioModifier_->SetEnabled(enabled_);
         radioModifier_->SetTotalScale(totalScale_);
         radioModifier_->SetPointScale(pointScale_);
+        radioModifier_->SetRingPointScale(ringPointScale_);
         radioModifier_->SetIsCheck(checked);
         radioModifier_->SetUIStatus(uiStatus_);
         radioModifier_->SetTouchHoverAnimationType(touchHoverType_);
@@ -101,6 +102,11 @@ public:
         pointScale_ = pointScale;
     }
 
+    void SetRingPointScale(const float ringPointScale)
+    {
+        ringPointScale_ = ringPointScale;
+    }
+
     void SetUIStatus(const UIStatus uiStatus)
     {
         uiStatus_ = uiStatus;
@@ -118,6 +124,7 @@ private:
     bool enabled_ = true;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
+    float ringPointScale_ = 0.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
