@@ -1620,8 +1620,8 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         Dimension height;
         ParseJsonDimensionVp(imageArgs->GetValue("width"), width);
         ParseJsonDimensionVp(imageArgs->GetValue("height"), height);
-        double valueWidth = width.Value();
-        double valueHeight = height.Value();
+        double valueWidth = width.ConvertToPx();
+        double valueHeight = height.ConvertToPx();
         BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
         BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
         if (width.Unit() == DimensionUnit::PERCENT) {
