@@ -50,12 +50,38 @@ public:
         const RefPtr<CanvasImage>& secondaryImageCanvas, const RefPtr<CanvasImage>& backgroundImageCanvas,
         const ImagePaintConfig& singleStarImagePaintConfig)
     {
+        if (!JudgeCanvasImage(foregroundImageCanvas, secondaryImageCanvas, backgroundImageCanvas)) {
+            return;
+        }
+        SetNeedDraw(true);
         foregroundImageCanvas_ = foregroundImageCanvas;
         secondaryImageCanvas_ = secondaryImageCanvas;
         backgroundImageCanvas_ = backgroundImageCanvas;
         foregroundImageCanvas_->SetPaintConfig(singleStarImagePaintConfig);
         secondaryImageCanvas_->SetPaintConfig(singleStarImagePaintConfig);
         backgroundImageCanvas_->SetPaintConfig(singleStarImagePaintConfig);
+    }
+
+    bool JudgeCanvasImage(const RefPtr<CanvasImage>& foreground, const RefPtr<CanvasImage>& secondary,
+        const RefPtr<CanvasImage>& background)
+    {
+        if (foreground != foregroundImageCanvas_) {
+            return true;
+        }
+        if (secondary != secondaryImageCanvas_) {
+            return true;
+        }
+        if (background != backgroundImageCanvas_) {
+            return true;
+        }
+        return false;
+    }
+
+    void SetNeedDraw(bool flag)
+    {
+        if (needDraw_) {
+            needDraw_->Set(flag);
+        }
     }
 
     void SetBoardColor(LinearColor color, int32_t times, const RefPtr<CubicCurve>& curve)
@@ -137,6 +163,7 @@ private:
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
     // non-animatable property
+    RefPtr<PropertyBool> needDraw_;
     RefPtr<PropertyInt> starNum_;
     RefPtr<PropertyInt> touchStar_;
     RefPtr<PropertyFloat> drawScore_;
