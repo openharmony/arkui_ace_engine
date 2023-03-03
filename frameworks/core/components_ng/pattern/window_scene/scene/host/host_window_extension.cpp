@@ -35,6 +35,7 @@ HostWindowExtension::HostWindowExtension(const std::string& bundleName, const st
         callerToken = context->GetToken();
     }
 
+    Rosen::ExtensionSessionManager::GetInstance().Init();
     Rosen::SessionInfo extensionSessionInfo = {
         .bundleName_ = bundleName,
         .abilityName_ = abilityName,
