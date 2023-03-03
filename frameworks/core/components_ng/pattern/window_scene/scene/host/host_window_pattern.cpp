@@ -26,7 +26,8 @@
 namespace OHOS::Ace::NG {
 class LifecycleListener : public Rosen::ILifecycleListener {
 public:
-    LifecycleListener(const WeakPtr<HostWindowPattern>& hostWindowPattern) : hostWindowPattern_(hostWindowPattern) {}
+    explicit LifecycleListener(const WeakPtr<HostWindowPattern>& hostWindowPattern)
+        : hostWindowPattern_(hostWindowPattern) {}
     virtual ~LifecycleListener() = default;
 
     void OnForeground() override
@@ -55,6 +56,8 @@ HostWindowPattern::HostWindowPattern()
 void HostWindowPattern::RegisterLifecycleListener()
 {
     CHECK_NULL_VOID(session_);
+    auto lifecycleListener = std::make_shared<LifecycleListener>(WeakClaim(this));
+    session_->RegisterLifecycleListener(lifecycleListener);
 }
 
 void HostWindowPattern::InitContent()

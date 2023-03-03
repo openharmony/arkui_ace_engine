@@ -29,18 +29,18 @@ namespace {
 MMI::Direction ConvertDegreeToMMIRotation(float degree)
 {
     if (NearEqual(degree, 0)) {
-        return MMI::Direction0;
+        return MMI::DIRECTION0;
     }
     if (NearEqual(degree, 90)) {
-        return MMI::Direction90;
+        return MMI::DIRECTION90;
     }
     if (NearEqual(degree, 180)) {
-        return MMI::Direction180;
+        return MMI::DIRECTION180;
     }
     if (NearEqual(degree, 270)) {
-        return MMI::Direction270;
+        return MMI::DIRECTION270;
     }
-    return MMI::Direction0;
+    return MMI::DIRECTION0;
 }
 } // namespace
 

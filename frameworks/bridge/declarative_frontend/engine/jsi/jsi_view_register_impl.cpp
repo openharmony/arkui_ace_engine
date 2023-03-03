@@ -625,9 +625,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Model", JSSceneView::JSBind },
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
-    { "HostWindowScene", JSHostWindowScene::JSBind},
-    { "RootScene", JSRootScene::JSBind},
-    { "Screen", JSScreen::JSBind},
+    { "HostWindowScene", JSHostWindowScene::JSBind },
+    { "RootScene", JSRootScene::JSBind },
+    { "Screen", JSScreen::JSBind },
 #endif
 };
 

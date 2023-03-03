@@ -175,9 +175,7 @@ sptr<Rosen::Session> CreateSceneSessionFromNapiValue(JSRef<JSVal> obj)
         LOGE("nativeEngine is nullptr");
         return nullptr;
     }
-#ifdef USE_V8_ENGINE
-    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
@@ -220,9 +218,7 @@ sptr<Rosen::ScreenSession> CreateScreenSessionFromNapiValue(JSRef<JSVal> obj)
         LOGE("nativeEngine is nullptr");
         return nullptr;
     }
-#ifdef USE_V8_ENGINE
-    v8::Local<v8::Value> value = obj->operator v8::Local<v8::Value>();
-#elif USE_ARK_ENGINE
+#ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
     JSValueWrapper valueWrapper = value;
