@@ -270,6 +270,11 @@ bool Scrollable::IsStopped() const
     return (!springController_ || (springController_->IsStopped())) && (!controller_ || (controller_->IsStopped()));
 }
 
+bool Scrollable::IsSpringStopped() const
+{
+    return !springController_ || (springController_->IsStopped());
+}
+
 void Scrollable::StopScrollable()
 {
     if (controller_) {

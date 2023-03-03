@@ -147,6 +147,13 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     if (indicator != indicator_ &&
         layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        if (childrenMainSize_ > frameSize.MainSize(axis) && tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
+            axis == Axis::HORIZONTAL) {
+            OffsetF childOffset = OffsetF(currentOffset_, 0.0f);
+            indicator_ = indicator;
+            LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
+            return;
+        }
         indicator_ = indicator;
         auto space = GetSpace(layoutWrapper, indicator, frameSize, axis);
         float frontChildrenMainSize = CalculateFrontChildrenMainSize(layoutWrapper, indicator, axis);
@@ -172,8 +179,10 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
         return;
     }
-    auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
-    currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
+    if (tabBarStyle_ != TabBarStyle::SUBTABBATSTYLE) {
+        auto scrollableDistance = std::max(childrenMainSize_ - frameSize.MainSize(axis), 0.0f);
+        currentOffset_ = std::clamp(currentOffset_, -scrollableDistance, 0.0f);
+    }
     OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_, 0.0f) : OffsetF(0.0f, currentOffset_));
     indicator_ = indicator;
     LayoutChildren(layoutWrapper, frameSize, axis, childOffset);
