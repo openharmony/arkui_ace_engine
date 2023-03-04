@@ -289,8 +289,8 @@ bool JsInspectorManager::OperateGeneralUINode(int32_t parentID, int32_t slot, Re
     auto parentGroupNode = AceType::DynamicCast<NG::GroupNode>(parent);
     if (parentGroupNode) {
         LOGD("parentNode is GroupNode");
-        parentGroupNode->RemoveChildAndReturnIndex(parentGroupNode->GetContentChildFromGroup());
-        parentGroupNode->AddChildToGroup(newUINode);
+        parentGroupNode->DeleteChildFromGroup(slot);
+        parentGroupNode->AddChildToGroup(newUINode, slot);
     } else {
         parent->RemoveChildAtIndex(slot);
         newUINode->MountToParent(parent, slot, false);

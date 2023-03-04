@@ -42,7 +42,7 @@ RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     return navBarNode;
 }
 
-void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -57,13 +57,6 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child)
         AddChild(contentNode);
     }
     contentNode->AddChild(child);
-}
-
-const RefPtr<UINode> NavBarNode::GetContentChildFromGroup()
-{
-    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
-    CHECK_NULL_RETURN(pattern, nullptr);
-    return GetNavBarContentNode();
 }
 
 std::string NavBarNode::GetTitleString() const

@@ -33,8 +33,7 @@ public:
     NavBarNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern) : GroupNode(tag, nodeId, pattern)
     {}
     ~NavBarNode() override = default;
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
-    const RefPtr<UINode> GetContentChildFromGroup() override;
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     static RefPtr<NavBarNode> GetOrCreateNavBarNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
