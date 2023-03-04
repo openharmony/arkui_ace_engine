@@ -54,6 +54,8 @@ constexpr Dimension DEFAULT_WIDTH_DIMENSION = Dimension(DEFAULT_WIDTH);
 constexpr Dimension DEFAULT_HEIGHT_DIMENSION = Dimension(DEFAULT_HEIGHT);
 const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
+constexpr Color NORMAL_COLOR = Color(0xff0000ff);
+constexpr Color ERROR_COLOR = Color();
 } // namespace
 
 class RadioPatternTestNg : public testing::Test {
@@ -92,6 +94,109 @@ HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest001, TestSize.Level1)
     auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_EQ(radioPaintProperty->GetRadioCheck(), CHECKED);
+}
+
+/**
+ * @tc.name: RadioPaintPropertyTest002
+ * @tc.desc: Test SetBackgroundColor when the Radio is checked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest002, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    radioModelNG.SetCheckedBackgroundColor(NORMAL_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    EXPECT_FALSE(radioPaintProperty == nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioCheckedBackgroundColorValue(), NORMAL_COLOR);
+}
+/**
+ * @tc.name: RadioPaintPropertyTest003
+ * @tc.desc: Test SetBackgroundColor when the Radio is checked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest003, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    radioModelNG.SetCheckedBackgroundColor(ERROR_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    EXPECT_FALSE(radioPaintProperty == nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioCheckedBackgroundColorValue(), ERROR_COLOR);
+}
+/**
+ * @tc.name: RadioPaintPropertyTest004
+ * @tc.desc: Test BackgroundBorderColor when the Radio is unchecked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest004, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(false);
+    radioModelNG.SetUncheckedBorderColor(NORMAL_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    EXPECT_FALSE(radioPaintProperty == nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioUncheckedBorderColorValue(), NORMAL_COLOR);
+}
+/**
+ * @tc.name: RadioPaintPropertyTest005
+ * @tc.desc: Test BackgroundBorderColor when the Radio is unchecked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest005, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(false);
+    radioModelNG.SetUncheckedBorderColor(ERROR_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    EXPECT_FALSE(radioPaintProperty == nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioUncheckedBorderColorValue(), ERROR_COLOR);
+}
+/**
+ * @tc.name: RadioPaintPropertyTest006
+ * @tc.desc: Test SetIndicatorColor when the Radio is select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest006, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    radioModelNG.SetIndicatorColor(NORMAL_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    EXPECT_FALSE(radioPaintProperty == nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioIndicatorColorValue(), NORMAL_COLOR);
+}
+/**
+ * @tc.name: RadioPaintPropertyTest007
+ * @tc.desc: Test SetIndicatorColor when the Radio is select.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest007, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    radioModelNG.SetIndicatorColor(ERROR_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    EXPECT_FALSE(radioPaintProperty == nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioIndicatorColorValue(), ERROR_COLOR);
 }
 
 /**
