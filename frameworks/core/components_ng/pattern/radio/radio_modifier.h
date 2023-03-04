@@ -133,6 +133,13 @@ public:
         }
     }
 
+    void SetRingPointScale(const float ringPointScale)
+    {
+        if (ringPointScale_) {
+            ringPointScale_->Set(ringPointScale);
+        }
+    }
+
     void SetOffset(const OffsetF& offset)
     {
         offset_ = offset;
@@ -178,6 +185,7 @@ private:
     RefPtr<RadioModifier> radioModifier_;
     RefPtr<PropertyFloat> totalScale_;
     RefPtr<PropertyFloat> pointScale_;
+    RefPtr<PropertyFloat> ringPointScale_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;
     TouchHoverAnimationType touchHoverType_;
 

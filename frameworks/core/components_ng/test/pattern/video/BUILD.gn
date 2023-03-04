@@ -116,6 +116,7 @@ ohos_unittest("video_pattern_test_ng") {
     # components_ng_pattern
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_container/grid_container_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
