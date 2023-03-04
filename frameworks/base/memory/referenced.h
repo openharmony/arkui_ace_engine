@@ -38,9 +38,9 @@ public:
     template<class T>
     static RefPtr<T> Claim(T* rawPtr)
     {
-#ifdef ACE_MEMORY_MONITOR
-        MemoryMonitor::GetInstance().Update(rawPtr, static_cast<Referenced*>(rawPtr));
-#endif
+        if (MemoryMonitor::IsEnable()) {
+            MemoryMonitor::GetInstance().Update(rawPtr, static_cast<Referenced*>(rawPtr));
+        }
         return RefPtr<T>(rawPtr);
     }
     template<class T>
@@ -77,20 +77,19 @@ public:
         }
         return refCount;
     }
-#ifdef ACE_MEMORY_MONITOR
+
     int32_t RefCount() const
     {
         return refCounter_->StrongRefCount();
     }
-#endif
 
 protected:
     explicit Referenced(bool threadSafe = true)
         : refCounter_(threadSafe ? ThreadSafeRef::Create() : ThreadUnsafeRef::Create())
     {
-#ifdef ACE_MEMORY_MONITOR
-        MemoryMonitor::GetInstance().Add(this);
-#endif
+        if (MemoryMonitor::IsEnable()) {
+            MemoryMonitor::GetInstance().Add(this);
+        }
     }
 
     virtual ~Referenced()
@@ -98,9 +97,9 @@ protected:
         // Decrease weak reference count held by 'Referenced' itself.
         refCounter_->DecWeakRef();
         refCounter_ = nullptr;
-#ifdef ACE_MEMORY_MONITOR
-        MemoryMonitor::GetInstance().Remove(this);
-#endif
+        if (MemoryMonitor::IsEnable()) {
+            MemoryMonitor::GetInstance().Remove(this);
+        }
     }
 
     virtual bool MaybeRelease()

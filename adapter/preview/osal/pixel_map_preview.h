@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 class PixelMapPreview : public PixelMap {
-    DECLARE_ACE_TYPE(PixelMapOhos, PixelMap)
+    DECLARE_ACE_TYPE(PixelMapPreview, PixelMap)
 
 public:
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);

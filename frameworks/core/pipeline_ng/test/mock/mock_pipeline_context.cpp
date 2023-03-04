@@ -36,7 +36,7 @@ class ManagerInterface : public AceType {
 };
 
 class OffscreenCanvas : public AceType {
-    DECLARE_ACE_TYPE(Frontend, AceType);
+    DECLARE_ACE_TYPE(OffscreenCanvas, AceType);
 };
 } // namespace OHOS::Ace
 namespace OHOS::Ace::NG {

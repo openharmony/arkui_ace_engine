@@ -98,7 +98,10 @@ template("js_pa_engine_ark") {
 
     defines += [ "PA_SUPPORT" ]
 
-    deps += [ ":gen_obj_src_abc_proxyclass" ]
+    deps += [
+      ":gen_obj_src_abc_proxyclass",
+      "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    ]
 
     if (target_cpu == "arm64") {
       defines += [ "APP_USE_ARM64" ]
