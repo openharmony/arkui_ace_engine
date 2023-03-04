@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -58,37 +59,56 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeSelectMenuPosition(LayoutWrapper* l
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
 
+    auto menu = menuItem->GetHostNode();
+    CHECK_NULL_RETURN(menu, OffsetF());
+    auto menuPattern = menu->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_RETURN(menuPattern, OffsetF());
+
+    OffsetF menuPosition;
+
     // Calculate the spacing with text and handle, menu is fixed up the handle and text.
     double menuSpacingBetweenText = theme->GetMenuSpacingWithText().ConvertToPx();
     double menuSpacingBetweenHandle = theme->GetHandleDiameter().ConvertToPx();
 
     auto menuWidth = menuItem->GetGeometryNode()->GetMarginFrameSize().Width();
     auto menuHeight = menuItem->GetGeometryNode()->GetMarginFrameSize().Height();
-    OffsetF menuPosition;
-    const auto& firstHandleRect = info_->firstHandle.paintRect;
-    if (info_->isSingleHandle) {
-        double menuSpacing = menuSpacingBetweenText;
-        menuPosition = OffsetF((firstHandleRect.Left() + firstHandleRect.Right() - menuWidth) / 2.0f,
-            static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
+
+    if (!menuPattern->GetIsVertical()) {
+        const auto& firstHandleRect = info_->firstHandle.paintRect;
+        if (info_->isSingleHandle) {
+            double menuSpacing = menuSpacingBetweenText;
+            menuPosition = OffsetF((firstHandleRect.Left() + firstHandleRect.Right() - menuWidth) / 2.0f,
+                static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
+        } else {
+            double menuSpacing = menuSpacingBetweenText + menuSpacingBetweenHandle;
+            const auto& secondHandleRect = info_->secondHandle.paintRect;
+            menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
+                static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
+        }
+
+        auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
+
+        // Adjust position of overlay.
+        if (LessOrEqual(menuPosition.GetX(), 0.0)) {
+            menuPosition.SetX(theme->GetDefaultMenuPositionX());
+        } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, overlayWidth)) {
+            menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
+        }
+        if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
+            menuPosition.SetY(
+                static_cast<float>(firstHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
+        }
+        auto node = layoutWrapper->GetHostNode();
+        auto selectOverlayNode = DynamicCast<SelectOverlayNode>(node);
+        CHECK_NULL_RETURN(selectOverlayNode, OffsetF());
+        auto extensionMenu = selectOverlayNode->GetExtensionMenu();
+        if (extensionMenu) {
+            defaultMenuEndOffset_ = menuPosition + OffsetF(menuWidth, 0.0f);
+        }
     } else {
-        double menuSpacing = menuSpacingBetweenText + menuSpacingBetweenHandle;
-        const auto& secondHandleRect = info_->secondHandle.paintRect;
-        menuPosition = OffsetF((firstHandleRect.Left() + secondHandleRect.Left() - menuWidth) / 2.0f,
-            static_cast<float>(firstHandleRect.Top() - menuSpacing - menuHeight));
+        menuPosition = defaultMenuEndOffset_ - OffsetF(menuWidth, 0.0f);
     }
 
-    auto overlayWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
-
-    // Adjust position of overlay.
-    if (LessOrEqual(menuPosition.GetX(), 0.0)) {
-        menuPosition.SetX(theme->GetDefaultMenuPositionX());
-    } else if (GreatOrEqual(menuPosition.GetX() + menuWidth, overlayWidth)) {
-        menuPosition.SetX(overlayWidth - menuWidth - theme->GetDefaultMenuPositionX());
-    }
-    if (LessNotEqual(menuPosition.GetY(), menuHeight)) {
-        menuPosition.SetY(
-            static_cast<float>(firstHandleRect.Bottom() + menuSpacingBetweenText + menuSpacingBetweenHandle));
-    }
     return menuPosition;
 }
 

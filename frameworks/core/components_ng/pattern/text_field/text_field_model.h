@@ -29,6 +29,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
@@ -129,6 +130,8 @@ public:
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
+
+    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

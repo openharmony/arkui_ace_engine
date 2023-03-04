@@ -56,6 +56,7 @@ public:
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void ProcessDefaultPadding(PaddingProperty& paddings);
 
 private:

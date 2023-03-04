@@ -546,14 +546,6 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
 
 RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
 {
-#ifdef PREVIEW
-    JSRef<JSVal> id = jsViewObject_->GetProperty("id_");
-    if (id->IsNumber()) {
-        viewId_ = id->ToString();
-        LOGD("JSViewPartialUpdate videId:%{public}s", viewId_.c_str());
-    }
-    Framework::JSViewStackProcessor::SetViewMap(viewId_, jsViewObject_);
-#endif
     auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string viewId) {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
@@ -667,8 +659,14 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     if (jsViewFunction_->HasLayout()) {
         info.layoutFunc = std::move(layoutFunc);
     }
-
-    return ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
+    auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
+#ifdef PREVIEW
+    auto uiNode = AceType::DynamicCast<NG::UINode>(node);
+    if (uiNode) {
+        Framework::JSViewStackProcessor::SetViewMap(std::to_string(uiNode->GetId()), jsViewObject_);
+    }
+#endif
+    return node;
 }
 
 RefPtr<AceType> JSViewPartialUpdate::InitialRender()

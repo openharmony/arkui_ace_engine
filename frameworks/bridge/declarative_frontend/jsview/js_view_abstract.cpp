@@ -42,6 +42,7 @@
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/border_image.h"
@@ -1894,6 +1895,43 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
     } else {
         LOGE("args format error. %{public}s", args->ToString().c_str());
         return;
+    }
+}
+
+void JSViewAbstract::ParseMenuOptions(
+    const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items)
+{
+    auto length = jsArray->Length();
+    for (size_t i = 0; i < length; i++) {
+        auto item = jsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            LOGI("menu option item is not object");
+            continue;
+        }
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        NG::MenuOptionsParam menuOptionItem;
+        std::string value;
+        std::string icon;
+        auto menuOptionsValue = itemObject->GetProperty("content");
+        auto menuOptionsIcon = itemObject->GetProperty("icon");
+
+        if (!ParseJsString(menuOptionsValue, value)) {
+            LOGI("menuOptionsValue is null");
+            return;
+        }
+        if (!ParseJsMedia(menuOptionsIcon, icon)) {
+            LOGI("menuOptionsIcon is null");
+        }
+        menuOptionItem.content = value;
+        menuOptionItem.icon = icon;
+
+        auto itemActionValue = itemObject->GetProperty("action");
+        if (itemActionValue->IsFunction()) {
+            JsEventCallback<void(const std::string&)> callback(
+                info.GetExecutionContext(), JSRef<JSFunc>::Cast(itemActionValue));
+            menuOptionItem.action = callback;
+        }
+        items.emplace_back(menuOptionItem);
     }
 }
 

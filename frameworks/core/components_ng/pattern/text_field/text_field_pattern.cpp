@@ -1715,12 +1715,21 @@ void TextFieldPattern::ShowSelectOverlay(
             pattern->HandleOnSelectAll();
             pattern->SetNeedCloseOverlay(false);
         };
+        if (!pattern->GetMenuOptionItems().empty()) {
+            selectInfo.menuOptionItems = pattern->GetMenuOptionItems();
+        }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID_NOLOG(host);
         auto gesture = host->GetOrCreateGestureEventHub();
         gesture->RemoveTouchEvent(pattern->GetTouchListener());
 
         pattern->SetSelectOverlay(pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo));
+
+        auto selectOverlay = pattern->GetSelectOverlay();
+        CHECK_NULL_VOID_NOLOG(selectOverlay);
+        auto start = pattern->GetTextSelector().GetStart();
+        auto end = pattern->GetTextSelector().GetEnd();
+        selectOverlay->SetSelectInfo(pattern->GetTextEditingValue().GetSelectedText(start, end));
     };
     clipboard_->HasData(hasDataCallback);
 }
@@ -1780,6 +1789,13 @@ void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
     selectionMode_ = isSingleHandle_ ? SelectionMode::NONE : SelectionMode::SELECT;
     caretUpdateType_ = CaretUpdateType::HANDLE_MOVE;
     UpdateTextSelectorByHandleMove(isFirstHandle, position, caretMetrics.offset);
+
+    auto selectOverlay = GetSelectOverlay();
+    CHECK_NULL_VOID_NOLOG(selectOverlay);
+    auto start = GetTextSelector().GetStart();
+    auto end = GetTextSelector().GetEnd();
+    selectOverlay->SetSelectInfo(GetTextEditingValue().GetSelectedText(start, end));
+
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

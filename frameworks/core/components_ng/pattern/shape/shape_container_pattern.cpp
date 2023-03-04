@@ -87,7 +87,7 @@ void ShapeContainerPattern::MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode)
     for (const auto& child : children) {
         auto childNode = AceType::DynamicCast<FrameNode>(child);
         if (childNode) {
-            childNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            childNode->MarkNeedRenderOnly();
             MarkChildrenDirty(childNode);
         }
     }

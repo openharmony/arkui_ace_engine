@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -35,6 +36,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -489,6 +491,17 @@ public:
     {
         return mouseStatus_;
     }
+
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
+    {
+        menuOptionItems_ = std::move(menuOptionItems);
+    }
+
+    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
+    {
+        return std::move(menuOptionItems_);
+    }
+
     void UpdateEditingValueToRecord();
 
     // xts
@@ -689,6 +702,7 @@ private:
     std::vector<TextEditingValueNG> redoOperationRecords_;
     std::vector<TextSelector> textSelectorRecords_;
     std::vector<TextSelector> redoTextSelectorRecords_;
+    std::vector<MenuOptionsParam> menuOptionItems_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
 
