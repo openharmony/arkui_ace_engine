@@ -340,6 +340,8 @@ void TextFieldModelImpl::SetOnPaste(std::function<void(const std::string&)>&& fu
     component->SetOnPaste(std::move(func));
 }
 
+void TextFieldModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
+
 void TextFieldModelImpl::SetCopyOption(CopyOptions copyOption)
 {
     JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOption);

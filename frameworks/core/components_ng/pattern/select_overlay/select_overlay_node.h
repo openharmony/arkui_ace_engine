@@ -33,15 +33,39 @@ public:
     ~SelectOverlayNode() override = default;
 
     static RefPtr<FrameNode> CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
+    RefPtr<FrameNode> CreateMoreSelectOverlayNode(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
 
     void UpdateToolBar(bool menuItemChanged);
 
+    void SetSelectInfo(const std::string& selectInfo)
+    {
+        selectInfo_ = selectInfo;
+    }
+
+    const std::string& GetSelectInfo() const
+    {
+        return selectInfo_;
+    }
+
+    void ChangeToolBar(bool isUseExtensionMenu);
+
+    RefPtr<FrameNode> GetExtensionMenu()
+    {
+        return extensionMenu_;
+    }
+
 private:
     void CreateToolBar();
+    void CreateExtensionToolBar(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
+    void GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, float& maxWidth);
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
 
     RefPtr<FrameNode> selectMenu_;
+
+    RefPtr<FrameNode> extensionMenu_;
+
+    std::string selectInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

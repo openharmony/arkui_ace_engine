@@ -168,6 +168,11 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
         textSelector_.Update(textSelector_.baseOffset, end);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+    CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
+    auto start = textSelector_.GetTextStart();
+    auto end = textSelector_.GetTextEnd();
+    selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
 }
 
 void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
@@ -257,12 +262,19 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
         pattern->HandleOnSelectAll();
     };
 
+    if (!menuOptionItems_.empty()) {
+        selectInfo.menuOptionItems = GetMenuOptionItems();
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         selectOverlayProxy_->Close();
     }
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo);
+    CHECK_NULL_VOID_NOLOG(selectOverlayProxy_);
+    auto start = textSelector_.GetTextStart();
+    auto end = textSelector_.GetTextEnd();
+    selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
 }
 
 void TextPattern::HandleOnSelectAll()
@@ -275,6 +287,9 @@ void TextPattern::HandleOnSelectAll()
         SelectHandleInfo secondHandleInfo;
         firstHandleInfo.paintRect = textSelector_.firstHandle;
         secondHandleInfo.paintRect = textSelector_.secondHandle;
+        auto start = textSelector_.GetTextStart();
+        auto end = textSelector_.GetTextEnd();
+        selectOverlayProxy_->SetSelectInfo(GetSelectedText(start, end));
         selectOverlayProxy_->UpdateFirstAndSecondHandleInfo(firstHandleInfo, secondHandleInfo);
     } else {
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);

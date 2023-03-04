@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/text/text_model.h"
 
 namespace OHOS::Ace::NG {
+
 class ACE_EXPORT TextModelNG : public TextModel {
 public:
     void Create(const std::string& content) override;
@@ -53,6 +54,8 @@ public:
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    
 };
 } // namespace OHOS::Ace::NG
 
