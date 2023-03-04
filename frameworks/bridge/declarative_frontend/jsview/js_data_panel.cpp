@@ -112,7 +112,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
                 break;
             }
         }
-        dateValues.push_back(value);
+        dateValues.emplace_back(value);
     }
     if (LessOrEqual(max, 0.0)) {
         max = dataSum;
@@ -140,7 +140,6 @@ void JSDataPanel::CloseEffect(const JSCallbackInfo& info)
 void JSDataPanel::ValueColors(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -155,10 +154,9 @@ void JSDataPanel::ValueColors(const JSCallbackInfo& info)
         auto item = paramArray->GetValueAt(i);
         OHOS::Ace::NG::Gradient gradient;
         if (!ConvertGradientColor(item, gradient)) {
-            LOGE("Convert gradient color failed.");
             return;
         }
-        valueColors.push_back(gradient);
+        valueColors.emplace_back(gradient);
     }
     DataPanelModel::GetInstance()->SetValueColors(valueColors);
 }
@@ -166,12 +164,10 @@ void JSDataPanel::ValueColors(const JSCallbackInfo& info)
 void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        LOGE("args can not set backgroundColor");
         return;
     }
 
@@ -181,7 +177,6 @@ void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
 void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
 
@@ -200,7 +195,6 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
 void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("toggle ShadowOption error, info is non-valid");
         return;
     }
 
@@ -233,10 +227,9 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
             auto item = colorsArray->GetValueAt(i);
             OHOS::Ace::NG::Gradient gradient;
             if (!ConvertGradientColor(item, gradient)) {
-                LOGE("Convert gradient color failed.");
                 return;
             }
-            shadowColors.push_back(gradient);
+            shadowColors.emplace_back(gradient);
         }
     }
 
@@ -253,7 +246,6 @@ bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::
     if (itemParam->IsObject()) {
         JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(itemParam)->Unwrap<JSLinearGradient>();
         if (!jsLinearGradient) {
-            LOGE("JSDataPanel::jsLinearGradient is null.");
             return false;
         }
 

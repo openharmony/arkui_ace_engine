@@ -61,3 +61,4 @@ void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
 }
 
 } // namespace OHOS::Ace::NG
+
