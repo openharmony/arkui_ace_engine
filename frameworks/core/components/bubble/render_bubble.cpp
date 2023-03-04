@@ -91,7 +91,7 @@ void RenderBubble::Update(const RefPtr<Component>& component)
     targetId_ = bubble->GetPopupParam()->GetTargetId();
     weakStack_ = bubble->GetWeakStack();
     useCustom_ = bubble->GetPopupParam()->IsUseCustom();
-    targetSpace_ = bubble->GetPopupParam()->GetTargetSpace();
+    targetSpace_ = bubble->GetPopupParam()->GetTargetSpace().value_or(Dimension());
     isShowInSubWindow_ = bubble->GetPopupParam()->IsShowInSubWindow();
     if (isShowInSubWindow_) {
         targetSize_ = bubble->GetPopupParam()->GetTargetSize();
