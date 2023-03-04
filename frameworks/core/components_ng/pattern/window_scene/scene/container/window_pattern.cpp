@@ -154,7 +154,7 @@ void WindowPattern::LoadContent(
 {
     uiContent_ = UIContent::Create(context_.get(), engine);
     CHECK_NULL_VOID(uiContent_);
-    uiContent_->Initialize(shared_from_this(), contentUrl, storage);
+    uiContent_->Initialize(std::shared_ptr<Window>(this), contentUrl, storage);
 }
 
 void WindowPattern::UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason)
@@ -284,12 +284,16 @@ void WindowPattern::Connect()
 
 void WindowPattern::Foreground()
 {
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->Foreground();
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Foreground();
 }
 
 void WindowPattern::Background()
 {
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->Background();
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Background();
 }
