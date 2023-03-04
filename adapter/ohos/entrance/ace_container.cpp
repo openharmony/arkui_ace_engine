@@ -272,8 +272,17 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN_NOLOG(container, false);
-    // When the container is for menu, it need close the menu first.
+    // When the container is for overlay, it need close the overlay first.
     if (container->IsSubContainer()) {
+        if (container->IsUseNewPipeline()) {
+            LOGI("back press for remove overlay node");
+            ContainerScope scope(instanceId);
+            auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_RETURN_NOLOG(subPipelineContext, false);
+            auto overlayManager = subPipelineContext->GetOverlayManager();
+            CHECK_NULL_RETURN_NOLOG(overlayManager, false);
+            return overlayManager->RemoveOverlayInSubwindow();
+        }
         SubwindowManager::GetInstance()->CloseMenu();
         return true;
     }
@@ -597,8 +606,13 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height, type, rsTransaction]() {
+            [context, width, height, type, rsTransaction, id]() {
                 context->OnSurfaceChanged(width, height, type, rsTransaction);
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
+                    CHECK_NULL_VOID_NOLOG(subwindow);
+                    subwindow->ResizeWindow();
+                }
             },
             TaskExecutor::TaskType::UI);
     };

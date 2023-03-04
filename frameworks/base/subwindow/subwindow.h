@@ -34,6 +34,7 @@ public:
     static RefPtr<Subwindow> CreateSubwindow(int32_t instanceId);
 
     virtual void InitContainer() = 0;
+    virtual void ResizeWindow() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
     virtual void HideMenuNG(int32_t targetId) = 0;
@@ -53,7 +54,7 @@ public:
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects) {};
 
-    int32_t GetSubwindowId()
+    int32_t GetSubwindowId() const
     {
         return subwindowId_;
     }

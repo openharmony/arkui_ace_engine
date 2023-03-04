@@ -96,6 +96,7 @@ public:
      *   @return    true if popup was removed, false if no overlay exists
      */
     bool RemoveOverlay();
+    bool RemoveOverlayInSubwindow();
 
     void RegisterOnHideMenu(std::function<void()> callback)
     {
