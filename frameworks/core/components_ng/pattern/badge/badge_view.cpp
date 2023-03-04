@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/badge/badge_view.h"
 
+#include "base/utils/utils.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
@@ -69,7 +70,8 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
         layoutProperty->UpdateBadgeTextColor(badgeTheme->GetBadgeTextColor());
     }
 
-    if (badgeParameters.badgeFontSize.has_value()) {
+    if (badgeParameters.badgeFontSize.has_value() &&
+        GreatOrEqual(badgeParameters.badgeFontSize.value().ConvertToPx(), 0)) {
         layoutProperty->UpdateBadgeFontSize(badgeParameters.badgeFontSize.value());
     } else {
         layoutProperty->UpdateBadgeFontSize(badgeTheme->GetBadgeFontSize());
