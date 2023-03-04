@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@ public:
         layoutAlgorithm->SetSideBarStatus(sideBarStatus_);
         layoutAlgorithm->SetNeedInitRealSideBarWidth(needInitRealSideBarWidth_);
         layoutAlgorithm->SetRealSideBarWidth(realSideBarWidth_);
+        layoutAlgorithm->SetRealDividerWidth(realDividerWidth_);
         return layoutAlgorithm;
     }
 
@@ -78,6 +79,8 @@ public:
     }
 
     void InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitSideBarContentEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
     void UpdateSideBarPosition(float value);
 
 private:
@@ -93,12 +96,19 @@ private:
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
+    void HandlePanEventEnd();
     void UpdateResponseRegion(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
     void OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     void OnUpdateShowControlButton(
         const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
+    void OnUpdateShowDivider(
+        const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& host);
+    void OnHover(bool isHover);
+    void AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm);
 
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
+    RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> controller_;
     RefPtr<CurveAnimation<float>> rightToLeftAnimation_;
     RefPtr<CurveAnimation<float>> leftToRightAnimation_;
@@ -106,6 +116,7 @@ private:
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
+    float realDividerWidth_ = 0.0f;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool showSideBar_ = true;
     bool needInitRealSideBarWidth_ = true;
