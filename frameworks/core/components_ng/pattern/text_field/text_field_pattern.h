@@ -344,6 +344,7 @@ public:
     void CursorMoveUp();
     void CursorMoveDown();
     void SetCaretPosition(int32_t position);
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void HandleSetSelection(int32_t start, int32_t end);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
@@ -504,7 +505,7 @@ public:
     std::string GetCopyOptionString() const;
     std::string GetShowPasswordIconString() const;
     std::string GetInputStyleString() const;
-
+    void SetSelectionFlag(bool flag, int32_t selectionStart, int32_t selectionEnd);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
 
 private:
@@ -665,6 +666,9 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
+    bool setSelectionFlag_ = false;
+    int32_t selectionStart_ = 0;
+    int32_t selectionEnd_ = 0;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
