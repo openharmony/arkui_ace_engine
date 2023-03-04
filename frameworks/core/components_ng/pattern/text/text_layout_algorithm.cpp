@@ -280,13 +280,11 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
         }
     }
 
-    if (!contentConstraint.selfIdealSize.Width()) {
-        float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
-        paragraphNewWidth =
-            std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
-        if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
-            paragraph_->Layout(std::ceil(paragraphNewWidth));
-        }
+    float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
+    paragraphNewWidth =
+        std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
+    if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
+        paragraph_->Layout(std::ceil(paragraphNewWidth));
     }
     return true;
 }
