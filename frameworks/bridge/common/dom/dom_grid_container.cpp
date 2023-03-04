@@ -75,6 +75,8 @@ void DomGridContainer::CallSpecializedMethod(const std::string& method, const st
             result.append(DOM_GRID_SIZE_TYPE_MD);
         } else if (sizeType == GridSizeType::SM) {
             result.append(DOM_GRID_SIZE_TYPE_SM);
+        } else if (sizeType == GridSizeType::XS) {
+            result.append(DOM_GRID_SIZE_TYPE_XS);
         }
         result.append("\"");
     } else {
