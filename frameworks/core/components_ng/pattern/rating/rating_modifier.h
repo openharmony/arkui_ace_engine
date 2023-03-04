@@ -84,11 +84,11 @@ public:
         }
     }
 
-    void SetBoardColor(LinearColor color, int32_t times, const RefPtr<CubicCurve>& curve)
+    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
     {
         if (boardColor_) {
             AnimationOption option = AnimationOption();
-            option.SetDuration(times);
+            option.SetDuration(duratuion);
             option.SetCurve(curve);
             AnimationUtils::Animate(option, [&]() { boardColor_->Set(color); });
         }
@@ -117,6 +117,9 @@ public:
 
     void SetTouchStar(int32_t touchStar)
     {
+        if (touchStar < 0 || touchStar >= starNum_->Get() || touchStar_->Get() != touchStar) {
+            SetHoverState(RatingAnimationType::NONE);
+        }
         if (touchStar_) {
             touchStar_->Set(touchStar);
         }
@@ -131,6 +134,10 @@ public:
 
     void SetHoverState(const RatingAnimationType& state)
     {
+        if (state_ == state) {
+            return;
+        }
+        state_ = state;
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto ratingTheme = pipeline->GetTheme<RatingTheme>();
@@ -159,6 +166,8 @@ public:
     }
 
 private:
+    // others
+    RatingAnimationType state_ = RatingAnimationType::NONE;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
