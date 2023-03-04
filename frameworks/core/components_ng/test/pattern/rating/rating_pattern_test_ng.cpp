@@ -237,7 +237,7 @@ HWTEST_F(RatingPatternTestNg, RatingRenderPropertyTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: RatingConstrainsPropertyTest007
+ * @tc.name: RatingConstrainsPropertyTest006
  * @tc.desc: Test setting out-of-bounds ratingScore and starNum values.
  * @tc.type: FUNC
  */
