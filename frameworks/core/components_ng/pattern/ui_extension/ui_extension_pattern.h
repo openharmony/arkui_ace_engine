@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_PATTERN_H
 
-#include "base/log/log.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_event_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_paint_property.h"
@@ -33,22 +32,15 @@ public:
 
     ~UIExtensionPattern() override = default;
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<UIExtensionLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<UIExtensionPaintProperty>();
-    }
+    RefPtr<PaintProperty> CreatePaintProperty() override;
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<UIExtensionEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
 private:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
 } // namespace OHOS::Ace::NG
