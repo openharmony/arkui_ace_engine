@@ -22,10 +22,10 @@
 
 
 #define VERIFY_CLASSNAME(classname, p) \
-    VerifyClass<std::is_same_v<classname, std::remove_cv_t<std::remove_pointer_t<decltype(p)>>>>::Success()
+    OHOS::Ace::VerifyClass<std::is_same_v<classname, std::remove_cv_t<std::remove_pointer_t<decltype(p)>>>>::Success()
 
 #define VERIFY_DECLARED_CLASS(classname) \
-    VerifyClass<std::is_same_v<classname, typename classname::SelfType>>::Success()
+    OHOS::Ace::VerifyClass<std::is_same_v<classname, typename classname::SelfType>>::Success()
 
 #define DECLARE_CLASS_TYPE_SIZE(classname)                              \
     typedef classname SelfType;                                         \
