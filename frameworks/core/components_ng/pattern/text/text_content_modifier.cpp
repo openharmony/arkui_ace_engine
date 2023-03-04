@@ -122,12 +122,10 @@ void TextContentModifier::SetDefaultTextDecoration(const TextStyle& textStyle)
 }
 void TextContentModifier::SetDefaultBaselineOffset(const TextStyle& textStyle)
 {
-    float baselineOffset;
+    float baselineOffset = textStyle.GetBaselineOffset().Value();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         baselineOffset = pipelineContext->NormalizeToPx(textStyle.GetBaselineOffset());
-    } else {
-        baselineOffset = textStyle.GetBaselineOffset().Value();
     }
 
     baselineOffsetFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(baselineOffset);
@@ -144,7 +142,8 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
         float textRacePercent = GetTextRacePercent();
         drawingContext.canvas.ClipRect(RSRect(0, 0, drawingContext.width, drawingContext.height), RSClipOp::REPLACE);
 
-        float paragraph1Offset = (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / 100 * -1;
+        float paragraph1Offset =
+            (paragraph_->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
         if ((paintOffset_.GetX() + paragraph1Offset + paragraph_->GetTextWidth()) > 0) {
             paragraph_->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
         }
@@ -235,7 +234,7 @@ void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag)
 {
     if (fontWeight_.has_value() && fontWeightFloat_ &&
-        static_cast<int>(fontWeight_.value()) != fontWeightFloat_->Get()) {
+        !NearEqual(static_cast<float>(static_cast<int>(fontWeight_.value())), fontWeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
     }
 }

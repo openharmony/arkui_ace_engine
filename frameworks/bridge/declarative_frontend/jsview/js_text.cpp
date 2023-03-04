@@ -118,11 +118,11 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
 void JSText::SetTextShadow(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     if (!info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("info[0] not is Object or Number");
+        LOGW("info[0] not is Object or Number");
         return;
     }
     int32_t shadowStyle = 0;
@@ -134,7 +134,7 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
     }
     auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
     if (!argsPtrItem || argsPtrItem->IsNull()) {
-        LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        LOGW("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
         info.ReturnSelf();
         return;
     }
@@ -346,7 +346,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 void JSText::SetHeightAdaptivePolicy(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
-        LOGE("Text: HeightAdaptivePolicy(%d) expected positive number", value);
+        LOGW("Text: HeightAdaptivePolicy(%d) expected positive number", value);
         return;
     }
     TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
