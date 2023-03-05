@@ -28,25 +28,24 @@ public:
     LinearVector() = default;
     explicit LinearVector(const size_t n) : std::vector<T>(n) {};
     LinearVector(const size_t n, T value) : std::vector<T>(n, value) {};
+    ~LinearVector() = default;
 
     LinearVector operator+(const LinearVector& linearVector) const
     {
-        LinearVector longLinearVector = linearVector.size() > this->size() ? linearVector : *this;
-        LinearVector* shortLinearVector = linearVector.size() < this->size() ? &linearVector : this;
-        for (size_t i = 0; i < shortLinearVector->size(); ++i) {
-            longLinearVector[i] += shortLinearVector->at(i);
+        LinearVector tempLinearVector = *this;
+        for (size_t i = 0; i < tempLinearVector.size() && i < linearVector.size(); ++i) {
+            tempLinearVector[i] += linearVector[i];
         }
-        return longLinearVector;
+        return tempLinearVector;
     }
 
     LinearVector operator-(const LinearVector& linearVector) const
     {
-        LinearVector longLinearVector = linearVector.size() > this->size() ? linearVector : *this;
-        LinearVector* shortLinearVector = linearVector.size() < this->size() ? &linearVector : this;
-        for (size_t i = 0; i < shortLinearVector->size(); ++i) {
-            longLinearVector[i] -= shortLinearVector->at(i);
+        LinearVector tempLinearVector = *this;
+        for (size_t i = 0; i < tempLinearVector.size() && i < linearVector.size(); ++i) {
+            tempLinearVector[i] -= linearVector[i];
         }
-        return longLinearVector;
+        return tempLinearVector;
     }
 
     LinearVector operator*(const float scale) const
