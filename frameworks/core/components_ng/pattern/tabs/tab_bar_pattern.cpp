@@ -817,6 +817,66 @@ void TabBarPattern::StopTranslateAnimation()
     }
 }
 
+void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetGeometryNode()->GetFrameSize().Width() >= childrenMainSize_) {
+        return;
+    }
+    auto space = GetSpace(targetIndex);
+    float frontChildrenMainSize = CalculateFrontChildrenMainSize(targetIndex);
+    float backChildrenMainSize = CalculateBackChildrenMainSize(targetIndex);
+    auto targetOffset = frontChildrenMainSize < space ? 0.0f
+                        : backChildrenMainSize < space
+                            ? host->GetGeometryNode()->GetFrameSize().Width() - childrenMainSize_
+                            : space - frontChildrenMainSize;
+    auto startOffset = currentOffset_;
+    LOGI("Play translate animation startPos: %{public}lf, endPos: %{public}lf", startOffset, targetOffset);
+    auto curve = MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+
+    // If animation is still running, stop it before play new animation.
+    StopTabBarTranslateAnimation();
+
+    auto weak = AceType::WeakClaim(this);
+    auto tabBarTranslate = AceType::MakeRefPtr<CurveAnimation<double>>(startOffset, targetOffset, curve);
+    tabBarTranslate->AddListener(Animation<double>::ValueCallback([weak, startOffset, targetOffset](double value) {
+        auto tabBarPattern = weak.Upgrade();
+        CHECK_NULL_VOID(tabBarPattern);
+        if (!NearEqual(value, startOffset) && !NearEqual(value, targetOffset) &&
+            !NearEqual(startOffset, targetOffset)) {
+            float moveRate = Curves::EASE_OUT->MoveInternal(
+                static_cast<float>((value - startOffset) / (targetOffset - startOffset)));
+            value = startOffset + (targetOffset - startOffset) * moveRate;
+        }
+        tabBarPattern->currentOffset_ = value;
+        auto host = tabBarPattern->GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    }));
+
+    if (!controller_) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        controller_ = AceType::MakeRefPtr<Animator>(pipeline);
+    }
+    controller_->ClearStopListeners();
+    controller_->ClearInterpolators();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    controller_->SetDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
+    controller_->AddInterpolator(tabBarTranslate);
+    controller_->Play();
+}
+
+void TabBarPattern::StopTabBarTranslateAnimation()
+{
+    if (tabBarTranslateController_ && !tabBarTranslateController_->IsStopped()) {
+        tabBarTranslateController_->Stop();
+    }
+}
+
 void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
 {
     currentIndicatorOffset_ = currentIndicatorOffset_ + offset;
