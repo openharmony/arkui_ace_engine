@@ -36,6 +36,8 @@ const UndefinedElmtId = -1;
 
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+// function type of recycle node update function
+type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
 // Nativeview
 // implemented in C++  for release
@@ -463,6 +465,25 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} - DONE.`);
+  }
+
+  // recycle creation
+  public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
+    const node: ViewPU = RecycleManager.GetInstance().get(name);
+    const elmtId: number = node ? node.id__() : ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    const compilerAssignedUpdateFunc: UpdateFunc = (element, isFirstRender) => {
+      recycleUpdateFunc(element, isFirstRender, undefined)
+    };
+    recycleUpdateFunc(elmtId, true, node);
+    this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
+  }
+
+  // add current js view to recycle manager
+  public recycleJSView(name: string): void {
+    RecycleManager.GetInstance().add(name, this);
+    if (this.parent_) {
+      this.parent_.removeChild(this);
+    }
   }
 
   // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }

@@ -4206,6 +4206,23 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
         
     }
+    // recycle creation
+    observeRecycleComponentCreation(name, recycleUpdateFunc) {
+        const node = RecycleManager.GetInstance().get(name);
+        const elmtId = node ? node.id__() : ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        const compilerAssignedUpdateFunc = (element, isFirstRender) => {
+            recycleUpdateFunc(element, isFirstRender, undefined);
+        };
+        recycleUpdateFunc(elmtId, true, node);
+        this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
+    }
+    // add current js view to recycle manager
+    recycleJSView(name) {
+        RecycleManager.GetInstance().add(name, this);
+        if (this.parent_) {
+            this.parent_.removeChild(this);
+        }
+    }
     // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
     ifElseBranchUpdateFunction(branchId, branchfunc) {
         const oldBranchid = If.getBranchId();
@@ -4330,6 +4347,50 @@ class ViewPU extends NativeViewPartialUpdate {
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ *  * RecycleManager - Recycle cache manager
+ *
+* all definitions in this file are framework internal
+*/
+/**
+ * Manage the js cache of all recycled node
+ */
+class RecycleManager {
+    constructor() {
+        this.cachedRecycleNodes = new Map();
+    }
+    static GetInstance() {
+        if (!RecycleManager.instance_) {
+            RecycleManager.instance_ = new RecycleManager();
+        }
+        return RecycleManager.instance_;
+    }
+    add(name, node) {
+        var _a;
+        if (!this.cachedRecycleNodes.get(name)) {
+            this.cachedRecycleNodes.set(name, new Array());
+        }
+        (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.push(node);
+    }
+    get(name) {
+        var _a;
+        let node = (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
+        return node;
+    }
+}
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
