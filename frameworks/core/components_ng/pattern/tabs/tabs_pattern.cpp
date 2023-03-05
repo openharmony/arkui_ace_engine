@@ -53,7 +53,11 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-            tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE) {
+                tabBarPattern->PlayTabBarTranslateAnimation(index);
+            } else {
+                tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+            }
         }
         /* js callback */
         if (jsEvent) {
