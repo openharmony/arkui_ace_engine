@@ -67,6 +67,8 @@ public:
         paintMethod->SetIsHover(isHover_);
         paintMethod->SetIsPressed(isPressed_);
         paintMethod->SetHoverPoint(hoverPoint_);
+        paintMethod->SetMouseClickIndex(mouseClickIndex_);
+        mouseClickIndex_ = std::nullopt;
         return paintMethod;
     }
 
@@ -96,13 +98,18 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
+    void HandleMouseClick(const GestureEvent& info);
+    void HandleTouchClick(const GestureEvent& info);
     void InitHoverMouseEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
+    void HoverInAnimation(const Color& hoverColor);
+    void HoverOutAnimation(const Color& normalColor);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown();
     void HandleTouchUp();
+    void GetMouseClickIndex();
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -111,6 +118,7 @@ private:
     bool isPressed_ = false;
     PointF hoverPoint_;
 
+    std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<SwiperIndicatorModifier> swiperIndicatorModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };

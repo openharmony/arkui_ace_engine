@@ -180,6 +180,7 @@ public:
 
     void ShowNext();
     void ShowPrevious();
+    void SwipeTo(int32_t index);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -223,7 +224,6 @@ private:
 
     // Implement of swiper controller
     void SwipeToWithoutAnimation(int32_t index);
-    void SwipeTo(int32_t index);
     void FinishAnimation();
     void StopTranslateAnimation();
     void StopSpringAnimation();
@@ -284,6 +284,7 @@ private:
     float turnPageRate_ = 0.0f;
 
     bool moveDirection_ = false;
+    bool touch_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 

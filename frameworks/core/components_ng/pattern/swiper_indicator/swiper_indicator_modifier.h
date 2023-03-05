@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -27,45 +28,85 @@ class SwiperIndicatorModifier : public ContentModifier {
 
 public:
     SwiperIndicatorModifier()
-        : vectorBlackPointCenterX_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
+        : backgroundColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
+          vectorBlackPointCenterX_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
           longPointLeftCenterX_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           longPointRightCenterX_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          centerY_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           pointRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          hoverPointRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0))
+          normalToHoverPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
+          hoverToNormalPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
+          longPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
+          indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
+          indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0)))
     {
         AttachProperty(vectorBlackPointCenterX_);
         AttachProperty(longPointLeftCenterX_);
         AttachProperty(longPointRightCenterX_);
-        AttachProperty(centerY_);
         AttachProperty(pointRadius_);
-        AttachProperty(hoverPointRadius_);
+        AttachProperty(normalToHoverPointDilateRatio_);
+        AttachProperty(hoverToNormalPointDilateRatio_);
+        AttachProperty(longPointDilateRatio_);
+        AttachProperty(backgroundColor_);
+        AttachProperty(indicatorPadding_);
+        AttachProperty(indicatorMargin_);
     }
     ~SwiperIndicatorModifier() override = default;
 
     struct ContentProperty {
+        Color backgroundColor = Color::TRANSPARENT;
         LinearVector<float> vectorBlackPointCenterX;
         float longPointLeftCenterX = 0;
         float longPointRightCenterX = 0;
-        float centerY = 0;
         float pointRadius = 0;
-        float hoverPointRadius = 0;
+        float normalToHoverPointDilateRatio = 1;
+        float hoverToNormalPointDilateRatio = 1;
+        float longPointDilateRatio = 0;
+        float indicatorPadding = 0;
+        OffsetF indicatorMargin = { 0, 0 };
     };
 
     void onDraw(DrawingContext& context) override;
-
+    // paint
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
     void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, float radius);
     void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter, float radius);
-    bool isHoverPoint(const OffsetF& leftCenter, const OffsetF& rightCenter, float radius);
     void PaintMask(DrawingContext& context);
+    void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
+    float GetRadius(size_t index, ContentProperty& contentProperty);
+    // Update property
+    void UpdateShrinkPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
+    void UpdateDilatePaintProperty(const float& hoverPointRadius, const LinearVector<float>& vectorBlackPointCenterX,
+        const std::pair<float, float>& longPointCenterX);
+    void UpdateBackgroundColor(const Color& backgroundColor);
 
-    void UpdateVectorBlackPointCenterX(const LinearVector<float>& vectorBlackPointCenterX);
+    void UpdateNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
+    void UpdateHoverPaintProperty(const float& hoverPointRadius, const LinearVector<float>& vectorBlackPointCenterX,
+        const std::pair<float, float>& longPointCenterX);
+    void UpdatePressPaintProperty(const float& hoverPointRadius, const LinearVector<float>& vectorBlackPointCenterX,
+        const std::pair<float, float>& longPointCenterX);
+    // Update
+    void UpdateNormalToHoverPaintProperty(const float& hoverPointRadius,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
+    void UpdateHoverToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
+    void UpdateNormalToPressPaintProperty(const float& hoverPointRadius,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
+    void UpdatePressToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
+    void UpdateHoverAndPressConversionPaintProperty();
+
+    // Point dilate ratio
+    void UpdateNormalToHoverPointDilateRatio();
+    void UpdateHoverToNormalPointDilateRatio();
+    void UpdateLongPointDilateRatio();
+
+    void UpdateAllPointCenterXAnimation(bool isForward, const LinearVector<float>& vectorBlackPointCenterX,
+        const std::pair<float, float>& longPointCenterX);
+
     void UpdateLongPointLeftCenterX(float longPointLeftCenterX, bool isAnimation);
     void UpdateLongPointRightCenterX(float longPointRightCenterX, bool isAnimation);
-    void UpdateCenterY(float centerY);
-    void UpdatePointRadius(float pointRadius);
-    void UpdateHoverPointRadius(float startHoverPointRadius, float endHoverPointRadius);
 
     void SetAxis(Axis axis)
     {
@@ -82,9 +123,24 @@ public:
         selectedColor_ = selectedColor;
     }
 
-    void SetHoverPoint(const PointF& hoverPoint)
+    void SetNormalToHoverIndex(const std::optional<int32_t>& normalToHoverIndex)
     {
-        hoverPoint_ = hoverPoint;
+        normalToHoverIndex_ = normalToHoverIndex;
+    }
+
+    void SetHoverToNormalIndex(const std::optional<int32_t>& hoverToNormalIndex)
+    {
+        hoverToNormalIndex_ = hoverToNormalIndex;
+    }
+
+    std::optional<int32_t> GetNormalToHoverIndex()
+    {
+        return normalToHoverIndex_;
+    }
+
+    std::optional<int32_t> GetHoverToNormalIndex()
+    {
+        return hoverToNormalIndex_;
     }
 
     void SetIndicatorMask(bool indicatorMask)
@@ -97,18 +153,72 @@ public:
         offset_ = offset;
     }
 
+    void SetCenterY(const float& centerY)
+    {
+        centerY_ = centerY;
+    }
+
+    void SetIsHover(bool isHover)
+    {
+        isHover_ = isHover;
+    }
+
+    bool GetIsHover() const
+    {
+        return isHover_;
+    }
+
+    void SetIsPressed(bool isPressed)
+    {
+        isPressed_ = isPressed;
+    }
+
+    bool GetIsPressed() const
+    {
+        return isPressed_;
+    }
+
+    void SetLongPointIsHover(bool isHover)
+    {
+        longPointIsHover_ = isHover;
+    }
+
+    bool GetLongPointIsHover() const
+    {
+        return longPointIsHover_;
+    }
+
 private:
+    static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
+    {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_RETURN(swiperTheme, nullptr);
+        return swiperTheme;
+    }
+
+    RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
     RefPtr<AnimatablePropertyFloat> longPointLeftCenterX_;
     RefPtr<AnimatablePropertyFloat> longPointRightCenterX_;
-    RefPtr<AnimatablePropertyFloat> centerY_;
     RefPtr<AnimatablePropertyFloat> pointRadius_;
-    RefPtr<AnimatablePropertyFloat> hoverPointRadius_;
+    RefPtr<AnimatablePropertyFloat> normalToHoverPointDilateRatio_;
+    RefPtr<AnimatablePropertyFloat> hoverToNormalPointDilateRatio_;
+    RefPtr<AnimatablePropertyFloat> longPointDilateRatio_;
+    RefPtr<AnimatablePropertyFloat> indicatorPadding_;
+    RefPtr<AnimatablePropertyOffsetF> indicatorMargin_;
 
+    float centerY_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
     Color unselectedColor_ = Color::TRANSPARENT;
     Color selectedColor_ = Color::TRANSPARENT;
-    std::optional<PointF> hoverPoint_ = std::nullopt;
+    std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
+    std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;
+    bool longPointIsHover_ = false;
+    bool isHover_ = false;
+    bool isPressed_ = false;
+
     bool indicatorMask_ = false;
     OffsetF offset_;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorModifier);
