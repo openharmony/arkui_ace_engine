@@ -40,6 +40,7 @@
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
@@ -70,7 +71,11 @@ const std::string STATE = "true";
 const OffsetF DISPLAY_WINDOW_OFFSET = OffsetF(ZERO, ZERO);
 const Color BUBBLE_PAINT_PROPERTY_MASK_COLOR = Color(0XFFFF0000);
 const Color BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR = Color(0XFFFFFF00);
+const Color BUBBLE_PAINT_PROPERTY_TEXT_COLOR = Color(0XFFFF0000);
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+const Dimension BUBBLE_PAINT_PROPERTY_TARGET_SPACE = Dimension(20.1, DimensionUnit::PX);
+const Dimension BUBBLE_PAINT_PROPERTY_FONT_SIZE = Dimension(20.1, DimensionUnit::PX);
+const Ace::FontWeight BUBBLE_PAINT_PROPERTY_FONT_WEIGHT = Ace::FontWeight::W100;
 constexpr Dimension BUBBLE_PAINT_PROPERTY_ARROW_OFFSET = 20.0_px;
 constexpr Placement BUBBLE_LAYOUT_PROPERTY_PLACEMENT = Placement::LEFT;
 } // namespace
@@ -514,6 +519,10 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest007, TestSize.Level1)
     popupParam->SetMaskColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR);
     popupParam->SetHasAction(false);
     popupParam->SetBackgroundColor(BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
+    popupParam->SetTargetSpace(BUBBLE_PAINT_PROPERTY_TARGET_SPACE);
+    popupParam->SetTextColor(BUBBLE_PAINT_PROPERTY_TEXT_COLOR);
+    popupParam->SetFontSize(BUBBLE_PAINT_PROPERTY_FONT_SIZE);
+    popupParam->SetFontWeight(BUBBLE_PAINT_PROPERTY_FONT_WEIGHT);
 
     // create bubbleNode
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
@@ -558,6 +567,10 @@ HWTEST_F(BubblePatternTestNg, BubblePatternTest008, TestSize.Level1)
     popupParam->SetMaskColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR);
     popupParam->SetHasAction(false);
     popupParam->SetBackgroundColor(BUBBLE_PAINT_PROPERTY_BACK_GROUND_COLOR);
+    popupParam->SetTargetSpace(BUBBLE_PAINT_PROPERTY_TARGET_SPACE);
+    popupParam->SetTextColor(BUBBLE_PAINT_PROPERTY_TEXT_COLOR);
+    popupParam->SetFontSize(BUBBLE_PAINT_PROPERTY_FONT_SIZE);
+    popupParam->SetFontWeight(BUBBLE_PAINT_PROPERTY_FONT_WEIGHT);
 
     // create customBubbleNode
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,

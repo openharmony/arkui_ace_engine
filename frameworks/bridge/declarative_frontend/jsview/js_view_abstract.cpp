@@ -383,6 +383,41 @@ void ParseShowObject(const JSCallbackInfo& info, const JSRef<JSObject>& showObj,
     }
 }
 
+void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPtr<PopupParam>& popupParam)
+{
+    auto colorValue = messageOptionsObj->GetProperty("textColor");
+    Color textColor;
+    if (JSViewAbstract::ParseJsColor(colorValue, textColor)) {
+        if (popupParam) {
+            popupParam->SetTextColor(textColor);
+        } else {
+            LOGI("Empty popup.");
+        }
+    }
+
+    auto font = messageOptionsObj->GetProperty("font");
+    if (!font->IsNull() && font->IsObject()) {
+        JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(font);
+        auto fontSizeValue = fontObj->GetProperty("size");
+        Dimension fontSize;
+        if (JSViewAbstract::ParseJsDimensionFp(fontSizeValue, fontSize)) {
+            if (popupParam) {
+                popupParam->SetFontSize(fontSize);
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+        auto fontWeightValue = fontObj->GetProperty("weight");
+        if (fontWeightValue->IsString()) {
+            if (popupParam) {
+                popupParam->SetFontWeight(ConvertStrToFontWeight(fontWeightValue->ToString()));
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+    }
+}
+
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
     JSRef<JSVal> messageVal = popupObj->GetProperty("message");
@@ -401,6 +436,26 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             LOGI("Empty popup.");
         }
     }
+
+    auto targetSpace = popupObj->GetProperty("targetSpace");
+    if (!targetSpace->IsNull()) {
+        Dimension space;
+        if (JSViewAbstract::ParseJsDimensionVp(targetSpace, space)) {
+            if (popupParam) {
+                popupParam->SetTargetSpace(space);
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+    }
+
+    auto messageOptions = popupObj->GetProperty("messageOptions");
+    JSRef<JSObject> messageOptionsObj;
+    if (!messageOptions->IsNull() && messageOptions->IsObject()) {
+        messageOptionsObj = JSRef<JSObject>::Cast(messageOptions);
+        SetPopupMessageOptions(messageOptionsObj, popupParam);
+    }
+
     JSRef<JSVal> showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
         bool showInSubBoolean = showInSubWindowValue->ToBoolean();
@@ -559,6 +614,16 @@ void ParseCustomPopupParam(
     Dimension offset;
     if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
         popupParam->SetArrowOffset(offset);
+    }
+
+    auto targetSpace = popupObj->GetProperty("targetSpace");
+    Dimension space;
+    if (JSViewAbstract::ParseJsDimensionVp(targetSpace, space)) {
+        if (popupParam) {
+            popupParam->SetTargetSpace(space);
+        } else {
+            LOGI("Empty popup.");
+        }
     }
 
     auto maskValue = popupObj->GetProperty("mask");
@@ -4699,5 +4764,4 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
     hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
     ViewAbstractModel::GetInstance()->SetHitTestMode(hitTestModeNG);
 }
-
 } // namespace OHOS::Ace::Framework
