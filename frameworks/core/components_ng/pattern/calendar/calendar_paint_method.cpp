@@ -145,7 +145,9 @@ void CalendarPaintMethod::DrawCalendar(
     auto y = dayOffset.GetY();
 
     dateTextStyle.color_ = IsToday(day) ? focusedDayColor_ : IsOffDay(day) ? weekendDayColor_ : dayColor_;
-    lunarTextStyle.color_ = IsToday(day) ? focusedLunarColor_ : IsOffDay(day) ? weekendLunarColor_ : lunarColor_;
+    lunarTextStyle.color_ =
+        IsToday(day) ? focusedLunarColor_
+                     : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
 
     if (day.focused && day.month.month == currentMonth_.month) {
         if (IsToday(day)) {
