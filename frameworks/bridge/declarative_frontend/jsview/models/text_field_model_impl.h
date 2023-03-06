@@ -58,6 +58,7 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
+    void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
 };
 

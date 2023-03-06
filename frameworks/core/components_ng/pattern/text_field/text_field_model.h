@@ -130,7 +130,7 @@ public:
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
-
+    virtual void ResetMaxLength() = 0;
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
 private:
