@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -89,7 +89,7 @@ void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
     }
 }
 
-void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /*info*/)
+void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /* info */)
 {
     GetMouseClickIndex();
     CHECK_NULL_VOID_NOLOG(mouseClickIndex_);
@@ -105,7 +105,7 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto paintProperty = host->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -242,7 +242,7 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     CHECK_NULL_VOID(swiperTheme);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto paintProperty = host->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
@@ -273,5 +273,4 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
         }
     }
 }
-
 } // namespace OHOS::Ace::NG

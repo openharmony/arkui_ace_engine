@@ -25,10 +25,11 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_layout_algorithm.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_layout_property.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_paint_method.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 #undef private
 #undef protected
 #include "core/components_ng/test/mock/render/mock_render_context.h"
@@ -115,7 +116,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorLayoutAlgorithmMeasure001,
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(algorithm == nullptr);
 
-    auto paintProperty = indicatorNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
     EXPECT_FALSE(paintProperty == nullptr);
     paintProperty->UpdateSize(Dimension(-1.0, DimensionUnit::PX));
 
@@ -169,7 +170,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorLayoutAlgorithmMeasure002,
     auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(algorithm == nullptr);
 
-    auto paintProperty = indicatorNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
     EXPECT_FALSE(paintProperty == nullptr);
     paintProperty->UpdateSize(Dimension(SWIPER_INDICATOR_SIZE_MINUS, DimensionUnit::PX));
 
@@ -553,8 +554,8 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorLayoutAlgorithmGetValidEdg
     auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
     EXPECT_FALSE(indicatorPattern == nullptr);
 
-    RefPtr<SwiperIndicatorLayoutAlgorithm> algorithm =
-        AceType::DynamicCast<SwiperIndicatorLayoutAlgorithm>(indicatorPattern->CreateLayoutAlgorithm());
+    RefPtr<DotIndicatorLayoutAlgorithm> algorithm =
+        AceType::DynamicCast<DotIndicatorLayoutAlgorithm>(indicatorPattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(algorithm == nullptr);
 
     /**
@@ -737,7 +738,7 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorHandleClick001, TestSize.L
     EXPECT_FALSE(indicatorPattern == nullptr);
 
     GestureEvent info;
-    auto paintProperty = indicatorNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
     EXPECT_FALSE(paintProperty == nullptr);
     paintProperty->UpdateSize(Dimension(-1.0, DimensionUnit::PX));
     indicatorPattern->HandleClick(info);
@@ -775,14 +776,14 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorGetContentModifier001, Tes
     EXPECT_FALSE(indicatorNode == nullptr);
     frameNode->AddChild(indicatorNode);
 
-    RefPtr<SwiperIndicatorModifier> modifier = AceType::MakeRefPtr<SwiperIndicatorModifier>();
-    RefPtr<SwiperIndicatorPaintMethod> paintMethod =
-        AceType::MakeRefPtr<SwiperIndicatorPaintMethod>(modifier);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod =
+        AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
 
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_FALSE(geometryNode == nullptr);
 
-    auto paintProperty = AceType::MakeRefPtr<SwiperIndicatorPaintProperty>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
     EXPECT_TRUE(paintProperty != nullptr);
     paintProperty->Clone();
     paintProperty->Reset();

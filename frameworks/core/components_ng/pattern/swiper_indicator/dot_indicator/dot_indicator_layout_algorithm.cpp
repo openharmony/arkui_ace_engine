@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_layout_algorithm.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -21,24 +21,21 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_paint_property.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 namespace {
-
-// TODO::add to theme
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
-
+constexpr float HALF = 0.5f;
+constexpr float DOUBLE = 2.0f;
 } // namespace
-
-void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
+void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
@@ -55,7 +52,7 @@ void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto itemCount = swiperPattern->TotalCount();
     auto direction = swiperPattern->GetDirection();
 
-    auto paintProperty = frameNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    auto paintProperty = frameNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -74,12 +71,12 @@ void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     indicatorPadding = INDICATOR_PADDING_HOVER;
 
     // Length of a selected indicator round rect.
-    auto selectedSize = userSize * 2.0f;
+    auto selectedSize = userSize * DOUBLE;
 
     // The width and height of the entire indicator.
-    auto indicatorHeight = static_cast<float>(userSize + indicatorPadding.ConvertToPx() * 2);
+    auto indicatorHeight = static_cast<float>(userSize + indicatorPadding.ConvertToPx() * DOUBLE);
     auto indicatorWidth = static_cast<float>(
-        (indicatorPadding.ConvertToPx() * 2 + (userSize + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) +
+        (indicatorPadding.ConvertToPx() * DOUBLE + (userSize + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) +
         selectedSize);
 
     if (direction == Axis::HORIZONTAL) {
@@ -102,7 +99,7 @@ void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
 
-void SwiperIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
+void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
@@ -137,7 +134,7 @@ void SwiperIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         position.SetX(swiperWidth - indicatorWidth_ - rightValue);
     } else {
         position.SetX(
-            direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) / 2.0 : swiperWidth - indicatorWidth_);
+            direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) * HALF : swiperWidth - indicatorWidth_);
     }
     if (top.has_value()) {
         auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(top->Value()));
@@ -149,14 +146,14 @@ void SwiperIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (direction == Axis::HORIZONTAL) {
             position.SetY(swiperHeight - indicatorHeight_);
         } else {
-            position.SetY((swiperHeight - indicatorHeight_) / 2.0);
+            position.SetY((swiperHeight - indicatorHeight_) * HALF);
         }
     }
     auto currentOffset = OffsetF { static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
     layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 }
 
-double SwiperIndicatorLayoutAlgorithm::GetValidEdgeLength(
+double DotIndicatorLayoutAlgorithm::GetValidEdgeLength(
     float swiperLength, float indicatorLength, const Dimension& edge)
 {
     double edgeLength = edge.Unit() == DimensionUnit::PERCENT ? swiperLength * edge.Value() : edge.ConvertToPx();
@@ -168,5 +165,4 @@ double SwiperIndicatorLayoutAlgorithm::GetValidEdgeLength(
     }
     return edgeLength;
 }
-
 } // namespace OHOS::Ace::NG
