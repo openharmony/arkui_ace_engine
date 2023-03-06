@@ -354,6 +354,13 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         LOGE("Builder of CustomDialog is null.");
         return;
     }
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
+
     // NG
     if (Container::IsCurrentUseNewPipeline()) {
         auto container = Container::Current();
@@ -386,14 +393,6 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         return;
     }
 
-    CHECK_NULL_VOID(jsBuilderFunction_);
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-    if (!scopedDelegate) {
-        // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
-        return;
-    }
-
     // Cannot reuse component because might depend on state
     if (customDialog_) {
         customDialog_ = nullptr;
@@ -416,6 +415,12 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsCloseDialog)");
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
 
     if (Container::IsCurrentUseNewPipeline()) {
         auto dialog = dialog_.Upgrade();
@@ -438,13 +443,6 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseDialog(dialog);
-        return;
-    }
-
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-    if (!scopedDelegate) {
-        // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
         return;
     }
     CloseDialog();
