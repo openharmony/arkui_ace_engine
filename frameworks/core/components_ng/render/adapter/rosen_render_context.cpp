@@ -1906,7 +1906,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
     if (transitionEffect_) {
         transitionEffect_->OnDetach(Claim(this));
     }
-    // TODO: if the struct of effect not changed, we can change the params in effect directly
+    // [[PLANNING]]: if the struct of effect not changed, we can change the params in effect directly
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
     CHECK_NULL_VOID(transitionEffect_);
     auto frameNode = GetHost();
@@ -1961,13 +1961,15 @@ void RosenRenderContext::OnTransitionOutFinish()
     if (disappearingTransitionCount_ <= 0) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        // remove self from disappearing nodes of parent.
         auto parent = host->GetParent();
-        if (parent) {
-            parent->RemoveDisappearingChild(host);
+        // clean up related status.
+        host->UINode::OnRemoveFromParent();
+        // try to remove self from disappearing nodes of parent.
+        if (parent && parent->RemoveDisappearingChild(host)) {
+            // if success, tell parent to rebuild render tree.
+            parent->MarkNeedSyncRenderTree();
+            parent->RebuildRenderContextTree();
         }
-        host->OnRemoveFromParent();
-        host->MarkNeedSyncRenderTree();
     }
 }
 

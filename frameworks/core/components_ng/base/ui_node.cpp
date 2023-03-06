@@ -66,9 +66,10 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         LOGE("child is not exist.");
         return children_.end();
     }
+    // cleanup disappearing children, avoid duplicated entry
     RemoveDisappearingChild(child);
     if ((*iter)->OnRemoveFromParent()) {
-        // move child to disappearing children, skip syncing render tree
+        // move child into disappearing children, and skip syncing render tree
         disappearingChildren_.emplace_back(child, std::distance(children_.begin(), iter));
     } else {
         // remove the child and sync render tree
@@ -580,10 +581,14 @@ void UINode::SetChildrenInDestroying()
     }
 }
 
-void UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
+bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 {
-    disappearingChildren_.remove_if(
-        [child](const auto& disappearingChild) { return disappearingChild.first == child; });
+    auto it = std::find_if(disappearingChildren_.begin(), disappearingChildren_.end(),
+        [child](const auto& pair) { return pair.first == child; });
+    if (it != disappearingChildren_.end()) {
+        disappearingChildren_.erase(it);
+        return true;
+    }
+    return false;
 }
-
 } // namespace OHOS::Ace::NG

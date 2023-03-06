@@ -298,7 +298,7 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void RemoveDisappearingChild(const RefPtr<UINode>& child);
+    bool RemoveDisappearingChild(const RefPtr<UINode>& child);
 
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)
@@ -334,7 +334,8 @@ protected:
         }
     }
 
-    virtual void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX)
+    virtual void OnGenerateOneDepthVisibleFrameWithTransition(
+        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX)
     {
         for (const auto& child : children_) {
             child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);

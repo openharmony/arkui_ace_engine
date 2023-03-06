@@ -64,7 +64,7 @@ class PropertyTransitionEffectImpl final : public RosenTransitionEffect {
     DECLARE_ACE_TYPE(PropertyTransitionEffectImpl, RosenTransitionEffect);
 
 public:
-    explicit PropertyTransitionEffectImpl() : RosenTransitionEffect(), identityValue_({}), activeValue_({}) {}
+    explicit PropertyTransitionEffectImpl() : RosenTransitionEffect() {}
     explicit PropertyTransitionEffectImpl(PropertyType identityProperty, PropertyType activeValue)
         : RosenTransitionEffect(), identityValue_(identityProperty), activeValue_(activeValue)
     {}
@@ -117,8 +117,8 @@ protected:
 private:
     std::shared_ptr<Modifier> modifier_;
     std::shared_ptr<Rosen::RSAnimatableProperty<PropertyType>> property_;
-    PropertyType identityValue_;
-    PropertyType activeValue_;
+    PropertyType identityValue_ {};
+    PropertyType activeValue_ {};
     bool isActive_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PropertyTransitionEffectImpl);
@@ -158,14 +158,18 @@ class RosenSlideTransitionEffect : public RosenAsymmetricTransitionEffect {
     DECLARE_ACE_TYPE(RosenSlideTransitionEffect, RosenAsymmetricTransitionEffect);
 
 public:
-    RosenSlideTransitionEffect()
+    RosenSlideTransitionEffect(TransitionEdge transitionInEdge, TransitionEdge transitionOutEdge)
         : RosenAsymmetricTransitionEffect(
-              MakeRefPtr<RosenTranslateTransitionEffect>(), MakeRefPtr<RosenTranslateTransitionEffect>())
+              MakeRefPtr<RosenTranslateTransitionEffect>(), MakeRefPtr<RosenTranslateTransitionEffect>()),
+          transitionInEdge_(transitionInEdge), transitionOutEdge_(transitionOutEdge)
     {}
 
     void UpdateFrameSize(const SizeF& size) override;
+
+private:
+    static Rosen::Vector2f GetTranslateValue(TransitionEdge edge, const SizeF& size);
+    TransitionEdge transitionInEdge_;
+    TransitionEdge transitionOutEdge_;
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_TRANSITION_EFFECT_H

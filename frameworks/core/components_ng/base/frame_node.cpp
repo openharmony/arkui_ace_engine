@@ -771,14 +771,8 @@ void FrameNode::RebuildRenderContextTree()
     }
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
+    // generate full children list, including disappear children.
     GenerateOneDepthVisibleFrameWithTransition(children);
-    std::stringstream ss;
-    for (auto child : children) {
-        ss << std::hex << "(" << AceType::RawPtr(child) << ", tag:" << child->GetTag() << "), ";
-    }
-    LOGI("rebuildRenderContextTree, this: %{public}p, this tag:%{public}s, child:[%{public}s]", this, GetTag().c_str(), ss.str().c_str());
-    // insert disappearing children here
-
     frameChildren_ = { children.begin(), children.end() };
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
@@ -922,9 +916,8 @@ void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Fr
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
-    // for visible transition animation
-    // TODO: re-check this
-    if (!isActive_ && !IsVisible() && !context->HasTransitionOutAnimation()) {
+    // skip if 1.not active or 2.not visible and has no transition out animation.
+    if (!isActive_ || (!IsVisible() && !context->HasTransitionOutAnimation())) {
         return;
     }
     if (index > visibleList.size()) {

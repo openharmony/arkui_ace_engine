@@ -257,9 +257,27 @@ void RosenAsymmetricTransitionEffect::UpdateFrameSize(const SizeF& size)
     }
 }
 
+Rosen::Vector2f RosenSlideTransitionEffect::GetTranslateValue(TransitionEdge edge, const SizeF& size)
+{
+    switch (edge) {
+        case TransitionEdge::START:
+            return { -size.Width(), 0.0f };
+        case TransitionEdge::END:
+            return { size.Width(), 0.0f };
+        case TransitionEdge::TOP:
+            return { 0.0f, -size.Height() };
+        case TransitionEdge::BOTTOM:
+            return { 0.0f, size.Height() };
+        default:
+            return { 0.0f, 0.0f };
+    }
+}
+
 void RosenSlideTransitionEffect::UpdateFrameSize(const SizeF& size)
 {
-    DynamicCast<RosenTranslateTransitionEffect>(transitionIn_)->SetActiveValue({ -size.Width(), 0.0f });
-    DynamicCast<RosenTranslateTransitionEffect>(transitionOut_)->SetActiveValue({ size.Width(), 0.0f });
+    DynamicCast<RosenTranslateTransitionEffect>(transitionIn_)
+        ->SetActiveValue(GetTranslateValue(transitionInEdge_, size));
+    DynamicCast<RosenTranslateTransitionEffect>(transitionOut_)
+        ->SetActiveValue(GetTranslateValue(transitionOutEdge_, size));
 }
 } // namespace OHOS::Ace::NG

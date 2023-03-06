@@ -1155,7 +1155,6 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
     }
     if (!hasEffect) {
         // default transition
-        LOGI("transition use default Transition");
         transitionOption = NG::TransitionOptions::GetDefaultTransition(transitionOption.Type);
     }
     return transitionOption;
@@ -1164,7 +1163,6 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
     LOGD("JsTransition");
-    LOGI("JsTransition");
     if (info.Length() > 1) {
         LOGE("Too many arguments");
         return;
@@ -1180,9 +1178,7 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (!obj->GetProperty("successor_")->IsUndefined()) {
-        LOGI("info[0]:%{public}s", info[0]->ToString().c_str());
         auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
-        LOGI("parseResult: %{public}p, effect:%{public}s", AceType::RawPtr(chainedEffect), chainedEffect->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
         return;
     }
@@ -4226,14 +4222,11 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
         return;
     }
     auto obj = JSRef<JSObject>::Cast(info[0]);
-    if (obj->GetProperty("type_")->IsString()) {
-        LOGI("info[0]:%{public}s", info[0]->ToString().c_str());
+    if (!obj->GetProperty("successor_")->IsUndefined()) {
         auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
-        LOGI("parseResult: %{public}p, effect:%{public}s", AceType::RawPtr(chainedEffect), chainedEffect->ToString().c_str());
         ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
         return;
     }
-    LOGI("info[0]:%{public}s", info[0]->ToString().c_str());
     auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
     auto options = ParseTransition(transitionArgs);
     ViewAbstractModel::GetInstance()->SetTransition(options, true);

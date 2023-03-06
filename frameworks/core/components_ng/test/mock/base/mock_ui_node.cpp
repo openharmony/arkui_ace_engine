@@ -19,10 +19,6 @@ namespace OHOS::Ace::NG {
 UINode::~UINode() {}
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode) {}
 void UINode::Clean() {}
-bool UINode::OnRemoveFromParent()
-{
-    return false;
-}
 void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const {}
 void UINode::AttachToMainTree() {}
 void UINode::DetachFromMainTree() {}
@@ -35,6 +31,10 @@ void UINode::MarkNeedSyncRenderTree() {}
 void UINode::RebuildRenderContextTree() {}
 void UINode::OnDetachFromMainTree() {}
 void UINode::OnAttachToMainTree() {}
+bool UINode::OnRemoveFromParent()
+{
+    return false;
+}
 void UINode::DumpTree(int32_t depth) {}
 void UINode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
 void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
@@ -133,6 +133,11 @@ RefPtr<LayoutWrapper> UINode::CreateLayoutWrapper(bool forceMeasure, bool forceL
 }
 
 bool UINode::MarkRemoving()
+{
+    return false;
+}
+
+bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 {
     return false;
 }
