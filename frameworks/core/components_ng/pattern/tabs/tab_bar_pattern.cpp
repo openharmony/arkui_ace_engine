@@ -702,13 +702,14 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
     if (tabBarPattern->IsContainsBuilder() || layoutProperty->GetAxis() == Axis::VERTICAL ||
         tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
+        paintProperty->UpdateIndicator({});
         return;
     }
 
     RectF rect = layoutProperty->GetIndicatorRect(indicator);
-    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
     paintProperty->UpdateIndicator(rect);
     currentIndicatorOffset_ = rect.GetX();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
