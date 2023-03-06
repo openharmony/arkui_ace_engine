@@ -30,13 +30,15 @@ using BorderRadiusArray = std::array<PointF, 4>;
 struct ImagePaintConfig {
     RectF srcRect_;
     RectF dstRect_;
+    std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
+    std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
     ImageRenderMode renderMode_ = ImageRenderMode::ORIGINAL;
     ImageInterpolation imageInterpolation_ = ImageInterpolation::NONE;
     ImageRepeat imageRepeat_ = ImageRepeat::NO_REPEAT;
     ImageFit imageFit_ = ImageFit::COVER;
-    std::shared_ptr<std::vector<float>> colorFilter_ = nullptr;
     bool needFlipCanvasHorizontally_ = false;
-    std::shared_ptr<BorderRadiusArray> borderRadiusXY_ = nullptr;
     bool isSvg_ = false;
 };
 

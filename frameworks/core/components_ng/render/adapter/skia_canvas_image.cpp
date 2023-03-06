@@ -23,6 +23,7 @@
 #include "pipeline/rs_recording_canvas.h"
 #endif
 
+// deprecated
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint8_t RADIUS_POINTS_SIZE = 4;

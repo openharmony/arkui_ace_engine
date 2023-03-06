@@ -95,7 +95,7 @@ public:
 
 private:
     void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
-    bool DrawCompressedImage(
+    bool DrawWithRecordingCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
 
     uint32_t uniqueId_ = 0;

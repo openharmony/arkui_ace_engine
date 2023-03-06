@@ -27,6 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
+// deprecated
 class SkiaCanvasImage : public CanvasImage {
     DECLARE_ACE_TYPE(SkiaCanvasImage, CanvasImage)
 public:
