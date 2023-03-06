@@ -24,6 +24,10 @@
 
 namespace OHOS::Ace::NG {
 
+enum class SideBarAnimationDirection {
+    LTR,
+    RTL,
+};
 class SideBarContainerPattern : public Pattern {
     DECLARE_ACE_TYPE(SideBarContainerPattern, Pattern);
 
@@ -87,6 +91,8 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
+    void UpdateAnimDir();
+    void DoAnimation();
     void DoSideBarAnimation();
     void CreateAnimation();
     void InitSideBar();
@@ -123,6 +129,7 @@ private:
     RectF dragRect_;
     float preSidebarWidth_ = 0.0f;
     bool hasControlButton_ = false;
+    SideBarAnimationDirection animDir_ = SideBarAnimationDirection::LTR;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerPattern);
 };

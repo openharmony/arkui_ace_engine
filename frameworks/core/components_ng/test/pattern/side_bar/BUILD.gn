@@ -59,6 +59,7 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_view.cpp",
+    "side_bar_layout_test_ng.cpp",
     "side_bar_pattern_test_ng.cpp",
     "side_bar_view_test_ng.cpp",
   ]
