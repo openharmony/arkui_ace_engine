@@ -46,6 +46,8 @@ public:
         auto ratingTheme = pipeline->GetTheme<RatingTheme>();
         CHECK_NULL_VOID(ratingTheme);
         auto paintProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());
+        ratingModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+        ratingModifier_->SetStartNum(starNum_);
         if (paintProperty) {
             constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
             ratingModifier_->SetDrawScore(paintProperty->GetRatingScoreValue(0.f));
@@ -53,8 +55,6 @@ public:
             ratingModifier_->SetTouchStar(paintProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER));
         }
         ratingModifier_->SetHoverState(state_);
-        ratingModifier_->SetContentOffset(paintWrapper->GetContentOffset());
-        ratingModifier_->SetStartNum(starNum_);
     }
 
 private:
