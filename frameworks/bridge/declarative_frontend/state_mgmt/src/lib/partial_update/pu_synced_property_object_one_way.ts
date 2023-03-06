@@ -93,7 +93,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     }
 
     this.resetLocalValue(this.source_.get(), /* needDeepCopy */ true);
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor ready with localCopyObservedObject '${JSON.stringify(this.localCopyObservedObject)}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: constructor ready with local copy.`);
   }
 
   /*
@@ -148,15 +148,16 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   }
 
   public getUnmonitored(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.localCopyObservedObject)}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored.`);
     // unmonitored get access , no call to notifyPropertyRead !
     return this.localCopyObservedObject;
   }
 
   // get 'read through` from the ObservedObject
   public get(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get returning ${JSON.stringify(this.localCopyObservedObject)}.`)
-    this.notifyPropertryHasBeenReadPU()
+    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: get.`);
+
+    this.notifyPropertryHasBeenReadPU();
     return this.localCopyObservedObject;
   }
 
@@ -164,11 +165,11 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
   // set 'writes through` to the ObservedObject
   public set(newValue: C): void {
     if (this.localCopyObservedObject == newValue) {
-      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value '${JSON.stringify(newValue)}'- ignoring.`);
+      stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}IP, '${this.info() || "unknown"}']: set with unchanged value - ignoring.`);
       return;
     }
 
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue: '${JSON.stringify(newValue)}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: set to newValue.`);
 
     if (this.resetLocalValue(newValue, /* needDeepCopy */ false)) {
       this.notifyPropertryHasChangedPU();
@@ -177,12 +178,12 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
 
 
   public reset(sourceChangedValue: C): void {
-    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${JSON.stringify(this.localCopyObservedObject)}' to '${JSON.stringify(sourceChangedValue)}'.`);
+    stateMgmtConsole.debug(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset.`);
     if (this.source_ !== undefined) {
       // if set causes an actual change, then, ObservedPropertyObject source_ will call syncPeerHasChanged
       this.source_.set(sourceChangedValue);
     } else {
-      stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${JSON.stringify(this.localCopyObservedObject)}' to '${JSON.stringify(sourceChangedValue)}' No source_. Internal error!`);
+      stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset --- No source_. Internal error!`);
     }
   }
 
@@ -202,7 +203,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
       return false;
     }
 
-    // unsubscribe from old wappedValue ObservedOject  
+    // unsubscribe from old wrappedValue ObservedOject  
     ObservedObject.removeOwningProperty(this.localCopyObservedObject, this);
 
 
@@ -215,7 +216,7 @@ class SynchedPropertyObjectOneWayPU<C extends Object>
     // deep copy value 
     // needed whenever newObservedObjectValue comes from source
     // not needed on a local set (aka when called from set() method)
-    let copy = needDeepCopy ? ObservedObject.GetDeepCopyOfObject(newObservedObjectValue) : newObservedObjectValue;
+    let copy = needDeepCopy ? ObservedObject.GetDeepCopyOfObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
 
     if (ObservedObject.IsObservedObject(copy)) {
       // case: new ObservedObject

@@ -1911,39 +1911,62 @@ class ObservedObject extends ExtendableProxy {
      * this rule applies for each individual object or array found in the recursive process
      * subscriber info will not be copied from the source object to its copy.
      * @param obj object, array of simple type data item to be deep copied
+     * @param variable Variable name of the object to be copied
      * @returns deep copied object, optionally wrapped inside an ObservedObject
      */
-    static GetDeepCopyOfObject(obj) {
-        
-        if (obj === null || typeof obj !== 'object') {
+    static GetDeepCopyOfObject(obj, variable) {
+        if (!obj || typeof obj !== 'object') {
             return obj;
         }
-        let copy = Array.isArray(obj) ? [] : !obj.constructor ? {} : new obj.constructor();
-        Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
-        if (obj instanceof Set) {
-            for (let setKey of obj.keys()) {
-                copy.add(ObservedObject.GetDeepCopyOfObject(setKey));
+        let stack = new Array();
+        let copiedObjects = new Map();
+        return GetDeepCopyOfObjectRecursive(obj);
+        function GetDeepCopyOfObjectRecursive(obj) {
+            if (!obj || typeof obj !== 'object') {
+                return obj;
             }
-        }
-        else if (obj instanceof Map) {
-            for (let mapKey of obj.keys()) {
-                copy.set(mapKey, ObservedObject.GetDeepCopyOfObject(obj.get(mapKey)));
+            const alreadyCopiedObject = copiedObjects.get(obj);
+            if (alreadyCopiedObject) {
+                let msg = `@Prop DeepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
+                stack.forEach(stackItem => msg += ` - ${stackItem.name}`);
+                stateMgmtConsole.warn(msg);
+                return alreadyCopiedObject;
             }
-        }
-        else if (obj instanceof Object) {
-            for (let objKey of Object.keys(obj)) {
-                copy[objKey] = ObservedObject.GetDeepCopyOfObject(obj[objKey]);
+            let copy;
+            if (obj instanceof Set) {
+                copy = new Set();
+                for (const setKey of obj.keys()) {
+                    stack.push({ name: setKey });
+                    copiedObjects.set(obj, copy);
+                    copy.add(GetDeepCopyOfObjectRecursive(setKey));
+                    stack.pop();
+                }
             }
-        }
-        else if (obj instanceof Date) {
-            copy.setTime(obj.getTime());
-        }
-        for (let key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                copy[key] = ObservedObject.GetDeepCopyOfObject(obj[key]);
+            else if (obj instanceof Map) {
+                copy = new Map();
+                for (const mapKey of obj.keys()) {
+                    stack.push({ name: mapKey });
+                    copiedObjects.set(obj, copy);
+                    copy.set(mapKey, GetDeepCopyOfObjectRecursive(obj.get(mapKey)));
+                    stack.pop();
+                }
             }
+            else if (obj instanceof Date) {
+                copy = new Date();
+                copy.setTime(obj.getTime());
+            }
+            else if (obj instanceof Object) {
+                copy = Array.isArray(obj) ? [] : {};
+                Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+                for (const objKey of Object.keys(obj)) {
+                    stack.push({ name: objKey });
+                    copiedObjects.set(obj, copy);
+                    Reflect.set(copy, objKey, GetDeepCopyOfObjectRecursive(obj[objKey]));
+                    stack.pop();
+                }
+            }
+            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
         }
-        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     }
     /**
      * Create a new ObservableObject and subscribe its owner to propertyHasChanged
@@ -3424,7 +3447,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             this.source_.set(sourceChangedValue);
         }
         else {
-            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${JSON.stringify(this.localCopyObservedObject)}' to '${JSON.stringify(sourceChangedValue)}' No source_. Internal error!`);
+            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset --- No source_. Internal error!`);
         }
     }
     /*
@@ -3441,7 +3464,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             stateMgmtConsole.error(`SynchedPropertyOneWayObjectPU[${this.id__()}]: setLocalValue new value must be an Object. Not setting.`);
             return false;
         }
-        // unsubscribe from old wappedValue ObservedOject  
+        // unsubscribe from old wrappedValue ObservedOject  
         ObservedObject.removeOwningProperty(this.localCopyObservedObject, this);
         if (newObservedObjectValue == undefined) {
             // case: newObservedObjectValue undefined
@@ -3451,7 +3474,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         // deep copy value 
         // needed whenever newObservedObjectValue comes from source
         // not needed on a local set (aka when called from set() method)
-        let copy = needDeepCopy ? ObservedObject.GetDeepCopyOfObject(newObservedObjectValue) : newObservedObjectValue;
+        let copy = needDeepCopy ? ObservedObject.GetDeepCopyOfObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
         if (ObservedObject.IsObservedObject(copy)) {
             // case: new ObservedObject
             this.localCopyObservedObject = copy;
