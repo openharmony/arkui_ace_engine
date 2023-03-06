@@ -46,6 +46,10 @@ public:
     }
     virtual bool IsAtTop() const = 0;
     virtual bool IsAtBottom() const = 0;
+    virtual bool OutBoundaryCallback()
+    {
+        return IsAtTop() || IsAtBottom();
+    }
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
     {

@@ -16,8 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
-#include "core/animation/bilateral_spring_adapter.h"
-#include "core/animation/simple_spring_chain.h"
+#include "core/animation/chain_animation.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
@@ -128,6 +127,7 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    bool OutBoundaryCallback() override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -174,7 +174,6 @@ public:
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation(bool enable);
-    void InitChainAnimation(int32_t nodeCount);
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
     void ProcessDragUpdate(float dragOffset);
@@ -256,13 +255,9 @@ private:
     int32_t lanes_ = 1;
 
     // chain animation
-    SpringChainProperty chainProperty_;
-    RefPtr<SpringProperty> overSpringProperty_;
-    RefPtr<BilateralSpringAdapter> chainAdapter_;
-    RefPtr<SimpleSpringChain> chain_;
-    bool chainOverScroll_ = false;
-    int32_t dragStartIndexPending_ = 0;
-    int32_t dragStartIndex_ = 0;
+    RefPtr<ChainAnimation> chainAnimation_;
+    bool dragFromSpring_ = false;
+    RefPtr<SpringProperty> springProperty_;
 
     // multiSelectable
     bool multiSelectable_ = false;

@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/animation/bilateral_spring_node.h"
+#include "core/animation/spring_model.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/scroll/scrollable.h"
@@ -33,7 +34,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t CHAIN_ANIMATION_NODE_COUNT = 30;
+constexpr Dimension CHAIN_INTERVAL_DEFAULT = 20.0_vp;
+constexpr double CHAIN_SPRING_MASS = 1.0;
+constexpr double CHAIN_SPRING_DAMPING = 30.0;
+constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
@@ -273,25 +277,38 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() && scrollState_ != SCROLL_FROM_BAR;
     listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
-    if (chainAdapter_) {
+    if (chainAnimation_) {
         listLayoutAlgorithm->SetChainOffsetCallback([weak = AceType::WeakClaim(this)](int32_t index) {
             auto list = weak.Upgrade();
             CHECK_NULL_RETURN(list, 0.0f);
             return list->GetChainDelta(index);
         });
-        listLayoutAlgorithm->SetChainInterval(chainProperty_.Interval().ConvertToPx());
+        if (!listLayoutProperty->GetSpace().has_value() && chainAnimation_) {
+            listLayoutAlgorithm->SetChainInterval(CHAIN_INTERVAL_DEFAULT.ConvertToPx());
+        }
     }
     return listLayoutAlgorithm;
 }
 
 bool ListPattern::IsAtTop() const
 {
-    return (startIndex_ == 0) && NonNegative(startMainPos_);
+    return (startIndex_ == 0) && NonNegative(startMainPos_ + GetChainDelta(0));
 }
 
 bool ListPattern::IsAtBottom() const
 {
-    return endIndex_ == maxListItemIndex_ && LessOrEqual(endMainPos_, GetMainContentSize());
+    return endIndex_ == maxListItemIndex_ && LessOrEqual(endMainPos_ + GetChainDelta(endIndex_), GetMainContentSize());
+}
+
+bool ListPattern::OutBoundaryCallback()
+{
+    bool outBoundary = IsAtTop() || IsAtBottom();
+    if (!dragFromSpring_ && outBoundary && chainAnimation_) {
+        auto delta = chainAnimation_->SetControlIndex(IsAtTop() ? 0 : maxListItemIndex_);
+        currentDelta_ -= delta;
+        dragFromSpring_ = true;
+    }
+    return outBoundary;
 }
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
@@ -378,6 +395,12 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     auto startPos = useCurrentDelta ? startMainPos_ - currentDelta_ : startMainPos_;
     auto endPos = useCurrentDelta ? endMainPos_ - currentDelta_ : endMainPos_;
     auto mainSize = GetMainContentSize();
+    if (startIndex_ == 0) {
+        startPos += GetChainDelta(0);
+    }
+    if (endIndex_ == maxListItemIndex_) {
+        endPos += GetChainDelta(endIndex_);
+    }
     bool outOfStart = (startIndex_ == 0) && Positive(startPos) && GreatNotEqual(endPos, mainSize);
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, mainSize) && Negative(startPos);
     return outOfStart || outOfEnd;
@@ -454,16 +477,20 @@ void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEf
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
         CHECK_NULL_RETURN_NOLOG(list, 0.0);
-        return list->startMainPos_ - list->currentDelta_;
+        return list->startMainPos_ + list->GetChainDelta(list->startIndex_) - list->currentDelta_;
     });
     scrollEffect->SetLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        return list->GetMainContentSize() - (list->endMainPos_ - list->startMainPos_);
+        auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
+        auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
+        return list->GetMainContentSize() - (endPos - startPos);
     });
     scrollEffect->SetTrailingCallback([]() -> double { return 0.0; });
     scrollEffect->SetInitLeadingCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto list = weak.Upgrade();
-        return list->GetMainContentSize() - (list->endMainPos_ - list->startMainPos_);
+        auto endPos = list->endMainPos_ + list->GetChainDelta(list->endIndex_);
+        auto startPos = list->startMainPos_ + list->GetChainDelta(list->startIndex_);
+        return list->GetMainContentSize() - (endPos - startPos);
     });
     scrollEffect->SetInitTrailingCallback([]() -> double { return 0.0; });
 }
@@ -663,95 +690,37 @@ void ListPattern::UpdateScrollBarOffset()
 void ListPattern::SetChainAnimation(bool enable)
 {
     if (!enable) {
-        overSpringProperty_.Reset();
-        chain_.Reset();
-        chainAdapter_.Reset();
+        chainAnimation_.Reset();
         return;
     }
-    if (!chainAdapter_) {
-        InitChainAnimation(CHAIN_ANIMATION_NODE_COUNT);
-        overSpringProperty_ = SpringChainProperty::GetDefaultOverSpringProperty();
+    if (!chainAnimation_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+        CHECK_NULL_VOID(listLayoutProperty);
+        auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+        springProperty_ =
+            AceType::MakeRefPtr<SpringProperty>(CHAIN_SPRING_MASS, CHAIN_SPRING_STIFFNESS, CHAIN_SPRING_DAMPING);
+        chainAnimation_ =
+            AceType::MakeRefPtr<ChainAnimation>(space, space * 2, space / 2, springProperty_); /* 2:double */
+        chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
+            auto list = weak.Upgrade();
+            CHECK_NULL_VOID(list);
+            list->MarkDirtyNodeSelf();
+        });
     }
-}
-
-void ListPattern::InitChainAnimation(int32_t nodeCount)
-{
-    chainAdapter_ = AceType::MakeRefPtr<BilateralSpringAdapter>();
-    chain_ = AceType::MakeRefPtr<SimpleSpringChain>(chainAdapter_);
-    chain_->SetFrameDelta(chainProperty_.FrameDelay());
-    if (chainProperty_.StiffnessTransfer()) {
-        chain_->SetStiffnessTransfer(AceType::MakeRefPtr<ExpParamTransfer>(chainProperty_.StiffnessCoefficient()));
-    } else {
-        chain_->SetStiffnessTransfer(AceType::MakeRefPtr<LinearParamTransfer>(chainProperty_.StiffnessCoefficient()));
-    }
-    if (chainProperty_.DampingTransfer()) {
-        chain_->SetDampingTransfer(AceType::MakeRefPtr<ExpParamTransfer>(chainProperty_.DampingCoefficient()));
-    } else {
-        chain_->SetDampingTransfer(AceType::MakeRefPtr<LinearParamTransfer>(chainProperty_.DampingCoefficient()));
-    }
-    chain_->SetControlDamping(chainProperty_.ControlDamping());
-    chain_->SetControlStiffness(chainProperty_.ControlStiffness());
-    chain_->SetDecoration(chainProperty_.Interval().ConvertToPx());
-    chain_->SetMinDecoration(chainProperty_.MinInterval().ConvertToPx());
-    chain_->SetMaxDecoration(chainProperty_.MaxInterval().ConvertToPx());
-    for (int32_t index = 0; index < nodeCount; index++) {
-        auto node = AceType::MakeRefPtr<BilateralSpringNode>(PipelineBase::GetCurrentContext(), index, 0.0);
-        node->AddUpdateListener(
-            [weak = AceType::WeakClaim(this)](double value, double velocity) {
-                auto list = weak.Upgrade();
-                CHECK_NULL_VOID(list);
-                list->MarkDirtyNodeSelf();
-            });
-        chainAdapter_->AddNode(node);
-    }
-    chainAdapter_->NotifyControlIndexChange();
-}
-
-float ListPattern::FlushChainAnimation(float dragOffset)
-{
-    if (!chain_ || !chainAdapter_) {
-        return 0.0;
-    }
-    float deltaDistance = 0.0;
-    bool needSetValue = false;
-    auto scrollableEvent = GetScrollableEvent();
-    bool overScroll = scrollableEvent && scrollableEvent->GetScrollable() &&
-        scrollableEvent->GetScrollable()->IsSpringMotionRunning();
-    if (chainOverScroll_ != overScroll) {
-        if (overScroll) {
-            if (overSpringProperty_ && overSpringProperty_->IsValid()) {
-                chain_->SetControlStiffness(overSpringProperty_->Stiffness());
-                chain_->SetControlDamping(overSpringProperty_->Damping());
-            }
-        } else {
-            chain_->SetControlStiffness(chainProperty_.ControlStiffness());
-            chain_->SetControlDamping(chainProperty_.ControlDamping());
-        }
-        chain_->OnControlNodeChange();
-        chainOverScroll_ = overScroll;
-    }
-    chain_->FlushAnimation();
-    if (dragStartIndexPending_ != dragStartIndex_) {
-        deltaDistance = chainAdapter_->ResetControl(dragStartIndexPending_ - dragStartIndex_);
-        dragStartIndex_ = dragStartIndexPending_;
-        chainAdapter_->SetDeltaValue(-deltaDistance);
-        needSetValue = true;
-    }
-    if (!NearZero(dragOffset)) {
-        chainAdapter_->SetDeltaValue(dragOffset);
-        needSetValue = true;
-    }
-    if (needSetValue) {
-        chain_->SetValue(0.0);
-    }
-    return deltaDistance;
 }
 
 void ListPattern::ProcessDragStart(float startPosition)
 {
+    CHECK_NULL_VOID(chainAnimation_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto globalOffset = host->GetOffsetRelativeToWindow();
     int32_t index = -1;
+    auto offset = startPosition - GetMainAxisOffset(globalOffset, GetAxis());
     for (auto & pos : itemPosition_) {
-        if (startPosition <= pos.second.endPos) {
+        if (offset <= pos.second.endPos) {
             index = pos.first;
             break;
         }
@@ -759,33 +728,24 @@ void ListPattern::ProcessDragStart(float startPosition)
     if (index == -1 && !itemPosition_.empty()) {
         index = itemPosition_.rbegin()->first + 1;
     }
-    dragStartIndexPending_ = index;
+    dragFromSpring_ = false;
+    chainAnimation_->SetControlIndex(index);
+    chainAnimation_->SetMaxIndex(maxListItemIndex_);
 }
 
 void ListPattern::ProcessDragUpdate(float dragOffset)
 {
-    if (!chainAdapter_) {
-        return;
-    }
-
+    CHECK_NULL_VOID(chainAnimation_);
     if (NearZero(dragOffset)) {
         return;
     }
-
-    float delta = FlushChainAnimation(-dragOffset);
-    currentDelta_ += delta;
+    chainAnimation_->SetDelta(-dragOffset);
 }
 
 float ListPattern::GetChainDelta(int32_t index) const
 {
-    if (!chainAdapter_) {
-        return 0.0f;
-    }
-    int32_t baseIndex = dragStartIndex_ - chainAdapter_->GetControlIndex();
-    auto targetIndex = std::clamp(index - baseIndex, 0, CHAIN_ANIMATION_NODE_COUNT - 1);
-    auto node = AceType::DynamicCast<BilateralSpringNode>(chainAdapter_->GetNode(targetIndex));
-    CHECK_NULL_RETURN(node, 0.0f);
-    return node->GetValue();
+    CHECK_NULL_RETURN_NOLOG(chainAnimation_, 0.0f);
+    return chainAnimation_->GetValue(index);
 }
 
 void ListPattern::InitMouseEvent()
