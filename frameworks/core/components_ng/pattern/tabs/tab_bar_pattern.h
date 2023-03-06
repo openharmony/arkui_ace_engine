@@ -205,6 +205,16 @@ public:
     void PlayTabBarTranslateAnimation(int32_t targetIndex);
     void StopTabBarTranslateAnimation();
 
+    bool GetChangeByClick() const
+    {
+        return changeByClick_;
+    }
+
+    void SetChangeByClick(bool changeByClick)
+    {
+        changeByClick_ = changeByClick;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -275,6 +285,7 @@ private:
     RefPtr<Animator> tabBarTranslateController_;
     float currentIndicatorOffset_ = 0.0f;
     bool isAnimating_ = false;
+    bool changeByClick_ = false;
 };
 } // namespace OHOS::Ace::NG
 
