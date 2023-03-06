@@ -123,7 +123,11 @@ RefPtr<FrameNode> BuildButton(
     MeasureContext content;
     content.textContent = data;
     content.fontSize = textStyle.GetFontSize();
+#ifdef ENABLE_ROSEN_BACKEND
     contentWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
+#else
+    contentWidth = 0.0;
+#endif
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
@@ -361,7 +365,11 @@ void SelectOverlayNode::GetDefaultButtonAndMenuWidth(float& defaultOptionWidth, 
 
     auto textStyle = textOverlayTheme->GetMenuButtonTextStyle();
     content.fontSize = textStyle.GetFontSize();
+#ifdef ENABLE_ROSEN_BACKEND
     auto size = RosenRenderCustomPaint::MeasureTextSizeInner(content);
+#else
+    auto size = Size(0.0, 0.0);
+#endif
     auto fontWidth = size.Width();
     const auto& buttonPadding = textOverlayTheme->GetMenuButtonPadding();
     defaultOptionWidth = fontWidth + buttonPadding.Left().ConvertToPx() + buttonPadding.Right().ConvertToPx();

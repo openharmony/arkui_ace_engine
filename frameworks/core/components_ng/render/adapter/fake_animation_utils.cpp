@@ -33,6 +33,13 @@ void AnimationUtils::Animate(
 class AnimationUtils::Animation {
 };
 
+void AnimationUtils::AddKeyFrame(
+    float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{}
+
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback)
+{}
+
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(
     const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
 {
