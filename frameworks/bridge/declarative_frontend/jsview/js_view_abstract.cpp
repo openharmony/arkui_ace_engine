@@ -1392,6 +1392,10 @@ void JSViewAbstract::JsFlexGrow(const JSCallbackInfo& info)
             return;
         }
     }
+    // negative use default value.
+    if (value < 0.0) {
+        value = 0.0;
+    }
     ViewAbstractModel::GetInstance()->SetFlexGrow(static_cast<float>(value));
 }
 
@@ -1409,6 +1413,10 @@ void JSViewAbstract::JsFlexShrink(const JSCallbackInfo& info)
         } else {
             return;
         }
+    }
+    // negative use default value.
+    if (value < 0.0) {
+        value = 1.0;
     }
     ViewAbstractModel::GetInstance()->SetFlexShrink(static_cast<float>(value));
 }
