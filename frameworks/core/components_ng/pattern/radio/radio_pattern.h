@@ -103,10 +103,8 @@ public:
         auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
         auto value = radioEventHub ? radioEventHub->GetValue() : "";
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
-        auto resultJson = JsonUtil::Create(true);
-        resultJson->Put("value", value.c_str());
-        resultJson->Put("group", group.c_str());
-        json->Put("value", resultJson->ToString().c_str());
+        json->Put("value", value.c_str());
+        json->Put("group", group.c_str());
     }
 
 private:

@@ -96,6 +96,16 @@ public:
         return currentOffset_;
     }
 
+    float GetContentMainSize() const
+    {
+        return contentMainSize_;
+    }
+
+    void SetPrevContentMainSize(float mainSize)
+    {
+        prevContentMainSize_ = mainSize;
+    }
+
     int32_t GetStartIndex() const
     {
         return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
@@ -163,7 +173,7 @@ public:
         chainInterval_ = interval;
     }
 
-    float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis);
+    float GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
 
@@ -180,8 +190,8 @@ public:
     }
 
 protected:
-    virtual void UpdateListItemConstraint(Axis axis, const OptionalSizeF& selfIdealSize,
-        LayoutConstraintF& contentConstraint);
+    virtual void UpdateListItemConstraint(
+        Axis axis, const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     virtual int32_t LayoutALineForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         Axis axis, int32_t& currentIndex, float startPos, float& endPos);
     virtual int32_t LayoutALineBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
@@ -196,6 +206,9 @@ protected:
 
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
         const RefPtr<ListLayoutProperty>& layoutProperty) const;
+    void CheckListItemGroupRecycle(
+        LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
+    void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index);
     void SetItemInfo(int32_t index, ListItemInfo&& info)
     {
         itemPosition_[index] = info;
@@ -216,6 +229,7 @@ private:
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
     void CreateItemGroupList(LayoutWrapper* layoutWrapper);
+    void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
@@ -238,6 +252,7 @@ private:
 
     bool mainSizeIsDefined_ = false;
     float contentMainSize_ = 0.0f;
+    float prevContentMainSize_ = 0.0f;
     float paddingBeforeContent_ = 0.0f;
     float paddingAfterContent_ = 0.0f;
 

@@ -27,12 +27,14 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -83,6 +85,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     if (totalItemCount_ > 0) {
+        OnSurfaceChanged(layoutWrapper);
         currentOffset_ = currentDelta_;
         startMainPos_ = currentOffset_;
         endMainPos_ = currentOffset_ + contentMainSize_;
@@ -125,10 +128,15 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
 }
 
-float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis)
+float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const
 {
+    if (GetItemPosition().empty()) {
+        return 0.0f;
+    }
     float maxCrossSize = 0.0f;
-    for (const auto& pos : itemPosition_) {
+    float crossSize = 0.0f;
+    float prevPos = GetItemPosition().begin()->second.startPos;
+    for (const auto& pos : GetItemPosition()) {
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
         if (!wrapper) {
             continue;
@@ -137,7 +145,13 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
         if (!getGeometryNode) {
             continue;
         }
-        maxCrossSize = std::max(maxCrossSize, getGeometryNode->GetMarginFrameSize().CrossSize(axis));
+        if (NearEqual(prevPos, pos.second.startPos)) {
+            crossSize += getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+        } else {
+            crossSize = getGeometryNode->GetMarginFrameSize().CrossSize(axis);
+        }
+        prevPos = pos.second.startPos;
+        maxCrossSize = std::max(crossSize, maxCrossSize);
     }
     return maxCrossSize;
 }
@@ -187,13 +201,14 @@ void ListLayoutAlgorithm::MeasureList(
     if (jumpIndex_) {
         LOGD("Jump index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             jumpIndex_.value(), currentOffset_, startMainPos_, endMainPos_);
-        jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
         if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_TOP) {
+            jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
             LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), startMainPos_);
             if (jumpIndex_.value() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() - 1, GetStartPosition());
             }
         } else if (scrollIndexAlignment_ == ScrollIndexAlignment::ALIGN_BUTTON) {
+            jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value()) + GetLanes() - 1;
             LayoutBackward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value(), endMainPos_);
             if (jumpIndex_.value() < totalItemCount_ - 1 && LessNotEqual(GetEndPosition(), endMainPos_)) {
                 LayoutForward(layoutWrapper, layoutConstraint, axis, jumpIndex_.value() + 1, GetEndPosition());
@@ -288,7 +303,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         LOGD("LayoutForward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + paddingAfterContent_));
+    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutForward");
@@ -317,12 +332,18 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
             startMainPos_ = currentEndPos - contentMainSize_;
             endMainPos_ = currentEndPos;
         }
+        if (Negative(currentOffset_) && itemPosition_.begin()->second.isGroup) {
+            AdjustPostionForListItemGroup(layoutWrapper, axis, GetStartIndex());
+        }
     }
 
     // Mark inactive in wrapper.
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (GreatOrEqual(pos->second.endPos + chainOffset, startMainPos_ - paddingBeforeContent_)) {
+        if (GreatOrEqual(pos->second.endPos + chainOffset, startMainPos_)) {
+            if (pos->second.isGroup) {
+                CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.startPos + chainOffset, true);
+            }
             break;
         }
         LOGI("recycle item:%{public}d", pos->first);
@@ -352,7 +373,7 @@ void ListLayoutAlgorithm::LayoutBackward(
         LOGD("LayoutBackward: %{public}d current start pos: %{public}f, current end pos: %{public}f", currentIndex,
             currentStartPos, currentEndPos);
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
-    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos - paddingBeforeContent_));
+    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
 
     if (overScrollFeature_) {
         LOGD("during over scroll, just return in LayoutBackward");
@@ -376,7 +397,10 @@ void ListLayoutAlgorithm::LayoutBackward(
     std::list<int32_t> removeIndexes;
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
-        if (LessOrEqual(pos->second.startPos + chainOffset, endMainPos_ + paddingAfterContent_)) {
+        if (LessOrEqual(pos->second.startPos + chainOffset, endMainPos_)) {
+            if (pos->second.isGroup) {
+                CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.endPos + chainOffset, false);
+            }
             break;
         }
         layoutWrapper->RemoveChildInRenderTree(pos->first);
@@ -458,6 +482,38 @@ float ListLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float child
     }
 }
 
+void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
+{
+    if (GreatOrEqual(contentMainSize_, prevContentMainSize_)) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    // textField not in List
+    if (!focusHub->IsCurrentFocus()) {
+        return;
+    }
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_VOID_NOLOG(textFieldManager);
+    // only when textField is onFocus
+    auto textField = textFieldManager->GetOnFocusTextField().Upgrade();
+    CHECK_NULL_VOID_NOLOG(textField);
+    auto textFieldHost = textField->GetHost();
+    CHECK_NULL_VOID(textFieldHost);
+    auto position = textFieldHost->GetTransformRelativeOffset().GetY() + textField->GetHostFrameSize()->Height();
+    auto globalOffset = host->GetTransformRelativeOffset();
+    auto offset = contentMainSize_ + globalOffset.GetY() - position;
+    if (LessOrEqual(offset, 0.0)) {
+        // negative offset to scroll down
+        currentDelta_ -= static_cast<float>(offset);
+        LOGI("update offset on virtual keyboard height change, %{public}f", offset);
+    }
+}
+
 void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos,
     bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty) const
 {
@@ -465,9 +521,43 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_VOID(itemGroup);
-    itemGroup->SetListMainSize(
-        startMainPos_ - paddingBeforeContent_, endMainPos_ + paddingAfterContent_, referencePos, forwardLayout);
+    itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
+}
+
+void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper, int32_t index,
+    float referencePos, bool forwardLayout) const
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    auto algorithmWrapper = wrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(algorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    itemGroup->CheckRecycle(wrapper, startMainPos_, endMainPos_, referencePos, forwardLayout);
+}
+
+void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index)
+{
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    auto algorithmWrapper = wrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(algorithmWrapper);
+    auto itemGroup = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(algorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(itemGroup);
+    itemGroup->SetListMainSize(startMainPos_, endMainPos_, itemPosition_[index].endPos, false);
+    itemGroup->Measure(AceType::RawPtr(wrapper));
+    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis);
+    float delta = 0.0f;
+    for (auto& pos : itemPosition_) {
+        if (pos.first == index) {
+            delta = (pos.second.endPos - pos.second.startPos) - mainLen;
+            pos.second.endPos = pos.second.startPos + mainLen;
+        } else if (pos.first > index) {
+            pos.second.startPos -= delta;
+            pos.second.endPos -= delta;
+        }
+    }
 }
 
 void ListLayoutAlgorithm::CreateItemGroupList(LayoutWrapper* layoutWrapper)

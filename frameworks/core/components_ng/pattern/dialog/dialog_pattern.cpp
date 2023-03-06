@@ -55,7 +55,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
-constexpr Dimension SHEET_IMAGE_PADDING = 16.0_vp;
+constexpr Dimension SHEET_IMAGE_MARGIN = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
 constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
@@ -435,16 +435,15 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
         auto iconId = ElementRegister::GetInstance()->MakeUniqueId();
         auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, iconId, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_RETURN(iconNode, nullptr);
-        // add image padding
-        CalcLength padding(SHEET_IMAGE_PADDING.ConvertToPx());
-        PaddingProperty imagePadding = {
-            .left = padding,
-            .right = padding,
-            .top = padding,
-            .bottom = padding,
+        // add image margin
+        MarginProperty margin = {
+            .left = CalcLength(SHEET_IMAGE_MARGIN),
+            .right = CalcLength(SHEET_IMAGE_MARGIN),
+            .top = CalcLength(SHEET_IMAGE_MARGIN),
+            .bottom = CalcLength(SHEET_IMAGE_MARGIN),
         };
         auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        iconProps->UpdatePadding(imagePadding);
+        iconProps->UpdateMargin(margin);
         LOGD("item icon src = %s", item.icon.c_str());
         auto imageSrc = ImageSourceInfo(item.icon);
         iconProps->UpdateImageSourceInfo(imageSrc);

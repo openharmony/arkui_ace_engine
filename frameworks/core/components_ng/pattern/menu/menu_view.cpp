@@ -100,6 +100,7 @@ RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
         }
+        optionNode->MarkModifyDone();
         optionNode->MountToParent(menuNode);
     }
     auto menuPattern = menuNode->GetPattern<MenuPattern>();

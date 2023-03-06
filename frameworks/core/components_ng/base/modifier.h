@@ -23,6 +23,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/render/adapter/linear_vector.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/modifier_adapter.h"
@@ -177,21 +178,24 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifier);
 };
 
-#define DECLARE_PROP_TYPED_CLASS(classname, template_class, type) \
-    class classname : public template_class<type> {               \
-        DECLARE_ACE_TYPE(classname, template_class);              \
-                                                                  \
-    public:                                                       \
-        explicit classname(type value) : template_class(value) {} \
-        ~classname() override = default;                          \
-        ACE_DISALLOW_COPY_AND_MOVE(classname);                    \
+#define DECLARE_PROP_TYPED_CLASS(classname, template_class, type)        \
+    class classname : public template_class<type> {                      \
+        DECLARE_ACE_TYPE(classname, template_class);                     \
+                                                                         \
+    public:                                                              \
+        explicit classname(const type& value) : template_class(value) {} \
+        ~classname() override = default;                                 \
+        ACE_DISALLOW_COPY_AND_MOVE(classname);                           \
     };
 
 DECLARE_PROP_TYPED_CLASS(PropertyBool, NormalProperty, bool);
 DECLARE_PROP_TYPED_CLASS(PropertySizeF, NormalProperty, SizeF);
 DECLARE_PROP_TYPED_CLASS(PropertyOffsetF, NormalProperty, OffsetF);
+DECLARE_PROP_TYPED_CLASS(PropertyInt, NormalProperty, int32_t);
+DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorFloat, AnimatableProperty, LinearVector<float>);
 
 } // namespace OHOS::Ace::NG
 

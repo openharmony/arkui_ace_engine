@@ -19,6 +19,7 @@
 #include <optional>
 #include <utility>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -282,6 +283,7 @@ void ViewAbstract::SetFlexBasis(const Dimension& value)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0f)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension());
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
@@ -383,7 +385,12 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
         return;
     }
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(value);
+    if (Negative(value.Value())) {
+        borderWidth.SetBorderWidth(Dimension(0));
+        LOGW("border width is negative, reset to 0");
+    } else {
+        borderWidth.SetBorderWidth(value);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
 }
 
@@ -840,7 +847,10 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
-
+#ifdef PREVIEW
+    // unable to use the subWindow in the Previewer.
+    isContextMenu = false;
+#endif
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type);
     if (isContextMenu) {

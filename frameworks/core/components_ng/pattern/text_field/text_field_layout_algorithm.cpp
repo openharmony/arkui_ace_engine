@@ -124,9 +124,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth()) && !pattern->IsTextArea() && !showPlaceHolder) {
         paragraph_->Layout(std::ceil(paragraphNewWidth));
     }
-    if (showPlaceHolder) {
-        placeholderParagraphHeight_ = paragraph_->GetHeight();
-    }
     auto preferredHeight = static_cast<float>(paragraph_->GetHeight());
     if (textContent.empty()) {
         preferredHeight = pattern->PreferredLineHeight();
@@ -151,7 +148,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
                     std::clamp(textRect_.Width(), contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
             }
         }
-        return SizeF(idealWidth, preferredHeight);
+        return SizeF(idealWidth, std::min(preferredHeight, idealHeight));
     }
     float imageSize = 0.0f;
     imageSize = showPasswordIcon ? preferredHeight : 0.0f;
@@ -200,9 +197,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // Update content position.
     OffsetF contentOffset;
     if (pattern->IsTextArea()) {
-        contentOffset = OffsetF(pattern->GetUtilPadding().Offset());
-        content->SetOffset(contentOffset);
-        textRect_.SetOffset(contentOffset);
+        content->SetOffset(pattern->GetUtilPadding().Offset());
+        textRect_.SetOffset(pattern->GetTextRect().GetOffset());
         return;
     }
     contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
@@ -307,6 +303,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
         textStyle.SetTextAlign(layoutProperty->GetPlaceholderTextAlign().value());
     }
     textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+    textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
 void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText)
@@ -318,6 +315,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
     paraStyle.fontSize_ = textStyle.GetFontSize().ConvertToPx();
+    paraStyle.fontFamily_ = textStyle.GetFontFamilies().at(0);
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         paraStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);
     }

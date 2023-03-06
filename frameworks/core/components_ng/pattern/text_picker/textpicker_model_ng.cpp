@@ -117,4 +117,9 @@ void TextPickerModelNG::SetOnChange(TextChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
+
+void TextPickerModelNG::SetValue(const std::string& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Value, value);
+}
 } // namespace OHOS::Ace::NG

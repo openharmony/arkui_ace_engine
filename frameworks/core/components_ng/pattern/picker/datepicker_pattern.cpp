@@ -1250,4 +1250,31 @@ const std::string& DatePickerPattern::GetLunarDay(uint32_t day)
     return lunarDays_[day - 1]; // index in [0,29]
 }
 
+void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto GetDateString = [](const PickerDate& pickerDate) {
+        std::string ret;
+        ret += std::to_string(pickerDate.GetYear());
+        ret += "-";
+        ret += std::to_string(pickerDate.GetMonth());
+        ret += "-";
+        ret += std::to_string(pickerDate.GetDay());
+        return ret;
+    };
+    auto rowLayoutProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(rowLayoutProperty);
+    auto jsonConstructor = JsonUtil::Create(true);
+    auto isLunar = rowLayoutProperty->GetLunarValue(false);
+    if (isLunar) {
+        jsonConstructor->Put("start", rowLayoutProperty->GetDateStart().c_str());
+        jsonConstructor->Put("end", rowLayoutProperty->GetDateEnd().c_str());
+        jsonConstructor->Put("selected", rowLayoutProperty->GetDateSelected().c_str());
+    } else {
+        jsonConstructor->Put("start", GetDateString(startDateSolar_).c_str());
+        jsonConstructor->Put("end", GetDateString(endDateSolar_).c_str());
+        jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
+    }
+    json->Put("constructor", jsonConstructor);
+}
+
 } // namespace OHOS::Ace::NG

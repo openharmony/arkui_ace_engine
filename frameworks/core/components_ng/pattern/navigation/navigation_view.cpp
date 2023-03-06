@@ -58,8 +58,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
-
 RefPtr<FrameNode> CreateBarItemTextNode(const std::string& text)
 {
     int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -877,7 +875,9 @@ void NavigationView::SetCustomToolBar(const RefPtr<UINode>& customToolBar)
         }
     }
     navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
-    navBarNode->SetToolBarNode(customToolBar);
+    auto toolBarNode = navBarNode->GetToolBarNode();
+    CHECK_NULL_VOID(toolBarNode);
+    customToolBar->MountToParent(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(true);
 }
 

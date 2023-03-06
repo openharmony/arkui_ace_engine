@@ -99,17 +99,18 @@ struct TextSelector {
         return destinationOffset == baseOffset;
     }
 
+    bool StartEqualToDest() const
+    {
+        return baseOffset == destinationOffset;
+    }
+
     std::string ToString()
     {
         std::string result;
         result.append("base offset: ");
         result.append(std::to_string(baseOffset));
-        result.append(", base position: ");
-        result.append(selectionBaseOffset.ToString());
         result.append(", destination offset: ");
         result.append(std::to_string(destinationOffset));
-        result.append(", destination position: ");
-        result.append(selectionDestinationOffset.ToString());
         return result;
     }
 

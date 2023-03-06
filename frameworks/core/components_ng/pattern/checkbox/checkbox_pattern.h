@@ -119,6 +119,9 @@ public:
         json->Put("name", name.c_str());
         json->Put("group", group.c_str());
         json->Put("type", "ToggleType.Checkbox");
+        auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+        auto select = paintProperty->GetCheckBoxSelectValue(false);
+        json->Put("select", select ? "true" : "false");
     }
 
     FocusPattern GetFocusPattern() const override;

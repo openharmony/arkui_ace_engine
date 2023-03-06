@@ -48,6 +48,23 @@ public:
         ResetDivider();
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("space", propSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str());
+        if (propDivider_.has_value()) {
+            auto divider = JsonUtil::Create(false);
+            divider->Put("strokeWidth", propDivider_.value().strokeWidth.ToString().c_str());
+            divider->Put("startMargin", propDivider_.value().startMargin.ToString().c_str());
+            divider->Put("endMargin", propDivider_.value().endMargin.ToString().c_str());
+            divider->Put("color", propDivider_.value().color.ColorToString().c_str());
+            json->Put("divider", divider);
+        } else {
+            auto divider = JsonUtil::Create(false);
+            json->Put("divider", divider);
+        }
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Space, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, V2::ItemDivider, PROPERTY_UPDATE_MEASURE);
 };

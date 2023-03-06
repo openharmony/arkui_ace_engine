@@ -39,6 +39,11 @@ public:
     {
         return onSelectEvent_;
     }
+
+    int32_t GetIndex(const Point& point) const;
+
+    std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag) override;
+
 private:
     OnSelectFunc onSelectEvent_;
 };

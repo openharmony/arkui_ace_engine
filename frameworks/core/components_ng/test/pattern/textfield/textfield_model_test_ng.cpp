@@ -249,7 +249,7 @@ HWTEST_F(TextFieldModelTestNG, SetPlaceholderFont001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetPlaceholderItalicFontStyle().value(), Ace::FontStyle::NORMAL);
     EXPECT_EQ(layoutProperty->GetPlaceholderFontWeight().value(), Ace::FontWeight::W200);
     EXPECT_EQ(layoutProperty->GetPlaceholderFontFamily().value().size(), fontFamilies.size());
-    EXPECT_TRUE(layoutProperty->GetPreferredLineHeightNeedToUpdate().value());
+    EXPECT_TRUE(layoutProperty->GetPreferredTextLineHeightNeedToUpdate().value());
 }
 
 /**

@@ -535,6 +535,7 @@ void VideoPattern::OnAttachToFrameNode()
     renderContextForMediaPlayer_->InitContext(false, "MediaPlayerSurface");
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->SetClipToBounds(true);
 }
 
 void VideoPattern::OnModifyDone()

@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
+#include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -367,8 +368,7 @@ JSRef<JSVal> CreateJsObjectFromJsonValue(const EcmaVM* vm, const std::unique_ptr
     }
 }
 
-void RegisterCardUpdateCallback(
-    const RefPtr<CardFrontendDelegateDeclarative>& delegate, const panda::Local<panda::ObjectRef>& obj)
+void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::ObjectRef>& obj)
 {
     JSRef<JSObject> object = JSRef<JSObject>::Make(obj);
     JSRef<JSVal> storageValue = object->GetProperty("localStorage_");
@@ -378,7 +378,6 @@ void RegisterCardUpdateCallback(
     }
 
     JSRef<JSObject> storage = JSRef<JSObject>::Cast(storageValue);
-
     JSRef<JSVal> setOrCreateVal = storage->GetProperty("setOrCreate");
     if (!setOrCreateVal->IsFunction()) {
         LOGE("RegisterCardUpdateCallback: can not get property 'setOrCreate'!");
@@ -386,15 +385,13 @@ void RegisterCardUpdateCallback(
     }
 
     JSRef<JSFunc> setOrCreate = JSRef<JSFunc>::Cast(setOrCreateVal);
-
     auto id = ContainerScope::CurrentId();
-    delegate->SetUpdateCardDataCallback([storage, setOrCreate, id](const std::string& data) {
+    auto callback = [storage, setOrCreate, id](const std::string& data) {
         ContainerScope scope(id);
         const EcmaVM* vm = storage->GetEcmaVM();
         CHECK_NULL_VOID(vm);
         std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
         CHECK_NULL_VOID(jsonRoot);
-
         auto child = jsonRoot->GetChild();
         if (!child || !child->IsValid()) {
             LOGE("update card data error");
@@ -410,8 +407,26 @@ void RegisterCardUpdateCallback(
             setOrCreate->Call(storage, FUNC_SET_CREATE_ARG_LEN, args);
             child = child->GetNext();
         }
-    });
-    delegate->UpdatePageDataImmediately();
+    };
+
+    auto container = Container::Current();
+    if (container->IsFRSCardContainer()) {
+        LOGI("RegisterCardUpdateCallback:Run Card In FRS");
+        auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_VOID(frontEnd);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_VOID(delegate);
+        delegate->SetUpdateCardDataCallback(callback);
+        delegate->UpdatePageDataImmediately();
+    } else {
+        LOGI("RegisterCardUpdateCallback:Run Card In Host");
+        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_VOID(frontEnd);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_VOID(delegate);
+        delegate->SetUpdateCardDataCallback(callback);
+        delegate->UpdatePageDataImmediately();
+    }
 }
 
 void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
@@ -424,19 +439,32 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
+        // Set Partial Update
+        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+
         auto cardId = CardScope::CurrentId();
         view->SetCardId(cardId);
 
-        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
-        CHECK_NULL_VOID(frontEnd);
+        RegisterCardUpdateCallback(cardId, obj);
 
-        auto delegate = frontEnd->GetDelegate();
-        CHECK_NULL_VOID(delegate);
-        RegisterCardUpdateCallback(delegate, obj);
+        RefPtr<NG::PageRouterManager> pageRouterManager;
 
-        auto pageRouterManager = delegate->GetPageRouterManager();
+        if (container->IsFRSCardContainer()) {
+            LOGI("Run Card In FRS");
+            auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+            CHECK_NULL_VOID(frontEnd);
+            auto delegate = frontEnd->GetDelegate();
+            CHECK_NULL_VOID(delegate);
+            pageRouterManager = delegate->GetPageRouterManager();
+        } else {
+            LOGI("Run Card In Host");
+            auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+            CHECK_NULL_VOID(frontEnd);
+            auto delegate = frontEnd->GetDelegate();
+            CHECK_NULL_VOID(delegate);
+            pageRouterManager = delegate->GetPageRouterManager();
+        }
         CHECK_NULL_VOID(pageRouterManager);
-
         auto pageNode = pageRouterManager->GetCurrentPageNode();
         CHECK_NULL_VOID(pageNode);
 
@@ -541,23 +569,28 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
 
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
-        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
-        if (!frontEnd) {
-            return panda::JSValueRef::Undefined(vm);
+        if (container->IsFRSCardContainer()) {
+            LOGE("Form PostCardAction in FRS");
+            auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+            CHECK_NULL_RETURN(frontEnd, panda::JSValueRef::Undefined(vm));
+            auto delegate = frontEnd->GetDelegate();
+            CHECK_NULL_RETURN(delegate, panda::JSValueRef::Undefined(vm));
+            delegate->FireCardAction(action);
+        } else {
+            LOGE("Form PostCardAction in HOST");
+            auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+            CHECK_NULL_RETURN(frontEnd, panda::JSValueRef::Undefined(vm));
+            auto delegate = frontEnd->GetDelegate();
+            CHECK_NULL_RETURN(delegate, panda::JSValueRef::Undefined(vm));
+            delegate->FireCardAction(action);
         }
-
-        auto delegate = frontEnd->GetDelegate();
-        if (!delegate) {
-            return panda::JSValueRef::Undefined(vm);
-        }
-        delegate->FireCardAction(action);
     }
     return panda::JSValueRef::Undefined(vm);
 }
 
 panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("Load eTS Card start");
+    LOGI("Load eTS Card start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {

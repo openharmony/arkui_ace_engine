@@ -165,6 +165,9 @@ void JSSpan::SetDecoration(const JSCallbackInfo& info)
     Color result;
     if (ParseJsColor(colorValue, result)) {
         colorVal = result;
+    } else {
+        // default color
+        colorVal = Color::BLACK;
     }
     if (textDecoration) {
         SpanModel::GetInstance()->SetTextDecoration(textDecoration.value());

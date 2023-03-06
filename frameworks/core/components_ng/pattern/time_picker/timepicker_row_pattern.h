@@ -261,8 +261,8 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
-        json->Put("selectedTime", selectedTime_.ToString(false, false).c_str());
-        json->Put("isUseMilitaryTime", V2::ConvertBoolToString(hour24_).c_str());
+        json->Put("selected", selectedTime_.ToString(false, false).c_str());
+        json->Put("useMilitaryTime", V2::ConvertBoolToString(hour24_).c_str());
     }
 
     void CreateAmPmNode();

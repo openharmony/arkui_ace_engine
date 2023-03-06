@@ -154,7 +154,7 @@ void RenderTabContent::FireContentChangeEvent() const
         return;
     }
     if (changeEvent_) {
-        LOGI("FireChangeEvent, index = %{public}d.", currentIndex_);
+        LOGD("FireChangeEvent, index = %{public}d.", currentIndex_);
         std::string param = std::string(R"("change",{"index":)").append(std::to_string(currentIndex_).append("},null"));
         changeEvent_(param);
     }
@@ -162,7 +162,7 @@ void RenderTabContent::FireContentChangeEvent() const
 
 void RenderTabContent::FireDomChangeEvent(int32_t index) const
 {
-    LOGI("FireDomChangeEvent, index is %{public}d", index);
+    LOGD("FireDomChangeEvent, index is %{public}d", index);
     if (domChangeEvent_) {
         domChangeEvent_(index);
     }
@@ -191,7 +191,7 @@ void RenderTabContent::HandleDragUpdate(double offset)
     }
     UpdateScrollPosition(offset);
     if (NearZero(scrollOffset_)) {
-        LOGI("ScrollOffset near equals 0.");
+        LOGD("ScrollOffset near equals 0.");
         return;
     }
     
@@ -208,7 +208,7 @@ void RenderTabContent::HandleDragEnd()
     }
     isDragging_ = false;
     if (NearZero(scrollOffset_)) {
-        LOGI("ScrollOffset near equals 0.");
+        LOGD("ScrollOffset near equals 0.");
         return;
     }
     int32_t newIndex = IsRightToLeft() ? (scrollOffset_ < 0.0 ? GetPrevIndex() : GetNextIndex())
@@ -218,7 +218,7 @@ void RenderTabContent::HandleDragEnd()
 
 void RenderTabContent::ChangeScroll(int32_t index, bool fromController)
 {
-    LOGI("Change scroll index is %{public}d", index);
+    LOGD("Change scroll index is %{public}d", index);
     if (Container::IsCurrentUsePartialUpdate() && contentMap_.find(currentIndex_) == contentMap_.end()) {
         // That happens in case we just updated index only
         // so we needed to keep content as is.
@@ -268,7 +268,7 @@ void RenderTabContent::ScrollContents(int32_t newIndex, bool isLinkBar, bool fro
             minOffset = MIN_SCROLL_OFFSET * contentWidth_;
         }
         if (!NearZero(scrollOffset_) && std::abs(scrollOffset_) < minOffset) {
-            LOGI("ScrollOffset less than min scroll offset.");
+            LOGD("ScrollOffset less than min scroll offset.");
             end = 0.0;
         }
     }
@@ -330,7 +330,7 @@ void RenderTabContent::HandleStartListener(int32_t newIndex, bool needChange, bo
 
 void RenderTabContent::HandleStopListener(int32_t newIndex, bool needChange, bool fromController)
 {
-    LOGI("HandleStopListener start, newIndex is %{public}d,needChange is %{public}d", newIndex, needChange);
+    LOGD("HandleStopListener start, newIndex is %{public}d,needChange is %{public}d", newIndex, needChange);
     // callback used to notify the change of index
     if (newIndex >= 0 && newIndex < contentCount_ && needChange) {
         if (!fromController) {

@@ -67,7 +67,7 @@ void OnMessage(const std::string& message)
             }
         }
         if (message.find(requestMessage, 0) != std::string::npos) {
-            if (g_inspector->setSwitchStatus_ != nullptr) {
+            if (g_inspector->createLayoutInfo_ != nullptr) {
                 LOGI("tree start");
                 g_inspector->createLayoutInfo_(g_inspector->instanceId_);
             }

@@ -1887,7 +1887,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.steps: !onReachStart, startIndex!=0; !onReachEnd, endIndex!=max; !scrollStop, !onScrollStop
      * @tc.expected: step2. equal.
      */
-    listPattern->ProcessEvent(false, 1, false);
+    listPattern->ProcessEvent(false, 1, false, 0, 0);
     EXPECT_EQ(listPattern->scrollStop_, false);
 
     /**
@@ -1899,7 +1899,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
     listPattern->startIndex_ = 0;
     listPattern->endIndex_ = listPattern->maxListItemIndex_;
     listPattern->scrollStop_ = true;
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
     EXPECT_EQ(listPattern->scrollStop_, false);
     
     /**
@@ -1915,7 +1915,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
     listEventHub->SetOnReachEnd([]() {});
     listPattern->endIndex_ = listPattern->maxListItemIndex_ - 1;
     listPattern->scrollStop_ = true;
-    listPattern->ProcessEvent(true, 1, false);
+    listPattern->ProcessEvent(true, 1, false, 0, 0);
     EXPECT_EQ(listPattern->scrollStop_, false);
     
     /**
@@ -1928,7 +1928,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
     listPattern->startIndex_ = 0;
     listPattern->endIndex_ = listPattern->maxListItemIndex_;
     listEventHub->SetOnScrollStop([]() {});
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
 
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
@@ -1937,7 +1937,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollState_ = SCROLL_FROM_ANIMATION;
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
     
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
@@ -1946,7 +1946,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollState_ = SCROLL_FROM_ANIMATION_SPRING;
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
 
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
@@ -1955,7 +1955,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollState_ = SCROLL_FROM_BAR;
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
 }
 
 /**

@@ -353,7 +353,7 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     } else if (IsCrashBottom()) {
         HandleCrashBottom();
     }
-    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
 

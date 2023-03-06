@@ -246,7 +246,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(const RefPtr<PopupParam>& para
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto layoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START); // mainAxisAlign
-    layoutProps->UpdateCrossAxisAlign(FlexAlign::FLEX_END);  // crossAxisAlign
     auto message = BubbleView::CreateMessage(param->GetMessage(), param->IsUseCustom());
 
     auto popupTheme = GetPopupTheme();
@@ -257,10 +256,14 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(const RefPtr<PopupParam>& para
     textPadding.right = CalcLength(padding.Right());
     textPadding.top = CalcLength(padding.Top());
     textLayoutProps->UpdatePadding(textPadding);
+    textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
     message->MarkModifyDone();
     message->MountToParent(columnNode);
 
     auto buttonRow = BubbleView::CreateButtons(param, popupId, targetId);
+    auto buttonRowLayoutProperty = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
+    buttonRowLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
+    buttonRow->MarkModifyDone();
     auto maxWidth = GetMaxWith();
     auto childLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);

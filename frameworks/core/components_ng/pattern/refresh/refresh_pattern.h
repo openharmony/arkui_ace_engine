@@ -69,7 +69,6 @@ public:
     void FireChangeEvent(const std::string& value);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     void OnActive() override {}
-    void OnInActive() override;
     void CheckCoordinationEvent();
     RefPtr<FrameNode> FindScrollableChild();
 
@@ -79,23 +78,30 @@ private:
     void HandleDragUpdate(float delta);
     void HandleDragEnd();
     void HandleDragCancel();
-    void UpdateScrollableOffset(float delta);
-    float GetFriction(float percentage) const;
-    float GetOffset(float delta) const;
-    float MaxScrollableHeight() const;
-    double GetLoadingDiameter() const;
-    OffsetF GetLoadingOffset() const;
-    OffsetF GetShowTimeOffset() const;
-    float GetOpacity() const;
-    RefreshStatus GetNextStatus();
+    void TriggerRefresh();
+    void TriggerInActive();
+    void TriggerDone();
+    void TriggerFinish();
+    void TriggerStatusChange(RefreshStatus newStatus);
+    void TransitionPeriodAnimation();
+    void RefreshStatusChange(RefreshStatus newStatus);
+    void LoadingProgressExit();
+    void LoadingProgressAppear();
+    void LoadingProgressRecycle();
+    void UpdateLoadingProgress(int32_t state, float ratio);
+    void ReplaceLoadingProgressNode();
+    void LoadingProgressReset();
+    void OnExitAnimationFinish();
+    float GetFollowRatio();
+    float GetScrollOffset(float delta);
     bool ScrollComponentReactInMove();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
-    static std::string GetFormatDateTime();
     RefPtr<PanEvent> panEvent_;
-    OffsetF timeOffset_;
+    OffsetF scrollOffset_;
     bool movedByScrollableComponent_ = false;
 
-    RefPtr<FrameNode> textChild_;
+    bool isRefreshing_ = false;
+    float triggerLoadingDistance_ = 0.0f;
     RefPtr<FrameNode> progressChild_;
     WeakPtr<FrameNode> scrollableNode_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);

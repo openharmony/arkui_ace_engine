@@ -94,6 +94,7 @@ public:
         json->Put("sideBarWidth", std::to_string(sideBarWidth.Value()).c_str());
         json->Put("minSideBarWidth", std::to_string(minSideBarWidth.Value()).c_str());
         json->Put("maxSideBarWidth", std::to_string(maxSideBarWidth.Value()).c_str());
+        json->Put("autoHide", propAutoHide_.value_or(true) ? "true" : "false");
         json->Put("sideBarPosition",
             sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End");
 

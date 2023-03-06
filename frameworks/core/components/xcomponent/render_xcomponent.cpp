@@ -275,6 +275,8 @@ void RenderXComponent::Paint(RenderContext& context, const Offset& offset)
 
         if (xcomponentSizeInitEvent_ && (!drawSize_.IsHeightInfinite())) {
             xcomponentSizeInitEvent_(textureId_, drawSize_.Width(), drawSize_.Height());
+            // Save the size in case it changes before OnSurfaceCreated() is called
+            initDrawSize_ = drawSize_;
             isSurfaceInit_ = true;
         }
     } else {
@@ -326,8 +328,8 @@ void RenderXComponent::NativeXComponentInit(
     nativeXComponentImpl_ = nativeXComponentImpl;
 
     pipelineContext->GetTaskExecutor()->PostTask(
-        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, w = drawSize_.Width(),
-            h = drawSize_.Height()] {
+        [weakNXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, w = initDrawSize_.Width(),
+            h = initDrawSize_.Height()] {
             auto nXCompImpl = weakNXCompImpl.Upgrade();
             if (nXComp && nXCompImpl) {
                 nXCompImpl->SetXComponentWidth((int)(w));

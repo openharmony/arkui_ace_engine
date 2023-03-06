@@ -212,15 +212,9 @@ public:
     std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag) override
     {
         auto json = JsonUtil::Create(true);
-        if (drag == DragEventType::START) {
-            int32_t index = GetListItemIndexByPosition(point.GetX(), point.GetY());
-            json->Put("selectedIndex", index);
-        } else if (drag == DragEventType::DROP || drag == DragEventType::MOVE) {
+        if (drag == DragEventType::DROP || drag == DragEventType::MOVE) {
             int32_t index = GetListItemIndexByPosition(point.GetX(), point.GetY());
             json->Put("insertIndex", index);
-        } else {
-            int32_t index = INVALID_IDX;
-            json->Put("selectedIndex", index);
         }
         if (!extraInfo.empty()) {
             json->Put("extraInfo", extraInfo.c_str());

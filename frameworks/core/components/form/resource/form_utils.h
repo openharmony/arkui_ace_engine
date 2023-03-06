@@ -27,6 +27,9 @@ public:
 
     virtual int32_t RouterEvent(const int64_t formId, const std::string& action, const int32_t contianerId,
         const std::string& defualtbundleName);
+
+    virtual int32_t BackgroundEvent(const int64_t formId, const std::string& action, const int32_t contianerId,
+        const std::string& defualtbundleName);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_RESOURCE_FORM_UTILS_H

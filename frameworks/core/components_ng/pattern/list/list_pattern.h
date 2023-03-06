@@ -86,6 +86,8 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
     int32_t GetStartIndex() const
@@ -160,6 +162,7 @@ public:
     void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
+    void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
 
     void UpdateScrollBarOffset() override;
@@ -192,7 +195,7 @@ private:
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
     float GetMainContentSize() const;
-    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
+    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true);
     bool OnScrollCallback(float offset, int32_t source) override;
@@ -200,6 +203,9 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void FireOnScrollStart();
+    void FireOnScrollStop();
+    void CheckRestartSpring();
+    void StopAnimate();
 
     // multiSelectable
     void InitMouseEvent();
@@ -220,6 +226,7 @@ private:
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
+    float contentMainSize_ = 0.0f;
 
     float currentDelta_ = 0.0f;
 
@@ -230,6 +237,7 @@ private:
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
+    bool scrollAbort_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
     std::list<WeakPtr<FrameNode>> itemGroupList_;

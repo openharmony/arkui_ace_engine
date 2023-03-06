@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H
 
+#include <condition_variable>
 #include <regex>
 #include <string>
 
@@ -141,6 +142,19 @@ public:
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
 };
 
-} // namespace OHOS::Ace
+class SharedMemoryImageLoader : public ImageLoader, public ImageProviderLoader {
+    DECLARE_ACE_TYPE(SharedMemoryImageLoader, ImageLoader);
 
+public:
+    SharedMemoryImageLoader() = default;
+    ~SharedMemoryImageLoader() override = default;
+    sk_sp<SkData> LoadImageData(const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context) override;
+    void UpdateData(const std::string& uri, const std::vector<uint8_t>& memData) override;
+
+private:
+    std::condition_variable cv_;
+    std::mutex mtx_;
+    std::vector<uint8_t> data_;
+};
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H

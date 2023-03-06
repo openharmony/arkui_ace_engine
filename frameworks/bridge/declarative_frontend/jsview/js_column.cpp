@@ -53,7 +53,7 @@ void JSColumn::Create(const JSCallbackInfo& info)
         JSRef<JSVal> spaceVal = obj->GetProperty("space");
         Dimension value;
         if (ParseJsDimensionVp(spaceVal, value)) {
-            space = value;
+            space = value.IsValid() ? value : Dimension();
         }
     }
 

@@ -91,8 +91,11 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
     }
 
     std::string value = "";
+    if (!ParseJsString(getValue, value)) {
+        value = getRangeVector.front();
+    }
     uint32_t selected = 0;
-    if (!ParseJsInteger(getSelected, selected) && ParseJsString(getValue, value)) {
+    if (!ParseJsInteger(getSelected, selected) && !value.empty()) {
         auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
         if (valueIterator != getRangeVector.end()) {
             selected = std::distance(getRangeVector.begin(), valueIterator);
@@ -111,15 +114,22 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
     TextPickerModel::GetInstance()->Create(theme);
     TextPickerModel::GetInstance()->SetRange(getRangeVector);
     TextPickerModel::GetInstance()->SetSelected(selected);
+    TextPickerModel::GetInstance()->SetValue(value);
     JSInteractableView::SetFocusable(false);
     JSInteractableView::SetFocusNode(true);
 }
 
 void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
 {
-    Dimension height;
-    if (!ParseJsDimensionFp(info[0], height)) {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
+    }
+    Dimension height;
+    if (info[0]->IsNumber() || info[0]->IsString()) {
+        if (!ParseJsDimensionFp(info[0], height)) {
+            return;
+        }
     }
     TextPickerModel::GetInstance()->SetDefaultPickerItemHeight(height);
 }
@@ -233,8 +243,10 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     }
 
     Dimension height;
-    if (defaultHeight->IsNumber() && !JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
-        return;
+    if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
+        if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
+            return;
+        }
     }
 
     auto theme = JSDatePicker::GetTheme<DialogTheme>();
@@ -390,8 +402,10 @@ void JSTextPickerDialog::ParseText(RefPtr<PickerTextComponent>& component, const
     }
 
     Dimension height;
-    if (defaultHeight->IsNumber() && !JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
-        return;
+    if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
+        if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
+            return;
+        }
     }
 
     component->SetIsDialog(true);

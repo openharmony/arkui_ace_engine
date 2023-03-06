@@ -30,6 +30,7 @@ public:
     virtual void Create(RefPtr<PickerTheme> pickerTheme) =0;
     virtual void SetSelected(uint32_t value) = 0;
     virtual void SetRange(const std::vector<std::string>& value) = 0;
+    virtual void SetValue(const std::string& value) = 0;
     virtual void SetOnChange(TextChangeEvent&& onChange) = 0;
     virtual void SetDefaultPickerItemHeight(const Dimension& value) = 0;
 private:
