@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/view_partial_update_model_ng.h"
-#include <utility>
 
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"

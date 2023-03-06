@@ -642,7 +642,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic(),
-        .jsViewName = GetJSViewName()};
+        .jsViewName = GetJSViewName() };
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
