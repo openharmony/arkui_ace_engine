@@ -78,6 +78,7 @@ build_component_ng("pattern_ng") {
     "dialog/dialog_view.cpp",
     "divider/divider_layout_algorithm.cpp",
     "divider/divider_model_ng.cpp",
+    "divider/divider_modifier.cpp",
     "divider/divider_pattern.cpp",
     "flex/flex_layout_algorithm.cpp",
     "flex/flex_model_ng.cpp",
