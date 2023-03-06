@@ -1095,8 +1095,8 @@ void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
     CHECK_NULL_VOID(modifier);
     auto modifierAdapter = std::static_pointer_cast<OverlayModifierAdapter>(ConvertOverlayModifier(modifier));
     auto rect = AceType::DynamicCast<OverlayModifier>(modifier)->GetBoundsRect();
-    std::shared_ptr<Rosen::RectI> overlayRect =
-        std::make_shared<Rosen::RectI>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    std::shared_ptr<Rosen::RectF> overlayRect =
+        std::make_shared<Rosen::RectF>(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
     modifierAdapter->SetOverlayBounds(overlayRect);
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
