@@ -95,11 +95,9 @@ private:
     void ResetLoadingProgressColor();
     float GetFollowRatio();
     float GetScrollOffset(float delta);
-    bool ScrollComponentReactInMove();
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;
-    bool movedByScrollableComponent_ = false;
 
     bool isRefreshing_ = false;
     float triggerLoadingDistance_ = 0.0f;
