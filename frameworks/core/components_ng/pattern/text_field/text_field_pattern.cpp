@@ -1930,27 +1930,30 @@ void TextFieldPattern::InitMouseEvent()
 
 void TextFieldPattern::OnHover(bool isHover)
 {
+    LOGI("Textfield %{public}d %{public}s", GetHost()->GetId(), isHover ? "on hover" : "exit hover");
     auto frame = GetHost();
     CHECK_NULL_VOID(frame);
     auto frameId = frame->GetId();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    if (isHover) {
+        pipeline->SetMouseStyleHoldNode(frameId);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+    } else {
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(frameId);
+    }
     isOnHover_ = isHover;
-    LOGI("Textfield %{public}d %{public}s", GetHost()->GetId(), isHover ? "on hover" : "exit hover");
     if (enableTouchAndHoverEffect_) {
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
         if (isOnHover_) {
-            pipeline->SetMouseStyleHoldNode(frameId);
-            pipeline->ChangeMouseStyle(frameId, HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
             renderContext->AnimateHoverEffectBoard(true);
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
         }
         isOnHover_ = false;
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
-        pipeline->FreeMouseStyleHoldNode(frameId);
         renderContext->AnimateHoverEffectBoard(false);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -1963,10 +1966,19 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto frameId = frame->GetId();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    pipeline->SetMouseStyleHoldNode(frameId);
 
     if (!IsSearchParentNode()) {
         info.SetStopPropagation(true);
     }
+
+    if (info.GetLocalLocation().GetX() > (frameRect_.Width() - imageRect_.Width() - GetIconRightOffset()) &&
+        NeedShowPasswordIcon()) {
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+    } else {
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
+    }
+
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         LOGI("Handle mouse right click");
@@ -2005,10 +2017,8 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         if (!focusHub->RequestFocusImmediately()) {
             LOGE("Request focus failed, cannot open input method");
             StopTwinkling();
-            pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_GRABBING);
             return;
         }
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         return;
     }
@@ -2018,7 +2028,6 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         caretUpdateType_ = CaretUpdateType::NONE;
         isMousePressed_ = false;
         mouseStatus_ = MouseStatus::RELEASED;
-        pipeline->ChangeMouseStyle(frameId, HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
         if (!focusHub->IsCurrentFocus()) {
             return;
         }

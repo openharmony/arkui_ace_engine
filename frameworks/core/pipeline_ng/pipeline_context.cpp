@@ -963,10 +963,16 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event)
 
 bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
+    if (!onFocus_) {
+        LOGD("ChangeMouseStyle failed because the window is not on focus.");
+        return false;
+    }
     if (mouseStyleNodeId_ != nodeId) {
         return false;
     }
     auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_RETURN(mouseStyle, false);
+    LOGD("ChangeMouseStyle to %{public}d on Frame %{public}d", format, nodeId);
     return mouseStyle->ChangePointerStyle(GetWindowId(), format);
 }
 

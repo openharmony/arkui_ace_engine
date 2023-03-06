@@ -20,7 +20,9 @@
 #include "base/memory/referenced.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
+#include "core/event/mouse_event.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,17 +49,17 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandlePanStart(info.GetOffsetX(), info.GetOffsetY(), info.GetGlobalLocation());
+        pattern->HandlePanStart(info);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandlePanUpdate(info.GetOffsetX(), info.GetOffsetY(), info.GetGlobalLocation());
+        pattern->HandlePanUpdate(info);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandlePanEnd(info.GetGlobalLocation());
+        pattern->HandlePanEnd(info);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {};
     if (panEvent_) {
@@ -71,8 +73,11 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
-void LinearSplitPattern::HandlePanStart(float xOffset, float yOffset, const Offset& globalLocation)
+void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
 {
+    auto xOffset = info.GetOffsetX();
+    auto yOffset = info.GetOffsetY();
+    const auto& globalLocation = info.GetGlobalLocation();
     auto localOffset = OffsetF(static_cast<float>(globalLocation.GetX()) - parentOffset_.GetX(),
         static_cast<float>(globalLocation.GetY()) - parentOffset_.GetY());
     if (!resizeable_) {
@@ -138,11 +143,14 @@ void LinearSplitPattern::GetdragedSplitIndexOrIsMoving(const Point& point)
     }
 }
 
-void LinearSplitPattern::HandlePanUpdate(float xOffset, float yOffset, const Offset& globalLocation)
+void LinearSplitPattern::HandlePanUpdate(const GestureEvent& info)
 {
     if (!resizeable_) {
         return;
     }
+    auto xOffset = info.GetOffsetX();
+    auto yOffset = info.GetOffsetY();
+    const auto& globalLocation = info.GetGlobalLocation();
     if (isOverParent_) {
         isDragedMoving_ = false;
     }
@@ -166,9 +174,8 @@ void LinearSplitPattern::HandlePanUpdate(float xOffset, float yOffset, const Off
             if (dragSplitOffset_[dragedSplitIndex_] <= 0.0 || xOffset - preOffset_ >= 0.0) {
                 preOffset_ = xOffset;
                 return;
-            } else {
-                isOverParent_ = false;
             }
+            isOverParent_ = false;
         }
         dragSplitOffset_[dragedSplitIndex_] += xOffset - preOffset_;
         preOffset_ = xOffset;
@@ -177,9 +184,8 @@ void LinearSplitPattern::HandlePanUpdate(float xOffset, float yOffset, const Off
             if (dragSplitOffset_[dragedSplitIndex_] <= 0.0 || yOffset - preOffset_ >= 0.0) {
                 preOffset_ = yOffset;
                 return;
-            } else {
-                isOverParent_ = false;
             }
+            isOverParent_ = false;
         }
         dragSplitOffset_[dragedSplitIndex_] += yOffset - preOffset_;
         preOffset_ = yOffset;
@@ -197,60 +203,69 @@ void LinearSplitPattern::HandlePanUpdate(float xOffset, float yOffset, const Off
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void LinearSplitPattern::HandlePanEnd(const Offset& globalLocation)
+void LinearSplitPattern::HandlePanEnd(const GestureEvent& info)
 {
     isDragedMoving_ = false;
     isDraged_ = false;
     dragedSplitIndex_ = DEFAULT_DRAG_INDEX;
     mouseDragedSplitIndex_ = DEFAULT_DRAG_INDEX;
+
+    if (info.GetSourceDevice() == SourceType::MOUSE) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto frame = GetHost();
+        CHECK_NULL_VOID(frame);
+        auto frameId = frame->GetId();
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(frameId);
+    }
 }
 
-void LinearSplitPattern::InitMouseEvent(const RefPtr<GestureEventHub>& gestureHub)
+void LinearSplitPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
 {
-    if (mouseEvent_) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto mouseEventHub = host->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(mouseEventHub);
+    CHECK_NULL_VOID(inputHub);
 
-    auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandleMouseEvent(info.GetGlobalLocation());
-    };
-    mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
-    mouseEventHub->AddOnMouseEvent(mouseEvent_);
+    if (!mouseEvent_) {
+        auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(pattern);
+            pattern->HandleMouseEvent(info);
+        };
+        mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+        inputHub->AddOnMouseEvent(mouseEvent_);
+    }
+    if (!hoverEvent_) {
+        auto hoverTask = [weak = WeakClaim(this)](bool isHovered) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(pattern);
+            pattern->HandleHoverEvent(isHovered);
+        };
+        hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+        inputHub->AddOnHoverEvent(hoverEvent_);
+    }
 }
 
-void LinearSplitPattern::HandleMouseEvent(const Offset& globalLocation)
+void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
 {
     if (!resizeable_) {
         return;
     }
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_VOID(mouseStyle);
+    const auto& globalLocation = info.GetGlobalLocation();
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    int32_t pointerStyle = 0;
-    MouseFormat mousePointerStyle;
-
-    if (splitType_ == SplitType::ROW_SPLIT) {
-        mousePointerStyle = MouseFormat::WEST_EAST;
-    } else {
-        mousePointerStyle = MouseFormat::NORTH_SOUTH;
-    }
+    auto frame = GetHost();
+    CHECK_NULL_VOID(frame);
+    auto frameId = frame->GetId();
+    pipeline->SetMouseStyleHoldNode(frameId);
 
     if (isDraged_) {
         if (mouseDragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
             mouseDragedSplitIndex_ = dragedSplitIndex_;
-            mouseStyle->GetPointerStyle(windowId, pointerStyle);
-            if (pointerStyle == static_cast<int32_t>(MouseFormat::DEFAULT)) {
-                mouseStyle->SetPointerStyle(windowId, mousePointerStyle);
-            }
         }
+        pipeline->ChangeMouseStyle(frameId, GetMouseFormat());
         return;
     }
     auto localOffset = OffsetF(static_cast<float>(globalLocation.GetX()) - parentOffset_.GetX(),
@@ -265,24 +280,51 @@ void LinearSplitPattern::HandleMouseEvent(const Offset& globalLocation)
             break;
         }
     }
-    mouseStyle->GetPointerStyle(windowId, pointerStyle);
 
+    if (mouseDragedSplitIndex_ != DEFAULT_DRAG_INDEX) {
+        pipeline->ChangeMouseStyle(frameId, GetMouseFormat());
+    } else {
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+    }
+    pipeline->FreeMouseStyleHoldNode(frameId);
+}
+
+void LinearSplitPattern::HandleHoverEvent(bool isHovered)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frame = GetHost();
+    CHECK_NULL_VOID(frame);
+    auto frameId = frame->GetId();
+
+    if (!isHovered && !isDraged_) {
+        pipeline->SetMouseStyleHoldNode(frameId);
+        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        pipeline->FreeMouseStyleHoldNode(frameId);
+    }
+}
+
+MouseFormat LinearSplitPattern::GetMouseFormat()
+{
+    MouseFormat format = MouseFormat::DEFAULT;
     if (splitType_ == SplitType::ROW_SPLIT) {
-        if (mouseDragedSplitIndex_ != DEFAULT_DRAG_INDEX &&
-            pointerStyle != static_cast<int32_t>(MouseFormat::WEST_EAST)) {
-            mouseStyle->SetPointerStyle(windowId, mousePointerStyle);
+        if (isOverParent_) {
+            format = MouseFormat::WEST;
+        } else if (NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::EAST;
+        } else {
+            format = MouseFormat::WEST_EAST;
         }
     } else {
-        if (mouseDragedSplitIndex_ != DEFAULT_DRAG_INDEX &&
-            pointerStyle != static_cast<int32_t>(MouseFormat::NORTH_SOUTH)) {
-            mouseStyle->SetPointerStyle(windowId, mousePointerStyle);
+        if (isOverParent_) {
+            format = MouseFormat::NORTH;
+        } else if (NearZero(dragSplitOffset_[mouseDragedSplitIndex_])) {
+            format = MouseFormat::SOUTH;
+        } else {
+            format = MouseFormat::NORTH_SOUTH;
         }
     }
-
-    if (mouseDragedSplitIndex_ == DEFAULT_DRAG_INDEX && pointerStyle != static_cast<int32_t>(MouseFormat::DEFAULT)) {
-        MouseFormat defaultStyle = MouseFormat::DEFAULT;
-        mouseStyle->SetPointerStyle(windowId, defaultStyle);
-    }
+    return format;
 }
 
 void LinearSplitPattern::OnModifyDone()
@@ -300,7 +342,10 @@ void LinearSplitPattern::OnModifyDone()
     resizeable_ = layoutProperty->GetResizeable().value_or(false);
 
     InitPanEvent(gestureHub);
-    InitMouseEvent(gestureHub);
+
+    auto inputHub = hub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    InitMouseEvent(inputHub);
 }
 
 bool LinearSplitPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
