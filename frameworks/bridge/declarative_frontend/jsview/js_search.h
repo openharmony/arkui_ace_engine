@@ -44,6 +44,7 @@ public:
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void JsMenuOptionsExtension(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

@@ -33,6 +33,7 @@ public:
     void SetTextFont(const Font& font) override;
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
+    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnChange(std::function<void(const std::string&)>&& onChange) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;

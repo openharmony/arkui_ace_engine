@@ -280,6 +280,8 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
         }
     }
 
+    // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
+    // generally not allowed to be modified
     if (!contentConstraint.selfIdealSize.Width()) {
         float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
         paragraphNewWidth =
