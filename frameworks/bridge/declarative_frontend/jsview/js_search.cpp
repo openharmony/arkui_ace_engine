@@ -91,6 +91,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
+    JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::Inherit<JSViewAbstract>();
     JSClass<JSSearch>::Bind(globalObj);
 }
@@ -511,6 +512,19 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     SearchModel::GetInstance()->SetCopyOption(copyOptions);
+}
+
+void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsArray()) {
+            std::vector<NG::MenuOptionsParam> menuOptionsItems;
+            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
+            SearchModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
+        }
+    } else {
+        LOGI("only newPipeline supply");
+    }
 }
 
 void JSSearchController::JSBind(BindingTarget globalObj)

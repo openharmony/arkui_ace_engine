@@ -34,6 +34,7 @@ public:
     virtual void SetTextFont(const Font& font);
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
+    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
     virtual void SetOnChange(std::function<void(const std::string&)>&& onChange);
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);
