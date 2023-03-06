@@ -57,6 +57,7 @@ public:
     virtual void Insert(const std::string& args) {}
 
     virtual void CaretPosition(int32_t caretPosition) {}
+    virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
 
     void SetCaretPosition(std::function<void(const int32_t)>&& setCaretPosition)
     {
