@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     position_ = props->GetMenuOffset().value_or(OffsetF());
+    positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
 
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
@@ -136,16 +137,14 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    LOGD("MenuLayout: clickPosition = %{public}f, %{public}f", position_.GetX(), position_.GetY());
-    CHECK_NULL_VOID(props);
-
-    float x = HorizontalLayout(size, position_.GetX());
-    float y = VerticalLayout(size, position_.GetY());
+    float x = HorizontalLayout(size, position_.GetX()) + positionOffset_.GetX();
+    float y = VerticalLayout(size, position_.GetY()) + positionOffset_.GetY();
     if (!menuPattern->IsContextMenu()) {
         x -= pageOffset_.GetX();
         y -= pageOffset_.GetY();
     }
+    x = std::clamp(x, 0.0f, screenSize_.Width() - size.Width() - outPadding_ * 2.0f);
+    y = std::clamp(y, 0.0f, screenSize_.Height() - size.Height() - outPadding_* 2.0f);
 
     MarginPropertyF margin;
     if (!menuPattern->IsMultiMenu()) {

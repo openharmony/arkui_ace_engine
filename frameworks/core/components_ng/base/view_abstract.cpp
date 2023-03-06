@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -835,8 +835,8 @@ void ViewAbstract::BindPopup(
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
-void ViewAbstract::BindMenuWithItems(
-    std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset)
+void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
+    const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -844,12 +844,12 @@ void ViewAbstract::BindMenuWithItems(
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(std::move(params), targetNode->GetId());
+    auto menuNode = MenuView::Create(std::move(params), targetNode->GetId(), MenuType::MENU, menuParam);
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
 void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-    bool isContextMenu, const NG::OffsetF& offset)
+    bool isContextMenu, const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
@@ -859,7 +859,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     isContextMenu = false;
 #endif
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
-    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type);
+    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type, menuParam);
     if (isContextMenu) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
         return;

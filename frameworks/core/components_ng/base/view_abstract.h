@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,8 +45,29 @@
 #include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
+struct OptionParam {
+    std::string value;
+    std::string icon;
+    std::function<void()> action;
 
-using OptionParam = std::pair<std::string, std::function<void()>>;
+    OptionParam() = default;
+    OptionParam(
+        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam),
+          icon(iconParam),
+          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
+        : value(valueParam),
+          icon(""),
+          action(actionParam) {}
+
+    ~OptionParam() = default;
+};
+
+struct MenuParam {
+    std::string title;
+    OffsetF positionOffset;
+};
 
 class ACE_EXPORT ViewAbstract {
 public:
@@ -179,9 +200,9 @@ public:
     static void BindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
     static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
-        const NG::OffsetF& offset);
+        const NG::OffsetF& offset, const MenuParam& menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-        bool isContextMenu, const NG::OffsetF& offset);
+        bool isContextMenu, const NG::OffsetF& offset, const MenuParam& menuParam);
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);

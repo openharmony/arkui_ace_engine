@@ -20,97 +20,14 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-void MenuItemView::AddIcon(const std::optional<std::string>& icon, const RefPtr<FrameNode>& row)
-{
-    auto iconPath = icon.value_or("");
-    if (!iconPath.empty()) {
-        auto iconNode = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        props->UpdateImageSourceInfo(ImageSourceInfo(iconPath));
-        props->UpdateImageFit(ImageFit::SCALE_DOWN);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        props->UpdateCalcMaxSize(
-            CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
-        props->UpdateAlignment(Alignment::CENTER);
-
-        auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(renderProperty);
-        renderProperty->UpdateSvgFillColor(theme->GetMenuIconColor());
-
-        iconNode->MountToParent(row);
-        iconNode->MarkModifyDone();
-    }
-}
-
-void MenuItemView::AddContent(
-    const std::string& content, const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& menuItem)
-{
-    auto contentNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_VOID(contentNode);
-    auto contentProperty = contentNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(contentProperty);
-    auto context = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    contentProperty->UpdateFontSize(theme->GetMenuFontSize());
-    contentProperty->UpdateFontWeight(FontWeight::REGULAR);
-    contentProperty->UpdateTextColor(theme->GetMenuFontColor());
-    contentProperty->UpdateContent(content);
-
-    contentNode->MountToParent(row);
-    contentNode->MarkModifyDone();
-
-    auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
-    CHECK_NULL_VOID(menuItemPattern);
-    menuItemPattern->SetContentNode(contentNode);
-}
-
-void MenuItemView::AddLabelInfo(
-    const std::optional<std::string>& labelInfo, const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& menuItem)
-{
-    auto labelStr = labelInfo.value_or("");
-    if (!labelStr.empty()) {
-        auto labelNode = FrameNode::CreateFrameNode(
-            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_VOID(labelNode);
-        auto labelProperty = labelNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(labelProperty);
-
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(theme);
-        labelProperty->UpdateFontSize(theme->GetMenuFontSize());
-        labelProperty->UpdateTextColor(theme->GetSecondaryFontColor());
-        labelProperty->UpdateFontWeight(FontWeight::REGULAR);
-        labelProperty->UpdateContent(labelStr);
-
-        labelNode->MountToParent(row);
-        labelNode->MarkModifyDone();
-
-        auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(menuItemPattern);
-        menuItemPattern->SetLabelNode(labelNode);
-    }
-}
-
 void MenuItemView::Create(const RefPtr<UINode>& customNode) {}
 
 void MenuItemView::Create(const MenuItemProperties& menuItemProps)
@@ -144,8 +61,6 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
     leftRow->MountToParent(menuItem);
-    AddIcon(menuItemProps.startIcon, leftRow);
-    AddContent(menuItemProps.content, leftRow, menuItem);
     auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(rightRow);
@@ -156,15 +71,19 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
     rightRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
 
     rightRow->MountToParent(menuItem);
-    AddLabelInfo(menuItemProps.labelInfo, rightRow, menuItem);
-    AddIcon(menuItemProps.endIcon, rightRow);
-
     auto buildFunc = menuItemProps.buildFunc;
     if (buildFunc.has_value()) {
         auto pattern = menuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->SetSubBuilder(buildFunc.value_or(nullptr));
     }
+
+    auto menuProperty = menuItem->GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    menuProperty->UpdateStartIcon(menuItemProps.startIcon.value_or(""));
+    menuProperty->UpdateContent(menuItemProps.content);
+    menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(""));
+    menuProperty->UpdateLabel(menuItemProps.labelInfo.value_or(""));
 }
 
 void MenuItemView::SetSelected(bool isSelected)
@@ -176,9 +95,12 @@ void MenuItemView::SetSelected(bool isSelected)
 
 void MenuItemView::SetSelectIcon(bool isShow)
 {
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuItemPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSelectIcon(isShow);
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIcon, isShow);
+}
+
+void MenuItemView::SetSelectIconSrc(const std::string& src)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src);
 }
 
 void MenuItemView::SetOnChange(std::function<void(bool)>&& onChange)
@@ -186,5 +108,43 @@ void MenuItemView::SetOnChange(std::function<void(bool)>&& onChange)
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<MenuItemEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(onChange);
+}
+
+void MenuItemView::SetFontSize(const Dimension& fontSize)
+{
+    if (!fontSize.IsValid()) {
+        LOGE("FontSize value is not valid");
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize);
+}
+
+void MenuItemView::SetFontColor(const Color& color)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, color);
+}
+
+void MenuItemView::SetFontWeight(Ace::FontWeight weight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontWeight, weight);
+}
+
+void MenuItemView::SetLabelFontSize(const Dimension& fontSize)
+{
+    if (!fontSize.IsValid()) {
+        LOGE("FontSize value is not valid");
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize);
+}
+
+void MenuItemView::SetLabelFontColor(const Color& color)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color);
+}
+
+void MenuItemView::SetLabelFontWeight(Ace::FontWeight weight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontWeight, weight);
 }
 } // namespace OHOS::Ace::NG

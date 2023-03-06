@@ -1787,26 +1787,54 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
     LOGD("parsing paramArray size = %{public}d", static_cast<int>(paramArray->Length()));
     for (size_t i = 0; i < paramArray->Length(); ++i) {
         auto indexObject = JSRef<JSObject>::Cast(paramArray->GetValueAt(i));
-        JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].first);
-        LOGD("option #%{public}d is %{public}s", static_cast<int>(i), params[i].first.c_str());
+        JSViewAbstract::ParseJsString(indexObject->GetProperty("value"), params[i].value);
+        LOGD("option #%{public}d is %{public}s", static_cast<int>(i), params[i].value.c_str());
         auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(indexObject->GetProperty("action")));
         // set onClick function
-        params[i].second = [func = std::move(action), context = info.GetExecutionContext()]() {
+        params[i].action = [func = std::move(action), context = info.GetExecutionContext()]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
             ACE_SCORING_EVENT("menu.action");
             if (func) {
                 func->Execute();
             }
         };
+        std::string iconPath;
+        if (JSViewAbstract::ParseJsMedia(indexObject->GetProperty("icon"), iconPath)) {
+            params[i].icon = iconPath;
+        }
     }
     return params;
 }
 
+void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
+{
+    auto menuOptions = JSRef<JSObject>::Cast(info[1]);
+    (void)JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
+    auto offsetVal = menuOptions->GetProperty("offset");
+    if (offsetVal->IsObject()) {
+        auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
+        JSRef<JSVal> xVal = offsetObj->GetProperty("x");
+        JSRef<JSVal> yVal = offsetObj->GetProperty("y");
+        Dimension dx;
+        Dimension dy;
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
+            menuParam.positionOffset.SetX(dx.ConvertToPx());
+        }
+        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
+            menuParam.positionOffset.SetY(dy.ConvertToPx());
+        }
+    }
+}
+
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 {
+    NG::MenuParam menuParam;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        ParseBindOptionParam(info, menuParam);
+    }
     if (info[0]->IsArray()) {
         std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info);
-        ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr);
+        ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
     } else if (info[0]->IsObject()) {
         // CustomBuilder
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -1822,7 +1850,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("BuildMenu");
             func->Execute();
         };
-        ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc));
+        ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
     } else {
         LOGE("bindMenu info is invalid");
     }

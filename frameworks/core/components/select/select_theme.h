@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,6 +128,9 @@ public:
 
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, theme->fontSize_);
             theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
+            theme->menuTitleFontSize_ =
+                pattern->GetAttr<Dimension>("menu_title_text_font_size", theme->menuTitleFontSize_);
+            theme->menuTitleHeight_ = pattern->GetAttr<Dimension>("menu_title_height", theme->menuTitleHeight_);
             theme->fontColor_ =
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
                     .BlendOpacity(pattern->GetAttr<double>("menu_text_primary_alpha", defaultTextColorAlpha));
@@ -239,6 +242,8 @@ public:
         theme->menuBorderRadius_ = menuBorderRadius_;
         theme->innerBorderRadius_ = innerBorderRadius_;
         theme->menuFontSize_ = menuFontSize_;
+        theme->menuTitleFontSize_ = menuTitleFontSize_;
+        theme->menuTitleHeight_ = menuTitleHeight_;
         theme->menuFontColor_ = menuFontColor_;
         theme->disabledMenuFontColor_ = disabledMenuFontColor_;
         theme->menuIconPadding_ = menuIconPadding_;
@@ -655,6 +660,16 @@ public:
         return menuFontSize_;
     }
 
+    const Dimension& GetMenuTitleFontSize() const
+    {
+        return menuTitleFontSize_;
+    }
+
+    const Dimension& GetMenuTitleHeight() const
+    {
+        return menuTitleHeight_;
+    }
+
     const Color& GetMenuFontColor() const
     {
         return menuFontColor_;
@@ -784,6 +799,8 @@ private:
     Dimension menuBorderRadius_;
     Dimension innerBorderRadius_;
     Dimension menuFontSize_;
+    Dimension menuTitleFontSize_;
+    Dimension menuTitleHeight_;
     Dimension menuIconPadding_;
     Dimension iconContentPadding_;
     Dimension dividerPaddingVertical_;

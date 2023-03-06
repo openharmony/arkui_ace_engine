@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,22 +20,23 @@ namespace {
 constexpr int32_t LONG_PRESS_DURATION = 280;
 
 void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode, bool isContextMenu,
-    const NG::OffsetF& offset)
+    const NG::OffsetF& offset, const MenuParam& menuParam = MenuParam())
 {
     NG::ScopedViewStackProcessor builderViewStackProcessor;
     buildFunc();
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset);
+    NG::ViewAbstract::BindMenuWithCustomNode(customNode, targetNode, isContextMenu, offset, menuParam);
 }
 } // namespace
 
-void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc)
+void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+    const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (!params.empty()) {
-        showMenu = [params, weakTarget](GestureEvent& info) mutable {
+        showMenu = [params, weakTarget, menuParam](GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY() };
@@ -44,15 +45,15 @@ void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::f
                 NG::ViewAbstract::ShowMenu(targetNode->GetId(), menuPosition);
                 return;
             }
-            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition);
+            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
             params.clear();
         };
     } else if (buildFunc) {
-        showMenu = [builderFunc = std::move(buildFunc), weakTarget](const GestureEvent& info) mutable {
+        showMenu = [builderFunc = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
             auto targetNode = weakTarget.Upgrade();
             CHECK_NULL_VOID(targetNode);
             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY() };
-            CreateCustomMenu(builderFunc, targetNode, false, menuPosition);
+            CreateCustomMenu(builderFunc, targetNode, false, menuPosition, menuParam);
         };
     } else {
         LOGE("empty param or null builder");
