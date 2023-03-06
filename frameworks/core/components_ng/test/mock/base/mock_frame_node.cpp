@@ -34,6 +34,10 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 void FrameNode::OnAttachToMainTree() {}
 void FrameNode::OnDetachFromMainTree() {}
+bool FrameNode::OnRemoveFromParent()
+{
+    return false;
+}
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty) {}
 void FrameNode::SetActive(bool active)
 {
@@ -54,6 +58,8 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary) {}
 void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, PropertyChangeFlag extraFlag) {}
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) {}
 void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) {}
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
+{}
 void FrameNode::UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapper>& self, bool forceMeasure, bool forceLayout) {}
 void FrameNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout) {}
 void FrameNode::UpdateLayoutPropertyFlag() {}

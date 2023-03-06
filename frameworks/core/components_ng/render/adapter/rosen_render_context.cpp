@@ -52,6 +52,7 @@
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
+#include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
@@ -117,13 +118,17 @@ void RosenRenderContext::OnNodeAppear()
 {
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
     // to calculate the pivot, so just mark need to perform appearing transition.
-    CHECK_NULL_VOID_NOLOG(propTransitionAppearing_);
+    if (!propTransitionDisappearing_ && !transitionEffect_) {
+        return;
+    }
     firstTransitionIn_ = true;
 }
 
 void RosenRenderContext::OnNodeDisappear()
 {
-    CHECK_NULL_VOID_NOLOG(propTransitionDisappearing_);
+    if (!propTransitionDisappearing_ && !transitionEffect_) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     LOGD("rsNode disappear transition, rsNode:%{public}p", rsNode_.get());
     auto rect = GetPaintRectWithoutTransform();
@@ -539,25 +544,15 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
     return rect;
 }
 
-void RosenRenderContext::NotifyTransition(
-    const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
-{
-    CHECK_NULL_VOID(rsNode_);
-    auto effect = GetRSTransitionWithoutType(transOptions);
-    AnimationUtils::Animate(
-        option,
-        [rsNode = rsNode_, isTransitionIn, effect]() {
-            CHECK_NULL_VOID_NOLOG(rsNode);
-            rsNode->NotifyTransition(effect, isTransitionIn);
-        },
-        option.GetOnFinishEvent());
-}
-
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
 {
+    CHECK_NULL_VOID(rsNode_);
+    if (transitionEffect_) {
+        NotifyTransition(isTransitionIn);
+        return;
+    }
     auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
     CHECK_NULL_VOID_NOLOG(transOptions);
-    CHECK_NULL_VOID(rsNode_);
     SetTransitionPivot(frameSize, isTransitionIn);
     auto effect = GetRSTransitionWithoutType(*transOptions, frameSize);
     // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
@@ -1415,6 +1410,18 @@ void RosenRenderContext::SetModifier(std::shared_ptr<T>& modifier, D data)
     modifier->SetCustomData(data);
 }
 
+void RosenRenderContext::AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier)
+{
+    CHECK_NULL_VOID(modifier);
+    rsNode_->AddModifier(modifier);
+}
+
+void RosenRenderContext::RemoveModifier(const std::shared_ptr<Rosen::RSModifier>& modifier)
+{
+    CHECK_NULL_VOID(modifier);
+    rsNode_->RemoveModifier(modifier);
+}
+
 // helper function to update one of the graphic effects
 template<typename T, typename D>
 void RosenRenderContext::UpdateGraphic(std::shared_ptr<T>& modifier, D data)
@@ -1916,4 +1923,77 @@ void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkDrivenRenderFramePaintState(flag);
 }
+
+void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
+{
+    if (transitionEffect_) {
+        transitionEffect_->OnDetach(Claim(this));
+    }
+    // [[PLANNING]]: if the struct of effect not changed, we can change the params in effect directly
+    transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
+    CHECK_NULL_VOID(transitionEffect_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    bool isOnTheTree = frameNode->IsOnMainTree();
+    // transition effects should be initialized without animation.
+    RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
+        // transitionIn effects should be initialized as active if currently not on the tree.
+        transitionEffect_->OnAttach(Claim(this), !isOnTheTree);
+    });
+}
+
+void RosenRenderContext::NotifyTransition(bool isTransitionIn)
+{
+    CHECK_NULL_VOID(transitionEffect_);
+
+    LOGI("notifyTransition, transition:%{public}s", isTransitionIn ? "in" : "out");
+    RSNode::ExecuteWithoutAnimation([this]() {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
+        transitionEffect_->UpdateFrameSize(size);
+    });
+
+    if (isTransitionIn) {
+        transitionEffect_->Appear();
+        return;
+    } else {
+        // copy current implicit animation params and replace the finish callback function.
+        RSNode::Animate(
+            [isTransitionIn, this]() {
+                transitionEffect_->Disappear();
+                ++disappearingTransitionCount_;
+            },
+            [weakThis = WeakClaim(this)]() {
+                auto context = weakThis.Upgrade();
+                CHECK_NULL_VOID(context);
+                context->OnTransitionOutFinish();
+            });
+    }
+}
+
+void RosenRenderContext::OnTransitionOutFinish()
+{
+    // update transition out count
+    --disappearingTransitionCount_;
+    if (disappearingTransitionCount_ < 0) {
+        LOGE("disappearingTransitionCount_ should not be less than 0");
+        disappearingTransitionCount_ = 0;
+    }
+    // if all transition out effects are finished, do clean up.
+    if (disappearingTransitionCount_ <= 0) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto parent = host->GetParent();
+        // clean up related status.
+        host->UINode::OnRemoveFromParent();
+        // try to remove self from disappearing nodes of parent.
+        if (parent && parent->RemoveDisappearingChild(host)) {
+            // if success, tell parent to rebuild render tree.
+            parent->MarkNeedSyncRenderTree();
+            parent->RebuildRenderContextTree();
+        }
+    }
+}
+
 } // namespace OHOS::Ace::NG

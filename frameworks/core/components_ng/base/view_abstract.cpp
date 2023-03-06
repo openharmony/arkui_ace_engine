@@ -990,6 +990,15 @@ void ViewAbstract::SetTransition(const TransitionOptions& options)
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
 }
 
+void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ChainedTransition, effect);
+}
+
 void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

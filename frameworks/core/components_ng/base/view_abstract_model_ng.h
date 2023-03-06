@@ -345,6 +345,11 @@ public:
         ViewAbstract::SetTransition(transitionOptions);
     }
 
+    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
+    {
+        ViewAbstract::SetChainedTransition(effect);
+    }
+
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
         const std::optional<Dimension>& offsetX, const std::optional<Dimension>& offsetY) override
     {

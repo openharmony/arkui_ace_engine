@@ -36,7 +36,7 @@ GeometryTransition::GeometryTransition(const WeakPtr<FrameNode>& frameNode, bool
 // animates to the place where it should to be(inNode identity), meanwhile outNode starts with its own size
 // and position(outNode identity), animates to the final size and position of inNode(outNode active). Although
 // we have two transitions but these two transitions fit together perfectly, so the appearance looks like a
-// single view move from its old position to its new position, thus visual foucus guidance is completed.
+// single view move from its old position to its new position, thus visual focus guidance is completed.
 // We design the pipeline to have two layouts with different layout constraints, during implicit animation
 // layout related render node properties changes by two layouts are animated. The relationship between node and
 // layout state is as follows.
@@ -48,7 +48,7 @@ GeometryTransition::GeometryTransition(const WeakPtr<FrameNode>& frameNode, bool
 // (active inNode syncs position to outNode's position)
 // ---------------------------------------------------------
 // (active outNode uses inNode's size as layout constraint)
-// identity |  acitve  | final layout
+// identity |  active  | final layout
 // (active outNode syncs position to inNode's position)
 // ---------------------------------------------------------
 bool GeometryTransition::IsNodeActive(const WeakPtr<FrameNode>& frameNode) const
@@ -85,7 +85,7 @@ bool GeometryTransition::IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode)
     return hasOutAnim_ && frameNode.Upgrade() == outNode_ && state_ == State::FINAL_LAYOUT;
 }
 
-// Build should be called during node tree bulid phase dealing with node add/remove or appearing/disappearing
+// Build should be called during node tree build phase dealing with node add/remove or appearing/disappearing
 void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn)
 {
     CHECK_NULL_VOID(frameNode.Upgrade());
@@ -137,7 +137,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
         inNode->GetId(), hasInAnim_, outNode->GetId(), hasOutAnim_, state_);
 }
 
-// Update should be called during node update phase when node exisits
+// Update should be called during node update phase when node exists
 bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value)
 {
     if (which.Upgrade() == inNode_) {

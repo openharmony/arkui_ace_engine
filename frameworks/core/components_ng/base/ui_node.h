@@ -99,6 +99,7 @@ public:
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
@@ -297,6 +298,8 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    bool RemoveDisappearingChild(const RefPtr<UINode>& child);
+
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)
     {
@@ -331,6 +334,20 @@ protected:
         }
     }
 
+    virtual void OnGenerateOneDepthVisibleFrameWithTransition(
+        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX)
+    {
+        for (const auto& child : children_) {
+            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+        }
+        // disappearing children
+        for (const auto& pair : disappearingChildren_) {
+            auto& child = pair.first;
+            auto index = pair.second;
+            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
+        }
+    }
+
     virtual void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
     {
         for (const auto& child : children_) {
@@ -347,12 +364,14 @@ protected:
     virtual void OnDetachFromMainTree();
 
     bool isRemoving_ = false;
+    // return value: return true if node has disappearing transition
+    virtual bool OnRemoveFromParent();
 
 private:
-    void OnRemoveFromParent();
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
 
     std::list<RefPtr<UINode>> children_;
+    std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
     int32_t depth_ = 0;
