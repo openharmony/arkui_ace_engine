@@ -1590,6 +1590,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
                                                 webCom->GetWindowExitEventId(), oldContext);
         onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
+        onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
     }
     return true;
 }
@@ -4205,6 +4206,13 @@ void WebDelegate::OnTouchIconUrl(const std::string& iconUrl, bool precomposed)
     }
 }
 
+void WebDelegate::OnAudioStateChanged(bool audible)
+{
+    if (onAudioStateChangedV2_) {
+        onAudioStateChangedV2_(std::make_shared<AudioStateChangedEvent>(audible));
+    }
+}
+
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
     if (isRefreshPixelMap_) {
@@ -4517,6 +4525,16 @@ Size WebDelegate::GetEnhanceSurfaceSize(const Size& drawSize)
     }
     return Size(width, height);
 }
+
+WebDelegate::EventCallbackV2 WebDelegate::GetAudioStateChangedCallback(
+    bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub)
+{
+    if (eventHub && useNewPipe) {
+        return eventHub->GetOnAudioStateChangedEvent();
+    }
+    return nullptr;
+}
+
 #ifdef ENABLE_ROSEN_BACKEND
 void WebDelegate::SetSurface(const sptr<Surface>& surface)
 {

@@ -18,7 +18,6 @@ ohos_unittest("xcomponent_pattern_test_ng") {
   module_out_path = "$pattern_test_output_path/xcomponent"
 
   sources = [
-    "$ace_root/frameworks/base/utils/time_util.cpp",
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/linear_layout_utils.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",

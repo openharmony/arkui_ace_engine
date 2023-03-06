@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t RATING_IMAGE_SUCCESS_CODE = 0b111;
-constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
+constexpr int32_t DEFAULT_RATING_TOUCH_STAR_NUMBER = 0;
 
 void RatingPattern::CheckImageInfoHasChangedOrNot(
     int32_t imageFlag, const ImageSourceInfo& sourceInfo, const std::string& lifeCycleTag)
@@ -358,15 +358,10 @@ void RatingPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 void RatingPattern::HandleTouchUp()
 {
     CHECK_NULL_VOID_NOLOG(!IsIndicator());
-
-    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
-    CHECK_NULL_VOID(ratingRenderProperty);
-    // Update touch star to 0 to indicate there is no star to be touched.
-    ratingRenderProperty->UpdateTouchStar(DEFAULT_RATING_TOUCH_STAR_NUMBER);
+    state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    state_ = isHover_ ? RatingModifier::RatingAnimationType::PRESSTOHOVER : RatingModifier::RatingAnimationType::NONE;
 }
 
 void RatingPattern::HandleTouchDown(const Offset& localPosition)
@@ -551,11 +546,6 @@ void RatingPattern::HandleHoverEvent(bool isHover)
 {
     isHover_ = isHover;
     state_ = isHover_ ? RatingModifier::RatingAnimationType::HOVER : RatingModifier::RatingAnimationType::NONE;
-    // Remove hover state when rating is not hovered.
-    CHECK_NULL_VOID_NOLOG(!isHover);
-    auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
-    CHECK_NULL_VOID(ratingRenderProperty);
-    ratingRenderProperty->UpdateTouchStar(DEFAULT_RATING_TOUCH_STAR_NUMBER);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -567,9 +557,14 @@ void RatingPattern::HandleMouseEvent(MouseInfo& info)
 
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(ratingLayoutProperty);
     // calculate the number of star the mouse moved on and trigger render update.
-    ratingRenderProperty->UpdateTouchStar(
-        static_cast<int32_t>(floor(info.GetLocalLocation().GetX() / singleStarDstRect_.Width())));
+    auto touchStar = static_cast<int32_t>(floor(info.GetLocalLocation().GetX() / singleStarDstRect_.Width()));
+    touchStar = std::clamp(touchStar, DEFAULT_RATING_TOUCH_STAR_NUMBER,
+        ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)) -
+            1);
+    ratingRenderProperty->UpdateTouchStar(touchStar);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -580,6 +575,7 @@ void RatingPattern::OnModifyDone()
     // Reset image state code.
     imageReadyStateCode_ = 0;
     imageSuccessStateCode_ = 0;
+    singleStarImagePaintConfig_.isSvg_ = false;
     // Constrains ratingScore and starNum in case of the illegal input.
     ConstrainsRatingScore();
 

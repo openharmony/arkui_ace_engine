@@ -41,9 +41,13 @@ public:
     }
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
-    void CalculatePointCenterX(const PaintWrapper* paintWrapper);
-    void CalculatePointCenterY(const PaintWrapper* paintWrapper);
-    void CalculatePointRadius(const PaintWrapper* paintWrapper);
+    void PaintNormalIndicator(const PaintWrapper* paintWrapper);
+    void PaintHoverIndicator(const PaintWrapper* paintWrapper);
+    void PaintPressIndicator(const PaintWrapper* paintWrapper);
+    void CalculateNormalMargin(float radius, const SizeF& frameSize);
+    void CalculatePointCenterX(float radius, float margin, float padding, float space, int32_t index);
+    void CalculateHoverIndex(float radius);
+    bool isHoverPoint(const PointF& hoverPoint, const OffsetF& leftCenter, const OffsetF& rightCenter, float radius);
 
     void SetCurrentIndex(int32_t index)
     {
@@ -85,23 +89,37 @@ public:
         turnPageRate_ = turnPageRate;
     }
 
+    void SetMouseClickIndex(const std::optional<int32_t>& mouseClickIndex)
+    {
+        mouseClickIndex_ = mouseClickIndex;
+    }
+
 private:
-    PointF hoverPoint_;
+    static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
+    {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_RETURN(swiperTheme, nullptr);
+        return swiperTheme;
+    }
 
     RefPtr<SwiperIndicatorModifier> swiperIndicatorModifier_;
+    PointF hoverPoint_;
+    std::optional<int32_t> hoverIndex_ = std::nullopt;
+    std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t itemCount_ = 0;
     float turnPageRate_ = 0.0f;
     bool isHover_ = false;
     bool isPressed_ = false;
+    bool longPointIsHover_ = false;
     // Animatable properties for updating Modifier
     LinearVector<float> vectorBlackPointCenterX_ = {};
-    float longPointLeftCenterX_ = 0.0f;
-    float longPointRightCenterX_ = 0.0f;
+    std::pair<float, float> longPointCenterX_ = { 0, 0 };
+    OffsetF normalMargin_ = { 0, 0 };
     float centerY_ = 0.0f;
-    float pointRadius_ = 0.0f;
-    float hoverPointRadius_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPaintMethod);
 };

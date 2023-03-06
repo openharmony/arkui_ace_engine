@@ -122,7 +122,6 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_dump_log.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_view_stack_processor.cpp",
@@ -152,10 +151,10 @@ ohos_unittest("select_pattern_test_ng") {
   ]
 
   deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson_static",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 

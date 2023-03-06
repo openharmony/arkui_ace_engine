@@ -335,6 +335,7 @@ public:
     {
         return dumpFrameCount_;
     }
+    static bool GetIsUseMemoryMonitor();
 
 private:
     static bool traceEnabled_;

@@ -18,7 +18,6 @@ common_sources = [
   # inner
   "$ace_root/frameworks/base/geometry/dimension.cpp",
   "$ace_root/frameworks/base/json/json_util.cpp",
-  "$ace_root/frameworks/base/log/dump_log.cpp",
   "$ace_root/frameworks/base/utils/base_id.cpp",
   "$ace_root/frameworks/base/utils/string_expression.cpp",
   "$ace_root/frameworks/base/utils/string_utils.cpp",
@@ -164,10 +163,10 @@ ohos_unittest("list_pattern_test_ng") {
   sources = test_sources + common_sources
 
   deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson_static",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 
@@ -182,10 +181,10 @@ ohos_unittest("list_test_ng") {
   sources = common_sources + test_sources
 
   deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson_static",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
     "//third_party/googletest:gmock_main",
   ]
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,10 @@ constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
 constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
+constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 
 enum class WidthType : uint32_t {
     SIDEBAR_WIDTH = 0,
@@ -214,6 +218,7 @@ void JSSideBar::JSBind(BindingTarget globalObj)
     JSClass<JSSideBar>::StaticMethod("maxSideBarWidth", &JSSideBar::JsMaxSideBarWidth);
     JSClass<JSSideBar>::StaticMethod("autoHide", &JSSideBar::JsAutoHide);
     JSClass<JSSideBar>::StaticMethod("sideBarPosition", &JSSideBar::JsSideBarPosition);
+    JSClass<JSSideBar>::StaticMethod("divider", &JSSideBar::JsDivider);
     JSClass<JSSideBar>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSSideBar>::StaticMethod("width", SetWidth);
     JSClass<JSSideBar>::StaticMethod("height", SetHeight);
@@ -385,11 +390,11 @@ void JSSideBar::JsControlButtonForNG(const JSCallbackInfo& info)
             NG::SideBarContainerView::SetControlButtonHeight(controlButtonHeight);
         }
 
-        if (!left->IsNull() && left->IsNumber()) {
+        if (!left->IsNull() && left->IsNumber() && GreatOrEqual(left->ToNumber<double>(), 0.0)) {
             NG::SideBarContainerView::SetControlButtonLeft(Dimension(left->ToNumber<double>(), DimensionUnit::VP));
         }
 
-        if (!top->IsNull() && top->IsNumber()) {
+        if (!top->IsNull() && top->IsNumber() && GreatOrEqual(top->ToNumber<double>(), 0.0)) {
             NG::SideBarContainerView::SetControlButtonTop(Dimension(top->ToNumber<double>(), DimensionUnit::VP));
         }
 
@@ -411,6 +416,52 @@ void JSSideBar::JsControlButtonForNG(const JSCallbackInfo& info)
                 NG::SideBarContainerView::SetControlButtonSwitchingIconStr(switchingIconStr);
             }
         }
+    }
+}
+
+void JSSideBar::JsDivider(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    if (info.Length() < 1) {
+        LOGE("Invalid params");
+        return;
+    }
+
+    if (info[0]->IsNull()) {
+        NG::SideBarContainerView::SetDividerStrokeWidth(0.0_vp);
+        return;
+    }
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+
+        Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
+        if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), strokeWidth) || (strokeWidth.Value() < 0.0f)) {
+            LOGE("Invalid strokeWidth of divider");
+            strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
+        }
+        NG::SideBarContainerView::SetDividerStrokeWidth(strokeWidth);
+
+        Color color = DEFAULT_DIVIDER_COLOR;
+        if (!ConvertFromJSValue(obj->GetProperty("color"), color)) {
+            color = DEFAULT_DIVIDER_COLOR;
+        }
+        NG::SideBarContainerView::SetDividerColor(color);
+
+        Dimension startMargin = DEFAULT_DIVIDER_START_MARGIN;
+        if (!ConvertFromJSValue(obj->GetProperty("startMargin"), startMargin) || (startMargin.Value() < 0.0f)) {
+            startMargin = DEFAULT_DIVIDER_START_MARGIN;
+        }
+        NG::SideBarContainerView::SetDividerStartMargin(startMargin);
+
+        Dimension endMargin = DEFAULT_DIVIDER_END_MARGIN;
+        if (!ConvertFromJSValue(obj->GetProperty("endMargin"), endMargin) || (endMargin.Value() < 0.0f)) {
+            endMargin = DEFAULT_DIVIDER_END_MARGIN;
+        }
+        NG::SideBarContainerView::SetDividerEndMargin(endMargin);
     }
 }
 

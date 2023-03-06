@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
 #include "core/components_ng/layout/layout_property.h"
 
@@ -31,6 +32,13 @@ struct ControlButtonStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonShowIconStr, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonHiddenIconStr, std::string);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ControlButtonSwitchingIconStr, std::string);
+};
+
+struct DividerStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerStrokeWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerStartMargin, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerEndMargin, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DividerColor, Color);
 };
 
 class ACE_EXPORT SideBarContainerLayoutProperty : public LayoutProperty {
@@ -53,6 +61,7 @@ public:
         value->propAutoHide_ = CloneAutoHide();
         value->propSideBarPosition_ = CloneSideBarPosition();
         value->propControlButtonStyle_ = CloneControlButtonStyle();
+        value->propDividerStyle_ = CloneDividerStyle();
         return value;
     }
 
@@ -68,6 +77,7 @@ public:
         ResetAutoHide();
         ResetSideBarPosition();
         ResetControlButtonStyle();
+        ResetDividerStyle();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -81,6 +91,10 @@ public:
         constexpr Dimension DEFAULT_SIDE_BAR_WIDTH = 200.0_vp;
         constexpr Dimension DEFAULT_MIN_SIDE_BAR_WIDTH = 200.0_vp;
         constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
+        constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
+        constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
+        constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
+        constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 
         auto type = propSideBarContainerType_.value_or(SideBarContainerType::EMBED);
         auto sideBarWidth = propSideBarWidth_.value_or(DEFAULT_SIDE_BAR_WIDTH);
@@ -98,20 +112,41 @@ public:
         json->Put("sideBarPosition",
             sideBarPosition == SideBarPosition::START ? "SideBarPosition.Start" : "SideBarPosition.End");
 
-        CHECK_NULL_VOID(propControlButtonStyle_);
+        // divider
+        Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
+        Dimension startMargin = DEFAULT_DIVIDER_START_MARGIN;
+        Dimension endMargin = DEFAULT_DIVIDER_END_MARGIN;
+        Color color = DEFAULT_DIVIDER_COLOR;
 
+        if (propDividerStyle_) {
+            strokeWidth = propDividerStyle_->propDividerStrokeWidth.value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
+            startMargin = propDividerStyle_->propDividerStartMargin.value_or(DEFAULT_DIVIDER_START_MARGIN);
+            endMargin = propDividerStyle_->propDividerEndMargin.value_or(DEFAULT_DIVIDER_END_MARGIN);
+            color = propDividerStyle_->propDividerColor.value_or(DEFAULT_DIVIDER_COLOR);
+        }
+        auto jsonDivider = JsonUtil::Create(true);
+        CHECK_NULL_VOID(jsonDivider);
+        jsonDivider->Put("strokeWidth", strokeWidth.ToString().c_str());
+        jsonDivider->Put("startMargin", startMargin.ToString().c_str());
+        jsonDivider->Put("endMargin", endMargin.ToString().c_str());
+        jsonDivider->Put("color", color.ColorToString().c_str());
+        json->Put("divider", jsonDivider->ToString().c_str());
+
+        CHECK_NULL_VOID(propControlButtonStyle_);
         auto left = propControlButtonStyle_->propControlButtonLeft.value_or(DEFAULT_CONTROL_BUTTON_LEFT);
         auto top = propControlButtonStyle_->propControlButtonTop.value_or(DEFAULT_CONTROL_BUTTON_TOP);
         auto width = propControlButtonStyle_->propControlButtonWidth.value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
         auto height = propControlButtonStyle_->propControlButtonHeight.value_or(DEFAULT_CONTROL_BUTTON_HEIGHT);
 
         auto jsonControl = JsonUtil::Create(true);
+        CHECK_NULL_VOID(jsonControl);
         jsonControl->Put("left", std::to_string(left.Value()).c_str());
         jsonControl->Put("top", std::to_string(top.Value()).c_str());
         jsonControl->Put("width", std::to_string(width.Value()).c_str());
         jsonControl->Put("height", std::to_string(height.Value()).c_str());
 
         auto jsonIcon = JsonUtil::Create(true);
+        CHECK_NULL_VOID(jsonIcon);
         jsonIcon->Put("shown", propControlButtonStyle_->propControlButtonShowIconStr->c_str());
         jsonIcon->Put("hidden", propControlButtonStyle_->propControlButtonHiddenIconStr->c_str());
         jsonIcon->Put("switching", propControlButtonStyle_->propControlButtonSwitchingIconStr->c_str());
@@ -141,6 +176,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         ControlButtonStyle, ControlButtonSwitchingIconStr, std::string, PROPERTY_UPDATE_MEASURE);
 
+    ACE_DEFINE_PROPERTY_GROUP(DividerStyle, DividerStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerStrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerStartMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerEndMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DividerStyle, DividerColor, Color, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerLayoutProperty);
 };

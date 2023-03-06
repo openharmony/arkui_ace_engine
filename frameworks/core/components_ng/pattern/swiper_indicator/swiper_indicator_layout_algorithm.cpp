@@ -69,10 +69,9 @@ void SwiperIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     auto indicatorPadding = INDICATOR_PADDING_DEFAULT;
-    if (isHoverOrPress_) {
-        userSize *= INDICATOR_ZOOM_IN_SCALE;
-        indicatorPadding = INDICATOR_PADDING_HOVER;
-    }
+    // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
+    userSize *= INDICATOR_ZOOM_IN_SCALE;
+    indicatorPadding = INDICATOR_PADDING_HOVER;
 
     // Length of a selected indicator round rect.
     auto selectedSize = userSize * 2.0f;

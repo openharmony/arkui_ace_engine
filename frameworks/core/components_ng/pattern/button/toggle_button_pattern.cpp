@@ -103,7 +103,6 @@ void ToggleButtonPattern::OnModifyDone()
     InitButtonAndText();
     HandleEnabled();
     InitTouchEvent();
-    InitClickEvent();
 }
 
 void ToggleButtonPattern::HandleEnabled()

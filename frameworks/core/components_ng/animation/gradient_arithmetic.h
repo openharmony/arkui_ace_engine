@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRADIENT_ARITHMETIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRADIENT_ARITHMETIC_H
 
+#include "core/components_ng/animation/animatable_arithmetic.h"
 #include "core/components_ng/property/gradient_property.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/modifier/rs_animatable_arithmetic.h"
 
 namespace OHOS::Ace::NG {
-class GradientArithmetic : public Rosen::RSAnimatableArithmetic<GradientArithmetic> {
+class GradientArithmetic : public AnimatableArithmetic<GradientArithmetic> {
 public:
     GradientArithmetic() = default;
     explicit GradientArithmetic(const Gradient& gradient) : gradientValue_(gradient) {}

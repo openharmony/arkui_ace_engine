@@ -173,6 +173,7 @@ public:
     bool OnCursorChange(const NWeb::CursorType& type, const NWeb::NWebCursorInfo& info) override;
     void OnSelectPopupMenu(std::shared_ptr<NWeb::NWebSelectPopupMenuParam> params,
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
+    void OnAudioStateChanged(bool playing) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

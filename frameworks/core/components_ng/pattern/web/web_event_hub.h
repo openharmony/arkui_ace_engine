@@ -118,6 +118,7 @@ public:
         return propOnPreKeyEvent_;
     }
 
+    ACE_WEB_EVENT_PROPERTY(OnAudioStateChanged, void);
     ACE_WEB_EVENT_PROPERTY(OnPageStarted, void);
     ACE_WEB_EVENT_PROPERTY(OnPageFinished, void);
     ACE_WEB_EVENT_PROPERTY(OnHttpErrorReceive, void);

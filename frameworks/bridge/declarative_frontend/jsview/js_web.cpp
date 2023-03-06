@@ -1482,6 +1482,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
+    JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -4110,6 +4111,37 @@ void JSWeb::VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::WebView::SetVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
+    }
+}
+
+JSRef<JSVal> AudioStateChangedEventToJSValue(const AudioStateChangedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("playing", eventInfo.IsPlaying());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnAudioStateChanged");
+
+    if (!args[0]->IsFunction()) {
+        LOGE("OnAudioStateChanged Param is invalid, it is not a function");
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AudioStateChangedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), AudioStateChangedEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<AudioStateChangedEvent>(info.get());
+            func->Execute(*eventInfo);
+        };
+        NG::WebView::SetAudioStateChangedId(std::move(uiCallback));
     }
 }
 } // namespace OHOS::Ace::Framework

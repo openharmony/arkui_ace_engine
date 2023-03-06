@@ -33,7 +33,6 @@ ohos_fuzztest("UtilFuzzTest") {
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
-    "$ace_root/frameworks/base/log/dump_log.cpp",
     "$ace_root/frameworks/bridge/common/utils/source_map.cpp",
     "//third_party/cJSON/cJSON.c",
     "util_fuzzer.cpp",
@@ -46,6 +45,7 @@ ohos_fuzztest("UtilFuzzTest") {
     "$ace_root",
     cjson_root,
   ]
+  deps = [ "$ace_root/frameworks/base:ace_memory_monitor_ohos" ]
   external_deps = [
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",

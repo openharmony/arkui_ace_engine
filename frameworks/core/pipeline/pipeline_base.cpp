@@ -387,12 +387,10 @@ bool PipelineBase::Dump(const std::vector<std::string>& params) const
         return false;
     }
     // the first param is the key word of dump.
-#ifdef ACE_MEMORY_MONITOR
     if (params[0] == "-memory") {
         MemoryMonitor::GetInstance().Dump();
         return true;
     }
-#endif
     if (params[0] == "-jscrash") {
         EventReport::JsErrReport(
             AceApplicationInfo::GetInstance().GetPackageName(), "js crash reason", "js crash summary");

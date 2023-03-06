@@ -58,6 +58,7 @@ public:
         auto paintMethod = MakeRefPtr<RadioPaintMethod>(radioModifier_);
         paintMethod->SetTotalScale(totalScale_);
         paintMethod->SetPointScale(pointScale_);
+        paintMethod->SetRingPointScale(ringPointScale_);
         paintMethod->SetUIStatus(uiStatus_);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
@@ -130,6 +131,7 @@ private:
     void StopAnimation();
     void UpdateTotalScale(float scale);
     void UpdatePointScale(float scale);
+    void UpdateRingPointScale(float scale);
     void UpdateUIStatus(bool check);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -152,6 +154,7 @@ private:
     bool isHover_ = false;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
+    float ringPointScale_ = 0.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;

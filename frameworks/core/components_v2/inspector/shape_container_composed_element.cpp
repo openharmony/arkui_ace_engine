@@ -224,7 +224,7 @@ std::unique_ptr<JsonValue> ShapeContainerComposedElement::GetMesh() const
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
     auto jsonMesh = JsonUtil::Create(true);
     if (render) {
-        auto jsonValueArray = JsonUtil::CreateArray(false);
+        auto jsonValueArray = JsonUtil::CreateArray(true);
         std::vector<double> array = render->GetMesh();
         for (size_t i = 0; i < array.size(); i++) {
             auto index = std::to_string(i);
