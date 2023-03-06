@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -327,6 +327,7 @@ void SelectPattern::BuildChild()
     CHECK_NULL_VOID(rowProps);
     rowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rowProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    rowProps->UpdateFlexDirection(FlexDirection::ROW);
     rowProps->UpdateSpace(theme->GetContentSpinnerPadding());
     text_ =
         FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -690,6 +691,20 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("options", InspectorGetOptions().c_str());
     json->Put("selected", std::to_string(selected_).c_str());
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetChildren().empty()) {
+        auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+        json->Put("space", rowProps->GetSpace()->ToString().c_str());
+
+        if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
+            json->Put("arrowPosition", "ArrowPosition.END");
+        } else {
+            json->Put("arrowPosition", "ArrowPosition.START");
+        }
+    }
+
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     json->Put("value", props->GetContent().value_or("").c_str());
@@ -759,4 +774,34 @@ bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return true;
 }
 
+void SelectPattern::SetSpace(const Dimension& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetChildren().empty()) {
+        auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+        rowProps->UpdateSpace(value);
+        row->MarkModifyDone();
+        row->MarkDirtyNode();
+    }
+}
+
+void SelectPattern::SetArrowPosition(const ArrowPosition value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetChildren().empty()) {
+        auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+
+        if (value == ArrowPosition::END) {
+            rowProps->UpdateFlexDirection(FlexDirection::ROW);
+        } else {
+            rowProps->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
+        }
+        row->MarkModifyDone();
+        row->MarkDirtyNode();
+    }
+}
 } // namespace OHOS::Ace::NG
