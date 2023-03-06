@@ -51,6 +51,7 @@
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
+#include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
@@ -514,20 +515,6 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
     auto paintRectVector = rsNode_->GetStagingProperties().GetBounds();
     rect.SetRect(paintRectVector[0], paintRectVector[1], paintRectVector[2], paintRectVector[3]);
     return rect;
-}
-
-void RosenRenderContext::NotifyTransition(
-    const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
-{
-    CHECK_NULL_VOID(rsNode_);
-    auto effect = GetRSTransitionWithoutType(transOptions);
-    AnimationUtils::Animate(
-        option,
-        [rsNode = rsNode_, isTransitionIn, effect]() {
-            CHECK_NULL_VOID_NOLOG(rsNode);
-            rsNode->NotifyTransition(effect, isTransitionIn);
-        },
-        option.GetOnFinishEvent());
 }
 
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
@@ -1392,6 +1379,18 @@ void RosenRenderContext::SetModifier(std::shared_ptr<T>& modifier, D data)
     modifier->SetCustomData(data);
 }
 
+void RosenRenderContext::AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier)
+{
+    CHECK_NULL_VOID(modifier);
+    rsNode_->AddModifier(modifier);
+}
+
+void RosenRenderContext::RemoveModifier(const std::shared_ptr<Rosen::RSModifier>& modifier)
+{
+    CHECK_NULL_VOID(modifier);
+    rsNode_->RemoveModifier(modifier);
+}
+
 // helper function to update one of the graphic effects
 template<typename T, typename D>
 void RosenRenderContext::UpdateGraphic(std::shared_ptr<T>& modifier, D data)
@@ -1893,4 +1892,69 @@ void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->MarkDrivenRenderFramePaintState(flag);
 }
+
+void RosenRenderContext::UpdateTransition(const std::shared_ptr<RosenTransitionEffect>&& effect)
+{
+    if (transitionEffect_) {
+        transitionEffect_->OnDetach(Claim(this));
+    }
+    transitionEffect_ = effect;
+    CHECK_NULL_VOID(transitionEffect_);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    bool isOnTheTree = frameNode->IsOnMainTree();
+    // transition effects should be initialized without animation.
+    RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
+        // transitionIn effects should be initialized as active if currently not on the tree.
+        transitionEffect_->OnAttach(Claim(this), !isOnTheTree);
+    });
+}
+
+void RosenRenderContext::NotifyTransition(bool isTransitionIn)
+{
+    CHECK_NULL_VOID(transitionEffect_);
+
+    RSNode::ExecuteWithoutAnimation([this]() {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
+        transitionEffect_->UpdateFrameSize(size);
+    });
+    
+    if (isTransitionIn) {
+        transitionEffect_->Appear();
+        return;
+    } else {
+        // copy current implicit animation params and replace the finish callback function.
+        RSNode::Animate(
+            [isTransitionIn, this]() {
+                transitionEffect_->Disappear();
+                ++disappearingTransitionCount_;
+            },
+            [weakThis = WeakClaim(this)]() {
+                auto context = weakThis.Upgrade();
+                CHECK_NULL_VOID(context);
+                context->OnTransitionOutFinish();
+            });
+    }
+}
+
+void RosenRenderContext::OnTransitionOutFinish()
+{
+    // update transition out count
+    --disappearingTransitionCount_;
+    if (disappearingTransitionCount_ < 0) {
+        LOGE("disappearingTransitionCount_ should not be less than 0");
+        disappearingTransitionCount_ = 0;
+    }
+    // if all transition out effects are finished, do clean up.
+    if (disappearingTransitionCount_ <= 0) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        // TODO clean up disappearing children
+        host->OnRemoveFromParent();
+        host->MarkNeedSyncRenderTree();
+    }
+}
+
 } // namespace OHOS::Ace::NG

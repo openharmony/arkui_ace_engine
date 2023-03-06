@@ -143,6 +143,10 @@ public:
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void OnNodeDisappear() {}
     virtual void OnNodeAppear() {}
+    virtual bool HasTransitionOutAnimation() const
+    {
+        return false;
+    }
 
     virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
@@ -183,10 +187,6 @@ public:
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     virtual void ClearDrawCommands() {}
-
-    virtual void NotifyTransition(
-        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn)
-    {}
 
     virtual void DumpInfo() const {}
 

@@ -50,8 +50,6 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 
-constexpr int32_t DEFAULT_FRAME_SLOT = -1;
-
 // FrameNode will display rendering region in the screen.
 class ACE_EXPORT FrameNode : public UINode {
     DECLARE_ACE_TYPE(FrameNode, UINode);
@@ -321,6 +319,8 @@ public:
         return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
     }
 
+    bool OnRemoveFromParent() override;
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -336,6 +336,8 @@ private:
     RefPtr<PaintWrapper> CreatePaintWrapper();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();

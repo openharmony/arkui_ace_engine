@@ -19,7 +19,10 @@ namespace OHOS::Ace::NG {
 UINode::~UINode() {}
 void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode) {}
 void UINode::Clean() {}
-void UINode::OnRemoveFromParent() {}
+bool UINode::OnRemoveFromParent()
+{
+    return false;
+}
 void UINode::GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const {}
 void UINode::AttachToMainTree() {}
 void UINode::DetachFromMainTree() {}

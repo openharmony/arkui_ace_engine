@@ -43,6 +43,7 @@ class MouseSelectModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
+class RosenTransitionEffect;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -143,6 +144,7 @@ public:
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
 
     void UpdateTransition(const TransitionOptions& options) override;
+    void UpdateTransition(const std::shared_ptr<RosenTransitionEffect>&& effect);
     bool HasAppearingTransition() const
     {
         return propTransitionAppearing_ != nullptr;
@@ -178,12 +180,9 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
-    virtual void GetPointWithTransform(PointF& point) override;
+    void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
-
-    void NotifyTransition(
-        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;
@@ -266,6 +265,12 @@ private:
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
+    void NotifyTransition(bool isTransitionIn);
+    bool HasTransitionOutAnimation() const override
+    {
+        return disappearingTransitionCount_ > 0;
+    }
+    void OnTransitionOutFinish();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
 
@@ -295,6 +300,9 @@ private:
     template<typename T, typename D>
     void SetModifier(std::shared_ptr<T>& modifier, D data);
 
+    void AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier);
+    void RemoveModifier(const std::shared_ptr<Rosen::RSModifier>& modifier);
+
     // helper function to update one of the graphic effects
     template<typename T, typename D>
     void UpdateGraphic(std::shared_ptr<T>& modifier, D data);
@@ -323,9 +331,11 @@ private:
     bool firstTransitionIn_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
+    int disappearingTransitionCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
+    std::shared_ptr<RosenTransitionEffect> transitionEffect_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
@@ -344,6 +354,9 @@ private:
     std::shared_ptr<InvertModifier> invertModifier_;
     std::shared_ptr<HueRotateModifier> hueRotateModifier_;
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
+
+    template<typename Modifier, typename PropertyType>
+    friend class PropertyTransitionEffectImpl;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

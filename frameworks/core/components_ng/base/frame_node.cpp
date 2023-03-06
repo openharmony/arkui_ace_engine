@@ -284,6 +284,7 @@ void FrameNode::OnAttachToMainTree()
 
 void FrameNode::OnVisibleChange(bool isVisible)
 {
+    // notify transition
     pattern_->OnVisibleChange(isVisible);
     for (const auto& child : GetChildren()) {
         child->OnVisibleChange(isVisible);
@@ -770,7 +771,9 @@ void FrameNode::RebuildRenderContextTree()
     }
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
-    GenerateOneDepthVisibleFrame(children);
+    GenerateOneDepthVisibleFrameWithTransition(children);
+    // insert disappearing children here
+
     frameChildren_ = { children.begin(), children.end() };
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
@@ -902,6 +905,36 @@ void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& vis
 {
     if (isActive_ && IsVisible()) {
         visibleList.emplace_back(Claim(this));
+    }
+}
+
+void FrameNode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    // normal child
+    UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
+    // disappearing children
+    for (const auto& pair : GetDisappearingChildren()) {
+        auto& child = pair.first;
+        auto index = pair.second;
+        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
+    }
+}
+
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    // for visible transition animation
+    // TODO: re-check this
+    if (!(isActive_ && IsVisible()) && !context->HasTransitionOutAnimation()) {
+        return;
+    }
+    if (index > visibleList.size()) {
+        visibleList.emplace_back(Claim(this));
+    } else {
+        auto iter = visibleList.begin();
+        std::advance(iter, index);
+        visibleList.insert(iter, Claim(this));
     }
 }
 
@@ -1350,6 +1383,21 @@ void FrameNode::RemoveLastHotZoneRect() const
 {
     auto gestureHub = GetOrCreateGestureEventHub();
     gestureHub->RemoveLastResponseRect();
+}
+
+bool FrameNode::OnRemoveFromParent()
+{
+    // kick out transition animation if needed, wont re-entry if already detached.
+    DetachFromMainTree();
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, false);
+    if (context->HasTransitionOutAnimation()) {
+        // pending remove, move self into disappearing children
+        return true;
+    } else {
+        // directly remove, reset parent and depth
+        return UINode::OnRemoveFromParent();
+    }
 }
 
 } // namespace OHOS::Ace::NG

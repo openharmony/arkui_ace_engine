@@ -49,7 +49,9 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
             (*it)->GetId(), child->GetId());
         return;
     }
-
+    // remove from disappearing children
+    disappearingChildren_.remove_if(
+        [child](const auto& disappearingChild) { return disappearingChild.first == child; });
     it = children_.begin();
     std::advance(it, slot);
     DoAddChild(it, child, silently);
@@ -64,9 +66,16 @@ std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& ch
         LOGE("child is not exist.");
         return children_.end();
     }
-    (*iter)->OnRemoveFromParent();
+    disappearingChildren_.remove_if(
+        [child](const auto& disappearingChild) { return disappearingChild.first == child; });
+    if ((*iter)->OnRemoveFromParent()) {
+        // move child to disappearing children, skip syncing render tree
+        disappearingChildren_.emplace_back(child, std::distance(children_.begin(), iter));
+    } else {
+        // remove the child and sync render tree
+        MarkNeedSyncRenderTree();
+    }
     auto result = children_.erase(iter);
-    MarkNeedSyncRenderTree();
     return result;
 }
 
@@ -83,9 +92,15 @@ void UINode::RemoveChildAtIndex(int32_t index)
     }
     auto iter = children_.begin();
     std::advance(iter, index);
-    (*iter)->OnRemoveFromParent();
+    disappearingChildren_.remove_if([iter](const auto& disappearingChild) { return disappearingChild.first == *iter; });
+    if ((*iter)->OnRemoveFromParent()) {
+        // move child to disappearing children, skip syncing render tree
+        disappearingChildren_.emplace_back(*iter, std::distance(children_.begin(), iter));
+    } else {
+        // remove the child and sync render tree
+        MarkNeedSyncRenderTree();
+    }
     children_.erase(iter);
-    MarkNeedSyncRenderTree();
 }
 
 RefPtr<UINode> UINode::GetChildAtIndex(int32_t index) const
@@ -129,7 +144,12 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 void UINode::Clean()
 {
     for (const auto& child : children_) {
-        child->OnRemoveFromParent();
+        disappearingChildren_.remove_if(
+            [&child](const auto& disappearingChild) { return disappearingChild.first == child; });
+        if (child->OnRemoveFromParent()) {
+            // move child to disappearing children, skip syncing render tree
+            disappearingChildren_.emplace_back(child, -1);
+        }
         if (child->MarkRemoving()) {
             // pending remove child is removed from tree but not cleaned completely, we'll keep reference of it
             // and hold its tree integrity temporarily for transition use, of course the pending remove tree is
@@ -155,7 +175,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent, int32_t slot, bool sile
     }
 }
 
-void UINode::OnRemoveFromParent()
+bool UINode::OnRemoveFromParent()
 {
     DetachFromMainTree();
     auto* frame = AceType::DynamicCast<FrameNode>(this);
@@ -167,6 +187,7 @@ void UINode::OnRemoveFromParent()
     }
     parent_.Reset();
     depth_ = -1;
+    return false;
 }
 
 void UINode::DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently)
@@ -361,6 +382,13 @@ void UINode::GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleL
 {
     for (const auto& child : children_) {
         child->OnGenerateOneDepthVisibleFrame(visibleList);
+    }
+}
+
+void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+{
+    for (const auto& child : children_) {
+        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
     }
 }
 
