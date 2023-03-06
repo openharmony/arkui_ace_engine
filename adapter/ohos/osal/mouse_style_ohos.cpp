@@ -36,6 +36,10 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
     CHECK_NULL_RETURN(inputManager, false);
     static const LinearEnumMapNode<MouseFormat, int32_t> mouseFormatMap[] = {
         { MouseFormat::DEFAULT, MMI::DEFAULT },
+        { MouseFormat::EAST, MMI::EAST },
+        { MouseFormat::WEST, MMI::WEST },
+        { MouseFormat::SOUTH, MMI::SOUTH },
+        { MouseFormat::NORTH, MMI::NORTH },
         { MouseFormat::WEST_EAST, MMI::WEST_EAST },
         { MouseFormat::NORTH_SOUTH, MMI::NORTH_SOUTH },
         { MouseFormat::NORTH_EAST_SOUTH_WEST, MMI::NORTH_EAST_SOUTH_WEST },

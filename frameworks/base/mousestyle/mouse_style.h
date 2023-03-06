@@ -22,6 +22,10 @@ namespace OHOS::Ace {
 
 enum class MouseFormat : int32_t {
     DEFAULT = 0,        // Default mouse style
+    EAST = 1,           // Eastwards arrow
+    WEST = 2,           // Westwards arrow
+    SOUTH = 3,          // Southwards arrow
+    NORTH = 4,          // Northwards arrow
     WEST_EAST = 5,      // Drag left-right mouse style
     NORTH_SOUTH = 6,    // Drag up-down mouse style
     NORTH_EAST_SOUTH_WEST = 11,

@@ -28,6 +28,16 @@ public:
     ~HyperlinkPattern() override = default;
 
 private:
+    void OnAttachToFrameNode() override;
+    void OnModifyDone() override;
+
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void InitInputEvent(const RefPtr<InputEventHub>& inputHub);
+
+    void OnHoverEvent(bool isHovered);
+
+    RefPtr<InputEvent> onHoverEvent_;
+
     ACE_DISALLOW_COPY_AND_MOVE(HyperlinkPattern);
 };
 } // namespace OHOS::Ace::NG

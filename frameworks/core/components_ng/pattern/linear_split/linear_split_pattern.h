@@ -20,6 +20,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/input_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_split/linear_split_layout_property.h"
@@ -68,11 +69,13 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandlePanStart(float xOffset, float yOffset, const Offset& globalLocation);
-    void HandlePanUpdate(float xOffset, float yOffset, const Offset& globalLocation);
-    void HandlePanEnd(const Offset& globalLocation);
-    void InitMouseEvent(const RefPtr<GestureEventHub>& gestureHub);
-    void HandleMouseEvent(const Offset& globalLocation);
+    void HandlePanStart(const GestureEvent& info);
+    void HandlePanUpdate(const GestureEvent& info);
+    void HandlePanEnd(const GestureEvent& info);
+    void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
+    void HandleMouseEvent(MouseInfo& info);
+    void HandleHoverEvent(bool isHovered);
+    MouseFormat GetMouseFormat();
     void GetdragedSplitIndexOrIsMoving(const Point& point);
 
     std::vector<OffsetF> childrenOffset_;
@@ -80,6 +83,7 @@ private:
     SplitType splitType_;
     RefPtr<DragEvent> dragEvent_;
     RefPtr<InputEvent> mouseEvent_;
+    RefPtr<InputEvent> hoverEvent_;
     RefPtr<PanEvent> panEvent_;
     bool resizeable_ = false;
 
