@@ -223,7 +223,7 @@ std::unique_ptr<JsonValue> ShapeContainerComposedElement::GetMesh() const
 {
     auto render = GetContentRender<RenderShapeContainer>(ShapeContainerElement::TypeId());
     auto jsonMesh = JsonUtil::Create(true);
-    if (render) {
+    if (render && jsonMesh) {
         auto jsonValueArray = JsonUtil::CreateArray(true);
         std::vector<double> array = render->GetMesh();
         for (size_t i = 0; i < array.size(); i++) {
