@@ -45,6 +45,10 @@ void QRCodePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) cons
         return;
     }
     auto value = paintProperty->GetValueValue();
+    auto renderContext = paintWrapper->GetRenderContext();
+    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+        paintProperty->UpdateColor(Color::FOREGROUND);
+    }
     auto color = paintProperty->GetColorValue();
     auto backgroundColor = paintProperty->GetBackgroundColorValue();
     auto qrCode = qrcodegen::QrCode::encodeText(value.c_str(), qrcodegen::QrCode::Ecc::LOW);

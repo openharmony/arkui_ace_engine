@@ -84,8 +84,9 @@ public:
 
     static TextDirection GetTextDirection(const std::string& content);
 
-    static void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
+    static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+        TextStyle& textStyle, bool isDisabled);
     static void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
 

@@ -53,6 +53,7 @@ const Color Color::RED = Color(0xffff0000);
 const Color Color::GREEN = Color(0xff00ff00);
 const Color Color::BLUE = Color(0xff0000ff);
 const Color Color::GRAY = Color(0xffc0c0c0);
+const Color Color::FOREGROUND = Color(0x00000001); // foreground color and foreground color strategy identification
 
 const LinearColor LinearColor::TRANSPARENT = LinearColor(0x00000000);
 const LinearColor LinearColor::WHITE = LinearColor(0xffffffff);

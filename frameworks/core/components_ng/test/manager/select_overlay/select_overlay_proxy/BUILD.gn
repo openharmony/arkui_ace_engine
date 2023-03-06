@@ -39,6 +39,7 @@ ohos_unittest("select_overlay_proxy_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
 
     # mock
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_box_layout_algorithm.cpp",

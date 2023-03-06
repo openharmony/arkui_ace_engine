@@ -126,6 +126,7 @@ void SideBarContainerPattern::OnUpdateShowDivider(
 
 void SideBarContainerPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     CreateAnimation();
     InitSideBar();
 

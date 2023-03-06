@@ -73,7 +73,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return std::nullopt;
     }
 
-    TextStyle textStyle = CreateTextStyleUsingTheme(
+    TextStyle textStyle = CreateTextStyleUsingThemeWithText(frameNode,
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);

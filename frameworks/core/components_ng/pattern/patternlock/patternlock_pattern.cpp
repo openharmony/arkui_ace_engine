@@ -42,6 +42,7 @@ void PatternLockPattern::OnAttachToFrameNode()
 
 void PatternLockPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 

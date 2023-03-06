@@ -40,6 +40,7 @@ void CheckBoxPattern::OnAttachToFrameNode()
 
 void CheckBoxPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

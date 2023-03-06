@@ -219,6 +219,7 @@ void TextFieldModelNG::SetFontWeight(FontWeight value)
 void TextFieldModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 void TextFieldModelNG::SetFontStyle(Ace::FontStyle value)
 {
@@ -314,6 +315,11 @@ void TextFieldModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(frameNode);
 
     dragDropManager->AddTextFieldDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+}
+
+void TextFieldModelNG::SetForegroundColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value);
 }
 
 } // namespace OHOS::Ace::NG

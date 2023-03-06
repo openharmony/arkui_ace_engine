@@ -176,6 +176,16 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPaintMethodTest001, TestSi
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper2);
     EXPECT_EQ(paintMethod->color_, COLOR_DEFUALT);
+
+    /**
+     * @tc.cases: case3. renderContext has foreground color and modifier will foreground color flag
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_FALSE(renderContext == nullptr);
+    PaintWrapper paintWrapper3(renderContext, nullptr, loadingProgressPaintProperty);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
+    paintMethod->UpdateContentModifier(&paintWrapper3);
+    EXPECT_EQ(paintMethod->color_, Color::FOREGROUND);
 }
 
 /**

@@ -2662,6 +2662,24 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
     return true;
 }
 
+bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)
+{
+    if (!jsValue->IsString()) {
+        return false;
+    }
+    if (jsValue->IsString()) {
+        std::string colorStr = jsValue->ToString();
+         // Remove all " ".
+        colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
+        std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
+        if (colorStr.compare("invert") == 0) {
+            strategy = ForegroundColorStrategy::INVERT;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
 {
     result.clear();
@@ -4121,6 +4139,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("paddingLeft", &JSViewAbstract::SetPaddingLeft, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingRight", &JSViewAbstract::SetPaddingRight, opt);
 
+    JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
     JSClass<JSViewAbstract>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
@@ -4764,4 +4783,23 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
     hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
     ViewAbstractModel::GetInstance()->SetHitTestMode(hitTestModeNG);
 }
+
+void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color foregroundColor;
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        return;
+    }
+    if (!ParseJsColor(info[0], foregroundColor)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
 } // namespace OHOS::Ace::Framework

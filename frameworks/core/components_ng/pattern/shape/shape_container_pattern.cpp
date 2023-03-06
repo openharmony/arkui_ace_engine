@@ -74,6 +74,7 @@ void ShapeContainerPattern::ViewPortTransform()
 
 void ShapeContainerPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     MarkChildrenDirty(GetHost());
 }
 

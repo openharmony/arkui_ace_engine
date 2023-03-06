@@ -82,6 +82,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
 
 void TabsPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     if (onChangeEvent_) {
         return;
     }

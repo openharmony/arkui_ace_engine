@@ -61,6 +61,7 @@ void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void RadioPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

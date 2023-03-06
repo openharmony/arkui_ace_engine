@@ -211,6 +211,10 @@ public:
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
 
+    // foregroundColor
+    virtual void SetForegroundColor(const Color& color) = 0;
+    virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
+
 private:
     static std::unique_ptr<ViewAbstractModel> instance_;
 };

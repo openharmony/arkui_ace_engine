@@ -66,6 +66,7 @@ public:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
         const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
+    static void SetForegroundColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
