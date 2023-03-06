@@ -64,6 +64,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
 
 void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    FrameNode::ToJsonValue(json);
     auto navBarNode = DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->ToJsonValue(json);
