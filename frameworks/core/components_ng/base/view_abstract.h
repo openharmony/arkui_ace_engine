@@ -189,6 +189,7 @@ public:
     static void SetDebugLine(const std::string& line);
     // transition
     static void SetTransition(const TransitionOptions& options);
+    static void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect);
     // sharedTransition
     static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     // geometryTransition

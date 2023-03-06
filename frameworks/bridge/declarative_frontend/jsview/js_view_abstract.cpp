@@ -43,8 +43,10 @@
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components/common/layout/screen_system_manager.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
@@ -349,6 +351,181 @@ RefPtr<JsFunction> ParseDragStartBuilderFunc(const JSRef<JSVal>& info)
     }
 
     return AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
+    const JSRef<JSObject>& object, const JSExecutionContext& context);
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedRotateTransition(
+    const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
+{
+    RefPtr<NG::ChainedTransitionEffect> effect;
+    if (effectOption->IsObject()) {
+        auto rotateArgs = JsonUtil::ParseJsonString(effectOption->ToString());
+        if (!rotateArgs || rotateArgs->IsNull()) {
+            LOGE("Js Parse object failed. argsPtr is null. %{public}s", effectOption->ToString().c_str());
+            return nullptr;
+        }
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
+        std::optional<float> angle;
+        ParseJsRotate(
+            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
+        if (angle.has_value()) {
+            rotate.angle = angle.value();
+            return AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
+        }
+        LOGW("RotateOption does not specify angle");
+    } else {
+        LOGW("chained rotate effect, but effect option is not object");
+    }
+    return nullptr;
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedOpacityTransition(
+    const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
+{
+    double opacity = 1.0;
+    if (JSViewAbstract::ParseJsDouble(effectOption, opacity)) {
+        if ((LessNotEqual(opacity, 0.0)) || opacity > 1.0) {
+            LOGW("set opacity to %{public}f, over range, set to default opacity", opacity);
+            opacity = 1.0;
+        }
+        return AceType::MakeRefPtr<NG::ChainedOpacityEffect>(opacity);
+    }
+    LOGW("chained opacity effect, but effect option is not number");
+    return nullptr;
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedTranslateTransition(
+    const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
+{
+    if (effectOption->IsObject()) {
+        auto translateArgs = JsonUtil::ParseJsonString(effectOption->ToString());
+        // default: x, y, z (0.0, 0.0, 0.0)
+        NG::TranslateOptions translate;
+        ParseJsTranslate(translateArgs, translate.x, translate.y, translate.z);
+        return AceType::MakeRefPtr<NG::ChainedTranslateEffect>(translate);
+    }
+    LOGW("chained translate effect, but effect option is not object");
+    return nullptr;
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedScaleTransition(
+    const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
+{
+    if (effectOption->IsObject()) {
+        auto scaleArgs = JsonUtil::ParseJsonString(effectOption->ToString());
+        // default: x, y, z (1.0, 1.0, 1.0), centerX, centerY 50% 50%;
+        NG::ScaleOptions scale(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
+        ParseJsScale(scaleArgs, scale.xScale, scale.yScale, scale.zScale, scale.centerX, scale.centerY);
+        return AceType::MakeRefPtr<NG::ChainedScaleEffect>(scale);
+    }
+    LOGW("chained scale effect, but effect option is not object");
+    return nullptr;
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedMoveTransition(
+    const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
+{
+    int32_t edge = 0;
+    if (JSViewAbstract::ParseJsInt32(effectOption, edge)) {
+        if (edge < static_cast<int32_t>(NG::TransitionEdge::TOP) ||
+            edge > static_cast<int32_t>(NG::TransitionEdge::END)) {
+            LOGW("set edge to %{public}d, over range, set to default edge", edge);
+            edge = static_cast<int32_t>(NG::TransitionEdge::START);
+        }
+        return AceType::MakeRefPtr<NG::ChainedMoveEffect>(static_cast<NG::TransitionEdge>(edge));
+    }
+    LOGW("chained move effect, but effect option is not number");
+    return nullptr;
+}
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedAsymmetricTransition(
+    const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
+{
+    if (effectOption->IsObject()) {
+        auto effectObj = JSRef<JSObject>::Cast(effectOption);
+        auto appearJsVal = effectObj->GetProperty("appear");
+        auto disappearJsVal = effectObj->GetProperty("disappear");
+        RefPtr<NG::ChainedTransitionEffect> appearEffect;
+        RefPtr<NG::ChainedTransitionEffect> disappearEffect;
+        if (appearJsVal->IsObject()) {
+            auto appearObj = JSRef<JSObject>::Cast(appearJsVal);
+            appearEffect = ParseChainedTransition(appearObj, context);
+        }
+        if (disappearJsVal->IsObject()) {
+            auto disappearObj = JSRef<JSObject>::Cast(disappearJsVal);
+            disappearEffect = ParseChainedTransition(disappearObj, context);
+        }
+        return AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);
+    }
+    LOGW("chained asymmetric effect, but effect option is not object");
+    return nullptr;
+}
+
+using ChainedTransitionEffectCreator = RefPtr<NG::ChainedTransitionEffect> (*)(
+    const JSRef<JSVal>&, const JSExecutionContext&);
+
+RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
+    const JSRef<JSObject>& object, const JSExecutionContext& context)
+{
+    auto propType = object->GetProperty("type_");
+    if (!propType->IsString()) {
+        LOGW("ParseChainedTransition failed, transitionEffect type is not string");
+        return nullptr;
+    }
+    std::string type = propType->ToString();
+    auto propEffectOption = object->GetProperty("effect_");
+    auto propAnimationOption = object->GetProperty("animation_");
+    auto propSuccessor = object->GetProperty("successor_");
+    static const LinearMapNode<ChainedTransitionEffectCreator> creatorMap[] = {
+        { "asymmetric", ParseChainedAsymmetricTransition },
+        { "identity",
+            [](const JSRef<JSVal>& effectOption, const JSExecutionContext& context)
+                -> RefPtr<NG::ChainedTransitionEffect> { return AceType::MakeRefPtr<NG::ChainedIdentityEffect>(); } },
+        { "move", ParseChainedMoveTransition },
+        { "opacity", ParseChainedOpacityTransition },
+        { "rotate", ParseChainedRotateTransition },
+        { "scale", ParseChainedScaleTransition },
+        { "slideSwitch",
+            [](const JSRef<JSVal>& effectOption,
+                const JSExecutionContext& context) -> RefPtr<NG::ChainedTransitionEffect> {
+                return AceType::MakeRefPtr<NG::ChainedSlideSwitchEffect>();
+            } },
+        { "translate", ParseChainedTranslateTransition },
+    };
+    int64_t index = BinarySearchFindIndex(creatorMap, ArraySize(creatorMap), type.c_str());
+    if (index < 0) {
+        LOGW("no valid creator found for ChainedTransitionEffect, type: %{public}s", type.c_str());
+        return nullptr;
+    }
+    RefPtr<NG::ChainedTransitionEffect> result = creatorMap[index].value(propEffectOption, context);
+    if (!result) {
+        return nullptr;
+    }
+    if (propAnimationOption->IsObject()) {
+        auto animationOptionArgs = JsonUtil::ParseJsonString(propAnimationOption->ToString());
+        auto animationOptionResult =
+            std::make_shared<AnimationOption>(JSViewContext::CreateAnimation(animationOptionArgs));
+        auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
+        JSRef<JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
+        if (onFinish->IsFunction()) {
+            RefPtr<JsFunction> jsFunc =
+                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+            std::function<void()> onFinishEvent = [execCtx = context, func = std::move(jsFunc),
+                                                      id = Container::CurrentId()]() {
+                ContainerScope scope(id);
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                func->Execute();
+            };
+            animationOptionResult->SetOnFinishEvent(onFinishEvent);
+        }
+        result->SetAnimationOption(animationOptionResult);
+    }
+    if (propSuccessor->IsObject()) {
+        result->SetNext(ParseChainedTransition(JSRef<JSObject>::Cast(propSuccessor), context));
+    }
+    return result;
 }
 
 #ifndef WEARABLE_PRODUCT
@@ -978,6 +1155,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
     }
     if (!hasEffect) {
         // default transition
+        LOGI("transition use default Transition");
         transitionOption = NG::TransitionOptions::GetDefaultTransition(transitionOption.Type);
     }
     return transitionOption;
@@ -986,6 +1164,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
 void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
 {
     LOGD("JsTransition");
+    LOGI("JsTransition");
     if (info.Length() > 1) {
         LOGE("Too many arguments");
         return;
@@ -997,6 +1176,14 @@ void JSViewAbstract::JsTransition(const JSCallbackInfo& info)
     }
     if (!info[0]->IsObject()) {
         LOGE("arg is not Object.");
+        return;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    if (!obj->GetProperty("successor_")->IsUndefined()) {
+        LOGI("info[0]:%{public}s", info[0]->ToString().c_str());
+        auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
+        LOGI("parseResult: %{public}p, effect:%{public}s", AceType::RawPtr(chainedEffect), chainedEffect->ToString().c_str());
+        ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
         return;
     }
     auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
@@ -4038,6 +4225,15 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
         LOGE("arg is not Object.");
         return;
     }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    if (obj->GetProperty("type_")->IsString()) {
+        LOGI("info[0]:%{public}s", info[0]->ToString().c_str());
+        auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
+        LOGI("parseResult: %{public}p, effect:%{public}s", AceType::RawPtr(chainedEffect), chainedEffect->ToString().c_str());
+        ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
+        return;
+    }
+    LOGI("info[0]:%{public}s", info[0]->ToString().c_str());
     auto transitionArgs = JsonUtil::ParseJsonString(info[0]->ToString());
     auto options = ParseTransition(transitionArgs);
     ViewAbstractModel::GetInstance()->SetTransition(options, true);

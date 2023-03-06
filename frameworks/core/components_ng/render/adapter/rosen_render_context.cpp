@@ -117,13 +117,17 @@ void RosenRenderContext::OnNodeAppear()
 {
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
     // to calculate the pivot, so just mark need to perform appearing transition.
-    CHECK_NULL_VOID_NOLOG(propTransitionAppearing_);
+    if (!propTransitionDisappearing_ && !transitionEffect_) {
+        return;
+    }
     firstTransitionIn_ = true;
 }
 
 void RosenRenderContext::OnNodeDisappear()
 {
-    CHECK_NULL_VOID_NOLOG(propTransitionDisappearing_);
+    if (!propTransitionDisappearing_ && !transitionEffect_) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     LOGD("rsNode disappear transition, rsNode:%{public}p", rsNode_.get());
     auto rect = GetPaintRectWithoutTransform();
@@ -519,9 +523,13 @@ RectF RosenRenderContext::GetPaintRectWithoutTransform()
 
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
 {
+    CHECK_NULL_VOID(rsNode_);
+    if (transitionEffect_) {
+        NotifyTransition(isTransitionIn);
+        return;
+    }
     auto& transOptions = isTransitionIn ? propTransitionAppearing_ : propTransitionDisappearing_;
     CHECK_NULL_VOID_NOLOG(transOptions);
-    CHECK_NULL_VOID(rsNode_);
     SetTransitionPivot(frameSize, isTransitionIn);
     auto effect = GetRSTransitionWithoutType(*transOptions, frameSize);
     // notice that we have been in animateTo, so do not need to use Animation closure to notify transition.
@@ -1893,12 +1901,13 @@ void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
     rsNode_->MarkDrivenRenderFramePaintState(flag);
 }
 
-void RosenRenderContext::UpdateTransition(const std::shared_ptr<RosenTransitionEffect>&& effect)
+void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     if (transitionEffect_) {
         transitionEffect_->OnDetach(Claim(this));
     }
-    transitionEffect_ = effect;
+    // TODO: if the struct of effect not changed, we can change the params in effect directly
+    transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
     CHECK_NULL_VOID(transitionEffect_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -1914,13 +1923,14 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
 {
     CHECK_NULL_VOID(transitionEffect_);
 
+    LOGI("notifyTransition, transition:%{public}s", isTransitionIn ? "in" : "out");
     RSNode::ExecuteWithoutAnimation([this]() {
         auto frameNode = GetHost();
         CHECK_NULL_VOID(frameNode);
         const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
         transitionEffect_->UpdateFrameSize(size);
     });
-    
+
     if (isTransitionIn) {
         transitionEffect_->Appear();
         return;
@@ -1951,7 +1961,11 @@ void RosenRenderContext::OnTransitionOutFinish()
     if (disappearingTransitionCount_ <= 0) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        // TODO clean up disappearing children
+        // remove self from disappearing nodes of parent.
+        auto parent = host->GetParent();
+        if (parent) {
+            parent->RemoveDisappearingChild(host);
+        }
         host->OnRemoveFromParent();
         host->MarkNeedSyncRenderTree();
     }

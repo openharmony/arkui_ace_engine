@@ -16,12 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_TRANSITION_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_TRANSITION_PROPERTY_H
 
+#include <iomanip>
+#include <ios>
 #include <optional>
 #include <string>
 #include <sstream>
 
 #include "base/geometry/dimension.h"
 #include "core/animation/animation_pub.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -122,5 +125,253 @@ struct TransitionOptions {
     }
 };
 
+enum class ChainedTransitionEffectType {
+    IDENTITY = 0,
+    OPACITY,
+    SLIDE_SWITCH,
+    MOVE,
+    TRANSLATE,
+    ROTATE,
+    SCALE,
+    ASYMMETRIC,
+};
+
+enum class TransitionEdge {
+    TOP = 0,
+    BOTTOM,
+    START,
+    END,
+};
+
+class ChainedTransitionEffect : public AceType {
+    DECLARE_ACE_TYPE(ChainedTransitionEffect, AceType);
+
+public:
+    explicit ChainedTransitionEffect(ChainedTransitionEffectType type) : type_(type) {}
+
+    ChainedTransitionEffectType GetType() const
+    {
+        return type_;
+    }
+    const RefPtr<ChainedTransitionEffect>& GetNext() const
+    {
+        return next_;
+    }
+    const std::shared_ptr<AnimationOption>& GetAnimationOption() const
+    {
+        return animationOption_;
+    }
+    void SetNext(const RefPtr<ChainedTransitionEffect>& next)
+    {
+        next_ = next;
+    }
+    void SetAnimationOption(const std::shared_ptr<AnimationOption>& option)
+    {
+        animationOption_ = option;
+    }
+    virtual std::string ToString() = 0;
+
+protected:
+    std::string AnimationOptionToString() const
+    {
+        if (animationOption_) {
+            return "{duration:" + std::to_string(animationOption_->GetDuration()) +
+                   ", delay:" + std::to_string(animationOption_->GetDelay()) + ", curve:" +
+                   (animationOption_->GetCurve() ? animationOption_->GetCurve()->ToString() : std::string("null")) +
+                   "}";
+        }
+        return "null";
+    }
+    ChainedTransitionEffectType type_;
+    std::shared_ptr<AnimationOption> animationOption_;
+    RefPtr<ChainedTransitionEffect> next_;
+};
+
+class ChainedTranslateEffect final : public ChainedTransitionEffect {
+    DECLARE_ACE_TYPE(ChainedTranslateEffect, ChainedTransitionEffect);
+
+public:
+    explicit ChainedTranslateEffect(const TranslateOptions& option)
+        : ChainedTransitionEffect(ChainedTransitionEffectType::TRANSLATE), effect_(option)
+    {}
+
+    const TranslateOptions& GetEffect() const
+    {
+        return effect_;
+    }
+    std::string ToString() override
+    {
+        std::string ans = "{type: translate";
+        ans += ", effect: " + effect_.ToString();
+        ans += ", animation: " + AnimationOptionToString();
+        ans += ", successor: " + (next_ ? next_->ToString() : std::string("null")) + "}";
+        return ans;
+    }
+
+private:
+    TranslateOptions effect_;
+};
+
+class ChainedRotateEffect final : public ChainedTransitionEffect {
+    DECLARE_ACE_TYPE(ChainedRotateEffect, ChainedTransitionEffect);
+
+public:
+    explicit ChainedRotateEffect(const RotateOptions& option)
+        : ChainedTransitionEffect(ChainedTransitionEffectType::ROTATE), effect_(option)
+    {}
+
+    const RotateOptions& GetEffect() const
+    {
+        return effect_;
+    }
+    std::string ToString() override
+    {
+        std::string ans = "{type: rotate";
+        ans += ", effect: " + effect_.ToString();
+        ans += ", animation: " + AnimationOptionToString();
+        ans += ", successor: " + (next_ ? next_->ToString() : std::string("null")) + "}";
+        return ans;
+    }
+
+private:
+    RotateOptions effect_;
+};
+
+class ChainedScaleEffect final : public ChainedTransitionEffect {
+    DECLARE_ACE_TYPE(ChainedScaleEffect, ChainedTransitionEffect);
+
+public:
+    explicit ChainedScaleEffect(const ScaleOptions& option)
+        : ChainedTransitionEffect(ChainedTransitionEffectType::SCALE), effect_(option)
+    {}
+
+    const ScaleOptions& GetEffect() const
+    {
+        return effect_;
+    }
+    std::string ToString() override
+    {
+        std::string ans = "{type: scale";
+        ans += ", effect: " + effect_.ToString();
+        ans += ", animation: " + AnimationOptionToString();
+        ans += ", successor: " + (next_ ? next_->ToString() : std::string("null")) + "}";
+        return ans;
+    }
+
+private:
+    ScaleOptions effect_;
+};
+
+class ChainedOpacityEffect final : public ChainedTransitionEffect {
+    DECLARE_ACE_TYPE(ChainedOpacityEffect, ChainedTransitionEffect);
+
+public:
+    explicit ChainedOpacityEffect(float opacity)
+        : ChainedTransitionEffect(ChainedTransitionEffectType::OPACITY), opacity_(opacity)
+    {}
+
+    const float& GetEffect() const
+    {
+        return opacity_;
+    }
+    std::string ToString() override
+    {
+        std::string ans = "{type: opacity";
+        ans += ", effect: " + std::to_string(opacity_);
+        ans += ", animation: " + AnimationOptionToString();
+        ans += ", successor: " + (next_ ? next_->ToString() : std::string("null")) + "}";
+        return ans;
+    }
+
+private:
+    float opacity_;
+};
+
+class ChainedMoveEffect final : public ChainedTransitionEffect {
+    DECLARE_ACE_TYPE(ChainedMoveEffect, ChainedTransitionEffect);
+
+public:
+    explicit ChainedMoveEffect(TransitionEdge edge)
+        : ChainedTransitionEffect(ChainedTransitionEffectType::MOVE), edge_(edge)
+    {}
+
+    const TransitionEdge& GetEffect() const
+    {
+        return edge_;
+    }
+    std::string ToString() override
+    {
+        const static std::string edgeName[] = { "top", "bottom", "start", "end" };
+        std::string ans = "{type: move";
+        ans += ", effect: " + edgeName[static_cast<int>(edge_)];
+        ans += ", animation: " + AnimationOptionToString();
+        ans += ", successor: " + (next_ ? next_->ToString() : std::string("null")) + "}";
+        return ans;
+    }
+
+private:
+    TransitionEdge edge_;
+};
+
+class ChainedSlideSwitchEffect final : public ChainedTransitionEffect {
+    DECLARE_ACE_TYPE(ChainedSlideSwitchEffect, ChainedTransitionEffect);
+
+public:
+    explicit ChainedSlideSwitchEffect() : ChainedTransitionEffect(ChainedTransitionEffectType::SLIDE_SWITCH) {}
+    std::string ToString() override
+    {
+        std::string ans = "{type: slideSwitch";
+        ans += ", animation: " + AnimationOptionToString();
+        ans += ", successor: " + (next_ ? next_->ToString() : std::string("null")) + "}";
+        return ans;
+    }
+};
+
+class ChainedIdentityEffect final : public ChainedTransitionEffect {
+    DECLARE_ACE_TYPE(ChainedIdentityEffect, ChainedTransitionEffect);
+
+public:
+    explicit ChainedIdentityEffect() : ChainedTransitionEffect(ChainedTransitionEffectType::IDENTITY) {}
+    std::string ToString() override
+    {
+        std::string ans = "{type: identity";
+        ans += ", animation: " + AnimationOptionToString();
+        ans += ", successor: " + (next_ ? next_->ToString() : std::string("null")) + "}";
+        return ans;
+    }
+};
+
+class ChainedAsymmetricEffect final : public ChainedTransitionEffect {
+    DECLARE_ACE_TYPE(ChainedAsymmetricEffect, ChainedTransitionEffect);
+
+public:
+    explicit ChainedAsymmetricEffect(
+        const RefPtr<ChainedTransitionEffect>& appear, const RefPtr<ChainedTransitionEffect>& disappear)
+        : ChainedTransitionEffect(ChainedTransitionEffectType::ASYMMETRIC), appearEffect_(appear),
+          disappearEffect_(disappear)
+    {}
+
+    const RefPtr<ChainedTransitionEffect>& GetAppearEffect() const
+    {
+        return appearEffect_;
+    }
+    const RefPtr<ChainedTransitionEffect>& GetDisappearEffect() const
+    {
+        return disappearEffect_;
+    }
+    std::string ToString() override
+    {
+        std::string ans = "{type: asymmetric";
+        ans += ", effect: {appear: " + (appearEffect_ ? appearEffect_->ToString() : "null") +
+               ", disappear: " + (disappearEffect_ ? disappearEffect_->ToString() : "null") + "}";
+        ans += ", animation: " + AnimationOptionToString();
+        ans += ", successor: " + (next_ ? next_->ToString() : std::string("null")) + "}";
+        return ans;
+    }
+
+private:
+    RefPtr<ChainedTransitionEffect> appearEffect_;
+    RefPtr<ChainedTransitionEffect> disappearEffect_;
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_TRANSITION_PROPERTY_H

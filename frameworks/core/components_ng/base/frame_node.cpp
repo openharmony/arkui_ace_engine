@@ -772,6 +772,11 @@ void FrameNode::RebuildRenderContextTree()
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
     GenerateOneDepthVisibleFrameWithTransition(children);
+    std::stringstream ss;
+    for (auto child : children) {
+        ss << std::hex << "(" << AceType::RawPtr(child) << ", tag:" << child->GetTag() << "), ";
+    }
+    LOGI("rebuildRenderContextTree, this: %{public}p, this tag:%{public}s, child:[%{public}s]", this, GetTag().c_str(), ss.str().c_str());
     // insert disappearing children here
 
     frameChildren_ = { children.begin(), children.end() };
@@ -908,16 +913,9 @@ void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& vis
     }
 }
 
-void FrameNode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList)
+void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
 {
-    // normal child
-    UINode::GenerateOneDepthVisibleFrameWithTransition(visibleList);
-    // disappearing children
-    for (const auto& pair : GetDisappearingChildren()) {
-        auto& child = pair.first;
-        auto index = pair.second;
-        child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
-    }
+    allList.emplace_back(Claim(this));
 }
 
 void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList, uint32_t index)
@@ -926,7 +924,7 @@ void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Fr
     CHECK_NULL_VOID(context);
     // for visible transition animation
     // TODO: re-check this
-    if (!(isActive_ && IsVisible()) && !context->HasTransitionOutAnimation()) {
+    if (!isActive_ && !IsVisible() && !context->HasTransitionOutAnimation()) {
         return;
     }
     if (index > visibleList.size()) {
@@ -936,11 +934,6 @@ void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Fr
         std::advance(iter, index);
         visibleList.insert(iter, Claim(this));
     }
-}
-
-void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList)
-{
-    allList.emplace_back(Claim(this));
 }
 
 bool FrameNode::IsMeasureBoundary()

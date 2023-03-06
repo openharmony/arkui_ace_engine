@@ -19,10 +19,11 @@
 #include "modifier/rs_property.h"
 #include "modifier/rs_property_modifier.h"
 
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/animation_option.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {
 class RosenRenderContext;
@@ -31,12 +32,13 @@ class RosenTransitionEffect : public AceType {
     DECLARE_ACE_TYPE(RosenTransitionEffect, AceType);
 
 public:
-    RosenTransitionEffect();
+    RosenTransitionEffect() = default;
     ~RosenTransitionEffect() override = default;
 
     virtual void OnAttach(RefPtr<RosenRenderContext> context, bool activeTransition);
     virtual void OnDetach(RefPtr<RosenRenderContext> context);
     virtual void UpdateFrameSize(const SizeF& size);
+    static RefPtr<RosenTransitionEffect> ConvertToRosenTransitionEffect(const RefPtr<ChainedTransitionEffect>& effect);
 
     void Appear();
     void Disappear(bool activeTransition = true);
@@ -50,9 +52,8 @@ protected:
 
     void ApplyAnimationOption(const std::function<void()>& func, bool withAnimation = true);
 
-    RefPtr<RosenTransitionEffect> chainedEffect_ = nullptr;
-
 private:
+    RefPtr<RosenTransitionEffect> chainedEffect_ = nullptr;
     std::shared_ptr<AnimationOption> animationOption = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenTransitionEffect);
@@ -68,32 +69,8 @@ public:
         : RosenTransitionEffect(), identityValue_(identityProperty), activeValue_(activeValue)
     {}
 
-    void OnAttach(RefPtr<RosenRenderContext> context, bool activeTransition) override
-    {
-        CHECK_NULL_VOID(context);
-        if (modifier_ != nullptr) {
-            LOGE("PropertyTransitionEffectImpl::OnAttach modifier_ is not null");
-            return;
-        }
-
-        isActive_ = activeTransition;
-        property_ = std::make_shared<Rosen::RSAnimatableProperty<PropertyType>>(
-            activeTransition ? activeValue_ : identityValue_);
-        modifier_ = std::make_shared<Modifier>(property_);
-        context->AddModifier(modifier_);
-
-        RosenTransitionEffect::OnAttach(context, activeTransition);
-    }
-
-    void OnDetach(RefPtr<RosenRenderContext> context) override
-    {
-        CHECK_NULL_VOID(context);
-        context->RemoveModifier(modifier_);
-        property_.reset();
-        modifier_.reset();
-
-        RosenTransitionEffect::OnDetach(context);
-    }
+    void OnAttach(RefPtr<RosenRenderContext> context, bool activeTransition) override;
+    void OnDetach(RefPtr<RosenRenderContext> context) override;
 
     void SetIdentityValue(PropertyType identityValue)
     {
@@ -120,7 +97,9 @@ protected:
     void OnDisappear(bool activeTransition) override
     {
         RosenTransitionEffect::OnDisappear(activeTransition);
-        Active();
+        if (activeTransition) {
+            Active();
+        }
     }
 
     void Identity()
@@ -145,16 +124,17 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PropertyTransitionEffectImpl);
 };
 
-using OpacityTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSAlphaModifier, Rosen::Vector2f>;
-using TranslateTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSTranslateModifier, Rosen::Vector2f>;
-using RotationTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSRotationModifier, float>;
+using RosenOpacityTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSAlphaModifier, float>;
+using RosenTranslateTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSTranslateModifier, Rosen::Vector2f>;
+using RosenRotationTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSRotationModifier, float>;
+using RosenScaleTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSScaleModifier, Rosen::Vector2f>;
 
-class AsymmetricTransitionEffect : public RosenTransitionEffect {
-    DECLARE_ACE_TYPE(AsymmetricTransitionEffect, RosenTransitionEffect);
+class RosenAsymmetricTransitionEffect : public RosenTransitionEffect {
+    DECLARE_ACE_TYPE(RosenAsymmetricTransitionEffect, RosenTransitionEffect);
 
 public:
-    AsymmetricTransitionEffect() : RosenTransitionEffect() {}
-    AsymmetricTransitionEffect(
+    RosenAsymmetricTransitionEffect() : RosenTransitionEffect() {}
+    RosenAsymmetricTransitionEffect(
         const RefPtr<RosenTransitionEffect>& transitionIn, const RefPtr<RosenTransitionEffect>& transitionOut)
         : RosenTransitionEffect(), transitionIn_(transitionIn), transitionOut_(transitionOut)
     {}
@@ -174,12 +154,13 @@ protected:
     RefPtr<RosenTransitionEffect> transitionOut_;
 };
 
-class SlideTransitionEffect : public AsymmetricTransitionEffect {
-    DECLARE_ACE_TYPE(SlideTransitionEffect, AsymmetricTransitionEffect);
+class RosenSlideTransitionEffect : public RosenAsymmetricTransitionEffect {
+    DECLARE_ACE_TYPE(RosenSlideTransitionEffect, RosenAsymmetricTransitionEffect);
 
 public:
-    SlideTransitionEffect()
-        : AsymmetricTransitionEffect(MakeRefPtr<TranslateTransitionEffect>(), MakeRefPtr<TranslateTransitionEffect>())
+    RosenSlideTransitionEffect()
+        : RosenAsymmetricTransitionEffect(
+              MakeRefPtr<RosenTranslateTransitionEffect>(), MakeRefPtr<RosenTranslateTransitionEffect>())
     {}
 
     void UpdateFrameSize(const SizeF& size) override;

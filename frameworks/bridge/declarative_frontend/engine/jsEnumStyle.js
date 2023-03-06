@@ -1003,6 +1003,14 @@ var ContextMenuEditStateFlags;
   ContextMenuEditStateFlags[ContextMenuEditStateFlags["CAN_SELECT_ALL"] = 8] = "CAN_SELECT_ALL";
 })(ContextMenuEditStateFlags || (ContextMenuEditStateFlags = {}));
 
+var TransitionEdge;
+(function (TransitionEdge) {
+    TransitionEdge['TOP'] = 0;
+    TransitionEdge['BOTTOM'] = 1;
+    TransitionEdge['START']  = 2;
+    TransitionEdge['END']  = 3;
+})(TransitionEdge || (TransitionEdge = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
@@ -1030,3 +1038,69 @@ var ArrowPosition ;
   ArrowPosition[ArrowPosition["END"] = 0] = "END";
   ArrowPosition[ArrowPosition["START"] = 1] = "START";
 })(ArrowPosition  || (ArrowPosition  = {}));
+
+class TransitionEffect {
+  type_ = '';
+  effect_ = undefined;
+  animation_ = undefined;
+  // use successor_ to mark whether this is an instance of TransitionEffect
+  successor_ = null;
+
+  constructor(type, effect) {
+    this.type_ = type;
+    this.effect_ = effect;
+  }
+
+  static get IDENTITY() {
+    return new TransitionEffect('identity', undefined);
+  }
+  static get OPACITY() {
+    return new TransitionEffect('opacity', 0);
+  }
+  static get SLIDE() {
+    return new TransitionEffect('asymmetric', {
+      appear: new TransitionEffect('move', TransitionEdge.START),
+      disappear: new TransitionEffect('move', TransitionEdge.END)
+    });
+  }
+  static get SLIDE_SWITCH() {
+    return new TransitionEffect('slideSwitch', undefined);
+  }
+  static translate(option) {
+    return new TransitionEffect('translate', option);
+  }
+  static rotate(option) {
+    return new TransitionEffect('rotate', option);
+  }
+  static scale(option) {
+    return new TransitionEffect('scale', option);
+  }
+  static opacity(value) {
+    return new TransitionEffect('opacity', value);
+  }
+  static move(edge) {
+    return new TransitionEffect('move', edge);
+  }
+  static asymmetric(appearEffect, disappearEffect) {
+    return new TransitionEffect('asymmetric', {
+      appear: appearEffect,
+      disappear: disappearEffect
+    });
+  }
+
+  animation(option) {
+    this.animation_ = option;
+    return this;
+  }
+  combine(nextEffect) {
+    if (nextEffect == null || nextEffect == undefined) {
+      return this;
+    }
+    var lastEffect = this;
+    while (lastEffect.successor_ != null) {
+      lastEffect = lastEffect.successor_;
+    }
+    lastEffect.successor_ = nextEffect;
+    return this;
+  }
+}

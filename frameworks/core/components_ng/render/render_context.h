@@ -141,6 +141,7 @@ public:
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
+    virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
     virtual void OnNodeDisappear() {}
     virtual void OnNodeAppear() {}
     virtual bool HasTransitionOutAnimation() const

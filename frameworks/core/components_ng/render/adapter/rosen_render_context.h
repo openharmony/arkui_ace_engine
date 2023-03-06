@@ -34,6 +34,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
+#include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -43,7 +44,6 @@ class MouseSelectModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
-class RosenTransitionEffect;
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext)
 public:
@@ -144,7 +144,7 @@ public:
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
 
     void UpdateTransition(const TransitionOptions& options) override;
-    void UpdateTransition(const std::shared_ptr<RosenTransitionEffect>&& effect);
+    void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) override;
     bool HasAppearingTransition() const
     {
         return propTransitionAppearing_ != nullptr;
@@ -335,7 +335,7 @@ private:
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
-    std::shared_ptr<RosenTransitionEffect> transitionEffect_;
+    RefPtr<RosenTransitionEffect> transitionEffect_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
