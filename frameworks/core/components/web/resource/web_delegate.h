@@ -35,6 +35,7 @@
 #include "core/components/web/resource/web_resource.h"
 #include "core/components/web/web_component.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/pattern/web/web_event_hub.h"
 #include "surface_delegate.h"
 #ifdef OHOS_STANDARD_SYSTEM
 #include "nweb_handler.h"
@@ -503,6 +504,7 @@ public:
     void OnFaviconReceived(const void* data, size_t width, size_t height, OHOS::NWeb::ImageColorType colorType,
         OHOS::NWeb::ImageAlphaType alphaType);
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
+    void OnAudioStateChanged(bool audible);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -602,6 +604,8 @@ private:
     void UpdateScreenOffSet(double& offsetX, double& offsetY);
     void RegisterSurfacePositionChangedCallback();
     void UnregisterSurfacePositionChangedCallback();
+
+    EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -649,6 +653,7 @@ private:
     EventCallbackV2 onWindowExitV2_;
     EventCallbackV2 onPageVisibleV2_;
     EventCallbackV2 onTouchIconUrlV2_;
+    EventCallbackV2 onAudioStateChangedV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;
