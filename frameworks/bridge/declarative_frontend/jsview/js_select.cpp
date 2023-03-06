@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -134,6 +134,9 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("optionFont", &JSSelect::OptionFont, opt);
     JSClass<JSSelect>::StaticMethod("optionFontColor", &JSSelect::OptionFontColor, opt);
     JSClass<JSSelect>::StaticMethod("onSelect", &JSSelect::OnSelected, opt);
+    JSClass<JSSelect>::StaticMethod("space", &JSSelect::SetSpace, opt);
+    JSClass<JSSelect>::StaticMethod("arrowPosition", &JSSelect::SetArrowPosition, opt);
+
     // API7 onSelected deprecated
     JSClass<JSSelect>::StaticMethod("onSelected", &JSSelect::OnSelected, opt);
     JSClass<JSSelect>::StaticMethod("width", &JSSelect::JsWidth);
@@ -909,6 +912,54 @@ void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
     auto selectComponent = AceType::DynamicCast<SelectComponent>(stack->GetMainComponent());
     if (selectComponent) {
         selectComponent->SetBottomPadding(value);
+    }
+}
+
+void JSSelect::SetSpace(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    auto selectTheme = GetTheme<SelectTheme>();
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        LOGI("JSSelect set space value is mull");
+        value = selectTheme->GetContentSpinnerPadding();
+    }
+    if (LessNotEqual(value.Value(), 0.0)) {
+        LOGI("JSSelect set space value is to small");
+        value = selectTheme->GetContentSpinnerPadding();
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetSpace(value);
+    }
+}
+
+void JSSelect::SetArrowPosition(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    int32_t direction;
+    if (!ParseJsInt32(info[0], direction)) {
+        LOGE("direction is wrong");
+        direction = 0;
+    }
+
+    if (static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::START &&
+        static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::END) {
+            LOGE("direction is unused FlexDirection");
+            direction = 0;
+        }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::SelectView::SetArrowPosition(static_cast<NG::ArrowPosition>(direction));
     }
 }
 } // namespace OHOS::Ace::Framework

@@ -91,4 +91,11 @@ void SelectOverlayProxy::Close() const
     manager->DestroySelectOverlay(selectOverlayId_);
 }
 
+void SelectOverlayProxy::SetSelectInfo(const std::string& selectInfo) const
+{
+    auto pattern = GetSelectOverlayPattern(selectOverlayId_);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectInfo(selectInfo);
+}
+
 } // namespace OHOS::Ace::NG

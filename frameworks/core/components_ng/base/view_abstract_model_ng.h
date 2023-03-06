@@ -679,6 +679,16 @@ public:
     void SetAccessibilityDescription(const std::string& description) override {}
     void SetAccessibilityImportance(const std::string& importance) override {}
 
+    void SetForegroundColor(const Color& color) override
+    {
+        ViewAbstract::SetForegroundColor(color);
+    }
+
+    void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
+    {
+        ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
+
 };
 } // namespace OHOS::Ace::NG
 

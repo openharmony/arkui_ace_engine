@@ -57,7 +57,10 @@ public:
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
+    void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
+    void SetForegroundColor(const Color& value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

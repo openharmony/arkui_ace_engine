@@ -144,10 +144,8 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID_NOLOG(isRenderDone_);
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
     isOnShow_ = true;
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     if (onPageShow_) {
-        context->PostAsyncEvent([onPageShow = onPageShow_]() { onPageShow(); });
+        onPageShow_();
     }
 }
 
@@ -155,10 +153,8 @@ void PagePattern::OnHide()
 {
     CHECK_NULL_VOID_NOLOG(isOnShow_);
     isOnShow_ = false;
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     if (onPageHide_) {
-        context->PostAsyncEvent([onPageHide = onPageHide_]() { onPageHide(); });
+        onPageHide_();
     }
 }
 

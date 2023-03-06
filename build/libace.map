@@ -65,6 +65,8 @@
       OHOS::Ace::SystemProperties::*;
       OHOS::Ace::ThemeConstants::*;
       OHOS::Ace::UIContentImpl::*;
+      OHOS::Ace::MemoryMonitor::*;
+      OHOS::Ace::DumpLog::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

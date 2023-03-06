@@ -43,6 +43,9 @@ public:
         if (propertiesFromAncestor_) {
             shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
+        if (paintWrapper->HasForegroundColor()) {
+            shapePaintProperty->UpdateFill(Color::FOREGROUND);
+        }
         float height = paintWrapper->GetContentSize().Height();
         float width = paintWrapper->GetContentSize().Width();
         float dx = paintWrapper->GetContentOffset().GetX();

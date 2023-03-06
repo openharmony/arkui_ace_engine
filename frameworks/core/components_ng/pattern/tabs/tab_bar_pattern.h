@@ -202,6 +202,19 @@ public:
         return tabBarStyle_;
     }
 
+    void PlayTabBarTranslateAnimation(int32_t targetIndex);
+    void StopTabBarTranslateAnimation();
+
+    bool GetChangeByClick() const
+    {
+        return changeByClick_;
+    }
+
+    void SetChangeByClick(bool changeByClick)
+    {
+        changeByClick_ = changeByClick;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -269,8 +282,10 @@ private:
     std::optional<int32_t> hoverIndex_;
     TabBarStyle tabBarStyle_;
     RefPtr<Animator> controller_;
+    RefPtr<Animator> tabBarTranslateController_;
     float currentIndicatorOffset_ = 0.0f;
     bool isAnimating_ = false;
+    bool changeByClick_ = false;
 };
 } // namespace OHOS::Ace::NG
 

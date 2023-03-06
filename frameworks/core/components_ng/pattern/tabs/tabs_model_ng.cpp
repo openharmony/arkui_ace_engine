@@ -107,7 +107,11 @@ void TabsModelNG::SetTabBarWidth(const Dimension& tabBarWidth)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(tabBarWidth), std::nullopt));
+    if (tabBarWidth.ConvertToPx() < 0.0) {
+        tabBarLayoutProperty->ClearUserDefinedIdealSize(true, false);
+    } else {
+        tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(tabBarWidth), std::nullopt));
+    }
     tabBarLayoutProperty->UpdateTabBarWidth(tabBarWidth);
 }
 
@@ -120,7 +124,11 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, NG::CalcLength(tabBarHeight)));
+    if (tabBarHeight.ConvertToPx() < 0.0) {
+        tabBarLayoutProperty->ClearUserDefinedIdealSize(false, true);
+    } else {
+        tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, NG::CalcLength(tabBarHeight)));
+    }
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 

@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -35,6 +36,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -350,6 +352,7 @@ public:
     void CursorMoveUp();
     void CursorMoveDown();
     void SetCaretPosition(int32_t position);
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void HandleSetSelection(int32_t start, int32_t end);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
@@ -489,6 +492,17 @@ public:
     {
         return mouseStatus_;
     }
+
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
+    {
+        menuOptionItems_ = std::move(menuOptionItems);
+    }
+
+    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
+    {
+        return std::move(menuOptionItems_);
+    }
+
     void UpdateEditingValueToRecord();
 
     // xts
@@ -510,7 +524,7 @@ public:
     std::string GetCopyOptionString() const;
     std::string GetShowPasswordIconString() const;
     std::string GetInputStyleString() const;
-
+    void SetSelectionFlag(bool flag, int32_t selectionStart, int32_t selectionEnd);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
 
 private:
@@ -671,6 +685,9 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
+    bool setSelectionFlag_ = false;
+    int32_t selectionStart_ = 0;
+    int32_t selectionEnd_ = 0;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
@@ -689,6 +706,7 @@ private:
     std::vector<TextEditingValueNG> redoOperationRecords_;
     std::vector<TextSelector> textSelectorRecords_;
     std::vector<TextSelector> redoTextSelectorRecords_;
+    std::vector<MenuOptionsParam> menuOptionItems_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
 

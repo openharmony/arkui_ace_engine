@@ -604,4 +604,11 @@ void WebView::SetForceDarkAccess(bool access)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateForceDarkAccess(access);
 }
+
+void WebView::SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnAudioStateChangedEvent(std::move(audioStateChanged));
+}
 } // namespace OHOS::Ace::NG

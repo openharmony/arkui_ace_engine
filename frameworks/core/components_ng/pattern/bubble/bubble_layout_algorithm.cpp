@@ -173,7 +173,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     padding_ = popupTheme->GetPadding();
     borderRadius_ = popupTheme->GetRadius().GetX();
     border_.SetBorderRadius(popupTheme->GetRadius());
-    targetSpace_ = popupTheme->GetTargetSpace();
+    targetSpace_ = layoutProp->GetTargetSpace().value_or(popupTheme->GetTargetSpace());
     placement_ = layoutProp->GetPlacement().value_or(Placement::BOTTOM);
     scaledBubbleSpacing_ = static_cast<float>(popupTheme->GetBubbleSpacing().ConvertToPx());
     arrowHeight_ = static_cast<float>(popupTheme->GetArrowHeight().ConvertToPx());
@@ -182,14 +182,14 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
 OffsetF BubbleLayoutAlgorithm::GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp)
 {
     InitArrowState(layoutProp);
-    auto scaledBubbleSpacing = scaledBubbleSpacing_;
+    float targetSpace = targetSpace_.ConvertToPx();
     OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
-        targetOffset_.GetY() + targetSize_.Height() + scaledBubbleSpacing);
+        targetOffset_.GetY() + targetSize_.Height() + targetSpace);
     if (showBottomArrow_) {
         bottomPosition += OffsetF(0.0, arrowHeight_);
     }
     OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / 2.0,
-        targetOffset_.GetY() - childSize.Height() - scaledBubbleSpacing);
+        targetOffset_.GetY() - childSize.Height() - targetSpace);
     if (showTopArrow_) {
         topPosition += OffsetF(0.0, -arrowHeight_);
     }
@@ -280,7 +280,7 @@ OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacement(const SizeF& childSize, 
             break;
         case Placement::TOP_LEFT:
             childPosition = OffsetF(targetOffset_.GetX() - marginRight,
-                targetOffset_.GetY() - childSize.Height() - bubbleSpacing * 2.0 - marginBottom);
+                targetOffset_.GetY() - childSize.Height() - bubbleSpacing - marginBottom - targetSpace);
             arrowPosition_ = childPosition + OffsetF(radius + arrowHalfWidth, childSize.Height() + bubbleSpacing);
             break;
         case Placement::TOP_RIGHT:

@@ -272,8 +272,17 @@ bool AceContainer::OnBackPressed(int32_t instanceId)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN_NOLOG(container, false);
-    // When the container is for menu, it need close the menu first.
+    // When the container is for overlay, it need close the overlay first.
     if (container->IsSubContainer()) {
+        if (container->IsUseNewPipeline()) {
+            LOGI("back press for remove overlay node");
+            ContainerScope scope(instanceId);
+            auto subPipelineContext = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_RETURN_NOLOG(subPipelineContext, false);
+            auto overlayManager = subPipelineContext->GetOverlayManager();
+            CHECK_NULL_RETURN_NOLOG(overlayManager, false);
+            return overlayManager->RemoveOverlayInSubwindow();
+        }
         SubwindowManager::GetInstance()->CloseMenu();
         return true;
     }
@@ -296,38 +305,39 @@ void AceContainer::OnShow(int32_t instanceId)
     if (!container->UpdateState(Frontend::State::ON_SHOW)) {
         return;
     }
-    auto front = container->GetFrontend();
-    if (front && !container->IsSubContainer()) {
-        WeakPtr<Frontend> weakFrontend = front;
-        taskExecutor->PostTask(
-            [weakFrontend]() {
-                auto frontend = weakFrontend.Upgrade();
-                if (frontend) {
-                    frontend->UpdateState(Frontend::State::ON_SHOW);
-                    frontend->OnShow();
-                }
-            },
-            TaskExecutor::TaskType::JS);
-    }
 
-    taskExecutor->PostTask(
-        [container]() {
-            std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
-            container->GetCardFrontendMap(cardFrontendMap);
-            for (const auto& [_, weakCardFront] : cardFrontendMap) {
-                auto cardFront = weakCardFront.Upgrade();
-                if (!cardFront) {
-                    LOGE("cardFront is null");
-                    continue;
-                }
-                cardFront->OnShow();
+    auto jsTask = [container, front = container->GetFrontend()]() {
+        if (front && !container->IsSubContainer()) {
+            front->UpdateState(Frontend::State::ON_SHOW);
+            front->OnShow();
+        }
+    };
+
+    auto uiTask = [container]() {
+        std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
+        container->GetCardFrontendMap(cardFrontendMap);
+        for (const auto& [_, weakCardFront] : cardFrontendMap) {
+            auto cardFront = weakCardFront.Upgrade();
+            if (!cardFront) {
+                LOGE("cardFront is null");
+                continue;
             }
-            auto pipelineBase = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineBase);
-            pipelineBase->OnShow();
-            pipelineBase->SetForegroundCalled(true);
-        },
-        TaskExecutor::TaskType::UI);
+            cardFront->OnShow();
+        }
+        auto pipelineBase = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineBase);
+        pipelineBase->OnShow();
+        pipelineBase->SetForegroundCalled(true);
+    };
+
+    // stege model needn't post task when already run on UI
+    if (container->GetSettings().useUIAsJSThread && taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        jsTask();
+        uiTask();
+    } else {
+        taskExecutor->PostTask(jsTask, TaskExecutor::TaskType::JS);
+        taskExecutor->PostTask(uiTask, TaskExecutor::TaskType::UI);
+    }
 }
 
 void AceContainer::OnHide(int32_t instanceId)
@@ -340,43 +350,47 @@ void AceContainer::OnHide(int32_t instanceId)
     if (!container->UpdateState(Frontend::State::ON_HIDE)) {
         return;
     }
-    auto front = container->GetFrontend();
-    if (front && !container->IsSubContainer()) {
-        WeakPtr<Frontend> weakFrontend = front;
-        taskExecutor->PostTask(
-            [weakFrontend]() {
-                auto frontend = weakFrontend.Upgrade();
-                if (frontend) {
-                    frontend->UpdateState(Frontend::State::ON_HIDE);
-                    frontend->OnHide();
-                    frontend->TriggerGarbageCollection();
-                }
-            },
-            TaskExecutor::TaskType::JS);
-    }
+    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
+    container->GetCardFrontendMap(cardFrontendMap);
 
-    taskExecutor->PostTask(
-        [container]() {
-            auto taskExecutor = container->GetTaskExecutor();
-            std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap;
-            container->GetCardFrontendMap(cardFrontendMap);
-            for (const auto& [_, weakCardFront] : cardFrontendMap) {
-                auto cardFront = weakCardFront.Upgrade();
-                if (!cardFront) {
-                    LOGE("cardFront is null");
-                    continue;
-                }
-                cardFront->OnHide();
-                if (taskExecutor) {
-                    taskExecutor->PostTask(
-                        [cardFront]() { cardFront->TriggerGarbageCollection(); }, TaskExecutor::TaskType::JS);
-                }
+    auto jsTask = [container, front = container->GetFrontend(), cardFrontendMap]() {
+        if (front && !container->IsSubContainer()) {
+            front->UpdateState(Frontend::State::ON_HIDE);
+            front->OnHide();
+            front->TriggerGarbageCollection();
+        }
+        for (const auto& [_, weakCardFront] : cardFrontendMap) {
+            auto cardFront = weakCardFront.Upgrade();
+            if (!cardFront) {
+                LOGE("cardFront is null");
+                continue;
             }
-            auto pipelineContext = container->GetPipelineContext();
-            CHECK_NULL_VOID(pipelineContext);
-            pipelineContext->OnHide();
-        },
-        TaskExecutor::TaskType::UI);
+            cardFront->TriggerGarbageCollection();
+        }
+    };
+
+    auto uiTask = [container, cardFrontendMap]() {
+        for (const auto& [_, weakCardFront] : cardFrontendMap) {
+            auto cardFront = weakCardFront.Upgrade();
+            if (!cardFront) {
+                LOGE("cardFront is null");
+                continue;
+            }
+            cardFront->OnHide();
+        }
+        auto pipelineBase = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineBase);
+        pipelineBase->OnHide();
+    };
+
+    // stege model needn't post task when already run on UI
+    if (container->GetSettings().useUIAsJSThread && taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        jsTask();
+        uiTask();
+    } else {
+        taskExecutor->PostTask(jsTask, TaskExecutor::TaskType::JS);
+        taskExecutor->PostTask(uiTask, TaskExecutor::TaskType::UI);
+    }
 }
 
 void AceContainer::OnActive(int32_t instanceId)
@@ -597,8 +611,13 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
         context->GetTaskExecutor()->PostTask(
-            [context, width, height, type, rsTransaction]() {
+            [context, width, height, type, rsTransaction, id]() {
                 context->OnSurfaceChanged(width, height, type, rsTransaction);
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(id);
+                    CHECK_NULL_VOID_NOLOG(subwindow);
+                    subwindow->ResizeWindow();
+                }
             },
             TaskExecutor::TaskType::UI);
     };

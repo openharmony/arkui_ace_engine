@@ -50,6 +50,7 @@ void MountNavBar(const RefPtr<NavigationGroupNode>& hostNode)
 
 void NavigationPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountNavBar(hostNode);

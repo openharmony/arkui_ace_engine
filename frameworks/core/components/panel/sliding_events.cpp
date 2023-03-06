@@ -21,7 +21,7 @@ namespace OHOS::Ace {
 
 std::string SlidingPanelSizeChangeEvent::ToJSONString() const
 {
-    auto jsonResult = JsonUtil::Create(false);
+    auto jsonResult = JsonUtil::Create(true);
     jsonResult->Put("height", height_);
     jsonResult->Put("width", width_);
     auto result = JsonUtil::Create(true);

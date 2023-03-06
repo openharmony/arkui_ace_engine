@@ -152,10 +152,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     if (tabBarParam.GetText().empty()) {
         LOGW("Text is empty.");
-        return;
+    } else {
+        LOGD("Text %{public}s", tabBarParam.GetText().c_str());
     }
-
-    LOGD("Text %{public}s", tabBarParam.GetText().c_str());
 
     // Create text node and image node.
     RefPtr<FrameNode> textNode;

@@ -21,6 +21,7 @@
 #include <stdint.h>
 
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -297,6 +298,7 @@ void DatePickerColumnPattern::FlushCurrentOptions()
         }
         auto optionValue = datePickerPattern->GetAllOptions(host)[optionIndex];
         textLayoutProperty->UpdateContent(optionValue);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
     }

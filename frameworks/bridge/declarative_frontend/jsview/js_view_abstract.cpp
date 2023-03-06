@@ -42,6 +42,7 @@
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components/common/properties/border_image.h"
@@ -382,6 +383,41 @@ void ParseShowObject(const JSCallbackInfo& info, const JSRef<JSObject>& showObj,
     }
 }
 
+void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPtr<PopupParam>& popupParam)
+{
+    auto colorValue = messageOptionsObj->GetProperty("textColor");
+    Color textColor;
+    if (JSViewAbstract::ParseJsColor(colorValue, textColor)) {
+        if (popupParam) {
+            popupParam->SetTextColor(textColor);
+        } else {
+            LOGI("Empty popup.");
+        }
+    }
+
+    auto font = messageOptionsObj->GetProperty("font");
+    if (!font->IsNull() && font->IsObject()) {
+        JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(font);
+        auto fontSizeValue = fontObj->GetProperty("size");
+        Dimension fontSize;
+        if (JSViewAbstract::ParseJsDimensionFp(fontSizeValue, fontSize)) {
+            if (popupParam) {
+                popupParam->SetFontSize(fontSize);
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+        auto fontWeightValue = fontObj->GetProperty("weight");
+        if (fontWeightValue->IsString()) {
+            if (popupParam) {
+                popupParam->SetFontWeight(ConvertStrToFontWeight(fontWeightValue->ToString()));
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+    }
+}
+
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
     JSRef<JSVal> messageVal = popupObj->GetProperty("message");
@@ -400,6 +436,26 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
             LOGI("Empty popup.");
         }
     }
+
+    auto targetSpace = popupObj->GetProperty("targetSpace");
+    if (!targetSpace->IsNull()) {
+        Dimension space;
+        if (JSViewAbstract::ParseJsDimensionVp(targetSpace, space)) {
+            if (popupParam) {
+                popupParam->SetTargetSpace(space);
+            } else {
+                LOGI("Empty popup.");
+            }
+        }
+    }
+
+    auto messageOptions = popupObj->GetProperty("messageOptions");
+    JSRef<JSObject> messageOptionsObj;
+    if (!messageOptions->IsNull() && messageOptions->IsObject()) {
+        messageOptionsObj = JSRef<JSObject>::Cast(messageOptions);
+        SetPopupMessageOptions(messageOptionsObj, popupParam);
+    }
+
     JSRef<JSVal> showInSubWindowValue = popupObj->GetProperty("showInSubWindow");
     if (showInSubWindowValue->IsBoolean()) {
         bool showInSubBoolean = showInSubWindowValue->ToBoolean();
@@ -558,6 +614,16 @@ void ParseCustomPopupParam(
     Dimension offset;
     if (JSViewAbstract::ParseJsDimensionVp(arrowOffset, offset)) {
         popupParam->SetArrowOffset(offset);
+    }
+
+    auto targetSpace = popupObj->GetProperty("targetSpace");
+    Dimension space;
+    if (JSViewAbstract::ParseJsDimensionVp(targetSpace, space)) {
+        if (popupParam) {
+            popupParam->SetTargetSpace(space);
+        } else {
+            LOGI("Empty popup.");
+        }
     }
 
     auto maskValue = popupObj->GetProperty("mask");
@@ -1620,8 +1686,8 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
         Dimension height;
         ParseJsonDimensionVp(imageArgs->GetValue("width"), width);
         ParseJsonDimensionVp(imageArgs->GetValue("height"), height);
-        double valueWidth = width.Value();
-        double valueHeight = height.Value();
+        double valueWidth = width.ConvertToPx();
+        double valueHeight = height.ConvertToPx();
         BackgroundImageSizeType typeWidth = BackgroundImageSizeType::LENGTH;
         BackgroundImageSizeType typeHeight = BackgroundImageSizeType::LENGTH;
         if (width.Unit() == DimensionUnit::PERCENT) {
@@ -1894,6 +1960,43 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
     } else {
         LOGE("args format error. %{public}s", args->ToString().c_str());
         return;
+    }
+}
+
+void JSViewAbstract::ParseMenuOptions(
+    const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items)
+{
+    auto length = jsArray->Length();
+    for (size_t i = 0; i < length; i++) {
+        auto item = jsArray->GetValueAt(i);
+        if (!item->IsObject()) {
+            LOGI("menu option item is not object");
+            continue;
+        }
+        auto itemObject = JSRef<JSObject>::Cast(item);
+        NG::MenuOptionsParam menuOptionItem;
+        std::string value;
+        std::string icon;
+        auto menuOptionsValue = itemObject->GetProperty("content");
+        auto menuOptionsIcon = itemObject->GetProperty("icon");
+
+        if (!ParseJsString(menuOptionsValue, value)) {
+            LOGI("menuOptionsValue is null");
+            return;
+        }
+        if (!ParseJsMedia(menuOptionsIcon, icon)) {
+            LOGI("menuOptionsIcon is null");
+        }
+        menuOptionItem.content = value;
+        menuOptionItem.icon = icon;
+
+        auto itemActionValue = itemObject->GetProperty("action");
+        if (itemActionValue->IsFunction()) {
+            JsEventCallback<void(const std::string&)> callback(
+                info.GetExecutionContext(), JSRef<JSFunc>::Cast(itemActionValue));
+            menuOptionItem.action = callback;
+        }
+        items.emplace_back(menuOptionItem);
     }
 }
 
@@ -2557,6 +2660,24 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
     }
     result = themeConstants->GetColor(resId->ToNumber<uint32_t>());
     return true;
+}
+
+bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)
+{
+    if (!jsValue->IsString()) {
+        return false;
+    }
+    if (jsValue->IsString()) {
+        std::string colorStr = jsValue->ToString();
+         // Remove all " ".
+        colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
+        std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
+        if (colorStr.compare("invert") == 0) {
+            strategy = ForegroundColorStrategy::INVERT;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool JSViewAbstract::ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result)
@@ -4018,6 +4139,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("paddingLeft", &JSViewAbstract::SetPaddingLeft, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingRight", &JSViewAbstract::SetPaddingRight, opt);
 
+    JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
     JSClass<JSViewAbstract>::StaticMethod("backgroundColor", &JSViewAbstract::JsBackgroundColor);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImage", &JSViewAbstract::JsBackgroundImage);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
@@ -4660,6 +4782,24 @@ void JSViewAbstract::JsHitTestBehavior(const JSCallbackInfo& info)
     NG::HitTestMode hitTestModeNG = NG::HitTestMode::HTMDEFAULT;
     hitTestModeNG = static_cast<NG::HitTestMode>(info[0]->ToNumber<int32_t>());
     ViewAbstractModel::GetInstance()->SetHitTestMode(hitTestModeNG);
+}
+
+void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color foregroundColor;
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        return;
+    }
+    if (!ParseJsColor(info[0], foregroundColor)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 
 } // namespace OHOS::Ace::Framework

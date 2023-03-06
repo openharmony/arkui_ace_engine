@@ -22,13 +22,15 @@
 
 namespace OHOS::Ace::NG {
 RatingModifier::RatingModifier()
-    : starNum_(AceType::MakeRefPtr<PropertyInt>(0)),
+    : needDraw_(AceType::MakeRefPtr<PropertyBool>(false)),
+      starNum_(AceType::MakeRefPtr<PropertyInt>(0)),
       touchStar_(AceType::MakeRefPtr<PropertyInt>(0)),
       drawScore_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
       stepSize_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
 {
+    AttachProperty(needDraw_);
     AttachProperty(starNum_);
     AttachProperty(touchStar_);
     AttachProperty(drawScore_);
@@ -45,6 +47,7 @@ void RatingModifier::onDraw(DrawingContext& context)
     // step1: check if touch down any stars.
     PaintBoard(context);
     PaintStar(context);
+    SetNeedDraw(false);
 }
 
 void RatingModifier::PaintBoard(DrawingContext& context)

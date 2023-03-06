@@ -57,6 +57,7 @@ constexpr int32_t STATE_PROGRESS_DRAG = 3;
 
 void RefreshPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();

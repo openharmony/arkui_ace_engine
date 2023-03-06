@@ -80,6 +80,8 @@ void TextModelNG::SetFontSize(const Dimension& value)
 void TextModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 
 void TextModelNG::SetTextShadow(const Shadow& value)
@@ -180,6 +182,14 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
 void TextModelNG::SetDraggable(bool draggable)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Draggable, draggable);
+}
+
+void TextModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->SetMenuOptionItems(std::move(menuOptionsItems));
 }
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,16 @@ public:
         return realSideBarWidth_;
     }
 
+    void SetRealDividerWidth(float realDividerWidth)
+    {
+        realDividerWidth_ = realDividerWidth;
+    }
+
+    float GetRealDividerWidth() const
+    {
+        return realDividerWidth_;
+    }
+
     void SetNeedInitRealSideBarWidth(bool needInitRealSideBarWidth)
     {
         needInitRealSideBarWidth_ = needInitRealSideBarWidth;
@@ -76,14 +86,18 @@ private:
         const RefPtr<LayoutWrapper>& sideBarLayoutWrapper);
     void MeasureSideBarContent(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
         const RefPtr<LayoutWrapper>& contentLayoutWrapper, float parentWidth);
+    void MeasureDivider(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty,
+        const RefPtr<LayoutWrapper>& dividerLayoutWrapper, float parentWidth);
     void LayoutControlButton(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& buttonLayoutWrapper);
     void LayoutSideBar(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper);
     void LayoutSideBarContent(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& contentLayoutWrapper);
+    void LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& dividerLayoutWrapper);
     void InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth);
 
     float currentOffset_ = 0.0f;
     float realSideBarWidth_ = 0.0f;
     float realSideBarHeight_ = 0.0f;
+    float realDividerWidth_ = 0.0f;
     SideBarStatus sideBarStatus_ = SideBarStatus::SHOW;
     bool needInitRealSideBarWidth_ = true;
     OffsetF sideBarOffset_;

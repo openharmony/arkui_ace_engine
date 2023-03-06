@@ -47,7 +47,6 @@ ohos_unittest("shared_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/components/common/properties/test/mock/mock_motion_path_evaluator.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/animation/mock_geometry_transition.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/base/mock_dump_log.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/event/mock_focus_hub.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/event/mock_gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/event/mock_input_event_hub.cpp",
@@ -65,6 +64,7 @@ ohos_unittest("shared_overlay_manager_test_ng") {
   ]
 
   deps = [
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

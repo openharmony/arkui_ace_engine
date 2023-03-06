@@ -15,14 +15,19 @@
 
 #include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float HALF = 0.5f;
+constexpr float DOUBLE = 2.0f;
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
+constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode()
@@ -34,6 +39,7 @@ void SwiperIndicatorPattern::OnAttachToFrameNode()
 
 void SwiperIndicatorPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
@@ -75,6 +81,27 @@ void SwiperIndicatorPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestu
 }
 
 void SwiperIndicatorPattern::HandleClick(const GestureEvent& info)
+{
+    if (info.GetSourceDevice() == SourceType::MOUSE) {
+        HandleMouseClick(info);
+    } else if (info.GetSourceDevice() == SourceType::TOUCH) {
+        HandleTouchClick(info);
+    }
+}
+
+void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /*info*/)
+{
+    GetMouseClickIndex();
+    CHECK_NULL_VOID_NOLOG(mouseClickIndex_);
+    auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SwipeTo(mouseClickIndex_.value());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -156,16 +183,7 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(swiperTheme);
-    auto hoverColor = swiperTheme->GetHoverColor();
-    renderContext->UpdateBackgroundColor(isHover_ ? hoverColor : Color::TRANSPARENT);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -205,16 +223,7 @@ void SwiperIndicatorPattern::HandleTouchDown()
     isPressed_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(swiperTheme);
-    auto pressedColor = swiperTheme->GetPressedColor();
-    renderContext->UpdateBackgroundColor(pressedColor);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SwiperIndicatorPattern::HandleTouchUp()
@@ -222,9 +231,47 @@ void SwiperIndicatorPattern::HandleTouchUp()
     isPressed_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwiperIndicatorPattern::GetMouseClickIndex()
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperTheme);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<SwiperIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    float normalDiameter = static_cast<float>(paintProperty->GetSizeValue(swiperTheme->GetSize()).ConvertToPx());
+    float diameter = normalDiameter * INDICATOR_ZOOM_IN_SCALE;
+    float radius = diameter * HALF;
+    float padding = static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx());
+    float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
+    int32_t currentIndex = swiperPattern->GetCurrentIndex();
+    int32_t itemCount = swiperPattern->TotalCount();
+    auto frameSize = host->GetGeometryNode()->GetFrameSize();
+    auto axis = swiperPattern->GetDirection();
+    float centerX = padding + radius;
+    float centerY = (axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) * HALF;
+    PointF hoverPoint = axis == Axis::HORIZONTAL ? hoverPoint_ : PointF(hoverPoint_.GetY(), hoverPoint_.GetX());
+    for (int32_t i = 0; i < itemCount; ++i) {
+        float nowCenterX = 0;
+        if (i != currentIndex) {
+            nowCenterX = centerX;
+            centerX += space + diameter;
+        } else {
+            nowCenterX = centerX + radius;
+            centerX += space + diameter * DOUBLE;
+        }
+        if (std::abs(hoverPoint.GetX() - nowCenterX) <= radius && std::abs(hoverPoint.GetY() - centerY) <= radius) {
+            mouseClickIndex_ = i;
+            break;
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

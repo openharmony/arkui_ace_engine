@@ -752,4 +752,14 @@ void ReleaseSurfaceImpl::ReleaseSurface()
     }
     surfaceDelegate_->ReleaseSurface();
 }
+
+void WebClientImpl::OnAudioStateChanged(bool playing)
+{
+    LOGI("OnAudioStateChanged playing: %{public}s", (playing ? "true" : "false"));
+
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnAudioStateChanged(playing);
+}
 } // namespace OHOS::Ace

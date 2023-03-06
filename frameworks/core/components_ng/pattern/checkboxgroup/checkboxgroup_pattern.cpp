@@ -64,6 +64,7 @@ void CheckBoxGroupPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void CheckBoxGroupPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     UpdateState();
     auto host = GetHost();
     CHECK_NULL_VOID(host);

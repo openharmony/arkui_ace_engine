@@ -46,6 +46,7 @@ constexpr double VELOCITY_THRESHOLD = 1000.0; // Move 1000px per second.
 
 void SlidingPanelPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SlidingPanelLayoutProperty>();

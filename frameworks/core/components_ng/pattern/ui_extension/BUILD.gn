@@ -19,6 +19,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "ui_extension_layout_algorithm.cpp",
     "ui_extension_model_ng.cpp",
     "ui_extension_node.cpp",
+    "ui_extension_pattern.cpp",
   ]
 
   external_deps = [

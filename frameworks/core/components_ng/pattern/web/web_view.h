@@ -111,6 +111,7 @@ public:
     static void SetForceDarkAccess(bool access);
     static void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled);
     static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
+    static void SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

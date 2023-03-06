@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -189,5 +190,19 @@ HWTEST_F(DividerPatternTestNg, DividerPatternTest003, TestSize.Level1)
             k++;
         }
     }
+}
+
+/**
+ * @tc.name: DividerModifier
+ * @tc.desc: Test the dynamic effect of the Divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerPatternTestNg, DividerModifierTest001, TestSize.Level1)
+{
+    DividerModifier dividerModifier;
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    dividerModifier.onDraw(context);
 }
 } // namespace OHOS::Ace::NG

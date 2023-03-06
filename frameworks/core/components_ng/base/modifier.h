@@ -73,7 +73,7 @@ struct DrawingContext {
 
 template<typename T>
 class NormalProperty : public PropertyBase {
-    DECLARE_ACE_TYPE(Property, PropertyBase);
+    DECLARE_ACE_TYPE(NormalProperty, PropertyBase);
 
 public:
     explicit NormalProperty(const T& value) : value_(value) {}
@@ -196,6 +196,7 @@ DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorFloat, AnimatableProperty, LinearVector<float>);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
 
 } // namespace OHOS::Ace::NG
 
