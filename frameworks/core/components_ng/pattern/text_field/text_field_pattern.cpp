@@ -1539,6 +1539,8 @@ void TextFieldPattern::OnModifyDone()
     auto maxLength = GetMaxLength();
     if (GreatOrEqual(textEditingValue_.GetWideText().length(), maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
+        textEditingValue_.caretPosition = std::clamp(
+            textEditingValue_.caretPosition, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
         SetEditingValueToProperty(textEditingValue_.text);
     }
     FireOnChangeIfNeeded();
