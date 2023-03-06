@@ -541,6 +541,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
 {
     bool runOutOfRecord = false;
     // Measure grid items row by row
+    int32_t tempEndIndex = -1;
     while (LessNotEqual(mainLength, mainSize)) {
         // If [gridMatrix_] does not contain record of line [currentMainLineIndex_], do [FillNewLineBackward]
         auto gridMatrixIter = gridLayoutInfo_.gridMatrix_.find(++currentMainLineIndex_);
@@ -555,6 +556,10 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
                 continue;
             }
             currentIndex = gridItemRecord.second;
+            if (currentIndex == -1) {
+                // move from another grid
+                continue;
+            }
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
                 LOGE("GridItem wrapper of index %{public}u null", currentIndex);
@@ -565,7 +570,8 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
             auto itemSize = itemWrapper->GetGeometryNode()->GetMarginFrameSize();
             lineHeight = std::max(GetMainAxisSize(itemSize, gridLayoutInfo_.axis_), lineHeight);
             // Record end index. When fill new line, the [endIndex_] will be the first item index to request
-            gridLayoutInfo_.endIndex_ = gridItemRecord.second;
+            tempEndIndex = std::max(currentIndex, tempEndIndex);
+            gridLayoutInfo_.endIndex_ = tempEndIndex;
         }
 
         if (lineHeight > 0) { // Means at least one item has been measured
@@ -664,7 +670,7 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
         gridLayoutInfo_.startIndex_ = std::min(
-            gridLayoutInfo_.startIndex_ - estimatedIndex, static_cast<int32_t>(gridLayoutInfo_.childrenCount_));
+            gridLayoutInfo_.startIndex_ - estimatedIndex, gridLayoutInfo_.childrenCount_);
         gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_;
         LOGI("estimatedIndex:%{public}d, currentOffset_:%{public}f", gridLayoutInfo_.startIndex_,
             gridLayoutInfo_.currentOffset_);

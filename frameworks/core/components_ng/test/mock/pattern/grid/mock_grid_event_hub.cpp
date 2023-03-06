@@ -56,4 +56,16 @@ void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemInde
         onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
     }
 }
+
+void GridEventHub::FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const
+{
+    if (onItemDragMove_) {
+        onItemDragMove_(dragInfo, itemIndex, insertIndex);
+    }
+}
+
+int32_t GridEventHub::GetInsertPosition(float x, float y)
+{
+    return -1;
+}
 } // namespace OHOS::Ace::NG

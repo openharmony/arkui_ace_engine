@@ -31,7 +31,7 @@ int32_t ListAccessibilityProperty::GetEndIndex() const
     return -1;
 }
 
-size_t ListAccessibilityProperty::GetCollectionItemCounts() const
+int32_t ListAccessibilityProperty::GetCollectionItemCounts() const
 {
     return -1;
 }

@@ -34,7 +34,7 @@ public:
 
     int32_t GetEndIndex() const override;
 
-    size_t GetCollectionItemCounts() const override;
+    int32_t GetCollectionItemCounts() const override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ListAccessibilityProperty);

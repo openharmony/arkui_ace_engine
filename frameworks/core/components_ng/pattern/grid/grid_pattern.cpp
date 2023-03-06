@@ -199,8 +199,9 @@ void GridPattern::ClearMultiSelect()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    for (const auto& item : host->GetChildren()) {
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& item : children) {
         if (!AceType::InstanceOf<FrameNode>(item)) {
             continue;
         }
@@ -422,7 +423,7 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     auto curMainEnd = gridLayoutInfo_.endMainLineIndex_;
     auto curChildStartIndex = gridLayoutInfo_.startIndex_;
     auto curChildEndIndex = gridLayoutInfo_.endIndex_;
-    auto childrenCount = static_cast<int32_t>(gridLayoutInfo_.childrenCount_);
+    auto childrenCount = gridLayoutInfo_.childrenCount_;
     auto curMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[curMainIndex]).size());
     LOGD("Current main index start-end: %{public}d-%{public}d, Current cross count: %{public}d, Current child "
          "index start-end: %{public}d-%{public}d, Total children count: %{public}d",
@@ -723,7 +724,7 @@ void GridPattern::UpdateScrollBarOffset()
 
     float estimatedHeight = 0.f;
     auto averageHeight_ = heightSum / itemCount;
-    if (itemCount >= (info.childrenCount_ - 1)) {
+    if (itemCount >= static_cast<size_t>(info.childrenCount_ - 1)) {
         estimatedHeight = heightSum - mainGap;
     } else {
         estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight_;
@@ -740,5 +741,76 @@ RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
     // default "scrollBar" attribute of Grid is BarState.Off
     property->UpdateScrollBarMode(NG::DisplayMode::OFF);
     return property;
+}
+
+int32_t GridPattern::GetInsertPosition(float x, float y) const
+{
+    if (gridLayoutInfo_.currentRect_.IsInRegion(PointF(x, y))) {
+        return gridLayoutInfo_.GetOriginalIndex();
+    }
+
+    return -1;
+}
+
+int32_t GridPattern::GetOriginalIndex() const
+{
+    return gridLayoutInfo_.GetOriginalIndex();
+}
+
+int32_t GridPattern::GetCrossCount() const
+{
+    return gridLayoutInfo_.crossCount_;
+}
+
+int32_t GridPattern::GetChildrenCount() const
+{
+    return gridLayoutInfo_.childrenCount_;
+}
+
+void GridPattern::ClearDragState()
+{
+    gridLayoutInfo_.ClearDragState();
+}
+
+void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& item : children) {
+        auto itemPattern = item->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        auto mainIndex = itemPattern->GetMainIndex();
+        auto crossIndex = itemPattern->GetCrossIndex();
+        if (mainIndex * static_cast<int32_t>(gridLayoutInfo_.crossCount_) + crossIndex == insertIndex) {
+            auto size = item->GetRenderContext()->GetPaintRectWithTransform();
+            size.SetOffset(item->GetTransformRelativeOffset());
+            gridLayoutInfo_.currentRect_ = size;
+            break;
+        }
+    }
+}
+
+void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
+{
+    if (insertIndex < 0 ||
+        insertIndex >= ((itemIndex == -1) ? (gridLayoutInfo_.childrenCount_ + 1) : gridLayoutInfo_.childrenCount_)) {
+        return;
+    }
+
+    if (itemIndex == -1) {
+        UpdateRectOfDraggedInItem(insertIndex);
+    }
+
+    gridLayoutInfo_.SwapItems(itemIndex, insertIndex);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        pipeline->FlushUITasks();
+    }
 }
 } // namespace OHOS::Ace::NG
