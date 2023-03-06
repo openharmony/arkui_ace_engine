@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -182,7 +182,6 @@ HWTEST_F(RatingPatternTestNg, RatingLayoutPropertyTest003, TestSize.Level1)
     EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
     auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
     EXPECT_NE(ratingLayoutProperty, nullptr);
-
     // Test indicator value.
     EXPECT_EQ(ratingLayoutProperty->GetIndicator().value_or(false), RATING_INDICATOR);
     // Test starNum value.
@@ -238,7 +237,7 @@ HWTEST_F(RatingPatternTestNg, RatingRenderPropertyTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: RatingConstrainsPropertyTest006
+ * @tc.name: RatingConstrainsPropertyTest007
  * @tc.desc: Test setting out-of-bounds ratingScore and starNum values.
  * @tc.type: FUNC
  */
@@ -531,5 +530,30 @@ HWTEST_F(RatingPatternTestNg, RatingMeasureTest009, TestSize.Level1)
             }
         }
     }
+}
+
+/**
+ * @tc.name: RatingLayoutPropertyTest010
+ * @tc.desc: Test when starStyle is undefined, flag is set by true, and star sourceInfo is from Theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingPatternTestNg, RatingLayoutPropertyTest010, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    rating.SetBackgroundSrc("", true);
+    rating.SetForegroundSrc("", true);
+    rating.SetSecondarySrc("", true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::RATING_ETS_TAG);
+    auto ratingLayoutProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    EXPECT_NE(ratingLayoutProperty, nullptr);
+    EXPECT_EQ(ratingLayoutProperty->propertyChangeFlag_ & PROPERTY_UPDATE_MEASURE, PROPERTY_UPDATE_MEASURE);
+    auto ratingPattern = frameNode->GetPattern<RatingPattern>();
+    EXPECT_NE(ratingPattern, nullptr);
+    EXPECT_TRUE(ratingPattern->singleStarImagePaintConfig_.isSvg_);
+    EXPECT_TRUE(ratingPattern->isBackgroundImageInfoFromTheme_);
+    EXPECT_TRUE(ratingPattern->isSecondaryImageInfoFromTheme_);
+    EXPECT_TRUE(ratingPattern->isForegroundImageInfoFromTheme_);
 }
 } // namespace OHOS::Ace::NG
