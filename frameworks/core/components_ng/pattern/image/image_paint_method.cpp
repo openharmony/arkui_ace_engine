@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 namespace OHOS::Ace::NG {
-void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps)
+void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper)
 {
     auto&& config = canvasImage_->GetPaintConfig();
     config.renderMode_ = renderProps->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
@@ -29,6 +29,11 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     if (colorFilterMatrix.has_value()) {
         config.colorFilter_ = std::make_shared<std::vector<float>>(colorFilterMatrix.value());
     }
+    // scale for recordingCanvas: take padding into account
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    auto contentSize = paintWrapper->GetContentSize();
+    config.scaleX_ = contentSize.Width() / frameSize.Width();
+    config.scaleY_ = contentSize.Height() / frameSize.Height();
 }
 
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
@@ -40,7 +45,7 @@ CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintW
     // update render props to ImagePaintConfig
     auto props = DynamicCast<ImageRenderProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_RETURN(props, nullptr);
-    UpdatePaintConfig(props);
+    UpdatePaintConfig(props, paintWrapper);
     ImagePainter imagePainter(canvasImage_);
     return
         [imagePainter, offset, contentSize](RSCanvas& canvas) { imagePainter.DrawImage(canvas, offset, contentSize); };
