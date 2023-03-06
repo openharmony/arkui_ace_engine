@@ -51,7 +51,6 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
