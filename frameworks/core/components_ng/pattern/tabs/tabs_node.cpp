@@ -29,7 +29,7 @@ constexpr int32_t ANIMATION_DURATION_DEFAULT = 200;
 
 } // namespace
 
-void TabsNode::AddChildToGroup(const RefPtr<UINode>& child)
+void TabsNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     if (swiperChildren_.find(child->GetId()) != swiperChildren_.end()) {
         LOGW("Child has already exist.");
@@ -41,11 +41,6 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child)
     if (swiperNode) {
         child->MountToParent(swiperNode);
     }
-}
-
-const RefPtr<UINode> TabsNode::GetContentChildFromGroup()
-{
-    return GetChildren().back();
 }
 
 void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
