@@ -97,6 +97,8 @@ public:
 protected:
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;
+    void DumpProperty(const RefPtr<AccessibilityNode> node);
+    void DumpPropertyNG(const std::vector<std::string>& params);
     void DumpTree(int32_t depth, NodeId nodeID) override;
 
 private:

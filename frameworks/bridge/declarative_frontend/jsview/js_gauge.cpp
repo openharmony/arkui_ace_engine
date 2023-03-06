@@ -132,7 +132,7 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
         float weight = tempColors->GetValueAt(1)->ToNumber<float>();
         Color selectedColor;
         if (!ParseJsColor(tempColors->GetValueAt(0), selectedColor)) {
-            selectedColor = theme->GetProgressColor();
+            selectedColor = Color::BLACK;
         }
         colors.push_back(selectedColor);
         values.push_back(value);

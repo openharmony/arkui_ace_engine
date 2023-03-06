@@ -18,10 +18,12 @@
 
 #include <cstdint>
 #include <functional>
+#include <vector>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 
 namespace OHOS::Ace::NG {
 
@@ -95,6 +97,8 @@ struct SelectOverlayInfo {
     // menu info.
     SelectMenuInfo menuInfo;
     SelectMenuCallback menuCallback;
+
+    std::vector<MenuOptionsParam> menuOptionItems;
 
     // force hide callback, which may be called when other textOverlay shows.
     std::function<void()> onClose;

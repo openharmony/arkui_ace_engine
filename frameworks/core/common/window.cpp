@@ -60,7 +60,9 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         if (callback.callback_ == nullptr) {
             continue;
         }
-
+#if !defined(PREVIEW)
+        callback.callback_(nanoTimestamp, frameCount);
+#else
         auto task = [nanoTimestamp, frameCount, callback = callback.callback_] {
             callback(nanoTimestamp, frameCount);
         };
@@ -70,6 +72,7 @@ void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         if (executor != nullptr) {
             executor->PostTask(task, TaskExecutor::TaskType::UI);
         }
+#endif
     }
 }
 

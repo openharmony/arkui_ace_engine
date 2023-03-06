@@ -20,11 +20,7 @@
 
 #include "base/utils/macros.h"
 
-#ifdef ACE_DEBUG
-#define ACE_MEMORY_MONITOR
-#endif
 
-#ifdef ACE_MEMORY_MONITOR
 #define VERIFY_CLASSNAME(classname, p) \
     VerifyClass<std::is_same_v<classname, std::remove_cv_t<std::remove_pointer_t<decltype(p)>>>>::Success()
 
@@ -56,11 +52,4 @@ struct VerifyClass<true> {
 };
 
 } // namespace OHOS::Ace
-
-#else // ACE_MEMORY_MONITOR
-#define DECLARE_CLASS_TYPE_SIZE(classname)
-#define DECLARE_CLASS_GET_TYPE_SIZE(classname)
-#define VERIFY_DECLARED_CLASS(classname)
-#endif // ACE_MEMORY_MONITOR
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_DEF_H

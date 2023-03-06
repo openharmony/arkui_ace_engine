@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 
 #define ACE_FORCE_EXPORT __attribute__((visibility("default")))
+#define ACE_WEAK_SYM     __attribute__((weak))
 
 #ifndef ACE_EXPORT
 #ifndef HIDDEN_SYMBOL

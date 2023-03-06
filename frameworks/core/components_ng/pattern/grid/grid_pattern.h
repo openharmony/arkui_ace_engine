@@ -20,6 +20,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -52,6 +53,11 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<GridAccessibilityProperty>();
+    }
 
     bool IsScrollable() const override
     {

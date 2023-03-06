@@ -19,6 +19,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/plugin_model_impl.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components_ng/pattern/plugin/plugin_model.h"
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
@@ -73,7 +74,10 @@ void JSPlugin::Create(const JSCallbackInfo& info)
         LOGD("JSPlugin::Create: source=%{public}s bundleName=%{public}s", pluginInfo.pluginName.c_str(),
             pluginInfo.bundleName.c_str());
     }
-
+    if (pluginInfo.bundleName.size() > PATH_MAX || pluginInfo.pluginName.size() > PATH_MAX) {
+        LOGE("the source path or the bundleName is too long");
+        return;
+    }
     // Parse data
     auto dataValue = obj->GetProperty("data");
 

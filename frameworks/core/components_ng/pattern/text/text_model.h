@@ -26,6 +26,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
@@ -66,6 +67,7 @@ public:
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
     virtual void SetDraggable(bool draggable) = 0;
+    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

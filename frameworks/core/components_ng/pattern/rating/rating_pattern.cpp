@@ -580,6 +580,7 @@ void RatingPattern::OnModifyDone()
     // Reset image state code.
     imageReadyStateCode_ = 0;
     imageSuccessStateCode_ = 0;
+    singleStarImagePaintConfig_.isSvg_ = false;
     // Constrains ratingScore and starNum in case of the illegal input.
     ConstrainsRatingScore();
 

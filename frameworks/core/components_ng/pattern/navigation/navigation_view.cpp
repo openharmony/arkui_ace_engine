@@ -644,9 +644,6 @@ void NavigationView::SetCustomMenu(const RefPtr<UINode>& customMenu)
 
 void NavigationView::SetTitleMode(NavigationTitleMode mode)
 {
-    if (mode != NavigationTitleMode::MINI) {
-        return;
-    }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);

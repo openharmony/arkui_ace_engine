@@ -140,10 +140,12 @@ public:
         MediaQueryListener* listener = GetListener(env, thisVar);
         if (!listener) {
             LOGE("listener is null");
+            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         auto iter = listener->FindCbList(cb);
         if (iter != listener->cbList_.end()) {
+            napi_close_handle_scope(env, scope);
             return nullptr;
         }
         napi_ref ref = nullptr;

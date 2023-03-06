@@ -273,7 +273,7 @@ private:
     Radius radius_;
     uint32_t showTime_ = 0;
     uint32_t hideTime_ = 0;
-    Dimension targetSpace_;
+    Dimension targetSpace_ = TARGET_SPACE;
     Dimension fontSize_;
     Dimension buttonFontSize_ = 14.0_fp;
     Color fontColor_;

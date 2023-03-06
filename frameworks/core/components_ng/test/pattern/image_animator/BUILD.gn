@@ -77,6 +77,7 @@ ohos_unittest("image_animator_pattern_test") {
 
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",

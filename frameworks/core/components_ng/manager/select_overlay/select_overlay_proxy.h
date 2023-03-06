@@ -53,6 +53,8 @@ public:
         return selectOverlayId_;
     }
 
+    void SetSelectInfo(const std::string& selectInfo) const;
+
 private:
     int32_t selectOverlayId_ = 0;
 

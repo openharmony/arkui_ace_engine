@@ -202,6 +202,9 @@ public:
         return tabBarStyle_;
     }
 
+    void PlayTabBarTranslateAnimation(int32_t targetIndex);
+    void StopTabBarTranslateAnimation();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -221,13 +224,14 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void HandleClick(const GestureEvent& info);
     void HandleTouchEvent(const TouchLocationInfo& info);
+    void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
 
     void HandleTouchDown(int32_t index);
     void HandleTouchUp(int32_t index);
     int32_t CalculateSelectedIndex(const Offset& info);
 
     void PlayPressAnimation(int32_t index, const Color& pressColor, AnimationType animationType);
-    void PlayTranslateAnimation(float startPos, float endPos);
+    void PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset);
     void StopTranslateAnimation();
     void UpdateIndicatorCurrentOffset(float offset);
 
@@ -235,12 +239,22 @@ private:
     void PaintFocusState();
     void FocusIndexChange(int32_t index);
 
+    float GetSpace(int32_t indicator);
+    float CalculateFrontChildrenMainSize(int32_t indicator);
+    float CalculateBackChildrenMainSize(int32_t indicator);
+    void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub);
+    void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
+    bool IsAtTop() const;
+    bool IsAtBottom() const;
+    bool IsOutOfBoundary();
+
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<SwiperController> swiperController_;
+    RefPtr<ScrollEdgeEffect> scrollEffect_;
 
     float currentOffset_ = 0.0f;
     float childrenMainSize_ = 0.0f;
@@ -258,7 +272,9 @@ private:
     std::optional<int32_t> hoverIndex_;
     TabBarStyle tabBarStyle_;
     RefPtr<Animator> controller_;
+    RefPtr<Animator> tabBarTranslateController_;
     float currentIndicatorOffset_ = 0.0f;
+    bool isAnimating_ = false;
 };
 } // namespace OHOS::Ace::NG
 

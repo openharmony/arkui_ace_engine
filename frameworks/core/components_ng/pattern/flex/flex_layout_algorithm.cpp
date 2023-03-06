@@ -111,14 +111,16 @@ void UpdateChildLayoutConstrainByFlexBasis(
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
-    auto selfIdealSize = child->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
-    if (child->GetHostTag() == V2::BLANK_ETS_TAG && selfIdealSize.has_value()) {
-        if (IsHorizontal(direction) && selfIdealSize->Width().has_value() &&
-            selfIdealSize->Width()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
-            return;
-        } else if (!IsHorizontal(direction) && selfIdealSize->Height().has_value() &&
-                   selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
-            return;
+    if (child->GetLayoutProperty()->GetCalcLayoutConstraint()) {
+        auto selfIdealSize = child->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
+        if (child->GetHostTag() == V2::BLANK_ETS_TAG && selfIdealSize.has_value()) {
+            if (IsHorizontal(direction) && selfIdealSize->Width().has_value() &&
+                selfIdealSize->Width()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                return;
+            } else if (!IsHorizontal(direction) && selfIdealSize->Height().has_value() &&
+                    selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                return;
+            }
         }
     }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {

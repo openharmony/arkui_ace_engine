@@ -73,7 +73,7 @@ struct DrawingContext {
 
 template<typename T>
 class NormalProperty : public PropertyBase {
-    DECLARE_ACE_TYPE(Property, PropertyBase);
+    DECLARE_ACE_TYPE(NormalProperty, PropertyBase);
 
 public:
     explicit NormalProperty(const T& value) : value_(value) {}

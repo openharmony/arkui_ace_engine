@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,21 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 2;
+constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
+constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
+} // namespace
 
 void SideBarContainerView::Create()
 {
@@ -42,8 +51,8 @@ void SideBarContainerView::Pop()
     CHECK_NULL_VOID(sideBarContainerNode);
 
     auto children = sideBarContainerNode->GetChildren();
-    if (children.empty()) {
-        LOGE("SideBarContainerView::Pop children is null.");
+    if (children.size() < DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
+        LOGE("SideBarContainerView::Pop children's size is wrong[%{public}zu].", children.size());
         return;
     }
 
@@ -58,7 +67,24 @@ void SideBarContainerView::Pop()
     sideBarNode->MovePosition(DEFAULT_NODE_SLOT);
     sideBarContainerNode->RebuildRenderContextTree();
 
+    auto begin = children.begin();
+    InitSideBarContentEvent(sideBarContainerNode, AceType::DynamicCast<FrameNode>(*(++begin)));
+
+    CreateAndMountDivider(sideBarContainerNode);
     CreateAndMountControlButton(sideBarContainerNode);
+}
+
+void SideBarContainerView::InitSideBarContentEvent(const RefPtr<FrameNode>& parentNode,
+    const RefPtr<FrameNode>& sideBarContentFrameNode)
+{
+    CHECK_NULL_VOID(parentNode);
+    CHECK_NULL_VOID(sideBarContentFrameNode);
+    auto gestureHub = sideBarContentFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto parentPattern = parentNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(parentPattern);
+    parentPattern->InitSideBarContentEvent(gestureHub);
+    sideBarContentFrameNode->MarkModifyDone();
 }
 
 void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& parentNode)
@@ -101,6 +127,40 @@ void SideBarContainerView::CreateAndMountControlButton(const RefPtr<FrameNode>& 
 
     imgNode->MountToParent(parentNode);
     imgNode->MarkModifyDone();
+}
+
+void SideBarContainerView::CreateAndMountDivider(const RefPtr<FrameNode>& parentNode)
+{
+    CHECK_NULL_VOID(parentNode);
+    auto layoutProperty = parentNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto dividerColor = layoutProperty->GetDividerColor().value_or(DEFAULT_DIVIDER_COLOR);
+    auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
+
+    int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dividerNode = FrameNode::GetOrCreateFrameNode(
+        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+
+    auto dividerHub = dividerNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(dividerHub);
+    auto inputHub = dividerHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+    auto parentPattern = parentNode->GetPattern<SideBarContainerPattern>();
+    CHECK_NULL_VOID(parentPattern);
+    parentPattern->InitDividerMouseEvent(inputHub);
+
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(dividerColor);
+
+    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    dividerLayoutProperty->UpdateVertical(true);
+    dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
+
+    dividerNode->MountToParent(parentNode);
+    dividerNode->MarkModifyDone();
 }
 
 void SideBarContainerView::SetSideBarContainerType(SideBarContainerType type)
@@ -179,6 +239,26 @@ void SideBarContainerView::SetControlButtonHiddenIconStr(const std::string& hidd
 void SideBarContainerView::SetControlButtonSwitchingIconStr(const std::string& switchingIconStr)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, ControlButtonSwitchingIconStr, switchingIconStr);
+}
+
+void SideBarContainerView::SetDividerStrokeWidth(const Dimension& strokeWidth)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStrokeWidth, strokeWidth);
+}
+
+void SideBarContainerView::SetDividerColor(const Color& color)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerColor, color);
+}
+
+void SideBarContainerView::SetDividerStartMargin(const Dimension& startMargin)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerStartMargin, startMargin);
+}
+
+void SideBarContainerView::SetDividerEndMargin(const Dimension& endMargin)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, DividerEndMargin, endMargin);
 }
 
 void SideBarContainerView::SetOnChange(ChangeEvent&& onChange)

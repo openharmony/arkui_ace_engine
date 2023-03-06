@@ -45,12 +45,12 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 std::string ProgressPaintProperty::ProgressOptions() const
 {
-    auto JsonValue = JsonUtil::Create(true);
-    JsonValue->Put("value", std::to_string(GetValue().value_or(0.f)).c_str());
-    JsonValue->Put("total", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str());
-    JsonValue->Put("type",
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("value", std::to_string(GetValue().value_or(0.f)).c_str());
+    jsonValue->Put("total", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str());
+    jsonValue->Put("type",
         ProgressTypeUtils::ConvertProgressTypeToString(GetProgressType().value_or(ProgressType::LINEAR)).c_str());
-    return JsonValue->ToString();
+    return jsonValue->ToString();
 }
 
 } // namespace OHOS::Ace::NG

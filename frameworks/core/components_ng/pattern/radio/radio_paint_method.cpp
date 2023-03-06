@@ -49,12 +49,14 @@ RadioModifier::RadioModifier()
     AttachProperty(inactiveColor_);
     totalScale_ = AceType::MakeRefPtr<PropertyFloat>(1.0f);
     pointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.5f);
+    ringPointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
 
     AttachProperty(totalScale_);
     AttachProperty(pointScale_);
+    AttachProperty(ringPointScale_);
     AttachProperty(animateTouchHoverColor_);
-    
+
     InitializeParam();
 }
 
@@ -85,30 +87,55 @@ void RadioModifier::PaintRadio(DrawingContext& context) const
     float centerX = paintOffset.GetX() + outCircleRadius;
     float centerY = paintOffset.GetY() + outCircleRadius;
     RSPen pen;
+    RSPen outPen;
     RSBrush brush;
-    brush.SetAntiAlias(true);
+    RSBrush shadowBrush;
     pen.SetAntiAlias(true);
     pen.SetWidth(borderWidth_);
+    outPen.SetAntiAlias(true);
+    brush.SetAntiAlias(true);
+    shadowBrush.SetAntiAlias(true);
+    shadowBrush.SetColor(ToRSColor(shadowColor_));
     if (uiStatus_ == UIStatus::SELECTED) {
-        // draw stroke border
         if (!enabled_) {
             brush.SetColor(
+                ToRSColor(pointColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
+        } else {
+            brush.SetColor(ToRSColor(pointColor_->Get()));
+        }
+        if (!NearZero(pointScale_->Get())) {
+            // draw shadow
+            canvas.AttachBrush(shadowBrush);
+            canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get() + shadowWidth_);
+            // draw inner circle
+            canvas.AttachBrush(brush);
+            canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get());
+        }
+        // draw ring circle
+        if (!enabled_) {
+            brush.SetColor(
+                ToRSColor(inactivePointColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
+        } else {
+            brush.SetColor(ToRSColor(inactivePointColor_));
+        }
+        if (!NearZero(ringPointScale_->Get())) {
+            canvas.AttachBrush(brush);
+            canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * ringPointScale_->Get());
+        }
+        // draw out circular ring
+        if (!enabled_) {
+            outPen.SetColor(
                 ToRSColor(activeColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         } else {
-            brush.SetColor(ToRSColor(activeColor_->Get()));
+            outPen.SetColor(ToRSColor(activeColor_->Get()));
         }
-        canvas.AttachBrush(brush);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get());
-        // draw shadow
-        if (!NearZero(pointScale_) && !NearEqual(pointScale_, 1.0)) {
-            brush.SetColor(ToRSColor(shadowColor_));
-            canvas.AttachBrush(brush);
-            canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get() + shadowWidth_);
+        auto outWidth = outCircleRadius * (totalScale_->Get() - pointScale_->Get() - ringPointScale_->Get());
+        if (outWidth < borderWidth_) {
+            outWidth = borderWidth_;
         }
-        // draw inner circle
-        brush.SetColor(ToRSColor(pointColor_->Get()));
-        canvas.AttachBrush(brush);
-        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get());
+        outPen.SetWidth(outWidth);
+        canvas.AttachPen(outPen);
+        canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - outWidth / CALC_RADIUS);
     } else if (uiStatus_ == UIStatus::UNSELECTED) {
         auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
         if (!enabled_) {

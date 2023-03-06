@@ -359,9 +359,17 @@ void SelectOverlayPattern::UpdateShowArea(const RectF& area)
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*config*/)
+bool SelectOverlayPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipMeasure || dirty->SkipMeasureContent()) {
+        return false;
+    }
+    
+    auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto textLayoutAlgorithm = DynamicCast<SelectOverlayLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(textLayoutAlgorithm, false);
+    defaultMenuEndOffset_ = textLayoutAlgorithm->GetDefaultMenuEndOffset();
     return true;
 }
 

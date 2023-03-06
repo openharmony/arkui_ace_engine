@@ -95,17 +95,17 @@ public:
 
     std::string GetIndicatorStyle() const
     {
-        JsonValue jsonValue;
-        jsonValue.Put("left", swiperParameters_.dimLeft.value_or(0.0_vp).ToString().c_str());
-        jsonValue.Put("top", swiperParameters_.dimTop.value_or(0.0_vp).ToString().c_str());
-        jsonValue.Put("right", swiperParameters_.dimRight.value_or(0.0_vp).ToString().c_str());
-        jsonValue.Put("bottom", swiperParameters_.dimBottom.value_or(0.0_vp).ToString().c_str());
-        jsonValue.Put("size", swiperParameters_.dimSize.value_or(6.0_vp).ToString().c_str());
-        jsonValue.Put("selectedColor",
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("left", swiperParameters_.dimLeft.value_or(0.0_vp).ToString().c_str());
+        jsonValue->Put("top", swiperParameters_.dimTop.value_or(0.0_vp).ToString().c_str());
+        jsonValue->Put("right", swiperParameters_.dimRight.value_or(0.0_vp).ToString().c_str());
+        jsonValue->Put("bottom", swiperParameters_.dimBottom.value_or(0.0_vp).ToString().c_str());
+        jsonValue->Put("size", swiperParameters_.dimSize.value_or(6.0_vp).ToString().c_str());
+        jsonValue->Put("selectedColor",
             swiperParameters_.selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());
-        jsonValue.Put(
+        jsonValue->Put(
             "color", swiperParameters_.colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
-        return jsonValue.ToString();
+        return jsonValue->ToString();
     }
 
     int32_t GetCurrentShownIndex() const
@@ -285,6 +285,7 @@ private:
 
     bool moveDirection_ = false;
     bool touch_ = false;
+    bool isInit_ = true;
 
     Axis direction_ = Axis::HORIZONTAL;
 
