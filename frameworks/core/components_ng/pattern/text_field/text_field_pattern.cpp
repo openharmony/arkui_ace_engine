@@ -43,6 +43,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
@@ -245,8 +246,7 @@ void TextFieldPattern::UpdateCaretInfoToController() const
 bool TextFieldPattern::UpdateCaretPosition()
 {
     // If the parent node is a Search, do not check whether it is a focus state.
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
-    if (!parentFrameNode || parentFrameNode->GetTag() != V2::SEARCH_ETS_TAG) {
+    if (!IsSearchParentNode()) {
         auto focusHub = GetHost()->GetOrCreateFocusHub();
         if (focusHub && !focusHub->IsCurrentFocus()) {
             CloseSelectOverlay();
@@ -807,14 +807,23 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-    caretUpdateType_ = CaretUpdateType::EVENT;
-    CloseSelectOverlay();
-    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                      : PROPERTY_UPDATE_MEASURE);
+    bool focusEventConsumed = false;
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        auto searchPattern = parentFrameNode->GetPattern<SearchPattern>();
+        CHECK_NULL_VOID(searchPattern);
+        focusEventConsumed = searchPattern->HandleInputChildOnFocus();
+    }
+    if (!focusEventConsumed) {
+        auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+        UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
+        caretUpdateType_ = CaretUpdateType::EVENT;
+        CloseSelectOverlay();
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                          : PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
@@ -1096,8 +1105,8 @@ void TextFieldPattern::HandleOnCopy()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnCopy(value);
@@ -1156,8 +1165,8 @@ void TextFieldPattern::HandleOnPaste()
         auto host = textfield->GetHost();
         CHECK_NULL_VOID(host);
         // If the parent node is a Search, the Search callback is executed.
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-        if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        if (textfield->IsSearchParentNode()) {
+            auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
             auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
             CHECK_NULL_VOID(eventHub);
             eventHub->FireOnPaste(StringUtils::ToString(pasteData));
@@ -1209,8 +1218,8 @@ void TextFieldPattern::HandleOnCut()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnCut(selectedText);
@@ -1242,8 +1251,8 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->UpdateChangeEvent(text);
@@ -1886,7 +1895,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
-    info.SetStopPropagation(true);
+    if (!IsSearchParentNode()) {
+        info.SetStopPropagation(true);
+    }
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         LOGI("Handle mouse right click");
@@ -2227,8 +2238,8 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->UpdateChangeEvent(textEditingValue_.text);
@@ -2490,8 +2501,8 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
-    if (parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
         auto eventHub = parentFrameNode->GetEventHub<SearchEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->UpdateSubmitEvent(textEditingValue_.text);
@@ -2921,6 +2932,12 @@ std::string TextFieldPattern::GetInputFilter() const
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
     return layoutProperty->GetInputFilterValue("");
+}
+
+bool TextFieldPattern::IsSearchParentNode()
+{
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+    return parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG;
 }
 
 void TextFieldPattern::SearchRequestKeyboard()

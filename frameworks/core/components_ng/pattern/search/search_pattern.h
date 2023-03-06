@@ -76,6 +76,8 @@ public:
 
     FocusPattern GetFocusPattern() const override;
 
+    bool HandleInputChildOnFocus() const;
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     static std::string ConvertCopyOptionsToString(CopyOptions copyOptions)
