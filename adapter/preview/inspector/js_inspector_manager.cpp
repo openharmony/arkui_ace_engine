@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -212,7 +213,7 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
 
     if (Container::IsCurrentUseNewPipeline()) {
         LOGD("parentID:%{public}d slot:%{public}d", parentID, slot);
-        auto newUINode = AceType::DynamicCast<NG::FrameNode>(GetNewFrameNodeWithJsCode(root));
+        auto newUINode = GetNewFrameNodeWithJsCode(root);
         CHECK_NULL_RETURN(newUINode, false);
         if (parentID <= 0) {
             return OperateRootUINode(newUINode);
@@ -269,20 +270,22 @@ bool JsInspectorManager::OperateGeneralComponent(
     return false;
 }
 
-bool JsInspectorManager::OperateRootUINode(RefPtr<NG::FrameNode> newUINode)
+bool JsInspectorManager::OperateRootUINode(RefPtr<NG::UINode> newUINode)
 {
     auto rootNode = GetRootUINode();
     CHECK_NULL_RETURN(rootNode, false);
     rootNode->RemoveChildAtIndex(0); // rootNode is Entry View Node which only has one child,and use the default slot 0
     newUINode->MountToParent(rootNode, 0, false);
-    newUINode->OnMountToParentDone();
-    newUINode->MarkModifyDone();
+    auto newFrameNode = AceType::DynamicCast<NG::FrameNode>(newUINode);
+    if (newFrameNode) {
+        newFrameNode->OnMountToParentDone();
+    }
     newUINode->FlushUpdateAndMarkDirty();
     rootNode->FlushUpdateAndMarkDirty();
     return true;
 }
 
-bool JsInspectorManager::OperateGeneralUINode(int32_t parentID, int32_t slot, RefPtr<NG::FrameNode> newUINode)
+bool JsInspectorManager::OperateGeneralUINode(int32_t parentID, int32_t slot, RefPtr<NG::UINode> newUINode)
 {
     auto parent = ElementRegister::GetInstance()->GetUINodeById(parentID);
     CHECK_NULL_RETURN(parent, false);
@@ -295,8 +298,13 @@ bool JsInspectorManager::OperateGeneralUINode(int32_t parentID, int32_t slot, Re
         parent->RemoveChildAtIndex(slot);
         newUINode->MountToParent(parent, slot, false);
     }
-    newUINode->OnMountToParentDone();
-    newUINode->MarkModifyDone();
+    auto newFrameNode = AceType::DynamicCast<NG::FrameNode>(newUINode);
+    auto newSpanNode = AceType::DynamicCast<NG::SpanNode>(newUINode);
+    if (newFrameNode) {
+        newFrameNode->OnMountToParentDone();
+    } else if (newSpanNode) {
+        newSpanNode->RequestTextFlushDirty();
+    }
     newUINode->FlushUpdateAndMarkDirty();
     parent->FlushUpdateAndMarkDirty();
     return true;
@@ -333,7 +341,7 @@ RefPtr<NG::UINode> JsInspectorManager::GetNewFrameNodeWithJsCode(const std::uniq
 {
     std::string jsCode = root->GetString("jsCode", "");
     std::string viewID = root->GetString("viewID", "");
-    if (jsCode.length() == 0) {
+    if (jsCode.empty() || viewID.empty()) {
         LOGE("Get jsCode Failed");
         return nullptr;
     }

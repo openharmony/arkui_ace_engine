@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
+#include "core/components_ng/render/paragraph.h"
+
 namespace OHOS::Ace::NG {
 TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
 
