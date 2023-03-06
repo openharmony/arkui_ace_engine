@@ -152,7 +152,6 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         // Turn off the multi-finger press deadline timer
         fingerDeadlineTimer_.Cancel();
         equalsToFingers_ = true;
-        refereeState_ = RefereeState::DETECTING;
         if (ExceedSlop()) {
             LOGE("fail to detect multi finger tap due to offset is out of slop");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
