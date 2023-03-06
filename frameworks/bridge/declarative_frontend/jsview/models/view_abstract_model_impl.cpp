@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1435,13 +1435,13 @@ GestureEventFunc CreateMenuEventWithParams(
                 continue;
             }
             auto optionComponent = AceType::MakeRefPtr<OHOS::Ace::OptionComponent>(optionTheme);
-            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(param.first);
+            auto textComponent = AceType::MakeRefPtr<OHOS::Ace::TextComponent>(param.value);
 
             optionComponent->SetTextStyle(optionTheme->GetOptionTextStyle());
             optionComponent->SetTheme(optionTheme);
             optionComponent->SetText(textComponent);
-            optionComponent->SetValue(param.first);
-            optionComponent->SetCustomizedCallback(param.second);
+            optionComponent->SetValue(param.value);
+            optionComponent->SetCustomizedCallback(param.action);
             optionComponent->SetSelectedBackgroundColor(optionTheme->GetSelectedColor());
             menuComponent->AppendOption(optionComponent);
         }
@@ -1489,7 +1489,8 @@ GestureEventFunc CreateMenuEventWithBuilder(
     };
 }
 
-void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc)
+void ViewAbstractModelImpl::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+    const NG::MenuParam&)
 {
     ViewStackProcessor::GetInstance()->GetCoverageComponent();
     auto menuComponent = ViewStackProcessor::GetInstance()->GetMenuComponent(true);

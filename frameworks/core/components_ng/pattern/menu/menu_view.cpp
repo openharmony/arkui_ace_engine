@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -46,28 +47,76 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, Men
 
     return { wrapperNode, menuNode };
 }
+
+void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& menuNode)
+{
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(textNode);
+    auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textProperty);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto padding = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
+        static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    PaddingProperty textPadding;
+    textPadding.left = CalcLength(padding);
+    textPadding.right = CalcLength(padding);
+    textProperty->UpdatePadding(textPadding);
+    textProperty->UpdateFontSize(theme->GetMenuTitleFontSize());
+    textProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textProperty->UpdateTextColor(theme->GetMenuFontColor());
+    textProperty->UpdateContent(title);
+
+    CalcSize idealSize;
+    idealSize.SetHeight(CalcLength(theme->GetMenuTitleHeight()));
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    textProperty->UpdateCalcLayoutProperty(layoutConstraint);
+
+    auto eventHub = textNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabled(false);
+
+    textNode->MountToParent(menuNode);
+    textNode->MarkModifyDone();
+}
 } // namespace
 
 // create menu with menuItems
-RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t targetId, MenuType type)
+RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params,
+    int32_t targetId, MenuType type, const MenuParam& menuParam)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, type);
+    if (!menuParam.title.empty()) {
+        CreateTitleNode(menuParam.title, menuNode);
+    }
     // append options to menu
     for (size_t i = 0; i < params.size(); ++i) {
-        auto optionNode = OptionView::CreateMenuOption(params[i].first, std::move(params[i].second), i);
+        auto optionNode = OptionView::CreateMenuOption(
+            params[i].value, std::move(params[i].action), i, params[i].icon);
         // first node never paints divider
-        if (i == 0) {
+        if (i == 0 && menuParam.title.empty()) {
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
         }
         optionNode->MountToParent(menuNode);
         optionNode->MarkModifyDone();
     }
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    if (menuProperty) {
+        menuProperty->UpdateTitle(menuParam.title);
+        menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+    }
     return wrapperNode;
 }
 
 // create menu with custom node from a builder
-RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t targetId, MenuType type)
+RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode,
+    int32_t targetId, MenuType type, const MenuParam& menuParam)
 {
     if (type == MenuType::SUB_MENU) {
         auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -87,6 +136,11 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
 
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    if (menuProperty) {
+        menuProperty->UpdateTitle(menuParam.title);
+        menuProperty->UpdatePositionOffset(menuParam.positionOffset);
+    }
     return wrapperNode;
 }
 
@@ -123,9 +177,20 @@ void MenuView::Create()
 
 void MenuView::SetFontSize(const Dimension& fontSize)
 {
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<MenuPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetFontSize(fontSize);
+    if (!fontSize.IsValid()) {
+        LOGE("FontSize value is not valid");
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
 }
 
+void MenuView::SetFontColor(const Color& color)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color);
+}
+
+void MenuView::SetFontWeight(Ace::FontWeight weight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontWeight, weight);
+}
 } // namespace OHOS::Ace::NG

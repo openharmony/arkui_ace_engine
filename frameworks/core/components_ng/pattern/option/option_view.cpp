@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,18 +86,58 @@ RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& 
     return textNode;
 }
 
+RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
+{
+    auto iconNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(iconNode, nullptr);
+    auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    props->UpdateImageSourceInfo(ImageSourceInfo(icon));
+    props->UpdateImageFit(ImageFit::SCALE_DOWN);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    props->UpdateCalcMaxSize(
+        CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
+    props->UpdateAlignment(Alignment::CENTER_LEFT);
+
+    auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(renderProperty, nullptr);
+    renderProperty->UpdateSvgFillColor(theme->GetMenuIconColor());
+
+    MarginProperty margin;
+    margin.right = CalcLength(theme->GetIconContentPadding());
+    props->UpdateMargin(margin);
+
+    iconNode->MountToParent(parent);
+    iconNode->MarkModifyDone();
+    return iconNode;
+}
 } // namespace
 
 RefPtr<FrameNode> OptionView::CreateMenuOption(
-    const std::string& value, std::function<void()>&& onClickFunc, int32_t index)
+    const std::string& value, std::function<void()>&& onClickFunc, int32_t index, const std::string& icon)
 {
     auto option = Create(index);
-    CreateText(value, option);
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    if (!icon.empty()) {
+        (void)CreateIcon(icon, row);
+    }
+    auto textNode = CreateText(value, row);
+    row->MountToParent(option);
+    row->MarkModifyDone();
+
+    auto pattern = option->GetPattern<OptionPattern>();
+    CHECK_NULL_RETURN(pattern, option);
+    pattern->SetTextNode(textNode);
+    pattern->SetIcon(icon);
 
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
     eventHub->SetMenuOnClick(std::move(onClickFunc));
-
     return option;
 }
 
@@ -111,31 +151,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
 
     // create icon node
     if (!icon.empty()) {
-        auto iconNode = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_RETURN(iconNode, nullptr);
-        auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        props->UpdateImageSourceInfo(ImageSourceInfo(icon));
-        props->UpdateImageFit(ImageFit::SCALE_DOWN);
-
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, nullptr);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_RETURN(theme, nullptr);
-        props->UpdateCalcMaxSize(
-            CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
-        props->UpdateAlignment(Alignment::CENTER_LEFT);
-
-        auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_RETURN(renderProperty, nullptr);
-        renderProperty->UpdateSvgFillColor(theme->GetMenuIconColor());
-
-        MarginProperty margin;
-        margin.right = CalcLength(theme->GetIconContentPadding());
-        props->UpdateMargin(margin);
-
-        iconNode->MountToParent(row);
-        iconNode->MarkModifyDone();
+        (void)CreateIcon(icon, row);
     }
 
     auto text = CreateText(value, row);

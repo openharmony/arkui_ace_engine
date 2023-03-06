@@ -23,4 +23,21 @@ bool ScrollablePattern::OnScrollCallback(float offset, int32_t source)
 {
     return true;
 }
+
+void ScrollablePattern::SetAxis(Axis) {}
+
+void ScrollablePattern::AddScrollEvent() {}
+
+void ScrollablePattern::SetEdgeEffect(EdgeEffect) {}
+
+void ScrollablePattern::SetScrollBar(DisplayMode displayMode) {}
+
+void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>&) {}
+
+bool ScrollablePattern::HandleEdgeEffect(float, int32_t, const SizeF&)
+{
+    return false;
+}
+
+void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort) {}
 } // namespace OHOS::Ace::NG

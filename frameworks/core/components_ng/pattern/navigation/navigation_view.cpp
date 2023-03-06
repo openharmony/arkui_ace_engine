@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -525,7 +525,7 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
     for (const auto& menuItem : menuItems) {
         ++count;
         if (needMoreButton && (count > mostMenuItemCount - 1)) {
-            params.push_back(std::make_pair(menuItem.text.value(), menuItem.action));
+            params.push_back({ menuItem.text.value(), "", menuItem.action });
         } else {
             auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());

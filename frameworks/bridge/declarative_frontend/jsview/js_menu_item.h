@@ -25,8 +25,13 @@ public:
     static void JSBind(BindingTarget globalObj);
 
     static void IsSelected(bool isSelected);
-    static void SelectIcon(bool isShow);
+    static void SelectIcon(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
+
+    static void ContentFont(const JSCallbackInfo& info);
+    static void ContentFontColor(const JSCallbackInfo& info);
+    static void LabelFont(const JSCallbackInfo& info);
+    static void LabelFontColor(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MENU_ITEM_H

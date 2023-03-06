@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -163,7 +163,8 @@ public:
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
-    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override;
+    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+        const NG::MenuParam& menuParam) override;
     void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
 
     void SetAccessibilityGroup(bool accessible) override;

@@ -91,20 +91,6 @@ public:
         return type_ == MenuType::SUB_MENU;
     }
 
-    void SetFontSize(const Dimension& value)
-    {
-        fontSize_ = value;
-    }
-
-    Dimension FontSize() const
-    {
-        auto context = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(context, Dimension());
-        auto theme = context->GetTheme<SelectTheme>();
-        CHECK_NULL_RETURN(theme, Dimension());
-        return fontSize_.value_or(theme->GetMenuFontSize());
-    }
-
     void SetParentMenuItem(const RefPtr<FrameNode>& parentMenuItem)
     {
         parentMenuItem_ = parentMenuItem;
@@ -137,14 +123,13 @@ private:
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event) const;
+    void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
 
     RefPtr<TouchEventImpl> onClick_;
     int32_t targetId_ = -1;
     MenuType type_ = MenuType::MENU;
 
     RefPtr<FrameNode> parentMenuItem_;
-
-    std::optional<Dimension> fontSize_;
 
     bool isSelectMenu_ = false;
 
