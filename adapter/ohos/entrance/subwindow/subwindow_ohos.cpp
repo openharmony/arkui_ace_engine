@@ -155,6 +155,14 @@ void SubwindowOhos::InitContainer()
     subPipelineContext->SetupSubRootElement();
 }
 
+void SubwindowOhos::ResizeWindow()
+{
+    LOGI("SubwindowOhos::ResizeWindow");
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_VOID(defaultDisplay);
+    window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+}
+
 void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
     ShowWindow();
