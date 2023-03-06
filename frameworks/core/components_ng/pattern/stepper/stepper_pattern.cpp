@@ -50,6 +50,7 @@ constexpr float BUTTON_ON_PRESS_BEZIER_CURVE_Y1 = 1.0f;
 
 void StepperPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto swiperNode =

@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
 
 void OptionPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
@@ -323,6 +324,7 @@ void OptionPattern::SetFontColor(const Color& color)
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     props->UpdateTextColor(color);
+    text_->GetRenderContext()->UpdateForegroundColor(color);
 }
 
 std::string OptionPattern::InspectorGetFont()

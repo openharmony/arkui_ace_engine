@@ -54,6 +54,7 @@ void TextTimerModelNG::SetFontSize(const Dimension& value)
 void TextTimerModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 
 void TextTimerModelNG::SetItalicFontStyle(Ace::FontStyle value)

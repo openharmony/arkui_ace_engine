@@ -57,6 +57,7 @@ public:
     virtual void Insert(const std::string& args) {}
 
     virtual void CaretPosition(int32_t caretPosition) {}
+    virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
 
     void SetCaretPosition(std::function<void(const int32_t)>&& setCaretPosition)
     {
@@ -131,6 +132,8 @@ public:
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
     virtual void ResetMaxLength() = 0;
+    virtual void SetForegroundColor(const Color& value) = 0;
+
     virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
 private:

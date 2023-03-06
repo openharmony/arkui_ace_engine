@@ -150,6 +150,8 @@ public:
     }
 
     void PlayBgColorAnimation(bool isHoverChange = true);
+    void SetSpace(const Dimension& value);
+    void SetArrowPosition(const ArrowPosition value);
 
 private:
     void OnModifyDone() override;

@@ -76,6 +76,9 @@ RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& 
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(theme->GetMenuFontColor());
+    // set default foregroundColor
+    auto textRenderContext = textNode->GetRenderContext();
+    textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
     textProperty->UpdateContent(value);
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();

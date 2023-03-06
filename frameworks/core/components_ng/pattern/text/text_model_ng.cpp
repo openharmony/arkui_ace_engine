@@ -80,6 +80,8 @@ void TextModelNG::SetFontSize(const Dimension& value)
 void TextModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 
 void TextModelNG::SetTextShadow(const Shadow& value)

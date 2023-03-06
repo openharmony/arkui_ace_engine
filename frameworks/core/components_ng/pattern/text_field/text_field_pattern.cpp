@@ -196,6 +196,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     auto textRectNotNeedToChange = UpdateCaretPosition();
     UpdateCaretInfoToController();
+    if (setSelectionFlag_) {
+        SetTextSelection(selectionStart_, selectionEnd_);
+        setSelectionFlag_ = false;
+    }
     if (mouseStatus_ == MouseStatus::RELEASED) {
         mouseStatus_ = MouseStatus::NONE;
     }
@@ -685,8 +689,10 @@ void TextFieldPattern::GetTextRectsInRange(
     if (base > destination) {
         std::swap(base, destination);
     }
-    textBoxes = paragraph_->GetRectsForRange(
-        base, destination, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
+    if (paragraph_) {
+        textBoxes = paragraph_->GetRectsForRange(base, destination, RSTypographyProperties::RectHeightStyle::MAX,
+            RSTypographyProperties::RectWidthStyle::TIGHT);
+    }
 }
 
 bool TextFieldPattern::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result)
@@ -832,7 +838,8 @@ void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
 {
     LOGI("HandleSetSelection %{public}d, %{public}d", start, end);
     UpdateSelection(start, end);
-    textEditingValue_.caretPosition = end;
+    textEditingValue_.caretPosition =
+        std::clamp(end, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), textBoxes_);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
@@ -1484,6 +1491,7 @@ void TextFieldPattern::StopTwinkling()
 
 void TextFieldPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -2430,7 +2438,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder)
     TextStyle textStyle;
     // use text or placeHolder value if exists, space otherwise
     if (!isPlaceholder) {
-        TextFieldLayoutAlgorithm::UpdateTextStyle(layoutProperty, textFieldTheme, textStyle, false);
+        TextFieldLayoutAlgorithm::UpdateTextStyle(GetHost(), layoutProperty, textFieldTheme, textStyle, false);
         textContent = "a";
     } else {
         TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(layoutProperty, textFieldTheme, textStyle, false);
@@ -2802,6 +2810,51 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay();
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    selectionStart = selectionStart < 0 ? 0 : selectionStart;
+    if (selectionStart >= selectionEnd) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto instanceId = GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto task = [weak = WeakClaim(this), selectionStart, selectionEnd] {
+        auto client = AceType::DynamicCast<TextFieldPattern>(weak.Upgrade());
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->GetInstanceId());
+        client->HandleSetSelection(selectionStart, selectionEnd);
+        client->SetInSelectMode(SelectionMode::SELECT);
+        client->SetCaretUpdateType(CaretUpdateType::EVENT);
+        if (client->RequestKeyboard(false, true, true)) {
+            auto textFieldFrameNode = client->GetHost();
+            CHECK_NULL_VOID(textFieldFrameNode);
+            auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->FireOnEditChanged(true);
+        }
+    };
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+}
+
+void TextFieldPattern::SetSelectionFlag(bool flag, int32_t selectionStart, int32_t selectionEnd)
+{
+    setSelectionFlag_ = flag;
+    selectionStart_ = selectionStart;
+    selectionEnd_ = selectionEnd;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::CaretMoveToLastNewLineChar()

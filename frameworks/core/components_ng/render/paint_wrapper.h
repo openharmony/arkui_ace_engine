@@ -85,6 +85,12 @@ public:
         return geometryNode_->GetContentOffset();
     }
 
+    bool HasForegroundColor() const
+    {
+        auto renderContext = renderContext_.Upgrade();
+        return (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy());
+    }
+
 private:
     WeakPtr<RenderContext> renderContext_;
     RefPtr<GeometryNode> geometryNode_;

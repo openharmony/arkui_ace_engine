@@ -60,6 +60,7 @@ public:
     void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
     void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
+    void SetForegroundColor(const Color& value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

@@ -43,6 +43,7 @@ ohos_unittest("drag_drop_proxy_test_ng") {
     # mock
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
     "$ace_root/frameworks/base/test/mock/mock_pixel_map.cpp",
+    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_clipboard.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_ui_node.cpp",

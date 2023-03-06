@@ -56,6 +56,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void BubblePattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     InitTouchEvent();
     RegisterButtonOnHover();
     RegisterButtonOnTouch();

@@ -115,6 +115,7 @@ void ButtonView::SetFontFamily(const std::vector<std::string>& fontFamilies)
 void ButtonView::SetFontColor(const Color& textColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontColor, textColor);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, textColor);
 }
 
 void ButtonView::SetBorderRadius(const Dimension& radius)

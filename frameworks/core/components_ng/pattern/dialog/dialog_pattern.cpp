@@ -66,6 +66,7 @@ const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
 
 void DialogPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();

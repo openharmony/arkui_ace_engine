@@ -55,6 +55,7 @@ const OffsetT<Dimension> POINT_R_EXPAND = OffsetT<Dimension>(47.0_vp, 9.0_vp);  
 
 void DragBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitProps();

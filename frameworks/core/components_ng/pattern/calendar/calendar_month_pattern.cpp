@@ -39,6 +39,7 @@ bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
 
 void CalendarMonthPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID_NOLOG(!clickListener_);

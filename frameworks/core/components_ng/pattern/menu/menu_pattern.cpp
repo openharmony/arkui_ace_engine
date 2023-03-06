@@ -29,6 +29,7 @@
 namespace OHOS::Ace::NG {
 void MenuPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     if (!onClick_) {
         RegisterOnClick();
     }

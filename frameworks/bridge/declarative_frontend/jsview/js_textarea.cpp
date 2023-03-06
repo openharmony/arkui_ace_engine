@@ -66,6 +66,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextArea>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
     JSClass<JSTextArea>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
+    JSClass<JSTextArea>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     JSClass<JSTextArea>::Inherit<JSViewAbstract>();
     JSClass<JSTextArea>::Bind(globalObj);
 }

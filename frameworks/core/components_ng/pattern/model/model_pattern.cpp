@@ -38,6 +38,7 @@ ModelPattern::ModelPattern(uint32_t key) : key_(key)
 
 void ModelPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     LOGD("MODEL_NG: ModelPattern::OnModifyDone()");
     auto host = GetHost();
     CHECK_NULL_VOID(host);

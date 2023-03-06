@@ -204,6 +204,10 @@ public:
 
     static void Pop();
 
+    // foregroundColor
+    static void SetForegroundColor(const Color& color);
+    static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
+
 private:
     static void AddDragFrameNodeToManager();
 };

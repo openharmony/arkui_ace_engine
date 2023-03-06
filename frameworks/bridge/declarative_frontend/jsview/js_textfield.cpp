@@ -412,6 +412,26 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
 
+void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        TextFieldModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
+        return;
+    }
+    Color foregroundColor;
+    if (!ParseJsColor(info[0], foregroundColor)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+    TextFieldModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
 void JSTextField::SetFontStyle(int32_t value)
 {
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {

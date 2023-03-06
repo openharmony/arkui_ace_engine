@@ -45,6 +45,11 @@ union ColorParam {
     uint32_t value;
 };
 
+enum class ForegroundColorStrategy : uint32_t {
+    NONE,
+    INVERT,
+};
+
 // A color value present by 32 bit.
 class ACE_EXPORT Color {
 public:
@@ -69,6 +74,7 @@ public:
     static const Color GREEN;
     static const Color BLUE;
     static const Color GRAY;
+    static const Color FOREGROUND;
 
     Color BlendColor(const Color& overlayColor) const;
 

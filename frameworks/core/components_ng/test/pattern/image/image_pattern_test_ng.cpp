@@ -732,6 +732,9 @@ HWTEST_F(ImagePatternTestNg, ImageSvgTest001, TestSize.Level1)
     EXPECT_NE(imageRenderProperty, nullptr);
     EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::BLUE);
     frameNode->MarkModifyDone();
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), Color::FOREGROUND);
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetForegroundColor().value(), Color::BLUE);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_NE(imagePattern, nullptr);
     EXPECT_NE(imagePattern->loadingCtx_, nullptr);

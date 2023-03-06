@@ -87,6 +87,7 @@ void MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
 
 void TitleBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountBackButton(hostNode);
