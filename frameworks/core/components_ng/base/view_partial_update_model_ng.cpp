@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/view_partial_update_model_ng.h"
+#include <utility>
 
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -61,6 +62,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetPageTransitionFunction(std::move(info.pageTransitionFunc));
     customNode->SetForceUpdateNodeFunc(std::move(info.nodeUpdateFunc));
     customNode->SetReloadFunction(std::move(info.reloadFunc));
+    customNode->SetJSViewName(std::move(info.jsViewName));
     return customNode;
 }
 

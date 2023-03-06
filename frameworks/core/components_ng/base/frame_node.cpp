@@ -298,7 +298,7 @@ void FrameNode::OnDetachFromMainTree()
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
 {
-    ACE_FUNCTION_TRACE();
+    ACE_SCOPED_TRACE("SwapDirtyLayoutWrapperOnMainThread %s", GetTag().c_str());
     LOGD("SwapDirtyLayoutWrapperOnMainThread, %{public}s", GetTag().c_str());
     CHECK_NULL_VOID(dirty);
 
@@ -543,7 +543,7 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
     if (!isLayoutDirtyMarked_) {
         return std::nullopt;
     }
-    ACE_SCOPED_TRACE("CreateLayoutTask:PrepareTask");
+    ACE_SCOPED_TRACE("CreateLayoutTask:PrepareTask %s", GetTag().c_str());
     RefPtr<LayoutWrapper> layoutWrapper;
     UpdateLayoutPropertyFlag();
     layoutWrapper = CreateLayoutWrapper();
@@ -553,15 +553,15 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
         layoutWrapper->SetRootMeasureNode();
         layoutWrapper->WillLayout();
         {
-            ACE_SCOPED_TRACE("LayoutWrapper::Measure");
+            ACE_SCOPED_TRACE("LayoutWrapper::Measure %s", layoutWrapper->GetHostTag().c_str());
             layoutWrapper->Measure(layoutConstraint);
         }
         {
-            ACE_SCOPED_TRACE("LayoutWrapper::Layout");
+            ACE_SCOPED_TRACE("LayoutWrapper::Layout %s", layoutWrapper->GetHostTag().c_str());
             layoutWrapper->Layout();
         }
         {
-            ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
+            ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread %s", layoutWrapper->GetHostTag().c_str());
             if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
                 layoutWrapper->MountToHostOnMainThread();
                 layoutWrapper->DidLayout();
@@ -586,11 +586,11 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     if (!isRenderDirtyMarked_) {
         return std::nullopt;
     }
-    ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask");
+    ACE_SCOPED_TRACE("CreateRenderTask:PrepareTask %s", GetTag().c_str());
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN_NOLOG(wrapper, std::nullopt);
-    auto task = [wrapper, paintProperty = paintProperty_]() {
-        ACE_SCOPED_TRACE("FrameNode::RenderTask");
+    auto task = [wrapper, paintProperty = paintProperty_, tag = GetTag()]() {
+        ACE_SCOPED_TRACE("FrameNode::RenderTask %s", tag.c_str());
         wrapper->FlushRender();
         paintProperty->CleanDirty();
     };
