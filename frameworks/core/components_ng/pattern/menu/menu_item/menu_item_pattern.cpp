@@ -34,6 +34,7 @@
 namespace OHOS::Ace::NG {
 void MenuItemPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();

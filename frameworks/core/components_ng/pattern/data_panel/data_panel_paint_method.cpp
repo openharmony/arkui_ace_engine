@@ -45,10 +45,10 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         valuesColor = paintProperty->GetValueColorsValue();
     } else {
         auto colors = theme->GetColorsArray();
-        for (auto item : colors) {
+        for (const auto& item : colors) {
             Gradient gradient;
             CreateGradient(item, gradient);
-            valuesColor.push_back(gradient);
+            valuesColor.emplace_back(gradient);
         }
     }
 

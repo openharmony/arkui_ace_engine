@@ -33,6 +33,7 @@ bool DataPanelPattern::OnDirtyLayoutWrapperSwap(
 
 void DataPanelPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 

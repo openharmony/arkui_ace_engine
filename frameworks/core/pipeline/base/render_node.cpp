@@ -247,12 +247,6 @@ void RenderNode::UpdateTouchRect()
         touchRect_ = GetTransformRect(touchRect_);
         touchRectList_.emplace_back(touchRect_);
         SetTouchRectList(touchRectList_);
-        std::vector<Rect> tmplist;
-        for (auto& rect : touchRectList_) {
-            auto trasrect = GetTransformRect(rect);
-            tmplist.push_back(trasrect);
-        }
-        touchRectList_ = tmplist;
         return;
     }
 
@@ -732,12 +726,11 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         return false;
     }
 
-    Point transformPoint = parentLocalPoint;
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
     if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         return false;
     }
 
-    transformPoint = GetTransformPoint(transformPoint);
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
 
     bool dispatchSuccess = DispatchTouchTestToChildren(localPoint, globalPoint, touchRestrict, result);

@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ImagePaintMethod : public NodePaintMethod {
@@ -36,7 +37,7 @@ public:
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
-    void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps);
+    void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);
     RefPtr<CanvasImage> canvasImage_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);

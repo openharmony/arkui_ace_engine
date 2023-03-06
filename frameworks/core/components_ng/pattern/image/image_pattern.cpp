@@ -277,6 +277,8 @@ void ImagePattern::LoadImageDataIfNeed()
 
 void ImagePattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
+    UpdateFillColorIfForegroundColor();
     LoadImageDataIfNeed();
 }
 
@@ -486,6 +488,25 @@ void ImagePattern::BeforeCreatePaintWrapper()
 void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     json->Put("draggable", draggable_ ? "true" : "false");
+}
+
+void ImagePattern::UpdateFillColorIfForegroundColor()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+        auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+        if (imageSourceInfo.IsSvg()) {
+            imageSourceInfo.SetFillColor(Color::FOREGROUND);
+            imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        }
+        auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageRenderProperty->UpdateSvgFillColor(Color::FOREGROUND);
+    }
 }
 
 } // namespace OHOS::Ace::NG

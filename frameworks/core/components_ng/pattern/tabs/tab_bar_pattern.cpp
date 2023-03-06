@@ -363,6 +363,7 @@ void TabBarPattern::PaintFocusState()
 
 void TabBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -511,6 +512,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     if (indicator == index) {
         return;
     }
+    changeByClick_ = true;
     auto originalPaintRect = layoutProperty->GetIndicatorRect(indicator);
     auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
     auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();

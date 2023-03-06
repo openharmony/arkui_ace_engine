@@ -536,6 +536,7 @@ void VideoPattern::OnAttachToFrameNode()
 
 void VideoPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     if (!hiddenChangeEvent_) {
         SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
             auto videoPattern = weak.Upgrade();

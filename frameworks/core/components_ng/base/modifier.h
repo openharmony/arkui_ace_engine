@@ -24,7 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/animation/gradient_arithmetic.h"
-#include "core/components_ng/render/adapter/linear_vector.h"
+#include "core/components_ng/base/linear_vector.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/modifier_adapter.h"

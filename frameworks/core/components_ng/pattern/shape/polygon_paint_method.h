@@ -43,6 +43,9 @@ public:
         if (propertiesFromAncestor_) {
             shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
+        if (paintWrapper->HasForegroundColor()) {
+            shapePaintProperty->UpdateFill(Color::FOREGROUND);
+        }
         return [shapePaintProperty, isClose = isClose_](
                    RSCanvas& canvas) { PolygonPainter::DrawPolygon(canvas, *shapePaintProperty, isClose); };
     }

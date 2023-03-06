@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 
 void NavRouterPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();

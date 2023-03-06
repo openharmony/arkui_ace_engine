@@ -52,7 +52,7 @@ DataPanelModifier::DataPanelModifier()
     for (size_t i = 0; i < MAX_COUNT; i++) {
         auto value = AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0);
         AttachProperty(value);
-        values_.push_back(value);
+        values_.emplace_back(value);
     }
     max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(DEFAULT_MAX_VALUE);
     trackBackgroundColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(theme->GetBackgroundColor()));
@@ -62,14 +62,14 @@ DataPanelModifier::DataPanelModifier()
     AttachProperty(trackBackgroundColor_);
     AttachProperty(strokeWidth_);
 
-    shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowRadiu().ConvertToPx());
+    shadowRadiusFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowRadius().ConvertToPx());
     shadowOffsetXFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowOffsetX().ConvertToPx());
     shadowOffsetYFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(theme->GetTrackShadowOffsetY().ConvertToPx());
     AttachProperty(shadowRadiusFloat_);
     AttachProperty(shadowOffsetXFloat_);
     AttachProperty(shadowOffsetYFloat_);
 
-    for (auto item : colors) {
+    for (const auto& item : colors) {
         Gradient gradient;
         GradientColor gradientColorStart;
         gradientColorStart.SetColor(item.first);
@@ -82,11 +82,11 @@ DataPanelModifier::DataPanelModifier()
 
         auto gradientColor = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(gradient));
         AttachProperty(gradientColor);
-        valueColors_.push_back(gradientColor);
+        valueColors_.emplace_back(gradientColor);
 
         auto gradientShadowColor = AceType::MakeRefPtr<AnimatablePropertyVectorColor>(GradientArithmetic(gradient));
         AttachProperty(gradientShadowColor);
-        shadowColors_.push_back(gradientShadowColor);
+        shadowColors_.emplace_back(gradientShadowColor);
     }
 }
 
@@ -142,13 +142,13 @@ void DataPanelModifier::PaintRainbowFilterMask(RSCanvas& canvas, double factor, 
     std::vector<float> pos;
     size_t length = arcData.shadowColor.GetColors().size();
     for (size_t i = 0; i < length; i++) {
-        colors.push_back(arcData.shadowColor.GetColors().at(i).GetColor().GetValue());
+        colors.emplace_back(arcData.shadowColor.GetColors().at(i).GetColor().GetValue());
         if (arcData.gradientPointBase == 0.0) {
-            pos.push_back(arcData.shadowColor.GetColors().at(i).GetDimension().Value());
+            pos.emplace_back(arcData.shadowColor.GetColors().at(i).GetDimension().Value());
         } else {
             auto itemPos = (1.0f - arcData.gradientPointBase) *
                 arcData.shadowColor.GetColors().at(i).GetDimension().Value() + arcData.gradientPointBase;
-            pos.push_back(itemPos);
+            pos.emplace_back(itemPos);
         }
     }
     pos.at(pos.size() - 1) = 1.0f;
@@ -349,8 +349,8 @@ void DataPanelModifier::PaintColorSegment(RSCanvas& canvas, const LinearData& se
     std::vector<float> pos;
     size_t length = segmentLinearData.segmentColor.GetColors().size();
     for (size_t i = 0; i < length; i++) {
-        colors.push_back(segmentLinearData.segmentColor.GetColors().at(i).GetColor().GetValue());
-        pos.push_back(segmentLinearData.segmentColor.GetColors().at(i).GetDimension().Value());
+        colors.emplace_back(segmentLinearData.segmentColor.GetColors().at(i).GetColor().GetValue());
+        pos.emplace_back(segmentLinearData.segmentColor.GetColors().at(i).GetDimension().Value());
     }
 
     if (segmentLinearData.isFirstData) {
@@ -413,8 +413,8 @@ void DataPanelModifier::PaintColorSegmentFilterMask(RSCanvas& canvas, const Line
     std::vector<float> pos;
     size_t length = segmentLinearData.segmentShadowColor.GetColors().size();
     for (size_t i = 0; i < length; i++) {
-        colors.push_back(segmentLinearData.segmentShadowColor.GetColors().at(i).GetColor().GetValue());
-        pos.push_back(segmentLinearData.segmentShadowColor.GetColors().at(i).GetDimension().Value());
+        colors.emplace_back(segmentLinearData.segmentShadowColor.GetColors().at(i).GetColor().GetValue());
+        pos.emplace_back(segmentLinearData.segmentShadowColor.GetColors().at(i).GetDimension().Value());
     }
 
     if (segmentLinearData.isFirstData) {
@@ -517,13 +517,13 @@ void DataPanelModifier::PaintProgress(
     std::vector<float> pos;
     size_t length = arcData.progressColors.GetColors().size();
     for (size_t i = 0; i < length; i++) {
-        colors.push_back(arcData.progressColors.GetColors().at(i).GetColor().GetValue());
+        colors.emplace_back(arcData.progressColors.GetColors().at(i).GetColor().GetValue());
         if (arcData.gradientPointBase == 0.0) {
-            pos.push_back(arcData.progressColors.GetColors().at(i).GetDimension().Value());
+            pos.emplace_back(arcData.progressColors.GetColors().at(i).GetDimension().Value());
         } else {
             auto itemPos = (1.0f - arcData.gradientPointBase) *
                 arcData.progressColors.GetColors().at(i).GetDimension().Value() + arcData.gradientPointBase;
-            pos.push_back(itemPos);
+            pos.emplace_back(itemPos);
         }
     }
     pos.at(pos.size() - 1) = 1.0f;

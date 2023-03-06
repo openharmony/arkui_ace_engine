@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 void NavigatorPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     // only register click event once
     if (clickListener_) {
         return;

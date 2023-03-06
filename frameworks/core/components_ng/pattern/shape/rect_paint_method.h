@@ -39,6 +39,9 @@ public:
         if (propertiesFromAncestor_) {
             rectPaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
+        if (paintWrapper->HasForegroundColor()) {
+            rectPaintProperty->UpdateFill(Color::FOREGROUND);
+        }
         rect_.SetSize(paintWrapper->GetContentSize());
         rect_.SetOffset(paintWrapper->GetContentOffset());
 

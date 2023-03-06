@@ -34,12 +34,12 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
     0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
     0, 0, 0, 1.0f, 0 };                                          // alpha transparency
 
-SkPixmap CloneSkPixmap(SkPixmap& srcPixmap)
+SkPixmap CloneSkPixmap(SkPixmap& srcPixmap, const std::unique_ptr<uint8_t[]>& dstPixels)
 {
+    // Media::PixelMap::Create only accepts BGRA ColorType pixmap, have to clone and change ColorType.
     SkImageInfo dstImageInfo = SkImageInfo::Make(srcPixmap.info().width(), srcPixmap.info().height(),
         SkColorType::kBGRA_8888_SkColorType, srcPixmap.alphaType());
-    auto dstPixels = std::make_unique<uint8_t[]>(srcPixmap.computeByteSize());
-    SkPixmap dstPixmap(dstImageInfo, dstPixels.release(), srcPixmap.rowBytes());
+    SkPixmap dstPixmap(dstImageInfo, dstPixels.get(), srcPixmap.rowBytes());
 
     SkBitmap dstBitmap;
     if (!dstBitmap.installPixels(dstPixmap)) {
@@ -160,7 +160,8 @@ RefPtr<PixelMap> SkiaImage::GetPixelMap()
     if (!rasterImage->peekPixels(&srcPixmap)) {
         return nullptr;
     }
-    SkPixmap newSrcPixmap = CloneSkPixmap(srcPixmap);
+    auto dstPixels = std::make_unique<uint8_t[]>(srcPixmap.computeByteSize());
+    SkPixmap newSrcPixmap = CloneSkPixmap(srcPixmap, dstPixels);
     const auto* addr = newSrcPixmap.addr32();
     auto width = static_cast<int32_t>(newSrcPixmap.width());
     auto height = static_cast<int32_t>(newSrcPixmap.height());
@@ -183,65 +184,17 @@ void SkiaImage::DrawToRSCanvas(
 {
     auto image = GetImage();
     CHECK_NULL_VOID(image || GetCompressData());
-    RSImage rsImage(&image);
-    RSSamplingOptions options;
-
-    // TODO: should not import RSSkCanvas here.
-#ifdef ENABLE_ROSEN_BACKEND
-    auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
-    if (rsCanvas == nullptr) {
+    if (!DrawWithRecordingCanvas(canvas, srcRect, dstRect, radiusXY)) {
+        RSImage rsImage(&image);
+        RSSamplingOptions options;
+        ClipRRect(canvas, dstRect, radiusXY);
         canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-        return;
     }
-    auto skCanvas = rsCanvas->ExportSkCanvas();
-    if (skCanvas == nullptr) {
-        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-        return;
-    }
-    auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
-    if (recordingCanvas == nullptr) {
-        canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-        return;
-    }
-    SkPaint paint;
-    AddFilter(paint);
-    SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
-    if (radiusXY.size() == RADIUS_POINTS_SIZE) {
-        radii[SkRRect::kUpperLeft_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kUpperRight_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kLowerLeft_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kLowerRight_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
-    }
-    recordingCanvas->ClipAdaptiveRRect(radii);
-    auto config = GetPaintConfig();
-    if (config.imageFit_ == ImageFit::TOP_LEFT) {
-        SkAutoCanvasRestore acr(recordingCanvas, true);
-        auto skSrcRect = SkRect::MakeXYWH(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetWidth(), srcRect.GetHeight());
-        auto skDstRect = SkRect::MakeXYWH(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetWidth(), dstRect.GetHeight());
-        recordingCanvas->concat(SkMatrix::MakeRectToRect(skSrcRect, skDstRect, SkMatrix::kFill_ScaleToFit));
-    }
-    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
-        GetCompressWidth(), GetCompressHeight());
-    auto data = GetCompressData();
-    recordingCanvas->DrawImageWithParm(image, std::move(data), rsImageInfo, paint);
-#else
-    canvas.DrawImageRect(rsImage, srcRect, dstRect, options);
-#endif
 }
 
-bool SkiaImage::DrawCompressedImage(
+bool SkiaImage::DrawWithRecordingCanvas(
     RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
-    CHECK_NULL_RETURN_NOLOG(GetCompressData(), false);
-
 #ifdef ENABLE_ROSEN_BACKEND
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
     CHECK_NULL_RETURN(rsCanvas, false);
@@ -275,12 +228,15 @@ bool SkiaImage::DrawCompressedImage(
         auto skDstRect = SkRect::MakeXYWH(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetWidth(), dstRect.GetHeight());
         recordingCanvas->concat(SkMatrix::MakeRectToRect(skSrcRect, skDstRect, SkMatrix::kFill_ScaleToFit));
     }
+    recordingCanvas->scale(config.scaleX_, config.scaleY_);
 
     Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
-    recordingCanvas->DrawImageWithParm(nullptr, std::move(data), rsImageInfo, paint);
-#endif
+    recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);
     return true;
+#else
+    return false;
+#endif
 }
 } // namespace OHOS::Ace::NG

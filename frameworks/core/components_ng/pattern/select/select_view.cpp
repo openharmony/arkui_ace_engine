@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -204,4 +204,17 @@ void SelectView::SetOnSelect(SelectEvent&& onSelect)
     hub->SetSelectEvent(std::move(onSelect));
 }
 
+void SelectView::SetSpace(const Dimension& value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSpace(value);
+}
+
+void SelectView::SetArrowPosition(const ArrowPosition value)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetArrowPosition(value);
+}
 } // namespace OHOS::Ace::NG

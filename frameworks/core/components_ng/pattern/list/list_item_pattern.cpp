@@ -164,6 +164,7 @@ void ListItemPattern::SetSwiperItemForList()
 
 void ListItemPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     if (HasStartNode() || HasEndNode()) {
         axis_ = GetAxis();
         InitSwiperAction();

@@ -30,6 +30,11 @@ var Color;
   Color["Transparent"] = "#00000000";
 })(Color || (Color = {}));
 
+var ColoringStrategy;
+(function (ColoringStrategy){
+  ColoringStrategy["Invert"] = "Invert";
+})(ColoringStrategy || (ColoringStrategy = {}));
+
 var TextInputStyle;
 (function (TextInputStyle) {
   TextInputStyle["Default"] = "Default";
@@ -1024,3 +1029,9 @@ var TextHeightAdaptivePolicy;
   TextHeightAdaptivePolicy[TextHeightAdaptivePolicy["MIN_FONT_SIZE_FIRST"] = 1] = "MIN_FONT_SIZE_FIRST";
   TextHeightAdaptivePolicy[TextHeightAdaptivePolicy["LAYOUT_CONSTRAINT_FIRST"] = 2] = "LAYOUT_CONSTRAINT_FIRST";
 })(TextHeightAdaptivePolicy || (TextHeightAdaptivePolicy = {}));
+
+var ArrowPosition ;
+(function (ArrowPosition ) {
+  ArrowPosition[ArrowPosition["END"] = 0] = "END";
+  ArrowPosition[ArrowPosition["START"] = 1] = "START";
+})(ArrowPosition  || (ArrowPosition  = {}));

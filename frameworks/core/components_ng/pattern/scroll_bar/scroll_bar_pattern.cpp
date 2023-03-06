@@ -35,6 +35,7 @@ void ScrollBarPattern::OnAttachToFrameNode()
 
 void ScrollBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollBarLayoutProperty>();

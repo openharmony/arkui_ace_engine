@@ -65,6 +65,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextInput>::StaticMethod("copyOption", &JSTextField::SetCopyOption);
     JSClass<JSTextInput>::StaticMethod("textMenuOptions", &JSTextField::JsMenuOptionsExtension);
+    JSClass<JSTextInput>::StaticMethod("foregroundColor", &JSTextField::SetForegroundColor);
     // API7 onEditChanged deprecated
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
@@ -93,6 +94,7 @@ void JSTextInputController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextInputController>::Declare("TextInputController");
     JSClass<JSTextInputController>::Method("caretPosition", &JSTextInputController::CaretPosition);
+    JSClass<JSTextInputController>::Method("setTextSelection", &JSTextInputController::SetTextSelection);
     JSClass<JSTextInputController>::Bind(
         globalObj, JSTextInputController::Constructor, JSTextInputController::Destructor);
 }
@@ -116,6 +118,14 @@ void JSTextInputController::CaretPosition(int32_t caretPosition)
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
         controller->CaretPosition(caretPosition);
+    }
+}
+
+void JSTextInputController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->SetTextSelection(selectionStart, selectionEnd);
     }
 }
 

@@ -202,6 +202,17 @@ void SearchModelNG::SetCopyOption(const CopyOptions& copyOptions)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->SetMenuOptionItems(std::move(menuOptionsItems));
+}
+
 void SearchModelNG::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

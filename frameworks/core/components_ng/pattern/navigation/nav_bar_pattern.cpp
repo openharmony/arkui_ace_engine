@@ -24,7 +24,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -187,6 +186,7 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
 
 void NavBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountTitleBar(hostNode);

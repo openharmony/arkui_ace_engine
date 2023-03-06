@@ -124,6 +124,7 @@ void ImageModelNG::SetImageFill(const Color& color)
         ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, imageSourceInfo);
     }
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
 }
 
 void ImageModelNG::SetImageInterpolation(ImageInterpolation interpolation)

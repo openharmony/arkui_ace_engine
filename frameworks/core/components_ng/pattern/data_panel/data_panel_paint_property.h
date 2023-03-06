@@ -109,9 +109,9 @@ public:
             auto theme = pipelineContext->GetTheme<DataPanelTheme>();
             auto colors = theme->GetColorsArray();
             Gradient gradient;
-            for (auto item : colors) {
+            for (const auto& item : colors) {
                 CreateGradient(item, gradient);
-                valueColors.push_back(gradient);
+                valueColors.emplace_back(gradient);
             }
         }
 
@@ -143,7 +143,7 @@ public:
             trackShadow.offsetY = propShadowOption_.value().offsetY;
             trackShadow.colors = propShadowOption_.value().colors;
         } else {
-            trackShadow.radius = theme->GetTrackShadowRadiu().ConvertToVp();
+            trackShadow.radius = theme->GetTrackShadowRadius().ConvertToVp();
             trackShadow.offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
             trackShadow.offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
         }
@@ -154,9 +154,9 @@ public:
             } else {
                 auto colors = theme->GetColorsArray();
                 Gradient gradient;
-                for (auto item : colors) {
+                for (const auto& item : colors) {
                     CreateGradient(item, gradient);
-                    trackShadow.colors.push_back(gradient);
+                    trackShadow.colors.emplace_back(gradient);
                 }
             }
         }

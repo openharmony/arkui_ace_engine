@@ -64,7 +64,7 @@ public:
                 themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_8_END));
             theme->percentageColors_.emplace_back(themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_9_START),
                 themeConstants->GetColor(THEME_DATA_PANEL_CONFIG_COLOR_9_END));
-            theme->trackShadowRadiu_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_RADIU);
+            theme->trackShadowRadius_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_RADIU);
             theme->trackShadowOffsetX_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_OFFSETX);
             theme->trackShadowOffsetY_ = themeConstants->GetDimension(THEME_DATA_PANEL_TRACKSHADOW_OFFSETY);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
@@ -83,7 +83,7 @@ public:
                 return;
             }
             theme->backgroundColor_ = dataPanelPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
-            theme->trackShadowRadiu_ = dataPanelPattern->GetAttr<Dimension>(DATA_PANEL_TRACK_SHADOW_RADIU, 0.0_vp);
+            theme->trackShadowRadius_ = dataPanelPattern->GetAttr<Dimension>(DATA_PANEL_TRACK_SHADOW_RADIU, 0.0_vp);
             theme->loadingColors_.first = dataPanelPattern->GetAttr<Color>(DATA_PANEL_LOADING_COLOR_END, Color::BLACK);
             theme->loadingColors_.second =
                 dataPanelPattern->GetAttr<Color>(DATA_PANEL_LOADING_COLOR_START, Color::BLACK);
@@ -157,9 +157,9 @@ public:
         return percentageColors_;
     }
 
-    const Dimension& GetTrackShadowRadiu() const
+    const Dimension& GetTrackShadowRadius() const
     {
-        return trackShadowRadiu_;
+        return trackShadowRadius_;
     }
 
     const Dimension& GetTrackShadowOffsetX() const
@@ -181,7 +181,7 @@ private:
     Dimension defaultHeight_;
     Dimension defaultWidth_;
     Dimension thickness_;
-    Dimension trackShadowRadiu_;
+    Dimension trackShadowRadius_;
     Dimension trackShadowOffsetX_;
     Dimension trackShadowOffsetY_;
 };

@@ -356,9 +356,27 @@ void JSTextField::SetCaretColor(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCaretColor(color);
 }
 
-void JSTextField::SetMaxLength(uint32_t value)
+void JSTextField::SetMaxLength(const JSCallbackInfo& info)
 {
-    TextFieldModel::GetInstance()->SetMaxLength(value);
+    if (info.Length() < 1) {
+        LOGI("The arg(SetMaxLength) is wrong, it is supposed to have atleast 1 argument");
+        return;
+    }
+    int32_t maxLength = 0;
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->ResetMaxLength();
+        return;
+    } else if (!info[0]->IsNumber()) {
+        LOGI("Max length should be number");
+        TextFieldModel::GetInstance()->ResetMaxLength();
+        return;
+    }
+    maxLength = info[0]->ToNumber<int32_t>();
+    if (GreatOrEqual(maxLength, 0)) {
+        TextFieldModel::GetInstance()->SetMaxLength(maxLength);
+    } else {
+        TextFieldModel::GetInstance()->ResetMaxLength();
+    }
 }
 
 void JSTextField::SetFontSize(const JSCallbackInfo& info)
@@ -392,6 +410,26 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
         return;
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);
+}
+
+void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        TextFieldModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
+        return;
+    }
+    Color foregroundColor;
+    if (!ParseJsColor(info[0], foregroundColor)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+    TextFieldModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 
 void JSTextField::SetFontStyle(int32_t value)

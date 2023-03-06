@@ -176,6 +176,8 @@ void SearchModelImpl::SetCopyOption(const CopyOptions& copyOptions)
     JSViewSetProperty(&TextFieldComponent::SetCopyOption, copyOptions);
 }
 
+void SearchModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
+
 void SearchModelImpl::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
 {
     auto* stack = ViewStackProcessor::GetInstance();

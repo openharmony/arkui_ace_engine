@@ -143,18 +143,22 @@ void JSDataPanel::ValueColors(const JSCallbackInfo& info)
         return;
     }
 
+    std::vector<OHOS::Ace::NG::Gradient> valueColors;
     if (!info[0]->IsArray() || info[0]->IsEmpty()) {
+        ConvertThemeColor(valueColors);
+        DataPanelModel::GetInstance()->SetValueColors(valueColors);
         return;
     }
 
-    std::vector<OHOS::Ace::NG::Gradient> valueColors;
     auto paramArray = JSRef<JSArray>::Cast(info[0]);
     size_t length = paramArray->Length();
     for (size_t i = 0; i < length && i < MAX_COUNT; i++) {
         auto item = paramArray->GetValueAt(i);
         OHOS::Ace::NG::Gradient gradient;
         if (!ConvertGradientColor(item, gradient)) {
-            return;
+            valueColors.clear();
+            ConvertThemeColor(valueColors);
+            break;
         }
         valueColors.emplace_back(gradient);
     }
@@ -168,7 +172,8 @@ void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
     }
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        return;
+        RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+        color = theme->GetBackgroundColor();
     }
 
     DataPanelModel::GetInstance()->SetTrackBackground(color);
@@ -194,7 +199,7 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
 
 void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (info.Length() < 1) {
         return;
     }
 
@@ -206,7 +211,7 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
     RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
     double radius = 0.0;
     if (!ParseJsDouble(jsRadius, radius)) {
-        radius = theme->GetTrackShadowRadiu().ConvertToVp();
+        radius = theme->GetTrackShadowRadius().ConvertToVp();
     }
 
     double offsetX = 0.0;
@@ -227,7 +232,9 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
             auto item = colorsArray->GetValueAt(i);
             OHOS::Ace::NG::Gradient gradient;
             if (!ConvertGradientColor(item, gradient)) {
-                return;
+                shadowColors.clear();
+                ConvertThemeColor(shadowColors);
+                break;
             }
             shadowColors.emplace_back(gradient);
         }
@@ -271,5 +278,23 @@ bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::
         gradient.AddColor(gradientColorEnd);
     }
     return true;
+}
+
+void JSDataPanel::ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
+{
+    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    auto themeColors = theme->GetColorsArray();
+    for (const auto& item : themeColors) {
+        OHOS::Ace::NG::Gradient gradient;
+        OHOS::Ace::NG::GradientColor gradientColorStart;
+        gradientColorStart.SetColor(item.first);
+        gradientColorStart.SetDimension(Dimension(0.0));
+        gradient.AddColor(gradientColorStart);
+        OHOS::Ace::NG::GradientColor gradientColorEnd;
+        gradientColorEnd.SetColor(item.second);
+        gradientColorEnd.SetDimension(Dimension(1.0));
+        gradient.AddColor(gradientColorEnd);
+        colors.emplace_back(gradient);
+    }
 }
 } // namespace OHOS::Ace::Framework

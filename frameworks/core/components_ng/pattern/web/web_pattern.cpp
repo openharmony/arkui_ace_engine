@@ -890,6 +890,7 @@ void WebPattern::InitEnhanceSurfaceFlag()
 
 void WebPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     // called in each update function.
     auto host = GetHost();
     CHECK_NULL_VOID(host);

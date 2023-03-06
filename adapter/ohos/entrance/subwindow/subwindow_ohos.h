@@ -52,6 +52,7 @@ public:
     ~SubwindowOhos() = default;
 
     void InitContainer() override;
+    void ResizeWindow() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
     void HideMenuNG(int32_t targetId) override;

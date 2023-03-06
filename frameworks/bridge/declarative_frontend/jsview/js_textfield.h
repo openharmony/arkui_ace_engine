@@ -36,7 +36,7 @@ public:
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetCaretColor(const JSCallbackInfo& info);
-    static void SetMaxLength(uint32_t value);
+    static void SetMaxLength(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
@@ -66,6 +66,7 @@ public:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
         const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
+    static void SetForegroundColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework
