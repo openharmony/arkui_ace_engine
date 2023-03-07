@@ -50,11 +50,13 @@ public:
 
     void SetX(const Dimension& x)
     {
+        // bug to fix: unit of x will be convert to PX
         x_ = Dimension(x);
     }
 
     void SetY(const Dimension& y)
     {
+        // bug to fix: unit of x will be convert to PX
         y_ = Dimension(y);
     }
 

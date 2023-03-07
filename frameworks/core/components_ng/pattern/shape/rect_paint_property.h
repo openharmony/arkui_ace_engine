@@ -80,6 +80,20 @@ public:
         radiusArray[3] = { propBottomLeftRadius_.value().GetX().ConvertToPx(),
             propBottomLeftRadius_.value().GetY().ConvertToPx() };
         json->Put("radius", radiusArray.data());
+        if (radiusArray[0][0] == radiusArray[1][0] &&
+            radiusArray[0][0] == radiusArray[2][0] &&
+            radiusArray[0][0] == radiusArray[3][0]) {
+            json->Put("radiusWidth", radiusArray[0][0]);
+        } else {
+            json->Put("radiusWidth", 0);
+        }
+        if (radiusArray[0][1] == radiusArray[1][1] &&
+            radiusArray[0][1] == radiusArray[2][1] &&
+            radiusArray[0][1] == radiusArray[3][1]) {
+            json->Put("radiusHeight", radiusArray[0][1]);
+        } else {
+            json->Put("radiusHeight", 0);
+        }
     }
 
     const std::optional<Radius>& GetTopLeftRadius()
