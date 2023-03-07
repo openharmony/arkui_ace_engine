@@ -120,6 +120,7 @@ template("declarative_js_engine_ark") {
     sources += uicast_configs.uicast_jsi_sources
 
     if (defined(vendor_configs.extra_view_register_sources)) {
+      include_dirs = vendor_configs.ace_advance_dirs
       sources += vendor_configs.extra_view_register_sources
     } else {
       sources += [ "jsi_extra_view_register.cpp" ]

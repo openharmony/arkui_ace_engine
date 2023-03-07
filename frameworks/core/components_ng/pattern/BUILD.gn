@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import(
     "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
@@ -373,6 +374,10 @@ build_component_ng("pattern_ng") {
       "custom_paint/offscreen_canvas_paint_method.cpp",
       "custom_paint/offscreen_canvas_pattern.cpp",
     ]
+  }
+
+  if (defined(vendor_configs.ace_engine_advanced)) {
+    sources += vendor_configs.ace_engine_advanced_pattern
   }
 }
 
