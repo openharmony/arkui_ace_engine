@@ -43,12 +43,12 @@ void ListItemLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("editMode", false);
     }
     if (propEdgeEffect_.has_value()) {
-        auto swipeAction = JsonUtil::Create(false);
+        auto swipeAction = JsonUtil::Create(true);
         swipeAction->Put("edgeEffect", propEdgeEffect_.value() == V2::SwipeEdgeEffect::Spring ?
             "SwipeEdgeEffect.Spring" : "SwipeEdgeEffect.Node");
         json->Put("swipeAction", swipeAction);
     } else {
-        auto swipeAction = JsonUtil::Create(false);
+        auto swipeAction = JsonUtil::Create(true);
         json->Put("swipeAction", swipeAction);
     }
 }

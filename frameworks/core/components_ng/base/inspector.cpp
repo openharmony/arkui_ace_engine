@@ -124,8 +124,8 @@ void GetSpanInspector(
     CHECK_NULL_VOID_NOLOG(spanParentNode);
     auto node = AceType::DynamicCast<FrameNode>(spanParentNode);
     CHECK_NULL_VOID_NOLOG(node);
-    auto jsonNode = JsonUtil::Create(false);
-    auto jsonObject = JsonUtil::Create(false);
+    auto jsonNode = JsonUtil::Create(true);
+    auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
@@ -158,7 +158,7 @@ void GetInspectorChildren(
         GetSpanInspector(parent, jsonNodeArray, pageId);
         return;
     }
-    auto jsonNode = JsonUtil::Create(false);
+    auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
     auto node = AceType::DynamicCast<FrameNode>(parent);
@@ -180,14 +180,14 @@ void GetInspectorChildren(
     jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
     jsonNode->Put("$viewID", node->GetViewId().c_str());
 #endif
-    auto jsonObject = JsonUtil::Create(false);
+    auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);
     }
-    auto jsonChildrenArray = JsonUtil::CreateArray(false);
+    auto jsonChildrenArray = JsonUtil::CreateArray(true);
     for (auto uiNode : children) {
         GetInspectorChildren(uiNode, jsonChildrenArray, pageId);
     }
@@ -266,7 +266,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     if (overlayNode) {
         GetFrameNodeChildren(overlayNode, children, pageId);
     }
-    auto jsonNodeArray = JsonUtil::CreateArray(false);
+    auto jsonNodeArray = JsonUtil::CreateArray(true);
     for (auto& uiNode : children) {
         GetInspectorChildren(uiNode, jsonNodeArray, pageId);
     }
@@ -315,7 +315,7 @@ std::string Inspector::GetInspectorTree(bool isLayoutInspector)
                 continue;
             }
 
-            auto jsonNode = JsonUtil::Create(false);
+            auto jsonNode = JsonUtil::Create(true);
             jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
             jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
             RectF rect;
@@ -323,12 +323,12 @@ std::string Inspector::GetInspectorTree(bool isLayoutInspector)
             rect.SetWidth(inspectorElement->GetGeometryNode()->GetFrameRect().Width());
             rect.SetHeight(inspectorElement->GetGeometryNode()->GetFrameRect().Height());
             jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
-            auto jsonObject = JsonUtil::Create(false);
+            auto jsonObject = JsonUtil::Create(true);
             inspectorElement->ToJsonValue(jsonObject);
             jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
             if (!element->GetChildren().empty()) {
                 if (height > 0) {
-                    auto jsonNodeArray = JsonUtil::CreateArray(false);
+                    auto jsonNodeArray = JsonUtil::CreateArray(true);
                     auto childNodeJSONVec = elementJSONInfoMap[height - 1];
                     for (auto& iter : childNodeJSONVec) {
                         auto parent = iter.first->GetParent();
@@ -349,7 +349,7 @@ std::string Inspector::GetInspectorTree(bool isLayoutInspector)
         }
     }
 
-    auto jsonChildren = JsonUtil::CreateArray(false);
+    auto jsonChildren = JsonUtil::CreateArray(true);
     auto firstDepthNodeVec = elementJSONInfoMap[elementJSONInfoMap.size() - 1];
     for (const auto& nodeJSONInfo : firstDepthNodeVec) {
         auto nodeJSONValue = JsonUtil::ParseJsonString(nodeJSONInfo.second);

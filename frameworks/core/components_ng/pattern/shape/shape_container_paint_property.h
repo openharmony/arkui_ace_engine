@@ -74,7 +74,7 @@ public:
 
         auto meshJson = JsonUtil::Create(true);
         if (propImageMesh_.has_value()) {
-            auto jsonValueArray = JsonUtil::CreateArray(false);
+            auto jsonValueArray = JsonUtil::CreateArray(true);
             std::vector<double> array = propImageMesh_->GetMesh();
             for (size_t i = 0; i < array.size(); i++) {
                 auto index = std::to_string(i);
