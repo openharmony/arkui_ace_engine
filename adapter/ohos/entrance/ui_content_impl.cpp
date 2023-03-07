@@ -1552,4 +1552,16 @@ void UIContentImpl::SetErrorEventHandler(
     CHECK_NULL_VOID(front);
     return front->SetErrorEventHandler(std::move(errorCallback));
 }
+
+void UIContentImpl::OnFormSurfaceChange(float width, float height)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    ContainerScope scope(instanceId_);
+    auto density = pipelineContext->GetDensity();
+    pipelineContext->SetRootSize(density, width, height);
+    pipelineContext->OnSurfaceChanged(width, height);
+}
 } // namespace OHOS::Ace

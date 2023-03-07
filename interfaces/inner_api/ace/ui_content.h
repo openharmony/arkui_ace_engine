@@ -125,11 +125,10 @@ public:
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm() {};
+    virtual void OnFormSurfaceChange(float width, float height) {}
 
-    virtual void SetActionEventHandler(
-        std::function<void(const std::string&)>&& actionCallback) = 0;
-    virtual void SetErrorEventHandler(
-        std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
+    virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
+    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
 };
 
 } // namespace OHOS::Ace

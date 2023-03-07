@@ -370,6 +370,15 @@ void FormManagerDelegate::AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCall
     onFormSurfaceNodeCallback_ = callback;
 }
 
+void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        LOGE("callback is null or has released");
+        return;
+    }
+    onFormSurfaceChangeCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback)
 {
     if (!callback || state_ == State::RELEASED) {
@@ -459,6 +468,13 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
             formManagerDelegate->OnFormError(code, msg);
         };
     renderDelegate_->SetErrorEventHandler(std::move(onErrorEventHandler));
+
+    auto&& onSurfaceChangeHandler = [weak = WeakClaim(this)](float width, float height) {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnFormSurfaceChange(width, height);
+    };
+    renderDelegate_->SetSurfaceChangeEventHandler(std::move(onSurfaceChangeHandler));
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -555,6 +571,22 @@ void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)
     }
 
     formRendererDispatcher_->SetAllowUpdate(allowUpdate);
+}
+
+void FormManagerDelegate::NotifySurfaceChange(float width, float height)
+{
+    if (formRendererDispatcher_ == nullptr) {
+        LOGE("NotifySurfaceChange: formRendererDispatcher_ is null");
+        return;
+    }
+    formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height);
+}
+
+void FormManagerDelegate::OnFormSurfaceChange(float width, float height)
+{
+    if (onFormSurfaceChangeCallback_) {
+        onFormSurfaceChangeCallback_(width, height);
+    }
 }
 
 void FormManagerDelegate::OnFormAcquired(const std::string& param)

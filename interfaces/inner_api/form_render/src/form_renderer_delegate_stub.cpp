@@ -26,6 +26,8 @@ FormRendererDelegateStub::FormRendererDelegateStub()
         &FormRendererDelegateStub::HandleOnActionEvent;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR)] =
         &FormRendererDelegateStub::HandleOnError;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CHANGE)] =
+        &FormRendererDelegateStub::HandleOnSurfaceChange;
 }
 
 FormRendererDelegateStub::~FormRendererDelegateStub()
@@ -95,6 +97,15 @@ int32_t FormRendererDelegateStub::HandleOnError(MessageParcel &data, MessageParc
     std::string msg = data.ReadString();
     int32_t errCode = OnError(code, msg);
     reply.WriteInt32(errCode);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnSurfaceChange(MessageParcel& data, MessageParcel& reply)
+{
+    float width = data.ReadFloat();
+    float height = data.ReadFloat();
+    OnSurfaceChange(width, height);
+    reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }
 }  // namespace Ace

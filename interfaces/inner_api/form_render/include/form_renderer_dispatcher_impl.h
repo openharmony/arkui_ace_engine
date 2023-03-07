@@ -23,20 +23,21 @@
 
 namespace OHOS {
 namespace Ace {
+class FormRenderer;
 /**
  * @class FormRendererDispatcher
  * FormRendererDispatcher interface is used to form renderer dispatcher.
  */
 class ACE_EXPORT FormRendererDispatcherImpl : public FormRendererDispatcherStub {
 public:
-    explicit FormRendererDispatcherImpl(const std::shared_ptr<UIContent> uiContent);
+    FormRendererDispatcherImpl(
+        const std::shared_ptr<UIContent> uiContent, const std::shared_ptr<FormRenderer> formRenderer);
     ~FormRendererDispatcherImpl() override = default;
     /**
      * @brief Dispatcher pointer event.
      * @param pointerEvent The pointer event info.
      */
-    void DispatchPointerEvent(
-        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
+    void DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
     /**
      * @brief Set AllowUpdate.
      * @param allowUpdate The allowUpdate.
@@ -44,10 +45,13 @@ public:
     void SetAllowUpdate(bool allowUpdate) override;
     bool IsAllowUpdate();
 
+    void DispatchSurfaceChangeEvent(float width, float height) override;
+
 private:
     std::weak_ptr<UIContent> uiContent_;
+    std::weak_ptr<FormRenderer> formRenderer_;
     bool allowUpdate_ = true;
 };
-}  // namespace Ace
-}  // namespace OHOS
+} // namespace Ace
+} // namespace OHOS
 #endif  // FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_DISPATCHER_IMPL_H
