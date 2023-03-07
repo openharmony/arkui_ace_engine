@@ -32,7 +32,4 @@ group("ace_packages") {
 
   # pid register
   deps += [ "$ace_root/frameworks/core/common/register:hdc_register" ]
-
-  # connect server
-  deps += [ "$ace_root/frameworks/core/common/debugger:connectserver_debugger" ]
 }
