@@ -52,15 +52,21 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (!radioModifier_) {
+            radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
+        }
+        auto paintMethod = MakeRefPtr<RadioPaintMethod>(radioModifier_);
+        paintMethod->SetTotalScale(totalScale_);
+        paintMethod->SetPointScale(pointScale_);
+        paintMethod->SetRingPointScale(ringPointScale_);
+        paintMethod->SetUIStatus(uiStatus_);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        auto paintMethod =
-            MakeRefPtr<RadioPaintMethod>(enabled, isTouch_, isHover_, totalScale_, pointScale_, uiStatus_);
-        paintMethod->SetHotZoneOffset(hotZoneOffset_);
-        paintMethod->SetHotZoneSize(hotZoneSize_);
+        paintMethod->SetEnabled(enabled);
+        paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         return paintMethod;
     }
 
@@ -125,6 +131,7 @@ private:
     void StopAnimation();
     void UpdateTotalScale(float scale);
     void UpdatePointScale(float scale);
+    void UpdateRingPointScale(float scale);
     void UpdateUIStatus(bool check);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -147,6 +154,7 @@ private:
     bool isHover_ = false;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
+    float ringPointScale_ = 0.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -155,7 +163,10 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool isFirstAddhotZoneRect_ = true;
-    
+    TouchHoverAnimationType touchHoverType_;
+
+    RefPtr<RadioModifier> radioModifier_;
+
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };
 } // namespace OHOS::Ace::NG
