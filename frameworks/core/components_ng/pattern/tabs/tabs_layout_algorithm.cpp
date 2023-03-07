@@ -59,10 +59,12 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (swiperWrapper) {
         SizeF parentIdealSize = idealSize;
         if (axis == Axis::HORIZONTAL) {
-            childLayoutConstraint.maxSize.SetHeight(childLayoutConstraint.maxSize.Height() - tabBarSize.Height());
+            childLayoutConstraint.selfIdealSize.SetHeight(childLayoutConstraint.maxSize.Height() - tabBarSize.Height());
+            childLayoutConstraint.selfIdealSize.SetWidth(childLayoutConstraint.maxSize.Width());
             parentIdealSize.SetHeight(idealSize.Height() - tabBarSize.Height());
         } else if (axis == Axis::VERTICAL) {
-            childLayoutConstraint.maxSize.SetWidth(childLayoutConstraint.maxSize.Width() - tabBarSize.Width());
+            childLayoutConstraint.selfIdealSize.SetWidth(childLayoutConstraint.maxSize.Width() - tabBarSize.Width());
+            childLayoutConstraint.selfIdealSize.SetHeight(childLayoutConstraint.maxSize.Height());
             parentIdealSize.SetWidth(idealSize.Width() - tabBarSize.Width());
         }
         childLayoutConstraint.parentIdealSize = OptionalSizeF(parentIdealSize);
