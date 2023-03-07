@@ -21,6 +21,7 @@
 #include "core/components/button/button_component.h"
 #include "core/components/text/text_component.h"
 #include "core/components/touch_listener/touch_listener_component.h"
+#include "core/components_ng/pattern/button/button_view.h"
 #include "core/event/ace_event_handler.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
@@ -36,6 +37,7 @@ public:
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetType(const JSCallbackInfo& info);
     static void SetStateEffect(bool stateEffect);
+    static void SetLableStyle(const JSCallbackInfo& info);
     static void JsBackgroundColor(const JSCallbackInfo& info);
     static void JsRadius(const JSCallbackInfo& info);
     static void JsWidth(const JSCallbackInfo& info);
@@ -56,6 +58,8 @@ private:
     static void SetDefaultAttributes(const RefPtr<ButtonComponent>& buttonComponent);
     static void SetTypeAndStateEffect(const JSRef<JSObject>& obj, const RefPtr<ButtonComponent>& buttonComponent);
     static void SetTypeAndStateEffect(const JSRef<JSObject>& obj);
+    static void GetFontContent(const JSRef<JSVal> obj, NG::ButtonView::ButtonParameters& buttonParameters);
+    static void CompleteParameters(NG::ButtonView::ButtonParameters& buttonParameters);
     static Dimension GetSizeValue(const JSCallbackInfo& info);
     static RefPtr<TextComponent> GetTextComponent();
     static void ResetButtonHeight();

@@ -28,7 +28,6 @@
 #include "core/components/padding/padding_component.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
@@ -37,6 +36,12 @@
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 
 void JSButton::SetFontSize(const JSCallbackInfo& info)
 {
@@ -205,6 +210,124 @@ void JSButton::SetStateEffect(bool stateEffect)
     }
 }
 
+void JSButton::GetFontContent(const JSRef<JSVal> font, NG::ButtonView::ButtonParameters& buttonParameters)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
+    JSRef<JSVal> size = obj->GetProperty("size");
+    Dimension fontSize;
+    if (ParseJsDimensionFp(size, fontSize)) {
+        buttonParameters.fontSize = fontSize;
+    }
+    
+    JSRef<JSVal> weight = obj->GetProperty("weight");
+    if (weight->IsString()) {
+        buttonParameters.fontWeight = ConvertStrToFontWeight(weight->ToString());
+    }
+
+    JSRef<JSVal> family = obj->GetProperty("family");
+    std::vector<std::string> fontFamilies;
+    if (ParseJsFontFamilies(family, fontFamilies)) {
+        buttonParameters.fontFamily = fontFamilies;
+    }
+
+    JSRef<JSVal> style = obj->GetProperty("style");
+    if (style->IsNumber()) {
+        int32_t value = style->ToNumber<int32_t>();
+        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
+            buttonParameters.fontStyle = FONT_STYLES[value];
+        }
+    }
+}
+
+void JSButton::CompleteParameters(NG::ButtonView::ButtonParameters& buttonParameters)
+{
+    auto buttonTheme = GetTheme<ButtonTheme>();
+    if (!buttonTheme) {
+        return;
+    }
+    auto textStyle = buttonTheme->GetTextStyle();
+    if (!buttonParameters.maxLines.has_value()) {
+        buttonParameters.maxLines = buttonTheme->GetTextMaxLines();
+    }
+    if (!buttonParameters.minFontSize.has_value()) {
+        buttonParameters.minFontSize = buttonTheme->GetMinFontSize();
+    }
+    if (!buttonParameters.maxFontSize.has_value()) {
+        buttonParameters.maxFontSize = buttonTheme->GetMaxFontSize();
+    }
+    if (!buttonParameters.fontSize.has_value()) {
+        buttonParameters.fontSize = textStyle.GetFontSize();
+    }
+    if (!buttonParameters.fontWeight.has_value()) {
+        buttonParameters.fontWeight = textStyle.GetFontWeight();
+    }
+    if (!buttonParameters.fontStyle.has_value()) {
+        buttonParameters.fontStyle = textStyle.GetFontStyle();
+    }
+    if (!buttonParameters.heightAdaptivePolicy.has_value()) {
+        buttonParameters.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (!buttonParameters.textOverflow.has_value()) {
+        buttonParameters.textOverflow = TextOverflow::CLIP;
+    }
+}
+
+void JSButton::SetLableStyle(const JSCallbackInfo& info)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGE("info[0] not is Object");
+        return;
+    }
+    
+    NG::ButtonView::ButtonParameters buttonParameters;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+    if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
+        auto overflow = overflowValue->ToNumber<int32_t>();
+        if (overflow >= 0 &&
+            overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&
+            TEXT_OVERFLOWS[overflow] != TextOverflow::MARQUEE) {
+            buttonParameters.textOverflow = TEXT_OVERFLOWS[overflow];
+        }
+    }
+
+    JSRef<JSVal> maxLines = obj->GetProperty("maxLines");
+    if (!maxLines->IsNull() && maxLines->IsNumber()) {
+        buttonParameters.maxLines = maxLines->ToNumber<int32_t>();
+    }
+
+    JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
+    Dimension minFontSize;
+    if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
+        buttonParameters.minFontSize = minFontSize;
+    }
+
+    JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
+    Dimension maxFontSize;
+    if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
+        buttonParameters.maxFontSize = maxFontSize;
+    }
+
+    JSRef<JSVal> adaptHeightValue = obj->GetProperty("heightAdaptivePolicy");
+    if (!adaptHeightValue->IsNull() && adaptHeightValue->IsNumber()) {
+        auto adaptHeight = adaptHeightValue->ToNumber<int32_t>();
+        if (adaptHeight >= 0 && adaptHeight < static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+            buttonParameters.heightAdaptivePolicy = HEIGHT_ADAPTIVE_POLICY[adaptHeight];
+        }
+    }
+
+    JSRef<JSVal> font = obj->GetProperty("font");
+    if (!font->IsNull() && font->IsObject()) {
+        GetFontContent(font, buttonParameters);
+    }
+
+    CompleteParameters(buttonParameters);
+    NG::ButtonView::SetLableStyle(buttonParameters);
+}
+
 void JSButton::JsRemoteMessage(const JSCallbackInfo& info)
 {
     RemoteCallback remoteCallback;
@@ -227,6 +350,7 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("fontFamily", &JSButton::SetFontFamily, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("type", &JSButton::SetType, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("stateEffect", &JSButton::SetStateEffect, MethodOptions::NONE);
+    JSClass<JSButton>::StaticMethod("labelStyle", &JSButton::SetLableStyle, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("onClick", &JSButton::JsOnClick);
     JSClass<JSButton>::StaticMethod("remoteMessage", &JSButton::JsRemoteMessage);
     JSClass<JSButton>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -273,7 +397,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         auto buttonTheme = GetTheme<ButtonTheme>();
         auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
         textStyle.SetMaxLines(buttonTheme ? buttonTheme->GetTextMaxLines() : 1);
-        textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        textStyle.SetTextOverflow(TextOverflow::CLIP);
         textComponent->SetTextStyle(textStyle);
         auto padding = AceType::MakeRefPtr<PaddingComponent>();
         padding->SetPadding(buttonTheme ? buttonTheme->GetPadding() : Edge());

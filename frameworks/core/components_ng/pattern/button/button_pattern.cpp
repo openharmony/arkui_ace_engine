@@ -59,6 +59,46 @@ void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, co
     renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
 }
 
+void ButtonPattern::UpdateTextLayoutProperty(RefPtr<ButtonLayoutProperty> layoutProperty,
+    RefPtr<TextLayoutProperty> textLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    auto label = layoutProperty->GetLabelValue("");
+    textLayoutProperty->UpdateContent(label);
+    if (layoutProperty->GetFontSize().has_value()) {
+        textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
+    }
+    if (layoutProperty->GetFontWeight().has_value()) {
+        textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
+    }
+    if (layoutProperty->GetFontColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value());
+    }
+    if (layoutProperty->GetFontStyle().has_value()) {
+        textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetFontStyle().value());
+    }
+    if (layoutProperty->GetFontFamily().has_value()) {
+        textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
+    }
+    if (layoutProperty->GetTextOverflow().has_value()) {
+        textLayoutProperty->UpdateTextOverflow(layoutProperty->GetTextOverflow().value());
+    }
+    if (layoutProperty->GetMaxLines().has_value()) {
+        textLayoutProperty->UpdateMaxLines(layoutProperty->GetMaxLines().value());
+    }
+    if (layoutProperty->GetMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+    }
+    if (layoutProperty->GetMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+    }
+    if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
+        textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());
+    }
+}
+
 void ButtonPattern::InitButtonLabel()
 {
     auto host = GetHost();
@@ -82,24 +122,7 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto label = layoutProperty->GetLabelValue("");
-    textLayoutProperty->UpdateContent(label);
-
-    if (layoutProperty->GetFontSize().has_value()) {
-        textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
-    }
-    if (layoutProperty->GetFontWeight().has_value()) {
-        textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
-    }
-    if (layoutProperty->GetFontColor().has_value()) {
-        textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value());
-    }
-    if (layoutProperty->GetFontStyle().has_value()) {
-        textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetFontStyle().value());
-    }
-    if (layoutProperty->GetFontFamily().has_value()) {
-        textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
-    }
+    UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }

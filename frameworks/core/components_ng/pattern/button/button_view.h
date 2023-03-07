@@ -27,10 +27,23 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ButtonView {
 public:
+    struct ButtonParameters {
+        std::optional<Ace::TextOverflow> textOverflow;
+        std::optional<uint32_t> maxLines;
+        std::optional<Dimension> minFontSize;
+        std::optional<Dimension> maxFontSize;
+        std::optional<Ace::TextHeightAdaptivePolicy> heightAdaptivePolicy;
+        std::optional<Dimension> fontSize;
+        std::optional<Ace::FontWeight> fontWeight;
+        std::optional<std::vector<std::string>> fontFamily;
+        std::optional<Ace::FontStyle> fontStyle;
+    };
+
     static void CreateWithLabel(const std::string& label);
     static void Create(const std::string& tagName);
     static void SetType(ButtonType buttonType);
     static void SetStateEffect(bool stateEffect);
+    static void SetLableStyle(ButtonParameters& buttonParameters);
     static void SetFontSize(const Dimension& fontSize);
     static void SetFontWeight(Ace::FontWeight fontWeight);
     static void SetFontStyle(Ace::FontStyle fontStyle);
