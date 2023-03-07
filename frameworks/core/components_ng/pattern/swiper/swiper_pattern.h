@@ -285,6 +285,7 @@ private:
 
     bool moveDirection_ = false;
     bool touch_ = false;
+    bool isInit_ = true;
 
     Axis direction_ = Axis::HORIZONTAL;
 

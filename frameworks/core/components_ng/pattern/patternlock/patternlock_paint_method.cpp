@@ -62,7 +62,8 @@ void PatternLockPaintMethod::InitializeParam(const RefPtr<PatternLockPaintProper
     } else {
         sideLength_ = 300.0_vp;
     }
-    if (patternLockPaintProperty->HasCircleRadius()) {
+    if (patternLockPaintProperty->HasCircleRadius() &&
+        patternLockPaintProperty->GetCircleRadiusValue().IsNonNegative()) {
         circleRadius_ = patternLockPaintProperty->GetCircleRadiusValue();
     } else {
         circleRadius_ = 14.0_vp;

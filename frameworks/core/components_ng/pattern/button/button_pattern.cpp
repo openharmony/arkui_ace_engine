@@ -123,6 +123,7 @@ void ButtonPattern::InitTouchEvent()
     CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
+        CHECK_NULL_VOID(buttonPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             buttonPattern->OnTouchDown();
         }
@@ -184,11 +185,12 @@ void ButtonPattern::HandleEnabled()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
+    auto alpha = theme->GetBgDisabledAlpha();
+    auto backgroundColor = renderContext->GetBackgroundColor().value_or(theme->GetBgColor());
     if (!enabled) {
-        auto alpha = theme->GetBgDisabledAlpha();
-        renderContext->BlendBgColor(Color::WHITE.BlendOpacity(alpha));
+        renderContext->OnBackgroundColorUpdate(backgroundColor.BlendOpacity(alpha));
     } else {
-        renderContext->ResetBlendBgColor();
+        renderContext->OnBackgroundColorUpdate(backgroundColor);
     }
 }
 

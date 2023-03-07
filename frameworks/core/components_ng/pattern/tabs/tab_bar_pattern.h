@@ -202,6 +202,9 @@ public:
         return tabBarStyle_;
     }
 
+    void PlayTabBarTranslateAnimation(int32_t targetIndex);
+    void StopTabBarTranslateAnimation();
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -269,6 +272,7 @@ private:
     std::optional<int32_t> hoverIndex_;
     TabBarStyle tabBarStyle_;
     RefPtr<Animator> controller_;
+    RefPtr<Animator> tabBarTranslateController_;
     float currentIndicatorOffset_ = 0.0f;
     bool isAnimating_ = false;
 };
