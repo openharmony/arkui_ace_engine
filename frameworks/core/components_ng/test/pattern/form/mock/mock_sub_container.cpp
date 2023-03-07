@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components/form/sub_container.h"
-
 #include "ashmem.h"
+
+#include "core/components/form/sub_container.h"
 
 namespace OHOS::Ace {
 void SubContainer::Initialize() {}
@@ -25,6 +25,8 @@ void SubContainer::Destroy() {}
 void SubContainer::UpdateRootElementSize() {}
 
 void SubContainer::UpdateSurfaceSize() {}
+
+void SubContainer::UpdateSurfaceSizeWithAnimathion() {}
 
 void SubContainer::RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
