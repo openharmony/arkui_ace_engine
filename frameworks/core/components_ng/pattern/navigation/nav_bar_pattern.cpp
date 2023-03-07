@@ -122,7 +122,7 @@ void BuildTitleBar(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNo
             backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
             break;
         }
-        if (titleBarNode->GetBackButton()) {
+        if (titleBarNode->GetBackButton() && !titleBarLayoutProperty->GetHideBackButtonValue(false)) {
             auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
             CHECK_NULL_VOID(backButtonNode);
             auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
