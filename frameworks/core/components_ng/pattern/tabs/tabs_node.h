@@ -32,6 +32,7 @@ public:
     {}
     ~TabsNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child) override;
+    const RefPtr<UINode> GetContentChildFromGroup() override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     bool HasSwiperNode() const

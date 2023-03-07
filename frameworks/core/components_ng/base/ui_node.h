@@ -297,6 +297,16 @@ public:
     {
         return debugLine_;
     }
+
+    void SetViewId(const std::string& viewId)
+    {
+        viewId_ = viewId;
+    }
+
+    std::string GetViewId() const
+    {
+        return viewId_;
+    }
 #endif
 
 protected:
@@ -349,6 +359,7 @@ private:
 
 #ifdef PREVIEW
     std::string debugLine_;
+    std::string viewId_;
 #endif
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

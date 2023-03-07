@@ -271,6 +271,7 @@ public:
         return currentPage_;
     }
 
+    RefPtr<UINode> GetNewUINode();
 private:
     ViewStackProcessor();
 

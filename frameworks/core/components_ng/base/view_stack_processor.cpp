@@ -51,6 +51,9 @@ RefPtr<UINode> ViewStackProcessor::GetMainElementNode() const
 
 void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)
 {
+#ifdef PREVIEW
+    element->SetViewId(viewKey_);
+#endif
     if (ShouldPopImmediately()) {
         Pop();
     }
@@ -223,6 +226,11 @@ std::string ViewStackProcessor::GetKey()
 std::string ViewStackProcessor::ProcessViewId(const std::string& viewId)
 {
     return viewKey_.empty() ? viewId : viewKey_ + "_" + viewId;
+}
+
+RefPtr<UINode> ViewStackProcessor::GetNewUINode()
+{
+    return Finish();
 }
 
 ScopedViewStackProcessor::ScopedViewStackProcessor()

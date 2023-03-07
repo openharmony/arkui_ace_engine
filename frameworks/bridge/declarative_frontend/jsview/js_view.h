@@ -354,6 +354,8 @@ public:
     }
 
     void IsFirstRender(const JSCallbackInfo& info);
+    void FindChildByIdForPreview(const JSCallbackInfo& info);
+    bool GetChildByViewId(const std::string& viewId, JSRef<JSObject>& targetView);
 
 private:
     void MarkNeedUpdate() override;

@@ -30,6 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
+#include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -344,9 +345,10 @@ public:
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
+    bool ExecuteJsForFastPreview(const std::string& jsCode, const std::string& viewID) override;
 
     void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
-                                  const std::string assetPath, bool isBundle) override
+        const std::string assetPath, bool isBundle) override
     {
         bundleName_ = bundleName;
         moduleName_ = moduleName;

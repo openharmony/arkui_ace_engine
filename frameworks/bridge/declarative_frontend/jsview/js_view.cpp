@@ -543,6 +543,13 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
 
 RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
 {
+#ifdef PREVIEW
+    JSRef<JSVal> id = jsViewObject_->GetProperty("id_");
+    if (id->IsNumber()) {
+        viewId_ = id->ToString();
+        LOGD("JSViewPartialUpdate videId:%{public}s", viewId_.c_str());
+    }
+#endif
     auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string viewId) {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
@@ -740,6 +747,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::Method("elmtIdExists", &JSViewPartialUpdate::JsElementIdExists);
     JSClass<JSViewPartialUpdate>::CustomMethod("isLazyItemRender", &JSViewPartialUpdate::JSGetProxiedItemRenderState);
     JSClass<JSViewPartialUpdate>::CustomMethod("isFirstRender", &JSViewPartialUpdate::IsFirstRender);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
     JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
     JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
 }
@@ -840,6 +849,39 @@ void JSViewPartialUpdate::JSGetProxiedItemRenderState(const JSCallbackInfo& info
 void JSViewPartialUpdate::IsFirstRender(const JSCallbackInfo& info)
 {
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(isFirstRender_)));
+}
+
+void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
+{
+    LOGD("JSViewPartialUpdate::FindChildByIdForPreview");
+    std::string viewId = info[0]->ToString();
+    if (viewId_ == viewId) {
+        LOGD("find child view success");
+        info.SetReturnValue(jsViewObject_);
+        return;
+    }
+    JSRef<JSObject> targetView = JSRef<JSObject>::New();
+    GetChildByViewId(viewId, targetView);
+    auto view = targetView->Unwrap<JSViewPartialUpdate>();
+    if (view) {
+        LOGD("find targetView success");
+        info.SetReturnValue(targetView);
+    }
+    return;
+}
+
+bool JSViewPartialUpdate::GetChildByViewId(const std::string& viewId, JSRef<JSObject>& targetView)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    auto getChildByIdFunc = jsViewObject_->GetProperty("getChildById");
+    if (getChildByIdFunc->IsUndefined() || !getChildByIdFunc->IsFunction()) {
+        LOGW("viewId:%{public}s, getChildById func not found", viewId.c_str());
+        return false;
+    }
+
+    auto jsGetChildByIdFunc = JSRef<JSFunc>::Cast(getChildByIdFunc);
+    targetView = jsGetChildByIdFunc->Call(jsViewObject_);
+    return true;
 }
 
 } // namespace OHOS::Ace::Framework

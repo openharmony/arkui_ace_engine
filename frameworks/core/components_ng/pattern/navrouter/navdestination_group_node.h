@@ -36,6 +36,7 @@ public:
         : GroupNode(tag, nodeId, pattern) {}
     ~NavDestinationGroupNode() override = default;
     void AddChildToGroup(const RefPtr<UINode>& child) override;
+    const RefPtr<UINode> GetContentChildFromGroup() override;
     static RefPtr<NavDestinationGroupNode> GetOrCreateGroupNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
