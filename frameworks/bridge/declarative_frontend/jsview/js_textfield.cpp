@@ -355,9 +355,27 @@ void JSTextField::SetCaretColor(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCaretColor(color);
 }
 
-void JSTextField::SetMaxLength(uint32_t value)
+void JSTextField::SetMaxLength(const JSCallbackInfo& info)
 {
-    TextFieldModel::GetInstance()->SetMaxLength(value);
+    if (info.Length() < 1) {
+        LOGI("The arg(SetMaxLength) is wrong, it is supposed to have atleast 1 argument");
+        return;
+    }
+    int32_t maxLength = 0;
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->ResetMaxLength();
+        return;
+    } else if (!info[0]->IsNumber()) {
+        LOGI("Max length should be number");
+        TextFieldModel::GetInstance()->ResetMaxLength();
+        return;
+    }
+    maxLength = info[0]->ToNumber<int32_t>();
+    if (GreatOrEqual(maxLength, 0)) {
+        TextFieldModel::GetInstance()->SetMaxLength(maxLength);
+    } else {
+        TextFieldModel::GetInstance()->ResetMaxLength();
+    }
 }
 
 void JSTextField::SetFontSize(const JSCallbackInfo& info)

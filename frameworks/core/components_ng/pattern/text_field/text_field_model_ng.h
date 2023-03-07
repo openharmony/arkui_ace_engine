@@ -57,6 +57,7 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void ProcessDefaultPadding(PaddingProperty& paddings);
+    void ResetMaxLength() override;
 };
 
 } // namespace OHOS::Ace::NG
