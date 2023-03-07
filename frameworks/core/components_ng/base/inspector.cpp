@@ -135,6 +135,8 @@ void GetSpanInspector(
                       .append(",")
                       .append(std::to_string(rect.Height()));
     jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
+    jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
+    jsonNode->Put("$viewID", node->GetViewId().c_str());
 #endif
     jsonNodeArray->Put(jsonNode);
 }
@@ -159,12 +161,12 @@ void GetInspectorChildren(
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
 #else
     auto strRec = std::to_string(rect.Left())
-                  .append(",")
-                  .append(std::to_string(rect.Top()))
-                  .append(",")
-                  .append(std::to_string(rect.Width()))
-                  .append(",")
-                  .append(std::to_string(rect.Height()));
+                      .append(",")
+                      .append(std::to_string(rect.Top()))
+                      .append(",")
+                      .append(std::to_string(rect.Width()))
+                      .append(",")
+                      .append(std::to_string(rect.Height()));
     jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
     jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
     jsonNode->Put("$viewID", node->GetViewId().c_str());
