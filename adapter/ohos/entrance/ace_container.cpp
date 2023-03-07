@@ -1106,6 +1106,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
     }
 
     pipelineContext_->SetRootSize(density, width, height);
+    if (isFormRender_) {
+        pipelineContext_->OnSurfaceDensityChanged(density);
+    }
     pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
