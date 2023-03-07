@@ -299,6 +299,10 @@ private:
     mutable std::mutex cardPipelineMutex_;
     RefPtr<Context> context_;
 
+    //app bar to use
+    bool installationFree_ = false;
+    int32_t labelId_;
+
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };
 
