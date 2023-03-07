@@ -162,7 +162,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
         springEffect->SetOutBoundaryCallback([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN_NOLOG(pattern, false);
-            return pattern->IsAtTop() || pattern->IsAtBottom();
+            return pattern->OutBoundaryCallback();
         });
         // add callback to springEdgeEffect
         SetEdgeEffectCallback(springEffect);
