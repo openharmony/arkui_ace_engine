@@ -54,7 +54,11 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE) {
-                tabBarPattern->PlayTabBarTranslateAnimation(index);
+                if (!tabBarPattern->GetChangeByClick()) {
+                    tabBarPattern->PlayTabBarTranslateAnimation(index);
+                } else {
+                    tabBarPattern->SetChangeByClick(false);
+                }
             } else {
                 tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             }
