@@ -36,7 +36,7 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     return navDestinationNode;
 }
 
-void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<Pattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -50,12 +50,14 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
         CHECK_NULL_VOID(layoutProperty);
         AddChild(contentNode);
     }
-    contentNode->AddChild(child);
+    contentNode->AddChild(child, slot);
 }
 
-const RefPtr<UINode> NavDestinationGroupNode::GetContentChildFromGroup()
+void NavDestinationGroupNode::DeleteChildFromGroup(int32_t slot)
 {
-    return GetContentNode();
+    auto navDestination = GetContentNode();
+    CHECK_NULL_VOID(navDestination);
+    navDestination->RemoveChildAtIndex(slot);
 }
 
 void NavDestinationGroupNode::OnAttachToMainTree()

@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG {
 
-void SearchNode::AddChildToGroup(const RefPtr<UINode>& child)
+void SearchNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     if (searchChildren_.find(child->GetId()) != searchChildren_.end()) {
         LOGW("Child has already exist.");
@@ -30,11 +30,6 @@ void SearchNode::AddChildToGroup(const RefPtr<UINode>& child)
     auto searchNode = GetChildren().back();
     CHECK_NULL_VOID_NOLOG(searchNode);
     child->MountToParent(searchNode);
-}
-
-const RefPtr<UINode> SearchNode::GetContentChildFromGroup()
-{
-    return GetChildren().back();
 }
 
 } // namespace OHOS::Ace::NG

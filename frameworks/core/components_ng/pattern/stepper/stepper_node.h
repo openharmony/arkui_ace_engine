@@ -33,8 +33,8 @@ public:
     static RefPtr<StepperNode> GetOrCreateStepperNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
-    const RefPtr<UINode> GetContentChildFromGroup() override;
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
+    void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
 
     bool HasSwiperNode() const
     {

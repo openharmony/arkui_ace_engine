@@ -39,19 +39,21 @@ RefPtr<StepperNode> StepperNode::GetOrCreateStepperNode(
     return stepperNode;
 }
 
-void StepperNode::AddChildToGroup(const RefPtr<UINode>& child)
+void StepperNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     int32_t swiperId = GetSwiperId();
     auto swiperNode = GetChildAtIndex(GetChildIndexById(swiperId));
     if (swiperNode) {
-        child->MountToParent(swiperNode);
+        child->MountToParent(swiperNode, slot);
     }
 }
 
-const RefPtr<UINode> StepperNode::GetContentChildFromGroup()
+void StepperNode::DeleteChildFromGroup(int32_t slot)
 {
     int32_t swiperId = GetSwiperId();
-    return GetChildAtIndex(GetChildIndexById(swiperId));
+    auto swiper = GetChildAtIndex(GetChildIndexById(swiperId));
+    CHECK_NULL_VOID(swiper);
+    swiper->RemoveChildAtIndex(slot);
 }
 
 } // namespace OHOS::Ace::NG

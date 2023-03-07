@@ -39,7 +39,7 @@ RefPtr<CounterNode> CounterNode::GetOrCreateCounterNode(
     return counterNode;
 }
 
-void CounterNode::AddChildToGroup(const RefPtr<UINode>& child)
+void CounterNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     int32_t contentId = GetPattern<CounterPattern>()->GetContentId();
     auto contentNode = GetChildAtIndex(GetChildIndexById(contentId));
@@ -47,16 +47,17 @@ void CounterNode::AddChildToGroup(const RefPtr<UINode>& child)
     child->MountToParent(contentNode);
 }
 
-const RefPtr<UINode> CounterNode::GetContentChildFromGroup()
+void CounterNode::DeleteChildFromGroup(int32_t slot)
 {
     auto pattern = GetPattern<CounterPattern>();
-    CHECK_NULL_RETURN(pattern, nullptr);
+    CHECK_NULL_VOID(pattern);
     if (!pattern->HasContentNode()) {
-        return nullptr;
+        return;
     }
     int32_t contentId = pattern->GetContentId();
     const auto contentNode = GetChildAtIndex(GetChildIndexById(contentId));
-    return contentNode;
+    CHECK_NULL_VOID(contentNode);
+    contentNode->RemoveChild(contentNode->GetFirstChild());
 }
 
 } // namespace OHOS::Ace::NG

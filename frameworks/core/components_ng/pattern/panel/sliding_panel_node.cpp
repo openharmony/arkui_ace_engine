@@ -17,7 +17,7 @@
 
 namespace OHOS::Ace::NG {
 
-void SlidingPanelNode::AddChildToGroup(const RefPtr<UINode>& child)
+void SlidingPanelNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     if (columnChildren_.find(child->GetId()) != columnChildren_.end()) {
         LOGW("Child has already exist.");
@@ -29,11 +29,6 @@ void SlidingPanelNode::AddChildToGroup(const RefPtr<UINode>& child)
     if (columnNode) {
         child->MountToParent(columnNode);
     }
-}
-
-const RefPtr<UINode> SlidingPanelNode::GetContentChildFromGroup()
-{
-    return GetChildren().back();
 }
 
 } // namespace OHOS::Ace::NG

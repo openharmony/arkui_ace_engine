@@ -32,8 +32,7 @@ public:
         : GroupNode(tag, nodeId, pattern, isRoot)
     {}
     ~SlidingPanelNode() override = default;
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
-    const RefPtr<UINode> GetContentChildFromGroup() override;
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
     bool HasColumnNode() const
     {
         return columnId_.has_value();
