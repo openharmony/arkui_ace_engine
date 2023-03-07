@@ -85,6 +85,19 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize =
         CreateIdealSize(constraint.value(), axis, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
+    if (constraint->selfIdealSize.Width().has_value() &&
+        constraint->selfIdealSize.Width().value() > constraint->parentIdealSize.Width().value_or(0.0f)) {
+        idealSize.SetWidth(static_cast<float>(
+            axis == Axis::HORIZONTAL                         ? constraint->parentIdealSize.Width().value_or(0.0f)
+            : tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE ? tabTheme->GetTabBarDefaultWidth().ConvertToPx()
+                                                             : tabTheme->GetTabBarDefaultHeight().ConvertToPx()));
+    }
+    if (constraint->selfIdealSize.Height().has_value() &&
+        constraint->selfIdealSize.Height().value() > constraint->parentIdealSize.Height().value_or(0.0f)) {
+        idealSize.SetHeight(
+            static_cast<float>(axis == Axis::HORIZONTAL ? tabTheme->GetTabBarDefaultHeight().ConvertToPx()
+                                                        : constraint->parentIdealSize.Height().value_or(0.0f)));
+    }
     if (!constraint->selfIdealSize.Width().has_value() && axis == Axis::VERTICAL) {
         idealSize.SetWidth(static_cast<float>(tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE
                                                   ? tabTheme->GetTabBarDefaultWidth().ConvertToPx()
@@ -138,7 +151,7 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     if (layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-        childrenMainSize_ <= frameSize.MainSize(axis) && !isBuilder_) {
+        childrenMainSize_ <= frameSize.MainSize(axis)) {
         indicator_ = indicator;
         auto frontSpace = (frameSize.MainSize(axis) - childrenMainSize_) / 2;
         OffsetF childOffset = (axis == Axis::HORIZONTAL ? OffsetF(frontSpace, 0.0f) : OffsetF(0.0f, frontSpace));
