@@ -1221,7 +1221,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         if (declarativeFrontend) {
-            declarativeFrontend->AttachSubPipelineContext(AceType::DynamicCast<PipelineContext>(pipelineContext_));
+            declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }
         return;
     }
