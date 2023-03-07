@@ -441,14 +441,14 @@ void RosenRenderContext::UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle)
     isBackBlurChanged_ = true;
 }
 
-void RosenRenderContext::UpdateSphericalEffect(float radio)
+void RosenRenderContext::OnSphericalEffectUpdate(float radio)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetSpherizeDegree(radio);
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdatePixelStretchEffect(PixStretchEffectOption& option)
+void RosenRenderContext::OnPixelStretchEffectUpdate(const PixStretchEffectOption& option)
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f pixStretchVector;
@@ -459,7 +459,7 @@ void RosenRenderContext::UpdatePixelStretchEffect(PixStretchEffectOption& option
     RequestNextFrame();
 }
 
-void RosenRenderContext::UpdateLightupEffect(float radio)
+void RosenRenderContext::OnLightUpEffectUpdate(float radio)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetLightUpEffectDegree(radio);

@@ -71,7 +71,7 @@ public:
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
     virtual void SetSphericalEffect(float radio) {}
     virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
-    virtual void SetLightupEffect(float radio) {}
+    virtual void SetLightUpEffect(float radio) {}
 
     virtual void SetPadding(const Dimension& value) = 0;
     virtual void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,

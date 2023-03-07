@@ -162,9 +162,6 @@ public:
 
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const BlurStyleOption& blurStyle) {}
-    virtual void UpdateSphericalEffect(float radio) {}
-    virtual void UpdatePixelStretchEffect(PixStretchEffectOption& option) {}
-    virtual void UpdateLightupEffect(float radio) {}
     virtual void ClipWithRect(const RectF& rectF) {}
 
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
@@ -236,7 +233,12 @@ public:
     virtual void OnZIndexUpdate(int32_t value) {}
 
     virtual void OnBackgroundColorUpdate(const Color& value) {}
-
+    virtual void OnSphericalEffectUpdate(float radio) {}
+    virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
+    virtual void OnLightUpEffectUpdate(float radio) {}
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, float);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, float);
     // transform matrix
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TransformMatrix, Matrix4);
 

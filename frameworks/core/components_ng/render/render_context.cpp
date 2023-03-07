@@ -66,5 +66,14 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
     json->Put("zIndex", propZIndex_.value_or(0));
     json->Put("opacity", propOpacity_.value_or(1));
+    json->Put("lightUpEffect", propLightUpEffect_.value_or(0.0f));
+    json->Put("sphericalEffect", propSphericalEffect_.value_or(0.0f));
+    auto pixStretchEffectOption = propPixelStretchEffect_.value_or(PixStretchEffectOption());
+    auto pixelJsonValue = JsonUtil::Create(true);
+    pixelJsonValue->Put("left", pixStretchEffectOption.left.ConvertToPx());
+    pixelJsonValue->Put("right", pixStretchEffectOption.right.ConvertToPx());
+    pixelJsonValue->Put("top", pixStretchEffectOption.top.ConvertToPx());
+    pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ConvertToPx());
+    json->Put("pixelStretchEffect", pixelJsonValue);
 }
 } // namespace OHOS::Ace::NG

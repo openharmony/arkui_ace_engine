@@ -138,9 +138,9 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
-    void UpdateSphericalEffect(float radio) override;
-    void UpdatePixelStretchEffect(PixStretchEffectOption& option) override;
-    void UpdateLightupEffect(float radio) override;
+    void OnSphericalEffectUpdate(float radio) override;
+    void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
+    void OnLightUpEffectUpdate(float radio) override;
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
