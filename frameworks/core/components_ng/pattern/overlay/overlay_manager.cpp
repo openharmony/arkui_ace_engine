@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -680,13 +680,13 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     return dialog;
 }
 
-void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
-    std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
+    std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     LOGI("OverlayManager::ShowDateDialogPicker");
     auto dialogNode = DatePickerDialogView::Show(
-        dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancelEvent));
+        dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
     OpenDialogAnimation(dialogNode);
 }
 
@@ -734,7 +734,11 @@ bool OverlayManager::RemoveOverlay()
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (AceType::DynamicCast<DialogPattern>(pattern)) {
+            if (FireBackPressEvent()) {
+                return true;
+            }
             CloseDialog(overlay);
+            SetBackPressEvent(nullptr);
             return true;
         } else if (AceType::DynamicCast<BubblePattern>(pattern)) {
             auto popupNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildAtIndex(childrenSize - 1));
