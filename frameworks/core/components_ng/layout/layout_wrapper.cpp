@@ -142,16 +142,17 @@ void LayoutWrapper::WillLayout()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        LOGD("GeometryTransition: node%{public}d will layout", host->GetId());
+        LOGD("GeometryTransition: node%{public}d will layout, priority: %{public}d",
+            host->GetId(), host->GetLayoutPriority());
         geometryTransition->WillLayout(Claim(this));
     }
-    
+
     for (const auto& child : children_) {
         child->WillLayout();
     }
 }
 
-void LayoutWrapper::DidLayout()
+void LayoutWrapper::DidLayout(const RefPtr<LayoutWrapper>& root)
 {
     auto host = GetHostNode();
     if (!layoutProperty_ || !geometryNode_ || !host) {
@@ -160,12 +161,21 @@ void LayoutWrapper::DidLayout()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        geometryTransition->DidLayout(hostNode_);
+        geometryTransition->DidLayout(root, hostNode_);
         LOGD("GeometryTransition: node%{public}d did layout", host->GetId());
     }
 
     for (const auto& child : children_) {
-        child->DidLayout();
+        child->DidLayout(root);
+    }
+
+    if (root == this && !finishCallbacks_.empty()) {
+        for (const auto& callback : finishCallbacks_) {
+            if (callback) {
+                callback();
+            }
+        }
+        finishCallbacks_.clear();
     }
 }
 
@@ -324,6 +334,12 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
     for (const auto& child : children_) {
         if (child) {
+            if (node && node->GetLayoutProperty()) {
+                const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
+                if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
+                    continue;
+                }
+            }
             child->SwapDirtyLayoutWrapperOnMainThread();
         }
     }

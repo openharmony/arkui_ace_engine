@@ -196,6 +196,13 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
+    if (!isSynced_) {
+        isSynced_ = true;
+        auto borderRadius = GetBorderRadius();
+        if (borderRadius.has_value()) {
+            OnBorderRadiusUpdate(borderRadius.value());
+        }
+    }
     SetPivot(0.5f, 0.5f); // default pivot is center
 
     if (firstTransitionIn_) {
@@ -587,6 +594,9 @@ void RosenRenderContext::ScaleAnimation(const AnimationOption& option, double be
 
 void RosenRenderContext::OnBorderRadiusUpdate(const BorderRadiusProperty& value)
 {
+    if (!isSynced_) {
+        return;
+    }
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f cornerRadius;
     cornerRadius.SetValues(static_cast<float>(value.radiusTopLeft.value_or(Dimension()).ConvertToPx()),

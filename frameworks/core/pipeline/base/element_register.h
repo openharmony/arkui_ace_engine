@@ -100,6 +100,10 @@ public:
 
     RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(const std::string& id,
                                                                  const WeakPtr<NG::FrameNode>& frameNode);
+    const std::unordered_map<std::string, RefPtr<NG::GeometryTransition>>& GetGeometryTransitionMap() const
+    {
+        return geometryTransitionMap_;
+    }
 
     void AddPendingRemoveNode(const RefPtr<NG::UINode>& node);
     void ClearPendingRemoveNodes();

@@ -322,9 +322,8 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool skipSync = geometryTransition != nullptr && geometryTransition->IsNodeActive(WeakClaim(this));
-    bool forceSync = geometryTransition != nullptr && geometryTransition->IsNodeInAndIdentity(WeakClaim(this));
-    if (!skipSync && (forceSync || frameSizeChange || frameOffsetChange || HasPositionProp() ||
+    bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
+    if (!skipSync && (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                          (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
         if (pattern_->NeedOverridePaintRect()) {
             renderContext_->SyncGeometryProperties(pattern_->GetOverridePaintRect().value_or(RectF()));
@@ -565,14 +564,14 @@ std::optional<UITask> FrameNode::CreateLayoutTask(bool forceUseMainThread)
             ACE_SCOPED_TRACE("LayoutWrapper::MountToHostOnMainThread");
             if (forceUseMainThread || layoutWrapper->CheckShouldRunOnMain()) {
                 layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout();
+                layoutWrapper->DidLayout(layoutWrapper);
                 return;
             }
             auto host = layoutWrapper->GetHostNode();
             CHECK_NULL_VOID(host);
             host->PostTask([layoutWrapper]() {
                 layoutWrapper->MountToHostOnMainThread();
-                layoutWrapper->DidLayout();
+                layoutWrapper->DidLayout(layoutWrapper);
             });
         }
     };
@@ -697,7 +696,7 @@ RefPtr<LayoutWrapper> FrameNode::UpdateLayoutWrapper(
     do {
         if (CheckNeedMeasure(flag) || forceMeasure) {
             layoutWrapper->SetLayoutAlgorithm(MakeRefPtr<LayoutAlgorithmWrapper>(pattern_->CreateLayoutAlgorithm()));
-            bool forceChildMeasure = CheckMeasureFlag(flag) || forceMeasure;
+            bool forceChildMeasure = CheckMeasureFlag(flag) || CheckMeasureSelfAndChildFlag(flag) || forceMeasure;
             UpdateChildrenLayoutWrapper(layoutWrapper, forceChildMeasure, false);
             break;
         }

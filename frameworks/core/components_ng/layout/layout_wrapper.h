@@ -102,7 +102,7 @@ public:
 
     // Called after layout, perform final portion of additional layout-related tasks, such as final adjustments of
     // geometry position, clean up temporary changes.
-    void DidLayout();
+    void DidLayout(const RefPtr<LayoutWrapper>& root);
 
     const RefPtr<GeometryNode>& GetGeometryNode() const
     {
@@ -230,6 +230,11 @@ public:
 
     void BuildLazyItem();
 
+    void RegisterFinishCallback(std::function<void()>&& finishCallback)
+    {
+        finishCallbacks_.emplace_back(finishCallback);
+    }
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;
@@ -258,6 +263,8 @@ private:
 
     // When the location property is set, it departs from the layout flow.
     bool outOfLayout_ = false;
+
+    std::list<std::function<void()>> finishCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };

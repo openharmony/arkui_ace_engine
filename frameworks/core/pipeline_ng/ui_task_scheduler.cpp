@@ -44,33 +44,51 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
+static inline bool Cmp(const RefPtr<FrameNode>& nodeA, const RefPtr<FrameNode>& nodeB)
+{
+    if (!nodeA || !nodeB) {
+        return false;
+    }
+    return nodeA->GetLayoutPriority() > nodeB->GetLayoutPriority();
+}
+
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
-    // Priority task creation
-    uint64_t time = 0;
+    std::vector<RefPtr<FrameNode>> orderedNodes;
+    bool needReorder = false;
     for (auto&& pageNodes : dirtyLayoutNodes) {
         for (auto&& node : pageNodes.second) {
-            if (!node) {
+            if (!node || node->IsInDestroying()) {
                 continue;
             }
-            if (node->IsInDestroying()) {
-                continue;
-            }
-            time = GetSysTimestamp();
-            auto task = node->CreateLayoutTask(forceUseMainThread);
-            if (task) {
-                if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
-                    (*task)();
-                    time = GetSysTimestamp() - time;
-                    if (frameInfo_ != nullptr) {
-                        frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
-                    }
-                } else {
-                    LOGW("need to use multithread feature");
+            orderedNodes.emplace_back(node);
+            needReorder = node->GetLayoutPriority() != 0 ? true : needReorder;
+        }
+    }
+    if (needReorder) {
+        std::sort(orderedNodes.begin(), orderedNodes.end(), Cmp);
+    }
+
+    // Priority task creation
+    uint64_t time = 0;
+    for (auto& node : orderedNodes) {
+        if (!node) {
+            continue;
+        }
+        time = GetSysTimestamp();
+        auto task = node->CreateLayoutTask(forceUseMainThread);
+        if (task) {
+            if (forceUseMainThread || (task->GetTaskThreadType() == MAIN_TASK)) {
+                (*task)();
+                time = GetSysTimestamp() - time;
+                if (frameInfo_ != nullptr) {
+                    frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
                 }
+            } else {
+                LOGW("need to use multithread feature");
             }
         }
     }
@@ -108,6 +126,36 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     }
 }
 
+bool UITaskScheduler::NeedAdditionalLayout()
+{
+    // if dirtynodes still exist after layout done as new dirty nodes are added during layout,
+    // we need to initiate the additional layout, under normal build layout workflow the additional
+    // layout will not be excuted.
+    if (dirtyLayoutNodes_.empty()) {
+        return false;
+    }
+    for (auto&& pageNodes : dirtyLayoutNodes_) {
+        for (auto&& node : pageNodes.second) {
+            if (!node || !node->GetLayoutProperty()) {
+                continue;
+            }
+            const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
+            if (!geometryTransition || !geometryTransition->IsNodeInAndActive(node)) {
+                continue;
+            }
+            node->GetLayoutProperty()->CleanDirty();
+            node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            auto parent = AceType::DynamicCast<FrameNode>(node->GetParent());
+            if (parent) {
+                parent->GetLayoutProperty()->CleanDirty();
+                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            }
+            LOGD("GeometryTransition needs additional layout, nodes are arranged");
+        }
+    }
+    return true;
+}
+
 void UITaskScheduler::FlushTask()
 {
     CHECK_RUN_ON(UI);
@@ -115,7 +163,7 @@ void UITaskScheduler::FlushTask()
     FlushLayoutTask();
     // after first layout done if dirtynodes still exist due to new dirty nodes are added during fist layout,
     // we need to initiate the second layout, otherwise the second will not be excuted.
-    if (!dirtyLayoutNodes_.empty()) {
+    if (NeedAdditionalLayout()) {
         FlushLayoutTask();
     }
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();

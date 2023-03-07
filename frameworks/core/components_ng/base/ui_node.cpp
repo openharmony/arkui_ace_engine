@@ -133,7 +133,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
     DoAddChild(iter, newNode);
 }
 
-void UINode::Clean()
+void UINode::Clean(bool cleanDirectly)
 {
     int32_t index = 0;
     for (const auto& child : children_) {
@@ -142,7 +142,7 @@ void UINode::Clean()
             disappearingChildren_.emplace_back(child, index);
         }
 
-        if (child->MarkRemoving()) {
+        if (!cleanDirectly && child->MarkRemoving()) {
             // pending remove child is removed from tree but not cleaned completely, we'll keep reference of it
             // and hold its tree integrity temporarily for transition use, of course the pending remove tree is
             // unavailable for ui operations but some nodes in the tree may also be marked dirty as needed to
