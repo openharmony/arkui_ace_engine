@@ -278,7 +278,6 @@ void ImagePattern::LoadImageDataIfNeed()
 void ImagePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    UpdateFillColorIfForegroundColor();
     LoadImageDataIfNeed();
 }
 
