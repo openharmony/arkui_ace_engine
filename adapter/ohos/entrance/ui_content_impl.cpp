@@ -691,27 +691,6 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
     if (!isFormRender_) {
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
-    // for atomic service
-    container->SetInstallationFree(hapModuleInfo ? hapModuleInfo->installationFree : false);
-        if (hapModuleInfo && hapModuleInfo->installationFree) {
-            container->SetSharePanelCallback(
-                [context = context_](const std::string& faBundleName, const std::string& faAbilityName,
-                    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-                    const std::string& abilityName) {
-                    auto sharedContext = context.lock();
-                    CHECK_NULL_VOID_NOLOG(sharedContext);
-                    auto abilityContext =
-                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID_NOLOG(abilityContext);
-                    AAFwk::Want want;
-                    want.SetParam("bundleName", faBundleName);
-                    want.SetParam("moduleName", faModuleName);
-                    want.SetParam("abilityName", faAbilityName);
-                    want.SetParam("hostPkgName", faHostPkgName);
-                    want.SetElementName(bundleName, abilityName);
-                    abilityContext->StartAbility(want, REQUEST_CODE);
-                });
-        }
     }
 
     if (window_) {
@@ -1144,22 +1123,21 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
     // for atomic service
-    container->SetInstallationFree(hapModuleInfo ? hapModuleInfo->installationFree : false);
+    container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
         container->SetSharePanelCallback(
-            [context = context_](const std::string& faBundleName, const std::string& faAbilityName,
-                const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-                const std::string& abilityName) {
+            [context = context_](const std::string& bundleName, const std::string& abilityName) {
                 auto sharedContext = context.lock();
                 CHECK_NULL_VOID_NOLOG(sharedContext);
                 auto abilityContext =
                     OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
                 CHECK_NULL_VOID_NOLOG(abilityContext);
+                auto abilityInfo = abilityContext->GetAbilityInfo();
                 AAFwk::Want want;
-                want.SetParam("bundleName", faBundleName);
-                want.SetParam("moduleName", faModuleName);
-                want.SetParam("abilityName", faAbilityName);
-                want.SetParam("hostPkgName", faHostPkgName);
+                want.SetParam("abilityName", abilityInfo->name);
+                want.SetParam("bundleName", abilityInfo->bundleName);
+                want.SetParam("moduleName", abilityInfo->moduleName);
+                want.SetParam("hostPkgName", abilityInfo->bundleName);
                 want.SetElementName(bundleName, abilityName);
                 abilityContext->StartAbility(want, REQUEST_CODE);
             });
