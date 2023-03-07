@@ -334,6 +334,7 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
     for (const auto& child : children_) {
         if (child) {
+            auto node = child->GetHostNode();
             if (node && node->GetLayoutProperty()) {
                 const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
                 if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
