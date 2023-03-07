@@ -304,6 +304,10 @@ void AceAbility::InitEnv()
         appResourcesPath.append(DELIMITER);
     }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
+        // eTS Card
+        if (runArgs_.aceVersion == AceVersion::ACE_2_0 && runArgs_.formsEnabled) {
+            paths.push_back(runArgs_.assetPath + DELIMITER + "ets");
+        }
         paths.push_back(appResourcesPath);
         paths.push_back(appResourcesPath + ASSET_PATH_SHARE_STAGE);
     } else {
