@@ -116,6 +116,13 @@ struct BlurStyleOption {
     }
 };
 
+struct PixStretchEffectOption {
+    Dimension top;
+    Dimension bottom;
+    Dimension left;
+    Dimension right;
+};
+
 struct LinearGradientInfo {
     double x1 = 0.0;
     double x2 = 0.0;

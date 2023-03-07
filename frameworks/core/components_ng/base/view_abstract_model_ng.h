@@ -107,6 +107,19 @@ public:
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
     }
 
+    void SetSphericalEffect(float radio) override
+    {
+        ViewAbstract::SetSphericalEffect(radio);
+    }
+    void SetPixelStretchEffect(PixStretchEffectOption& option) override
+    {
+        ViewAbstract::SetPixelStretchEffect(option);
+    }
+    void SetLightupEffect(float radio) override
+    {
+        ViewAbstract::SetLightupEffect(radio);
+    }
+
     void SetPadding(const Dimension& value) override
     {
         // padding must great or equal zero.

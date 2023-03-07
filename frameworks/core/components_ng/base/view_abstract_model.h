@@ -69,6 +69,10 @@ public:
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetSphericalEffect(float radio) {}
+    virtual void SetPixelStretchEffect(PixStretchEffectOption& option) {}
+    virtual void SetLightupEffect(float radio) {}
+
     virtual void SetPadding(const Dimension& value) = 0;
     virtual void SetPaddings(const std::optional<Dimension>& top, const std::optional<Dimension>& bottom,
         const std::optional<Dimension>& left, const std::optional<Dimension>& right) = 0;

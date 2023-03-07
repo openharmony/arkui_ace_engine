@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <optional>
@@ -1854,6 +1855,74 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
         }
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
+}
+
+void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsNumber()) {
+        LOGE("The arg is not a number");
+        return;
+    }
+    auto radio = info[0]->ToNumber<float>();
+    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0f, 1.0f));
+}
+
+void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to be a object");
+        return;
+    }
+    auto jsObject = JSRef<JSObject>::Cast(info[0]);
+    Dimension left;
+    if (!ParseJsDimensionVp(jsObject->GetProperty("left"), left)) {
+        return;
+    }
+    Dimension right;
+    if (!ParseJsDimensionVp(jsObject->GetProperty("right"), right)) {
+        return;
+    }
+    Dimension top;
+    if (!ParseJsDimensionVp(jsObject->GetProperty("top"), top)) {
+        return;
+    }
+    Dimension bottom;
+    if (!ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom)) {
+        return;
+    }
+    PixStretchEffectOption option;
+    if ((left.IsNonNegative() && right.IsNonNegative() && top.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && right.IsNonPositive() && top.IsNonPositive() && bottom.IsNonPositive())) {
+        option.left = left;
+        option.right = right;
+        option.top = top;
+        option.bottom = bottom;
+    }
+    ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
+}
+
+void JSViewAbstract::JsLightupEffect(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    if (!info[0]->IsNumber()) {
+        LOGE("The arg is wrong,it is supposed to be a number!");
+        return;
+    }
+    auto radio = info[0]->ToNumber<float>();
+    ViewAbstractModel::GetInstance()->SetLightupEffect(std::clamp(radio, 0.0f, 1.0f));
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
@@ -4370,6 +4439,9 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
+    JSClass<JSViewAbstract>::StaticMethod("lightupEffect", &JSViewAbstract::JsLightupEffect);
+    JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
+    JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
     JSClass<JSViewAbstract>::StaticMethod("border", &JSViewAbstract::JsBorder);
     JSClass<JSViewAbstract>::StaticMethod("borderWidth", &JSViewAbstract::JsBorderWidth);
     JSClass<JSViewAbstract>::StaticMethod("borderColor", &JSViewAbstract::JsBorderColor);
