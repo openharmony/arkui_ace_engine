@@ -56,7 +56,6 @@ template("ace_osal_preview_source_set") {
       "response_data.cpp",
       "ressched_report.cpp",
       "stage_card_parser.cpp",
-      "stage_module_parser.cpp",
       "system_properties.cpp",
       "trace_id_impl.cpp",
     ]

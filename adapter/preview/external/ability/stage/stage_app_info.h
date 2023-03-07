@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,23 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_STAGE_MODULE_PARSER_H
-#define FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_STAGE_MODULE_PARSER_H
+#ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_ABILITY_STAGE_APP_INFO_H
+#define FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_ABILITY_STAGE_APP_INFO_H
 
 #include <string>
 
+#include "base/json/json_util.h"
 #include "base/log/log.h"
-#include "base/memory/referenced.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "frameworks/base/json/json_util.h"
 
 namespace OHOS::Ace {
+class StageAppInfo : public AceType {
+    DECLARE_ACE_TYPE(StageAppInfo, AceType);
 
-class StageAppInfo : public Referenced {
 public:
     StageAppInfo() = default;
     ~StageAppInfo() override = default;
-    void AppInfoParse(const std::unique_ptr<JsonValue>& root);
+    void Parse(const std::unique_ptr<JsonValue>& root);
     const std::string& GetApiReleaseType() const;
     const std::string& GetBundleName() const;
     const std::string& GetIcon() const;
@@ -60,37 +61,6 @@ private:
     uint32_t versionCode_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(StageAppInfo);
 };
-
-class StageModuleInfo : public Referenced {
-public:
-    StageModuleInfo() = default;
-    ~StageModuleInfo() override = default;
-    void ModuleInfoParse(const std::unique_ptr<JsonValue>& root);
-    const std::string& GetCompileMode() const;
-    const std::string& GetModuleName() const;
-    bool GetPartialUpdateFlag() const;
-
-private:
-    std::string compileMode_;
-    std::string moduleName_;
-    bool isPartialUpdate_ = true;
-    ACE_DISALLOW_COPY_AND_MOVE(StageModuleInfo);
-};
-
-class StageModuleParser : public Referenced {
-public:
-    StageModuleParser();
-    ~StageModuleParser() override = default;
-    void Parse(const std::string& contents);
-    const RefPtr<StageAppInfo>& GetAppInfo() const;
-    const RefPtr<StageModuleInfo>& GetModuleInfo() const;
-
-private:
-    RefPtr<StageAppInfo> stageAppInfo_;
-    RefPtr<StageModuleInfo> stageModuleInfo_;
-    ACE_DISALLOW_COPY_AND_MOVE(StageModuleParser);
-};
-
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_OSAL_STAGE_MODULE_PARSER_H
+#endif // FOUNDATION_ACE_ADAPTER_PREVIEW_EXTERNAL_ABILITY_STAGE_APP_INFO_H
