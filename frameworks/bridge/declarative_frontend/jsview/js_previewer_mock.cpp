@@ -413,4 +413,66 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
 
 void JSXComponentController::Mock(const JSCallbackInfo& info) {}
 
+void JSVideo::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
+        LOGE("video create error, info is invalid.");
+        return;
+    }
+    CreateMockComponent("Video");
+}
+
+void JSVideo::Mock(const JSCallbackInfo& info) {}
+
+void JSVideo::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSVideo>::Declare("Video");
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSVideo>::StaticMethod("create", &JSVideo::Create, opt);
+    JSClass<JSVideo>::StaticMethod("muted", &JSVideo::Mock, opt);
+    JSClass<JSVideo>::StaticMethod("autoPlay", &JSVideo::Mock, opt);
+    JSClass<JSVideo>::StaticMethod("controls", &JSVideo::Mock, opt);
+    JSClass<JSVideo>::StaticMethod("loop", &JSVideo::Mock, opt);
+    JSClass<JSVideo>::StaticMethod("objectFit", &JSVideo::Mock, opt);
+
+    JSClass<JSVideo>::StaticMethod("onStart", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onPause", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onFinish", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onFullscreenChange", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onPrepared", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onSeeking", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onSeeked", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onUpdate", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onError", &JSVideo::Mock);
+
+    JSClass<JSVideo>::StaticMethod("onTouch", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onHover", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onKeyEvent", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onDeleteEvent", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onClick", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onAppear", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("onDisAppear", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("remoteMessage", &JSVideo::Mock);
+
+    JSClass<JSVideo>::Inherit<JSViewAbstract>();
+    // override method
+    JSClass<JSVideo>::StaticMethod("opacity", &JSVideo::Mock);
+    JSClass<JSVideo>::StaticMethod("transition", &JSVideo::Mock);
+    JSClass<JSVideo>::Bind<>(globalObj);
+}
+
+void JSVideoController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSVideoController>::Declare("VideoController");
+    JSClass<JSVideoController>::StaticMethod("start", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("pause", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("stop", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("setCurrentTime", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("requestFullscreen", &JSVideoController::Mock);
+    JSClass<JSVideoController>::StaticMethod("exitFullscreen", &JSVideoController::Mock);
+    JSClass<JSVideoController>::Bind(globalObj);
+}
+
+void JSVideoController::Mock(const JSCallbackInfo& info) {}
+
 } // namespace OHOS::Ace::Framework
