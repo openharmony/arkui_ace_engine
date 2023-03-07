@@ -55,8 +55,10 @@ void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             if (GreatOrEqual(childSize_.Width(), layoutConstraint.maxSize.Width())) {
                 auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
                 auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
-                textLayoutProperty->UpdateAdaptMaxFontSize(buttonTheme->GetMaxFontSize());
-                textLayoutProperty->UpdateAdaptMinFontSize(buttonTheme->GetMinFontSize());
+                textLayoutProperty->UpdateAdaptMaxFontSize(
+                    buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
+                textLayoutProperty->UpdateAdaptMinFontSize(
+                    buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
                 childWrapper->Measure(layoutConstraint);
             }
         }

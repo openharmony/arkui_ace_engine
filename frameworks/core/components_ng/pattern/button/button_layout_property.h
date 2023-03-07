@@ -24,6 +24,10 @@
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_MAXLINES = 1;
+} // namespace
+
 class ACE_EXPORT ButtonLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(ButtonLayoutProperty, LayoutProperty);
 
@@ -44,6 +48,11 @@ public:
         value->propFontStyle_ = CloneFontStyle();
         value->propLabel_ = CloneLabel();
         value->propBorderRadius_ = CloneBorderRadius();
+        value->propTextOverflow_ = CloneTextOverflow();
+        value->propMaxLines_ = CloneMaxLines();
+        value->propMinFontSize_ = CloneMinFontSize();
+        value->propMaxFontSize_ = CloneMaxFontSize();
+        value->propHeightAdaptivePolicy_ = CloneHeightAdaptivePolicy();
         return value;
     }
 
@@ -58,9 +67,15 @@ public:
         ResetFontStyle();
         ResetLabel();
         ResetBorderRadius();
+        ResetTextOverflow();
+        ResetMaxLines();
+        ResetMinFontSize();
+        ResetMaxFontSize();
+        ResetHeightAdaptivePolicy();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Type, ButtonType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextOverflow, Ace::TextOverflow, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, Ace::FontWeight, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontColor, Color, PROPERTY_UPDATE_NORMAL);
@@ -68,6 +83,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontStyle, Ace::FontStyle, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Label, std::string, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BorderRadius, Dimension, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxLines, uint32_t, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MinFontSize, Dimension, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxFontSize, Dimension, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HeightAdaptivePolicy, Ace::TextHeightAdaptivePolicy, PROPERTY_UPDATE_NORMAL);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutProperty);
