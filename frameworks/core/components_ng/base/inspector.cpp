@@ -144,8 +144,8 @@ void GetSpanInspector(
                       .append(",")
                       .append(std::to_string(rect.Height()));
     jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
-    jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
-    jsonNode->Put("$viewID", node->GetViewId().c_str());
+    jsonNode->Put("$debugLine", parent->GetDebugLine().c_str());
+    jsonNode->Put("$viewID", parent->GetViewId().c_str());
 #endif
     jsonNodeArray->Put(jsonNode);
 }

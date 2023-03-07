@@ -48,8 +48,8 @@ private:
     bool OperateRootComponent(RefPtr<Component> newComponent);
     bool OperateGeneralComponent(
         int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent);
-    bool OperateRootUINode(RefPtr<NG::FrameNode> newUINode);
-    bool OperateGeneralUINode(int32_t parentID, int32_t slot, RefPtr<NG::FrameNode> newUINode);
+    bool OperateRootUINode(RefPtr<NG::UINode> newUINode);
+    bool OperateGeneralUINode(int32_t parentID, int32_t slot, RefPtr<NG::UINode> newUINode);
     RefPtr<Component> GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root);
     RefPtr<NG::UINode> GetNewFrameNodeWithJsCode(const std::unique_ptr<JsonValue>& root);
     RefPtr<V2::InspectorComposedElement> GetInspectorElementById(NodeId nodeId);
