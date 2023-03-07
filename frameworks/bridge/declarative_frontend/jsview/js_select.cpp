@@ -918,7 +918,7 @@ void JSSelect::SetPaddingBottom(const JSCallbackInfo& info)
 void JSSelect::SetSpace(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
@@ -942,19 +942,19 @@ void JSSelect::SetSpace(const JSCallbackInfo& info)
 void JSSelect::SetArrowPosition(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
         return;
     }
 
-    int32_t direction;
+    int32_t direction = 0;
     if (!ParseJsInt32(info[0], direction)) {
-        LOGE("direction is wrong");
+        LOGI("direction is wrong");
         direction = 0;
     }
 
     if (static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::START &&
         static_cast<NG::ArrowPosition>(direction) != NG::ArrowPosition::END) {
-            LOGE("direction is unused FlexDirection");
+            LOGI("direction is unused FlexDirection");
             direction = 0;
         }
 
