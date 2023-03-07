@@ -139,4 +139,8 @@ const char POPUP_BORDER_RADIUS[] = "popup_border_radius";
 const char POPUP_HORIZONTAL_PADDING[] = "popup_horizontal_padding";
 const char POPUP_VERTICAL_PADDING[] = "popup_vertical_padding";
 const char POPUP_BUTTON_TEXT_FONT_SIZE[] = "popup_button_text_font_size";
+
+// pattern attributes for badge
+const char BADGE_BORDER_COLOR[] = "border_color";
+const char BADGE_BORDER_WIDTH[] = "border_width";
 } // namespace OHOS::Ace

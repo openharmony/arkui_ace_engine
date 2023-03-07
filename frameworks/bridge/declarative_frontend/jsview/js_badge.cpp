@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,9 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
         JSRef<JSVal> fontSizeValue = value->GetProperty("fontSize");
         JSRef<JSVal> badgeSizeValue = value->GetProperty("badgeSize");
         JSRef<JSVal> badgeColorValue = value->GetProperty("badgeColor");
+        JSRef<JSVal> borderColorValue = value->GetProperty("borderColor");
+        JSRef<JSVal> borderWidthValue = value->GetProperty("borderWidth");
+        JSRef<JSVal> fontWeightValue = value->GetProperty("fontWeight");
 
         Color colorVal;
         if (ParseJsColor(colorValue, colorVal)) {
@@ -101,6 +104,40 @@ void JSBadge::CreateNG(const JSCallbackInfo& info)
         if (ParseJsColor(badgeColorValue, color)) {
             badgeParameters.badgeColor = color;
         }
+
+        Dimension borderWidth;
+        if (ParseJsDimensionVp(borderWidthValue, borderWidth)) {
+            badgeParameters.badgeBorderWidth = borderWidth;
+        } else {
+            auto badgeTheme = GetTheme<BadgeTheme>();
+            if (!badgeTheme) {
+                LOGW("Get badge theme error");
+                return;
+            }
+            badgeParameters.badgeBorderWidth = badgeTheme->GetBadgeBorderWidth();
+        }
+
+        Color borderColor;
+        if (ParseJsColor(borderColorValue, borderColor)) {
+            badgeParameters.badgeBorderColor = borderColor;
+        } else {
+            auto badgeTheme = GetTheme<BadgeTheme>();
+            if (!badgeTheme) {
+                LOGW("Get badge theme error");
+                return;
+            }
+            badgeParameters.badgeBorderColor = badgeTheme->GetBadgeBorderColor();
+        }
+
+        std::string fontWeight;
+        if (fontWeightValue->IsNumber()) {
+            fontWeight = std::to_string(fontWeightValue->ToNumber<int32_t>());
+        } else {
+            if (!ParseJsString(fontWeightValue, fontWeight)) {
+                badgeParameters.badgeFontWeight = FontWeight::NORMAL;
+            }
+        }
+        badgeParameters.badgeFontWeight = ConvertStrToFontWeight(fontWeight);
     }
 
     auto count = obj->GetProperty("count");

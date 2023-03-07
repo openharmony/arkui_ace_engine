@@ -43,13 +43,42 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension BADGE_FONT_SIZE = 10.0_vp;
 constexpr Dimension BADGE_CIRCLE_SIZE = 30.0_vp;
+constexpr Dimension BADGE_BORDER_WIDTH = 10.0_vp;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float FIRST_ITEM_WIDTH = 100.0f;
 constexpr float FIRST_ITEM_HEIGHT = 50.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
-} // namespace
+
+const FontWeight FontWeights[] {
+    FontWeight::W100,
+    FontWeight::W200,
+    FontWeight::W300,
+    FontWeight::W400,
+    FontWeight::W500,
+    FontWeight::W600,
+    FontWeight::W700,
+    FontWeight::W800,
+    FontWeight::W900,
+    FontWeight::BOLD,
+    FontWeight::NORMAL,
+    FontWeight::BOLDER,
+    FontWeight::LIGHTER,
+    FontWeight::MEDIUM,
+    FontWeight::REGULAR
+};
+
+const Color Colors[] {
+    Color::TRANSPARENT,
+    Color::WHITE,
+    Color::BLACK,
+    Color::RED,
+    Color::GREEN,
+    Color::BLUE,
+    Color::GRAY,
+};
+}  // namespace
 
 class BadgePatternTestNg : public testing::Test {
 public:
@@ -307,5 +336,135 @@ HWTEST_F(BadgePatternTestNg, BadgePatternTest002, TestSize.Level1)
     layoutWrapper->AppendChild(secondChildLayoutWrapper);
     badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+}
+
+/**
+ * @tc.name: BadgePatternTest003
+ * @tc.desc: test badge pattern OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgePatternTestNg, BadgePatternTest003, TestSize.Level1)
+{
+    BadgeView badgeView;
+    NG::BadgeView::BadgeParameters badgeParameters;
+    badgeParameters.badgeFontWeight = FontWeight::W100;
+    badgeView.Create(badgeParameters);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto badgePattern = frameNode->GetPattern<BadgePattern>();
+    ASSERT_NE(badgePattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    // test frameNode has not
+    badgePattern->OnModifyDone();
+
+    // add frameNode child
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode);
+    badgePattern->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode);
+    badgePattern->OnModifyDone();
+    for (auto fontWeight : FontWeights) {
+        layoutProperty->UpdateBadgeFontWeight(fontWeight);
+        badgePattern->OnModifyDone();
+        EXPECT_EQ(layoutProperty->GetBadgeFontWeight().value(), fontWeight);
+    }
+}
+
+/**
+ * @tc.name: BadgePatternTest004
+ * @tc.desc: test badge pattern OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgePatternTestNg, BadgePatternTest004, TestSize.Level1)
+{
+    BadgeView badgeView;
+    NG::BadgeView::BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeBorderWidth = BADGE_BORDER_WIDTH;
+    badgeView.Create(badgeParameters);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto badgePattern = frameNode->GetPattern<BadgePattern>();
+    ASSERT_NE(badgePattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    // test frameNode has not
+    badgePattern->OnModifyDone();
+
+    // add frameNode child
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode);
+    badgePattern->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode);
+    badgePattern->OnModifyDone();
+
+    layoutProperty->UpdateBadgeBorderWidth(BADGE_BORDER_WIDTH);
+    badgePattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetBadgeBorderWidth().value(), BADGE_BORDER_WIDTH);
+}
+
+/**
+ * @tc.name: BadgePatternTest005
+ * @tc.desc: test badge pattern OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgePatternTestNg, BadgePatternTest005, TestSize.Level1)
+{
+    BadgeView badge;
+    NG::BadgeView::BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeBorderColor = Color::BLACK;
+    badge.Create(badgeParameters);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto badgePattern = frameNode->GetPattern<BadgePattern>();
+    ASSERT_NE(badgePattern, nullptr);
+    badgePattern->OnModifyDone();
+
+    // add frameNode child
+    auto rowNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rowNode = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowNodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(rowNode, nullptr);
+    rowNode->MountToParent(frameNode);
+    badgePattern->OnModifyDone();
+
+    // add textNode child
+    auto textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, textNodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(textNode, nullptr);
+    textNode->MountToParent(frameNode);
+    badgePattern->OnModifyDone();
+
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    for (auto color : Colors) {
+        layoutProperty->UpdateBadgeBorderColor(color);
+        badgePattern->OnModifyDone();
+        EXPECT_EQ(layoutProperty->GetBadgeBorderColor().value(), color);
+    }
 }
 } // namespace OHOS::Ace::NG

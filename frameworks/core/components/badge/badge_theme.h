@@ -45,6 +45,8 @@ public:
             theme->showMessage_ = themeConstants->GetInt(THEME_BADGE_SHOWMESSAGE);
             theme->badgeTextColor_ = themeConstants->GetColor(THEME_BADGE_TEXT_COLOR);
             theme->badgeFontSize_ = themeConstants->GetDimension(THEME_BADGE_TEXT_FONT_SIZE);
+            theme->badgeBorderColor_ = themeConstants->GetColor(THEME_BADGE_BORDER_COLOR);
+            theme->badgeBorderWidth_ = themeConstants->GetDimension(THEME_BADGE_BORDER_WIDTH);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
@@ -63,6 +65,8 @@ public:
             theme->badgeColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::BLACK);
             theme->badgeFontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 0.0_vp);
             theme->badgeTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);
+            theme->badgeBorderColor_ = pattern->GetAttr<Color>(BADGE_BORDER_COLOR, Color::BLACK);
+            theme->badgeBorderWidth_ = pattern->GetAttr<Dimension>(BADGE_BORDER_WIDTH, 0.0_vp);
         }
     };
 
@@ -93,6 +97,11 @@ public:
         return badgeTextColor_;
     }
 
+    const Color& GetBadgeBorderColor() const
+    {
+        return badgeBorderColor_;
+    }
+
     const Dimension& GetBadgeFontSize() const
     {
         return badgeFontSize_;
@@ -118,16 +127,23 @@ public:
         return numericalBadgePadding_;
     }
 
+    const Dimension& GetBadgeBorderWidth()
+    {
+        return badgeBorderWidth_;
+    }
+
 protected:
     BadgeTheme() = default;
 
 private:
     Color badgeColor_;
     Color badgeTextColor_;
+    Color badgeBorderColor_;
     int64_t messageCount_;
     BadgePosition badgePosition_;
     bool showMessage_;
     Dimension badgeFontSize_;
+    Dimension badgeBorderWidth_;
     Dimension badgeSize_ = 16.0_vp;
     Dimension littleBadgeSize_ = 6.0_vp;
     Dimension numericalBadgePadding_ = 6.0_vp;

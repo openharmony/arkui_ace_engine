@@ -142,5 +142,9 @@ extern const char POPUP_BORDER_RADIUS[];
 extern const char POPUP_HORIZONTAL_PADDING[];
 extern const char POPUP_VERTICAL_PADDING[];
 extern const char POPUP_BUTTON_TEXT_FONT_SIZE[];
+
+// pattern attributes for badge
+extern const char BADGE_BORDER_COLOR[];
+extern const char BADGE_BORDER_WIDTH[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H
