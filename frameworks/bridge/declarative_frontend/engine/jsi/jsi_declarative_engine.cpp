@@ -1243,9 +1243,32 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
         LOGE("fail to find abc file");
         return false;
     }
+
+#if !defined(PREVIEW)
     if (LoadJsWithModule(urlName.value())) {
         return true;
     }
+#else
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto delegate = engineInstance_->GetDelegate();
+    if (!assetPath_.empty() && !isBundle_) {
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        arkRuntime->SetBundleName(bundleName_);
+        arkRuntime->SetAssetPath(assetPath_);
+        arkRuntime->SetBundle(isBundle_);
+        arkRuntime->SetModuleName(moduleName_);
+        std::vector<uint8_t> content;
+        if (!delegate->GetAssetContent("modules.abc", content)) {
+            LOGE("GetAssetContent \"%{public}s\" failed.", urlName.value().c_str());
+            return false;
+        }
+        if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), urlName.value())) {
+            LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.value().c_str());
+            return false;
+        }
+        return true;
+    }
+#endif
     return ExecuteAbc(urlName.value());
 }
 
