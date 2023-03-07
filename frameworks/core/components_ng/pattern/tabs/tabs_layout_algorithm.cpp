@@ -59,10 +59,12 @@ void TabsLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (swiperWrapper) {
         SizeF parentIdealSize = idealSize;
         if (axis == Axis::HORIZONTAL) {
-            childLayoutConstraint.maxSize.SetHeight(childLayoutConstraint.maxSize.Height() - tabBarSize.Height());
+            childLayoutConstraint.selfIdealSize.SetHeight(childLayoutConstraint.maxSize.Height() - tabBarSize.Height());
+            childLayoutConstraint.selfIdealSize.SetWidth(childLayoutConstraint.maxSize.Width());
             parentIdealSize.SetHeight(idealSize.Height() - tabBarSize.Height());
         } else if (axis == Axis::VERTICAL) {
-            childLayoutConstraint.maxSize.SetWidth(childLayoutConstraint.maxSize.Width() - tabBarSize.Width());
+            childLayoutConstraint.selfIdealSize.SetWidth(childLayoutConstraint.maxSize.Width() - tabBarSize.Width());
+            childLayoutConstraint.selfIdealSize.SetHeight(childLayoutConstraint.maxSize.Height());
             parentIdealSize.SetWidth(idealSize.Width() - tabBarSize.Width());
         }
         childLayoutConstraint.parentIdealSize = OptionalSizeF(parentIdealSize);
@@ -92,39 +94,41 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto tabBarGeometryNode = tabBarWrapper->GetGeometryNode();
     CHECK_NULL_VOID(tabBarGeometryNode);
     auto tabBarFrameSize = tabBarGeometryNode->GetMarginFrameSize();
+    auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
 
     OffsetF tabBarOffset;
     OffsetF swiperOffset;
     if (axis == Axis::HORIZONTAL) {
         float barPosX = (frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL)) / 2;
         if (barPosition == BarPosition::START) {
-            tabBarOffset = OffsetF(barPosX, 0.0f);
-            swiperOffset = OffsetF(0.0f, tabBarFrameSize.MainSize(Axis::VERTICAL));
+            tabBarOffset = OffsetF(barPosX, padding.Offset().GetY());
+            swiperOffset =
+                OffsetF(padding.Offset().GetX(), tabBarFrameSize.MainSize(Axis::VERTICAL) + padding.Offset().GetY());
         } else {
-            tabBarOffset =
-                OffsetF(barPosX, frameSize.MainSize(Axis::VERTICAL) - tabBarFrameSize.MainSize(Axis::VERTICAL));
-            swiperOffset = OffsetF();
+            tabBarOffset = OffsetF(barPosX, frameSize.MainSize(Axis::VERTICAL) -
+                                                tabBarFrameSize.MainSize(Axis::VERTICAL) - padding.Offset().GetY());
+            swiperOffset = padding.Offset();
         }
     } else {
         float barPosY = (frameSize.MainSize(Axis::VERTICAL) - tabBarFrameSize.MainSize(Axis::VERTICAL)) / 2;
         if (barPosition == BarPosition::START) {
-            tabBarOffset = OffsetF(0.0f, barPosY);
-            swiperOffset = OffsetF(tabBarFrameSize.MainSize(Axis::HORIZONTAL), 0.0f);
+            tabBarOffset = OffsetF(padding.Offset().GetX(), barPosY);
+            swiperOffset =
+                OffsetF(tabBarFrameSize.MainSize(Axis::HORIZONTAL) + padding.Offset().GetX(), padding.Offset().GetY());
         } else {
-            tabBarOffset =
-                OffsetF(frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL), barPosY);
-            swiperOffset = OffsetF();
+            tabBarOffset = OffsetF(frameSize.MainSize(Axis::HORIZONTAL) - tabBarFrameSize.MainSize(Axis::HORIZONTAL) -
+                                       padding.Offset().GetX(),
+                barPosY);
+            swiperOffset = padding.Offset();
         }
     }
 
-    auto layoutProperty = DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-
-    tabBarGeometryNode->SetMarginFrameOffset(tabBarOffset + padding.Offset());
+    tabBarGeometryNode->SetMarginFrameOffset(tabBarOffset);
     tabBarWrapper->Layout();
 
-    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset + padding.Offset());
+    swiperWrapper->GetGeometryNode()->SetMarginFrameOffset(swiperOffset);
     swiperWrapper->Layout();
 }
 
