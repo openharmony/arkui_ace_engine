@@ -61,7 +61,7 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
-    void Clean();
+    void Clean(bool cleanDirectly = false);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
@@ -195,6 +195,16 @@ public:
     bool IsRemoving() const
     {
         return isRemoving_;
+    }
+
+    int32_t GetLayoutPriority() const
+    {
+        return layoutPriority_;
+    }
+
+    void SetLayoutPriority(int32_t priority)
+    {
+        layoutPriority_ = priority;
     }
 
     void SetInDestroying()
@@ -379,6 +389,7 @@ private:
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int32_t accessibilityId_ = -1;
+    int32_t layoutPriority_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;

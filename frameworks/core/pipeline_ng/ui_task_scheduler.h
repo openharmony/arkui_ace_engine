@@ -102,15 +102,14 @@ public:
     }
 
 private:
+    bool NeedAdditionalLayout();
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
         {
             if (!nodeLeft || !nodeRight) {
                 return false;
-            }
-            if (nodeLeft->IsRemoving() != nodeRight->IsRemoving()) {
-                return nodeRight->IsRemoving();
             }
             if (nodeLeft->GetDepth() < nodeRight->GetDepth()) {
                 return true;

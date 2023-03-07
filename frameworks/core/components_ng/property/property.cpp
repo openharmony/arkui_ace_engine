@@ -35,7 +35,7 @@ bool CheckNeedRequestParentMeasure(PropertyChangeFlag propertyChangeFlag)
 bool CheckNeedMeasure(PropertyChangeFlag propertyChangeFlag)
 {
     return CheckMeasureFlag(propertyChangeFlag) || CheckMeasureSelfAndParentFlag(propertyChangeFlag) ||
-           CheckMeasureSelfFlag(propertyChangeFlag);
+           CheckMeasureSelfFlag(propertyChangeFlag) || CheckMeasureSelfAndChildFlag(propertyChangeFlag);
 }
 
 bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag)
@@ -68,6 +68,11 @@ bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag)
 bool CheckMeasureSelfAndParentFlag(PropertyChangeFlag propertyChangeFlag)
 {
     return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT) == PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+}
+
+bool CheckMeasureSelfAndChildFlag(PropertyChangeFlag propertyChangeFlag)
+{
+    return ((propertyChangeFlag & PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD) == PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag)
