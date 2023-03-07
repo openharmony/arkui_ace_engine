@@ -116,6 +116,16 @@ void StageModuleInfo::ModuleInfoParse(const std::unique_ptr<JsonValue>& root)
     }
     compileMode_ = root->GetString("compileMode");
     moduleName_ = root->GetString("name");
+    isPartialUpdate_ = false;
+    auto metaData = root->GetValue("metadata");
+    if (metaData && metaData->IsArray()) {
+        for (auto index = 0; index < metaData->GetArraySize(); ++index) {
+            auto item = metaData->GetArrayItem(index);
+            if (item && item->GetString("name") == "ArkTSPartialUpdate") {
+                isPartialUpdate_ = (item->GetString("value", "false") == "true");
+            }
+        }
+    }
 }
 
 const std::string& StageModuleInfo::GetCompileMode() const
@@ -126,6 +136,11 @@ const std::string& StageModuleInfo::GetCompileMode() const
 const std::string& StageModuleInfo::GetModuleName() const
 {
     return moduleName_;
+}
+
+bool StageModuleInfo::GetPartialUpdateFlag() const
+{
+    return isPartialUpdate_;
 }
 
 void StageModuleParser::Parse(const std::string& contents)

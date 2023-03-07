@@ -68,10 +68,12 @@ public:
     void ModuleInfoParse(const std::unique_ptr<JsonValue>& root);
     const std::string& GetCompileMode() const;
     const std::string& GetModuleName() const;
+    bool GetPartialUpdateFlag() const;
 
 private:
     std::string compileMode_;
     std::string moduleName_;
+    bool isPartialUpdate_;
     ACE_DISALLOW_COPY_AND_MOVE(StageModuleInfo);
 };
 
