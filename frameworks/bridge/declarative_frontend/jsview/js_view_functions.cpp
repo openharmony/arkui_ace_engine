@@ -336,6 +336,11 @@ void ViewFunctions::InitViewFunctions(
         LOGD("onBackPress is not a function");
     }
 
+    JSRef<JSVal> jsSetInitiallyProvidedValueFunc = jsObject->GetProperty("setInitiallyProvidedValue");
+    if (jsSetInitiallyProvidedValueFunc->IsFunction()) {
+        jsSetInitiallyProvidedValueFunc_ = JSRef<JSFunc>::Cast(jsSetInitiallyProvidedValueFunc);
+    }
+
     if (!partialUpdate) {
         JSRef<JSVal> jsUpdateWithValueParamsFunc = jsObject->GetProperty("updateWithValueParams");
         if (jsUpdateWithValueParamsFunc->IsFunction()) {
@@ -453,6 +458,11 @@ void ViewFunctions::ExecuteShow()
 void ViewFunctions::ExecuteHide()
 {
     ExecuteFunction(jsOnHideFunc_, "onPageHide");
+}
+
+void ViewFunctions::ExecuteInitiallyProvidedValue(const std::string& jsonData)
+{
+    ExecuteFunctionWithParams(jsSetInitiallyProvidedValueFunc_, "setInitiallyProvidedValue", jsonData);
 }
 
 // Method not needed for Partial Update code path
