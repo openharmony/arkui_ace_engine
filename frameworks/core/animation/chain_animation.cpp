@@ -67,17 +67,22 @@ ChainAnimation::ChainAnimation(
     auto&& callback = [weak = AceType::WeakClaim(this)](uint64_t duration) {
         auto chain = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(chain);
-        chain->TickAnimation();
+        if (!chain->isOverDrag_) {
+            chain->TickAnimation();
+        }
     };
     scheduler_ = AceType::MakeRefPtr<Scheduler>(callback, PipelineBase::GetCurrentContext());
 }
 
-void ChainAnimation::SetDelta(float delta)
+void ChainAnimation::SetDelta(float delta, bool isOverDrag)
 {
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto timestamp = context->GetTimeFromExternalTimer();
-    auto duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
+    double duration = 0.0;
+    if (!isOverDrag) {
+        duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
+    }
     float factor = conductionCoefficient_ * linkageCoefficient_;
     for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
         nodes_[i]->SetDelta(delta * factor, static_cast<float>(duration));
@@ -87,7 +92,8 @@ void ChainAnimation::SetDelta(float delta)
     if (!scheduler_->IsActive()) {
         scheduler_->Start();
     }
-    timestamp_ = context->GetTimeFromExternalTimer();
+    timestamp_ = timestamp;
+    isOverDrag_ = isOverDrag;
 }
 
 void ChainAnimation::TickAnimation()
@@ -165,6 +171,19 @@ void ChainAnimation::SetSpace(float space, float maxSpace, float minSpace)
     for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
         nodes_[i]->SetSpace(space, maxSpace, minSpace);
         nodes_[-i]->SetSpace(space, maxSpace, minSpace);
+    }
+}
+
+void ChainAnimation::SetOverDrag(bool isOverDrag)
+{
+    if (isOverDrag_ == isOverDrag) {
+        return;
+    }
+    isOverDrag_ = isOverDrag;
+    if (!isOverDrag) {
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        timestamp_ = context->GetTimeFromExternalTimer();
     }
 }
 } // namespace OHOS::Ace

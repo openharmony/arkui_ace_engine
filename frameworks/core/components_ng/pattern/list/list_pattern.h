@@ -176,7 +176,7 @@ public:
     void SetChainAnimation(bool enable);
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
-    void ProcessDragUpdate(float dragOffset);
+    void ProcessDragUpdate(float dragOffset, int32_t source);
     float GetChainDelta(int32_t index) const;
 
     // multiSelectable

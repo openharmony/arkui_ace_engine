@@ -304,6 +304,7 @@ bool ListPattern::OutBoundaryCallback()
 {
     bool outBoundary = IsAtTop() || IsAtBottom();
     if (!dragFromSpring_ && outBoundary && chainAnimation_) {
+        chainAnimation_->SetOverDrag(false);
         auto delta = chainAnimation_->SetControlIndex(IsAtTop() ? 0 : maxListItemIndex_);
         currentDelta_ -= delta;
         dragFromSpring_ = true;
@@ -449,7 +450,7 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
         offset = scrollBar->CalcPatternOffset(offset);
         source = SCROLL_FROM_BAR;
     } else {
-        ProcessDragUpdate(offset);
+        ProcessDragUpdate(offset, source);
     }
     return UpdateCurrentOffset(offset, source);
 }
@@ -733,13 +734,14 @@ void ListPattern::ProcessDragStart(float startPosition)
     chainAnimation_->SetMaxIndex(maxListItemIndex_);
 }
 
-void ListPattern::ProcessDragUpdate(float dragOffset)
+void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 {
     CHECK_NULL_VOID(chainAnimation_);
     if (NearZero(dragOffset)) {
         return;
     }
-    chainAnimation_->SetDelta(-dragOffset);
+    bool overDrag = (source == SCROLL_FROM_UPDATE) && (IsAtTop() || IsAtBottom());
+    chainAnimation_->SetDelta(-dragOffset, overDrag);
 }
 
 float ListPattern::GetChainDelta(int32_t index) const
