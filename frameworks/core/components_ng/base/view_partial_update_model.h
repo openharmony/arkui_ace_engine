@@ -42,6 +42,8 @@ struct NodeInfoPU {
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
+
+    std::string jsViewName;
 };
 
 using UpdateTask = std::tuple<int32_t, RefPtr<AceType>, RefPtr<AceType>>;

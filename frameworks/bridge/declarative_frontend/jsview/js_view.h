@@ -362,6 +362,15 @@ public:
     void IsFirstRender(const JSCallbackInfo& info);
     void FindChildByIdForPreview(const JSCallbackInfo& info);
 
+    void SetJSViewName(const std::string& name)
+    {
+        jsViewName = name;
+    }
+    const std::string& GetJSViewName()
+    {
+        return jsViewName;
+    }
+
 private:
     void MarkNeedUpdate() override;
 
@@ -382,6 +391,8 @@ private:
     // Destroy deleted the ref, and thereby triggers the deletion
     // GC -> JS View Object -> JSView C++ Object
     JSRef<JSObject> jsViewObject_;
+
+    std::string jsViewName;
 };
 
 } // namespace OHOS::Ace::Framework

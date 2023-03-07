@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_full_update_model.h"
 #include "core/components_ng/base/view_full_update_model_ng.h"
@@ -640,7 +641,8 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .reloadFunc = std::move(reloadFunction),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
-        .isStatic = IsStatic() };
+        .isStatic = IsStatic(),
+        .jsViewName = GetJSViewName() };
 
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
@@ -759,10 +761,16 @@ void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
 {
     LOGD("creating C++ and JS View Objects ...");
     JSRef<JSObject> thisObj = info.This();
+
+    // Get js view name by this.constructor.name
+    JSRef<JSObject> constructor = thisObj->GetProperty("constructor");
+    JSRef<JSVal> jsViewName = constructor->GetProperty("name");
+    auto viewName = jsViewName->ToString();
     auto* instance = new JSViewPartialUpdate(thisObj);
 
     auto context = info.GetExecutionContext();
     instance->SetContext(context);
+    instance->SetJSViewName(viewName);
 
     //  The JS object owns the C++ object:
     // make sure the C++ is not destroyed when RefPtr thisObj goes out of scope
