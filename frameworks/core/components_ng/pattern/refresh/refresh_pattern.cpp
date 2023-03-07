@@ -92,7 +92,6 @@ void RefreshPattern::OnModifyDone()
 
 void RefreshPattern::CheckCoordinationEvent()
 {
-    movedByScrollableComponent_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto scrollableNode = FindScrollableChild();
@@ -120,7 +119,6 @@ void RefreshPattern::CheckCoordinationEvent()
     };
     coordinationEvent->SetOnScrollEndEvent(onScrollEndEvent);
     scrollablePattern->SetCoordinationEvent(coordinationEvent);
-    movedByScrollableComponent_ = true;
 }
 
 RefPtr<FrameNode> RefreshPattern::FindScrollableChild()
@@ -149,15 +147,6 @@ RefPtr<FrameNode> RefreshPattern::FindScrollableChild()
         }
     }
     return nullptr;
-}
-
-bool RefreshPattern::ScrollComponentReactInMove()
-{
-    auto scrollableNode = scrollableNode_.Upgrade();
-    CHECK_NULL_RETURN_NOLOG(scrollableNode, false);
-    auto scrollablePattern = scrollableNode->GetPattern<ScrollablePattern>();
-    CHECK_NULL_RETURN_NOLOG(scrollablePattern, false);
-    return movedByScrollableComponent_ && scrollablePattern->IsScrollable();
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
@@ -246,33 +235,21 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->ScrollComponentReactInMove()) {
-            return;
-        }
         pattern->HandleDragStart();
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->ScrollComponentReactInMove()) {
-            return;
-        }
         pattern->HandleDragUpdate(static_cast<float>(info.GetMainDelta()));
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->ScrollComponentReactInMove()) {
-            return;
-        }
         pattern->HandleDragEnd();
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (pattern->ScrollComponentReactInMove()) {
-            return;
-        }
         pattern->HandleDragCancel();
     };
     PanDirection panDirection;
