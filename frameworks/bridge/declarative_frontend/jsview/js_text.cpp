@@ -64,9 +64,17 @@ namespace {
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+<<<<<<< HEAD
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::LEFT,
     TextAlign::RIGHT, TextAlign::JUSTIFY };
 
+=======
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
+    TextAlign::LEFT, TextAlign::RIGHT };
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
+>>>>>>> 4008a8b24 (js_text_clock, js_text bugfix)
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -89,6 +97,11 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
+        TextModel::GetInstance()->SetFontSize(DEFAULT_FONT_SIZE);
+        return;
+    }
+    if (!fontSize.IsValid()) {
+        TextModel::GetInstance()->SetFontSize(DEFAULT_FONT_SIZE);
         return;
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
