@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,10 @@ class DataPanelModelImpl : public OHOS::Ace::DataPanelModel {
 public:
     void Create(const std::vector<double>& values, double max, int32_t dataPanelType) override;
     void SetEffect(bool isCloseEffect) override;
+    void SetValueColors(const std::vector<NG::Gradient>& valueColors) override {}
+    void SetTrackBackground(const Color& trackBackgroundColor) override {}
+    void SetStrokeWidth(const Dimension& strokeWidth) override {}
+    void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) override {}
 };
 
 } // namespace OHOS::Ace::Framework

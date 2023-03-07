@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,9 +18,22 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/components_ng/property/gradient_property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+struct DataPanelShadow {
+    double radius = 5.0;
+    double offsetX = 5.0;
+    double offsetY = 5.0;
+    std::vector<Gradient> colors;
+    bool operator==(const DataPanelShadow& rhs) const
+    {
+        return radius == rhs.radius && offsetX == rhs.offsetX && offsetY == rhs.offsetY && colors == rhs.colors;
+    }
+};
 class DataPanelPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(DataPanelPaintProperty, PaintProperty)
 
@@ -36,6 +49,11 @@ public:
         paintProperty->propMax_ = CloneMax();
         paintProperty->propDataPanelType_ = CloneDataPanelType();
         paintProperty->propEffect_ = CloneEffect();
+
+        paintProperty->propValueColors_ = CloneValueColors();
+        paintProperty->propTrackBackground_ = CloneTrackBackground();
+        paintProperty->propStrokeWidth_ = CloneStrokeWidth();
+        paintProperty->propShadowOption_ = CloneShadowOption();
         return paintProperty;
     }
 
@@ -46,6 +64,10 @@ public:
         ResetMax();
         ResetDataPanelType();
         ResetEffect();
+        ResetValueColors();
+        ResetTrackBackground();
+        ResetStrokeWidth();
+        ResetShadowOption();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -61,16 +83,127 @@ public:
         if (propEffect_.has_value()) {
             closeEffect = !propEffect_.value();
         }
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<DataPanelTheme>();
         json->Put("max", std::to_string(propMax_.value_or(100)).c_str());
         json->Put("closeEffect", closeEffect ? "true" : "false");
         json->Put("type", propDataPanelType_ == 1 ? "DataPanelType.Line" : "DataPanelType.Circle");
         json->Put("values", jsonDashArray);
+        json->Put("trackBackgroundColor",
+            GetTrackBackground().value_or(theme->GetBackgroundColor()).ColorToString().c_str());
+        json->Put("strokeWidth", GetStrokeWidth().value_or(theme->GetThickness()).ToString().c_str());
+
+        ToJsonValueColors(json);
+        ToJsonTrackShadow(json);
+    }
+
+    void ToJsonValueColors(std::unique_ptr<JsonValue>& json) const
+    {
+        std::vector<Gradient> valueColors;
+        if (propValueColors_.has_value()) {
+            valueColors = propValueColors_.value();
+        } else {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<DataPanelTheme>();
+            auto colors = theme->GetColorsArray();
+            Gradient gradient;
+            for (const auto& item : colors) {
+                CreateGradient(item, gradient);
+                valueColors.emplace_back(gradient);
+            }
+        }
+
+        auto valueColorsJosnArray = JsonUtil::CreateArray(true);
+        for (size_t i = 0; i < valueColors.size(); ++i) {
+            Gradient gradientItem = valueColors[i];
+            auto gradientItemJsonArray = JsonUtil::CreateArray(true);
+            for (size_t index = 0; index < gradientItem.GetColors().size(); ++index) {
+                auto gradientColor = gradientItem.GetColors()[index];
+                auto gradientColorJosn = JsonUtil::Create(true);
+                gradientColorJosn->Put("color", gradientColor.GetColor().ColorToString().c_str());
+                gradientColorJosn->Put("offset", gradientColor.GetDimension().ToString().c_str());
+                gradientItemJsonArray->Put(std::to_string(index).c_str(), gradientColorJosn);
+            }
+            valueColorsJosnArray->Put(std::to_string(i).c_str(), gradientItemJsonArray);
+        }
+        json->Put("valueColors", valueColorsJosnArray);
+    }
+
+    void ToJsonTrackShadow(std::unique_ptr<JsonValue>& json) const
+    {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<DataPanelTheme>();
+        DataPanelShadow trackShadow;
+        if (propShadowOption_.has_value()) {
+            trackShadow.radius = propShadowOption_.value().radius;
+            trackShadow.offsetX = propShadowOption_.value().offsetX;
+            trackShadow.offsetY = propShadowOption_.value().offsetY;
+            trackShadow.colors = propShadowOption_.value().colors;
+        } else {
+            trackShadow.radius = theme->GetTrackShadowRadius().ConvertToVp();
+            trackShadow.offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
+            trackShadow.offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
+        }
+
+        if (trackShadow.colors.size() == 0) {
+            if (propValueColors_.has_value() && (propValueColors_.value().size() != 0)) {
+                trackShadow.colors = propValueColors_.value();
+            } else {
+                auto colors = theme->GetColorsArray();
+                Gradient gradient;
+                for (const auto& item : colors) {
+                    CreateGradient(item, gradient);
+                    trackShadow.colors.emplace_back(gradient);
+                }
+            }
+        }
+        auto shadowOptionJson = JsonUtil::Create(true);
+        shadowOptionJson->Put("radius", std::to_string(trackShadow.radius).c_str());
+        shadowOptionJson->Put("offsetX", std::to_string(trackShadow.offsetX).c_str());
+        shadowOptionJson->Put("offsetY", std::to_string(trackShadow.offsetY).c_str());
+
+        auto colorsJosnArray = JsonUtil::CreateArray(true);
+        for (size_t i = 0; i < trackShadow.colors.size(); ++i) {
+            Gradient gradientItem = trackShadow.colors[i];
+            auto gradientItemJsonArray = JsonUtil::CreateArray(true);
+            for (size_t index = 0; index < gradientItem.GetColors().size(); ++index) {
+                auto gradientColor = gradientItem.GetColors()[index];
+                auto gradientColorJosn = JsonUtil::Create(true);
+                gradientColorJosn->Put("color", gradientColor.GetColor().ColorToString().c_str());
+                gradientColorJosn->Put("offset", gradientColor.GetDimension().ToString().c_str());
+                gradientItemJsonArray->Put(std::to_string(index).c_str(), gradientColorJosn);
+            }
+            colorsJosnArray->Put(std::to_string(i).c_str(), gradientItemJsonArray);
+        }
+        shadowOptionJson->Put("colors", colorsJosnArray);
+        json->Put("trackShadow", shadowOptionJson);
+    }
+
+    void CreateGradient(const std::pair<Color, Color>& itemParam, Gradient& gradient) const
+    {
+        GradientColor gradientColorStart;
+        gradientColorStart.SetColor(itemParam.first);
+        gradientColorStart.SetDimension(Dimension(0.0));
+        gradient.AddColor(gradientColorStart);
+        GradientColor gradientColorEnd;
+        gradientColorEnd.SetColor(itemParam.second);
+        gradientColorEnd.SetDimension(Dimension(1.0));
+        gradient.AddColor(gradientColorEnd);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<double>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Max, double, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DataPanelType, size_t, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Effect, bool, PROPERTY_UPDATE_RENDER);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ValueColors, std::vector<Gradient>, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TrackBackground, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShadowOption, DataPanelShadow, PROPERTY_UPDATE_RENDER);
+
     ACE_DISALLOW_COPY_AND_MOVE(DataPanelPaintProperty);
 };
 

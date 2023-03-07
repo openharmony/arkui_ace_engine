@@ -186,6 +186,7 @@ template("declarative_js_engine") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
+      "jsview/js_linear_gradient.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",

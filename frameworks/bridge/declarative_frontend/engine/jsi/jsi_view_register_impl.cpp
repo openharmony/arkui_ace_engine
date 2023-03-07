@@ -68,6 +68,7 @@
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
+#include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
@@ -514,6 +515,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "FlowItem", JSWaterFlowItem::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
+    { "LinearGradient", JSLinearGradient::JSBind },
 #ifdef PREVIEW
     { "FormComponent", JSForm::JSBind },
     { "XComponent", JSXComponent::JSBind },
@@ -557,6 +559,7 @@ void RegisterAllModule(BindingTarget globalObj)
     JSSearchController::JSBind(globalObj);
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
+    JSLinearGradient::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
     JSWebController::JSBind(globalObj);
 #endif

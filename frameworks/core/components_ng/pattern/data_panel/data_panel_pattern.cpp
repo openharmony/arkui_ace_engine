@@ -20,15 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
-void DataPanelPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->SetClipToFrame(true);
-}
+void DataPanelPattern::OnAttachToFrameNode() {}
 
 bool DataPanelPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)

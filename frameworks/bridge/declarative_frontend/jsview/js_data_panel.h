@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DATA_PANEL_H
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-
 namespace OHOS::Ace::Framework {
 
 class JSDataPanel : public JSViewAbstract {
@@ -25,7 +24,14 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void CloseEffect(const JSCallbackInfo& info);
-};
+    static void ValueColors(const JSCallbackInfo& info);
+    static void TrackBackground(const JSCallbackInfo& info);
+    static void StrokeWidth(const JSCallbackInfo& info);
+    static void ShadowOption(const JSCallbackInfo& info);
 
+private:
+    static bool ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient);
+    static void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors);
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DATA_PANEL_H
