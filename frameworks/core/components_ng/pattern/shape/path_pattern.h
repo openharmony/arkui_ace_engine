@@ -36,11 +36,6 @@ public:
     PathPattern() = default;
     ~PathPattern() override = default;
 
-    void OnModifyDone() override
-    {
-        SetClipBounds();
-    }
-
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         return MakeRefPtr<PathPaintMethod>(GetAncestorPaintProperty());
