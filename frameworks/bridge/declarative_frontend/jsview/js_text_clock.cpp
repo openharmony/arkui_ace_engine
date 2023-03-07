@@ -138,6 +138,7 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         R"(^([Yy]*[_|\W\s]*[M]*[_|\W\s]*[d]*[_|\W\s]*[D]*[_|\W\s]*[Hh]*[_|\W\s]*[m]*[_|\W\s]*[s]*[_|\W\s]*[S]*)$)");
     if (!std::regex_match(value, pattern)) {
         LOGE("The arg is wrong, because of format matching error.");
+        TextClockModel::GetInstance()->SetFormat("hms");
         return;
     }
     TextClockModel::GetInstance()->SetFormat(value);
