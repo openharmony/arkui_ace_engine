@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1015,6 +1015,13 @@ var TransitionEdge;
     TransitionEdge['START']  = 2;
     TransitionEdge['END']  = 3;
 })(TransitionEdge || (TransitionEdge = {}));
+
+var CtrlKey;
+(function (CtrlKey) {
+  CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
+  CtrlKey[CtrlKey["SHIFT"] = 1] = "SHIFT";
+  CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
+})(CtrlKey || (CtrlKey = {}));
 
 class SubTabBarStyle {
   constructor(content) {

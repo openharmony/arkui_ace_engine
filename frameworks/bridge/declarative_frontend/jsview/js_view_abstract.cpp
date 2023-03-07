@@ -4544,6 +4544,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
+    JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
@@ -5097,6 +5098,31 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
+void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
+{
+    if (info.Length() != 2) {
+        LOGE("JsKeyboardShortcut: The arg is wrong, it is supposed to have 2 arguments");
+        return;
+    }
+    if (!info[0]->IsString() || !info[1]->IsArray()) {
+        LOGE("JsKeyboardShortcut: The param type is invalid.");
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>());
+        return;
+    }
+    std::string value = info[0]->ToString();
+    auto keysArray = JSRef<JSArray>::Cast(info[1]);
+    size_t size = keysArray->Length();
+    std::vector<CtrlKey> keys(size);
+    keys.clear();
+    for (size_t i = 0; i < size; i++) {
+        JSRef<JSVal> key = keysArray->GetValueAt(i);
+        if (key->IsNumber()) {
+            keys.emplace_back(static_cast<CtrlKey>(key->ToNumber<int32_t>()));
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys);
 }
 
 } // namespace OHOS::Ace::Framework

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -979,6 +979,8 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
+    CHECK_NULL_RETURN(eventManager_, false);
+    eventManager_->DispatchKeyboardShortcut(event);
     // Need update while key tab pressed
     if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
         (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
