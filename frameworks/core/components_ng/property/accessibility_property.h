@@ -160,7 +160,7 @@ public:
         return AceTextCategory::INPUT_TYPE_DEFAULT;
     }
 
-    virtual size_t GetCollectionItemCounts() const
+    virtual int32_t GetCollectionItemCounts() const
     {
         return 0;
     }

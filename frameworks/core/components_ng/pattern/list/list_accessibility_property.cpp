@@ -47,7 +47,7 @@ int32_t ListAccessibilityProperty::GetEndIndex() const
     return listPattern->GetEndIndex();
 }
 
-size_t ListAccessibilityProperty::GetCollectionItemCounts() const
+int32_t ListAccessibilityProperty::GetCollectionItemCounts() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, -1);

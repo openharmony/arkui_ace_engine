@@ -59,14 +59,13 @@ int32_t GridAccessibilityProperty::GetEndIndex() const
     return gridLayoutInfo.endIndex_;
 }
 
-size_t GridAccessibilityProperty::GetCollectionItemCounts() const
+int32_t GridAccessibilityProperty::GetCollectionItemCounts() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, 0);
     auto gridPattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, 0);
-    auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
-    return gridLayoutInfo.childrenCount_;
+    return gridPattern->GetChildrenCount();
 }
 
 AceCollectionInfo GridAccessibilityProperty::GetCollectionInfo() const

@@ -36,7 +36,7 @@ int32_t GridAccessibilityProperty::GetEndIndex() const
     return -1;
 }
 
-size_t GridAccessibilityProperty::GetCollectionItemCounts() const
+int32_t GridAccessibilityProperty::GetCollectionItemCounts() const
 {
     return 0;
 }

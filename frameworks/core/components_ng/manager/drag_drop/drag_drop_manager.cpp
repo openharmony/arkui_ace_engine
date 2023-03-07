@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "base/geometry/point.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -308,10 +307,16 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
+    // use -1 for grid item not in eventGrid
+    auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](RefPtr<FrameNode>& eventGrid) {
+        return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
+    };
+
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
-            FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE, draggedIndex);
+            FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
+                getDraggedIndex(preGridTargetFrameNode_));
             preGridTargetFrameNode_ = nullptr;
         }
         return;
@@ -319,15 +324,17 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
 
     if (dragFrameNode == preGridTargetFrameNode_) {
         int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
-        FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, draggedIndex, insertIndex);
+        FireOnItemDragEvent(
+            dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, getDraggedIndex(dragFrameNode), insertIndex);
         return;
     }
 
     if (preGridTargetFrameNode_) {
-        FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE, draggedIndex);
+        FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
+            getDraggedIndex(preGridTargetFrameNode_));
     }
 
-    FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::ENTER, draggedIndex);
+    FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::ENTER, getDraggedIndex(dragFrameNode));
     preGridTargetFrameNode_ = dragFrameNode;
 }
 
@@ -430,9 +437,14 @@ int32_t DragDropManager::GetItemIndex(
     if (dragType == DragType::GRID) {
         auto eventHub = frameNode->GetEventHub<GridEventHub>();
         CHECK_NULL_RETURN(eventHub, -1);
+        if (frameNode != draggedGridFrameNode_) {
+            return eventHub->GetInsertPosition(globalX, globalY);
+        }
         auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
-        if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
-            return eventHub->GetFrameNodeChildSize();
+        if (!itemFrameNode) {
+            if (eventHub->CheckPostionInGrid(globalX, globalY)) {
+                return eventHub->GetFrameNodeChildSize();
+            }
         } else {
             return eventHub->GetGridItemIndex(itemFrameNode);
         }

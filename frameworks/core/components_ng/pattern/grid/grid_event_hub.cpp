@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 
+#include "core/animation/spring_curve.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -63,17 +64,46 @@ bool GridEventHub::CheckPostionInGrid(float x, float y)
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
-    auto size = host->GetGeometryNode()->GetFrameRect();
+    auto size = host->GetRenderContext()->GetPaintRectWithTransform();
+    size.SetOffset(host->GetTransformRelativeOffset());
     return size.IsInRegion(PointF(x, y));
+}
+
+int32_t GridEventHub::GetInsertPosition(float x, float y)
+{
+    if (!CheckPostionInGrid(x, y)) {
+        return -1;
+    }
+
+    auto host = GetFrameNode();
+    CHECK_NULL_RETURN(host, -1);
+    auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+    CHECK_NULL_RETURN(pattern, -1);
+    auto itemFrameNode = FindGridItemByPosition(x, y);
+    if (itemFrameNode) {
+        RefPtr<GridItemPattern> itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_RETURN(itemPattern, 0);
+        auto mainIndex = itemPattern->GetMainIndex();
+        auto crossIndex = itemPattern->GetCrossIndex();
+        return mainIndex * pattern->GetCrossCount() + crossIndex;
+    }
+
+    // on virtual grid item dragged in this grid
+    if (pattern->GetGridLayoutInfo().currentRect_.IsInRegion(PointF(x, y))) {
+        return pattern->GetOriginalIndex();
+    }
+
+    // in grid, but not on any grid item
+    return pattern->GetChildrenCount();
 }
 
 int GridEventHub::GetFrameNodeChildSize()
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, 0);
-    auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+    auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, 0);
-    return pattern->GetGridLayoutInfo().childrenCount_;
+    return pattern->GetChildrenCount();
 }
 
 RefPtr<FrameNode> GridEventHub::FindGridItemByPosition(float x, float y)
@@ -196,6 +226,12 @@ void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
         draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         draggingItem_ = nullptr;
     }
+
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->ClearDragState();
 }
 
 void GridEventHub::HandleOnItemDragCancel()
@@ -213,6 +249,12 @@ void GridEventHub::HandleOnItemDragCancel()
         draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         draggingItem_ = nullptr;
     }
+
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->ClearDragState();
 }
 
 void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
@@ -224,6 +266,16 @@ void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
 
 void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex)
 {
+    LOGI("itemIndex:%{public}d, %{public}p", itemIndex, this);
+    if (itemIndex == -1) {
+        auto host = GetFrameNode();
+        CHECK_NULL_VOID(host);
+        auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+        CHECK_NULL_VOID(pattern);
+        auto insertIndex = pattern->GetChildrenCount();
+        MoveItems(itemIndex, insertIndex);
+    }
+
     if (onItemDragLeave_) {
         onItemDragLeave_(dragInfo, itemIndex);
     }
@@ -231,11 +283,47 @@ void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t ite
 
 void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
 {
+    LOGI("itemIndex:%{public}d, insertIndex:%{public}d, %{public}p", itemIndex, insertIndex, this);
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    insertIndex = (itemIndex == -1 || insertIndex == -1) ? insertIndex : pattern->GetOriginalIndex();
+    pattern->ClearDragState();
     if (draggingItem_) {
         draggingItem_->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     }
     if (onItemDrop_) {
         onItemDrop_(dragInfo, itemIndex, insertIndex, isSuccess);
     }
+}
+
+void GridEventHub::FireOnItemDragMove(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) const
+{
+    MoveItems(itemIndex, insertIndex);
+
+    if (onItemDragMove_) {
+        onItemDragMove_(dragInfo, itemIndex, insertIndex);
+    }
+}
+
+void GridEventHub::MoveItems(int32_t itemIndex, int32_t insertIndex) const
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    constexpr float ANIMATION_CURVE_VELOCITY = 0.0f;    // The move animation spring curve velocity is 0.0
+    constexpr float ANIMATION_CURVE_MASS = 1.0f;        // The move animation spring curve mass is 1.0
+    constexpr float ANIMATION_CURVE_STIFFNESS = 400.0f; // The move animation spring curve stiffness is 110.0
+    constexpr float ANIMATION_CURVE_DAMPING = 38.0f;    // The move animation spring curve damping is 17.0
+    AnimationOption option;
+    constexpr int32_t duration = 400;
+    option.SetDuration(duration);
+    auto curve = MakeRefPtr<SpringCurve>(
+        ANIMATION_CURVE_VELOCITY, ANIMATION_CURVE_MASS, ANIMATION_CURVE_STIFFNESS, ANIMATION_CURVE_DAMPING);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(
+        option, [pattern, itemIndex, insertIndex]() { pattern->MoveItems(itemIndex, insertIndex); }, nullptr);
 }
 } // namespace OHOS::Ace::NG

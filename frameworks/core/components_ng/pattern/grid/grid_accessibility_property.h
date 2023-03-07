@@ -36,7 +36,7 @@ public:
 
     int32_t GetEndIndex() const override;
 
-    size_t GetCollectionItemCounts() const override;
+    int32_t GetCollectionItemCounts() const override;
 
     AceCollectionInfo GetCollectionInfo() const override;
 

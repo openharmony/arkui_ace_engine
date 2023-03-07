@@ -151,6 +151,14 @@ public:
 
     bool OnScrollCallback(float offset, int32_t source) override;
 
+    int32_t GetInsertPosition(float x, float y) const;
+    int32_t GetOriginalIndex() const;
+    int32_t GetCrossCount() const;
+    int32_t GetChildrenCount() const;
+    void MoveItems(int32_t itemIndex, int32_t insertIndex);
+    void ClearDragState();
+    void UpdateRectOfDraggedInItem(int32_t insertIndex);
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
