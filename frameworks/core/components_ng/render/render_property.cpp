@@ -115,6 +115,9 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("y", 0.0);
         json->Put("backgroundImagePosition", jsonValue);
     }
+    if (propBlurRadius.has_value()) {
+        json->Put("backdropBlur", propBlurRadius->ToString().c_str());
+    }
 }
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
