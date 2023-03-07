@@ -100,7 +100,9 @@ void AceContainer::Initialize()
     auto stageContext = AceType::DynamicCast<StageContext>(context_);
     auto faContext = AceType::DynamicCast<FaContext>(context_);
     bool useNewPipe = true;
-    if (stageContext) {
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
+        useNewPipe = false;
+    } else if (stageContext) {
         auto appInfo = stageContext->GetAppInfo();
         CHECK_NULL_VOID(appInfo);
         auto hapModuleInfo = stageContext->GetHapModuleInfo();
@@ -118,8 +120,6 @@ void AceContainer::Initialize()
         auto targetVersion = appInfo->GetTargetAPIVersion();
         auto releaseType = appInfo->GetApiReleaseType();
         useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFA("", compatibleVersion, targetVersion, releaseType);
-    } else if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
-        useNewPipe = false;
     }
     LOGI("Using %{public}s pipeline context ...", (useNewPipe ? "new" : "old"));
     if (useNewPipe) {
