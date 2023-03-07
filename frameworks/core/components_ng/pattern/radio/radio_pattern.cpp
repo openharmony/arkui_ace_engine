@@ -154,6 +154,11 @@ void RadioPattern::InitMouseEvent()
 void RadioPattern::HandleMouseEvent(bool isHover)
 {
     isHover_ = isHover;
+    if (isHover) {
+        touchHoverType_ = TouchHoverAnimationType::HOVER;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::NONE;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkNeedRenderOnly();
@@ -171,7 +176,7 @@ void RadioPattern::OnClick()
     } else {
         paintProperty->UpdateRadioCheck(false);
     }
-    
+
     if (!preCheck_ && !check) {
         paintProperty->UpdateRadioCheck(true);
         UpdateState();
@@ -180,17 +185,25 @@ void RadioPattern::OnClick()
 
 void RadioPattern::OnTouchDown()
 {
+    if (isHover_) {
+        touchHoverType_ = TouchHoverAnimationType::HOVER_TO_PRESS;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::PRESS;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isTouch_ = true;
     host->MarkNeedRenderOnly();
 }
 
 void RadioPattern::OnTouchUp()
 {
+    if (isHover_) {
+        touchHoverType_ = TouchHoverAnimationType::PRESS_TO_HOVER;
+    } else {
+        touchHoverType_ = TouchHoverAnimationType::NONE;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    isTouch_ = false;
     host->MarkNeedRenderOnly();
 }
 
@@ -335,16 +348,16 @@ void RadioPattern::PlayAnimation(bool isOn)
     StopTranslateAnimation();
     RefPtr<KeyframeAnimation<float>> shrinkEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
     RefPtr<KeyframeAnimation<float>> selectEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
+    RefPtr<KeyframeAnimation<float>> selectRingEngine = AceType::MakeRefPtr<KeyframeAnimation<float>>();
     onController_->ClearInterpolators();
     offController_->ClearInterpolators();
     auto shrinkFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, 1.0);
     auto shrinkFrameMid = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_MID_TIME_SLOT, DEFAULT_SHRINK_TIME_SLOT);
-    shrinkFrameMid->SetCurve(Curves::FRICTION);
     auto shrinkFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, 1.0);
-    shrinkFrameEnd->SetCurve(Curves::FRICTION);
     shrinkEngine->AddKeyframe(shrinkFrameStart);
     shrinkEngine->AddKeyframe(shrinkFrameMid);
     shrinkEngine->AddKeyframe(shrinkFrameEnd);
+    shrinkEngine->SetCurve(Curves::FRICTION);
     shrinkEngine->AddListener(Animation<float>::ValueCallback([weak = AceType::WeakClaim(this)](float value) {
         auto radio = weak.Upgrade();
         if (radio) {
@@ -352,28 +365,44 @@ void RadioPattern::PlayAnimation(bool isOn)
         }
     }));
 
-    auto selectFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, isOn ? 1.0 : 0.5);
+    auto selectFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, isOn ? 0.0 : 0.5);
     auto selectFrameMid = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_MID_TIME_SLOT, 0.0);
-    selectFrameMid->SetCurve(Curves::FRICTION);
-    auto selectFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, isOn ? 0.5 : 1.0);
-    selectFrameEnd->SetCurve(Curves::FRICTION);
+    auto selectFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, isOn ? 0.5 : 0.0);
     selectEngine->AddKeyframe(selectFrameStart);
     selectEngine->AddKeyframe(selectFrameMid);
     selectEngine->AddKeyframe(selectFrameEnd);
+    selectEngine->SetCurve(Curves::FRICTION);
     selectEngine->AddListener(Animation<float>::ValueCallback([weak = AceType::WeakClaim(this)](float value) {
         auto radio = weak.Upgrade();
         if (radio) {
             radio->UpdatePointScale(value);
         }
     }));
+
+    auto selectRingFrameStart = AceType::MakeRefPtr<Keyframe<float>>(0.0, isOn ? 1.0 : 0.0);
+    auto selectRingFrameMid = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_MID_TIME_SLOT, 0.0);
+    auto selectRingFrameEnd = AceType::MakeRefPtr<Keyframe<float>>(DEFAULT_END_TIME_SLOT, isOn ? 0.0 : 1.0);
+    selectRingEngine->AddKeyframe(selectRingFrameStart);
+    selectRingEngine->AddKeyframe(selectRingFrameMid);
+    selectRingEngine->AddKeyframe(selectRingFrameEnd);
+    selectRingEngine->SetCurve(Curves::FRICTION);
+    selectRingEngine->AddListener(Animation<float>::ValueCallback([weak = AceType::WeakClaim(this)](float value) {
+        auto radio = weak.Upgrade();
+        if (radio) {
+            radio->UpdateRingPointScale(value);
+        }
+    }));
+
     if (isOn) {
         onController_->AddInterpolator(shrinkEngine);
         onController_->AddInterpolator(selectEngine);
+        onController_->AddInterpolator(selectRingEngine);
         onController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
         onController_->Play();
     } else {
         offController_->AddInterpolator(shrinkEngine);
         offController_->AddInterpolator(selectEngine);
+        offController_->AddInterpolator(selectRingEngine);
         offController_->SetDuration(DEFAULT_RADIO_ANIMATION_DURATION);
         offController_->Play();
     }
@@ -408,6 +437,14 @@ void RadioPattern::UpdateTotalScale(float scale)
 void RadioPattern::UpdatePointScale(float scale)
 {
     pointScale_ = scale;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkNeedRenderOnly();
+}
+
+void RadioPattern::UpdateRingPointScale(float scale)
+{
+    ringPointScale_ = scale;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkNeedRenderOnly();

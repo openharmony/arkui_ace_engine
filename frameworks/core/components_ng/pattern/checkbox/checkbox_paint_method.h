@@ -18,7 +18,8 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/pattern/radio/radio_paint_method.h"
+#include "core/components_ng/pattern/checkbox/checkbox_modifier.h"
+#include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -27,10 +28,36 @@ class CheckBoxPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CheckBoxPaintMethod, NodePaintMethod)
 
 public:
-    CheckBoxPaintMethod(bool enabled, bool isTouch, bool isHover, float shapeScale, UIStatus uiStatus)
-        : enabled_(enabled), isTouch_(isTouch), isHover_(isHover), shapeScale_(shapeScale), uiStatus_(uiStatus) {};
+    explicit CheckBoxPaintMethod(const RefPtr<CheckBoxModifier>& checkboxModifier) : checkboxModifier_(checkboxModifier)
+    {}
+
     ~CheckBoxPaintMethod() override = default;
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(checkboxModifier_, nullptr);
+        return checkboxModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(checkboxModifier_);
+        checkboxModifier_->InitializeParam();
+        auto paintProperty = DynamicCast<CheckBoxPaintProperty>(paintWrapper->GetPaintProperty());
+        if (paintProperty->GetCheckBoxSelect().has_value()) {
+            checkboxModifier_->SetIsSelect(paintProperty->GetCheckBoxSelectValue());
+        }
+        if (paintProperty->HasCheckBoxSelectedColor()) {
+            checkboxModifier_->SetUserActiveColor(paintProperty->GetCheckBoxSelectedColorValue());
+        }
+        auto size = paintWrapper->GetContentSize();
+        auto offset = paintWrapper->GetContentOffset();
+        checkboxModifier_->SetSize(size);
+        checkboxModifier_->SetOffset(offset);
+        checkboxModifier_->SetEnabled(enabled_);
+        checkboxModifier_->SetIsHover(isHover_);
+        checkboxModifier_->UpdateAnimatableProperty();
+    }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
     {
@@ -42,40 +69,36 @@ public:
         hotZoneSize_ = hotZoneSize;
     }
 
+    void SetEnabled(bool enabled)
+    {
+        enabled_ = enabled;
+    }
+
+    void SetIsHover(bool isHover)
+    {
+        isHover_ = isHover;
+    }
+
+    void SetTotalScale(float totalScale)
+    {
+        totalScale_ = totalScale;
+    }
+
+    void SetPointScale(float pointScale)
+    {
+        pointScale_ = pointScale;
+    }
+
 private:
-    void InitializeParam();
-    void PaintCheckBox(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
-    void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, SizeF& paintSize) const;
-    void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
-    void DrawUnselectedBorder(
-        RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
-    void DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawAnimationOffToOn(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
-    void DrawAnimationOnToOff(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
-
-    float borderWidth_ = 0.0f;
-    float borderRadius_ = 0.0f;
-    float checkStroke_ = 0.0f;
-    Color pointColor_;
-    Color activeColor_;
-    Color inactiveColor_;
-    Color shadowColor_;
-    Color clickEffectColor_;
-    Color hoverColor_;
-    Color inactivePointColor_;
-    Dimension hoverRadius_;
-    Dimension hotZoneHorizontalPadding_;
-    Dimension hotZoneVerticalPadding_;
-    Dimension shadowWidth_;
-
     bool enabled_ = true;
-    bool isTouch_ = false;
     bool isHover_ = false;
-    float shapeScale_ = 1.0f;
-    UIStatus uiStatus_ = UIStatus::UNSELECTED;
+    float totalScale_ = 1.0f;
+    float pointScale_ = 0.5f;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+
+    RefPtr<CheckBoxModifier> checkboxModifier_;
+    ACE_DISALLOW_COPY_AND_MOVE(CheckBoxPaintMethod);
 };
 } // namespace OHOS::Ace::NG
 
