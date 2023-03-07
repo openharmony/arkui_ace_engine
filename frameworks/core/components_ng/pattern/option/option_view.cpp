@@ -151,7 +151,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
 
     // create icon node
     if (!icon.empty()) {
-        (void)CreateIcon(icon, row);
+        CreateIcon(icon, row);
     }
 
     auto text = CreateText(value, row);

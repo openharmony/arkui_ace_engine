@@ -112,16 +112,21 @@ void MenuItemView::SetOnChange(std::function<void(bool)>&& onChange)
 
 void MenuItemView::SetFontSize(const Dimension& fontSize)
 {
-    if (!fontSize.IsValid()) {
-        LOGE("FontSize value is not valid");
-        return;
+    if (fontSize.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize);
+    } else {
+        LOGW("FontSize value is not valid");
+        ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontSize, fontSize);
 }
 
-void MenuItemView::SetFontColor(const Color& color)
+void MenuItemView::SetFontColor(const std::optional<Color>& color)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, color);
+    if (color.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor, color.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, FontColor);
+    }
 }
 
 void MenuItemView::SetFontWeight(Ace::FontWeight weight)
@@ -131,16 +136,21 @@ void MenuItemView::SetFontWeight(Ace::FontWeight weight)
 
 void MenuItemView::SetLabelFontSize(const Dimension& fontSize)
 {
-    if (!fontSize.IsValid()) {
-        LOGE("FontSize value is not valid");
-        return;
+    if (fontSize.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize);
+    } else {
+        LOGW("FontSize value is not valid");
+        ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontSize, fontSize);
 }
 
-void MenuItemView::SetLabelFontColor(const Color& color)
+void MenuItemView::SetLabelFontColor(const std::optional<Color>& color)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color);
+    if (color.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor);
+    }
 }
 
 void MenuItemView::SetLabelFontWeight(Ace::FontWeight weight)
