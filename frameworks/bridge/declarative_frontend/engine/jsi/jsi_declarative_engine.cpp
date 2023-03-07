@@ -82,11 +82,9 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
 const std::string MERGE_SOURCEMAPS_PATH = "sourceMaps.map";
-#ifndef PREVIEW
 const std::string FORM_ES_MODULE_PATH = "ets/widgets.abc";
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
-#endif
 std::mutex loadFormMutex_;
 
 // native implementation for js function: perfutil.print()
@@ -1041,7 +1039,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         CHECK_NULL_RETURN(frontEnd, false);
         auto delegate = frontEnd->GetDelegate();
         CHECK_NULL_RETURN(delegate, false);
-#ifndef PREVIEW
         if (frontEnd->IsBundle()) {
             if (!delegate->GetAssetContent(fileName, content)) {
                 LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
@@ -1060,7 +1057,11 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         }
         const std::string bundleName = frontEnd->GetBundleName();
         const std::string moduleName = frontEnd->GetModuleName();
+#ifdef PREVIEW
+        const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_PATH).append(FORM_ES_MODULE_PATH);
+#else
         const std::string assetPath = ASSET_PATH_PREFIX + bundleName + "/" + moduleName + "/" + FORM_ES_MODULE_PATH;
+#endif
         LOGI("bundleName = %{public}s, moduleName = %{public}s, assetPath = %{public}s", bundleName.c_str(),
             moduleName.c_str(), assetPath.c_str());
         auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
@@ -1082,13 +1083,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             }
         }
         return true;
-#else
-        if (!delegate->GetAssetContent(fileName, content)) {
-            LOGE("EvaluateJsCode GetAssetContent \"%{public}s\" failed.", fileName.c_str());
-            return false;
-        }
-        abcPath = delegate->GetAssetPath(fileName).append(fileName);
-#endif
     } else {
         LOGI("ExecuteCardAbc In HOST");
         auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());

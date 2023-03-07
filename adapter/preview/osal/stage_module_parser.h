@@ -73,7 +73,7 @@ public:
 private:
     std::string compileMode_;
     std::string moduleName_;
-    bool isPartialUpdate_;
+    bool isPartialUpdate_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(StageModuleInfo);
 };
 

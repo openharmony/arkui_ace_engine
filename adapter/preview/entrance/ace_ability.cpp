@@ -263,12 +263,13 @@ void AceAbility::InitEnv()
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
+    container->InitialStageModuleParser();
+    auto stageModuleInfo = container->GetStageModuleInfo();
+    // When the application is FA-model ArkTS project, stageModuleInfo == null, ;
+    if (runArgs_.aceVersion == AceVersion::ACE_2_0 && (!stageModuleInfo || stageModuleInfo->GetPartialUpdateFlag())) {
+        container->SetUseNewPipeline();
+    }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
-        container->InitialStageModuleParser();
-        auto stageModuleInfo = container->GetStageModuleInfo();
-        if (stageModuleInfo && stageModuleInfo->GetPartialUpdateFlag()) {
-            container->SetUseNewPipeline();
-        }
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
         } else {
@@ -317,12 +318,13 @@ void AceAbility::InitEnv()
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
+    container->InitialStageModuleParser();
+    auto stageModuleInfo = container->GetStageModuleInfo();
+    // When the application is FA-model ArkTS project, stageModuleInfo == null, ;
+    if (runArgs_.aceVersion == AceVersion::ACE_2_0 && (!stageModuleInfo || stageModuleInfo->GetPartialUpdateFlag())) {
+        container->SetUseNewPipeline();
+    }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
-        container->InitialStageModuleParser();
-        auto stageModuleInfo = container->GetStageModuleInfo();
-        if (stageModuleInfo && stageModuleInfo->GetPartialUpdateFlag()) {
-            container->SetUseNewPipeline();
-        }
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
         } else {
