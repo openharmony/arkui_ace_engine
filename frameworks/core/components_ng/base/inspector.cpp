@@ -85,12 +85,20 @@ void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<N
                 return;
             }
         } else {
+#ifndef PREVIEW
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
             auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
             if ((frameNode && !frameNode->IsInternal()) || spanNode) {
                 children.emplace_back(uiNode);
                 return;
             }
+#else
+            auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+            if (!frameNode->GetViewId().empty()) {
+                children.emplace_back(uiNode);
+                return;
+            }
+#endif
         }
     }
 
