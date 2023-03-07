@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,11 @@
 
 #include <atomic>
 
+#ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
+#else
+#include "glfw_render_context.h"
+#endif
 
 #include "adapter/preview/entrance/ace_run_args.h"
 #include "base/utils/macros.h"
@@ -48,6 +52,12 @@ struct SystemParams {
     OHOS::Ace::DeviceOrientation orientation { DeviceOrientation::PORTRAIT };
 };
 
+#ifndef ENABLE_ROSEN_BACKEND
+using GlfwController = FlutterDesktopWindowControllerRef;
+#else
+using GlfwController = std::shared_ptr<OHOS::Rosen::GlfwRenderContext>;
+#endif
+
 class ACE_FORCE_EXPORT_WITH_PREVIEW AceAbility {
 public:
     explicit AceAbility(const AceRunArgs& runArgs);
@@ -67,7 +77,7 @@ public:
     std::string GetJSONTree();
     std::string GetDefaultJSONTree();
     bool OperateComponent(const std::string& attrsJson);
-    FlutterDesktopWindowControllerRef GetGlfwWindowController()
+    GlfwController GetGlfwWindowController()
     {
         return controller_;
     }
@@ -77,7 +87,7 @@ private:
 
     void SetConfigChanges(const std::string& configChanges);
 
-    void SetGlfwWindowController(const FlutterDesktopWindowControllerRef& controller)
+    void SetGlfwWindowController(const GlfwController &controller)
     {
         controller_ = controller;
     }
@@ -87,7 +97,7 @@ private:
 
     AceRunArgs runArgs_;
     ConfigChanges configChanges_;
-    FlutterDesktopWindowControllerRef controller_ = nullptr;
+    GlfwController controller_ = nullptr;
 };
 
 } // namespace OHOS::Ace::Platform

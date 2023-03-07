@@ -27,9 +27,6 @@
 #include "utils/camera3d.h"
 #include "utils/point3.h"
 #include "utils/scalar.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "pipeline/rs_recording_canvas.h"
-#endif
 
 namespace OHOS::Ace {
 using RSCanvas = Rosen::Drawing::Canvas;
@@ -62,10 +59,6 @@ using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
 using RSMaskFilter = Rosen::Drawing::MaskFilter;
 using RSBlurType = Rosen::Drawing::BlurType;
-#ifdef ENABLE_ROSEN_BACKEND
-using RSImageInfo = Rosen::RsImageInfo;
-using RSRecordingCanvas = Rosen::RSRecordingCanvas;
-#endif
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;

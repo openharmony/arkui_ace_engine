@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(PREVIEW)
 #include "core/components_ng/render/adapter/rosen_media_player.h"
 #endif
 #ifdef NG_BUILD
@@ -26,7 +26,11 @@ RefPtr<MediaPlayer> MediaPlayer::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
 #ifdef ENABLE_ROSEN_BACKEND
+#if !defined(PREVIEW)
         return MakeRefPtr<RosenMediaPlayer>();
+#else
+        return nullptr;
+#endif
 #endif
     }
 #ifdef NG_BUILD

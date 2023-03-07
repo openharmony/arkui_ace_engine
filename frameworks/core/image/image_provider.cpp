@@ -82,13 +82,17 @@ void ImageProvider::ProccessLoadingResult(
         for (const auto& callback : callbacks) {
             if (imageObj == nullptr) {
                 taskExecutor->PostTask([imageInfo, callback, errorMsg]() {
-                    callback.failedCallback(imageInfo, errorMsg);
+                    if (callback.failedCallback) {
+                        callback.failedCallback(imageInfo, errorMsg);
+                    }
                 }, TaskExecutor::TaskType::UI);
                 return;
             }
             auto obj = imageObj->Clone();
             taskExecutor->PostTask([obj, imageInfo, callback]() {
-                callback.successCallback(imageInfo, obj);
+                if (callback.successCallback) {
+                    callback.successCallback(imageInfo, obj);
+                }
             }, TaskExecutor::TaskType::UI);
             if (canStartUploadImageObj) {
                 bool forceResize = (!obj->IsSvg()) && (imageInfo.IsSourceDimensionValid());

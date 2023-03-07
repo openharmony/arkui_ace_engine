@@ -19,6 +19,9 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components_ng/render/drawing.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "pipeline/rs_recording_canvas.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -252,7 +255,7 @@ bool SkiaCanvasImage::DrawCompressedImage(
     CHECK_NULL_RETURN(rsCanvas, false);
     auto skCanvas = rsCanvas->ExportSkCanvas();
     CHECK_NULL_RETURN(skCanvas, false);
-    auto recordingCanvas = static_cast<RSRecordingCanvas*>(skCanvas);
+    auto recordingCanvas = static_cast<Rosen::RSRecordingCanvas*>(skCanvas);
     CHECK_NULL_RETURN(recordingCanvas, false);
 
     SkPaint paint;
@@ -281,7 +284,7 @@ bool SkiaCanvasImage::DrawCompressedImage(
         recordingCanvas->concat(SkMatrix::MakeRectToRect(skSrcRect, skDstRect, SkMatrix::kFill_ScaleToFit));
     }
 
-    RSImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
+    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
     recordingCanvas->DrawImageWithParm(nullptr, std::move(data), rsImageInfo, paint);
