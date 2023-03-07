@@ -62,7 +62,7 @@ class ChainAnimation : public AceType {
 
 public:
     ChainAnimation(float space, float maxSpace, float minSpace, RefPtr<SpringProperty> springProperty);
-    void SetDelta(float delta);
+    void SetDelta(float delta, bool isOverDrag);
     float GetValue(int32_t index);
     float SetControlIndex(int32_t index);
     void SetMaxIndex(int32_t index)
@@ -82,6 +82,7 @@ public:
         linkageCoefficient_ = value;
     }
     void SetSpace(float space, float maxSpace, float minSpace);
+    void SetOverDrag(bool isOverDrag);
 
 private:
     void TickAnimation();
@@ -101,6 +102,7 @@ private:
     int32_t maxIndex_ = 0;
     float conductionCoefficient_ = DEFAULT_CONDUCTION;
     float linkageCoefficient_ = DEFAULT_LINKAGE;
+    bool isOverDrag_ = false;
 };
 } // namespace OHOS::Ace
 #endif
