@@ -94,26 +94,6 @@ public:
         return abilityName_;
     }
 
-    const std::string& GetServiceBundleName() const
-    {
-        return serviceBundleName_;
-    }
-
-    const std::string& GetServiceAbilityName() const
-    {
-        return serviceAbilityName_;
-    }
-
-    const std::string& GetServiceModuleName() const
-    {
-        return serviceModuleName_;
-    }
-
-    const std::string& GetServiceHostPkgName() const
-    {
-        return serviceHostPkgName_;
-    }
-
 private:
     AppBarTheme() = default;
     static void ParsePattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<AppBarTheme>& theme)
@@ -133,12 +113,8 @@ private:
         theme->textColorPrimary_ = appBarPattern->GetAttr<Color>("text_color_primary", Color());
         theme->clickEffectColor_ = appBarPattern->GetAttr<Color>("click_effect_color", Color());
         theme->appBarBgColor_ = appBarPattern->GetAttr<Color>("app_bar_bg_color", Color());
-        theme->bundleName_ = appBarPattern->GetAttr<std::string>("app_bar_bundle_name", "");
-        theme->abilityName_ = appBarPattern->GetAttr<std::string>("app_bar_ability_name", "");
-        theme->serviceBundleName_ = appBarPattern->GetAttr<std::string>("app_bar_service_bundle_name", "");
-        theme->serviceAbilityName_ = appBarPattern->GetAttr<std::string>("app_bar_service_ability_name", "");
-        theme->serviceModuleName_ = appBarPattern->GetAttr<std::string>("app_bar_service_module_name", "");
-        theme->serviceHostPkgName_ = appBarPattern->GetAttr<std::string>("app_bar_service_host_pkg_name", "");
+        theme->bundleName_ = appBarPattern->GetAttr<std::string>("app_bar_bundle_name", "com.ohos.hag.famanager");
+        theme->abilityName_ = appBarPattern->GetAttr<std::string>("app_bar_ability_name", "FaPanelAbility");
     }
 
     Dimension appBarHeight_;
@@ -150,10 +126,6 @@ private:
     Color appBarBgColor_;
     std::string bundleName_;
     std::string abilityName_;
-    std::string serviceBundleName_;
-    std::string serviceAbilityName_;
-    std::string serviceModuleName_;
-    std::string serviceHostPkgName_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_APP_BAR_THEME_H
