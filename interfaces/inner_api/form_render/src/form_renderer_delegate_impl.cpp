@@ -14,6 +14,7 @@
  */
 #include "form_renderer_delegate_impl.h"
 
+#include "errors.h"
 #include "form_renderer_hilog.h"
 
 namespace OHOS {
@@ -66,6 +67,17 @@ int32_t FormRendererDelegateImpl::OnError(const std::string& code, const std::st
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateImpl::OnSurfaceChange(float width, float height)
+{
+    HILOG_DEBUG("%{public}s called.", __func__);
+    if (!surfaceChangeEventHandler_) {
+        HILOG_ERROR("surfaceChangeEventHandler_ is null");
+        return ERR_INVALID_DATA;
+    }
+    surfaceChangeEventHandler_(width, height);
+    return ERR_OK;
+}
+
 void FormRendererDelegateImpl::SetSurfaceCreateEventHandler(
     std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, const OHOS::AppExecFwk::FormJsInfo&,
         const AAFwk::Want&)>&& listener)
@@ -83,6 +95,11 @@ void FormRendererDelegateImpl::SetErrorEventHandler(
     std::function<void(const std::string&, const std::string&)>&& listener)
 {
     errorEventHandler_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetSurfaceChangeEventHandler(std::function<void(float width, float height)>&& listener)
+{
+    surfaceChangeEventHandler_ = std::move(listener);
 }
 } // namespace Ace
 } // namespace OHOS

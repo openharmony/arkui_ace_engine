@@ -577,6 +577,8 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         layoutConstraint.selfIdealSize = idealSize;
         layoutConstraint.maxSize = idealSize;
         rootNode_->UpdateLayoutConstraint(layoutConstraint);
+        // reset parentLayoutConstraint to update itself when next measure task
+        rootNode_->GetGeometryNode()->ResetParentLayoutConstraint();
         rootNode_->MarkDirtyNode();
     }
     if (rootNode_->GetGeometryNode()->GetFrameOffset().GetY() != offset) {

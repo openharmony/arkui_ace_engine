@@ -27,6 +27,8 @@ FormRendererDispatcherStub::FormRendererDispatcherStub()
         &FormRendererDispatcherStub::HandleDispatchPointerEvent;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_ALLOW_UPDATE)] =
         &FormRendererDispatcherStub::HandleSetAllowUpdate;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_SURFACE_CHANGE_EVENT)] =
+        &FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent;
 }
 
 FormRendererDispatcherStub::~FormRendererDispatcherStub()
@@ -79,6 +81,15 @@ int32_t FormRendererDispatcherStub::HandleSetAllowUpdate(MessageParcel &data, Me
 {
     bool allowUpdate = data.ReadBool();
     SetAllowUpdate(allowUpdate);
+    reply.WriteInt32(ERR_OK);
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleDispatchSurfaceChangeEvent(MessageParcel& data, MessageParcel& reply)
+{
+    float width = data.ReadFloat();
+    float height = data.ReadFloat();
+    DispatchSurfaceChangeEvent(width, height);
     reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }

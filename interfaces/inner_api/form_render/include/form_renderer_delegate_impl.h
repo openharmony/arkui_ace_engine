@@ -49,11 +49,18 @@ public:
      * @param msg The msg.
      */
     int32_t OnError(const std::string& code, const std::string& msg) override;
+    /**
+     * @brief OnSurfaceChange.
+     * @param width
+     * @param height
+     */
+    int32_t OnSurfaceChange(float width, float height) override;
 
     void SetSurfaceCreateEventHandler(std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&,
             const OHOS::AppExecFwk::FormJsInfo&, const AAFwk::Want&)>&& listener);
     void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& listener);
+    void SetSurfaceChangeEventHandler(std::function<void(float width, float height)>&& listener);
 
 private:
     std::function<void(
@@ -61,6 +68,7 @@ private:
         surfaceCreateEventHandler_;
     std::function<void(const std::string&)> actionEventHandler_;
     std::function<void(const std::string&, const std::string&)> errorEventHandler_;
+    std::function<void(float width, float height)> surfaceChangeEventHandler_;
 };
 } // namespace Ace
 } // namespace OHOS
