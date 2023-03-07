@@ -228,7 +228,11 @@ void ViewAbstract::SetSphericalEffect(float radio)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(SphericalEffect, radio);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->OnSphericalEffectUpdate(radio);
 }
 
 void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
@@ -237,16 +241,24 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->OnPixelStretchEffectUpdate(option);
 }
 
-void ViewAbstract::SetLightupEffect(float radio)
+void ViewAbstract::SetLightUpEffect(float radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(LightupEffect, radio);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->OnLightUpEffectUpdate(radio);
 }
 
 void ViewAbstract::SetLayoutWeight(int32_t value)

@@ -115,9 +115,9 @@ public:
     {
         ViewAbstract::SetPixelStretchEffect(option);
     }
-    void SetLightupEffect(float radio) override
+    void SetLightUpEffect(float radio) override
     {
-        ViewAbstract::SetLightupEffect(radio);
+        ViewAbstract::SetLightUpEffect(radio);
     }
 
     void SetPadding(const Dimension& value) override

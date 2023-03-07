@@ -121,6 +121,10 @@ struct PixStretchEffectOption {
     Dimension bottom;
     Dimension left;
     Dimension right;
+    bool operator==(const PixStretchEffectOption& other) const
+    {
+        return top == other.top && bottom == other.bottom && left == other.left && right == other.right;
+    }
 };
 
 struct LinearGradientInfo {

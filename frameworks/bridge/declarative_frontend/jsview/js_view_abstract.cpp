@@ -1654,7 +1654,7 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
 }
 
-void JSViewAbstract::JsLightupEffect(const JSCallbackInfo& info)
+void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
@@ -1665,7 +1665,7 @@ void JSViewAbstract::JsLightupEffect(const JSCallbackInfo& info)
         return;
     }
     auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetLightupEffect(std::clamp(radio, 0.0f, 1.0f));
+    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0f, 1.0f));
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
@@ -4092,7 +4092,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("backgroundImageSize", &JSViewAbstract::JsBackgroundImageSize);
     JSClass<JSViewAbstract>::StaticMethod("backgroundImagePosition", &JSViewAbstract::JsBackgroundImagePosition);
     JSClass<JSViewAbstract>::StaticMethod("backgroundBlurStyle", &JSViewAbstract::JsBackgroundBlurStyle);
-    JSClass<JSViewAbstract>::StaticMethod("lightupEffect", &JSViewAbstract::JsLightupEffect);
+    JSClass<JSViewAbstract>::StaticMethod("lightUpEffect", &JSViewAbstract::JsLightUpEffect);
     JSClass<JSViewAbstract>::StaticMethod("sphericalEffect", &JSViewAbstract::JsSphericalEffect);
     JSClass<JSViewAbstract>::StaticMethod("pixelStretchEffect", &JSViewAbstract::JsPixelStretchEffect);
     JSClass<JSViewAbstract>::StaticMethod("border", &JSViewAbstract::JsBorder);

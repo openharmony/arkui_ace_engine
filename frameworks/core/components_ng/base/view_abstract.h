@@ -70,7 +70,7 @@ public:
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
     static void SetSphericalEffect(float radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
-    static void SetLightupEffect(float radio);
+    static void SetLightUpEffect(float radio);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetMargin(const CalcLength& value);

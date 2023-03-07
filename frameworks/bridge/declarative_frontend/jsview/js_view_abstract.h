@@ -82,7 +82,7 @@ public:
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsSphericalEffect(const JSCallbackInfo& info);
     static void JsPixelStretchEffect(const JSCallbackInfo& info);
-    static void JsLightupEffect(const JSCallbackInfo& info);
+    static void JsLightUpEffect(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
