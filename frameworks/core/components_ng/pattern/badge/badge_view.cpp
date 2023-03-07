@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,24 @@ void BadgeView::Create(BadgeParameters& badgeParameters)
 
     if (badgeParameters.badgeCircleSize.has_value()) {
         layoutProperty->UpdateBadgeCircleSize(badgeParameters.badgeCircleSize.value());
+    }
+
+    if (badgeParameters.badgeBorderColor.has_value()) {
+        layoutProperty->UpdateBadgeBorderColor(badgeParameters.badgeBorderColor.value());
+    } else {
+        layoutProperty->UpdateBadgeBorderColor(badgeTheme->GetBadgeBorderColor());
+    }
+
+    if (badgeParameters.badgeBorderWidth.has_value()) {
+        layoutProperty->UpdateBadgeBorderWidth(badgeParameters.badgeBorderWidth.value());
+    } else {
+        layoutProperty->UpdateBadgeBorderWidth(badgeTheme->GetBadgeBorderWidth());
+    }
+
+    if (badgeParameters.badgeFontWeight.has_value()) {
+        layoutProperty->UpdateBadgeFontWeight(badgeParameters.badgeFontWeight.value());
+    } else {
+        layoutProperty->UpdateBadgeFontWeight(FontWeight::NORMAL);
     }
 }
 

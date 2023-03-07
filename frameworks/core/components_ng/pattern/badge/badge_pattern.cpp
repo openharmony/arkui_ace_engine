@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/badge/badge_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -62,6 +63,10 @@ void BadgePattern::OnModifyDone()
         }
     }
 
+    if (layoutProperty->GetBadgeFontWeight().has_value()) {
+        textLayoutProperty->UpdateFontWeight(layoutProperty->GetBadgeFontWeightValue());
+    }
+
     if (badgeValue.has_value()) {
         textLayoutProperty->UpdateContent(badgeValue.value());
         if (badgeValue.value().empty()) {
@@ -76,9 +81,24 @@ void BadgePattern::OnModifyDone()
     textLayoutProperty->UpdateFontSize(badgeFontSize.value());
 
     textLayoutProperty->UpdateMaxLines(1);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
+    Dimension width = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(width);
+    textLayoutProperty->UpdateBorderWidth(borderWidth);
+
     auto badgeColor = layoutProperty->GetBadgeColorValue();
     auto textRenderContext = lastFrameNode->GetRenderContext();
     textRenderContext->UpdateBackgroundColor(badgeColor);
+
+    Color color = layoutProperty->GetBadgeBorderColorValue(badgeTheme->GetBadgeBorderColor());
+    BorderColorProperty borderColor;
+    borderColor.SetColor(color);
+    textRenderContext->UpdateBorderColor(borderColor);
     lastFrameNode->MarkModifyDone();
 }
 
