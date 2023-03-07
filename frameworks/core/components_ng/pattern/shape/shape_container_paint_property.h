@@ -73,7 +73,7 @@ public:
         json->Put("viewPort", viewBoxJson);
 
         auto meshJson = JsonUtil::Create(true);
-        if (propImageMesh_.has_value()) {
+        if (propImageMesh_.has_value() && meshJson) {
             auto jsonValueArray = JsonUtil::CreateArray(true);
             std::vector<double> array = propImageMesh_->GetMesh();
             for (size_t i = 0; i < array.size(); i++) {
