@@ -147,7 +147,20 @@ void GetInspectorChildren(
 
     RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
     rect.SetOffset(node->GetTransformRelativeOffset());
+#ifndef PREVIEW
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
+#else
+    auto strRec = std::to_string(rect.Left())
+                 .append(",")
+                 .append(std::to_string(rect.Top()))
+                 .append(",")
+                 .append(std::to_string(rect.Width()))
+                 .append(",")
+                 .append(std::to_string(rect.Height()));
+    jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
+    jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
+    jsonNode->Put("debugLine", node->GetDebugLine().c_str());
+#endif
     auto jsonObject = JsonUtil::Create(false);
     parent->ToJsonValue(jsonObject);
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
