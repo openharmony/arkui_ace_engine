@@ -621,6 +621,10 @@ void GridScrollLayoutAlgorithm::SkipForwardLines(float mainSize, LayoutWrapper* 
         auto pattern = grid->GetPattern<GridPattern>();
         CHECK_NULL_VOID(pattern);
         auto estimatedHeight = pattern->GetScrollableDistance();
+        // no scroller
+        if (LessOrEqual(estimatedHeight, 0)) {
+            return;
+        }
         auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
         gridLayoutInfo_.startIndex_ = std::max(gridLayoutInfo_.startIndex_ - estimatedIndex, 0);
@@ -662,6 +666,10 @@ void GridScrollLayoutAlgorithm::SkipBackwardLines(float mainSize, LayoutWrapper*
         auto pattern = grid->GetPattern<GridPattern>();
         CHECK_NULL_VOID(pattern);
         auto estimatedHeight = pattern->GetScrollableDistance();
+        // no scroller
+        if (LessOrEqual(estimatedHeight, 0)) {
+            return;
+        }
         auto averageHeight = estimatedHeight / gridLayoutInfo_.childrenCount_;
         int32_t estimatedIndex = (gridLayoutInfo_.currentOffset_) / averageHeight;
         gridLayoutInfo_.startIndex_ = std::min(
