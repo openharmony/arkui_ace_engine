@@ -68,6 +68,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
+        LayoutProperty::ToJsonValue(json);
         json->Put("navBarWidth", GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ToString().c_str());
         json->Put("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) ==
             NavBarPosition::START ? "NavBarPosition.Start" : "NavBarPosition.End");
