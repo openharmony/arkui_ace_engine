@@ -14,6 +14,7 @@
  */
 #include "form_renderer_delegate_proxy.h"
 
+#include "form_renderer_delegate_interface.h"
 #include "form_renderer_hilog.h"
 
 namespace OHOS {
@@ -111,6 +112,34 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::s
         return error;
     }
 
+    return reply.ReadInt32();
+}
+
+int32_t FormRendererDelegateProxy::OnSurfaceChange(float width, float height)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteFloat(width)) {
+        HILOG_ERROR("write width fail, action error");
+        return ERR_INVALID_VALUE;
+    }
+
+    if (!data.WriteFloat(height)) {
+        HILOG_ERROR("write height fail, action error");
+        return ERR_INVALID_VALUE;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CHANGE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+    }
     return reply.ReadInt32();
 }
 

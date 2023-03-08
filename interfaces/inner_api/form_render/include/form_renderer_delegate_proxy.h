@@ -32,17 +32,17 @@ public:
     explicit FormRendererDelegateProxy(const sptr<IRemoteObject>& impl);
     ~FormRendererDelegateProxy() override = default;
 
-    int32_t OnSurfaceCreate(
-        const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
-        const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
-        const AAFwk::Want& want) override;
+    int32_t OnSurfaceCreate(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+        const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want) override;
 
     int32_t OnActionEvent(const std::string& action) override;
 
     int32_t OnError(const std::string& code, const std::string& msg) override;
 
+    int32_t OnSurfaceChange(float width, float height) override;
+
 private:
-    static bool WriteInterfaceToken(MessageParcel &data);
+    static bool WriteInterfaceToken(MessageParcel& data);
 
     static inline BrokerDelegator<FormRendererDelegateProxy> delegator_;
 };

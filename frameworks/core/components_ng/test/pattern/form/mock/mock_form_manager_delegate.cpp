@@ -57,4 +57,8 @@ void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle &callback
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate) {}
 
 void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
+
+void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
+
+void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback &&callback) {}
 } // namespace OHOS::Ace
