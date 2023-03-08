@@ -36,6 +36,7 @@ void SliderModelNG::Create(float value, float step, float min, float max)
 void SliderModelNG::SetSliderMode(const SliderMode& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, SliderMode, value);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SliderMode, value);
 }
 void SliderModelNG::SetDirection(Axis value)
 {
@@ -44,6 +45,7 @@ void SliderModelNG::SetDirection(Axis value)
 }
 void SliderModelNG::SetReverse(bool value)
 {
+    ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, value);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value);
 }
 void SliderModelNG::SetBlockColor(const Color& value)
@@ -77,6 +79,44 @@ void SliderModelNG::SetShowTips(bool value)
 void SliderModelNG::SetThickness(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value);
+}
+void SliderModelNG::SetBlockBorderColor(const Color& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderColor, value);
+}
+void SliderModelNG::SetBlockBorderWidth(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth, value);
+}
+void SliderModelNG::SetStepColor(const Color& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, StepColor, value);
+}
+void SliderModelNG::SetTrackBorderRadius(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value);
+}
+void SliderModelNG::SetBlockSize(const Size& value)
+{
+    SizeF size(value.Width(), value.Height());
+    ACE_UPDATE_LAYOUT_PROPERTY(SliderLayoutProperty, BlockSize, size);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockSize, size);
+}
+void SliderModelNG::SetBlockType(BlockStyleType value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockType, value);
+}
+void SliderModelNG::SetBlockImage(const std::string& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockImage, value);
+}
+void SliderModelNG::SetBlockShape(const RefPtr<BasicShape>& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockShape, value);
+}
+void SliderModelNG::SetStepSize(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value);
 }
 void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
 {

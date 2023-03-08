@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SK_PAINTER_PAINTER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SK_PAINTER_PAINTER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SK_PAINTER_PAINTER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SK_PAINTER_PAINTER_H
 
 #include <string>
 
@@ -33,8 +33,10 @@ public:
     static void DrawPath(RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty);
     static void SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty);
     static void SetBrush(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty);
+
+    static void DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset);
 };
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SK_PAINTER_PAINTER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_SK_PAINTER_PAINTER_H

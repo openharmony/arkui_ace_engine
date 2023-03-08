@@ -1109,3 +1109,10 @@ class TransitionEffect {
     return this;
   }
 }
+
+var SliderBlockType;
+(function (SliderBlockType) {
+  SliderBlockType[SliderBlockType["DEFAULT"] = 0] = "DEFAULT";
+  SliderBlockType[SliderBlockType["IMAGE"] = 1] = "IMAGE";
+  SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
+})(SliderBlockType || (SliderBlockType = {}));
