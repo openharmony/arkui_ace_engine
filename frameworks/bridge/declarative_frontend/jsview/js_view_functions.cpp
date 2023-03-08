@@ -263,7 +263,7 @@ void ViewFunctions::InitViewFunctions(
             LOGE("View lacks mandatory 'forceRerenderNode()' function, fatal internal error.");
         }
 
-        JSRef<JSVal> jsRecycleFunc = jsObject->GetProperty("recycleJSView");
+        JSRef<JSVal> jsRecycleFunc = jsObject->GetProperty("recycleSelf");
         if (jsRecycleFunc->IsFunction()) {
             jsRecycleFunc_ = JSRef<JSFunc>::Cast(jsRecycleFunc);
         } else {

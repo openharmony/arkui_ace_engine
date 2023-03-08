@@ -67,7 +67,7 @@ void CustomNode::Render()
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
-    if (!renderFunction_) {
+    if (!renderFunction_ && !HasRecycleRenderFunc()) {
         UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
         return;
     }

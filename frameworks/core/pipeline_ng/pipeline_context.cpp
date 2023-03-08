@@ -114,6 +114,7 @@ float PipelineContext::GetCurrentRootHeight()
 
 void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
+    LOGI("add dirty custom node %s, %d", dirtyNode->GetTag().c_str(), dirtyNode->GetId());
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirtyNode);
     dirtyNodes_.emplace(dirtyNode);
@@ -123,6 +124,7 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
+    LOGI("add dirty layout node %s, %d", dirty->GetTag().c_str(), dirty->GetId());
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyLayoutNode(dirty);
@@ -133,6 +135,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
+    LOGI("add dirty render node %s, %d", dirty->GetTag().c_str(), dirty->GetId());
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyRenderNode(dirty);

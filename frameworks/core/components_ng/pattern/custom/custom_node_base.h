@@ -122,6 +122,10 @@ public:
         }
     }
 
+    bool HasRecycleRenderFunc() {
+        return recycleRenderFunc_ != nullptr;
+    }
+
     void ResetRecycle()
     {
         recycleRenderFunc_ = nullptr;

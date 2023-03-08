@@ -21,29 +21,45 @@
  * Manage the js cache of all recycled node
  */
 class RecycleManager {
-  cachedRecycleNodes: Map<string, Array<ViewPU>>
-  static instance_: RecycleManager
+  private cachedRecycleNodes: Map<string, Array<ViewPU>> = undefined
+  // key: recycleNode element ID
+  // value: current assigned ID, used for sort rerender dirty element nodes
+  private recycleElmtIdMap: Map<number, number> = undefined
 
   constructor() {
-    this.cachedRecycleNodes = new Map();
+    this.cachedRecycleNodes = new Map<string, Array<ViewPU>>();
+    this.recycleElmtIdMap = new Map<number, number>();
   }
 
-  static GetInstance(): RecycleManager {
-    if (!RecycleManager.instance_) {
-      RecycleManager.instance_ = new RecycleManager();
-    }
-    return RecycleManager.instance_;
-  }
-
-  add(name: string, node: ViewPU): void {
+  public add(name: string, node: ViewPU): void {
     if (!this.cachedRecycleNodes.get(name)) {
-      this.cachedRecycleNodes.set(name, new Array());
+      this.cachedRecycleNodes.set(name, new Array<ViewPU>());
     }
     this.cachedRecycleNodes.get(name)?.push(node);
   }
 
-  get(name: string): ViewPU {
-    let node = this.cachedRecycleNodes.get(name)?.pop();
-    return node
+  public get(name: string): ViewPU {
+    return this.cachedRecycleNodes.get(name)?.pop();
+  }
+
+  public queryRecycleNodeCurrentElmtId(recycleElmtId: number): number {
+    if (this.recycleElmtIdMap.has(recycleElmtId)) {
+      return this.recycleElmtIdMap.get(recycleElmtId);
+    }
+    return recycleElmtId;
+  }
+
+  public setRecycleNodeCurrentElmtId(recycleElmtId: number, currentElmtId: number): void {
+    this.recycleElmtIdMap.set(recycleElmtId, currentElmtId);
+  }
+
+  public purgeAllCachedRecycleNode(removedElmtIds: number[]): void {
+    this.cachedRecycleNodes.forEach((nodes, _) => {
+      nodes.forEach((node) => {
+        removedElmtIds.push(node.id__())
+      })
+    })
+    this.cachedRecycleNodes.clear();
+    this.recycleElmtIdMap.clear();
   }
 }

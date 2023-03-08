@@ -3873,9 +3873,20 @@ class ViewPU extends NativeViewPartialUpdate {
     */
     constructor(parent, localStorage, elmtId = -1) {
         super();
+        // Array.sort() converts array items to string to compare them, sigh!
+        this.compareNumber = (a, b) => {
+            if (this.hasRecycleManager()) {
+                
+                let ta = this.getRecycleManager().queryRecycleNodeCurrentElmtId(a);
+                let tb = this.getRecycleManager().queryRecycleNodeCurrentElmtId(b);
+                return (ta < tb) ? -1 : (ta > tb) ? 1 : 0;
+            }
+            return (a < b) ? -1 : (a > b) ? 1 : 0;
+        };
         this.parent_ = undefined;
         this.childrenWeakrefMap_ = new Map();
         this.watchedProps = new Map();
+        this.recycleManager = undefined;
         // Set of dependent elmtIds that need partial update
         // during next re-render
         this.dirtDescendantElementIds_ = new Set();
@@ -3934,6 +3945,10 @@ class ViewPU extends NativeViewPartialUpdate {
         // because after the deletion, can no longer clean the RemoveIds cache on the C++ side through the
         // updateDirtyElements function.
         let removedElmtIds = [];
+        if (this.hasRecycleManager()) {
+            this.getRecycleManager().purgeAllCachedRecycleNode(removedElmtIds);
+            
+        }
         this.updateFuncByElmtId.forEach((value, key) => {
             this.purgeVariableDependenciesOnElmtId(key);
             removedElmtIds.push(key);
@@ -4032,7 +4047,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // see which elmtIds are managed by this View
         // and clean up all book keeping for them
         this.purgeDeletedElmtIds(deletedElmtIds);
-        Array.from(this.updateFuncByElmtId.keys()).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
+        Array.from(this.updateFuncByElmtId.keys()).sort(this.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
         if (deep) {
             this.childrenWeakrefMap_.forEach((weakRefChild) => {
                 const child = weakRefChild.deref();
@@ -4170,7 +4185,7 @@ class ViewPU extends NativeViewPartialUpdate {
             // process all elmtIds marked as needing update in ascending order.
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
-            Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+            Array.from(this.dirtDescendantElementIds_).sort(this.compareNumber).forEach(elmtId => {
                 this.UpdateElement(elmtId);
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
@@ -4206,21 +4221,50 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
         
     }
+    getOrCreateRecycleManager() {
+        if (!this.recycleManager) {
+            this.recycleManager = new RecycleManager;
+        }
+        return this.recycleManager;
+    }
+    getRecycleManager() {
+        return this.recycleManager;
+    }
+    hasRecycleManager() {
+        return !(this.recycleManager === undefined);
+    }
+    initRecycleManager() {
+        if (this.recycleManager) {
+            
+            return;
+        }
+        this.recycleManager = new RecycleManager;
+    }
     // recycle creation
     observeRecycleComponentCreation(name, recycleUpdateFunc) {
-        const node = RecycleManager.GetInstance().get(name);
-        const elmtId = node ? node.id__() : ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        // convert recycle update func to update func
         const compilerAssignedUpdateFunc = (element, isFirstRender) => {
             recycleUpdateFunc(element, isFirstRender, undefined);
         };
-        recycleUpdateFunc(elmtId, true, node);
+        let node;
+        if (!this.hasRecycleManager() || !(node = this.getRecycleManager().get(name))) {
+            
+            this.observeComponentCreation(compilerAssignedUpdateFunc);
+            return;
+        }
+        const currentElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        const elmtId = node.id__();
+        this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
+        recycleUpdateFunc(elmtId, /* is first rneder */ true, node);
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
     }
-    // add current js view to recycle manager
-    recycleJSView(name) {
-        RecycleManager.GetInstance().add(name, this);
+    // add current js view to it's parent recycle manager
+    recycleSelf(name) {
         if (this.parent_) {
-            this.parent_.removeChild(this);
+            this.parent_.getOrCreateRecycleManager().add(name, this);
+        }
+        else {
+            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
         }
     }
     // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
@@ -4343,10 +4387,6 @@ class ViewPU extends NativeViewPartialUpdate {
                 : new SynchedPropertyObjectOneWayPU(source, this, viewVariableName));
     }
 }
-// Array.sort() converts array items to string to compare them, sigh!
-ViewPU.compareNumber = (a, b) => {
-    return (a < b) ? -1 : (a > b) ? 1 : 0;
-};
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4370,13 +4410,12 @@ ViewPU.compareNumber = (a, b) => {
  */
 class RecycleManager {
     constructor() {
+        this.cachedRecycleNodes = undefined;
+        // key: recycleNode element ID
+        // value: current assigned ID, used for sort rerender dirty element nodes
+        this.recycleElmtIdMap = undefined;
         this.cachedRecycleNodes = new Map();
-    }
-    static GetInstance() {
-        if (!RecycleManager.instance_) {
-            RecycleManager.instance_ = new RecycleManager();
-        }
-        return RecycleManager.instance_;
+        this.recycleElmtIdMap = new Map();
     }
     add(name, node) {
         var _a;
@@ -4387,8 +4426,25 @@ class RecycleManager {
     }
     get(name) {
         var _a;
-        let node = (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
-        return node;
+        return (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
+    }
+    queryRecycleNodeCurrentElmtId(recycleElmtId) {
+        if (this.recycleElmtIdMap.has(recycleElmtId)) {
+            return this.recycleElmtIdMap.get(recycleElmtId);
+        }
+        return recycleElmtId;
+    }
+    setRecycleNodeCurrentElmtId(recycleElmtId, currentElmtId) {
+        this.recycleElmtIdMap.set(recycleElmtId, currentElmtId);
+    }
+    purgeAllCachedRecycleNode(removedElmtIds) {
+        this.cachedRecycleNodes.forEach((nodes, _) => {
+            nodes.forEach((node) => {
+                removedElmtIds.push(node.id__());
+            });
+        });
+        this.cachedRecycleNodes.clear();
+        this.recycleElmtIdMap.clear();
     }
 }
 /*
