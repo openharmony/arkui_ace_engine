@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,12 +49,7 @@ public:
         }
     }
 
-    void UpdateChangeEvent(const std::string& value) const
-    {
-        if (changeEvent_) {
-            changeEvent_(value);
-        }
-    }
+    void UpdateChangeEvent(const std::string& value) const;
 
     void SetOnCopy(std::function<void(const std::string&)>&& func)
     {

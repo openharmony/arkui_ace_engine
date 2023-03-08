@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,9 +26,21 @@ public:
     RefPtr<TextFieldControllerBase> Create(const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon) override;
     void SetSearchButton(const std::string& text) override;
+    void SetCaretWidth(const Dimension& value) override;
+    void SetCaretColor(const Color& color) override;
+    void SetSearchIconSize(const Dimension& value) override;
+    void SetSearchIconColor(const Color& color) override;
+    void SetSearchSrcPath(const std::string& src) override;
+    void SetRightIconSrcPath(const std::string& src) override;
+    void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle) override;
+    void SetCancelIconSize(const Dimension& value) override;
+    void SetCancelIconColor(const Color& color) override;
+    void SetSearchButtonFontSize(const Dimension& value) override;
+    void SetSearchButtonFontColor(const Color& color) override;
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
+    void SetTextColor(const Color& color) override;
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
@@ -39,12 +51,12 @@ public:
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
 
 private:
-    RefPtr<FrameNode> CreateTextField(const RefPtr<SearchNode>& parentNode,
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value);
-    RefPtr<FrameNode> CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src);
-    RefPtr<FrameNode> CreateCancelImage(const RefPtr<SearchNode>& parentNode);
-    RefPtr<FrameNode> CreateButton(const RefPtr<SearchNode>& parentNode);
-    RefPtr<FrameNode> CreateCancelButton(const RefPtr<SearchNode>& parentNode);
+    void CreateTextField(const RefPtr<SearchNode>& parentNode,
+        const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
+    void CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode);
+    void CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode);
+    void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
+    void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
     RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 };

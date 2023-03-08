@@ -16,12 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H
 
-namespace OHOS::Ace::Testing {
-enum class TextDirection {
-    RTL = 0,
-    LTR,
-};
+#include "core/components_ng/test/mock/rosen/testing_typography_properties.h"
 
+namespace OHOS::Ace::Testing {
 enum class WordBreakType {
     WordBreakTypeNormal = 0,
     WordBreakTypeBreakAll,
@@ -35,6 +32,22 @@ enum class TextAlign {
     JUSTIFY,
     START,
     END,
+};
+
+class TestingTypography {
+public:
+    TestingTypography() = default;
+    ~TestingTypography() = default;
+
+    double GetMaxWidth();
+    double GetHeight();
+    double GetLongestLine();
+    double GetMinIntrinsicWidth();
+    double GetMaxIntrinsicWidth();
+    double GetAlphabeticBaseline();
+    double GetIdeographicBaseline();
+    bool DidExceedMaxLines();
+    void Layout(double width);
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H

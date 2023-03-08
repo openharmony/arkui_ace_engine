@@ -24,6 +24,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components_ng/pattern/search/search_model.h"
 
 namespace OHOS::Ace {
 
@@ -232,6 +233,11 @@ public:
         return searchIconColor_;
     }
 
+    const CancelButtonStyle& GetCancelButtonStyle() const
+    {
+        return cancelButtonStyle_;
+    }
+
 protected:
     SearchTheme() = default;
 
@@ -263,6 +269,7 @@ private:
     Color searchDividerColor_;
     Color searchButtonTextColor_;
     Color searchIconColor_;
+    CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
 };
 
 } // namespace OHOS::Ace
