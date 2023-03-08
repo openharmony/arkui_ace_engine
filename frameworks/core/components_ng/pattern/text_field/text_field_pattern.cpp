@@ -1015,19 +1015,11 @@ bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
             }
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
-#if defined(PREVIEW)
-            DeleteBackward(1);
-#else
             DeleteForward(1);
-#endif
             return true;
         }
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
-#if defined(PREVIEW)
-            DeleteForward(1);
-#else
             DeleteBackward(1);
-#endif
             return true;
         }
         ParseAppendValue(keyEvent.code, appendElement);
@@ -2654,11 +2646,11 @@ void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY) 
     UpdateCaretInfoToController();
 }
 
-void TextFieldPattern::DeleteForward(int32_t length)
+void TextFieldPattern::DeleteBackward(int32_t length)
 {
-    LOGI("Handle DeleteForward %{public}d characters", length);
+    LOGI("Handle DeleteBackward %{public}d characters", length);
     if (textEditingValue_.caretPosition <= 0) {
-        LOGW("Caret position at the beginning , cannot DeleteForward");
+        LOGW("Caret position at the beginning , cannot DeleteBackward");
         return;
     }
     if (InSelectMode()) {
@@ -2683,11 +2675,11 @@ void TextFieldPattern::DeleteForward(int32_t length)
                                                                                       : PROPERTY_UPDATE_MEASURE);
 }
 
-void TextFieldPattern::DeleteBackward(int32_t length)
+void TextFieldPattern::DeleteForward(int32_t length)
 {
-    LOGI("Handle DeleteBackward %{public}d characters", length);
+    LOGI("Handle DeleteForward %{public}d characters", length);
     if (textEditingValue_.caretPosition >= static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
-        LOGW("Caret position at the end , cannot DeleteBackward");
+        LOGW("Caret position at the end , cannot DeleteForward");
         return;
     }
     if (InSelectMode()) {
