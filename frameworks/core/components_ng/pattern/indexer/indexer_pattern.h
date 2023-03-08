@@ -100,20 +100,24 @@ private:
     void OnChildHover(int32_t index, bool isHover);
     void ResetStatus();
     void OnKeyEventDisapear();
-    void InitBubbleList(
-        std::vector<std::string>& currentListData, RefPtr<FrameNode>& parentNode, RefPtr<IndexerTheme>& indexerTheme);
+    void InitBubbleList(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
+        RefPtr<IndexerTheme>& indexerTheme);
+    void UpdateBubbleText();
     void AddPopupTouchListener(RefPtr<FrameNode> popupNode);
     void OnPopupTouchDown(const TouchEventInfo& info);
     void AddListItemClickListener(RefPtr<FrameNode>& listItemNode, int32_t index);
     void OnListItemClick(int32_t index);
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
-    RefPtr<FrameNode> InitBubbleView();
+    RefPtr<FrameNode> CreatePopupNode();
+    void UpdateBubbleView();
+    void UpdateBubbleLetterView(bool showDivider);
+    void UpdateBubbleListView(std::vector<std::string>& currentListData);
+    void UpdatePopupOpacity(float ratio);
     bool NeedShowBubble();
     void ShowBubble();
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
-    void RemoveBubbleNode(int32_t popnodeId, int32_t targetId) const;
-    void StartBubbleAppearAnimation(RefPtr<FrameNode> animationNode);
+    void StartBubbleAppearAnimation();
     void IndexerHoverInAnimation();
     void IndexerHoverOutAnimation();
     void IndexerPressInAnimation();
@@ -121,6 +125,7 @@ private:
     void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
 
+    RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> bubbleAnimator_;
@@ -128,7 +133,6 @@ private:
     bool isKeyEventRegisted_ = false;
     bool isTouch_ = false;
     bool isHover_ = false;
-    bool removePopupNode_ = true;
 
     std::vector<std::string> arrayValue_;
     int32_t itemCount_ = 0;
