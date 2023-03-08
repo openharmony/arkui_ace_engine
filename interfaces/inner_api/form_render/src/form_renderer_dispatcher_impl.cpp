@@ -14,15 +14,17 @@
  */
 #include "form_renderer_dispatcher_impl.h"
 
+#include "form_renderer.h"
 #include "form_renderer_hilog.h"
 
 namespace OHOS {
 namespace Ace {
-FormRendererDispatcherImpl::FormRendererDispatcherImpl(const std::shared_ptr<UIContent> uiContent)
-    : uiContent_(uiContent) {}
+FormRendererDispatcherImpl::FormRendererDispatcherImpl(
+    const std::shared_ptr<UIContent> uiContent, const std::shared_ptr<FormRenderer> formRenderer)
+    : uiContent_(uiContent), formRenderer_(formRenderer)
+{}
 
-void FormRendererDispatcherImpl::DispatchPointerEvent(
-    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+void FormRendererDispatcherImpl::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
 {
     auto uiContent = uiContent_.lock();
     if (!uiContent) {
@@ -41,6 +43,25 @@ bool FormRendererDispatcherImpl::IsAllowUpdate()
 void FormRendererDispatcherImpl::SetAllowUpdate(bool allowUpdate)
 {
     allowUpdate_ = allowUpdate;
+}
+
+void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float height)
+{
+    auto uiContent = uiContent_.lock();
+    if (!uiContent) {
+        HILOG_ERROR("uiContent is nullptr");
+        return;
+    }
+    uiContent->SetFormWidth(width);
+    uiContent->SetFormHeight(height);
+    uiContent->OnFormSurfaceChange(width, height);
+
+    auto formRenderer = formRenderer_.lock();
+    if (!formRenderer) {
+        HILOG_ERROR("formRenderer is nullptr");
+        return;
+    }
+    formRenderer->OnSurfaceChange(width, height);
 }
 } // namespace Ace
 } // namespace OHOS

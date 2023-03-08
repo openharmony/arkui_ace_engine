@@ -56,9 +56,9 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     return nullptr;
 }
 
-void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
-    std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
+    std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {}
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,

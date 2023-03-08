@@ -23,11 +23,11 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-class SwiperIndicatorModifier : public ContentModifier {
-    DECLARE_ACE_TYPE(SwiperIndicatorModifier, ContentModifier);
+class DotIndicatorModifier : public ContentModifier {
+    DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
 
 public:
-    SwiperIndicatorModifier()
+    DotIndicatorModifier()
         : backgroundColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
           vectorBlackPointCenterX_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
           longPointLeftCenterX_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
@@ -50,7 +50,7 @@ public:
         AttachProperty(indicatorPadding_);
         AttachProperty(indicatorMargin_);
     }
-    ~SwiperIndicatorModifier() override = default;
+    ~DotIndicatorModifier() override = default;
 
     struct ContentProperty {
         Color backgroundColor = Color::TRANSPARENT;
@@ -221,7 +221,7 @@ private:
 
     bool indicatorMask_ = false;
     OffsetF offset_;
-    ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorModifier);
+    ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG
 

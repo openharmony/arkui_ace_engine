@@ -123,13 +123,6 @@ public:
         }
     }
 
-    void FireDeclarativeOnUpdateWithValueParamsCallback(const std::string& params) const
-    {
-        if (frontend_) {
-            frontend_->FireDeclarativeOnUpdateWithValueParamsCallback(params);
-        }
-    }
-
 private:
     void SetPluginComponentTheme(const std::string& path, const RefPtr<AssetManager>& flutterAssetManager);
     void SetActionEventHandler();

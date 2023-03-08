@@ -26,10 +26,10 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paint_wrapper.h"
-#include "core/components_ng/render/canvas.h"
 namespace OHOS::Ace::NG {
 enum class UIStatus {
     SELECTED = 0,
@@ -61,7 +61,8 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
-        PaintRadio(context);
+        RSCanvas canvas = context.canvas;
+        PaintRadio(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
     }
 
     void UpdateAnimatableProperty()
@@ -84,7 +85,7 @@ public:
     }
 
     void InitializeParam();
-    void PaintRadio(DrawingContext& context) const;
+    void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
 
     void SetPointColor(const Color& pointColor)
@@ -109,14 +110,18 @@ public:
         hotZoneSize_ = hotZoneSize;
     }
 
-    void SetEnabled(const bool enabled)
+    void SetEnabled(bool enabled)
     {
-        enabled_ = enabled;
+        if (enabled_) {
+            enabled_->Set(enabled);
+        }
     }
 
-    void SetIsCheck(const bool isCheck)
+    void SetIsCheck(bool isCheck)
     {
-        isCheck_ = isCheck;
+        if (isCheck_) {
+            isCheck_->Set(isCheck);
+        }
     }
 
     void SetTotalScale(const float totalScale)
@@ -140,19 +145,25 @@ public:
         }
     }
 
-    void SetOffset(const OffsetF& offset)
+    void SetOffset(OffsetF& offset)
     {
-        offset_ = offset;
+        if (offset_) {
+            offset_->Set(offset);
+        }
     }
 
-    void SetSize(const SizeF& size)
+    void SetSize(SizeF& size)
     {
-        size_ = size;
+        if (size_) {
+            size_->Set(size);
+        }
     }
 
-    void SetUIStatus(const UIStatus uiStatus)
+    void SetUIStatus(UIStatus& uiStatus)
     {
-        uiStatus_ = uiStatus;
+        if (uiStatus_) {
+            uiStatus_->Set(static_cast<int32_t>(uiStatus));
+        }
     }
 
     void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
@@ -174,14 +185,15 @@ private:
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
-
-    bool enabled_ = true;
-    bool isCheck_ = false;
-    UIStatus uiStatus_ = UIStatus::UNSELECTED;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    OffsetF offset_;
-    SizeF size_;
+
+    RefPtr<PropertyBool> enabled_;
+    RefPtr<PropertyBool> isCheck_;
+    RefPtr<PropertyInt> uiStatus_;
+
+    RefPtr<PropertyOffsetF> offset_;
+    RefPtr<PropertySizeF> size_;
     RefPtr<RadioModifier> radioModifier_;
     RefPtr<PropertyFloat> totalScale_;
     RefPtr<PropertyFloat> pointScale_;

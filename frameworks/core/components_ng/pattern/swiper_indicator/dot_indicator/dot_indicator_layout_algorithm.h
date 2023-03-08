@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_SWIPER_INDICATOR_LAYOUT_ALGORITHM_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_SWIPER_INDICATOR_LAYOUT_ALGORITHM_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DOT_INDICATOR_LAYOUT_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DOT_INDICATOR_LAYOUT_ALGORITHM_H
 
 #include <cstdint>
 #include <optional>
@@ -23,15 +23,13 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT SwiperIndicatorLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(SwiperIndicatorLayoutAlgorithm, LayoutAlgorithm);
+class ACE_EXPORT DotIndicatorLayoutAlgorithm : public LayoutAlgorithm {
+    DECLARE_ACE_TYPE(DotIndicatorLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    SwiperIndicatorLayoutAlgorithm() = default;
-    ~SwiperIndicatorLayoutAlgorithm() override = default;
+    DotIndicatorLayoutAlgorithm() = default;
+    ~DotIndicatorLayoutAlgorithm() override = default;
 
     void OnReset() override {}
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -54,6 +52,5 @@ private:
     bool isHoverOrPress_ = false;
     PointF hoverPoint_;
 };
-
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_SWIPER_INDICATOR_LAYOUT_ALGORITHM_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DOT_INDICATOR_LAYOUT_ALGORITHM_H

@@ -2069,7 +2069,7 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
 {
     auto menuOptions = JSRef<JSObject>::Cast(info[1]);
-    (void)JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
+    JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     auto offsetVal = menuOptions->GetProperty("offset");
     if (offsetVal->IsObject()) {
         auto offsetObj = JSRef<JSObject>::Cast(offsetVal);

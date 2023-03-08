@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <utility>
 #include "base/geometry/ng/size_t.h"
 #include "base/i18n/localization.h"
 #include "base/log/log.h"
@@ -216,18 +217,27 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     if (container->IsUseNewPipeline()) {
         RefPtr<NG::FrameNode> pageNode;
 #ifdef PLUGIN_COMPONENT_SUPPORTED
+        std::function<void(const std::string&)> callback = [weak = Referenced::WeakClaim(view)](
+                                                               const std::string& params) {
+            auto view = weak.Upgrade();
+            if (view && !params.empty()) {
+                view->ExecuteInitiallyProvidedValue(params);
+            }
+        };
+        if (view->isFullUpdate()) {
+            callback = [weak = Referenced::WeakClaim(view)](const std::string& params) {
+                auto view = weak.Upgrade();
+                if (view && !params.empty()) {
+                    view->ExecuteUpdateWithValueParams(params);
+                }
+            };
+        }
         if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
             auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());
             CHECK_NULL_VOID(pluginContainer);
             pageNode = pluginContainer->GetPluginNode().Upgrade();
             CHECK_NULL_VOID(pageNode);
-            pluginContainer->SetDeclarativeOnUpdateWithValueParamsCallback(
-                [weak = Referenced::WeakClaim(view)](const std::string& params) {
-                    auto view = weak.Upgrade();
-                    if (view && !params.empty()) {
-                        view->ExecuteUpdateWithValueParams(params);
-                    }
-                });
+            pluginContainer->SetDeclarativeOnUpdateWithValueParamsCallback(std::move(callback));
         } else
 #endif
         {

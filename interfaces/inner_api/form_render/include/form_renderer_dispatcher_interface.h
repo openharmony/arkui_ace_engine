@@ -47,9 +47,12 @@ public:
      */
     virtual void SetAllowUpdate(bool allowUpdate) = 0;
 
+    virtual void DispatchSurfaceChangeEvent(float width, float height) = 0;
+
     enum Message : uint32_t {
         DISPATCH_POINTER_EVENT = 1,
         SET_ALLOW_UPDATE,
+        DISPATCH_SURFACE_CHANGE_EVENT,
     };
 };
 }  // namespace Ace

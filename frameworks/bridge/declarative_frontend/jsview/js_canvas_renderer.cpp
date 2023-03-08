@@ -1254,7 +1254,6 @@ void JSCanvasRenderer::JsSetMiterLimit(const JSCallbackInfo& info)
     if (info[0]->IsNumber()) {
         double limit = 0.0;
         JSViewAbstract::ParseJsDouble(info[0], limit);
-        limit = SystemProperties::Vp2Px(limit);
         if (Container::IsCurrentUseNewPipeline()) {
             if (isOffscreen_) {
                 offscreenCanvasPattern_->SetMiterLimit(limit);

@@ -44,10 +44,10 @@ public:
     static void SetOnChange(std::function<void(bool)>&& onChange);
 
     static void SetFontSize(const Dimension& fontSize);
-    static void SetFontColor(const Color& color);
+    static void SetFontColor(const std::optional<Color>& color);
     static void SetFontWeight(FontWeight weight);
     static void SetLabelFontSize(const Dimension& fontSize);
-    static void SetLabelFontColor(const Color& color);
+    static void SetLabelFontColor(const std::optional<Color>& color);
     static void SetLabelFontWeight(FontWeight weight);
 };
 } // namespace OHOS::Ace::NG

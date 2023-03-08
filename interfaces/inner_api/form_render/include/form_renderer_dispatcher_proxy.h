@@ -37,6 +37,8 @@ public:
 
     void SetAllowUpdate(bool allowUpdate) override;
 
+    void DispatchSurfaceChangeEvent(float width, float height) override;
+
 private:
     template<typename T>
     int32_t GetParcelableInfos(MessageParcel &reply, std::vector<T> &parcelableInfos);

@@ -51,18 +51,21 @@ CheckBoxModifier::CheckBoxModifier(
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_VOID(checkBoxTheme);
-    
+
     animatableBoardColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(boardColor));
     animatableCheckColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(checkColor));
     animatableBorderColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(borderColor));
     animatableShadowColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(shadowColor));
-    checkStroke_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(
-        checkBoxTheme->GetCheckStroke().ConvertToPx()));
-    strokeSize_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(
-        checkBoxTheme->GetWidth().ConvertToPx()));
+    checkStroke_ =
+        AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(checkBoxTheme->GetCheckStroke().ConvertToPx()));
+    strokeSize_ =
+        AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(checkBoxTheme->GetWidth().ConvertToPx()));
     animateHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
+    offset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    size_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
+    enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
 
     AttachProperty(animatableBoardColor_);
     AttachProperty(animatableCheckColor_);
@@ -73,6 +76,9 @@ CheckBoxModifier::CheckBoxModifier(
     AttachProperty(strokeSize_);
     AttachProperty(isSelect_);
     AttachProperty(isHover_);
+    AttachProperty(offset_);
+    AttachProperty(size_);
+    AttachProperty(enabled_);
 }
 
 void CheckBoxModifier::InitializeParam()
@@ -111,19 +117,19 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
     RSPen shadowPen = RSPen(pen);
     brush.SetColor(ToRSColor(animatableBoardColor_->Get()));
     brush.SetAntiAlias(true);
-    if (!enabled_) {
+    if (!enabled_->Get()) {
         brush.SetColor(
             ToRSColor(animatableBoardColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
     }
     DrawBackboard(canvas, paintOffset, brush, contentSize);
     pen.SetColor(ToRSColor(animatableBorderColor_->Get()));
-    if (!enabled_) {
+    if (!enabled_->Get()) {
         pen.SetColor(
             ToRSColor(animatableBorderColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
     }
     DrawBorder(canvas, paintOffset, pen, contentSize);
     pen.SetColor(ToRSColor(animatableCheckColor_->Get()));
-    if (!enabled_) {
+    if (!enabled_->Get()) {
         pen.SetColor(
             ToRSColor(animatableCheckColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
     }
@@ -178,12 +184,9 @@ void CheckBoxModifier::DrawCheck(
     float originX = origin.GetX();
     float originY = origin.GetY();
     float strokeSize = strokeSize_->Get();
-    const Offset start =
-        Offset(strokeSize * CHECK_MARK_START_X_POSITION, strokeSize * CHECK_MARK_START_Y_POSITION);
-    const Offset middle =
-        Offset(strokeSize * CHECK_MARK_MIDDLE_X_POSITION, strokeSize * CHECK_MARK_MIDDLE_Y_POSITION);
-    const Offset end =
-        Offset(strokeSize * CHECK_MARK_END_X_POSITION, strokeSize * CHECK_MARK_END_Y_POSITION);
+    const Offset start = Offset(strokeSize * CHECK_MARK_START_X_POSITION, strokeSize * CHECK_MARK_START_Y_POSITION);
+    const Offset middle = Offset(strokeSize * CHECK_MARK_MIDDLE_X_POSITION, strokeSize * CHECK_MARK_MIDDLE_Y_POSITION);
+    const Offset end = Offset(strokeSize * CHECK_MARK_END_X_POSITION, strokeSize * CHECK_MARK_END_Y_POSITION);
     path.MoveTo(originX + start.GetX() + (paintSize.Width() - strokeSize) / CHECKBOX_DOUBLE_RATIO,
         originY + start.GetY() + (paintSize.Height() - strokeSize) / CHECKBOX_DOUBLE_RATIO);
     path.LineTo(originX + middle.GetX() + (paintSize.Width() - strokeSize) / CHECKBOX_DOUBLE_RATIO,

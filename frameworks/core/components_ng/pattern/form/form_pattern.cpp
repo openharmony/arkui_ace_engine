@@ -102,12 +102,17 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             }
         }
 
+        if (formManagerBridge_ && (cardInfo_.width != info.width || cardInfo_.height != info.height)) {
+            LOGI("Form surfaceChange callback");
+            formManagerBridge_->NotifySurfaceChange(size.Width(), size.Height());
+        }
+
         if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
             cardInfo_.width = info.width;
             cardInfo_.height = info.height;
             subContainer_->SetFormPattern(WeakClaim(this));
             subContainer_->UpdateRootElementSize();
-            subContainer_->UpdateSurfaceSize();
+            subContainer_->UpdateSurfaceSizeWithAnimathion();
         }
         return false;
     }
@@ -244,6 +249,22 @@ void FormPattern::InitFormManagerDelegate()
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
             host->GetRenderContext()->RequestNextFrame();
+    });
+
+    formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height) {
+        auto formComponent = weak.Upgrade();
+        CHECK_NULL_VOID(formComponent);
+        auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(formComponent->GetExternalRenderContext());
+        CHECK_NULL_VOID(externalRenderContext);
+        externalRenderContext->SetBounds(0, 0, width, height);
+        auto host = formComponent->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        auto parent = host->GetParent();
+        CHECK_NULL_VOID(parent);
+        parent->MarkNeedSyncRenderTree();
+        parent->RebuildRenderContextTree();
+        host->GetRenderContext()->RequestNextFrame();
     });
 
     formManagerBridge_->AddActionEventHandle(

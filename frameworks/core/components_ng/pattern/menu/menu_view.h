@@ -44,7 +44,7 @@ public:
     static void Create();
 
     static void SetFontSize(const Dimension& fontSize);
-    static void SetFontColor(const Color& color);
+    static void SetFontColor(const std::optional<Color>& color);
     static void SetFontWeight(FontWeight weight);
 };
 } // namespace OHOS::Ace::NG
