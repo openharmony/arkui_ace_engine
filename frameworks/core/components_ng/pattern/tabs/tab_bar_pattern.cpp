@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float NEARLY_ZERO = 0.001f;
+} // namespace
 
 void TabBarPattern::OnAttachToFrameNode()
 {
@@ -452,8 +455,9 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         indicator = 0;
     }
     if (!isAnimating_) {
-        UpdateIndicator(indicator);
+        UpdateIndicator(indicator_);
     }
+    UpdateGradientRegions();
     return false;
 }
 
@@ -495,6 +499,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     } else {
         swiperController_->SwipeToWithoutAnimation(index);
     }
+    indicator_ = index;
     layoutProperty->UpdateIndicator(index);
 }
 
@@ -672,15 +677,15 @@ void TabBarPattern::PlayPressAnimation(int32_t index, const Color& pressColor, A
             CHECK_NULL_VOID(columnNode);
             auto renderContext = columnNode->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            BorderRadiusProperty borderRadiusProperty;
             auto pipelineContext = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
-            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-            CHECK_NULL_VOID(tabTheme);
-            borderRadiusProperty.SetRadius(tabTheme->GetFocusIndicatorRadius());
             renderContext->UpdateBackgroundColor(color);
-            renderContext->UpdateBorderRadius(borderRadiusProperty);
             columnNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }, [weak = AceType::WeakClaim(this)]() {
+        auto tabBar = weak.Upgrade();
+        if (tabBar && tabBar->GetSelectedMode() == SelectedMode::BOARD) {
+            tabBar->UpdateSubTabBoard();
         }
     });
 }
@@ -697,6 +702,7 @@ void TabBarPattern::UpdateCurrentOffset(float offset)
 void TabBarPattern::UpdateIndicator(int32_t indicator)
 {
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndicator(indicator);
 
     auto tabBarNode = GetHost();
@@ -714,7 +720,44 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     paintProperty->UpdateIndicator(rect);
     currentIndicatorOffset_ = rect.GetX();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    UpdateSubTabBoard();
 }
+
+void TabBarPattern::UpdateGradientRegions()
+{
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto barMode = layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED);
+    auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+    auto tarBarNode = GetHost();
+    CHECK_NULL_VOID(tarBarNode);
+    auto geometryNode = tarBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameRect = geometryNode->GetFrameRect();
+
+    for (auto gradientRegion : gradientRegions_) {
+        gradientRegion = false;
+    }
+    if (barMode == TabBarMode::SCROLLABLE) {
+        if (axis == Axis::HORIZONTAL) {
+            if (tabItemOffsets_.front().GetX() < -NEARLY_ZERO) {
+                gradientRegions_[LEFT_GRADIENT] = true;
+            }
+            if (tabItemOffsets_.front().GetX() + childrenMainSize_ > frameRect.Width()) {
+                gradientRegions_[RIGHT_GRADIENT] = true;
+            }
+        } else if (axis == Axis::VERTICAL) {
+            if (tabItemOffsets_.front().GetY() < -NEARLY_ZERO) {
+                gradientRegions_[TOP_GRADIENT] = true;
+            }
+            if (tabItemOffsets_.front().GetY() + childrenMainSize_ > frameRect.Height()) {
+                gradientRegions_[BOTTOM_GRADIENT] = true;
+            }
+        }
+    }
+    tarBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 
 void TabBarPattern::UpdateTextColor(int32_t indicator)
 {
@@ -747,6 +790,35 @@ void TabBarPattern::UpdateTextColor(int32_t indicator)
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
     }
+}
+
+void TabBarPattern::UpdateSubTabBoard()
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator_));
+    CHECK_NULL_VOID(columnNode);
+    auto selectedColumnId = columnNode->GetId();
+
+    for (const auto& columnNode : tabBarNode->GetChildren()) {
+        CHECK_NULL_VOID(columnNode);
+        auto columnFrameNode = AceType::DynamicCast<FrameNode>(columnNode);
+        auto renderContext = columnFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (selectedModes_[indicator_] == SelectedMode::BOARD && columnFrameNode->GetId() == selectedColumnId) {
+            renderContext->UpdateBackgroundColor(indicatorStyles_[indicator_].color);
+        } else {
+            renderContext->UpdateBackgroundColor(Color::BLACK.BlendOpacity(0.0f));
+        }
+        columnFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+SelectedMode TabBarPattern::GetSelectedMode() const
+{
+    return selectedModes_[indicator_];
 }
 
 bool TabBarPattern::IsContainsBuilder()
@@ -886,6 +958,26 @@ void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
+{
+    Color backgroundColor = Color::WHITE;
+    auto tabBarNode = GetHost();
+    if (tabBarNode) {
+        auto tabsNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetParent());
+        if (tabsNode) {
+            auto renderContext = tabsNode->GetRenderContext();
+            if (renderContext) {
+                backgroundColor = renderContext->GetBackgroundColor().value_or(Color::WHITE);
+            }
+        }
+    }
+    if (!tabBarModifier_) {
+        tabBarModifier_ = AceType::MakeRefPtr<TabBarModifier>();
+    }
+    return MakeRefPtr<TabBarPaintMethod>(tabBarModifier_, gradientRegions_, backgroundColor,
+        indicatorStyles_[indicator_], currentIndicatorOffset_, selectedModes_[indicator_]);
 }
 
 float TabBarPattern::GetSpace(int32_t indicator)
