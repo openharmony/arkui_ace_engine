@@ -625,8 +625,7 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
     void ResetBackgroundColor();
-    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-        int32_t duration, const RefPtr<Curve>& curve);
+    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange = false);
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
