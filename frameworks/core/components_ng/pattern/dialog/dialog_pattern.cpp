@@ -347,6 +347,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
     layoutProps->UpdateFlexGrow(1.0);
+    layoutProps->UpdateFlexShrink(1.0);
     // set button default height
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
