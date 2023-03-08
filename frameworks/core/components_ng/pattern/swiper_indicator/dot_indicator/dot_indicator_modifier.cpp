@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_modifier.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 
 #include "base/utils/utils.h"
 #include "core/animation/spring_curve.h"
@@ -42,7 +42,7 @@ constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
 } // namespace
 
-void SwiperIndicatorModifier::onDraw(DrawingContext& context)
+void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
     contentProperty.backgroundColor = backgroundColor_->Get();
@@ -62,7 +62,7 @@ void SwiperIndicatorModifier::onDraw(DrawingContext& context)
     PaintContent(context, contentProperty);
 }
 
-void SwiperIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
+void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
 {
     CHECK_NULL_VOID_NOLOG(contentProperty.backgroundColor.GetAlpha());
     float diameter = contentProperty.pointRadius * DOUBLE;
@@ -91,7 +91,7 @@ void SwiperIndicatorModifier::PaintBackground(DrawingContext& context, const Con
     canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, rectRadius, rectRadius });
 }
 
-void SwiperIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
+void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
 {
     RSCanvas canvas = context.canvas;
     auto swiperTheme = GetSwiperIndicatorTheme();
@@ -107,7 +107,7 @@ void SwiperIndicatorModifier::PaintContent(DrawingContext& context, ContentPrope
         canvas, leftCenter, rightCenter, contentProperty.pointRadius * contentProperty.longPointDilateRatio);
 }
 
-float SwiperIndicatorModifier::GetRadius(size_t index, ContentProperty& contentProperty)
+float DotIndicatorModifier::GetRadius(size_t index, ContentProperty& contentProperty)
 {
     if (normalToHoverIndex_.has_value() && normalToHoverIndex_ == index) {
         return contentProperty.pointRadius * contentProperty.normalToHoverPointDilateRatio;
@@ -118,7 +118,7 @@ float SwiperIndicatorModifier::GetRadius(size_t index, ContentProperty& contentP
     return contentProperty.pointRadius;
 }
 
-void SwiperIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, float radius)
+void DotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, float radius)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
@@ -129,14 +129,13 @@ void SwiperIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const O
     canvas.DrawCircle({ pointX, pointY }, radius);
 }
 
-void SwiperIndicatorModifier::PaintSelectedIndicator(
+void DotIndicatorModifier::PaintSelectedIndicator(
     RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter, float radius)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(selectedColor_));
     canvas.AttachBrush(brush);
-    // todo 圆心距离也应该放大
     float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY()) - radius;
     float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX()) - radius;
     float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY()) + radius;
@@ -144,7 +143,7 @@ void SwiperIndicatorModifier::PaintSelectedIndicator(
     canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
 }
 
-void SwiperIndicatorModifier::PaintMask(DrawingContext& context)
+void DotIndicatorModifier::PaintMask(DrawingContext& context)
 {
     RSCanvas canvas = context.canvas;
 
@@ -168,7 +167,7 @@ void SwiperIndicatorModifier::PaintMask(DrawingContext& context)
     canvas.DrawRect({ startPt.GetX(), startPt.GetY(), endPt.GetX(), endPt.GetY() });
 }
 
-void SwiperIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+void DotIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& margin, const float& normalPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set(margin);
@@ -180,7 +179,7 @@ void SwiperIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& margin, c
     pointRadius_->Set(normalPointRadius);
 }
 
-void SwiperIndicatorModifier::UpdateDilatePaintProperty(const float& hoverPointRadius,
+void DotIndicatorModifier::UpdateDilatePaintProperty(const float& hoverPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set({ 0, 0 });
@@ -192,12 +191,12 @@ void SwiperIndicatorModifier::UpdateDilatePaintProperty(const float& hoverPointR
     pointRadius_->Set(hoverPointRadius);
 }
 
-void SwiperIndicatorModifier::UpdateBackgroundColor(const Color& backgroundColor)
+void DotIndicatorModifier::UpdateBackgroundColor(const Color& backgroundColor)
 {
     backgroundColor_->Set(LinearColor(backgroundColor));
 }
 
-void SwiperIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+void DotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
@@ -207,7 +206,7 @@ void SwiperIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& margin, c
     UpdateBackgroundColor(backgroundColor);
 }
 
-void SwiperIndicatorModifier::UpdateHoverPaintProperty(const float& hoverPointRadius,
+void DotIndicatorModifier::UpdateHoverPaintProperty(const float& hoverPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
@@ -217,7 +216,7 @@ void SwiperIndicatorModifier::UpdateHoverPaintProperty(const float& hoverPointRa
     UpdateBackgroundColor(backgroundColor);
 }
 
-void SwiperIndicatorModifier::UpdatePressPaintProperty(const float& hoverPointRadius,
+void DotIndicatorModifier::UpdatePressPaintProperty(const float& hoverPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
@@ -227,7 +226,7 @@ void SwiperIndicatorModifier::UpdatePressPaintProperty(const float& hoverPointRa
     UpdateBackgroundColor(backgroundColor);
 }
 
-void SwiperIndicatorModifier::UpdateNormalToHoverPaintProperty(const float& hoverPointRadius,
+void DotIndicatorModifier::UpdateNormalToHoverPaintProperty(const float& hoverPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption option;
@@ -237,7 +236,7 @@ void SwiperIndicatorModifier::UpdateNormalToHoverPaintProperty(const float& hove
         option, [&]() { this->UpdateHoverPaintProperty(hoverPointRadius, vectorBlackPointCenterX, longPointCenterX); });
 }
 
-void SwiperIndicatorModifier::UpdateHoverToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+void DotIndicatorModifier::UpdateHoverToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption option;
@@ -248,7 +247,7 @@ void SwiperIndicatorModifier::UpdateHoverToNormalPaintProperty(const OffsetF& ma
     });
 }
 
-void SwiperIndicatorModifier::UpdateNormalToPressPaintProperty(const float& hoverPointRadius,
+void DotIndicatorModifier::UpdateNormalToPressPaintProperty(const float& hoverPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption option;
@@ -258,7 +257,7 @@ void SwiperIndicatorModifier::UpdateNormalToPressPaintProperty(const float& hove
         option, [&]() { this->UpdatePressPaintProperty(hoverPointRadius, vectorBlackPointCenterX, longPointCenterX); });
 }
 
-void SwiperIndicatorModifier::UpdatePressToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+void DotIndicatorModifier::UpdatePressToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption option;
@@ -269,7 +268,7 @@ void SwiperIndicatorModifier::UpdatePressToNormalPaintProperty(const OffsetF& ma
     });
 }
 
-void SwiperIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
+void DotIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
@@ -280,7 +279,7 @@ void SwiperIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
     AnimationUtils::Animate(option, [&]() { this->UpdateBackgroundColor(backgroundColor); });
 }
 
-void SwiperIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
+void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
 {
     normalToHoverPointDilateRatio_->Set(1.0f);
     AnimationOption option;
@@ -289,7 +288,7 @@ void SwiperIndicatorModifier::UpdateNormalToHoverPointDilateRatio()
     AnimationUtils::Animate(option, [&]() { normalToHoverPointDilateRatio_->Set(INDICATOR_ZOOM_IN_SCALE); });
 }
 
-void SwiperIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
+void DotIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
 {
     hoverToNormalPointDilateRatio_->Set(normalToHoverPointDilateRatio_->Get());
     AnimationOption option;
@@ -298,7 +297,7 @@ void SwiperIndicatorModifier::UpdateHoverToNormalPointDilateRatio()
     AnimationUtils::Animate(option, [&]() { hoverToNormalPointDilateRatio_->Set(1.0f); });
 }
 
-void SwiperIndicatorModifier::UpdateLongPointDilateRatio()
+void DotIndicatorModifier::UpdateLongPointDilateRatio()
 {
     AnimationOption option;
     option.SetDuration(POINT_HOVER_ANIMATION_DURATION);
@@ -310,7 +309,7 @@ void SwiperIndicatorModifier::UpdateLongPointDilateRatio()
     }
 }
 
-void SwiperIndicatorModifier::UpdateAllPointCenterXAnimation(
+void DotIndicatorModifier::UpdateAllPointCenterXAnimation(
     bool isForward, const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption blackPointOption;
