@@ -40,7 +40,7 @@ public:
     void onDraw(DrawingContext& context) override
     {
         RSCanvas canvas = context.canvas;
-        PaintCheckBox(canvas, offset_, size_);
+        PaintCheckBox(canvas, offset_->Get(), size_->Get());
     }
 
     void UpdateAnimatableProperty()
@@ -94,21 +94,16 @@ public:
 
     void SetEnabled(bool enabled)
     {
-        enabled_ = enabled;
-    }
-
-    void SetIsTouch(bool isTouch)
-    {
-        isTouch_ = isTouch;
+        if (enabled_) {
+            enabled_->Set(enabled);
+        }
     }
 
     void SetIsSelect(bool isSelect)
     {
-        if (!isSelect_ || (isSelect_->Get() == isSelect)) {
-            return;
+        if (isSelect_) {
+            isSelect_->Set(isSelect);
         }
-        isSelect_->Set(isSelect);
-        UpdateAnimatableProperty();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
@@ -123,17 +118,16 @@ public:
 
     void SetOffset(OffsetF& offset)
     {
-        offset_ = offset;
+        if (offset_) {
+            offset_->Set(offset);
+        }
     }
 
     void SetSize(SizeF& size)
     {
-        size_ = size;
-    }
-
-    void SetUIStatus(UIStatus& uiStatus)
-    {
-        uiStatus_ = uiStatus;
+        if (size_) {
+            size_->Set(size);
+        }
     }
 
     void SetIsHover(bool isHover)
@@ -176,15 +170,10 @@ private:
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
-
-    bool enabled_ = true;
-    bool isTouch_ = false;
-    UIStatus uiStatus_ = UIStatus::UNSELECTED;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    OffsetF offset_;
-    SizeF size_;
 
+    RefPtr<PropertyBool> enabled_;
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animatableCheckColor_;
     RefPtr<AnimatablePropertyColor> animatableBorderColor_;
@@ -194,6 +183,8 @@ private:
     RefPtr<AnimatablePropertyFloat> strokeSize_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
+    RefPtr<PropertyOffsetF> offset_;
+    RefPtr<PropertySizeF> size_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxModifier);
 };
