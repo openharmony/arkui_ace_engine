@@ -19,6 +19,7 @@
 #include <functional>
 #include "base/geometry/dimension.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {
 using TextChangeEvent = std::function<void(const std::string&, double)>;
@@ -27,12 +28,16 @@ public:
     static TextPickerModel* GetInstance();
     virtual ~TextPickerModel() = default;
 
-    virtual void Create(RefPtr<PickerTheme> pickerTheme) =0;
+    virtual void Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnKind) = 0;
     virtual void SetSelected(uint32_t value) = 0;
-    virtual void SetRange(const std::vector<std::string>& value) = 0;
+    virtual void SetRange(const std::vector<NG::RangeContent>& value) = 0;
     virtual void SetValue(const std::string& value) = 0;
     virtual void SetOnChange(TextChangeEvent&& onChange) = 0;
     virtual void SetDefaultPickerItemHeight(const Dimension& value) = 0;
+    virtual void SetDefaultAttributes(RefPtr<PickerTheme> pickerTheme) = 0;
+    virtual void SetDisappearTextStyle(const NG::PickerTextStyle& value) = 0;
+    virtual void SetNormalTextStyle(const NG::PickerTextStyle& value) = 0;
+    virtual void SetSelectedTextStyle(const NG::PickerTextStyle& value) = 0;
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
 };

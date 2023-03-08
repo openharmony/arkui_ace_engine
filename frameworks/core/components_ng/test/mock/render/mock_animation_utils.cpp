@@ -29,7 +29,18 @@ bool AnimationUtils::CloseImplicitAnimation()
 
 void AnimationUtils::Animate(
     const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
-{}
+{
+    if (callback) {
+        callback();
+    }
+    if (finishCallback) {
+        finishCallback();
+    }
+    auto finishEvent = option.GetOnFinishEvent();
+    if (finishEvent) {
+        finishEvent();
+    }
+}
 
 void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback) {}
 

@@ -19,8 +19,9 @@
 #include "core/components/picker/picker_text_component.h"
 
 namespace OHOS::Ace::Framework {
-void TextPickerModelImpl::Create(RefPtr<PickerTheme> pickerTheme)
+void TextPickerModelImpl::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnKind)
 {
+    (void)columnKind;
     auto textPicker = AceType::MakeRefPtr<PickerTextComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(textPicker);
 
@@ -42,9 +43,16 @@ void TextPickerModelImpl::SetSelected(uint32_t value)
     JSViewSetProperty(&PickerTextComponent::SetSelected, value);
 }
 
-void TextPickerModelImpl::SetRange(const std::vector<std::string>& value)
+void TextPickerModelImpl::SetRange(const std::vector<NG::RangeContent>& value)
 {
-    JSViewSetProperty(&PickerTextComponent::SetRange, value);
+    if (!value.size()) {
+        return;
+    }
+    std::vector<std::string> textRange;
+    for (auto& range : value) {
+        textRange.emplace_back(range.text_);
+    }
+    JSViewSetProperty(&PickerTextComponent::SetRange, textRange);
 }
 
 void TextPickerModelImpl::SetOnChange(TextChangeEvent&& onChange)
