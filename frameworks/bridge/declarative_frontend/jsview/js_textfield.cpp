@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -354,6 +354,80 @@ void JSTextField::SetCaretColor(const JSCallbackInfo& info)
     }
 
     TextFieldModel::GetInstance()->SetCaretColor(color);
+}
+
+void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGW("CaretStyle create error, info is non-valid");
+        return;
+    }
+    CaretStyle caretStyle;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto caretWidth = paramObject->GetProperty("caretWidth");
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
+        caretStyle.caretWidth = theme->GetCursorWidth();
+    } else {
+        Dimension width;
+        if (!ParseJsDimensionVp(caretWidth, width)) {
+            caretStyle.caretWidth = theme->GetCursorWidth();
+        }
+        if (LessNotEqual(width.Value(), 0.0)) {
+            return;
+        }
+        caretStyle.caretWidth = width;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
+        return;
+    }
+}
+
+void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg(SetCaretPosition) is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    int32_t caretPosition = 0;
+    if (!ParseJsInt32(info[0], caretPosition)) {
+        return;
+    }
+    if (caretPosition < 0) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
+        return;
+    }
+}
+
+void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg(SetSelectedBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
+        return;
+    }
+
+    Color selectedColor;
+    if (!ParseJsColor(info[0], selectedColor)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        selectedColor = theme->GetSelectedColor();
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+        return;
+    }
 }
 
 void JSTextField::SetMaxLength(const JSCallbackInfo& info)

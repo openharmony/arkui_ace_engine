@@ -35,6 +35,8 @@ public:
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propInputStyle_ = CloneInputStyle();
         value->propCursorColor_ = CloneCursorColor();
+        value->propCursorWidth_ = CloneCursorWidth();
+        value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
         value->propBackgroundColor_ = CloneBackgroundColor();
         return value;
     }
@@ -43,18 +45,17 @@ public:
     {
         PaintProperty::Reset();
         ResetCursorColor();
+        ResetCursorWidth();
+        ResetSelectedBackgroundColor();
         ResetInputStyle();
         ResetBackgroundColor();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
-    {
-        PaintProperty::ToJsonValue(json);
-        json->Put("placeholderColor", propCursorColor_.value_or(Color()).ColorToString().c_str());
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorWidth, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InputStyle, InputStyle, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PressBgColor, Color, PROPERTY_UPDATE_RENDER);

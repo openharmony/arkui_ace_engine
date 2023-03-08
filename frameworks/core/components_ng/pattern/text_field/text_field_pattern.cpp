@@ -509,6 +509,9 @@ void TextFieldPattern::UpdateCaretRectByPosition(int32_t position)
     // add 1.0f here for offsetToParagraphBeginning offsetY is negative when caret position is zero
     caretRect_.SetTop(caretMetrics.offset.GetY());
     caretRect_.SetHeight(caretMetrics.height);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCaretPosition(textEditingValue_.caretPosition);
 }
 
 int32_t TextFieldPattern::GetLineNumber(float offsetY)
@@ -554,6 +557,9 @@ void TextFieldPattern::UpdateCaretPositionByPressOffset()
     }
     UpdateCaretOffsetByLastTouchOffset();
     UpdateSelection(textEditingValue_.caretPosition);
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateCaretPosition(textEditingValue_.caretPosition);
 }
 
 CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position)
@@ -827,6 +833,7 @@ void TextFieldPattern::HandleFocusEvent()
         auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
         UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
         caretUpdateType_ = CaretUpdateType::EVENT;
+        HandleOnSelectAll();
         CloseSelectOverlay();
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -1530,14 +1537,17 @@ void TextFieldPattern::OnModifyDone()
     obscureTickCountDown_ = OBSCURE_SHOW_TICKS;
     ProcessInnerPadding();
     textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
-    caretRect_.SetWidth(static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    float caretWidth = paintProperty->GetCursorWidth().has_value()
+                            ? static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx())
+                            : static_cast<float>(CURSOR_WIDTH.ConvertToPx());
+    caretRect_.SetWidth(caretWidth);
     caretRect_.SetHeight(GetTextOrPlaceHolderFontSize());
     if (textEditingValue_.caretPosition == 0) {
         caretRect_.SetLeft(GetPaddingLeft());
         caretRect_.SetTop(GetPaddingTop());
         caretRect_.SetHeight(PreferredLineHeight());
     }
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     auto renderContext = GetHost()->GetRenderContext();
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());

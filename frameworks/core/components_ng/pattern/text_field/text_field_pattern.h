@@ -108,7 +108,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this));
+        if (!textFieldOverlayModifier_) {
+            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this));
+        }
+        if (!textFieldContentModifier_) {
+            textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
+        }
+        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier_, textFieldContentModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -505,6 +511,11 @@ public:
 
     void UpdateEditingValueToRecord();
 
+    RefPtr<TextFieldContentModifier> GetContentModifier()
+    {
+        return textFieldContentModifier_;
+    }
+
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
@@ -699,6 +710,8 @@ private:
     TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
+    RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
+    RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
     RefPtr<Clipboard> clipboard_;

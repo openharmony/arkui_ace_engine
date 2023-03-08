@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -192,6 +192,30 @@ void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
 void TextFieldModelNG::SetCaretColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value);
+}
+
+void TextFieldModelNG::SetCaretStyle(const CaretStyle& value)
+{
+    if (value.caretWidth.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value());
+    }
+}
+
+void TextFieldModelNG::SetCaretPosition(const int32_t& value)
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto caretPosition = layoutProperty->GetPlaceholderValue() == "" ? value : 0;
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, caretPosition);
+    pattern->SetCaretPosition(caretPosition);
+    pattern->UpdateCaretPositionByTextEdit();
+}
+
+void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value);
 }
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)

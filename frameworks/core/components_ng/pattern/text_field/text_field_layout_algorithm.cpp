@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -97,6 +97,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto contentModifier = pattern->GetContentModifier();
     TextStyle textStyle;
     std::string textContent;
     bool showPlaceHolder = false;
@@ -109,6 +110,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
+    }
+    if (contentModifier) {
+        SetPropertyToModifier(textStyle, contentModifier);
+        contentModifier->ModifyTextStyle(textStyle);
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
@@ -383,4 +388,12 @@ float TextFieldLayoutAlgorithm::GetTextFieldDefaultImageHeight()
     return static_cast<float>(height.ConvertToPx());
 }
 
+void TextFieldLayoutAlgorithm::SetPropertyToModifier(
+    const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier)
+{
+    CHECK_NULL_VOID(modifier);
+    modifier->SetFontSize(textStyle.GetFontSize());
+    modifier->SetFontWeight(textStyle.GetFontWeight());
+    modifier->SetTextColor(textStyle.GetTextColor());
+}
 } // namespace OHOS::Ace::NG
