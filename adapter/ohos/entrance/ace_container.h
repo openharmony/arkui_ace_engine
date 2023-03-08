@@ -35,9 +35,7 @@
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
-using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
-    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-    const std::string& abilityName)>;
+using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
