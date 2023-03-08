@@ -1299,6 +1299,7 @@ void PipelineContext::FlushReload()
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID(pipeline->stageManager_);
         pipeline->stageManager_->ReloadStage();
         pipeline->FlushUITasks();
     });
