@@ -577,6 +577,13 @@ var SizeType;
   SizeType[SizeType["LG"] = 4] = "LG";
 })(SizeType || (SizeType = {}));
 
+var CancelButtonStyle;
+(function (CancelButtonStyle) {
+  CancelButtonStyle["CONSTANT"] = "CONSTANT";
+  CancelButtonStyle["INVISIBLE"] = "INVISIBLE";
+  CancelButtonStyle["INPUT"] = "INPUT";
+})(CancelButtonStyle || (CancelButtonStyle = {}));
+
 var ColorMode;
 (function (ColorMode) {
     ColorMode[ColorMode["LIGHT"] = 0] = "LIGHT";

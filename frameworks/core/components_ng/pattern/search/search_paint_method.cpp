@@ -39,7 +39,7 @@ CanvasDrawFunction SearchPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 
 void SearchPaintMethod::PaintSearch(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
-    if (!searchButton_.empty()) {
+    if (isSearchButtonEnabled_) {
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto searchTheme = pipeline->GetTheme<SearchTheme>();
