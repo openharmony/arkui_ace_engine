@@ -32,13 +32,6 @@
 #include "core/common/backend.h"
 
 namespace OHOS::Ace {
-
-class JsBackendEngineInstance {
-public:
-    JsBackendEngineInstance() = default;
-    virtual ~JsBackendEngineInstance() = default;
-};
-
 class JsBackendEngine : public AceType {
     DECLARE_ACE_TYPE(JsBackendEngine, AceType);
 
