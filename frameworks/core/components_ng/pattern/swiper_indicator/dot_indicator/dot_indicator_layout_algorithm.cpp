@@ -41,9 +41,6 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
-    const auto& minSize = layoutConstraint->minSize;
-    const auto& maxSize = layoutConstraint->maxSize;
-
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
@@ -72,19 +69,15 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
     userItemWidth *= INDICATOR_ZOOM_IN_SCALE;
     userItemHeight *= INDICATOR_ZOOM_IN_SCALE;
-    indicatorPadding = INDICATOR_PADDING_HOVER;
-
-    // Length of a selected indicator round rect.
-    auto userSelectedItemWidth = userItemWidth * DOUBLE;
-    auto userSelectedItemHeight = userItemHeight * DOUBLE;
+    indicatorPadding *= INDICATOR_PADDING_HOVER;
 
     // The width and height of the entire indicator.
     auto indicatorHeight = static_cast<float>(userItemWidth + indicatorPadding.ConvertToPx() * DOUBLE);
-    if (userSelectedItemHeight > userItemWidth) {
-       indicatorHeight = static_cast<float>(userSelectedItemHeight + indicatorPadding.ConvertToPx() * DOUBLE);
+    if (userItemHeight * DOUBLE > userItemWidth) {
+        indicatorHeight = static_cast<float>(userItemHeight * DOUBLE + indicatorPadding.ConvertToPx() * DOUBLE);
     }
     auto indicatorWidth = static_cast<float>((indicatorPadding.ConvertToPx() * DOUBLE +
-        (userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userSelectedItemWidth);
+        (userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userItemWidth * DOUBLE);
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;
@@ -100,7 +93,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (frameSize.IsNonNegative()) {
             break;
         }
-        frameSize.Constrain(minSize, maxSize);
+        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } while (false);
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
@@ -156,7 +149,7 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             position.SetY((swiperHeight - indicatorHeight_) * HALF);
         }
     }
-    auto currentOffset = OffsetF { static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
+    auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};
     layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 }
 

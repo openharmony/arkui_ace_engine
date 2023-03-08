@@ -23,6 +23,9 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int ITEM_SIZES_VECTOR_SIZE = 4;
+}
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
 
@@ -37,7 +40,7 @@ public:
           longPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
-          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4)))
+          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(ITEM_SIZES_VECTOR_SIZE)))
     {
         AttachProperty(vectorBlackPointCenterX_);
         AttachProperty(longPointLeftCenterX_);

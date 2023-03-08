@@ -121,7 +121,7 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(layoutGeometryNode);
-    auto currentOffset = OffsetF{ static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
+    auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};
     CalculateTextFrameSize(frameNode, layoutWrapper);
     layoutGeometryNode->SetMarginFrameOffset(currentOffset);
 }
@@ -171,7 +171,7 @@ void DigitIndicatorLayoutAlgorithm::CalculateTextContent(const RefPtr<FrameNode>
     firstTextLayoutProperty->UpdateFontSize(selectedFontSize);
     firstTextLayoutProperty->UpdateFontWeight(selectedFontWeight);
     currentIndex += 1;
-    if (currentIndex > itemCount) {
+    if (currentIndex > itemCount && itemCount > 0) {
         currentIndex = currentIndex % itemCount;
     }
     firstTextLayoutProperty->UpdateContent(std::to_string(currentIndex));
@@ -222,7 +222,7 @@ void DigitIndicatorLayoutAlgorithm::CalculateTextFrameSize(const RefPtr<FrameNod
     CHECK_NULL_VOID(backTextWrapper);
     auto backTextGeometryNode = backTextWrapper->GetGeometryNode();
     CHECK_NULL_VOID(backTextGeometryNode);
-    auto backTextCurrentOffset = OffsetF{ layoutGeometryNode->GetMarginFrameSize().Width() -
+    auto backTextCurrentOffset = OffsetF { layoutGeometryNode->GetMarginFrameSize().Width() -
         backTextGeometryNode->GetMarginFrameSize().Width() - DIGIT_SIDE_DISTANCE,
         (layoutGeometryNode->GetMarginFrameSize().Height() -
         backTextGeometryNode->GetMarginFrameSize().Height()) * HALF };

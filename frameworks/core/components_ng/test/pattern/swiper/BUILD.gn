@@ -112,7 +112,16 @@ ohos_unittest("swiper_pattern_test_ng") {
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/text/mock_text_paint_method.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+
+    # text
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_content_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_overlay_modifier.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_layout_algorithm.cpp",
@@ -120,6 +129,7 @@ ohos_unittest("swiper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/digit_indicator/digit_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.cpp",

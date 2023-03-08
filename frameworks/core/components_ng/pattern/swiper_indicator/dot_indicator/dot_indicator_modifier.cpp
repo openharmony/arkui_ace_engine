@@ -40,6 +40,10 @@ constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_MASS = 0.0f;
 constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
+constexpr int ITEM_HALF_WIDTH = 0;
+constexpr int ITEM_HALF_HEIGHT = 1;
+constexpr int SELECTED_ITEM_HALF_WIDTH = 2;
+constexpr int SELECTED_ITEM_HALF_HEIGHT = 3;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -65,14 +69,14 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
 void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
 {
     CHECK_NULL_VOID_NOLOG(contentProperty.backgroundColor.GetAlpha());
-    auto itemWidth = contentProperty.itemHalfSizes[0] * DOUBLE;
-    auto itemHeight = contentProperty.itemHalfSizes[1] * DOUBLE;
-    auto selectedItemWidth = contentProperty.itemHalfSizes[2] * DOUBLE;
-    auto selectedItemHeight = contentProperty.itemHalfSizes[3] * DOUBLE;
+    auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * DOUBLE;
+    auto itemHeight = contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] * DOUBLE;
+    auto selectedItemWidth = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * DOUBLE;
+    auto selectedItemHeight = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * DOUBLE;
     auto pointNumber = static_cast<float>(contentProperty.vectorBlackPointCenterX.size());
     float allPointDiameterSum = itemWidth * (pointNumber + 1);
-    if ((contentProperty.itemHalfSizes[0] != contentProperty.itemHalfSizes[2]) ||
-        (contentProperty.itemHalfSizes[1] != contentProperty.itemHalfSizes[3])) {
+    if ((contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] != contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
+        (contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] != contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
         allPointDiameterSum = itemWidth * static_cast<float>(pointNumber - 1) + selectedItemWidth;
     }
     float allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (pointNumber - 1);
@@ -123,17 +127,17 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
 LinearVector<float> DotIndicatorModifier::GetItemHalfSizes(size_t index, ContentProperty& contentProperty)
 {
     if (normalToHoverIndex_.has_value() && normalToHoverIndex_ == index) {
-        contentProperty.itemHalfSizes[0] *= contentProperty.normalToHoverPointDilateRatio;
-        contentProperty.itemHalfSizes[1] *= contentProperty.normalToHoverPointDilateRatio;
-        contentProperty.itemHalfSizes[2] *= contentProperty.normalToHoverPointDilateRatio;
-        contentProperty.itemHalfSizes[3] *= contentProperty.normalToHoverPointDilateRatio;
+        contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] *= contentProperty.normalToHoverPointDilateRatio;
+        contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] *= contentProperty.normalToHoverPointDilateRatio;
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] *= contentProperty.normalToHoverPointDilateRatio;
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] *= contentProperty.normalToHoverPointDilateRatio;
         return contentProperty.itemHalfSizes;
     }
     if (hoverToNormalIndex_.has_value() && hoverToNormalIndex_ == index) {
-        contentProperty.itemHalfSizes[0] *= contentProperty.hoverToNormalPointDilateRatio;
-        contentProperty.itemHalfSizes[1] *= contentProperty.hoverToNormalPointDilateRatio;
-        contentProperty.itemHalfSizes[2] *= contentProperty.hoverToNormalPointDilateRatio;
-        contentProperty.itemHalfSizes[3] *= contentProperty.hoverToNormalPointDilateRatio;
+        contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] *= contentProperty.hoverToNormalPointDilateRatio;
+        contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] *= contentProperty.hoverToNormalPointDilateRatio;
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] *= contentProperty.hoverToNormalPointDilateRatio;
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] *= contentProperty.hoverToNormalPointDilateRatio;
         return contentProperty.itemHalfSizes;
     }
     return contentProperty.itemHalfSizes;
@@ -146,16 +150,19 @@ void DotIndicatorModifier::PaintUnselectedIndicator(
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(unselectedColor_));
     canvas.AttachBrush(brush);
-    if ((itemHalfSizes[0] != itemHalfSizes[2]) || (itemHalfSizes[1] != itemHalfSizes[3])) {
-        float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) - itemHalfSizes[0];
-        float rectTop = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) - itemHalfSizes[1];
-        float rectRight = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) + itemHalfSizes[0];
-        float rectBottom = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) + itemHalfSizes[1];
-        canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, itemHalfSizes[1], itemHalfSizes[1] });
+    if ((itemHalfSizes[ITEM_HALF_WIDTH] != itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
+        (itemHalfSizes[ITEM_HALF_HEIGHT] != itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
+        float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) - itemHalfSizes[ITEM_HALF_WIDTH];
+        float rectTop = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) - itemHalfSizes[ITEM_HALF_HEIGHT];
+        float rectRight = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) + itemHalfSizes[ITEM_HALF_WIDTH];
+        float rectBottom = (axis_ == Axis::HORIZONTAL ? center.GetY() :
+            center.GetX()) + itemHalfSizes[ITEM_HALF_HEIGHT];
+        canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
+            itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[ITEM_HALF_HEIGHT] });
     } else {
         float pointX = axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY();
         float pointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
-        canvas.DrawCircle({ pointX, pointY }, itemHalfSizes[1]);
+        canvas.DrawCircle({ pointX, pointY }, itemHalfSizes[ITEM_HALF_HEIGHT]);
     }
 }
 
@@ -166,12 +173,16 @@ void DotIndicatorModifier::PaintSelectedIndicator(
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(selectedColor_));
     canvas.AttachBrush(brush);
-    // TODO: the center distance should also be enlarged
-    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY()) - itemHalfSizes[2];
-    float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX()) - itemHalfSizes[3];
-    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY()) + itemHalfSizes[2];
-    float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX()) + itemHalfSizes[3];
-    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, itemHalfSizes[3], itemHalfSizes[3] });
+    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() :
+        leftCenter.GetY()) - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() :
+        leftCenter.GetX()) - itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() :
+        rightCenter.GetY()) + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() :
+        rightCenter.GetX()) + itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
+        itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] });
 }
 
 void DotIndicatorModifier::PaintMask(DrawingContext& context)
@@ -272,8 +283,8 @@ void DotIndicatorModifier::UpdateNormalToHoverPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(
-        option, [&]() { this->UpdateHoverPaintProperty(hoverItemHalfSizes, vectorBlackPointCenterX, longPointCenterX); });
+    AnimationUtils::Animate(option, [&]() { this->UpdateHoverPaintProperty(hoverItemHalfSizes,
+        vectorBlackPointCenterX, longPointCenterX); });
 }
 
 void DotIndicatorModifier::UpdateHoverToNormalPaintProperty(
@@ -295,8 +306,8 @@ void DotIndicatorModifier::UpdateNormalToPressPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(
-        option, [&]() { this->UpdatePressPaintProperty(hoverItemHalfSizes, vectorBlackPointCenterX, longPointCenterX); });
+    AnimationUtils::Animate(option, [&]() { this->UpdatePressPaintProperty(hoverItemHalfSizes,
+        vectorBlackPointCenterX, longPointCenterX); });
 }
 
 void DotIndicatorModifier::UpdatePressToNormalPaintProperty(

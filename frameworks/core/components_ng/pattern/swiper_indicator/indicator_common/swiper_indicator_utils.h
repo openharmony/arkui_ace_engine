@@ -21,9 +21,7 @@
 #include "core/components/declaration/swiper/swiper_declaration.h"
 
 namespace OHOS::Ace::NG {
-
 static SwiperIndicatorType swiperIndicatorType = SwiperIndicatorType::DOT;
-
 class SwiperIndicatorUtils {
 public:
     SwiperIndicatorUtils() = delete;
@@ -39,6 +37,5 @@ public:
         swiperIndicatorType = indicatorType;
     }
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_INDICATOR_SWIPER_INDICATOR_UTILS_H

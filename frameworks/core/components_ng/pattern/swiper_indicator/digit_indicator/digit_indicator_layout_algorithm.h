@@ -25,7 +25,6 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT DigitIndicatorLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(DigitIndicatorLayoutAlgorithm, LayoutAlgorithm);
 
@@ -56,6 +55,5 @@ private:
     bool isHoverOrPress_ = false;
     PointF hoverPoint_;
 };
-
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_INDICATOR_DIGIT_INDICATOR_LAYOUT_ALGORITHM_H

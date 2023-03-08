@@ -272,7 +272,8 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
 
     // normalDiameter calculation
     float itemWidth = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
-    float selectedItemWidth = static_cast<float>(paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
+    float selectedItemWidth = static_cast<float>(
+        paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
 
     // diameter calculation
     float clickedItemWidth = itemWidth * INDICATOR_ZOOM_IN_SCALE;
@@ -342,6 +343,11 @@ void SwiperIndicatorPattern::InitTextContent(const RefPtr<SwiperIndicatorLayoutP
     firstTextLayoutProperty->UpdateFontWeight(selectedFontWeight);
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
+    InitTextContentSub();
+}
+
+void SwiperIndicatorPattern::InitTextContentSub(const RefPtr<FrameNode>& firstTextNode) {
+    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
