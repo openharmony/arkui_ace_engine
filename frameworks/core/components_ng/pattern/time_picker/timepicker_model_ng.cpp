@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -136,12 +137,51 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     frameNode->MarkDirtyNode();
 }
 
-void TimePickerModelNG::SetOnChange(ChangeEvent&& onChange)
+void TimePickerModelNG::SetOnChange(TimeChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void TimePickerModelNG::SetDisappearTextStyle(const PickerTextStyle& value)
+{
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize, value.fontSize.value());
+    }
+    if (value.textColor) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearColor, value.textColor.value());
+    }
+    if (value.fontWeight) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearWeight, value.fontWeight.value());
+    }
+}
+
+void TimePickerModelNG::SetNormalTextStyle(const PickerTextStyle& value)
+{
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, value.fontSize.value());
+    }
+    if (value.textColor) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, value.textColor.value());
+    }
+    if (value.fontWeight) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Weight, value.fontWeight.value());
+    }
+}
+
+void TimePickerModelNG::SetSelectedTextStyle(const PickerTextStyle& value)
+{
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize, value.fontSize.value());
+    }
+    if (value.textColor) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, value.textColor.value());
+    }
+    if (value.fontWeight) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight, value.fontWeight.value());
+    }
 }
 } // namespace OHOS::Ace::NG

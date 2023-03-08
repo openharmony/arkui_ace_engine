@@ -695,5 +695,35 @@ void DatePickerDialogView::SetDateTextProperties(const RefPtr<FrameNode>& frameN
 void DatePickerDialogView::SetTimeTextProperties(const RefPtr<FrameNode>& frameNode,
     const PickerTextProperties& properties)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateDisappearColor(properties.hasValueFlag & FLAG_DISAPPEAR_COLOR ?
+        properties.disappearColor_ : disappearStyle.GetTextColor());
+    pickerProperty->UpdateColor(properties.hasValueFlag & FLAG_COLOR ?
+        properties.color_ : normalStyle.GetTextColor());
+    pickerProperty->UpdateSelectedColor(properties.hasValueFlag & FLAG_SELECTED_COLOR ?
+        properties.selectedColor_ : selectedStyle.GetTextColor());
+    pickerProperty->UpdateDisappearFontSize((properties.hasValueFlag & FLAG_DISAPPEAR_FONTSIZE) &&
+        properties.disappearFontSize_.IsValid() ?
+        properties.disappearFontSize_ : disappearStyle.GetFontSize());
+    pickerProperty->UpdateFontSize((properties.hasValueFlag & FLAG_FONTSIZE) &&
+        properties.fontSize_.IsValid() ?
+        properties.fontSize_ : normalStyle.GetFontSize());
+    pickerProperty->UpdateSelectedFontSize((properties.hasValueFlag & FLAG_SELECTED_FONTSIZE) &&
+        properties.selectedFontSize_.IsValid() ?
+        properties.selectedFontSize_ : selectedStyle.GetFontSize());
+    pickerProperty->UpdateDisappearWeight(properties.hasValueFlag & FLAG_DISAPPEAR_WEIGHT ?
+        properties.disappearWeight_ : disappearStyle.GetFontWeight());
+    pickerProperty->UpdateWeight(properties.hasValueFlag & FLAG_WEIGHT ?
+        properties.weight_ : normalStyle.GetFontWeight());
+    pickerProperty->UpdateSelectedWeight(properties.hasValueFlag & FLAG_SELECTED_WEIGHT ?
+        properties.selectedWeight_ : selectedStyle.GetFontWeight());
 }
 } // namespace OHOS::Ace::NG
