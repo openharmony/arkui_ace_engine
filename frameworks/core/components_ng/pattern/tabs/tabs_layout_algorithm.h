@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,11 @@ public:
 private:
     BarPosition GetBarPosition(LayoutWrapper* layoutWrapper) const;
     Axis GetAxis(LayoutWrapper* layoutWrapper) const;
+    TabsItemDivider GetDivider(LayoutWrapper* layoutWrapper) const;
+    float MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
+        const RefPtr<LayoutWrapper>& dividerWrapper, SizeF idealSize);
+    std::vector<OffsetF> LayoutOffsetList(LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& tabBarWrapper, SizeF frameSize) const;
 };
 
 } // namespace OHOS::Ace::NG

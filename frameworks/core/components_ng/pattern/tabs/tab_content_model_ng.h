@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,12 +22,14 @@
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
-#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
+
+using TabBarBuilderFunc = std::function<void()>;
 
 class ACE_EXPORT TabContentModelNG : public OHOS::Ace::TabContentModel {
 public:
@@ -37,10 +39,16 @@ public:
     void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         TabBarBuilderFunc&& builder, bool useContentOnly) override;
     void SetTabBarStyle(TabBarStyle tabBarStyle) override;
+    void SetIndicator(const IndicatorStyle& indicator) override;
+    void SetBoard(const BoardStyle& board) override;
+    void SetSelectedMode(SelectedMode selectedMode) override;
+    void SetLabelStyle(const LabelStyle& labelStyle) override;
     static void AddTabBarItem(
         const RefPtr<UINode>& tabContent, int32_t position = DEFAULT_NODE_SLOT, bool update = false);
     static void RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode);
     static RefPtr<TabsNode> FindTabsNode(const RefPtr<UINode>& tabContent);
+private:
+    static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);
 };
 
 } // namespace OHOS::Ace::NG

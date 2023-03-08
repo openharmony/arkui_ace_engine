@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,14 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr int8_t LEFT_GRADIENT = 0;
+constexpr int8_t RIGHT_GRADIENT = 1;
+constexpr int8_t TOP_GRADIENT = 2;
+constexpr int8_t BOTTOM_GRADIENT = 3;
+constexpr int8_t POS_NUM = 4;
+}
+
 class TabBarPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(TabBarPaintProperty, PaintProperty)
 
@@ -35,6 +43,8 @@ public:
         auto paintProperty = MakeRefPtr<TabBarPaintProperty>();
         paintProperty->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         paintProperty->propIndicator_ = CloneIndicator();
+        paintProperty->propFadingEdge_ = CloneFadingEdge();
+
         return paintProperty;
     }
 
@@ -42,6 +52,7 @@ public:
     {
         PaintProperty::Reset();
         ResetIndicator();
+        ResetFadingEdge();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -50,10 +61,14 @@ public:
         if (HasIndicator()) {
             json->Put("indicator", GetIndicatorValue().ToString().c_str());
         }
+        if (HasFadingEdge()) {
+            json->Put("fadingEdge", GetFadingEdgeValue() ? "true" : "false");
+        }
     }
 
     /* Need to render when indicator has animation */
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, RectF, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadingEdge, bool, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

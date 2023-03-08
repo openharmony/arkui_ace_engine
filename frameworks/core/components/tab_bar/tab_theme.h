@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,7 @@ public:
                 themeConstants->GetDimension(THEME_TAB_FOCUS_INDICATOR_HORIZONTAL_PADDING);
             theme->focusIndicatorVerticalPadding_ =
                 themeConstants->GetDimension(THEME_TAB_FOCUS_INDICATOR_VERTICAL_PADDING);
+            theme->dividerColor_ = themeConstants->GetColor(THEME_DIVIDER_COLOR);
             auto themeStyle = themeConstants->GetThemeStyle();
             if (!themeStyle) {
                 return theme;
@@ -98,6 +99,10 @@ public:
                 theme->tabBarDefaultHeight_ = pattern->GetAttr<Dimension>("tab_bar_default_height", 0.0_vp);
                 theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
                 theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
+                theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
+                theme->dividerMargin_ = pattern->GetAttr<Dimension>("divider_margin", 0.0_vp);
+                theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
+                theme->tabBarGradientWidth_ = pattern->GetAttr<Dimension>("tab_bar_gradient_width", 0.0_vp);
             } else {
                 LOGW("find pattern of tab fail");
             }
@@ -297,6 +302,25 @@ public:
         return subTabBarMinWidth_;
     }
 
+    const Color& GetDividerColor() const
+    {
+        return dividerColor_;
+    }
+
+    const Dimension& GetDividerMargin() const
+    {
+        return dividerMargin_;
+    }
+
+    const Dimension& GetTabBarShadowMargin() const
+    {
+        return tabBarShadowMargin_;
+    }
+
+    const Dimension& GetTabBarGradientWidth() const
+    {
+        return tabBarGradientWidth_;
+    }
 protected:
     TabTheme() = default;
 
@@ -339,6 +363,10 @@ private:
     Dimension tabBarDefaultHeight_;
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
+    Color dividerColor_;
+    Dimension dividerMargin_;
+    Dimension tabBarShadowMargin_;
+    Dimension tabBarGradientWidth_;
 };
 
 } // namespace OHOS::Ace

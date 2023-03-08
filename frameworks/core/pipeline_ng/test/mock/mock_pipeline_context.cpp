@@ -44,7 +44,7 @@ namespace {
 constexpr int32_t NODE_ID = 143;
 } // namespace
 
-static RefPtr<PipelineContext> pipelineContext = nullptr;
+static RefPtr<PipelineContext> pipelineContext_ = nullptr;
 // static method
 float PipelineContext::GetCurrentRootWidth()
 {
@@ -58,10 +58,10 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    if (!pipelineContext) {
-        pipelineContext = AceType::MakeRefPtr<PipelineContext>();
+    if (!pipelineContext_) {
+        pipelineContext_ = AceType::MakeRefPtr<PipelineContext>();
     }
-    return pipelineContext;
+    return pipelineContext_;
 }
 
 // non-static method
