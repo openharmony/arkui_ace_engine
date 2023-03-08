@@ -16,6 +16,7 @@
 #include "core/components/common/properties/shadow_config.h"
 
 namespace OHOS::Ace {
+const Shadow ShadowConfig::NoneShadow = Shadow(0.0f, Offset(), Color());
 
 const Shadow ShadowConfig::DefaultShadowXS = Shadow(4.0f, Offset(0.0, 0.0), Color(0x26000000));
 const Shadow ShadowConfig::DefaultShadowS = Shadow(20.0f, Offset(0.0, 0.0), Color(0x14000000));
