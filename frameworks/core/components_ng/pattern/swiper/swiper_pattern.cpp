@@ -98,7 +98,11 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    InitSwiperIndicator();
+    if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        InitDotIndicator();
+    } else {
+        InitDigitIndicator();
+    }
     if (isInit_) {
         isInit_ = false;
     } else {
@@ -464,7 +468,7 @@ void SwiperPattern::InitSwiperController()
     });
 }
 
-void SwiperPattern::InitSwiperIndicator()
+void SwiperPattern::InitDigitIndicator()
 {
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
@@ -488,36 +492,42 @@ void SwiperPattern::InitSwiperIndicator()
         }
     }
     CHECK_NULL_VOID(indicatorNode);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    CHECK_NULL_VOID(indicatorPattern);
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (swiperParameters_.dimLeft.has_value()) {
-        layoutProperty->UpdateLeft(swiperParameters_.dimLeft.value());
+    SaveDigitIndicatorProperty(indicatorNode);
+    auto renderContext = indicatorNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderRadiusProperty radius;
+    radius.SetRadius(INDICATOR_BORDER_RADIUS);
+    renderContext->UpdateBorderRadius(radius);
+
+    indicatorNode->MarkModifyDone();
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SwiperPattern::InitDotIndicator()
+{
+    auto swiperNode = GetHost();
+    CHECK_NULL_VOID(swiperNode);
+    RefPtr<FrameNode> indicatorNode;
+    CHECK_NULL_VOID(swiperNode->GetLastChild());
+    if (swiperNode->GetLastChild()->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
+        LOGI("Swiper create new indicator");
+        if (!IsShowIndicator()) {
+            return;
+        }
+        indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        swiperNode->AddChild(indicatorNode);
+    } else {
+        LOGI("Swiper indicator already exist");
+        indicatorNode = DynamicCast<FrameNode>(swiperNode->GetLastChild());
+        if (!IsShowIndicator()) {
+            swiperNode->RemoveChild(indicatorNode);
+            return;
+        }
     }
-    if (swiperParameters_.dimTop.has_value()) {
-        layoutProperty->UpdateTop(swiperParameters_.dimTop.value());
-    }
-    if (swiperParameters_.dimRight.has_value()) {
-        layoutProperty->UpdateRight(swiperParameters_.dimRight.value());
-    }
-    if (swiperParameters_.dimBottom.has_value()) {
-        layoutProperty->UpdateBottom(swiperParameters_.dimBottom.value());
-    }
-    if (swiperParameters_.dimSize.has_value()) {
-        paintProperty->UpdateSize(swiperParameters_.dimSize.value());
-    }
-    if (swiperParameters_.maskValue.has_value()) {
-        paintProperty->UpdateIndicatorMask(swiperParameters_.maskValue.value());
-    }
-    if (swiperParameters_.colorVal.has_value()) {
-        paintProperty->UpdateColor(swiperParameters_.colorVal.value());
-    }
-    if (swiperParameters_.selectedColorVal.has_value()) {
-        paintProperty->UpdateSelectedColor(swiperParameters_.selectedColorVal.value());
-    }
+    CHECK_NULL_VOID(indicatorNode);
+    SaveDotIndicatorProperty(indicatorNode);
 
     auto renderContext = indicatorNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1195,6 +1205,13 @@ bool SwiperPattern::IsShowIndicator() const
     return swiperLayoutProperty->GetShowIndicatorValue(true);
 }
 
+SwiperIndicatorType SwiperPattern::GetIndicatorType() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, SwiperIndicatorType::DOT);
+    return swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT);
+}
+
 int32_t SwiperPattern::TotalCount() const
 {
     auto host = GetHost();
@@ -1224,4 +1241,86 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
+void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (swiperParameters_.dimLeft.has_value()) {
+        layoutProperty->UpdateLeft(swiperParameters_.dimLeft.value());
+    }
+    if (swiperParameters_.dimTop.has_value()) {
+        layoutProperty->UpdateTop(swiperParameters_.dimTop.value());
+    }
+    if (swiperParameters_.dimRight.has_value()) {
+        layoutProperty->UpdateRight(swiperParameters_.dimRight.value());
+    }
+    if (swiperParameters_.dimBottom.has_value()) {
+        layoutProperty->UpdateBottom(swiperParameters_.dimBottom.value());
+    }
+    if (swiperParameters_.itemWidth.has_value()) {
+        paintProperty->UpdateItemWidth(swiperParameters_.itemWidth.value());
+    }
+    if (swiperParameters_.itemHeight.has_value()) {
+        paintProperty->UpdateItemHeight(swiperParameters_.itemHeight.value());
+    }
+    if (swiperParameters_.selectedItemWidth.has_value()) {
+        paintProperty->UpdateSelectedItemWidth(swiperParameters_.selectedItemWidth.value());
+    }
+    if (swiperParameters_.selectedItemHeight.has_value()) {
+        paintProperty->UpdateSelectedItemHeight(swiperParameters_.selectedItemHeight.value());
+    }
+    if (swiperParameters_.maskValue.has_value()) {
+        paintProperty->UpdateIndicatorMask(swiperParameters_.maskValue.value());
+    }
+    if (swiperParameters_.colorVal.has_value()) {
+        paintProperty->UpdateColor(swiperParameters_.colorVal.value());
+    }
+    if (swiperParameters_.selectedColorVal.has_value()) {
+        paintProperty->UpdateSelectedColor(swiperParameters_.selectedColorVal.value());
+    }
+}
+
+void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (swiperDigitalParameters_.dimLeft.has_value()) {
+        layoutProperty->UpdateLeft(swiperDigitalParameters_.dimLeft.value());
+    }
+    if (swiperDigitalParameters_.dimTop.has_value()) {
+        layoutProperty->UpdateTop(swiperDigitalParameters_.dimTop.value());
+    }
+    if (swiperDigitalParameters_.dimRight.has_value()) {
+        layoutProperty->UpdateRight(swiperDigitalParameters_.dimRight.value());
+    }
+    if (swiperDigitalParameters_.dimBottom.has_value()) {
+        layoutProperty->UpdateBottom(swiperDigitalParameters_.dimBottom.value());
+    }
+    if (swiperDigitalParameters_.fontColor.has_value()) {
+        layoutProperty->UpdateFontColor(swiperDigitalParameters_.fontColor.value());
+    }
+    if (swiperDigitalParameters_.selectedFontColor.has_value()) {
+        layoutProperty->UpdateSelectedFontColor(swiperDigitalParameters_.selectedFontColor.value());
+    }
+    if (swiperDigitalParameters_.fontSize.has_value()) {
+        layoutProperty->UpdateFontSize(swiperDigitalParameters_.fontSize.value());
+    }
+    if (swiperDigitalParameters_.selectedFontSize.has_value()) {
+        layoutProperty->UpdateSelectedFontSize(swiperDigitalParameters_.selectedFontSize.value());
+    }
+    if (swiperDigitalParameters_.fontWeight.has_value()) {
+        layoutProperty->UpdateFontWeight(swiperDigitalParameters_.fontWeight.value());
+    }
+    if (swiperDigitalParameters_.selectedFontWeight.has_value()) {
+        layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters_.selectedFontWeight.value());
+    }
+}
 } // namespace OHOS::Ace::NG

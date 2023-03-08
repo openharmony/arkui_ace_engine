@@ -30,8 +30,11 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+
+const Dimension DEFAULT_FONT_SIZE = 14.0_vp;
 
 class SwiperPattern : public Pattern {
     DECLARE_ACE_TYPE(SwiperPattern, Pattern);
@@ -90,21 +93,51 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
         Pattern::ToJsonValue(json);
-        json->Put("indicatorStyle", GetIndicatorStyle().c_str());
+        auto indicatorType = GetIndicatorType();
+        if (indicatorType == SwiperIndicatorType::DOT) {
+            json->Put("indicator", GetDotIndicatorStyle().c_str());
+        } else {
+            json->Put("indicator", GetDigitIndicatorStyle().c_str());
+        }
     }
 
-    std::string GetIndicatorStyle() const
+    std::string GetDotIndicatorStyle() const
     {
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("left", swiperParameters_.dimLeft.value_or(0.0_vp).ToString().c_str());
         jsonValue->Put("top", swiperParameters_.dimTop.value_or(0.0_vp).ToString().c_str());
         jsonValue->Put("right", swiperParameters_.dimRight.value_or(0.0_vp).ToString().c_str());
         jsonValue->Put("bottom", swiperParameters_.dimBottom.value_or(0.0_vp).ToString().c_str());
-        jsonValue->Put("size", swiperParameters_.dimSize.value_or(6.0_vp).ToString().c_str());
+        jsonValue->Put("itemWidth", swiperParameters_.itemWidth.value_or(6.0_vp).ToString().c_str());
+        jsonValue->Put("itemHeight", swiperParameters_.itemHeight.value_or(6.0_vp).ToString().c_str());
+        jsonValue->Put("selectedItemWidth", swiperParameters_.selectedItemWidth.value_or(6.0_vp).ToString().c_str());
+        jsonValue->Put("selectedItemHeight", swiperParameters_.selectedItemHeight.value_or(6.0_vp).ToString().c_str());
         jsonValue->Put("selectedColor",
             swiperParameters_.selectedColorVal.value_or(Color::FromString("#ff007dff")).ColorToString().c_str());
         jsonValue->Put(
             "color", swiperParameters_.colorVal.value_or(Color::FromString("#19182431")).ColorToString().c_str());
+        jsonValue->Put("mask", swiperParameters_.maskValue ? "true" : "false");
+        return jsonValue->ToString();
+    }
+
+    std::string GetDigitIndicatorStyle() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("left", swiperDigitalParameters_.dimLeft.value_or(0.0_vp).ToString().c_str());
+        jsonValue->Put("top", swiperDigitalParameters_.dimTop.value_or(0.0_vp).ToString().c_str());
+        jsonValue->Put("right", swiperDigitalParameters_.dimRight.value_or(0.0_vp).ToString().c_str());
+        jsonValue->Put("bottom", swiperDigitalParameters_.dimBottom.value_or(0.0_vp).ToString().c_str());
+        jsonValue->Put("fontSize", swiperDigitalParameters_.fontSize.value_or(DEFAULT_FONT_SIZE).ToString().c_str());
+        jsonValue->Put("fontColor", swiperDigitalParameters_.fontColor.value_or(
+            Color::FromString("#99182431")).ColorToString().c_str());
+        jsonValue->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(
+            swiperDigitalParameters_.fontWeight.value_or(FontWeight::NORMAL)).c_str());
+        jsonValue->Put("selectedFontSize", swiperDigitalParameters_.selectedFontSize.value_or(
+            DEFAULT_FONT_SIZE).ToString().c_str());
+        jsonValue->Put("selectedFontColor", swiperDigitalParameters_.selectedFontColor.value_or(
+            Color::FromString("#99182431")).ColorToString().c_str());
+        jsonValue->Put("selectedFontWeight", V2::ConvertWrapFontWeightToStirng(
+            swiperDigitalParameters_.selectedFontWeight.value_or(FontWeight::NORMAL)).c_str());
         return jsonValue->ToString();
     }
 
@@ -178,12 +211,17 @@ public:
         swiperParameters_ = swiperParameters;
     }
 
+    void SetSwiperDigitalParameters(const SwiperDigitalParameters& swiperDigitalParameters)
+    {
+        swiperDigitalParameters_ = swiperDigitalParameters;
+    }
+
     void ShowNext();
     void ShowPrevious();
     void SwipeTo(int32_t index);
 
     void OnVisibleChange(bool isVisible) override;
-
+    SwiperIndicatorType GetIndicatorType() const;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -207,8 +245,10 @@ private:
     // Init controller of swiper, controller support showNext, showPrevious and finishAnimation interface.
     void InitSwiperController();
 
-    // Init swiper indicator
-    void InitSwiperIndicator();
+    // Init dot indicator
+    void InitDotIndicator();
+    // Init digital indicator
+    void InitDigitIndicator();
 
     void HandleDragStart();
     void HandleDragUpdate(const GestureEvent& info);
@@ -253,7 +293,8 @@ private:
     float GetTranslateLength() const;
     void OnIndexChange() const;
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
-
+    void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
+    void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -294,6 +335,7 @@ private:
     ChangeEventPtr changeEvent_;
 
     SwiperParameters swiperParameters_;
+    SwiperDigitalParameters swiperDigitalParameters_;
     SizeF maxChildSize_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;

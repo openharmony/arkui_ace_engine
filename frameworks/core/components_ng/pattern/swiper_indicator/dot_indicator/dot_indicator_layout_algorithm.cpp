@@ -59,25 +59,32 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
-    // Diameter of a single indicator circle.
-    auto userSize = paintProperty->GetSizeValue(theme->GetSize()).ConvertToPx();
-    if (LessNotEqual(userSize, 0.0)) {
-        userSize = theme->GetSize().ConvertToPx();
-    }
 
+    // Diameter of a single indicator circle, item or selected-item width and height
+    auto userItemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
+    auto userItemHeight = paintProperty->GetItemHeightValue(theme->GetSize()).ConvertToPx();
+    if (LessNotEqual(userItemWidth, 0.0) || LessNotEqual(userItemHeight, 0.0)) {
+        userItemWidth = theme->GetSize().ConvertToPx();
+        userItemHeight = theme->GetSize().ConvertToPx();
+    }
     auto indicatorPadding = INDICATOR_PADDING_DEFAULT;
+
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
-    userSize *= INDICATOR_ZOOM_IN_SCALE;
+    userItemWidth *= INDICATOR_ZOOM_IN_SCALE;
+    userItemHeight *= INDICATOR_ZOOM_IN_SCALE;
     indicatorPadding = INDICATOR_PADDING_HOVER;
 
     // Length of a selected indicator round rect.
-    auto selectedSize = userSize * DOUBLE;
+    auto userSelectedItemWidth = userItemWidth * DOUBLE;
+    auto userSelectedItemHeight = userItemHeight * DOUBLE;
 
     // The width and height of the entire indicator.
-    auto indicatorHeight = static_cast<float>(userSize + indicatorPadding.ConvertToPx() * DOUBLE);
-    auto indicatorWidth = static_cast<float>(
-        (indicatorPadding.ConvertToPx() * DOUBLE + (userSize + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) +
-        selectedSize);
+    auto indicatorHeight = static_cast<float>(userItemWidth + indicatorPadding.ConvertToPx() * DOUBLE);
+    if (userSelectedItemHeight > userItemWidth) {
+       indicatorHeight = static_cast<float>(userSelectedItemHeight + indicatorPadding.ConvertToPx() * DOUBLE);
+    }
+    auto indicatorWidth = static_cast<float>((indicatorPadding.ConvertToPx() * DOUBLE +
+        (userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userSelectedItemWidth);
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;

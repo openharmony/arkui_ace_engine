@@ -47,6 +47,8 @@ public:
                 themeConstants->GetDimension(THEME_SWIPER_DIGITAL_INDICATOR_FONT_SIZE));
             theme->digitalIndicatorTextStyle_.SetTextColor(
                 themeConstants->GetColor(THEME_SWIPER_DIGITAL_INDICATOR_TEXT_COLOR));
+            theme->digitalIndicatorTextStyle_.SetFontWeight(
+                FontWeight(themeConstants->GetInt(THEME_SWIPER_DIGITAL_INDICATOR_FONT_WEIGHT)));
             theme->startEndPadding_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_START_END_PADDING);
             theme->pressPadding_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_PRESS_PADDING);
             theme->pressPointPadding_ = themeConstants->GetDimension(THEME_SWIPER_INDICATOR_PRESS_POINT_PADDING);
@@ -73,7 +75,9 @@ public:
             theme->indicatorTextFocusColor_ =
                 swiperPattern->GetAttr<Color>("indicator_text_color_focused", Color::TRANSPARENT);
             theme->digitalIndicatorTextStyle_.SetTextColor(
-                swiperPattern->GetAttr<Color>("indicator_text_color", Color::TRANSPARENT));
+                swiperPattern->GetAttr<Color>("indicator_text_font_color", Color::TRANSPARENT));
+            theme->digitalIndicatorTextStyle_.SetFontSize(
+                swiperPattern->GetAttr<Dimension>("indicator_text_font_size", 14.0_vp));
             theme->selectedColor_ = swiperPattern->GetAttr<Color>("indicator_color_selected", Color::TRANSPARENT);
             theme->hoverColor_ = swiperPattern->GetAttr<Color>("indicator_color_hover", Color::TRANSPARENT);
             theme->pressedColor_ = swiperPattern->GetAttr<Color>("indicator_color_pressed", Color::TRANSPARENT);

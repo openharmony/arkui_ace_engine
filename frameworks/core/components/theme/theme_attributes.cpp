@@ -144,4 +144,7 @@ const char POPUP_BUTTON_TEXT_FONT_SIZE[] = "popup_button_text_font_size";
 // pattern attributes for badge
 const char BADGE_BORDER_COLOR[] = "border_color";
 const char BADGE_BORDER_WIDTH[] = "border_width";
+// swiper attributes
+const char INDICATOR_TEXT_FONT_SIZE[] = "indicator_text_font_size";
+const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
 } // namespace OHOS::Ace

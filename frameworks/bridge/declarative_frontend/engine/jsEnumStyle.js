@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1106,6 +1106,89 @@ class TransitionEffect {
       lastEffect = lastEffect.successor_;
     }
     lastEffect.successor_ = nextEffect;
+    return this;
+  }
+}
+
+class Indicator {
+  top(value) {
+    this.top = value;
+    return this;
+  }
+  left(value) {
+    this.left = value;
+    return this;
+  }
+  right(value) {
+    this.right = value;
+    return this;
+  }
+  bottom(value) {
+    this.bottom = value;
+    return this;
+  }
+  static dot() {
+    return new DotIndicator();
+  }
+  static digit() {
+    return new DigitIndicator();
+  }
+}
+
+class DotIndicator extends Indicator {
+  constructor() {
+    super();
+    this.type = 'DotIndicator';
+  }
+  itemWidth(value) {
+    this.itemWidth = value;
+    return this;
+  }
+  itemHeight(value) {
+    this.itemHeight = value;
+    return this;
+  }
+  selectedItemWidth(value) {
+    this.selectedItemWidth = value;
+    return this;
+  }
+  selectedItemHeight(value) {
+    this.selectedItemHeight = value;
+    return this;
+  }
+  mask(value) {
+    this.mask = value;
+    return this;
+  }
+  color(value) {
+    this.color = value;
+    return this;
+  }
+  selectedColor(value) {
+    this.selectedColor = value;
+    return this;
+  }
+}
+
+class DigitIndicator extends Indicator{
+  constructor() {
+    super();
+    this.type = 'DigitIndicator';
+  }
+  fontColor(value) {
+    this.fontColor = value;
+    return this;
+  }
+  selectedFontColor(value) {
+    this.selectedFontColor = value;
+    return this;
+  }
+  digitFont(value) {
+    this.digitFont = value;
+    return this;
+  }
+  selectedDigitFont(value) {
+    this.selectedDigitFont = value;
     return this;
   }
 }

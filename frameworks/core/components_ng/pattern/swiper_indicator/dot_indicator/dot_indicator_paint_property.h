@@ -22,7 +22,10 @@
 
 namespace OHOS::Ace::NG {
 struct DotIndicatorStyle {
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(Size, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ItemWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ItemHeight, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedItemWidth, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedItemHeight, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(IndicatorMask, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Color, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedColor, Color);
@@ -48,7 +51,10 @@ public:
         ResetDotIndicatorStyle();
     }
     ACE_DEFINE_PROPERTY_GROUP(DotIndicatorStyle, DotIndicatorStyle);
-    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, Size, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, ItemWidth, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, ItemHeight, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, SelectedItemWidth, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, SelectedItemHeight, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, IndicatorMask, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, Color, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DotIndicatorStyle, SelectedColor, Color, PROPERTY_UPDATE_RENDER);

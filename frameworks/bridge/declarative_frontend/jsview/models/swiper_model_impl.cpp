@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -256,8 +256,11 @@ void SwiperModelImpl::SetIndicatorStyle(const SwiperParameters& swiperParameters
         if (swiperParameters.dimBottom.has_value()) {
             indicator->SetBottom(swiperParameters.dimBottom.value());
         }
-        if (swiperParameters.dimSize.has_value()) {
-            indicator->SetSize(swiperParameters.dimSize.value());
+        if (swiperParameters.itemWidth.has_value()) {
+            indicator->SetSize(swiperParameters.itemWidth.value());
+        }
+        if (swiperParameters.itemHeight.has_value()) {
+            indicator->SetSize(swiperParameters.itemHeight.value());
         }
         if (swiperParameters.maskValue.has_value()) {
             indicator->SetIndicatorMask(swiperParameters.maskValue.value());

@@ -23,7 +23,11 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
+#include "core/components_ng/pattern/swiper_indicator/digit_indicator/digit_indicator_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 namespace OHOS::Ace::NG {
 class SwiperIndicatorPattern : public Pattern {
     DECLARE_ACE_TYPE(SwiperIndicatorPattern, Pattern);
@@ -38,35 +42,54 @@ public:
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
-        return MakeRefPtr<DotIndicatorPaintProperty>();
+        if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::DOT) {
+            return MakeRefPtr<DotIndicatorPaintProperty>();
+        } else {
+            return nullptr;
+        }
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto indicatorLayoutAlgorithm = MakeRefPtr<DotIndicatorLayoutAlgorithm>();
-        indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
-        indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
-        return indicatorLayoutAlgorithm;
+        auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+        CHECK_NULL_RETURN(swiperPattern, nullptr);
+        if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
+            auto indicatorLayoutAlgorithm = MakeRefPtr<DotIndicatorLayoutAlgorithm>();
+            indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
+            indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
+            return indicatorLayoutAlgorithm;
+        } else {
+            auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
+            indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
+            indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
+            return indicatorLayoutAlgorithm;
+        }
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (!dotIndicatorModifier_) {
-            dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
-        }
-        auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
         auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
-        paintMethod->SetAxis(swiperPattern->GetDirection());
-        paintMethod->SetCurrentIndex(swiperPattern->GetCurrentIndex());
-        paintMethod->SetItemCount(swiperPattern->TotalCount());
-        paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
-        paintMethod->SetIsHover(isHover_);
-        paintMethod->SetIsPressed(isPressed_);
-        paintMethod->SetHoverPoint(hoverPoint_);
+        if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
+            if (!dotIndicatorModifier_) {
+                dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
+            }
+            auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
+            auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+            CHECK_NULL_RETURN(swiperPattern, nullptr);
+            paintMethod->SetAxis(swiperPattern->GetDirection());
+            paintMethod->SetCurrentIndex(swiperPattern->GetCurrentIndex());
+            paintMethod->SetItemCount(swiperPattern->TotalCount());
+            paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
+            paintMethod->SetIsHover(isHover_);
+            paintMethod->SetIsPressed(isPressed_);
+            paintMethod->SetHoverPoint(hoverPoint_);
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         mouseClickIndex_ = std::nullopt;
         return paintMethod;
+        } else {
+            return nullptr;
+        }
     }
 
     RefPtr<FrameNode> GetSwiperNode() const
@@ -107,6 +130,8 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
     void GetMouseClickIndex();
+    void InitTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
+        const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
