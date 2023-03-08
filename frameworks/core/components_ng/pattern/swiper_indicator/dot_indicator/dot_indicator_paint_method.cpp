@@ -128,11 +128,9 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
     }
 
     CalculateHoverIndex(radius);
-    if (dotIndicatorModifier_->GetHoverToNormalIndex() != dotIndicatorModifier_->GetNormalToHoverIndex()) {
+    if (dotIndicatorModifier_->GetNormalToHoverIndex() != hoverIndex_) {
         dotIndicatorModifier_->SetHoverToNormalIndex(dotIndicatorModifier_->GetNormalToHoverIndex());
         dotIndicatorModifier_->UpdateHoverToNormalPointDilateRatio();
-    }
-    if (dotIndicatorModifier_->GetNormalToHoverIndex() != hoverIndex_) {
         dotIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
         dotIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
@@ -199,8 +197,9 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
     float endLongPointLeftCenterX = 0.0f;
     float endLongPointRightCenterX = 0.0f;
     float endCenterX = margin + padding + radius;
-    int32_t endCurrentIndex = turnPageRate_ == 0.0f || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f ?
-        endCurrentIndex = index : (turnPageRate_ < 0.0f ? index + 1 : index - 1);
+    int32_t endCurrentIndex = turnPageRate_ == 0.0f || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f
+                                  ? endCurrentIndex = index
+                                  : (turnPageRate_ < 0.0f ? index + 1 : index - 1);
     if (endCurrentIndex == -1) {
         endCurrentIndex = itemCount_ - 1;
     } else if (endCurrentIndex == itemCount_) {
@@ -239,26 +238,30 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(const StarAndEndPointCenter&
     const LinearVector<float>& startVectorBlackPointCenterX, const LinearVector<float>& endVectorBlackPointCenterX)
 {
     float blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
-        CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING).MoveInternal(std::abs(turnPageRate_));
-    float longPointLeftCenterMoveRate = CubicCurve(turnPageRate_ > 0 ?
-        LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
+        CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING)
+                                         .MoveInternal(std::abs(turnPageRate_));
+    float longPointLeftCenterMoveRate = CubicCurve(turnPageRate_ > 0 ? LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY
+                                                                     : LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING)
-        .MoveInternal(std::abs(turnPageRate_));
-    float longPointRightCenterMoveRate = CubicCurve(turnPageRate_ > 0 ?
-        LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
+                                            .MoveInternal(std::abs(turnPageRate_));
+    float longPointRightCenterMoveRate = CubicCurve(turnPageRate_ > 0 ? LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY
+                                                                      : LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY,
         CENTER_BEZIER_CURVE_MASS, CENTER_BEZIER_CURVE_STIFFNESS, CENTER_BEZIER_CURVE_DAMPING)
-        .MoveInternal(std::abs(turnPageRate_));
+                                             .MoveInternal(std::abs(turnPageRate_));
     vectorBlackPointCenterX_.resize(itemCount_);
     for (int32_t i = 0; i < itemCount_; ++i) {
-        vectorBlackPointCenterX_[i] = startVectorBlackPointCenterX[i] +
+        vectorBlackPointCenterX_[i] =
+            startVectorBlackPointCenterX[i] +
             (endVectorBlackPointCenterX[i] - startVectorBlackPointCenterX[i]) * blackPointCenterMoveRate;
     }
-    longPointCenterX_.first = starAndEndPointCenter.startLongPointLeftCenterX +
+    longPointCenterX_.first =
+        starAndEndPointCenter.startLongPointLeftCenterX +
         (starAndEndPointCenter.endLongPointLeftCenterX - starAndEndPointCenter.startLongPointLeftCenterX) *
-        longPointLeftCenterMoveRate;
-    longPointCenterX_.second = starAndEndPointCenter.startLongPointRightCenterX +
+            longPointLeftCenterMoveRate;
+    longPointCenterX_.second =
+        starAndEndPointCenter.startLongPointRightCenterX +
         (starAndEndPointCenter.endLongPointRightCenterX - starAndEndPointCenter.startLongPointRightCenterX) *
-        longPointRightCenterMoveRate;
+            longPointRightCenterMoveRate;
 }
 
 void DotIndicatorPaintMethod::CalculateHoverIndex(float radius)

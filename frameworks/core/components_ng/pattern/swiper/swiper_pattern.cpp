@@ -362,6 +362,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::ShowNext()
 {
+    indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
@@ -382,6 +383,7 @@ void SwiperPattern::ShowNext()
 
 void SwiperPattern::ShowPrevious()
 {
+    indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
@@ -742,7 +744,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG && touch_) {
+    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG && !indicatorDoingAnimation_) {
         auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
         indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -762,7 +764,7 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
-    touch_ = true;
+    indicatorDoingAnimation_ = false;
     // Stop translate animation when touch down.
     if (controller_ && controller_->IsRunning()) {
         controller_->Pause();
@@ -778,7 +780,6 @@ void SwiperPattern::HandleTouchDown()
 
 void SwiperPattern::HandleTouchUp()
 {
-    touch_ = false;
     if (controller_ && !controller_->IsStopped()) {
         controller_->Resume();
     }
