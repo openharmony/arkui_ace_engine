@@ -70,7 +70,6 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
     TextAlign::LEFT, TextAlign::RIGHT };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
-constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -93,11 +92,6 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
-        TextModel::GetInstance()->SetFontSize(DEFAULT_FONT_SIZE);
-        return;
-    }
-    if (!fontSize.IsValid()) {
-        TextModel::GetInstance()->SetFontSize(DEFAULT_FONT_SIZE);
         return;
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
