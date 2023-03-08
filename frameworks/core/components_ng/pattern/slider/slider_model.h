@@ -20,7 +20,10 @@
 #include <memory>
 
 #include "base/geometry/axis.h"
+#include "base/geometry/size.h"
+#include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
@@ -30,6 +33,12 @@ public:
         OUTSET,  // block on track, track is thin
         INSET,   // block inside track, track is rough
         CAPSULE, // capsule slider.
+    };
+
+    enum class BlockStyleType {
+        DEFAULT,
+        IMAGE,
+        SHAPE,
     };
 
     static SliderModel* GetInstance();
@@ -47,6 +56,15 @@ public:
     virtual void SetShowSteps(bool value) = 0;
     virtual void SetShowTips(bool value) = 0;
     virtual void SetThickness(const Dimension& value) = 0;
+    virtual void SetBlockBorderColor(const Color& value) = 0;
+    virtual void SetBlockBorderWidth(const Dimension& value) = 0;
+    virtual void SetStepColor(const Color& value) = 0;
+    virtual void SetTrackBorderRadius(const Dimension& value) = 0;
+    virtual void SetBlockSize(const Size& value) = 0;
+    virtual void SetBlockType(BlockStyleType value) = 0;
+    virtual void SetBlockImage(const std::string& value) = 0;
+    virtual void SetBlockShape(const RefPtr<BasicShape>& value) = 0;
+    virtual void SetStepSize(const Dimension& value) = 0;
     virtual void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) = 0;
 
 private:

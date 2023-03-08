@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/sk_painter.h"
+#include "core/components_ng/render/adapter/sk_painter.h"
 
 #include "include/core/SkColor.h"
 #include "include/core/SkPaint.h"
@@ -128,4 +128,19 @@ void SkPainter::SetBrush(SkPaint& skPaint, const ShapePaintProperty& shapePaintP
     skPaint.setColor(fillColor.BlendOpacity(curOpacity).GetValue());
 }
 
+void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset)
+{
+    SkPath skPath;
+    if (!SkParsePath::FromSVGString(commands.c_str(), &skPath)) {
+        LOGE("Invalid path value.");
+        return;
+    }
+
+    RSPath rsPath;
+    auto rsSkPath = rsPath.GetImpl<RSSkPath>();
+    CHECK_NULL_VOID(rsSkPath);
+    rsSkPath->SetPath(skPath);
+    rsSkPath->Offset(offset.GetX(), offset.GetY());
+    canvas.DrawPath(rsPath);
+}
 } // namespace OHOS::Ace::NG

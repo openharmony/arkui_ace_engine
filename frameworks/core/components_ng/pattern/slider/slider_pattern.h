@@ -74,6 +74,11 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
+    const OffsetF& GetBlockCenter() const
+    {
+        return circleCenter_;
+    }
+
 private:
     void OnModifyDone() override;
     void CancelExceptionValue(float& min, float& max);
@@ -118,6 +123,7 @@ private:
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void UpdateBlock();
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -136,8 +142,8 @@ private:
     OffsetF circleCenter_ = { 0, 0 };
 
     float trackThickness_ = 0.0f;
-    float blockDiameter_ = 0.0f;
     float blockHotSize_ = 0.0f;
+    SizeF blockSize_;
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickListener_;
@@ -146,6 +152,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
 
     RefPtr<SliderContentModifier> sliderContentModifier_;
+
     // tip Parameters
     bool bubbleFlag_ = false;
     RefPtr<Paragraph> paragraph_;
@@ -153,6 +160,9 @@ private:
     OffsetF bubbleOffset_;
     OffsetF textOffset_;
     RefPtr<SliderTipModifier> sliderTipModifier_;
+
+    RefPtr<FrameNode> imageFrameNode_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

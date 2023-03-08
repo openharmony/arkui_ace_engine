@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,6 +122,15 @@ void SliderModelImpl::SetThickness(const Dimension& value)
     CHECK_NULL_VOID(slider);
     slider->SetThickness(value);
 }
+void SliderModelImpl::SetBlockBorderColor(const Color& value) {}
+void SliderModelImpl::SetBlockBorderWidth(const Dimension& value) {}
+void SliderModelImpl::SetStepColor(const Color& value) {}
+void SliderModelImpl::SetTrackBorderRadius(const Dimension& value) {}
+void SliderModelImpl::SetBlockSize(const Size& value) {}
+void SliderModelImpl::SetBlockType(BlockStyleType value) {}
+void SliderModelImpl::SetBlockImage(const std::string& value) {}
+void SliderModelImpl::SetBlockShape(const RefPtr<BasicShape>& value) {}
+void SliderModelImpl::SetStepSize(const Dimension& value) {}
 void SliderModelImpl::SetOnChange(std::function<void(float, int32_t)>&& eventOnChange)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
