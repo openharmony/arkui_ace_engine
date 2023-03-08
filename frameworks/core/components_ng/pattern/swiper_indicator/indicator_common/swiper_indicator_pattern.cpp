@@ -269,6 +269,7 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
         }
         if (std::abs(hoverPoint.GetX() - nowCenterX) <= radius && std::abs(hoverPoint.GetY() - centerY) <= radius) {
             mouseClickIndex_ = i;
+            swiperPattern->SetIndicatorDoingAnimation(true);
             break;
         }
     }
