@@ -454,16 +454,12 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     CHECK_NULL_VOID(customNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        rootNode->RemoveChild(customPopupMap_[targetId]);
-        customPopupMap_.erase(it);
+    if (!customPopupMap_[targetId] || customPopupMap_[targetId] == customNode) {
+        customPopupMap_[targetId] = customNode;
+        customNode->MountToParent(rootNode);
+        customNode->MarkModifyDone();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    customPopupMap_[targetId] = customNode;
-    auto popupNode = customPopupMap_[targetId];
-    customNode->MountToParent(rootNode);
-    customNode->MarkModifyDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void OverlayManager::EraseIndexerPopup(int32_t targetId)
