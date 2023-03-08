@@ -30,8 +30,8 @@ class SearchPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(SearchPaintMethod, NodePaintMethod)
 
 public:
-    SearchPaintMethod(const SizeF& buttonSize, const std::string& searchButton)
-        : buttonSize_(buttonSize), searchButton_(searchButton) {};
+    SearchPaintMethod(const SizeF& buttonSize, const std::string& searchButton, bool isEnabled)
+        : buttonSize_(buttonSize), searchButton_(searchButton), isSearchButtonEnabled_(isEnabled) {};
     ~SearchPaintMethod() override = default;
 
     CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
@@ -41,6 +41,7 @@ private:
 
     SizeF buttonSize_;
     std::string searchButton_;
+    bool isSearchButtonEnabled_ = false;
 };
 
 } // namespace OHOS::Ace::NG

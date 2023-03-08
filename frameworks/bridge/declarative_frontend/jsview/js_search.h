@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/core/components/text_field/text_field_controller.h"
+#include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -27,7 +28,11 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 
-    static void SetSearchButton(const std::string& text);
+    static void SetSearchButton(const JSCallbackInfo& info);
+    static void SetSearchIcon(const JSCallbackInfo& info);
+    static void SetCancelButton(const JSCallbackInfo& info);
+    static void SetTextColor(const JSCallbackInfo& info);
+    static void SetCursor(const JSCallbackInfo& info);
     static void SetPlaceholderColor(const JSCallbackInfo& info);
     static void SetPlaceholderFont(const JSCallbackInfo& info);
     static void SetTextFont(const JSCallbackInfo& info);
@@ -44,6 +49,7 @@ public:
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnPaste(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void SetIconStyle(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
 };
 

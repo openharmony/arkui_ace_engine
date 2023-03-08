@@ -57,6 +57,7 @@ public:
         switchModifier_->SetIsSelect(isSelect_);
         switchModifier_->SetIsHover(isHover_);
         switchModifier_->SetMainDelta(mainDelta_);
+        switchModifier_->UpdateAnimatableProperty();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)

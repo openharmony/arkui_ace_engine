@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,20 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    void CancelImageMeasure(LayoutWrapper* layoutWrapper);
+    void CancelButtonMeasure(LayoutWrapper* layoutWrapper);
+    void TextFieldMeasure(LayoutWrapper* layoutWrapper);
+    void ImageMeasure(LayoutWrapper* layoutWrapper);
+    void SearchButtonMeasure(LayoutWrapper* layoutWrapper);
+    void SelfMeasure(LayoutWrapper* layoutWrapper);
+    bool IsFixedHeightMode(LayoutWrapper* layoutWrapper);
+    double CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper);
+    void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
+
+    SizeF searchButtonSizeMeasure_;
+    SizeF cancelBtnSizeMeasure_;
+    SizeF textFieldSizeMeasure_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };
 

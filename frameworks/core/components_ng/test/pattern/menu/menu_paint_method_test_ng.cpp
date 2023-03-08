@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
+
 #define private public
 #define protected public
-#include "gtest/gtest.h"
 
 #include "base/geometry/calc_dimension.h"
 #include "core/components_ng/base/geometry_node.h"

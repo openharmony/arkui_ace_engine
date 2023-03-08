@@ -215,6 +215,7 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
         LOGD("parentID:%{public}d slot:%{public}d", parentID, slot);
         auto newUINode = GetNewFrameNodeWithJsCode(root);
         CHECK_NULL_RETURN(newUINode, false);
+        NG::Inspector::HideAllMenus();
         if (parentID <= 0) {
             return OperateRootUINode(newUINode);
         } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t SINGLE_CHILD_SIZE = 1;
 constexpr int32_t CHILD_SIZE = 3;
+constexpr uint32_t MIN_MONTH = 1;
+constexpr uint32_t MAX_MONTH = 12;
+constexpr uint32_t MIN_DAY = 1;
 const Dimension PRESS_INTERVAL = 4.0_vp;
 const Dimension PRESS_RADIUS = 8.0_vp;
 } // namespace
@@ -86,7 +90,11 @@ void DatePickerPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitDisabled();
-    FlushColumn();
+    if (ShowMonthDays()) {
+        FlushMonthDaysColumn();
+    } else {
+        FlushColumn();
+    }
     ShowTitle(GetTitleId());
     SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag, bool add, uint32_t index, bool notify) {
         auto refPtr = weak.Upgrade();
@@ -122,7 +130,11 @@ void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
 {
     CHECK_NULL_VOID(GetHost());
     std::vector<RefPtr<FrameNode>> tags;
-    OnDataLinking(tag, isAdd, index, tags);
+    if (ShowMonthDays()) {
+        HandleMonthDaysChange(tag, isAdd, index, tags);
+    } else {
+        OnDataLinking(tag, isAdd, index, tags);
+    }
     for (const auto& tag : tags) {
         auto iter = std::find_if(datePickerColumns_.begin(), datePickerColumns_.end(),
             [&tag](const RefPtr<FrameNode>& column) { return column->GetId() == tag->GetId(); });
@@ -358,6 +370,48 @@ void DatePickerPattern::FlushColumn()
     dayColumnPattern->FlushCurrentOptions();
 }
 
+void DatePickerPattern::FlushMonthDaysColumn()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return;
+    }
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_VOID(monthDays);
+    iter++;
+    auto year = *iter;
+    CHECK_NULL_VOID(year);
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto stackYear = DynamicCast<FrameNode>(year);
+    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    CHECK_NULL_VOID(monthDaysNode);
+    CHECK_NULL_VOID(yearDaysNode);
+    auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
+    if (dataPickerRowLayoutProperty->GetLunar().value_or(false)) {
+        LunarMonthDaysColumnBuilding(
+            dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate())));
+    } else {
+        SolarMonthDaysColumnsBuilding(
+            LunarToSolar(dataPickerRowLayoutProperty->GetSelectedDate().value_or(SolarToLunar(GetSelectedDate()))));
+    }
+
+    auto monthDaysColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    auto yearColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_VOID(monthDaysColumnPattern);
+    CHECK_NULL_VOID(yearColumnPattern);
+
+    monthDaysColumnPattern->SetShowCount(GetShowCount());
+    yearColumnPattern->SetShowCount(GetShowCount());
+    monthDaysColumnPattern->FlushCurrentOptions();
+    yearColumnPattern->FlushCurrentOptions();
+}
+
 void DatePickerPattern::FireChangeEvent(bool refresh) const
 {
     if (refresh) {
@@ -409,6 +463,36 @@ void DatePickerPattern::OnDataLinking(
         return;
     }
     LOGE("unknown tag[%{private}d] of column.", tag->GetId());
+}
+
+void DatePickerPattern::HandleMonthDaysChange(
+    const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return;
+    }
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_VOID(monthDays);
+
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    if (tag != monthDaysNode) {
+        LOGE("unknown tag[%{private}d] of column.", tag->GetId());
+        return;
+    }
+
+    if (IsShowLunar()) {
+        HandleLunarMonthDaysChange(isAdd, index);
+    } else {
+        HandleSolarMonthDaysChange(isAdd, index);
+    }
+
+    resultTags.emplace_back(monthDaysNode);
 }
 
 void DatePickerPattern::HandleDayChange(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags)
@@ -582,6 +666,148 @@ void DatePickerPattern::HandleAddLunarDayChange(uint32_t index)
 
     AdjustLunarDate(lunarDate);
     LunarColumnsBuilding(lunarDate);
+}
+
+void DatePickerPattern::HandleSolarMonthDaysChange(bool isAdd, uint32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return;
+    }
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_VOID(monthDays);
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    CHECK_NULL_VOID(stackMonthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    CHECK_NULL_VOID(monthDaysNode);
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_VOID(monthDaysDatePickerColumnPattern);
+
+    auto date = GetCurrentDate();
+
+    if (isAdd && index == 0) {
+        // add to next year
+        date.SetYear(date.GetYear() + 1); // add to next year
+        if (date.GetYear() > endDateSolar_.GetYear()) {
+            date.SetYear(startDateSolar_.GetYear());
+        }
+    }
+    if (!isAdd &&
+        monthDaysDatePickerColumnPattern->GetCurrentIndex() == GetOptionCount(monthDaysNode) - 1) {
+            // reduce to previous year
+            date.SetYear(date.GetYear() - 1);
+            if (date.GetYear() < startDateSolar_.GetYear()) {
+                date.SetYear(endDateSolar_.GetYear());
+            }
+            // reduce to previous year's last day
+            date.SetMonth(MAX_MONTH);
+            date.SetDay(PickerDate::GetMaxDay(date.GetYear(), date.GetMonth()));
+        }
+    uint32_t maxDay = PickerDate::GetMaxDay(date.GetYear(), date.GetMonth());
+    if (date.GetDay() > maxDay) {
+        date.SetDay(maxDay);
+    }
+    AdjustSolarDate(date);
+    SolarMonthDaysColumnsBuilding(date);
+}
+
+void DatePickerPattern::HandleLunarMonthDaysChange(bool isAdd, uint32_t index)
+{
+    if (isAdd) {
+        HandleAddLunarMonthDaysChange(index);
+    } else {
+        HandleReduceLunarMonthDaysChange(index);
+    }
+}
+
+void DatePickerPattern::HandleAddLunarMonthDaysChange(uint32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return;
+    }
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_VOID(monthDays);
+    iter++;
+    auto year = *iter;
+    CHECK_NULL_VOID(year);
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto stackYear = DynamicCast<FrameNode>(year);
+    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    CHECK_NULL_VOID(monthDaysNode);
+    CHECK_NULL_VOID(yearDaysNode);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
+
+    uint32_t nowLunarYear = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
+    auto lunarDate = GetCurrentLunarDateByMonthDaysColumn(nowLunarYear);
+    if (index == 0) {
+        lunarDate.year = lunarDate.year + 1; // add to next year
+        if (lunarDate.year > endDateLunar_.year) {
+            lunarDate.year = startDateLunar_.year;
+        }
+        lunarDate.month = 1;
+        lunarDate.isLeapMonth = false;
+    }
+
+    AdjustLunarDate(lunarDate);
+    LunarMonthDaysColumnBuilding(lunarDate);
+}
+
+void DatePickerPattern::HandleReduceLunarMonthDaysChange(uint32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return;
+    }
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_VOID(monthDays);
+    iter++;
+    auto year = *iter;
+    CHECK_NULL_VOID(year);
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto stackYear = DynamicCast<FrameNode>(year);
+    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    CHECK_NULL_VOID(monthDaysNode);
+    CHECK_NULL_VOID(yearDaysNode);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_VOID(monthDaysDatePickerColumnPattern);
+    CHECK_NULL_VOID(yearDatePickerColumnPattern);
+
+    uint32_t nowLunarYear = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
+    auto lunarDate = GetCurrentLunarDateByMonthDaysColumn(nowLunarYear);
+    if (monthDaysDatePickerColumnPattern->GetCurrentIndex() == GetOptionCount(monthDaysNode) - 1) {
+        lunarDate.year = lunarDate.year - 1; // reduce to previous year
+        if (lunarDate.year < startDateLunar_.year) {
+            lunarDate.year = endDateLunar_.year;
+        }
+        lunarDate.month = MAX_MONTH; // set to be previous year's max month
+        lunarDate.isLeapMonth = false;
+        if (LunarCalculator::GetLunarLeapMonth(lunarDate.year) == 12) { // leap 12th month
+            lunarDate.isLeapMonth = true;
+        }
+        lunarDate.day = GetLunarMaxDay(lunarDate.year, lunarDate.month, lunarDate.isLeapMonth);
+    }
+
+    AdjustLunarDate(lunarDate);
+    LunarMonthDaysColumnBuilding(lunarDate);
 }
 
 void DatePickerPattern::HandleYearChange(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags)
@@ -789,6 +1015,15 @@ void DatePickerPattern::HandleSolarYearChange(bool isAdd, uint32_t index)
 
 PickerDate DatePickerPattern::GetCurrentDate() const
 {
+    if (ShowMonthDays()) {
+        return GetCurrentDateByMonthDaysColumn();
+    } else {
+        return GetCurrentDateByYearMonthDayColumn();
+    }
+}
+
+PickerDate DatePickerPattern::GetCurrentDateByYearMonthDayColumn() const
+{
     PickerDate currentDate;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, currentDate);
@@ -833,6 +1068,112 @@ PickerDate DatePickerPattern::GetCurrentDate() const
 
     uint32_t lunarYear = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
     return LunarToSolar(GetCurrentLunarDate(lunarYear));
+}
+
+PickerDate DatePickerPattern::GetCurrentDateByMonthDaysColumn() const
+{
+    PickerDate currentDate;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, currentDate);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return currentDate;
+    }
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_RETURN(monthDays, currentDate);
+    iter++;
+    auto year = *iter;
+    CHECK_NULL_RETURN(year, currentDate);
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto stackYear = DynamicCast<FrameNode>(year);
+    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    CHECK_NULL_RETURN_NOLOG(monthDaysNode, currentDate);
+    CHECK_NULL_RETURN_NOLOG(yearDaysNode, currentDate);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
+    if (!yearDatePickerColumnPattern || !monthDaysDatePickerColumnPattern) {
+        LOGE("year or monthDays pattern is null.");
+        return currentDate;
+    }
+
+    if (!IsShowLunar()) {
+        currentDate.SetYear(startDateSolar_.GetYear() + yearDatePickerColumnPattern->GetCurrentIndex());
+        auto monthDaysIndex = monthDaysDatePickerColumnPattern->GetCurrentIndex();
+
+        uint32_t month = 1;
+        for (; month <= 12; ++month) { // month start from 1 to 12
+            uint32_t daysInMonth = PickerDate::GetMaxDay(currentDate.GetYear(), month);
+            if (monthDaysIndex < daysInMonth) {
+                break;
+            } else {
+                monthDaysIndex -= daysInMonth;
+            }
+        }
+        currentDate.SetMonth(month);
+        currentDate.SetDay(monthDaysIndex + 1); // days is index start form 0 and day start form 1.
+        return currentDate;
+    }
+
+    uint32_t lunarYear = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
+    return LunarToSolar(GetCurrentLunarDateByMonthDaysColumn(lunarYear));
+}
+
+LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunarYear) const
+{
+    LunarDate lunarResult;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, lunarResult);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return lunarResult;
+    }
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_RETURN(monthDays, lunarResult);
+    iter++;
+    auto year = *iter;
+    CHECK_NULL_RETURN(year, lunarResult);
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto stackYear = DynamicCast<FrameNode>(year);
+    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    CHECK_NULL_RETURN_NOLOG(monthDaysNode, lunarResult);
+    CHECK_NULL_RETURN_NOLOG(yearDaysNode, lunarResult);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
+    if (!yearDatePickerColumnPattern || !monthDaysDatePickerColumnPattern) {
+        LOGE("year or month or day pattern is null.");
+        return lunarResult;
+    }
+
+    uint32_t lunarLeapMonth = 0;
+    bool hasLeapMonth = GetLunarLeapMonth(lunarYear, lunarLeapMonth);
+    auto monthDaysIndex = monthDaysDatePickerColumnPattern->GetCurrentIndex();
+    uint32_t month = 1;
+    for (; month <= 12; ++month) { // month start from 1 to 12
+        auto flag = hasLeapMonth && lunarLeapMonth == month;
+        uint32_t daysInMonth = GetLunarMaxDay(lunarYear, month, flag && lunarResult.isLeapMonth);
+        if (monthDaysIndex < daysInMonth) {
+            break;
+        } else {
+            monthDaysIndex -= daysInMonth;
+        }
+        if (flag && !lunarResult.isLeapMonth) {
+            --month;
+            lunarResult.isLeapMonth = true;
+        }
+    }
+    lunarResult.month = month;
+    lunarResult.day = monthDaysIndex + 1; // day start form 1, index start from 0
+    lunarResult.year = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
+
+    return lunarResult;
 }
 
 void DatePickerPattern::AdjustLunarDate(LunarDate& date) const
@@ -901,24 +1242,8 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
     CHECK_NULL_VOID(yearColumn);
     CHECK_NULL_VOID(monthColumn);
     CHECK_NULL_VOID(dayColumn);
-    auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
-    startDateLunar_ = dataPickerRowLayoutProperty->GetStartDate().value_or(SolarToLunar(startDateSolar_));
-    endDateLunar_ = dataPickerRowLayoutProperty->GetEndDate().value_or(SolarToLunar(endDateSolar_));
 
-    if (GetStartDateLunar().year > GetEndDateLunar().year) {
-        startDateLunar_ = SolarToLunar(startDefaultDateSolar_);
-        endDateLunar_ = SolarToLunar(endDefaultDateSolar_);
-    }
-    if (GetStartDateLunar().year == GetEndDateLunar().year && GetStartDateLunar().month > GetEndDateLunar().month) {
-        startDateLunar_ = SolarToLunar(startDefaultDateSolar_);
-        endDateLunar_ = SolarToLunar(endDefaultDateSolar_);
-    }
-    if (GetStartDateLunar().year == GetEndDateLunar().year && GetStartDateLunar().month == GetEndDateLunar().month &&
-        GetStartDateLunar().day > GetEndDateLunar().day) {
-        startDateLunar_ = SolarToLunar(startDefaultDateSolar_);
-        endDateLunar_ = SolarToLunar(endDefaultDateSolar_);
-    }
+    AdjustLunarStartEndDate();
     auto startYear = startDateLunar_.year;
     auto endYear = endDateLunar_.year;
     auto startMonth = startDateLunar_.month;
@@ -1021,24 +1346,8 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
     CHECK_NULL_VOID(yearColumn);
     CHECK_NULL_VOID(monthColumn);
     CHECK_NULL_VOID(dayColumn);
-    auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
-    startDateSolar_ = LunarToSolar(dataPickerRowLayoutProperty->GetStartDate().value_or(SolarToLunar(startDateSolar_)));
-    endDateSolar_ = LunarToSolar(dataPickerRowLayoutProperty->GetEndDate().value_or(SolarToLunar(endDateSolar_)));
 
-    if (startDateSolar_.GetYear() > endDateSolar_.GetYear()) {
-        startDateSolar_ = startDefaultDateSolar_;
-        endDateSolar_ = endDefaultDateSolar_;
-    }
-    if (startDateSolar_.GetYear() == endDateSolar_.GetYear() && startDateSolar_.GetMonth() > endDateSolar_.GetMonth()) {
-        startDateSolar_ = startDefaultDateSolar_;
-        endDateSolar_ = endDefaultDateSolar_;
-    }
-    if (startDateSolar_.GetYear() == endDateSolar_.GetYear() &&
-        startDateSolar_.GetMonth() == endDateSolar_.GetMonth() && startDateSolar_.GetDay() > endDateSolar_.GetDay()) {
-        startDateSolar_ = startDefaultDateSolar_;
-        endDateSolar_ = endDefaultDateSolar_;
-    }
+    AdjustSolarStartEndDate();
     auto startYear = startDateSolar_.GetYear();
     auto endYear = endDateSolar_.GetYear();
     auto startMonth = startDateSolar_.GetMonth();
@@ -1105,6 +1414,223 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
     dayColumnPattern->SetOptions(GetOptions());
 
     SetShowLunar(false);
+}
+
+void DatePickerPattern::LunarMonthDaysColumnBuilding(const LunarDate& current)
+{
+    RefPtr<FrameNode> monthDaysColumn;
+    RefPtr<FrameNode> yearColumn;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return;
+    }
+
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_VOID(monthDays);
+    iter++;
+    auto year = *iter;
+    CHECK_NULL_VOID(year);
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto stackYear = DynamicCast<FrameNode>(year);
+    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    CHECK_NULL_VOID(monthDaysNode);
+    CHECK_NULL_VOID(yearDaysNode);
+
+    monthDaysColumn = GetColumn(monthDaysNode->GetId());
+    yearColumn = GetColumn(yearDaysNode->GetId());
+    CHECK_NULL_VOID(monthDaysColumn);
+    CHECK_NULL_VOID(yearColumn);
+
+    AdjustLunarStartEndDate();
+
+    auto startYear = startDateLunar_.year;
+    auto endYear = endDateLunar_.year;
+
+    options_[yearColumn].clear();
+    for (uint32_t index = startYear; index <= endYear; ++index) {
+        if (current.year == index) {
+            auto datePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
+            CHECK_NULL_VOID(datePickerColumnPattern);
+            datePickerColumnPattern->SetCurrentIndex(options_[yearColumn].size());
+        }
+        auto yearTextValue = GetYearFormatString(index);
+        options_[yearColumn].emplace_back(yearTextValue);
+    }
+
+    FillLunarMonthDaysOptions(current, monthDaysColumn);
+
+    auto yearColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
+    auto monthDaysColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_VOID(yearColumnPattern);
+    CHECK_NULL_VOID(monthDaysColumnPattern);
+    yearColumnPattern->SetOptions(GetOptions());
+    monthDaysColumnPattern->SetOptions(GetOptions());
+
+    SetShowLunar(true);
+}
+
+void DatePickerPattern::SolarMonthDaysColumnsBuilding(const PickerDate& current)
+{
+    RefPtr<FrameNode> monthDaysColumn;
+    RefPtr<FrameNode> yearColumn;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto children = host->GetChildren();
+    if (children.size() <= SINGLE_CHILD_SIZE) {
+        return;
+    }
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    CHECK_NULL_VOID(monthDays);
+    iter++;
+    auto year = *iter;
+    CHECK_NULL_VOID(year);
+    auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetChildAtIndex(1));
+    auto stackYear = DynamicCast<FrameNode>(year);
+    auto yearDaysNode = DynamicCast<FrameNode>(stackYear->GetChildAtIndex(1));
+    monthDaysColumn = GetColumn(monthDaysNode->GetId());
+    yearColumn = GetColumn(yearDaysNode->GetId());
+    CHECK_NULL_VOID(monthDaysColumn);
+    CHECK_NULL_VOID(yearColumn);
+
+    AdjustSolarStartEndDate();
+    FillSolarYearOptions(current, yearColumn);
+
+    options_[monthDaysColumn].clear();
+    for (uint32_t index = MIN_MONTH; index <= MAX_MONTH; ++index) {
+        uint32_t maxDay = PickerDate::GetMaxDay(current.GetYear(), index);
+        auto monthTextValue = GetMonthFormatString(index, false, false);
+        for (uint32_t dayIndex = MIN_DAY; dayIndex <= maxDay; ++dayIndex) {
+            if (index == current.GetMonth() && dayIndex == current.GetDay()) {
+                auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+                CHECK_NULL_VOID(datePickerColumnPattern);
+                datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
+            }
+            auto dayTextValue = GetDayFormatString(dayIndex, false);
+            options_[monthDaysColumn].emplace_back(monthTextValue + dayTextValue);
+        }
+    }
+
+    auto yearColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
+    auto monthDaysColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_VOID(yearColumnPattern);
+    CHECK_NULL_VOID(monthDaysColumnPattern);
+    yearColumnPattern->SetOptions(GetOptions());
+    monthDaysColumnPattern->SetOptions(GetOptions());
+
+    SetShowLunar(false);
+}
+
+void DatePickerPattern::FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn)
+{
+    options_[yearColumn].clear();
+    for (uint32_t year = startDateSolar_.GetYear(); year <= endDateSolar_.GetYear(); ++year) {
+        if (year == current.GetYear()) {
+            auto datePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
+            CHECK_NULL_VOID(datePickerColumnPattern);
+            datePickerColumnPattern->SetCurrentIndex(options_[yearColumn].size());
+        }
+        auto yearTextValue = GetYearFormatString(year);
+        options_[yearColumn].emplace_back(yearTextValue);
+    }
+}
+
+void DatePickerPattern::FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn)
+{
+    uint32_t startMonth = 1;
+    uint32_t endMonth = 12;
+    uint32_t startDay = 1;
+
+    uint32_t lunarLeapMonth = 0;
+    bool hasLeapMonth = GetLunarLeapMonth(current.year, lunarLeapMonth);
+    options_[monthDaysColumn].clear();
+
+    for (uint32_t index = startMonth; index <= endMonth; ++index) {
+        uint32_t maxDay = GetLunarMaxDay(current.year, index, false);
+        auto monthTextValue = GetMonthFormatString(index, true, false);
+        for (uint32_t dayIndex = startDay; dayIndex <= maxDay; ++dayIndex) {
+            if (!current.isLeapMonth && current.month == index && current.day == dayIndex) {
+                auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+                CHECK_NULL_VOID(datePickerColumnPattern);
+                datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
+            }
+            auto dayTextValue = GetDayFormatString(dayIndex, true);
+            options_[monthDaysColumn].emplace_back(monthTextValue + dayTextValue);
+        }
+
+        if (!hasLeapMonth || lunarLeapMonth != index) {
+            continue;
+        }
+
+        maxDay = GetLunarMaxDay(current.year, index, true);
+        monthTextValue = GetMonthFormatString(index, true, true);
+        for (uint32_t dayIndex = startDay; dayIndex <= maxDay; ++dayIndex) {
+            if (current.isLeapMonth && current.month == index && current.day == dayIndex) {
+                auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
+                CHECK_NULL_VOID(datePickerColumnPattern);
+                datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
+            }
+            auto dayTextValue = GetDayFormatString(dayIndex, true);
+            options_[monthDaysColumn].emplace_back(monthTextValue + dayTextValue);
+        }
+    }
+}
+
+void DatePickerPattern::AdjustSolarStartEndDate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
+    startDateSolar_ = LunarToSolar(dataPickerRowLayoutProperty->GetStartDate().value_or(SolarToLunar(startDateSolar_)));
+    endDateSolar_ = LunarToSolar(dataPickerRowLayoutProperty->GetEndDate().value_or(SolarToLunar(endDateSolar_)));
+
+    if (startDateSolar_.GetYear() > endDateSolar_.GetYear()) {
+        startDateSolar_ = startDefaultDateSolar_;
+        endDateSolar_ = endDefaultDateSolar_;
+    }
+    if (startDateSolar_.GetYear() == endDateSolar_.GetYear() && startDateSolar_.GetMonth() > endDateSolar_.GetMonth()) {
+        startDateSolar_ = startDefaultDateSolar_;
+        endDateSolar_ = endDefaultDateSolar_;
+    }
+    if (startDateSolar_.GetYear() == endDateSolar_.GetYear() &&
+        startDateSolar_.GetMonth() == endDateSolar_.GetMonth() && startDateSolar_.GetDay() > endDateSolar_.GetDay()) {
+        startDateSolar_ = startDefaultDateSolar_;
+        endDateSolar_ = endDefaultDateSolar_;
+    }
+}
+
+void DatePickerPattern::AdjustLunarStartEndDate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto dataPickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(dataPickerRowLayoutProperty);
+    startDateLunar_ = dataPickerRowLayoutProperty->GetStartDate().value_or(SolarToLunar(startDateSolar_));
+    endDateLunar_ = dataPickerRowLayoutProperty->GetEndDate().value_or(SolarToLunar(endDateSolar_));
+
+    if (GetStartDateLunar().year > GetEndDateLunar().year) {
+        startDateLunar_ = SolarToLunar(startDefaultDateSolar_);
+        endDateLunar_ = SolarToLunar(endDefaultDateSolar_);
+    }
+    if (GetStartDateLunar().year == GetEndDateLunar().year && GetStartDateLunar().month > GetEndDateLunar().month) {
+        startDateLunar_ = SolarToLunar(startDefaultDateSolar_);
+        endDateLunar_ = SolarToLunar(endDefaultDateSolar_);
+    }
+    if (GetStartDateLunar().year == GetEndDateLunar().year && GetStartDateLunar().month == GetEndDateLunar().month &&
+        GetStartDateLunar().day > GetEndDateLunar().day) {
+        startDateLunar_ = SolarToLunar(startDefaultDateSolar_);
+        endDateLunar_ = SolarToLunar(endDefaultDateSolar_);
+    }
 }
 
 bool DatePickerPattern::GetLunarLeapMonth(uint32_t year, uint32_t& outLeapMonth) const

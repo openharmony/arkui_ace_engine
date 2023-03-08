@@ -49,7 +49,7 @@ Shadow Shadow::CreateShadow(ShadowStyle style)
             case ShadowStyle::OuterFloatingMD:
                 return ShadowConfig::FloatingShadowMDark;
         }
-        return {};
+        return ShadowConfig::NoneShadow;
     }
     switch (style) {
         case ShadowStyle::OuterDefaultXS:
@@ -65,6 +65,6 @@ Shadow Shadow::CreateShadow(ShadowStyle style)
         case ShadowStyle::OuterFloatingMD:
             return ShadowConfig::FloatingShadowM;
     }
-    return {};
+    return ShadowConfig::NoneShadow;
 }
 } // namespace OHOS::Ace
