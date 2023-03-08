@@ -221,6 +221,14 @@ AppExecFwk::FormProviderData PaContainer::GetFormData(int32_t instanceId)
     return paBackend->GetFormData();
 }
 
+void PaContainer::Destroy()
+{
+    RefPtr<Backend> backend;
+    backend_.Swap(backend);
+    CHECK_NULL_VOID(backend);
+    backend->UpdateState(Backend::State::ON_DESTROY);
+}
+
 void PaContainer::DestroyContainer(int32_t instanceId)
 {
     LOGI("DestroyContainer with id %{private}d", instanceId);
@@ -228,9 +236,7 @@ void PaContainer::DestroyContainer(int32_t instanceId)
     CHECK_NULL_VOID(container);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     CHECK_NULL_VOID(aceContainer);
-    auto back = aceContainer->GetBackend();
-    CHECK_NULL_VOID_NOLOG(back);
-    back->UpdateState(Backend::State::ON_DESTROY);
+    aceContainer->Destroy();
 }
 
 void PaContainer::AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,

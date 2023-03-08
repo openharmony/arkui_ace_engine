@@ -133,6 +133,16 @@ public:
         return errorCallback_;
     }
 
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
+
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
 #if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {

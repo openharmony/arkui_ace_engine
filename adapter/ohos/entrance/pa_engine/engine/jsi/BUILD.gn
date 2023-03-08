@@ -70,6 +70,8 @@ template("js_pa_engine_ark") {
     external_deps = [
       "ability_base:want",
       "ability_base:zuri",
+      "ability_runtime:js_environment",
+      "ability_runtime:runtime",
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",

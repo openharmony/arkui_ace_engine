@@ -34,6 +34,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
+#include "runtime.h"
 
 namespace OHOS::Ace {
 using namespace OHOS::Ace::Framework;
@@ -107,7 +108,7 @@ public:
 
     RefPtr<BackendDelegate> GetDelegate() const;
     std::shared_ptr<JsRuntime> GetJsRuntime() const;
-    ArkNativeEngine* GetArkNativeEngine() const;
+    NativeEngine* GetNativeEngine() const;
 
     bool GetBlockWaiting() const
     {
@@ -164,6 +165,9 @@ private:
     void RegisterConsoleModule(ArkNativeEngine* engine);
     void EvaluateJsCode();
     void SetDebuggerPostTask();
+    panda::ecmascript::EcmaVM* GetEcmaVm() const;
+    void InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options);
+    bool CreateJsRuntime(const AbilityRuntime::Runtime::Options& options);
 
     std::string ExcludeTag(const std::string& jsonString, const std::string& tagString);
     std::string IncludeTag(const std::string& jsonString, const std::string& tagString);
@@ -174,7 +178,7 @@ private:
     std::vector<std::string> ConvertStringVector(napi_env env, napi_value jsValue);
 
     int32_t instanceId_ = 0;
-    ArkNativeEngine* nativeEngine_ = nullptr;
+    std::unique_ptr<AbilityRuntime::Runtime> jsAilityRuntime_ = nullptr;
     std::shared_ptr<JsRuntime> runtime_ = nullptr;
     RefPtr<BackendDelegate> backendDelegate_ = nullptr;
     bool blockWaiting_ = false;
