@@ -326,10 +326,6 @@ void TextFieldPattern::CreateSingleHandle()
     ShowSelectOverlay(firstHandle, std::nullopt);
     selectionMode_ = SelectionMode::NONE;
     StopTwinkling();
-    auto renderContext = GetHost()->GetRenderContext();
-    if (renderContext) {
-        AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY, 0.0f, PRESS_DURATION, Curves::SHARP);
-    }
 }
 
 bool TextFieldPattern::UpdateCaretByPressOrLongPress()
@@ -1310,12 +1306,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
-        if (isOnHover_) {
-            AnimatePressAndHover(
-                renderContext, HOVER_ANIMATION_OPACITY, PRESS_ANIMATION_OPACITY, PRESS_DURATION, Curves::SHARP);
-        } else {
-            AnimatePressAndHover(renderContext, 0.0f, PRESS_ANIMATION_OPACITY, PRESS_DURATION, Curves::SHARP);
-        }
+        AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -1330,36 +1321,31 @@ void TextFieldPattern::HandleTouchUp()
     if (enableTouchAndHoverEffect_) {
         auto renderContext = GetHost()->GetRenderContext();
         if (isOnHover_) {
-            AnimatePressAndHover(
-                renderContext, PRESS_ANIMATION_OPACITY, HOVER_ANIMATION_OPACITY, PRESS_DURATION, Curves::SHARP);
+            AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY);
         } else {
-            AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY, 0.0f, PRESS_DURATION, Curves::SHARP);
+            AnimatePressAndHover(renderContext, 0.0f);
         }
     }
 }
 
 void TextFieldPattern::ResetBackgroundColor()
 {
-    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textfieldPaintProperty);
     auto renderContext = GetHost()->GetRenderContext();
-    renderContext->AnimateHoverEffectBoard(false);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    AnimatePressAndHover(renderContext, 0.0f);
 }
 
-void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-    int32_t duration, const RefPtr<Curve>& curve)
+void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange)
 {
-    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
-    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
-    Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
-    Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
-    renderContext->OnBackgroundColorUpdate(highlightStart);
     AnimationOption option = AnimationOption();
-    option.SetDuration(duration);
-    option.SetCurve(curve);
-    AnimationUtils::Animate(
-        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+    if (isHoverChange) {
+        option.SetDuration(HOVER_DURATION);
+        option.SetCurve(Curves::FRICTION);
+    } else {
+        option.SetDuration(PRESS_DURATION);
+        option.SetCurve(Curves::SHARP);
+    }
+    Color endBlendColor = Color::FromRGBO(0, 0, 0, endOpacity);
+    AnimationUtils::Animate(option, [renderContext, endBlendColor]() { renderContext->BlendBgColor(endBlendColor); });
 }
 
 void TextFieldPattern::InitTouchEvent()
@@ -1623,7 +1609,7 @@ void TextFieldPattern::ProcessOverlay()
     StopTwinkling();
     auto renderContext = GetHost()->GetRenderContext();
     if (renderContext) {
-        AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY, 0.0f, PRESS_DURATION, Curves::SHARP);
+        AnimatePressAndHover(renderContext, 0.0f);
     }
     if (textEditingValue_.text.empty()) {
         CreateSingleHandle();
@@ -1949,12 +1935,14 @@ void TextFieldPattern::OnHover(bool isHover)
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
         if (isOnHover_) {
-            renderContext->AnimateHoverEffectBoard(true);
+            AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY, true);
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
         }
         isOnHover_ = false;
-        renderContext->AnimateHoverEffectBoard(false);
+        if (!isMousePressed_) {
+            AnimatePressAndHover(renderContext, 0.0f, true);
+        }
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
