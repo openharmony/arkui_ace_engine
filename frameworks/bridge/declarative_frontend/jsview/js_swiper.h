@@ -55,10 +55,8 @@ public:
     static void GetDotIndicatorPosition(JSRef<JSVal>& info, SwiperParameters& dotParameters);
     static void GetDigitIndicatorPosition(JSRef<JSVal>& info, SwiperDigitalParameters& digitalParameters);
     static void GetFontContent(const JSRef<JSVal> font, SwiperDigitalParameters& digitalParameters, bool isSelected);
-
-private:
-    SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& jsObject);
-    SwiperDigitalParameters SetDigitIndicatorInfo(const JSRef<JSObject>& jsObject);
+    static SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& obj);
+    static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
 };
 
 class JSSwiperController final : public Referenced {

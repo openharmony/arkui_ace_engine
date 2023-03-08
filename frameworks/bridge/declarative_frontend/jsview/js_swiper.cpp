@@ -302,7 +302,7 @@ void JSSwiper::GetDigitIndicatorPosition(JSRef<JSVal>& info, SwiperDigitalParame
     }
 }
 
-SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& jsObject)
+SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> leftValue = obj->GetProperty("left");
     JSRef<JSVal> topValue = obj->GetProperty("top");
@@ -363,7 +363,7 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& jsObject)
     return swiperParameters;
 }
 
-SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& jsObject)
+SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& obj)
 {
     JSRef<JSVal> dotLeftValue = obj->GetProperty("left");
     JSRef<JSVal> dotTopValue = obj->GetProperty("top");

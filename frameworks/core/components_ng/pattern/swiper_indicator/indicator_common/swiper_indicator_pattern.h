@@ -132,7 +132,9 @@ private:
     void GetMouseClickIndex();
     void InitTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
-    void InitTextContentSub(const RefPtr<FrameNode>& firstTextNode);
+    void InitTextContentSub(
+        const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
+        const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;

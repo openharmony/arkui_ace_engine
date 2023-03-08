@@ -341,12 +341,17 @@ void SwiperIndicatorPattern::InitTextContent(const RefPtr<SwiperIndicatorLayoutP
     firstTextLayoutProperty->UpdateTextColor(selectedFontColor);
     firstTextLayoutProperty->UpdateFontSize(selectedFontSize);
     firstTextLayoutProperty->UpdateFontWeight(selectedFontWeight);
-    auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    InitTextContentSub();
+    InitTextContentSub(layoutProperty, firstTextNode, lastTextNode);
 }
 
-void SwiperIndicatorPattern::InitTextContentSub(const RefPtr<FrameNode>& firstTextNode) {
+void SwiperIndicatorPattern::InitTextContentSub(
+    const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
+    const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode) {
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);

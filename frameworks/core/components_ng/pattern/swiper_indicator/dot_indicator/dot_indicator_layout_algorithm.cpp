@@ -69,7 +69,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
     userItemWidth *= INDICATOR_ZOOM_IN_SCALE;
     userItemHeight *= INDICATOR_ZOOM_IN_SCALE;
-    indicatorPadding *= INDICATOR_PADDING_HOVER;
+    indicatorPadding = INDICATOR_PADDING_HOVER;
 
     // The width and height of the entire indicator.
     auto indicatorHeight = static_cast<float>(userItemWidth + indicatorPadding.ConvertToPx() * DOUBLE);
