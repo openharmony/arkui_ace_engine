@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,10 @@ struct Font {
     std::optional<Dimension> fontSize;
     std::optional<FontStyle> fontStyle;
     std::vector<std::string> fontFamilies;
+};
+
+struct CaretStyle {
+    std::optional<Dimension> caretWidth;
 };
 
 enum class InputStyle {
@@ -114,6 +118,9 @@ public:
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetCaretColor(const Color& value) = 0;
+    virtual void SetCaretPosition(const int32_t& value) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& value) = 0;
+    virtual void SetCaretStyle(const CaretStyle& value) = 0;
     virtual void SetMaxLength(uint32_t value) = 0;
     virtual void SetMaxLines(uint32_t value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;

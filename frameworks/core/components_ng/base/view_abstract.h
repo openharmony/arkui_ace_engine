@@ -198,6 +198,7 @@ public:
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
+    static void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys);
 
     // Bind properties
     static void BindPopup(

@@ -1023,6 +1023,13 @@ var TransitionEdge;
     TransitionEdge['END']  = 3;
 })(TransitionEdge || (TransitionEdge = {}));
 
+var CtrlKey;
+(function (CtrlKey) {
+  CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
+  CtrlKey[CtrlKey["SHIFT"] = 1] = "SHIFT";
+  CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
+})(CtrlKey || (CtrlKey = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
@@ -1116,6 +1123,13 @@ class TransitionEffect {
     return this;
   }
 }
+
+var SliderBlockType;
+(function (SliderBlockType) {
+  SliderBlockType[SliderBlockType["DEFAULT"] = 0] = "DEFAULT";
+  SliderBlockType[SliderBlockType["IMAGE"] = 1] = "IMAGE";
+  SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
+})(SliderBlockType || (SliderBlockType = {}));
 
 class Indicator {
   top(value) {

@@ -682,6 +682,11 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) override
+    {
+        ViewAbstract::SetKeyboardShortcut(value, keys);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

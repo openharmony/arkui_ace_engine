@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,8 @@
 #define protected public
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "textfield_test_ng_utils.h"
+#include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
+#include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #undef private
 #undef protected
 
@@ -37,6 +39,8 @@ const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
 const int32_t CARET_POSITION_1 = 10;
 const int32_t DELETE_LENGTH_1 = 1;
+const int32_t CARET_POSITION = 0;
+const Dimension CURSOR_WIDTH_SIZE = 10.0_vp;
 } // namespace
 class TextFieldPatternTestNg : public testing::Test {
 public:
@@ -46,6 +50,7 @@ public:
     void TearDown() override;
     RefPtr<TextFieldPattern> GetTextFieldPattern();
     RefPtr<TextFieldLayoutProperty> GetLayoutPropertyFromHost(const RefPtr<TextFieldPattern>& pattern);
+    RefPtr<FrameNode> GetFrameNode();
     RefPtr<FrameNode> host_;
 };
 
@@ -71,6 +76,19 @@ RefPtr<TextFieldLayoutProperty> TextFieldPatternTestNg::GetLayoutPropertyFromHos
     GetTextFieldPattern();
     return host_ ? host_->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
 }
+
+RefPtr<FrameNode> TextFieldPatternTestNg::GetFrameNode()
+{
+    TextFieldModelNG textFieldModelNG;
+    const std::string placeholder = "DEFAULT PLACEHOLDER";
+    const std::string value;
+    bool isTextArea = false;
+    textFieldModelNG.CreateNode(placeholder, value, isTextArea);
+    textFieldModelNG.SetCaretPosition(CARET_POSITION);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return frameNode;
+}
+
 /**
  * @tc.name: TextFieldInsertValue001
  * @tc.desc: Test inserting value of textfield.
@@ -569,5 +587,481 @@ HWTEST_F(TextFieldPatternTestNg, UpdateCaretOffsetByLastTouchOffset003, TestSize
     textFieldPattern->UpdateCaretOffsetByLastTouchOffset();
     EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, 0);
     EXPECT_EQ(textFieldPattern->GetCaretOffsetX(), 0.0);
+}
+
+/**
+ * @tc.name: CaretWidth001
+ * @tc.desc: Verify that the CursorWidth interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorWidth001, TestSize.Level1)
+{
+    auto frameNode = GetFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateCursorWidth(CURSOR_WIDTH_SIZE);
+    textFieldPattern->OnModifyDone();
+    EXPECT_EQ(paintProperty->GetCursorWidthValue(), CURSOR_WIDTH_SIZE);
+}
+
+/**
+ * @tc.name: SelectedColor001
+ * @tc.desc: Verify that the SelectedColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SelectedColor001, TestSize.Level1)
+{
+    auto frameNode = GetFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateSelectedBackgroundColor(Color::BLACK);
+    textFieldPattern->OnModifyDone();
+    EXPECT_TRUE(paintProperty->GetSelectedBackgroundColor().has_value());
+}
+
+/**
+ * @tc.name: CaretPosition001
+ * @tc.desc: Verify that the CursorPosition interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CaretPosition001, TestSize.Level1)
+{
+    auto frameNode = GetFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCaretPosition(CARET_POSITION);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    textFieldPattern->OnModifyDone();
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, CARET_POSITION);
+}
+
+/**
+ * @tc.name: CaretPosition002
+ * @tc.desc: Verify that the CursorPosition interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CaretPosition002, TestSize.Level1)
+{
+    auto frameNode = GetFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCaretPosition(CARET_POSITION);
+    textFieldPattern->UpdateCaretRectByPosition(CARET_POSITION);
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, CARET_POSITION);
+}
+
+/**
+ * @tc.name: CaretPosition003
+ * @tc.desc: Verify that the CursorPosition interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CaretPosition003, TestSize.Level1)
+{
+    auto frameNode = GetFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCaretPosition(CARET_POSITION);
+    textFieldPattern->UpdateCaretPositionByPressOffset();
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, CARET_POSITION);
+}
+
+/**
+ * @tc.name: CaretPosition004
+ * @tc.desc: Verify that the CursorPosition interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CaretPosition004, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    const std::string placeholder = "DEFAULT PLACEHOLDER";
+    const std::string value;
+    const std::string TEXT_VALUE = "DEFAULT_TEXT";
+    bool isTextArea = false;
+    textFieldModelNG.CreateNode(placeholder, value, isTextArea);
+    textFieldModelNG.SetCaretPosition(CARET_POSITION);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCaretPosition(CARET_POSITION);
+    textFieldPattern->InitEditingValueText(TEXT_VALUE);
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, TEXT_VALUE.length());
+}
+
+/**
+ * @tc.name: CaretPosition005
+ * @tc.desc: Verify that the CursorPosition interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CaretPosition005, TestSize.Level1)
+{
+    auto frameNode = GetFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(frameNode->GetPattern());
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateCaretPosition(CARET_POSITION);
+    textFieldPattern->textEditingValue_.text = "text";
+    textFieldPattern->UpdateCaretPositionByPressOffset();
+    EXPECT_EQ(textFieldPattern->GetTextEditingValue().caretPosition, CARET_POSITION);
+}
+
+/**
+ * @tc.name: GetPipelineContext001
+ * @tc.desc: Verify that the GetPipelineContext interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetPipelineContext001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    EXPECT_EQ(textFieldContentModifier.GetPipelineContext(), 0);
+}
+
+/**
+ * @tc.name: SetDefaultAnimatablePropertyValue001
+ * @tc.desc: Verify that the SetDefaultAnimatablePropertyValue interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetDefaultAnimatablePropertyValue001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    textFieldContentModifier.SetDefaultAnimatablePropertyValue();
+    EXPECT_EQ(textFieldContentModifier.fontSizeFloat_, nullptr);
+}
+
+/**
+ * @tc.name: SetDefaultFontSize001
+ * @tc.desc: Verify that the SetDefaultFontSize interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetDefaultFontSize001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const TextStyle textStyle;
+    textFieldContentModifier.SetDefaultFontSize(textStyle);
+    EXPECT_NE(textFieldContentModifier.fontSizeFloat_, nullptr);
+}
+
+/**
+ * @tc.name: SetDefaultFontWeight001
+ * @tc.desc: Verify that the SetDefaultFontWeight interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetDefaultFontWeight001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const TextStyle textStyle;
+    textFieldContentModifier.SetDefaultFontWeight(textStyle);
+    EXPECT_NE(textFieldContentModifier.fontWeightFloat_, nullptr);
+}
+
+/**
+ * @tc.name: SetDefaultTextColor001
+ * @tc.desc: Verify that the SetDefaultTextColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetDefaultTextColor001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const TextStyle textStyle;
+    textFieldContentModifier.SetDefaultTextColor(textStyle);
+    EXPECT_NE(textFieldContentModifier.animatableTextColor_, nullptr);
+}
+
+/**
+ * @tc.name: ModifyTextStyle001
+ * @tc.desc: Verify that the ModifyTextStyle interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ModifyTextStyle001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    TextStyle textStyle;
+    textFieldContentModifier.ModifyTextStyle(textStyle);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetFontSize001
+ * @tc.desc: Verify that the SetFontSize interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetFontSize001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const Dimension value;
+    textFieldContentModifier.SetFontSize(value);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetFontWeight001
+ * @tc.desc: Verify that the SetFontWeight interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetFontWeight001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const FontWeight value = FontWeight::W100;
+    textFieldContentModifier.SetFontWeight(value);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetTextColor001
+ * @tc.desc: Verify that the SetTextColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetTextColor001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const Color value;
+    textFieldContentModifier.SetTextColor(value);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetContentOffset001
+ * @tc.desc: Verify that the SetContentOffset interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetContentOffset001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    OffsetF value;
+    textFieldContentModifier.SetContentOffset(value);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetContentSize001
+ * @tc.desc: Verify that the SetContentSize interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetContentSize001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    SizeF value;
+    textFieldContentModifier.SetContentSize(value);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: SetTextValue001
+ * @tc.desc: Verify that the SetTextValue interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetTextValue001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    std::string value;
+    textFieldContentModifier.SetTextValue(value);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate001
+ * @tc.desc: Verify that the NeedMeasureUpdate interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, NeedMeasureUpdate001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    PropertyChangeFlag flag;
+    bool ret = true;
+    ret = textFieldContentModifier.NeedMeasureUpdate(flag);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SetCursorColor001
+ * @tc.desc: Verify that the SetCursorColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetCursorColor001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern);
+    Color value = Color::WHITE;
+    textFieldOverlayModifier.SetCursorColor(value);
+    EXPECT_EQ(textFieldOverlayModifier.cursorColor_->Get(), LinearColor(value));
+}
+
+/**
+ * @tc.name: SetCursortWidth001
+ * @tc.desc: Verify that the SetCursorWidth interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetCursortWidth001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern);
+    float value = 1.0;
+    textFieldOverlayModifier.SetCursorWidth(value);
+    EXPECT_EQ(textFieldOverlayModifier.cursorWidth_->Get(), value);
+}
+
+/**
+ * @tc.name: SetSelectedBackGroundColor001
+ * @tc.desc: Verify that the SetSelectedBackGroundColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetSelectedBackGroundColor001, TestSize.Level1)
+{
+    auto pattern = GetTextFieldPattern();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern);
+    Color value = Color::BLACK;
+    textFieldOverlayModifier.SetSelectedBackGroundColor(value);
+    EXPECT_EQ(textFieldOverlayModifier.selectedColor_->Get(), LinearColor(value));
+}
+
+/**
+ * @tc.name: SetCursorVisible001
+ * @tc.desc: Verify that the SetCursorVisible interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetCursorVisible001, TestSize.Level1)
+{
+    auto pattern = GetTextFieldPattern();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern);
+    bool value = true;
+    textFieldOverlayModifier.SetCursorVisible(value);
+    EXPECT_EQ(textFieldOverlayModifier.cursorVisible_->Get(), value);
+}
+
+/**
+ * @tc.name: SetContentSize002
+ * @tc.desc: Verify that the SetContentSize interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetContentSize002, TestSize.Level1)
+{
+    auto pattern = GetTextFieldPattern();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern);
+    SizeF value;
+    textFieldOverlayModifier.SetContentSize(value);
+    EXPECT_EQ(textFieldOverlayModifier.contentSize_->Get(), value);
+}
+
+/**
+ * @tc.name: SetContentOffset002
+ * @tc.desc: Verify that the SetContentOffset interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetContentOffset002, TestSize.Level1)
+{
+    auto pattern = GetTextFieldPattern();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern);
+    OffsetF value;
+    textFieldOverlayModifier.SetContentOffset(value);
+    EXPECT_EQ(textFieldOverlayModifier.contentOffset_->Get(), value);
+}
+
+/**
+ * @tc.name: SetCursorOffsetX001
+ * @tc.desc: Verify that the SetCursorOffsetX interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetCursorOffsetX001, TestSize.Level1)
+{
+    auto pattern = GetTextFieldPattern();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern);
+    float value = 1.0;
+    textFieldOverlayModifier.SetCursorOffsetX(value);
+    EXPECT_EQ(textFieldOverlayModifier.cursorOffsetX_->Get(), value);
+}
+
+/**
+ * @tc.name: SetInputStyle001
+ * @tc.desc: Verify that the SetInputStyle interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetInputStyle001, TestSize.Level1)
+{
+    auto pattern = GetTextFieldPattern();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern);
+    InputStyle value = InputStyle::INLINE;
+    textFieldOverlayModifier.SetInputStyle(value);
+    EXPECT_EQ(textFieldOverlayModifier.inputStyle_, InputStyle::INLINE);
 }
 } // namespace OHOS::Ace::NG

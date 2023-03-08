@@ -162,6 +162,7 @@ public:
     void SetDebugLine(const std::string& line) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,

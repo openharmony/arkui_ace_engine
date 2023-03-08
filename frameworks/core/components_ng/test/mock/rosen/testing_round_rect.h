@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,22 +29,34 @@ public:
         TOP_RIGHT_POS,
         BOTTOM_RIGHT_POS,
         BOTTOM_LEFT_POS,
+        POS_MAX,
     };
 
-    TestingRoundRect() = default;
+    TestingRoundRect()
+        : radiusXY_(POS_MAX, TestingPoint(0, 0)) {};
     virtual ~TestingRoundRect() = default;
 
-    TestingRoundRect(const TestingRoundRect& testingRoundRect) : rect_(testingRoundRect.rect_) {}
-
-    TestingRoundRect(const TestingRect& rect, float xRad, float yRad) : rect_(rect)
+    TestingRoundRect(const TestingRoundRect& testingRoundRect) : TestingRoundRect()
     {
+        rect_ = testingRoundRect.rect_;
+    }
+
+    TestingRoundRect(const TestingRect& rect, float xRad, float yRad) : TestingRoundRect()
+    {
+        rect_ = rect;
         for (size_t i = 0; i < radiusXY_.size(); ++i) {
             radiusXY_[i].SetX(xRad);
             radiusXY_[i].SetY(yRad);
         }
     }
 
-    TestingRoundRect(const TestingRect& rect, std::vector<TestingPoint>& radiusXY) : rect_(rect), radiusXY_(radiusXY) {}
+    TestingRoundRect(const TestingRect& rect, std::vector<TestingPoint>& radiusXY) : TestingRoundRect()
+    {
+        rect_ = rect;
+        for (size_t i = 0; i < radiusXY_.size(); ++i) {
+            radiusXY_[i] = radiusXY[i];
+        }
+    }
 
     virtual void SetCornerRadius(CornerPos pos, float radiusX, float radiusY)
     {

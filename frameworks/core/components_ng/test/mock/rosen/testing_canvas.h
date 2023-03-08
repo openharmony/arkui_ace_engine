@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,7 @@ public:
     virtual void ClipRect(const TestingRect& rect, ClipOp op) {}
     virtual void Scale(float sx, float sy) {}
     virtual void ClipPath(const TestingPath& path, ClipOp op) {}
+    virtual void DrawOval(const TestingRect& oval) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_H

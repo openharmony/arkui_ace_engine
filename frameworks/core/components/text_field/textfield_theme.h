@@ -152,6 +152,7 @@ public:
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color());
             theme->disableTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_DISABLED, Color());
             theme->cursorColor_ = pattern->GetAttr<Color>("cursor_color", Color());
+            theme->cursorWidth_ = pattern->GetAttr<Dimension>("cursor_width", 1.5_vp);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->disabledIconFillColor_ = theme->bgColor_.BlendOpacity(theme->disableOpacityRatio_);
@@ -260,6 +261,11 @@ public:
         return cursorRadius_;
     }
 
+    const Dimension& GetCursorWidth() const
+    {
+        return cursorWidth_;
+    }
+
     bool NeedFade() const
     {
         return needFade_;
@@ -365,6 +371,7 @@ private:
     // UX::cursor state cursor-color=#000000, cursor blur-radius=0.9, cursor-width=2, cursor-height=24, cursor-radius=1
     Color cursorColor_;
     Dimension cursorRadius_;
+    Dimension cursorWidth_;
     bool needFade_ = false;
 
     // UX::icon size = 24, hotZoneSize = 36

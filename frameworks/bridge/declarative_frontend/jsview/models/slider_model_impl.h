@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,15 @@ public:
     void SetShowSteps(bool value) override;
     void SetShowTips(bool value) override;
     void SetThickness(const Dimension& value) override;
+    void SetBlockBorderColor(const Color& value) override;
+    void SetBlockBorderWidth(const Dimension& value) override;
+    void SetStepColor(const Color& value) override;
+    void SetTrackBorderRadius(const Dimension& value) override;
+    void SetBlockSize(const Size& value) override;
+    void SetBlockType(BlockStyleType value) override;
+    void SetBlockImage(const std::string& value) override;
+    void SetBlockShape(const RefPtr<BasicShape>& value) override;
+    void SetStepSize(const Dimension& value) override;
     void SetOnChange(std::function<void(float, int32_t)>&& eventOnChange) override;
 };
 

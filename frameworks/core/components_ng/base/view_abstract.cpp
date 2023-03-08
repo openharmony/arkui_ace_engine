@@ -1249,4 +1249,37 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
 }
 
+void ViewAbstract::SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (value.size() > 1) {
+        LOGE("KeyboardShortcut value arg is wrong, return");
+        return;
+    }
+    if (value.empty() || keys.size() == 0) {
+        LOGI("KeyboardShortcut value and keys is invalid, return");
+        eventHub->SetKeyboardShortcut('\0', 0);
+        eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+        return;
+    }
+    auto key = eventManager->GetKeyboardShortcutKeys(keys);
+    if (key == 0) {
+        LOGI("KeyboardShortcut's keys are the same, return");
+        return;
+    }
+    if (eventManager->IsSameKeyboardShortcutNode(value[0], key)) {
+        LOGI("KeyboardShortcut is the same, return");
+        return;
+    }
+    eventHub->SetKeyboardShortcut(value[0], key);
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
+}
+
 } // namespace OHOS::Ace::NG
