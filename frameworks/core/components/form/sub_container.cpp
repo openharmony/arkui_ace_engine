@@ -139,6 +139,13 @@ void SubContainer::UpdateSurfaceSize()
         TaskExecutor::TaskType::UI);
 }
 
+void SubContainer::UpdateSurfaceSizeWithAnimathion()
+{
+    CHECK_NULL_VOID(pipelineContext_);
+    pipelineContext_->OnSurfaceChanged(surfaceWidth_, surfaceHeight_);
+    pipelineContext_->FlushPipelineImmediately();
+}
+
 void SubContainer::RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
     const FrontendType& cardType, const FrontendType& uiSyntax)

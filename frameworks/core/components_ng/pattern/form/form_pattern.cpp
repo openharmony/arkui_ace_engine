@@ -112,7 +112,7 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             cardInfo_.height = info.height;
             subContainer_->SetFormPattern(WeakClaim(this));
             subContainer_->UpdateRootElementSize();
-            subContainer_->UpdateSurfaceSize();
+            subContainer_->UpdateSurfaceSizeWithAnimathion();
         }
         return false;
     }
