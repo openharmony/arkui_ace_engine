@@ -1829,15 +1829,17 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsBackgroundBlurStyle", info, checkList)) {
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have at least 1 argument");
         return;
     }
     BlurStyleOption styleOption;
-    auto blurStyle = info[0]->ToNumber<int32_t>();
-    if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
-        blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
-        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
