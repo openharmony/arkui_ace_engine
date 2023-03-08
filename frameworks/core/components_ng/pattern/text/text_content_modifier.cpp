@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

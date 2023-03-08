@@ -22,7 +22,6 @@
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {

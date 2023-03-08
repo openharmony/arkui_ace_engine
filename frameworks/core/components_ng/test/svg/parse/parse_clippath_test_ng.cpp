@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_clip_path.h"
 #include "core/components_ng/svg/parse/svg_defs.h"
 #include "core/components_ng/svg/parse/svg_svg.h"

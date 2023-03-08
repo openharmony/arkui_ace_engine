@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
 #include "core/components_ng/pattern/text_clock/text_clock_layout_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 using TimeCallback = std::function<void()>;

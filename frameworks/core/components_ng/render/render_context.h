@@ -29,14 +29,13 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
-#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::NG {
 class GeometryNode;
@@ -133,10 +132,6 @@ public:
     virtual void MarkDrivenRender(bool flag) {}
     virtual void MarkDrivenRenderItemIndex(int32_t index) {}
     virtual void MarkDrivenRenderFramePaintState(bool flag) {}
-
-    virtual RefPtr<Canvas> GetCanvas() = 0;
-
-    virtual void Restore() = 0;
 
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
