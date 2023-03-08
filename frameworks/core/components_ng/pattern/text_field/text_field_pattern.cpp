@@ -318,8 +318,9 @@ void TextFieldPattern::CreateSingleHandle()
 {
     RectF firstHandle;
     auto firstHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
-    OffsetF firstHandleOffset(firstHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX(),
-        firstHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY());
+    auto emptyOffset = MakeEmptyOffset();
+    OffsetF firstHandleOffset(firstHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX() + emptyOffset.GetX(),
+        firstHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY() + emptyOffset.GetY());
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     firstHandle.SetOffset(firstHandleOffset);
     firstHandle.SetSize(handlePaintSize);
@@ -1126,7 +1127,14 @@ void TextFieldPattern::HandleOnCopy()
     }
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Copy value is %{private}s", value.c_str());
+#if defined(PREVIEW)
+        if (clipRecords_.size() >= RECORD_MAX_LENGTH) {
+            clipRecords_.erase(clipRecords_.begin());
+        }
+        clipRecords_.emplace_back(StringUtils::ToWstring(value));
+#else
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
+#endif
     }
 
     textEditingValue_.caretPosition = textSelector_.GetEnd();
@@ -1151,7 +1159,6 @@ void TextFieldPattern::HandleOnCopy()
 void TextFieldPattern::HandleOnPaste()
 {
     LOGI("TextFieldPattern::HandleOnPaste");
-    CHECK_NULL_VOID(clipboard_);
     auto pasteCallback = [weak = WeakClaim(this), textSelector = textSelector_](const std::string& data) {
         if (data.empty()) {
             LOGW("Paste value is empty");
@@ -1208,13 +1215,20 @@ void TextFieldPattern::HandleOnPaste()
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
     };
+#if defined(PREVIEW)
+    pasteCallback(clipRecords_.empty() ? "" : StringUtils::ToString((*clipRecords_.rbegin())));
+#else
+    CHECK_NULL_VOID(clipboard_);
     clipboard_->GetData(pasteCallback);
+#endif
 }
 
 void TextFieldPattern::HandleOnCut()
 {
     LOGI("TextFieldPattern::HandleOnCut");
+#if !defined(PREVIEW)
     CHECK_NULL_VOID(clipboard_);
+#endif
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     caretUpdateType_ = CaretUpdateType::NONE;
@@ -1230,7 +1244,14 @@ void TextFieldPattern::HandleOnCut()
     auto selectedText = value.GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd());
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Cut value is %{private}s", selectedText.c_str());
+#if defined(PREVIEW)
+        if (clipRecords_.size() >= RECORD_MAX_LENGTH) {
+            clipRecords_.erase(clipRecords_.begin());
+        }
+        clipRecords_.emplace_back(StringUtils::ToWstring(selectedText));
+#else
         clipboard_->SetData(selectedText, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
+#endif
     }
     textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) +
                              textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
@@ -1741,7 +1762,11 @@ void TextFieldPattern::ShowSelectOverlay(
         auto end = pattern->GetTextSelector().GetEnd();
         selectOverlay->SetSelectInfo(pattern->GetTextEditingValue().GetSelectedText(start, end));
     };
+#if defined(PREVIEW)
+    hasDataCallback(!clipRecords_.empty());
+#else
     clipboard_->HasData(hasDataCallback);
+#endif
 }
 
 bool TextFieldPattern::AllowCopy()
