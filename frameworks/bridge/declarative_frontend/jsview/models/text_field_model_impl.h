@@ -40,6 +40,9 @@ public:
     void SetEnterKeyType(TextInputAction value) override;
     void SetTextAlign(TextAlign value) override;
     void SetCaretColor(const Color& value) override;
+    void SetCaretStyle(const CaretStyle& value) override;
+    void SetCaretPosition(const int32_t& value) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     void SetMaxLength(uint32_t value) override;
     void SetMaxLines(uint32_t value) override;
     void SetFontSize(const Dimension& value) override;
