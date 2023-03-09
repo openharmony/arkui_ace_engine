@@ -554,6 +554,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     auto radius = textFieldTheme->GetBorderRadius();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
 
     PaddingProperty padding;
     padding.left = CalcLength(0.0);
