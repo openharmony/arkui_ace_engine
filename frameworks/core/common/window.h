@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,10 +57,7 @@ public:
 
     void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
 
-    virtual void SetVsyncCallback(AceVsyncCallback&& callback)
-    {
-        callbacks_.push_back(std::move(callback));
-    }
+    virtual void SetVsyncCallback(AceVsyncCallback&& callback);
 
     virtual void OnShow()
     {
@@ -102,7 +99,12 @@ protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
     double density_ = 1.0;
-    std::list<AceVsyncCallback> callbacks_;
+
+    struct VsyncCallback {
+        AceVsyncCallback callback_ = nullptr;
+        int32_t containerId_ = -1;
+    };
+    std::list<struct VsyncCallback> callbacks_;
 
 private:
     std::function<Rect()> windowRectImpl_;

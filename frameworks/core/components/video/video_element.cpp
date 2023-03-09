@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1089,7 +1089,7 @@ void VideoElement::OnError(const std::string& errorId, const std::string& param)
 
 void VideoElement::OnResolutionChange() const
 {
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_STANDARD_SYSTEM)
     if (!mediaPlayer_ || !renderNode_) {
         LOGE("player or render is null");
         return;
