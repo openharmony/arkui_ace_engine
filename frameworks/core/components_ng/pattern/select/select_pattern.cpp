@@ -697,7 +697,9 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     CHECK_NULL_VOID(host);
     if (!host->GetChildren().empty()) {
         auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        CHECK_NULL_VOID(row);
         auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_VOID(rowProps);
         json->Put("space", rowProps->GetSpace()->ToString().c_str());
 
         if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
