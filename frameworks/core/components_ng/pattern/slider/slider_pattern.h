@@ -35,13 +35,16 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter_, sliderLength_, borderBlank_,
-            stepRatio_, valueRatio_, hotBlockShadowWidth_, hotFlag_, mouseHoverFlag_, mousePressedFlag_ };
+        auto paintParameters = UpdateContentParameters();
+        if (!sliderContentModifier_) {
+            sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(paintParameters);
+        }
         SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
         if (!sliderTipModifier_ && bubbleFlag_) {
             sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>();
         }
-        return MakeRefPtr<SliderPaintMethod>(sliderTipModifier_, paintParameters, paragraph_, tipParameters);
+        return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
+            sliderTipModifier_, paragraph_, tipParameters);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -73,6 +76,7 @@ public:
 
 private:
     void OnModifyDone() override;
+    void CancelExceptionValue(float& min, float& max);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     void CreateParagraphFunc();
@@ -90,6 +94,8 @@ private:
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClickEvent();
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
@@ -107,6 +113,11 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
+
+    SliderContentModifier::Parameters UpdateContentParameters();
+    void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -129,10 +140,12 @@ private:
     float blockHotSize_ = 0.0f;
 
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<ClickEvent> clickListener_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
 
+    RefPtr<SliderContentModifier> sliderContentModifier_;
     // tip Parameters
     bool bubbleFlag_ = false;
     RefPtr<Paragraph> paragraph_;
