@@ -2793,7 +2793,9 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 {
     selectionStart = selectionStart < 0 ? 0 : selectionStart;
+    selectionEnd = std::clamp(selectionEnd, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
     if (selectionStart >= selectionEnd) {
+        LOGE("The start position is greater than or equal to the end position");
         return;
     }
     auto host = GetHost();
@@ -2825,9 +2827,9 @@ void TextFieldPattern::SetTextSelection(int32_t selectionStart, int32_t selectio
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
 }
 
-void TextFieldPattern::SetSelectionFlag(bool flag, int32_t selectionStart, int32_t selectionEnd)
+void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
 {
-    setSelectionFlag_ = flag;
+    setSelectionFlag_ = true;
     selectionStart_ = selectionStart;
     selectionEnd_ = selectionEnd;
     auto host = GetHost();
