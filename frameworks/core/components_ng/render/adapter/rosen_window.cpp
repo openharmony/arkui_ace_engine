@@ -106,12 +106,14 @@ void RosenWindow::RequestFrame()
 void RosenWindow::OnShow()
 {
     Window::OnShow();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoForeground();
 }
 
 void RosenWindow::OnHide()
 {
     Window::OnHide();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoBackground();
     rsUIDirector_->SendMessages();
 }
@@ -138,6 +140,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(root->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
     if (rosenRenderContext->GetRSNode()) {
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
 }
@@ -145,6 +148,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
 {
     LOGD("Rosenwindow RecordFrameTime");
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetTimeStamp(timeStamp, name);
 }
 
@@ -152,6 +156,7 @@ void RosenWindow::FlushTasks()
 {
     CHECK_RUN_ON(UI);
     LOGD("Rosenwindow flush tasks");
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 }
 
