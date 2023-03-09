@@ -52,6 +52,7 @@ public:
     using OnFormErrorCallback = std::function<void(const std::string&, const std::string&)>;
     using OnFormUninstallCallback = std::function<void(int64_t)>;
     using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&)>;
+    using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
     using ActionEventHandle = std::function<void(const std::string&)>;
 
     enum class State : char {
@@ -76,6 +77,7 @@ public:
     void AddFormErrorCallback(const OnFormErrorCallback& callback);
     void AddFormUninstallCallback(const OnFormUninstallCallback& callback);
     void AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback);
+    void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
@@ -92,8 +94,10 @@ public:
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
     void OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
         const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want);
+    void OnFormSurfaceChange(float width, float height);
     void ResetForm();
     void ReleaseForm();
+    void NotifySurfaceChange(float width, float height);
 #endif
 
 private:
@@ -115,6 +119,7 @@ private:
     OnFormErrorCallback onFormErrorCallback_;
     OnFormUninstallCallback onFormUninstallCallback_;
     OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;
+    OnFormSurfaceChangeCallback onFormSurfaceChangeCallback_;
     ActionEventHandle actionEventHandle_;
 
     State state_ { State::WAITINGFORSIZE };

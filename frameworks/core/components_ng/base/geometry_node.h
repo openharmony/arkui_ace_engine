@@ -229,6 +229,11 @@ public:
         parentGlobalOffset_ = parentGlobalOffset;
     }
 
+    void ResetParentLayoutConstraint()
+    {
+        parentLayoutConstraint_ = std::nullopt;
+    }
+
     void SetParentLayoutConstraint(const LayoutConstraintF& layoutConstraint)
     {
         parentLayoutConstraint_ = layoutConstraint;

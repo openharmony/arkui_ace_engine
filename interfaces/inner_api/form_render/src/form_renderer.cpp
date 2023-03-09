@@ -37,7 +37,6 @@ FormRenderer::FormRenderer(
     }
     auto& nativeEngine = (static_cast<AbilityRuntime::JsRuntime&>(*runtime_.get())).GetNativeEngine();
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
-    formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_);
 }
 
 void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -88,6 +87,7 @@ void FormRenderer::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk
         HILOG_ERROR("uiContent is null!");
         return;
     }
+    formRendererDispatcherImpl_ = new FormRendererDispatcherImpl(uiContent_, shared_from_this());
     ParseWant(want);
     InitUIContent(formJsInfo);
     SetRenderDelegate(proxy_);
@@ -148,6 +148,15 @@ void FormRenderer::Destroy()
     context_ = nullptr;
     runtime_ = nullptr;
     HILOG_INFO("Destroy FormRenderer finish.");
+}
+
+void FormRenderer::OnSurfaceChange(float width, float height)
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("form renderer delegate is null!");
+        return;
+    }
+    formRendererDelegate_->OnSurfaceChange(width, height);
 }
 
 void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)

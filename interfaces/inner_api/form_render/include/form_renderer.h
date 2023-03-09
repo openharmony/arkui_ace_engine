@@ -47,6 +47,7 @@ public:
     void OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
+    void OnSurfaceChange(float width, float height);
 
 private:
     void InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
