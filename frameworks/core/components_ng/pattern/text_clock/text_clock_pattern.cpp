@@ -193,6 +193,10 @@ int32_t TextClockPattern::GetHoursWest() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_RETURN(textClockLayoutProperty, GetSystemTimeZone());
-    return textClockLayoutProperty->GetHoursWest().value_or(GetSystemTimeZone());
+    if (textClockLayoutProperty->GetHoursWest().has_value()) {
+        return NearEqual(textClockLayoutProperty->GetHoursWest().value(), INT_MAX) ?
+            GetSystemTimeZone() : textClockLayoutProperty->GetHoursWest().value();
+    }
+    return GetSystemTimeZone();
 }
 } // namespace OHOS::Ace::NG
