@@ -57,6 +57,7 @@ public:
     static void OnFileSelectorShow(const JSCallbackInfo& args);
     static void OnInterceptRequest(const JSCallbackInfo& args);
     static void OnUrlLoadIntercept(const JSCallbackInfo& args);
+    static void OnLoadIntercept(const JSCallbackInfo& args);
     static void JsEnabled(bool isJsEnabled);
     static void ContentAccessEnabled(bool isContentAccessEnabled);
     static void FileAccessEnabled(bool isFileAccessEnabled);

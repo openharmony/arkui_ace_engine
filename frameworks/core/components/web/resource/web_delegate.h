@@ -490,6 +490,7 @@ public:
     bool OnFileSelectorShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info);
     bool OnHandleInterceptUrlLoading(const std::string& url);
+    bool OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request);
     void OnResourceLoad(const std::string& url);
     void OnScaleChange(float oldScaleFactor, float newScaleFactor);
     void OnScroll(double xOffset, double yOffset);

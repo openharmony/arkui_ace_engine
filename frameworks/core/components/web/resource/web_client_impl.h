@@ -130,7 +130,7 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
     std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> OnHandleInterceptRequest(
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
-    bool OnHandleInterceptUrlLoading(const std::string& url) override;
+    bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
     void OnScroll(double xOffset, double yOffset) override;
