@@ -170,7 +170,6 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             bubbleFlag_ = true;
             InitializeBubble();
         }
-        FireChangeEvent(SliderChangeMode::Begin);
         mousePressedFlag_ = true;
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
@@ -357,6 +356,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
+        pattern->FireChangeEvent(SliderChangeMode::Begin);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -383,7 +383,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
 
     PanDirection panDirection;
-    panDirection.type = direction_ == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
+    panDirection.type = PanDirection::ALL;
     float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
 }
@@ -568,6 +568,10 @@ void SliderPattern::FireChangeEvent(int32_t mode)
 {
     auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
+    if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
+        NearEqual(value_, sliderEventHub->GetValue())) {
+        return;
+    }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
     valueChangeFlag_ = false;
 }
