@@ -503,6 +503,7 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
     if (!selectPopupMenuShowing_) {
+        delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
