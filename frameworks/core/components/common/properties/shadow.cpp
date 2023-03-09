@@ -48,8 +48,9 @@ Shadow Shadow::CreateShadow(ShadowStyle style)
                 return ShadowConfig::FloatingShadowSDark;
             case ShadowStyle::OuterFloatingMD:
                 return ShadowConfig::FloatingShadowMDark;
+            default:
+                return ShadowConfig::NoneShadow;
         }
-        return ShadowConfig::NoneShadow;
     }
     switch (style) {
         case ShadowStyle::OuterDefaultXS:
@@ -64,6 +65,8 @@ Shadow Shadow::CreateShadow(ShadowStyle style)
             return ShadowConfig::FloatingShadowS;
         case ShadowStyle::OuterFloatingMD:
             return ShadowConfig::FloatingShadowM;
+        default:
+            return ShadowConfig::NoneShadow;
     }
     return ShadowConfig::NoneShadow;
 }
