@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -61,13 +61,13 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {}
 
-void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
-    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
+    std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {}
 
-void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
+    std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {}
 

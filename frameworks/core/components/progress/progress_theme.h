@@ -101,6 +101,9 @@ public:
             theme->moonTrackBackgroundColor_ = pattern->GetAttr<Color>("moon_progress_bg_color", Color::RED)
                 .BlendOpacity(pattern->GetAttr<double>("moon_progress_bg_color_alpha", 1.0))
                 .BlendOpacity(pattern->GetAttr<double>("moon_progress_bg_color_alpha_ex", 1.0));
+            theme->borderColor_ = pattern->GetAttr<Color>("progress_border_color", Color::RED);
+            theme->maskColor_ = pattern->GetAttr<Color>("progress_mask_color", Color::RED);
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("progress_border_width", 1.0_vp);
         }
     };
 
@@ -221,6 +224,21 @@ public:
         return bubbleRadius_;
     }
 
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    const Color& GetMaskColor() const
+    {
+        return maskColor_;
+    }
+
 protected:
     ProgressTheme() = default;
 
@@ -254,6 +272,10 @@ private:
     Dimension ringRadius_;
     Dimension orbitRadius_;
     double cometTailLen_ = 0.0;
+
+    Color borderColor_;
+    Dimension borderWidth_;
+    Color maskColor_;
 };
 
 } // namespace OHOS::Ace

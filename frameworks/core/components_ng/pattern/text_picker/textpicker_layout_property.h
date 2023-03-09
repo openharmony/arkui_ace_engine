@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -36,8 +37,10 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propDefaultPickerItemHeight_ = CloneDefaultPickerItemHeight();
         value->propSelected_ = CloneSelected();
-        value->propRange_ = CloneRange();
         value->propValue_ = CloneValue();
+        value->propDisappearTextStyle_ = CloneDisappearTextStyle();
+        value->propTextStyle_ = CloneTextStyle();
+        value->propSelectedTextStyle_ = CloneSelectedTextStyle();
         return value;
     }
 
@@ -46,8 +49,10 @@ public:
         LinearLayoutProperty::Reset();
         ResetDefaultPickerItemHeight();
         ResetSelected();
-        ResetRange();
         ResetValue();
+        ResetDisappearTextStyle();
+        ResetTextStyle();
+        ResetSelectedTextStyle();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -56,33 +61,58 @@ public:
 
         json->Put("defaultPickerItemHeight", GetDefaultPickerItemHeightValue(Dimension(0)).ToString().c_str());
         json->Put("selected", std::to_string(GetSelectedValue(0)).c_str());
-        json->Put("range", GetTextRange().c_str());
         json->Put("value", GetValueValue("").c_str());
-    }
 
-    std::string GetTextRange() const
-    {
-        if (HasRange()) {
-            auto range = GetRange();
-            std::string result = "[";
-            for (const auto& item : *range) {
-                result += "\"";
-                result += item;
-                result += "\"";
-                result += ",";
-            }
-            result = result.substr(0, result.size() - 1);
-            result += "]";
-            return result;
-        }
-        return "";
+        auto disappearFont = JsonUtil::Create(true);
+        disappearFont->Put("size", GetDisappearFontSizeValue(Dimension(0)).ToString().c_str());
+        disappearFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+            GetDisappearWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto disappearTextStyle = JsonUtil::Create(true);
+        disappearTextStyle->Put("color", GetDisappearColor().value_or(Color::BLACK).ColorToString().c_str());
+        disappearTextStyle->Put("font", disappearFont);
+        json->Put("disappearTextStyle", disappearTextStyle);
+
+        auto normalFont = JsonUtil::Create(true);
+        normalFont->Put("size", GetFontSizeValue(Dimension(0)).ToString().c_str());
+        normalFont->Put("weight", V2::ConvertWrapFontWeightToStirng(GetWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto normalTextStyle = JsonUtil::Create(true);
+        normalTextStyle->Put("color", GetColor().value_or(Color::BLACK).ColorToString().c_str());
+        normalTextStyle->Put("font", normalFont);
+        json->Put("textStyle", normalTextStyle);
+
+        auto selectedFont = JsonUtil::Create(true);
+        selectedFont->Put("size", GetSelectedFontSizeValue(Dimension(0)).ToString().c_str());
+        selectedFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+            GetSelectedWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto selectedTextStyle = JsonUtil::Create(true);
+        selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
+        selectedTextStyle->Put("font", selectedFont);
+        json->Put("selectedTextStyle", selectedTextStyle);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Selected, uint32_t, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Range, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Value, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DisappearTextStyle, TextColor, DisappearColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DisappearTextStyle, FontWeight, DisappearWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
 
+    ACE_DEFINE_PROPERTY_GROUP(TextStyle, FontStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(TextStyle, FontSize, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(TextStyle, TextColor, Color, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(TextStyle, FontWeight, Weight, FontWeight, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_GROUP(SelectedTextStyle, FontStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        SelectedTextStyle, FontSize, SelectedFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        SelectedTextStyle, TextColor, SelectedColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        SelectedTextStyle, FontWeight, SelectedWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutProperty);
 };

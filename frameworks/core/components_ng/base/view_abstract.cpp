@@ -1065,6 +1065,15 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
     ACE_UPDATE_RENDER_CONTEXT(ClipMask, basicShape);
 }
 
+void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ProgressMask, progress);
+}
+
 void ViewAbstract::SetBrightness(const Dimension& brightness)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

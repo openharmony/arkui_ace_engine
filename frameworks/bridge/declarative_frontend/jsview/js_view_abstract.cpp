@@ -61,6 +61,8 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/property/progress_mask_property.h"
+#include "core/components/progress/progress_theme.h"
 
 namespace OHOS::Ace {
 
@@ -1829,15 +1831,17 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsBackgroundBlurStyle", info, checkList)) {
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have at least 1 argument");
         return;
     }
     BlurStyleOption styleOption;
-    auto blurStyle = info[0]->ToNumber<int32_t>();
-    if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
-        blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
-        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
@@ -4165,7 +4169,41 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsObject()) {
+    if (info.Length() <= 0) {
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> typeParam = paramObject->GetProperty("type");
+    if (!typeParam->IsNull()) {
+        if (typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
+            auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+            JSRef<JSVal> jValue = paramObject->GetProperty("value");
+            auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+            if (value < 0.0f) {
+                value = 0.0f;
+            }
+            progressMask->SetValue(value);
+            JSRef<JSVal> jTotal = paramObject->GetProperty("total");
+            auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+            if (total < 0.0f) {
+                total = DEFAULT_PROGRESS_TOTAL;
+            }
+            progressMask->SetMaxValue(total);
+            JSRef<JSVal> jColor = paramObject->GetProperty("color");
+            Color colorVal;
+            if (ParseJsColor(jColor, colorVal)) {
+                progressMask->SetColor(colorVal);
+            } else {
+                RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+                progressMask->SetColor(theme->GetMaskColor());
+            }
+            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+        }
+    } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
             return;

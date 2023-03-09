@@ -164,11 +164,11 @@ void GetInspectorChildren(
         jsonNode->Put(INSPECTOR_RECT, strRec.c_str());
         jsonNode->Put("$debugLine", node->GetDebugLine().c_str());
         jsonNode->Put("$viewID", node->GetViewId().c_str());
+        auto jsonObject = JsonUtil::Create(true);
+        parent->ToJsonValue(jsonObject);
+        jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     }
 
-    auto jsonObject = JsonUtil::Create(true);
-    parent->ToJsonValue(jsonObject);
-    jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId);

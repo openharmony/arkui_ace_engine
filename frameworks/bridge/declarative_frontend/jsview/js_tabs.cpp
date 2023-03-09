@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 
@@ -203,6 +204,62 @@ void JSTabs::SetAnimationDuration(float value)
     TabsModel::GetInstance()->SetAnimationDuration(value);
 }
 
+void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
+{
+    bool fadingEdge = true;
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+    }
+    if (!ParseJsBool(info[0], fadingEdge)) {
+        LOGE("The arg is wrong, fail to parse bool");
+    }
+    TabsModel::GetInstance()->SetFadingEdge(fadingEdge);
+}
+
+void JSTabs::SetDivider(const JSCallbackInfo& info)
+{
+    TabsItemDivider divider;
+    if (info.Length() < 1) {
+        LOGW("Invalid params");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)
+        || divider.strokeWidth.Value() < 0.0f) {
+        LOGW("Invalid strokeWidth of divider");
+        divider.strokeWidth.Reset();
+    }
+    if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+        // Failed to get color from param, using default color defined in theme
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            divider.color = tabTheme->GetDividerColor();
+        }
+    }
+
+    if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)
+        || divider.startMargin.Value() < 0.0f) {
+        // Failed to get color from param, using default color defined in theme
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            divider.startMargin = tabTheme->GetDividerMargin();
+        }
+    }
+    
+    if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)
+        || divider.endMargin.Value() < 0.0f) {
+        // Failed to get color from param, using default color defined in theme
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            divider.endMargin = tabTheme->GetDividerMargin();
+        }
+    }
+
+    TabsModel::GetInstance()->SetDivider(divider);
+
+    info.ReturnSelf();
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabs>::Declare("Tabs");
@@ -216,6 +273,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barHeight", &JSTabs::SetBarHeight);
     JSClass<JSTabs>::StaticMethod("index", &JSTabs::SetIndex);
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
+    JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -225,6 +283,8 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTabs>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTabs>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
+
     JSClass<JSTabs>::Inherit<JSContainerBase>();
     JSClass<JSTabs>::Bind<>(globalObj);
 }

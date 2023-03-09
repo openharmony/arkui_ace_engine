@@ -2623,6 +2623,14 @@ void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineBas
     jsAccessibilityManager_->InitializeCallback();
 }
 
+void FrontendDelegateDeclarative::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
+{
+    if (!context) {
+        return;
+    }
+    jsAccessibilityManager_->AddSubPipelineContext(context);
+}
+
 RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();

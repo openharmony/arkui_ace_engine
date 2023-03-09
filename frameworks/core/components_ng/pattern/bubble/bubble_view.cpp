@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,6 +131,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     }
     popupPaintProp->UpdateAutoCancel(!param->HasAction());
     popupPaintProp->UpdatePlacement(param->GetPlacement());
+
+    auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
+    CHECK_NULL_RETURN(bubbleAccessibilityProperty, nullptr);
+    bubbleAccessibilityProperty->SetText(message);
 
     // Create child
     RefPtr<FrameNode> child;

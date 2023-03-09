@@ -42,4 +42,9 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::SetAxis(Axis axis)
 {}
+
+bool Scrollable::IsSpringStopped() const
+{
+    return true;
+}
 } // namespace OHOS::Ace

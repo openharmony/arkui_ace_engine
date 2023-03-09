@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -33,8 +34,9 @@ const int32_t MARGIN_HALF = 2;
 } // namespace
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
-    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+    const TimePickerSettingData& settingData, std::map<std::string, PickerTime> timePickerProperty,
+    std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -114,7 +116,8 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         auto selectedTime = timePickerProperty["selected"];
         SetSelectedTime(timePickerRowPattern, selectedTime);
     }
-    SetHour24(timePickerRowPattern, isUseMilitaryTime);
+    SetHour24(timePickerRowPattern, settingData.isUseMilitaryTime);
+    SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
     auto contentRow = CreateButtonNode(timePickerNode, dialogEvent, std::move(dialogCancelEvent));
@@ -371,4 +374,45 @@ void TimePickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNo
     eventHub->SetDialogAcceptEvent(std::move(onChange));
 }
 
+void TimePickerDialogView::SetTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const PickerTextProperties& properties)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+
+    Color disappearColor = properties.hasValueFlag & FLAG_DISAPPEAR_COLOR ?
+        properties.disappearColor_ : disappearStyle.GetTextColor();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearColor, disappearColor);
+    Color normalColor = properties.hasValueFlag & FLAG_COLOR ?
+        properties.color_ : normalStyle.GetTextColor();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, normalColor);
+    Color selectedColor = properties.hasValueFlag & FLAG_SELECTED_COLOR ?
+        properties.selectedColor_ : selectedStyle.GetTextColor();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, selectedColor);
+
+    Dimension disappearFontSize = (properties.hasValueFlag & FLAG_DISAPPEAR_FONTSIZE) &&
+        properties.disappearFontSize_.IsValid() ?
+        properties.disappearFontSize_ : disappearStyle.GetFontSize();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize, disappearFontSize);
+    Dimension normalFontSize = (properties.hasValueFlag & FLAG_FONTSIZE) &&
+        properties.fontSize_.IsValid() ?
+        properties.fontSize_ : normalStyle.GetFontSize();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, normalFontSize);
+    Dimension selectedFontSize = (properties.hasValueFlag & FLAG_SELECTED_FONTSIZE) &&
+        properties.selectedFontSize_.IsValid() ?
+        properties.selectedFontSize_ : selectedStyle.GetFontSize();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize, selectedFontSize);
+
+    FontWeight disappearWeight = properties.hasValueFlag & FLAG_DISAPPEAR_WEIGHT ?
+        properties.disappearWeight_ : disappearStyle.GetFontWeight();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearWeight, disappearWeight);
+    FontWeight normalWeight = properties.hasValueFlag & FLAG_WEIGHT ?
+        properties.weight_ : normalStyle.GetFontWeight();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Weight, normalWeight);
+    FontWeight selectedWeight = properties.hasValueFlag & FLAG_SELECTED_WEIGHT ?
+        properties.selectedWeight_ : selectedStyle.GetFontWeight();
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight, selectedWeight);
+}
 } // namespace OHOS::Ace::NG

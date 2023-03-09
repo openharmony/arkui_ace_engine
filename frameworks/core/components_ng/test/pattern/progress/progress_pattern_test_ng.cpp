@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cmath>
 #include <cstddef>
 #include <memory>
 #include <optional>
@@ -31,8 +32,12 @@
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
+#include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/render/adapter/moon_progress_modifier.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/render/render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -51,6 +56,7 @@ struct TestProperty {
     std::optional<int32_t> scaleCount = std::nullopt;
     std::optional<Color> frontColor = std::nullopt;
     std::optional<Color> bgColor = std::nullopt;
+    std::optional<Color> borderColor = std::nullopt;
 };
 
 namespace {
@@ -69,6 +75,7 @@ constexpr int32_t SCALE_COUNT = 120;
 constexpr int32_t TYPE_OF_PROGRESS = 5;
 constexpr Color FRONT_COLOR = Color(0xff0000ff);
 constexpr Color BG_COLOR = Color(0xffc0c0c0);
+constexpr Color BORDER_COLOR = Color(0xffc0c0c0);
 constexpr float PROGRESS_COMPONENT_MAXSIZE_WIDTH = 720.0f;
 constexpr float PROGRESS_COMPONENT_MAXSIZE_HEIGHT = 1400.0f;
 constexpr float PROGRESS_COMPONENT_WIDTH = 200.0f;
@@ -76,6 +83,11 @@ constexpr float LARG_PROGRESS_COMPONENT_WIDTH = 2000.0f;
 constexpr float PROGRESS_COMPONENT_HEIGHT = 200.0f;
 constexpr float LARG_PROGRESS_COMPONENT_HEIGHT = 2000.0f;
 constexpr float NUMBER_OF_TWO = 2.0f;
+constexpr float PROGRESS_STROKE_WIDTH = 10.0f;
+constexpr float PROGRESS_MODIFIER_VALUE = 100.0f;
+constexpr float CONTEXT_WIDTH = 100.0f;
+constexpr float CONTEXT_HEIGHT = 100.0f;
+constexpr float CONTEXT_LARGE_HEIGHT = 200.0f;
 constexpr Dimension DEFALT_RING_DIAMETER = 72.0_vp;
 constexpr Dimension TEST_PROGRERSS_THICKNESS = 4.0_vp;
 constexpr Dimension TEST_PROGRESS_STROKE_WIDTH = 10.0_vp;
@@ -83,6 +95,8 @@ constexpr Dimension TEST_PROGRESS_DEFAULT_WIDTH = 300.0_vp;
 constexpr Dimension TEST_PROGRESS_DEFAULT_DIAMETER = 72.0_vp;
 constexpr Dimension TEST_PROGRESS_SCALE_WIDTH = 2.0_vp;
 constexpr Dimension DEFALUT_STROKE_WIDTH = 2.0_vp;
+const Color TEST_COLOR = Color::BLUE;
+constexpr float VALUE_OF_SET_VALUE = 10.0f;
 
 CreateProperty creatProperty;
 DirtySwapConfig config;
@@ -157,6 +171,10 @@ RefPtr<FrameNode> ProgressPatternTestNg::CreateProgressParagraph(const TestPrope
         progressModel.SetBackgroundColor(testProperty.bgColor.value());
     }
 
+    if (testProperty.borderColor.has_value()) {
+        progressModel.SetBorderColor(testProperty.borderColor.value());
+    }
+
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
 
     return frameNode;
@@ -204,6 +222,10 @@ void ProgressPatternTestNg::CheckValue(const RefPtr<FrameNode>& frameNode, const
 
     if (testProperty.bgColor.has_value()) {
         EXPECT_EQ(progresspaintProperty->GetBackgroundColor(), testProperty.bgColor.value());
+    }
+
+    if (testProperty.borderColor.has_value()) {
+        EXPECT_EQ(progresspaintProperty->GetBorderColor(), testProperty.borderColor.value());
     }
 }
 
@@ -563,7 +585,7 @@ HWTEST_F(ProgressPatternTestNg, ScaleProgressFrameNodeCreator001, TestSize.Level
     testProperty.scaleCount = std::make_optional(SCALE_COUNT);
     testProperty.frontColor = std::make_optional(FRONT_COLOR);
     testProperty.bgColor = std::make_optional(BG_COLOR);
-
+    testProperty.borderColor = std::make_optional(BORDER_COLOR);
     /**
      * @tc.steps: step2. create progress frameNode and check the proregss properties with expected value .
      * @tc.expected: step2. get frameNode success and proregss properties equals expected value.
@@ -726,18 +748,10 @@ HWTEST_F(ProgressPatternTestNg, GetContentDrawFunction, TestSize.Level1)
         geometryNode->SetContentOffset(OffsetF(0, 0));
         RefPtr<PaintWrapper> paintWrapper =
             AceType::MakeRefPtr<PaintWrapper>(RenderContext::Create(), geometryNode, progressPaintProperty);
+        auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
         auto progressPaintMethod =
-            AceType::MakeRefPtr<ProgressPaintMethod>(progressType[i], LARG_STORKE_WIDTH.ConvertToPx());
-
-        /**
-         * @tc.steps: step4. call the function named GetContentDrawFunction in ProgressPaintMethod.
-         */
-        auto cnvasDrawFunction = progressPaintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
-        EXPECT_NE(cnvasDrawFunction, nullptr);
-
-        geometryNode->SetContentSize(SizeF(PROGRESS_COMPONENT_MAXSIZE_HEIGHT, PROGRESS_COMPONENT_MAXSIZE_WIDTH));
-        cnvasDrawFunction = progressPaintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
-        EXPECT_NE(cnvasDrawFunction, nullptr);
+            AceType::MakeRefPtr<ProgressPaintMethod>(progressType[i], LARG_STORKE_WIDTH.ConvertToPx(),
+            progressModifier);
     }
 }
 
@@ -774,49 +788,160 @@ HWTEST_F(ProgressPatternTestNg, ProgressPaintLinear001, TestSize.Level1)
     OffsetF contentOffset(0, 0);
     RefPtr<PaintWrapper> paintWrapper =
         AceType::MakeRefPtr<PaintWrapper>(RenderContext::Create(), geometryNode, progressPaintProperty);
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
     auto progressPaintMethod =
-        AceType::MakeRefPtr<ProgressPaintMethod>(PROGRESS_TYPE_LINEAR, LARG_STORKE_WIDTH.ConvertToPx());
+        AceType::MakeRefPtr<ProgressPaintMethod>(PROGRESS_TYPE_LINEAR, LARG_STORKE_WIDTH.ConvertToPx(),
+        progressModifier);
     RSCanvas canvas;
-
-    /**
-     * @tc.steps: step4. call the function named Paint in ProgressPaintMethod when width is lager than hight.
-     */
-    progressPaintMethod->PaintLinear(canvas, contentOffset, contentSize);
-    progressPaintMethod->PaintRing(canvas, contentOffset, contentSize);
-    progressPaintMethod->PaintScaleRing(canvas, contentOffset, contentSize);
-    progressPaintMethod->PaintMoon(canvas, contentOffset, contentSize);
-    progressPaintMethod->PaintCapsule(canvas, contentOffset, contentSize);
-    progressPaintMethod->PaintVerticalCapsule(canvas, contentOffset, contentSize);
 
     /**
      * @tc.steps: step5. call the function named Paint in ProgressPaintMethod when value has been set as 50.
      */
     progressPaintMethod->value_ = MAX_VALUE_OF_PROGRESS / NUMBER_OF_TWO;
-    progressPaintMethod->PaintVerticalCapsule(canvas, contentOffset, contentSize);
-
+    
     /**
      * @tc.steps: step5. call the function named Paint in ProgressPaintMethod when value has been set as 80.
      */
     progressPaintMethod->value_ = MAX_VALUE_OF_PROGRESS - VALUE_OF_PROGRESS;
-    progressPaintMethod->PaintLinear(canvas, contentOffset, contentSize);
-    progressPaintMethod->PaintMoon(canvas, contentOffset, contentSize);
-    progressPaintMethod->PaintCapsule(canvas, contentOffset, contentSize);
-    progressPaintMethod->PaintVerticalCapsule(canvas, contentOffset, contentSize);
 
     /**
      * @tc.steps: step5. call the function named Paint in ProgressPaintMethod when width is less than hight.
      */
     contentSize.SetHeight(PROGRESS_COMPONENT_HEIGHT);
     contentSize.SetWidth(PROGRESS_COMPONENT_MAXSIZE_WIDTH);
-    progressPaintMethod->PaintLinear(canvas, contentOffset, contentSize);
-
     progressPaintMethod->value_ = VALUE_OF_PROGRESS;
-    progressPaintMethod->PaintLinear(canvas, contentOffset, contentSize);
-
     progressPaintMethod->value_ = MAX_VALUE_OF_PROGRESS / NUMBER_OF_TWO;
-    progressPaintMethod->PaintCapsule(canvas, contentOffset, contentSize);
-
     progressPaintMethod->scaleWidth_ = SCALE_WIDTH.ConvertToPx() * NUMBER_OF_TWO;
-    progressPaintMethod->PaintScaleRing(canvas, contentOffset, contentSize);
+}
+
+/**
+ * @tc.name: ProgressModifier001
+ * @tc.desc: Test ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, ProgressModifier001, TestSize.Level1)
+{
+    ProgressModifier progressModifier;
+    progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    LinearColor linearColor;
+    progressModifier.SetColor(linearColor);
+    progressModifier.SetBackgroundColor(linearColor);
+    progressModifier.SetBorderColor(linearColor);
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetScaleWidth(PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetScaleCount(SCALE_COUNT);
+    OffsetF offset(0, 0);
+    progressModifier.SetOffset(offset);
+
+    RSCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+
+    // case1.set ProgressType LINEAR(Width >= Height)
+    progressModifier.SetProgressType(PROGRESS_TYPE_LINEAR);
+    progressModifier.onDraw(context);
+
+    // case2.set ProgressType LINEAR(Width < Height)
+    progressModifier.SetProgressType(PROGRESS_TYPE_LINEAR);
+    DrawingContext secondContext { canvas, CONTEXT_WIDTH, CONTEXT_LARGE_HEIGHT };
+    progressModifier.onDraw(secondContext);
+
+    // case3.set ProgressType RING
+    progressModifier.SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier.onDraw(context);
+
+    // case4.set ProgressType SCALE
+    progressModifier.SetProgressType(PROGRESS_TYPE_SCALE);
+    progressModifier.SetScaleWidth(0);
+    progressModifier.onDraw(context);
+
+    // case5.set ProgressType MOON
+    progressModifier.SetProgressType(PROGRESS_TYPE_MOON);
+    progressModifier.onDraw(context);
+
+    // case6.set ProgressType CAPSULE(Width >= Height)
+    progressModifier.SetProgressType(PROGRESS_TYPE_CAPSULE);
+    progressModifier.onDraw(context);
+
+    // case6.set ProgressType CAPSULE(Width < Height)
+    progressModifier.SetProgressType(PROGRESS_TYPE_CAPSULE);
+    progressModifier.onDraw(secondContext);
+}
+
+/**
+ * @tc.name: ProgressPaintMethod001
+ * @tc.desc: Test ProgressPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, ProgressPaintMethod001, TestSize.Level1)
+{
+    // creat frameNode
+    ProgressModelNG progressModelNG;
+    progressModelNG.Create(5.0, 10.0, 10.0, 20.0, ProgressType::LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    // creat paintWrapper
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    auto progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+    PaintWrapper *paintWrapper =
+        new PaintWrapper(renderContext, geometryNode, progressPaintProperty);
+
+    // creat progressPaintMethod
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>();
+    ProgressPaintMethod progressPaintMethod(ProgressType::LINEAR, PROGRESS_STROKE_WIDTH, progressModifier);
+
+    // set theme
+    MockPipelineBase::SetUp();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ProgressTheme>()));
+
+    // call GetContentModifier and UpdateContentModifier
+    progressPaintMethod.UpdateContentModifier(paintWrapper);
+    progressPaintMethod.GetContentModifier(paintWrapper);
+
+    MockPipelineBase::TearDown();
+}
+
+/**
+ * @tc.name: ProgressPaintProperty001
+ * @tc.desc: Test progress_paint_property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, ProgressPaintProperty001, TestSize.Level1)
+{
+    // creat frameNode
+    ProgressModelNG progressModelNG;
+    progressModelNG.Create(5.0, 10.0, 10.0, 20.0, ProgressType::LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    RefPtr<ProgressPaintProperty> progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPaintProperty, nullptr);
+
+    // call Clone and Reset
+    progressPaintProperty->Clone();
+    progressPaintProperty->Reset();
+}
+
+/**
+ * @tc.name: progressMaskPropertyTestNg001
+ * @tc.desc: Test progress mask property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, progressMaskPropertyTestNg001, TestSize.Level1)
+{
+    ProgressMaskProperty progressMaskProperty;
+    progressMaskProperty.GetValue();
+    progressMaskProperty.GetMaxValue();
+    progressMaskProperty.GetColor();
+    progressMaskProperty.SetValue(VALUE_OF_SET_VALUE);
+    progressMaskProperty.SetMaxValue(VALUE_OF_SET_VALUE);
+    progressMaskProperty.SetColor(TEST_COLOR);
 }
 } // namespace OHOS::Ace::NG

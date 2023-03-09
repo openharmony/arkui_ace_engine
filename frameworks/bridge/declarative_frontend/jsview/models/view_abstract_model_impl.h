@@ -19,6 +19,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -174,6 +175,7 @@ public:
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
 
+    void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
 };
