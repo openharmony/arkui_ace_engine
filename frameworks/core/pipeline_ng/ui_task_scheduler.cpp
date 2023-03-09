@@ -145,12 +145,19 @@ bool UITaskScheduler::NeedAdditionalLayout()
             }
             node->GetLayoutProperty()->CleanDirty();
             node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-            auto parent = AceType::DynamicCast<FrameNode>(node->GetParent());
-            if (parent) {
-                parent->GetLayoutProperty()->CleanDirty();
-                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            LOGD("GeometryTransition needs additional layout, node%{public}d is marked dirty", node->GetId());
+            auto parent = node->GetParent();
+            while (parent) {
+                auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+                if (frameNode) {
+                    frameNode->GetLayoutProperty()->CleanDirty();
+                    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+                    LOGD("GeometryTransition needs additional layout, parent node%{public}d is marked dirty",
+                        frameNode->GetId());
+                    break;
+                }
+                parent = parent->GetParent();
             }
-            LOGD("GeometryTransition needs additional layout, nodes are arranged");
         }
     }
     return true;
