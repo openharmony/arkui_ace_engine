@@ -69,6 +69,22 @@ public:
         json->Put("start", propPlayerStatus_.value_or(true) ? "true" : "false");
         json->Put(
             "fromStart", propDirection_.value_or(MarqueeDirection::RIGHT) == MarqueeDirection::LEFT ? "true" : "false");
+        json->Put("allowScale", propAllowScale_.value_or(false) ? "true" : "false");
+        json->Put("fontSize", textLayoutProperty->GetFontSize().value_or(10.0_vp).ToString().c_str());
+        json->Put("fontColor", textLayoutProperty->GetForegroundColor()
+            .value_or(textLayoutProperty->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
+        json->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textLayoutProperty->GetFontWeight()
+            .value_or(FontWeight::NORMAL)).c_str());
+        std::vector<std::string> fontFamilyVector =
+            textLayoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+        if (fontFamilyVector.empty()) {
+            fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
+        }
+        std::string fontFamily = fontFamilyVector.at(0);
+        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+            fontFamily += ',' + fontFamilyVector.at(i);
+        }
+        json->Put("fontFamily", fontFamily.c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlayerStatus, bool, PROPERTY_UPDATE_MEASURE);
