@@ -103,6 +103,10 @@ void SwiperIndicatorModifier::PaintContent(DrawingContext& context, ContentPrope
     }
     OffsetF leftCenter = { contentProperty.longPointLeftCenterX, centerY_ };
     OffsetF rightCenter = { contentProperty.longPointRightCenterX, centerY_ };
+    OffsetF centerDistance = rightCenter - leftCenter;
+    OffsetF centerDilateDistance = centerDistance * contentProperty.longPointDilateRatio;
+    leftCenter -= (centerDilateDistance - centerDistance) * HALF;
+    rightCenter += (centerDilateDistance - centerDistance) * HALF;
     PaintSelectedIndicator(
         canvas, leftCenter, rightCenter, contentProperty.pointRadius * contentProperty.longPointDilateRatio);
 }
@@ -178,6 +182,9 @@ void SwiperIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& margin, c
     longPointLeftCenterX_->Set(longPointCenterX.first);
     longPointRightCenterX_->Set(longPointCenterX.second);
     pointRadius_->Set(normalPointRadius);
+    normalToHoverPointDilateRatio_->Set(1.0f);
+    hoverToNormalPointDilateRatio_->Set(1.0f);
+    longPointDilateRatio_->Set(1.0f);
 }
 
 void SwiperIndicatorModifier::UpdateDilatePaintProperty(const float& hoverPointRadius,
