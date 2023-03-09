@@ -1177,3 +1177,41 @@ var SliderBlockType;
   SliderBlockType[SliderBlockType["IMAGE"] = 1] = "IMAGE";
   SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
 })(SliderBlockType || (SliderBlockType = {}));
+
+var TitleStyle;
+(function (TitleStyle) {
+  TitleStyle[TitleStyle["ListMode"] = 0] = "ListMode";
+  TitleStyle[TitleStyle["ContentMode"] = 1] = "ContentMode";
+})(TitleStyle || (TitleStyle = {}));
+
+var OperationStyle;
+(function (OperationStyle) {
+  OperationStyle[OperationStyle["TextArrow"] = 0] = "TextArrow";
+  OperationStyle[OperationStyle["Button"] = 1] = "Button";
+  OperationStyle[OperationStyle["IconGroup"] = 2] = "IconGroup";
+})(OperationStyle || (OperationStyle = {}));
+
+var TabItemType;
+(function (TabItemType) {
+  TabItemType[TabItemType["Tex"] = 0] = "Text";
+  TabItemType[TabItemType["Icon"] = 1] = "Icon";
+})(TabItemType || (TabItemType = {}));
+
+var EditableLeftIconType;
+(function (EditableLeftIconType) {
+  EditableLeftIconType[EditableLeftIconType["Back"] = 0] = "Back";
+  EditableLeftIconType[EditableLeftIconType["Cancel"] = 1] = "Cancel";
+})(EditableLeftIconType || (EditableLeftIconType = {}));
+
+var ContentIconPosition;
+(function (ContentIconPosition) {
+  ContentIconPosition[ContentIconPosition["Top"] = 0] = "Top";
+  ContentIconPosition[ContentIconPosition["Center"] = 1] = "Center";
+})(ContentIconPosition || (ContentIconPosition = {}));
+
+var ContentTextStyle;
+(function (ContentTextStyle) {
+  ContentTextStyle[ContentTextStyle["SingleLine"] = 0] = "SingleLine";
+  ContentTextStyle[ContentTextStyle["DoubleLine"] = 1] = "DoubleLine";
+  ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
+})(ContentTextStyle || (ContentTextStyle = {}));
