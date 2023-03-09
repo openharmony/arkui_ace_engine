@@ -305,7 +305,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const Layo
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
     } while (LessNotEqual(currentEndPos + chainOffset, endMainPos));
 
-    if (overScrollFeature_) {
+    if (overScrollFeature_ && canOverScroll_) {
         LOGD("during over scroll, just return in LayoutForward");
         return;
     }
@@ -375,7 +375,7 @@ void ListLayoutAlgorithm::LayoutBackward(
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(currentIndex) : 0.0f;
     } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos));
 
-    if (overScrollFeature_) {
+    if (overScrollFeature_ && canOverScroll_) {
         LOGD("during over scroll, just return in LayoutBackward");
         return;
     }
