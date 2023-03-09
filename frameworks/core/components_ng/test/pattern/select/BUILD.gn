@@ -35,6 +35,7 @@ ohos_unittest("select_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/shadow_config.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_abstract.cpp",
