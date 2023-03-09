@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int ITEM_SIZES_VECTOR_SIZE = 4;
+constexpr uint32_t ITEM_SIZES_VECTOR_SIZE = 4;
 }
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);

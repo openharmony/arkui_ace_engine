@@ -45,7 +45,7 @@ public:
         if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::DOT) {
             return MakeRefPtr<DotIndicatorPaintProperty>();
         } else {
-            return nullptr;
+            return MakeRefPtr<PaintProperty>();
         }
     }
 

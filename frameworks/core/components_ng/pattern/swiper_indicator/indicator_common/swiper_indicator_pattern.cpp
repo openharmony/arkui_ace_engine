@@ -28,7 +28,7 @@ constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
-constexpr int INDICATOR_HAS_CHILD = 2;
+constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 } // namespace
 
 void SwiperIndicatorPattern::OnAttachToFrameNode()

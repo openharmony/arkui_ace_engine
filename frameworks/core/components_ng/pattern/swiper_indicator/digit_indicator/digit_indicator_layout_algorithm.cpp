@@ -38,10 +38,13 @@ constexpr float HALF = 0.5f;
 
 void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     CalculateTextContent(frameNode);
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutPropertyConstraint = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutPropertyConstraint);
+    auto layoutConstraint = layoutPropertyConstraint->CreateChildConstraint();
     indicatorWidth_ = DIGIT_TOTAL_DISTANCE;
     indicatorHeight_ = 0.0f;
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -69,7 +72,9 @@ void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.Constrain(minSize, maxSize);
     } while (false);
 
-    layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(frameSize);
 }
 
 void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -91,7 +96,9 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto top = layoutProperty->GetTop();
     auto bottom = layoutProperty->GetBottom();
 
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    auto layoutPropertyConstraint = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutPropertyConstraint);
+    const auto& layoutConstraint = layoutPropertyConstraint->GetLayoutConstraint();
     auto swiperWidth = layoutConstraint->parentIdealSize.Width().value();
     auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
 

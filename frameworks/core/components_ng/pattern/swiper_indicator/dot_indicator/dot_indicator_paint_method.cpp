@@ -40,10 +40,10 @@ constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_MASS = 0.0f;
 constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
-constexpr int ITEM_HALF_WIDTH = 0;
-constexpr int ITEM_HALF_HEIGHT = 1;
-constexpr int SELECTED_ITEM_HALF_WIDTH = 2;
-constexpr int SELECTED_ITEM_HALF_HEIGHT = 3;
+constexpr uint32_t ITEM_HALF_WIDTH = 0;
+constexpr uint32_t ITEM_HALF_HEIGHT = 1;
+constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
+constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
 } // namespace
 
 void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
