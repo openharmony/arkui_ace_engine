@@ -419,4 +419,14 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
 
     return true;
 }
+
+void Inspector::HideAllMenus()
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->HideAllMenus();
+}
+
 } // namespace OHOS::Ace::NG
