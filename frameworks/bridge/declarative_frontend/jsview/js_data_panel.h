@@ -31,6 +31,7 @@ public:
 
 private:
     static bool ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient);
+    static bool ConvertResourceColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient);
     static void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors);
 };
 } // namespace OHOS::Ace::Framework
