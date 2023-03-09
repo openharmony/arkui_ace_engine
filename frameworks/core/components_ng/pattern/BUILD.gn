@@ -223,6 +223,7 @@ build_component_ng("pattern_ng") {
     "picker/toss_animation_controller.cpp",
     "progress/progress_layout_algorithm.cpp",
     "progress/progress_model_ng.cpp",
+    "progress/progress_modifier.cpp",
     "progress/progress_paint_method.cpp",
     "progress/progress_paint_property.cpp",
     "progress/progress_pattern.cpp",

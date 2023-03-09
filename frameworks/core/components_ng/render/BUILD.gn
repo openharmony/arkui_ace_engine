@@ -20,6 +20,7 @@ build_component_ng("render_ng") {
     "adapter/fake_animation_utils.cpp",
     "adapter/fake_modifier_adapter.cpp",
     "adapter/form_render_window.cpp",
+    "adapter/moon_progress_modifier.cpp",
     "adapter/path_painter.cpp",
     "adapter/pixelmap_image.cpp",
     "adapter/sk_painter.cpp",

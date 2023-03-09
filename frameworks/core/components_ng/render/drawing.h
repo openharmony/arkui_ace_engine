@@ -61,6 +61,7 @@ using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
 using RSMaskFilter = Rosen::Drawing::MaskFilter;
 using RSBlurType = Rosen::Drawing::BlurType;
+using RSPathFillType = Rosen::Drawing::PathFillType;
 using RSSkPath = Rosen::Drawing::SkiaPath;
 
 using RSPathEffect = rosen::PathEffect;

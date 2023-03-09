@@ -1062,6 +1062,25 @@ class SubTabBarStyle {
   }
 }
 
+class ProgressMask {
+  constructor(value, total, color) {
+    this.type = 'ProgressMask';
+    this.value = value;
+    this.total = total;
+    this.color = color;
+  }
+
+  updateProgress(arg) {
+    this.value = arg;
+    return this;
+  }
+
+  updateColor(arg) {
+    this.color = arg;
+    return this;
+  }
+}
+
 class BottomTabBarStyle {
   constructor(icon, text) {
     this.type = 'BottomTabBarStyle';
