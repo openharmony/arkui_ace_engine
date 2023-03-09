@@ -456,6 +456,21 @@ void OverlayManager::EraseIndexerPopup(int32_t targetId)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
+void OverlayManager::RemoveIndexerPopup(RefPtr<FrameNode>& overlayNode)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    for (const auto& popup : customPopupMap_) {
+        auto targetId = popup.first;
+        auto popupNode = popup.second;
+        if (overlayNode == popupNode) {
+            customPopupMap_.erase(targetId);
+            rootNode->RemoveChild(overlayNode);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        }
+    }
+}
+
 RefPtr<FrameNode> OverlayManager::GetIndexerPopup(int32_t targetId)
 {
     auto rootNode = rootNodeWeak_.Upgrade();
@@ -755,6 +770,8 @@ bool OverlayManager::RemoveOverlay()
                 }
             }
             return false;
+        } else {
+            RemoveIndexerPopup(overlay);
         }
         rootNode->RemoveChildAtIndex(1);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
