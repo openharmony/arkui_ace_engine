@@ -26,9 +26,9 @@
 #include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
-#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -590,8 +590,8 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterRotationEventCallback(rotationEventCallback);
 
-    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](
-                                    int32_t width, int32_t height, WindowSizeChangeReason type,
+    auto&& viewChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t width, int32_t height,
+                                    WindowSizeChangeReason type,
                                     const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
@@ -1576,7 +1576,12 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         auto ace = AceType::DynamicCast<AceContainer>(container);
-        if (ace) {
+        CHECK_NULL_VOID(ace);
+        if (ace->IsUseNewPipeline()) {
+            auto frontend = ace->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            frontend->RebuildAllPages();
+        } else {
             ace->NotifyConfigurationChange(true);
         }
         LOGI("frontend rebuild finished");

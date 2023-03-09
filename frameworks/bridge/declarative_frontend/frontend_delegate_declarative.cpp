@@ -2401,6 +2401,13 @@ void FrontendDelegateDeclarative::SetColorMode(ColorMode colorMode)
 
 void FrontendDelegateDeclarative::RebuildAllPages()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto url = pageRouterManager_->GetCurrentPageUrl();
+        pageRouterManager_->Clear();
+        pageRouterManager_->RunPage(url, "");
+        return;
+    }
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pages;
     {
         std::lock_guard<std::mutex> lock(mutex_);
