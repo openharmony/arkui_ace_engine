@@ -41,8 +41,8 @@ void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const Sh
     }
     SetPen(skPen, shapePaintProperty);
     SetBrush(skBrush, shapePaintProperty);
-    skCanvas->drawPath(skPath, skPen);
     skCanvas->drawPath(skPath, skBrush);
+    skCanvas->drawPath(skPath, skPen);
 }
 
 void SkPainter::SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty)
