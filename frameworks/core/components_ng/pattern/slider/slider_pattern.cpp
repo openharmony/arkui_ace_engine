@@ -74,7 +74,7 @@ void SliderPattern::CancelExceptionValue(float& min, float& max)
 {
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    if (min == max) {
+    if (NearEqual(min, max)) {
         max = min + MAX_STEPS;
         sliderPaintProperty->UpdateMax(max);
     }
@@ -490,7 +490,7 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     }
     nextValue = std::clamp(nextValue, min, max);
     nextValue = std::round(nextValue / step) * step;
-    if (nextValue == value_) {
+    if (NearEqual(nextValue, value_)) {
         return false;
     }
     value_ = nextValue;
