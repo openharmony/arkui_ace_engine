@@ -51,6 +51,8 @@ private:
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     Offset ComputePinchCenter();
 
+    bool IsCtrlBeingPressed();
+
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
 
