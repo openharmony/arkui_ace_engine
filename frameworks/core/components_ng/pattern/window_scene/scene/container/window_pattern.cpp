@@ -15,10 +15,6 @@
 
 #include "core/components_ng/pattern/window_scene/scene/container/window_pattern.h"
 
-#include "include/vsync_station.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
-#include "session/container/include/session_stage.h"
-
 #include "base/utils/time_util.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -174,7 +170,7 @@ void WindowPattern::LoadContent(
 {
     uiContent_ = UIContent::Create(context_.get(), engine);
     CHECK_NULL_VOID(uiContent_);
-    uiContent_->Initialize(std::shared_ptr<Window>(this), contentUrl, storage);
+    uiContent_->Initialize(shared_from_this(), contentUrl, storage);
 
     auto inputListener = std::make_shared<InputEventListener>(instanceId_);
     RegisterInputEventListener(inputListener);

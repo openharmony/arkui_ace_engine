@@ -19,16 +19,16 @@
 
 namespace OHOS::Ace::NG {
 
-using CreateRootSceneFunc = UIWindow* (*)();
-using CreateWindowSceneFunc = UIWindow* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
+using CreateRootSceneFunc = std::shared_ptr<UIWindow>* (*)();
+using CreateWindowSceneFunc = std::shared_ptr<UIWindow>* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
     const sptr<Rosen::ISession>&, const std::shared_ptr<Rosen::RSSurfaceNode>&);
-using CreateWindowExtensionFunc = UIWindow* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
+using CreateWindowExtensionFunc = std::shared_ptr<UIWindow>* (*)(const std::shared_ptr<AbilityRuntime::Context>&,
     const sptr<Rosen::ISession>&, const std::shared_ptr<Rosen::RSSurfaceNode>&);
 constexpr char CREATE_ROOT_SCENE_FUNC[] = "OHOS_ACE_CreateRootScene";
 constexpr char CREATE_WINDOW_SCENE_FUNC[] = "OHOS_ACE_CreateWindowScene";
 constexpr char CREATE_WINDOW_EXTENSION_FUNC[] = "OHOS_ACE_CreateWindowExtension";
 
-UIWindow* CreateRootSceneFromLib()
+std::shared_ptr<UIWindow> UIWindow::CreateRootScene()
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
     if (handle == nullptr) {
@@ -41,10 +41,17 @@ UIWindow* CreateRootSceneFromLib()
         return nullptr;
     }
 
-    return entry();
+    auto uiWindowPtr = entry();
+    if (uiWindowPtr == nullptr) {
+        return nullptr;
+    }
+    std::shared_ptr<UIWindow> uiWindow = *uiWindowPtr;
+    delete uiWindowPtr;
+
+    return uiWindow;
 }
 
-UIWindow* CreateWindowSceneFromLib(const std::shared_ptr<AbilityRuntime::Context>& context,
+std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
@@ -58,10 +65,17 @@ UIWindow* CreateWindowSceneFromLib(const std::shared_ptr<AbilityRuntime::Context
         return nullptr;
     }
 
-    return entry(context, iSession, surfaceNode);
+    auto uiWindowPtr = entry(context, iSession, surfaceNode);
+    if (uiWindowPtr == nullptr) {
+        return nullptr;
+    }
+    std::shared_ptr<UIWindow> uiWindow = *uiWindowPtr;
+    delete uiWindowPtr;
+
+    return uiWindow;
 }
 
-UIWindow* CreateWindowExtensionFromLib(const std::shared_ptr<AbilityRuntime::Context>& context,
+std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
     const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     void* handle = dlopen("libace.z.so", RTLD_LAZY);
@@ -75,27 +89,14 @@ UIWindow* CreateWindowExtensionFromLib(const std::shared_ptr<AbilityRuntime::Con
         return nullptr;
     }
 
-    return entry(context, iSession, surfaceNode);
-}
+    auto uiWindowPtr = entry(context, iSession, surfaceNode);
+    if (uiWindowPtr == nullptr) {
+        return nullptr;
+    }
+    std::shared_ptr<UIWindow> uiWindow = *uiWindowPtr;
+    delete uiWindowPtr;
 
-std::shared_ptr<UIWindow> UIWindow::CreateRootScene()
-{
-    std::shared_ptr<UIWindow> rootScene(CreateRootSceneFromLib());
-    return rootScene;
-}
-
-std::shared_ptr<UIWindow> UIWindow::CreateWindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
-{
-    std::shared_ptr<UIWindow> window(CreateWindowSceneFromLib(context, iSession, surfaceNode));
-    return window;
-}
-
-std::shared_ptr<UIWindow> UIWindow::CreateWindowExtension(const std::shared_ptr<AbilityRuntime::Context>& context,
-    const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
-{
-    std::shared_ptr<UIWindow> window(CreateWindowExtensionFromLib(context, iSession, surfaceNode));
-    return window;
+    return uiWindow;
 }
 
 } // namespace OHOS::Ace::NG

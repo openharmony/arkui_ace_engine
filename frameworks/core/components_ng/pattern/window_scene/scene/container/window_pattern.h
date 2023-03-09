@@ -18,21 +18,16 @@
 
 #include <mutex>
 
+#include "include/vsync_station.h"
 #include "pointer_event.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "session/container/include/session_stage.h"
 #include "ui_window.h"
 
 #include "session/container/include/session_stage.h"
 
 #include "core/common/window.h"
 #include "core/components_ng/pattern/pattern.h"
-
-namespace OHOS::Rosen {
-class RSUIDirector;
-struct VsyncCallback;
-class SessionStage;
-class ISizeChangeListener;
-enum class WindowSizeChangeReason : uint32_t;
-} // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
 

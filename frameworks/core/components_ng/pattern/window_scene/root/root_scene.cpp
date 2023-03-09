@@ -47,7 +47,8 @@ private:
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateRootScene()
 {
     LOGI("Ace lib loaded, CreateRootScene.");
-    return new RootScene();
+    auto rootScene = std::make_shared<RootScene>();
+    return new std::shared_ptr<UIWindow>(rootScene);
 }
 
 void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
@@ -58,7 +59,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     CHECK_NULL_VOID(context);
     uiContent_ = UIContent::Create(context, engine);
     CHECK_NULL_VOID(uiContent_);
-    uiContent_->Initialize(this, contentUrl, storage);
+    uiContent_->Initialize(shared_from_this(), contentUrl, storage);
 
     ViewportConfig config;
     config.SetPosition(0, 0);

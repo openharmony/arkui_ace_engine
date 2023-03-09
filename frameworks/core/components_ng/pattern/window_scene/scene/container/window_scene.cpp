@@ -23,7 +23,8 @@ extern "C" ACE_EXPORT void* OHOS_ACE_CreateWindowScene(const std::shared_ptr<Abi
     const sptr<Rosen::ISession>& iSession, const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     LOGI("Ace lib loaded, CreateWindowScene.");
-    return new WindowScene(context, iSession, surfaceNode);
+    auto windowScene = std::make_shared<WindowScene>(context, iSession, surfaceNode);
+    return new std::shared_ptr<UIWindow>(windowScene);
 }
 
 WindowScene::WindowScene(const std::shared_ptr<AbilityRuntime::Context>& context,
