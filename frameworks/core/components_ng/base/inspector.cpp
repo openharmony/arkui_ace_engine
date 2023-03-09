@@ -230,7 +230,7 @@ void GetSpanInspector(
 }
 
 void GetInspectorChildren(
-    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId)
+    const RefPtr<NG::UINode>& parent, std::unique_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int pageId, bool isActive)
 {
     // Span is a special case in Inspector since span inherits from UINode
     if (AceType::InstanceOf<SpanNode>(parent)) {
@@ -243,8 +243,12 @@ void GetInspectorChildren(
     auto node = AceType::DynamicCast<FrameNode>(parent);
     auto ctx = node->GetRenderContext();
 
-    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    RectF rect;
+    isActive = isActive && node->IsActive();
+    if (isActive) {
+        rect = node->GetRenderContext()->GetPaintRectWithTransform();
+        rect.SetOffset(node->GetTransformRelativeOffset());
+    }
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
@@ -255,7 +259,7 @@ void GetInspectorChildren(
     }
     auto jsonChildrenArray = JsonUtil::CreateArray(true);
     for (auto uiNode : children) {
-        GetInspectorChildren(uiNode, jsonChildrenArray, pageId);
+        GetInspectorChildren(uiNode, jsonChildrenArray, pageId, isActive);
     }
     if (jsonChildrenArray->GetArraySize()) {
         jsonNode->Put(INSPECTOR_CHILDREN, jsonChildrenArray);
@@ -335,7 +339,7 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
     }
     auto jsonNodeArray = JsonUtil::CreateArray(true);
     for (auto& uiNode : children) {
-        GetInspectorChildren(uiNode, jsonNodeArray, pageId);
+        GetInspectorChildren(uiNode, jsonNodeArray, pageId, true);
     }
     if (jsonNodeArray->GetArraySize()) {
         jsonRoot->Put(INSPECTOR_CHILDREN, jsonNodeArray);
