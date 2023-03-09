@@ -129,6 +129,7 @@ public:
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
+    virtual void ResetMaxLength() = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

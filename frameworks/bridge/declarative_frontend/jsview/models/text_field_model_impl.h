@@ -57,6 +57,7 @@ public:
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void ResetMaxLength() override {};
     static void InitTextInputDefaultStyle();
 };
 

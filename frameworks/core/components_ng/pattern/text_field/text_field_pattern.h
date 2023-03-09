@@ -473,6 +473,7 @@ public:
     void ProcessInnerPadding();
     void OnCursorMoveDone();
     bool IsDisabled();
+    bool AllowCopy();
 
     bool GetIsMousePressed() const
     {
@@ -502,6 +503,7 @@ public:
     std::string GetInputFilter() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void ParseAppendValue(KeyCode keycode, std::string& appendElement);
 
 private:
     void HandleBlurEvent();
@@ -556,6 +558,7 @@ private:
     void HandleOnCut();
 
     void FireEventHubOnChange(const std::string& text);
+    void FireOnChangeIfNeeded();
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
