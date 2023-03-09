@@ -500,14 +500,30 @@ void FrontendDelegateDeclarative::NotifyAppStorage(
 
 void FrontendDelegateDeclarative::OnBackGround()
 {
-    OnPageHide();
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)] {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            delegate->OnPageHide();
+        },
+        TaskExecutor::TaskType::JS);
 }
 
 void FrontendDelegateDeclarative::OnForeground()
 {
     // first page show will be called by push page successfully
     if (!isFirstNotifyShow_) {
-        OnPageShow();
+        taskExecutor_->PostTask(
+            [weak = AceType::WeakClaim(this)] {
+                auto delegate = weak.Upgrade();
+                if (!delegate) {
+                    return;
+                }
+                delegate->OnPageShow();
+            },
+            TaskExecutor::TaskType::JS);
     }
     isFirstNotifyShow_ = false;
 }
@@ -2397,67 +2413,41 @@ void FrontendDelegateDeclarative::RebuildAllPages()
 
 void FrontendDelegateDeclarative::OnPageShow()
 {
-    auto task = [weak = AceType::WeakClaim(this)] {
-        auto delegate = weak.Upgrade();
-        CHECK_NULL_VOID(delegate);
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto pageRouterManager = delegate->GetPageRouterManager();
-            CHECK_NULL_VOID(pageRouterManager);
-            auto pageNode = pageRouterManager->GetCurrentPageNode();
-            CHECK_NULL_VOID(pageNode);
-            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-            CHECK_NULL_VOID(pagePattern);
-            pagePattern->OnShow();
-            return;
-        }
-
-        auto pageId = delegate->GetRunningPageId();
-        auto page = delegate->GetPage(pageId);
-        if (page) {
-            page->FireDeclarativeOnPageAppearCallback();
-        }
-    };
-
-    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
-        task();
-        FireSyncEvent("_root", std::string("\"viewappear\",null,null"), std::string(""));
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto pageNode = pageRouterManager_->GetCurrentPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->OnShow();
         return;
-    } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
-        FireAsyncEvent("_root", std::string("\"viewappear\",null,null"), std::string(""));
     }
+
+    auto pageId = GetRunningPageId();
+    auto page = GetPage(pageId);
+    if (page) {
+        page->FireDeclarativeOnPageAppearCallback();
+    }
+    FireAsyncEvent("_root", std::string("\"viewappear\",null,null"), std::string(""));
 }
 
 void FrontendDelegateDeclarative::OnPageHide()
 {
-    auto task = [weak = AceType::WeakClaim(this)] {
-        auto delegate = weak.Upgrade();
-        CHECK_NULL_VOID(delegate);
-        if (Container::IsCurrentUseNewPipeline()) {
-            auto pageRouterManager = delegate->GetPageRouterManager();
-            CHECK_NULL_VOID(pageRouterManager);
-            auto pageNode = pageRouterManager->GetCurrentPageNode();
-            CHECK_NULL_VOID(pageNode);
-            auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
-            CHECK_NULL_VOID(pagePattern);
-            pagePattern->OnHide();
-            return;
-        }
-
-        auto pageId = delegate->GetRunningPageId();
-        auto page = delegate->GetPage(pageId);
-        if (page) {
-            page->FireDeclarativeOnPageDisAppearCallback();
-        }
-    };
-
-    if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
-        task();
-        FireSyncEvent("_root", std::string("\"viewdisappear\",null,null"), std::string(""));
-    } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS);
-        FireAsyncEvent("_root", std::string("\"viewdisappear\",null,null"), std::string(""));
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto pageNode = pageRouterManager_->GetCurrentPageNode();
+        CHECK_NULL_VOID(pageNode);
+        auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        pagePattern->OnHide();
+        return;
     }
+    auto pageId = GetRunningPageId();
+    auto page = GetPage(pageId);
+    if (page) {
+        page->FireDeclarativeOnPageDisAppearCallback();
+    }
+    FireAsyncEvent("_root", std::string("\"viewdisappear\",null,null"), std::string(""));
 }
 
 void FrontendDelegateDeclarative::ClearAlertCallback(PageInfo pageInfo)
