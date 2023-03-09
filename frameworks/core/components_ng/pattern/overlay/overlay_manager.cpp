@@ -683,6 +683,12 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     return dialog;
 }
 
+void OverlayManager::ShowRootDialog(const RefPtr<FrameNode>& rootNode)
+{
+    LOGI("OverlayManager::ShowRootDialog");
+    OpenDialogAnimation(rootNode);
+}
+
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
     std::map<std::string, NG::DialogEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
