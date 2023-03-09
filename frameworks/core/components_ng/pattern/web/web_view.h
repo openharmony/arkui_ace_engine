@@ -112,6 +112,7 @@ public:
     static void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled);
     static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
     static void SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged);
+    static void SetFirstContentfulPaintId(OnWebAsyncFunc&& firstContentfulPaintId);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

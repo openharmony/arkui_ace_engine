@@ -762,4 +762,13 @@ void WebClientImpl::OnAudioStateChanged(bool playing)
     CHECK_NULL_VOID(delegate);
     delegate->OnAudioStateChanged(playing);
 }
+
+void WebClientImpl::OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs)
+{
+    LOGI("OnFirstContentfulPaint");
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
+}
 } // namespace OHOS::Ace

@@ -1591,6 +1591,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
+        onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
     }
     return true;
 }
@@ -4156,6 +4157,14 @@ void WebDelegate::OnPageVisible(const std::string& url)
 {
     if (onPageVisibleV2_) {
         onPageVisibleV2_(std::make_shared<PageVisibleEvent>(url));
+    }
+}
+
+void WebDelegate::OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs)
+{
+    if (onFirstContentfulPaintV2_) {
+        onFirstContentfulPaintV2_(std::make_shared<FirstContentfulPaintEvent>(navigationStartTick,
+            firstContentfulPaintMs));
     }
 }
 

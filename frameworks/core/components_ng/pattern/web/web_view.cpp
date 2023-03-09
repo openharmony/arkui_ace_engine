@@ -611,4 +611,11 @@ void WebView::SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged)
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnAudioStateChangedEvent(std::move(audioStateChanged));
 }
+
+void WebView::SetFirstContentfulPaintId(OnWebAsyncFunc&& firstContentfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
+}
 } // namespace OHOS::Ace::NG

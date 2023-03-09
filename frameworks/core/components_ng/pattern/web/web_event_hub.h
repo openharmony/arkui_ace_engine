@@ -151,6 +151,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnPageVisible, void);
     ACE_WEB_EVENT_PROPERTY(OnDataResubmitted, void);
     ACE_WEB_EVENT_PROPERTY(OnFaviconReceived, void);
+    ACE_WEB_EVENT_PROPERTY(OnFirstContentfulPaint, void);
     ACE_WEB_EVENT_PROPERTY(OnTouchIconUrl, void);
 
 private:
