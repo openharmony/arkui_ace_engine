@@ -39,7 +39,7 @@ void TextFieldController::CaretPosition(int32_t caretPosition)
 void TextFieldController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    textFieldPattern->SetSelectionFlag(true, selectionStart, selectionEnd);
+    textFieldPattern->SetSelectionFlag(selectionStart, selectionEnd);
 }
 
 void TextFieldController::Insert(const std::string& args) {}

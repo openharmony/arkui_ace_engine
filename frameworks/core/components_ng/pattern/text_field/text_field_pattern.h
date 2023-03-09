@@ -535,7 +535,7 @@ public:
     std::string GetCopyOptionString() const;
     std::string GetShowPasswordIconString() const;
     std::string GetInputStyleString() const;
-    void SetSelectionFlag(bool flag, int32_t selectionStart, int32_t selectionEnd);
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
 
 private:
