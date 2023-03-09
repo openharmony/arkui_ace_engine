@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 

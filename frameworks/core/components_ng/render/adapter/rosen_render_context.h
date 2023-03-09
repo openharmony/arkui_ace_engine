@@ -32,11 +32,11 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
@@ -87,9 +87,6 @@ public:
 
     void ClearFocusState() override;
 
-    RefPtr<Canvas> GetCanvas() override;
-    void Restore() override;
-
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
@@ -97,14 +94,6 @@ public:
     void StartRecording() override;
 
     void StopRecordingIfNeeded() override;
-
-    bool IsRecording()
-    {
-        return !!recordingCanvas_;
-    }
-
-    void StartPictureRecording(float x, float y, float width, float height);
-    sk_sp<SkPicture> FinishRecordingAsPicture();
 
     void SetDrawContentAtLast(bool useDrawContentLastOrder) override
     {
@@ -333,9 +322,6 @@ private:
     RefPtr<CanvasImage> bdImage_;
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
-    SkPictureRecorder* recorder_ = nullptr;
-    RefPtr<Canvas> recordingCanvas_;
-    RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
