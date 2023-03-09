@@ -102,7 +102,6 @@ private:
     void OnKeyEventDisapear();
     void InitBubbleList(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
         RefPtr<IndexerTheme>& indexerTheme);
-    void UpdateBubbleText();
     void AddPopupTouchListener(RefPtr<FrameNode> popupNode);
     void OnPopupTouchDown(const TouchEventInfo& info);
     void AddListItemClickListener(RefPtr<FrameNode>& listItemNode, int32_t index);
@@ -113,6 +112,8 @@ private:
     void UpdateBubbleLetterView(bool showDivider);
     void UpdateBubbleListView(std::vector<std::string>& currentListData);
     void UpdatePopupOpacity(float ratio);
+    void UpdatePopupVisibility(VisibleType visible);
+    bool NeedShowPopupView();
     bool NeedShowBubble();
     void ShowBubble();
     bool IfSelectIndexValid();
@@ -122,6 +123,7 @@ private:
     void IndexerHoverOutAnimation();
     void IndexerPressInAnimation();
     void IndexerPressOutAnimation();
+    int32_t GenerateAnimationId();
     void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
 
@@ -143,6 +145,7 @@ private:
     int32_t childHoverIndex_ = -1;
     int32_t childFocusIndex_ = -1;
     int32_t childPressIndex_ = -1;
+    int32_t animationId_ = 0;
     float itemSizeRender_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
