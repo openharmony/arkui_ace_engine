@@ -130,11 +130,9 @@ void SwiperIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWr
     }
 
     CalculateHoverIndex(radius);
-    if (swiperIndicatorModifier_->GetHoverToNormalIndex() != swiperIndicatorModifier_->GetNormalToHoverIndex()) {
+    if (swiperIndicatorModifier_->GetNormalToHoverIndex() != hoverIndex_) {
         swiperIndicatorModifier_->SetHoverToNormalIndex(swiperIndicatorModifier_->GetNormalToHoverIndex());
         swiperIndicatorModifier_->UpdateHoverToNormalPointDilateRatio();
-    }
-    if (swiperIndicatorModifier_->GetNormalToHoverIndex() != hoverIndex_) {
         swiperIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
         swiperIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
     }
