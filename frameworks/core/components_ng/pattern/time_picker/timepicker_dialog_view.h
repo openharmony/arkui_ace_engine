@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,8 +25,8 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TimePickerDialogView {
 public:
-    static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties,
-        std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
+    static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const TimePickerSettingData& settingData,
+        std::map<std::string, PickerTime> timePickerProperty,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetSelectedTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
@@ -45,6 +45,7 @@ public:
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
+    static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties);
 };
 } // namespace OHOS::Ace::NG
 

@@ -81,4 +81,15 @@ LunarDate Localization::GetLunarDate(Date date)
     LunarDate dateRet;
     return dateRet;
 }
+
+std::vector<std::string> Localization::GetAmPmStrings()
+{
+    std::vector<std::string> amPms;
+    return amPms;
+}
+
+bool Localization::GetHourFormat(bool& isAmPm, bool& hasZero)
+{
+    return false;
+}
 } // namespace OHOS::Ace

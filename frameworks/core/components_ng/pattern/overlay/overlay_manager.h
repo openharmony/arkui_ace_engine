@@ -83,8 +83,8 @@ public:
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> timePickerProperty,
-        bool isUseMilitaryTime, std::map<std::string, NG::DialogEvent> dialogEvent,
+    void ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
+        std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
         std::map<std::string, NG::DialogTextEvent> dialogEvent,

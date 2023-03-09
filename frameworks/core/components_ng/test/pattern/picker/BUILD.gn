@@ -80,6 +80,7 @@ ohos_unittest("picker_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
@@ -113,6 +114,13 @@ ohos_unittest("picker_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/toss_animation_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_dialog_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_row_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/toss_animation_controller.cpp",
     "$ace_root/frameworks/core/components_ng/render/divider_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
@@ -184,6 +192,7 @@ ohos_unittest("picker_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/dialog/mock_dialog_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/dialog/mock_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_textpicker_model.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/picker/mock_timepicker_model.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_canvas.cpp",
@@ -206,6 +215,7 @@ ohos_unittest("picker_pattern_test_ng") {
     # self
     "datepicker_pattern_test_ng.cpp",
     "textpicker_pattern_test_ng.cpp",
+    "timepicker_pattern_test_ng.cpp",
     "toss_animation_controller_test_ng.cpp",
   ]
 

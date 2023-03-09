@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -762,6 +762,9 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTimePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTimePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTimePicker>::StaticMethod("disappearTextStyle", &JSTimePicker::SetDisappearTextStyle);
+    JSClass<JSTimePicker>::StaticMethod("textStyle", &JSTimePicker::SetTextStyle);
+    JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
     JSClass<JSTimePicker>::Inherit<JSViewAbstract>();
     JSClass<JSTimePicker>::Bind(globalObj);
 }
@@ -780,6 +783,42 @@ void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
     TimePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
 }
 
+void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    JSDatePicker::ParseTextStyle(info[0], textStyle);
+
+    TimePickerModel::GetInstance()->SetDisappearTextStyle(textStyle);
+}
+
+void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    JSDatePicker::ParseTextStyle(info[0], textStyle);
+
+    TimePickerModel::GetInstance()->SetNormalTextStyle(textStyle);
+}
+
+void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    JSDatePicker::ParseTextStyle(info[0], textStyle);
+
+    TimePickerModel::GetInstance()->SetSelectedTextStyle(textStyle);
+}
+
 void JSTimePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
 {
     auto selectedTime = paramObj->GetProperty("selected");
@@ -792,6 +831,34 @@ void JSTimePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
     if (selectedTime->IsObject()) {
         TimePickerModel::GetInstance()->SetSelectedTime(ParseTime(selectedTime));
     }
+    SetDefaultAttributes();
+}
+
+void JSTimePicker::SetDefaultAttributes()
+{
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("datePicker Theme is null");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    auto selectedStyle = theme->GetOptionStyle(true, false);
+    textStyle.textColor = selectedStyle.GetTextColor();
+    textStyle.fontSize = selectedStyle.GetFontSize();
+    textStyle.fontWeight = selectedStyle.GetFontWeight();
+    TimePickerModel::GetInstance()->SetSelectedTextStyle(textStyle);
+
+    auto disappearStyle = theme->GetDisappearOptionStyle();
+    textStyle.textColor = disappearStyle.GetTextColor();
+    textStyle.fontSize = disappearStyle.GetFontSize();
+    textStyle.fontWeight = disappearStyle.GetFontWeight();
+    TimePickerModel::GetInstance()->SetDisappearTextStyle(textStyle);
+
+    auto normalStyle = theme->GetOptionStyle(false, false);
+    textStyle.textColor = normalStyle.GetTextColor();
+    textStyle.fontSize = normalStyle.GetFontSize();
+    textStyle.fontWeight = normalStyle.GetFontWeight();
+    TimePickerModel::GetInstance()->SetNormalTextStyle(textStyle);
 }
 
 PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal)
@@ -877,15 +944,16 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
         return;
     }
 
-    auto selectedTime = paramObj->GetProperty("selected");
-    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
-    bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
-
     auto theme = JSAlertDialog::GetTheme<DialogTheme>();
     if (!theme) {
         LOGE("DialogTheme is null");
         return;
     }
+
+    auto selectedTime = paramObj->GetProperty("selected");
+    auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    NG::TimePickerSettingData settingData;
+    settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
 
     ButtonInfo buttonInfo;
     DialogProperties properties;
@@ -901,15 +969,17 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     if (selectedTime->IsObject()) {
         timePickerProperty["selected"] = ParseTime(selectedTime);
     }
+    JSDatePicker::ParseTextProperties(paramObj, settingData.properties);
+
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, timePickerProperty, isUseMilitaryTime, dialogEvent, dialogCancelEvent,
+        [properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTimeDialog(
-                properties, timePickerProperty, isUseMilitaryTime, dialogEvent, dialogCancelEvent);
+                properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
 }
