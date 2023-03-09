@@ -160,6 +160,16 @@ public:
     void AddKeyboardShortcutKeys(uint8_t keys, std::vector<KeyCode>& leftKeyCode, std::vector<KeyCode>& rightKeyCode,
         std::vector<uint8_t>& permutation);
 
+    bool IsKeyInPressed(KeyCode tarCode) const
+    {
+        return std::any_of(pressedKeyCodes_.begin(), pressedKeyCodes_.end(),
+            [tarCode](const KeyCode& code) { return code == tarCode; });
+    }
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -180,6 +190,7 @@ private:
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 } // namespace OHOS::Ace

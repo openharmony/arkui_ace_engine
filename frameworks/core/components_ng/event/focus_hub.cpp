@@ -914,7 +914,7 @@ void FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
 
 void FocusHub::ClearFocusState()
 {
-    if (!currentFocus_ && focusStyleType_ != FocusStyleType::NONE) {
+    if (focusStyleType_ != FocusStyleType::NONE) {
         auto frameNode = GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();
