@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,6 +76,7 @@ public:
     ~FrontendDelegateDeclarative() override;
 
     void AttachPipelineContext(const RefPtr<PipelineBase>& context) override;
+    void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     // JSFrontend delegate functions.
     void RunPage(const std::string& url, const std::string& params, const std::string& profile);
