@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,28 +22,41 @@
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DatePickerDialogView {
 public:
-    static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties,
-        std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
+    static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    static void SetStartDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value);
-    static void SetEndDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value);
-    static void SetSelectedDate(const RefPtr<DatePickerPattern>& datePickerPattern, const PickerDate& value);
-    static void SetShowLunar(bool lunar = false);
+    static void SetStartDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
+    static void SetEndDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
+    static void SetSelectedDate(const RefPtr<FrameNode>& frameNode, const PickerDate& value);
+    static void SetShowLunar(const RefPtr<FrameNode>& frameNode, bool lunar = false);
+    static void SetDateTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
+    static void SetTimeTextProperties(const RefPtr<FrameNode>& frameNode, const PickerTextProperties& properties);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
+    static void SetDialogSwitchEvent(std::function<bool()> switchEvent);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static RefPtr<FrameNode> CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode);
+    static void CreateTitleIconNode(const RefPtr<FrameNode>& titleNode);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
+    static RefPtr<FrameNode> CreateDateNode(int32_t dateNodeId, std::map<std::string, PickerDate> datePickerProperty,
+        const PickerTextProperties& properties, bool isLunar, bool hasTime);
+    static RefPtr<FrameNode> CreateColumnNode(int32_t nodeId, uint32_t showCount, bool isDate = true);
+    static void CreateNormalDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount);
+    static void CreateSingleDateNode(const RefPtr<FrameNode>& dateNode, uint32_t showCount);
+    static RefPtr<FrameNode> CreateTimeNode(std::map<std::string, PickerTime> timePickerProperty,
+        const PickerTextProperties& properties, bool useMilitaryTime);
 
+    static bool switchFlag_;
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();

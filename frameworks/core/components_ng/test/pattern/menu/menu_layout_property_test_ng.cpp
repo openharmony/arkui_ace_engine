@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
+
 #define private public
 #define protected public
-#include "gtest/gtest.h"
 
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"

@@ -40,7 +40,7 @@ public:
     void onDraw(DrawingContext& context) override
     {
         RSCanvas canvas = context.canvas;
-        PaintSwitch(canvas, offset_, size_);
+        PaintSwitch(canvas, offset_->Get(), size_->Get());
     }
 
     void UpdateAnimatableProperty()
@@ -77,7 +77,9 @@ public:
 
     void SetEnabled(bool enabled)
     {
-        enabled_ = enabled;
+        if (enabled_) {
+            enabled_->Set(enabled);
+        }
     }
 
     void SetIsHover(bool isHover)
@@ -89,11 +91,9 @@ public:
 
     void SetIsSelect(bool isSelect)
     {
-        if (!isSelect_ || (isSelect_->Get() == isSelect)) {
-            return;
+        if (isSelect_) {
+            isSelect_->Set(isSelect);
         }
-        isSelect_->Set(isSelect);
-        UpdateAnimatableProperty();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)
@@ -108,12 +108,16 @@ public:
 
     void SetOffset(OffsetF& offset)
     {
-        offset_ = offset;
+        if (offset_) {
+            offset_->Set(offset);
+        }
     }
 
     void SetSize(SizeF& size)
     {
-        size_ = size;
+        if (size_) {
+            size_->Set(size);
+        }
     }
 
     void SetMainDelta(float mainDelta)
@@ -128,7 +132,6 @@ private:
     float actualHeight_ = 0.0f;
     float pointRadius_ = 0.0f;
     const Dimension radiusGap_ = 2.0_vp;
-    bool enabled_ = true;
     Color clickEffectColor_;
     Color hoverColor_;
     Color activeColor_;
@@ -142,8 +145,6 @@ private:
 
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    OffsetF offset_;
-    SizeF size_;
 
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animateHoverColor_;
@@ -151,6 +152,9 @@ private:
     RefPtr<PropertyFloat> mainDelta_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
+    RefPtr<PropertyOffsetF> offset_;
+    RefPtr<PropertySizeF> size_;
+    RefPtr<PropertyBool> enabled_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchModifier);
 };

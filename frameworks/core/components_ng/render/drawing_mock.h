@@ -66,5 +66,9 @@ using RSWordBreakType = Testing::WordBreakType;
 using RSTextStyle = Testing::TestingTextStyle;
 using RSColorQuad = uint32_t;
 using RSScalar = float;
+using RSPathFillType = Testing::TestingPathFillType;
+
+using RSParagraph = Testing::TestingTypography;
+using RSTypographyProperties = Testing::TestingTypographyProperties;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H

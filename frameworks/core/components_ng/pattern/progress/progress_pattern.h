@@ -30,6 +30,8 @@
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/progress/progress_modifier.h"
+#include "core/components_ng/base/geometry_node.h"
 
 namespace OHOS::Ace::NG {
 // ProgressPattern is the base class for progress render node to perform paint progress.
@@ -45,7 +47,10 @@ public:
         auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
         CHECK_NULL_RETURN(progressLayoutProperty, nullptr);
         ProgressType progressType_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
-        return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_);
+        if (!progressModifier_) {
+            progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
+        }
+        return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -74,6 +79,7 @@ private:
     void OnAttachToFrameNode() override;
 
     double strokeWidth_ = 2;
+    RefPtr<ProgressModifier> progressModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

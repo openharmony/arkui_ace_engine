@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,13 +21,17 @@
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 
 namespace OHOS::Ace::NG {
+using TimeChangeEvent = std::function<void(const BaseEventInfo* info)>;
+
 class ACE_EXPORT TimePickerModelNG : public TimePickerModel {
 public:
     void CreateTimePicker(RefPtr<PickerTheme> pickerTheme) override;
     void SetSelectedTime(const PickerTime& value) override;
-    void SetOnChange(ChangeEvent&& onChange) override;
+    void SetOnChange(TimeChangeEvent&& onChange) override;
     void SetHour24(bool isUseMilitaryTime) override;
-
+    void SetDisappearTextStyle(const PickerTextStyle& value) override;
+    void SetNormalTextStyle(const PickerTextStyle& value) override;
+    void SetSelectedTextStyle(const PickerTextStyle& value) override;
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();

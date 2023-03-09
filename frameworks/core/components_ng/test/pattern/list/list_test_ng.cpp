@@ -223,14 +223,14 @@ HWTEST_F(ListTestNg, ListAttrSpaceTest001, TestSize.Level1)
     CreateListItem(ITEM_COUNT);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. RunMeasureAndLayout and check ListItem position.
      */
     RunMeasureAndLayout(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), EXPECT_ITEM_COUNT);
     for (size_t i = 0; i < EXPECT_ITEM_COUNT; i++) {
@@ -254,14 +254,14 @@ HWTEST_F(ListTestNg, ListAttrInitIndexTest001, TestSize.Level1)
      * @tc.steps: step1. create frameNode and set initialIndex for List.
      */
     auto frameNode = CreateListWithInitIndex(INIT_INDEX, ITEM_COUNT);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. RunMeasureAndLayout and check ListItem position.
      */
     RunMeasureAndLayout(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), EXPECT_ITEM_COUNT);
     for (size_t i = 0; i < EXPECT_ITEM_COUNT; i++) {
@@ -285,14 +285,14 @@ HWTEST_F(ListTestNg, ListAttrInitIndexTest002, TestSize.Level1)
      * @tc.steps: step1. create frameNode and set initialIndex for list.
      */
     auto frameNode = CreateListWithInitIndex(INIT_INDEX, ITEM_COUNT);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. RunMeasureAndLayout and check ListItem position.
      */
     RunMeasureAndLayout(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), ITEM_COUNT);
     for (size_t i = 0; i < ITEM_COUNT; i++) {
@@ -318,14 +318,14 @@ HWTEST_F(ListTestNg, ListAttrInitIndexTest003, TestSize.Level1)
      * @tc.steps: step1. create frameNode and set initialIndex for list.
      */
     auto frameNode = CreateListWithInitIndex(INIT_INDEX, ITEM_COUNT);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: RunMeasureAndLayout and check ListItem position.
      */
     RunMeasureAndLayout(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), EXPECT_ITEM_COUNT);
     for (size_t i = 0; i < EXPECT_ITEM_COUNT; i++) {
@@ -349,14 +349,14 @@ HWTEST_F(ListTestNg, ListAttrInitIndexTest004, TestSize.Level1)
      * @tc.steps: step1. create frameNode and set initialIndex for list.
      */
     auto frameNode = CreateListWithInitIndex(INIT_INDEX, ITEM_COUNT);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: RunMeasureAndLayout and check ListItem position.
      */
     RunMeasureAndLayout(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), EXPECT_ITEM_COUNT);
     for (size_t i = 0; i < EXPECT_ITEM_COUNT; i++) {
@@ -389,14 +389,14 @@ HWTEST_F(ListTestNg, ListAttrInitIndexTest005, TestSize.Level1)
     CreateListItem(ITEM_COUNT);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2 RunMeasureAndLayout and check ListItem position.
      */
     RunMeasureAndLayout(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), EXPECT_ITEM_COUNT);
     for (size_t i = 0; i < EXPECT_ITEM_COUNT; i++) {
@@ -425,7 +425,7 @@ HWTEST_F(ListTestNg, ListAttrLanesTest001, TestSize.Level1)
     CreateListItem(ITEM_COUNT);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2 RunMeasureAndLayout and check ListItem position.
@@ -433,7 +433,7 @@ HWTEST_F(ListTestNg, ListAttrLanesTest001, TestSize.Level1)
     RunMeasureAndLayout(frameNode);
     constexpr size_t EXPECT_ITEM_COUNT1 = 16;
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), EXPECT_ITEM_COUNT1);
     for (size_t i = 0; i < EXPECT_ITEM_COUNT1; i++) {
@@ -481,14 +481,14 @@ HWTEST_F(ListTestNg, ListAttrLanesTest002, TestSize.Level1)
     CreateListItem(ITEM_COUNT);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step2. RunMeasureAndLayout and check ListItem position.
      */
     RunMeasureAndLayout(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), EXPECT_ITEM_COUNT);
     for (size_t i = 0; i < EXPECT_ITEM_COUNT; i++) {
@@ -525,14 +525,14 @@ HWTEST_F(ListTestNg, ListAttrLanesTest003, TestSize.Level1)
     CreateListItem(ITEM_COUNT);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     /**
      * @tc.steps: step3. RunMeasureAndLayout and check ListItem position.
      */
     RunMeasureAndLayout(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto itemPosition = pattern->GetItemPosition();
     EXPECT_EQ(itemPosition.size(), EXPECT_ITEM_COUNT);
     for (size_t i = 0; i < EXPECT_ITEM_COUNT; i++) {
@@ -565,7 +565,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest001, TestSize.Level1)
     CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::None);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemPattern = GetItemPattern(frameNode, 0);
 
     /**
@@ -645,7 +645,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest002, TestSize.Level1)
     CreateListItemWithSwiper(nullptr, endFunc, V2::SwipeEdgeEffect::None);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemPattern = GetItemPattern(frameNode, 0);
 
     /**
@@ -726,7 +726,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest003, TestSize.Level1)
     CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::Spring);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemPattern = GetItemPattern(frameNode, 0);
 
     /**
@@ -765,7 +765,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest004, TestSize.Level1)
     CreateListItemWithSwiper(nullptr, endFunc, V2::SwipeEdgeEffect::Spring);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemPattern = GetItemPattern(frameNode, 0);
 
     /**
@@ -806,7 +806,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest005, TestSize.Level1)
     CreateListItemWithSwiper(startFunc, nullptr, V2::SwipeEdgeEffect::Spring);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemPattern = GetItemPattern(frameNode, 0);
 
     /**
@@ -849,7 +849,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest006, TestSize.Level1)
     CreateListItemWithSwiper(nullptr, endFunc, V2::SwipeEdgeEffect::Spring);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemPattern = GetItemPattern(frameNode, 0);
 
     /**
@@ -892,7 +892,7 @@ HWTEST_F(ListTestNg, ListItemAttrSwiperTest007, TestSize.Level1)
     CreateListItemWithSwiper(builder, builder, V2::SwipeEdgeEffect::Spring);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemPattern = GetItemPattern(frameNode, 0);
 
     /**
@@ -992,7 +992,7 @@ HWTEST_F(ListTestNg, ListItemGroupSpaceTest001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemGroupPattern = GetItemGroupPattern(frameNode, 0);
 
     /**
@@ -1031,7 +1031,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> const element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemGroupPattern = GetItemGroupPattern(frameNode, 0);
 
     /**
@@ -1095,7 +1095,7 @@ HWTEST_F(ListTestNg, ListItemGroupHeaderFooterTest002, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> const element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemGroupPattern = GetItemGroupPattern(frameNode, 0);
     auto pattern = frameNode->GetPattern<ListPattern>();
 
@@ -1179,7 +1179,7 @@ HWTEST_F(ListTestNg, ListItemGroupLayoutTest001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemGroupPattern = GetItemGroupPattern(frameNode, 0);
 
     /**
@@ -1216,7 +1216,7 @@ HWTEST_F(ListTestNg, ListItemGroupLayoutTest002, TestSize.Level1)
     CreateListItem(1);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     auto frameNode = AceType::DynamicCast<FrameNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto itemGroupPattern = GetItemGroupPattern(frameNode, 0);
 
     /**
@@ -1233,5 +1233,73 @@ HWTEST_F(ListTestNg, ListItemGroupLayoutTest002, TestSize.Level1)
         EXPECT_FLOAT_EQ(itemPosition[i].first, ((i - ITEM_START) * DEFAULT_ITEM_MAIN_SIZE));
         EXPECT_FLOAT_EQ(itemPosition[i].second, ((i - ITEM_START + 1) * DEFAULT_ITEM_MAIN_SIZE));
     }
+}
+
+/**
+ * @tc.name: ListEventTest001
+ * @tc.desc: Verify callback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 10;
+
+    /**
+     * @tc.steps: step1. Create List.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Set callback founction to list.
+     */
+    bool isScrollEventCalled = false;
+    bool isScrollIndexEventCalled = false;
+    bool isReachStartEventCalled = false;
+    bool isReachEndEventCalled = false;
+    auto scrollEvent = [&isScrollEventCalled](Dimension, ScrollState) { isScrollEventCalled = true; };
+    auto scrollIndexEvent = [&isScrollIndexEventCalled](int32_t, int32_t) { isScrollIndexEventCalled = true; };
+    auto reachStartEvent = [&isReachStartEventCalled]() { isReachStartEventCalled = true; };
+    auto reachEndEvent = [&isReachEndEventCalled]() { isReachEndEventCalled = true; };
+    listModelNG.SetOnScroll(scrollEvent);
+    listModelNG.SetOnScrollIndex(scrollIndexEvent);
+    listModelNG.SetOnReachStart(reachStartEvent);
+    listModelNG.SetOnReachEnd(reachEndEvent);
+
+    /**
+     * @tc.steps: step3. Create listItem and get frameNode, pattern.
+     */
+    CreateListItem(ITEM_COUNT);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. RunMeasureAndLayout and check onReachStart called.
+     * @tc.expected: The onReachStart callback is called.
+     */
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(isReachStartEventCalled);
+
+    /**
+     * @tc.steps: step5. Scroll 100px, RunMeasureAndLayout and check onScroll, onScrollIndex called.
+     * @tc.expected: The onScroll, onScrollIndex callback is called.
+     */
+    constexpr float SCROLL_OFFSET1 = -100.f;
+    pattern->UpdateCurrentOffset(SCROLL_OFFSET1, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(isScrollEventCalled);
+    EXPECT_TRUE(isScrollIndexEventCalled);
+
+    /**
+     * @tc.steps: step6. Scroll 100px, RunMeasureAndLayout and check onReachEnd called.
+     * @tc.expected: The onReachEnd callback is called.
+     */
+    constexpr float SCROLL_OFFSET2 = -100.f;
+    pattern->UpdateCurrentOffset(SCROLL_OFFSET2, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(isReachEndEventCalled);
 }
 } // namespace OHOS::Ace::NG

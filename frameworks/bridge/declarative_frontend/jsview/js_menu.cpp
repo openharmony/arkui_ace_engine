@@ -45,48 +45,49 @@ void JSMenu::FontSize(const JSCallbackInfo& info)
 
 void JSMenu::Font(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 object argument");
-        return;
-    }
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> size = obj->GetProperty("size");
-    if (!size->IsNull()) {
-        Dimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            NG::MenuView::SetFontSize(fontSize);
-        }
-    }
 
+    Dimension fontSize;
     std::string weight;
-    auto jsWeight = obj->GetProperty("weight");
-    if (!jsWeight->IsNull()) {
-        if (jsWeight->IsNumber()) {
-            weight = std::to_string(jsWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(jsWeight, weight);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
+    } else {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> size = obj->GetProperty("size");
+        if (!size->IsNull()) {
+            ParseJsDimensionFp(size, fontSize);
         }
-        NG::MenuView::SetFontWeight(ConvertStrToFontWeight(weight));
+
+        auto jsWeight = obj->GetProperty("weight");
+        if (!jsWeight->IsNull()) {
+            if (jsWeight->IsNumber()) {
+                weight = std::to_string(jsWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(jsWeight, weight);
+            }
+        }
     }
+    NG::MenuView::SetFontSize(fontSize);
+    NG::MenuView::SetFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenu::FontColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        return;
+    std::optional<Color> color = std::nullopt;
+    if (info.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+    } else {
+        Color textColor;
+        if (ParseJsColor(info[0], textColor)) {
+            color = textColor;
+        }
     }
-    NG::MenuView::SetFontColor(textColor);
+    NG::MenuView::SetFontColor(color);
 }
 
 void JSMenu::JSBind(BindingTarget globalObj)

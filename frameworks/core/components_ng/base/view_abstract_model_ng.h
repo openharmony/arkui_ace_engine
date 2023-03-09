@@ -453,6 +453,11 @@ public:
         ViewAbstract::SetMask(shape);
     }
 
+    void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override
+    {
+        ViewAbstract::SetProgressMask(progress);
+    }
+
     void SetBackdropBlur(const Dimension& radius) override
     {
         ViewAbstract::SetBackdropBlur(radius);
@@ -680,6 +685,11 @@ public:
     void SetHitTestMode(NG::HitTestMode hitTestMode) override
     {
         ViewAbstract::SetHitTestMode(hitTestMode);
+    }
+
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) override
+    {
+        ViewAbstract::SetKeyboardShortcut(value, keys);
     }
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override

@@ -177,16 +177,21 @@ void MenuView::Create()
 
 void MenuView::SetFontSize(const Dimension& fontSize)
 {
-    if (!fontSize.IsValid()) {
-        LOGE("FontSize value is not valid");
-        return;
+    if (fontSize.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
+    } else {
+        LOGW("FontSize value is not valid");
+        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontSize, fontSize);
 }
 
-void MenuView::SetFontColor(const Color& color)
+void MenuView::SetFontColor(const std::optional<Color>& color)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color);
+    if (color.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor, color.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(MenuLayoutProperty, FontColor);
+    }
 }
 
 void MenuView::SetFontWeight(Ace::FontWeight weight)

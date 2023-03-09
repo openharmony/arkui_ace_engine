@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TAB_TAB_CONTENT_NODE_H
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/tabs/tab_content_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,6 +29,7 @@ public:
         : FrameNode(tag, nodeId, pattern, isRoot)
     {}
     ~TabContentNode() = default;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
     static RefPtr<TabContentNode> GetOrCreateTabContentNode(
@@ -50,7 +52,6 @@ public:
         }
         return tabBarItemId_.value();
     }
-
 private:
     std::optional<int32_t> tabBarItemId_;
     ACE_DISALLOW_COPY_AND_MOVE(TabContentNode);

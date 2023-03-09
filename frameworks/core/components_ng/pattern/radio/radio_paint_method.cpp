@@ -47,11 +47,21 @@ RadioModifier::RadioModifier()
 
     inactiveColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(radioTheme->GetInactiveColor()));
     AttachProperty(inactiveColor_);
+    enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
+    isCheck_ = AceType::MakeRefPtr<PropertyBool>(false);
+    uiStatus_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
+    offset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    size_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     totalScale_ = AceType::MakeRefPtr<PropertyFloat>(1.0f);
     pointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.5f);
     ringPointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     animateTouchHoverColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT));
 
+    AttachProperty(enabled_);
+    AttachProperty(isCheck_);
+    AttachProperty(uiStatus_);
+    AttachProperty(offset_);
+    AttachProperty(size_);
     AttachProperty(totalScale_);
     AttachProperty(pointScale_);
     AttachProperty(ringPointScale_);
@@ -77,10 +87,9 @@ void RadioModifier::InitializeParam()
     touchDuration_ = radioTheme->GetTouchDuration();
 }
 
-void RadioModifier::PaintRadio(DrawingContext& context) const
+void RadioModifier::PaintRadio(
+    RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& offset) const
 {
-    auto& canvas = context.canvas;
-    auto contentSize = SizeF(context.width, context.height);
     OffsetF paintOffset;
     DrawTouchAndHoverBoard(canvas, contentSize, paintOffset);
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
@@ -96,8 +105,8 @@ void RadioModifier::PaintRadio(DrawingContext& context) const
     brush.SetAntiAlias(true);
     shadowBrush.SetAntiAlias(true);
     shadowBrush.SetColor(ToRSColor(shadowColor_));
-    if (uiStatus_ == UIStatus::SELECTED) {
-        if (!enabled_) {
+    if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::SELECTED)) {
+        if (!enabled_->Get()) {
             brush.SetColor(
                 ToRSColor(pointColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         } else {
@@ -112,7 +121,7 @@ void RadioModifier::PaintRadio(DrawingContext& context) const
             canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * pointScale_->Get());
         }
         // draw ring circle
-        if (!enabled_) {
+        if (!enabled_->Get()) {
             brush.SetColor(
                 ToRSColor(inactivePointColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         } else {
@@ -123,7 +132,7 @@ void RadioModifier::PaintRadio(DrawingContext& context) const
             canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * ringPointScale_->Get());
         }
         // draw out circular ring
-        if (!enabled_) {
+        if (!enabled_->Get()) {
             outPen.SetColor(
                 ToRSColor(activeColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         } else {
@@ -136,9 +145,9 @@ void RadioModifier::PaintRadio(DrawingContext& context) const
         outPen.SetWidth(outWidth);
         canvas.AttachPen(outPen);
         canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius * totalScale_->Get() - outWidth / CALC_RADIUS);
-    } else if (uiStatus_ == UIStatus::UNSELECTED) {
+    } else if (uiStatus_->Get() == static_cast<int32_t>(UIStatus::UNSELECTED)) {
         auto alphaCalculate = static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA;
-        if (!enabled_) {
+        if (!enabled_->Get()) {
             brush.SetColor(ToRSColor(inactivePointColor_.BlendOpacity(alphaCalculate)));
             pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(alphaCalculate)));
         } else {

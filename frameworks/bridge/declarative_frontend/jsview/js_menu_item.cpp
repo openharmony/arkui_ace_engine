@@ -116,24 +116,24 @@ void JSMenuItem::IsSelected(bool isSelected)
 
 void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
-        return;
-    }
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
     bool isShow = false;
     std::string icon;
-    if (info[0]->IsBoolean()) {
-        isShow = info[0]->ToBoolean();
-    } else if (info[0]->IsString()) {
-        icon = info[0]->ToString();
-        isShow = true;
-    } else if (ParseJsMedia(info[0], icon)) {
-        isShow = true;
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
     } else {
-        LOGW("can not parse select icon.");
+        if (info[0]->IsBoolean()) {
+            isShow = info[0]->ToBoolean();
+        } else if (info[0]->IsString()) {
+            icon = info[0]->ToString();
+            isShow = true;
+        } else if (ParseJsMedia(info[0], icon)) {
+            isShow = true;
+        } else {
+            LOGW("can not parse select icon.");
+        }
     }
     NG::MenuItemView::SetSelectIcon(isShow);
     NG::MenuItemView::SetSelectIconSrc(icon);
@@ -157,93 +157,95 @@ void JSMenuItem::OnChange(const JSCallbackInfo& info)
 
 void JSMenuItem::ContentFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 object argument");
-        return;
-    }
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> size = obj->GetProperty("size");
-    if (!size->IsNull()) {
-        Dimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            NG::MenuItemView::SetFontSize(fontSize);
-        }
-    }
 
+    Dimension fontSize;
     std::string weight;
-    auto jsWeight = obj->GetProperty("weight");
-    if (!jsWeight->IsNull()) {
-        if (jsWeight->IsNumber()) {
-            weight = std::to_string(jsWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(jsWeight, weight);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
+    } else {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> size = obj->GetProperty("size");
+        if (!size->IsNull()) {
+            ParseJsDimensionFp(size, fontSize);
         }
-        NG::MenuItemView::SetFontWeight(ConvertStrToFontWeight(weight));
+
+        auto jsWeight = obj->GetProperty("weight");
+        if (!jsWeight->IsNull()) {
+            if (jsWeight->IsNumber()) {
+                weight = std::to_string(jsWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(jsWeight, weight);
+            }
+        }
     }
+    NG::MenuItemView::SetFontSize(fontSize);
+    NG::MenuItemView::SetFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenuItem::ContentFontColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        return;
+    std::optional<Color> color = std::nullopt;
+    if (info.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+    } else {
+        Color textColor;
+        if (ParseJsColor(info[0], textColor)) {
+            color = textColor;
+        }
     }
-    NG::MenuItemView::SetFontColor(textColor);
+    NG::MenuItemView::SetFontColor(color);
 }
 
 void JSMenuItem::LabelFont(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 object argument");
-        return;
-    }
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> size = obj->GetProperty("size");
-    if (!size->IsNull()) {
-        Dimension fontSize;
-        if (ParseJsDimensionFp(size, fontSize)) {
-            NG::MenuItemView::SetLabelFontSize(fontSize);
-        }
-    }
 
+    Dimension fontSize;
     std::string weight;
-    auto jsWeight = obj->GetProperty("weight");
-    if (!jsWeight->IsNull()) {
-        if (jsWeight->IsNumber()) {
-            weight = std::to_string(jsWeight->ToNumber<int32_t>());
-        } else {
-            ParseJsString(jsWeight, weight);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
+    } else {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> size = obj->GetProperty("size");
+        if (!size->IsNull()) {
+            ParseJsDimensionFp(size, fontSize);
         }
-        NG::MenuItemView::SetLabelFontWeight(ConvertStrToFontWeight(weight));
+
+        auto jsWeight = obj->GetProperty("weight");
+        if (!jsWeight->IsNull()) {
+            if (jsWeight->IsNumber()) {
+                weight = std::to_string(jsWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(jsWeight, weight);
+            }
+        }
     }
+    NG::MenuItemView::SetLabelFontSize(fontSize);
+    NG::MenuItemView::SetLabelFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenuItem::LabelFontColor(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
-        return;
-    }
     if (!Container::IsCurrentUseNewPipeline()) {
         return;
     }
-    Color textColor;
-    if (!ParseJsColor(info[0], textColor)) {
-        return;
+    std::optional<Color> color = std::nullopt;
+    if (info.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+    } else {
+        Color textColor;
+        if (ParseJsColor(info[0], textColor)) {
+            color = textColor;
+        }
     }
-    NG::MenuItemView::SetLabelFontColor(textColor);
+    NG::MenuItemView::SetLabelFontColor(color);
 }
 } // namespace OHOS::Ace::Framework

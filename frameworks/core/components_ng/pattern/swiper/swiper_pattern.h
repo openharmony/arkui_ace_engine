@@ -138,6 +138,11 @@ public:
         return controller_;
     }
 
+    void SetIndicatorDoingAnimation(bool indicatorDoingAnimation)
+    {
+        indicatorDoingAnimation_ = indicatorDoingAnimation;
+    }
+
     void UpdateCurrentOffset(float offset);
 
     int32_t TotalCount() const;
@@ -284,7 +289,7 @@ private:
     float turnPageRate_ = 0.0f;
 
     bool moveDirection_ = false;
-    bool touch_ = false;
+    bool indicatorDoingAnimation_ = false;
     bool isInit_ = true;
 
     Axis direction_ = Axis::HORIZONTAL;

@@ -61,6 +61,8 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/property/progress_mask_property.h"
+#include "core/components/progress/progress_theme.h"
 
 namespace OHOS::Ace {
 
@@ -1829,15 +1831,17 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsBackgroundBlurStyle", info, checkList)) {
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have at least 1 argument");
         return;
     }
     BlurStyleOption styleOption;
-    auto blurStyle = info[0]->ToNumber<int32_t>();
-    if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
-        blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
-        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
@@ -2069,7 +2073,7 @@ std::vector<NG::OptionParam> ParseBindOptionParam(const JSCallbackInfo& info)
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam)
 {
     auto menuOptions = JSRef<JSObject>::Cast(info[1]);
-    (void)JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
+    JSViewAbstract::ParseJsString(menuOptions->GetProperty("title"), menuParam.title);
     auto offsetVal = menuOptions->GetProperty("offset");
     if (offsetVal->IsObject()) {
         auto offsetObj = JSRef<JSObject>::Cast(offsetVal);
@@ -4165,7 +4169,41 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsObject()) {
+    if (info.Length() <= 0) {
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> typeParam = paramObject->GetProperty("type");
+    if (!typeParam->IsNull()) {
+        if (typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
+            auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+            JSRef<JSVal> jValue = paramObject->GetProperty("value");
+            auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+            if (value < 0.0f) {
+                value = 0.0f;
+            }
+            progressMask->SetValue(value);
+            JSRef<JSVal> jTotal = paramObject->GetProperty("total");
+            auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+            if (total < 0.0f) {
+                total = DEFAULT_PROGRESS_TOTAL;
+            }
+            progressMask->SetMaxValue(total);
+            JSRef<JSVal> jColor = paramObject->GetProperty("color");
+            Color colorVal;
+            if (ParseJsColor(jColor, colorVal)) {
+                progressMask->SetColor(colorVal);
+            } else {
+                RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+                progressMask->SetColor(theme->GetMaskColor());
+            }
+            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+        }
+    } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
             return;
@@ -4544,6 +4582,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
+    JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
@@ -5097,6 +5136,31 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
+void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
+{
+    if (info.Length() != 2) {
+        LOGE("JsKeyboardShortcut: The arg is wrong, it is supposed to have 2 arguments");
+        return;
+    }
+    if (!info[0]->IsString() || !info[1]->IsArray()) {
+        LOGE("JsKeyboardShortcut: The param type is invalid.");
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>());
+        return;
+    }
+    std::string value = info[0]->ToString();
+    auto keysArray = JSRef<JSArray>::Cast(info[1]);
+    size_t size = keysArray->Length();
+    std::vector<CtrlKey> keys(size);
+    keys.clear();
+    for (size_t i = 0; i < size; i++) {
+        JSRef<JSVal> key = keysArray->GetValueAt(i);
+        if (key->IsNumber()) {
+            keys.emplace_back(static_cast<CtrlKey>(key->ToNumber<int32_t>()));
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys);
 }
 
 } // namespace OHOS::Ace::Framework

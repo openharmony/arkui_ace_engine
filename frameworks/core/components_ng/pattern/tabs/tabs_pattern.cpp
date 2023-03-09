@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,9 +25,15 @@
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t CHILDREN_MIN_SIZE = 2;
+} // namespace
 
 void TabsPattern::OnAttachToFrameNode()
 {
@@ -80,6 +86,37 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
     }
 }
 
+void TabsPattern::OnUpdateShowDivider()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabsLayoutProperty>();
+    TabsItemDivider defaultDivider;
+    auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
+    auto children = host->GetChildren();
+    if (children.size() < CHILDREN_MIN_SIZE) {
+        LOGE("OnUpdateShowDivider: children is empty or children's size is less than 2.");
+        return;
+    }
+
+    auto begin = children.begin();
+    auto dividerNode = *(++begin);
+    if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
+        LOGE("OnUpdateShowDivider: Get divider failed.");
+        return;
+    }
+
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
+    auto dividerRenderProperty = dividerFrameNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    dividerRenderProperty->UpdateDividerColor(divider.color);
+
+    auto dividerLayoutProperty = dividerFrameNode->GetLayoutProperty<DividerLayoutProperty>();
+    CHECK_NULL_VOID(dividerLayoutProperty);
+    dividerLayoutProperty->UpdateStrokeWidth(divider.strokeWidth);
+    dividerFrameNode->MarkModifyDone();
+}
+
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -87,6 +124,7 @@ void TabsPattern::OnModifyDone()
         return;
     }
     SetOnChangeEvent(nullptr);
+    OnUpdateShowDivider();
 }
 
 } // namespace OHOS::Ace::NG

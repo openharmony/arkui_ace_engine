@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -568,6 +568,12 @@ var BarMode;
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
 
+var SelectedMode;
+(function (SelectedMode) {
+  SelectedMode["INDICATOR"] = "INDICATOR";
+  SelectedMode["BOARD"] = "BOARD";
+})(SelectedMode || (SelectedMode = {}));
+
 var SizeType;
 (function (SizeType) {
   SizeType[SizeType["Auto"] = 0] = "Auto";
@@ -576,6 +582,13 @@ var SizeType;
   SizeType[SizeType["MD"] = 3] = "MD";
   SizeType[SizeType["LG"] = 4] = "LG";
 })(SizeType || (SizeType = {}));
+
+var CancelButtonStyle;
+(function (CancelButtonStyle) {
+  CancelButtonStyle["CONSTANT"] = "CONSTANT";
+  CancelButtonStyle["INVISIBLE"] = "INVISIBLE";
+  CancelButtonStyle["INPUT"] = "INPUT";
+})(CancelButtonStyle || (CancelButtonStyle = {}));
 
 var ColorMode;
 (function (ColorMode) {
@@ -1016,10 +1029,55 @@ var TransitionEdge;
     TransitionEdge['END']  = 3;
 })(TransitionEdge || (TransitionEdge = {}));
 
+var CtrlKey;
+(function (CtrlKey) {
+  CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
+  CtrlKey[CtrlKey["SHIFT"] = 1] = "SHIFT";
+  CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
+})(CtrlKey || (CtrlKey = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
     this.content = content;
+  }
+  static of(content) {
+    return new SubTabBarStyle(content);
+  }
+  indicator(arg) {
+    this.indicator = arg;
+    return this;
+  }
+  selectedMode(arg) {
+    this.selectedMode = arg;
+    return this;
+  }
+  board(arg) {
+    this.board = arg;
+    return this;
+  }
+  labelStyle(arg) {
+    this.labelStyle = arg;
+    return this;
+  }
+}
+
+class ProgressMask {
+  constructor(value, total, color) {
+    this.type = 'ProgressMask';
+    this.value = value;
+    this.total = total;
+    this.color = color;
+  }
+
+  updateProgress(arg) {
+    this.value = arg;
+    return this;
+  }
+
+  updateColor(arg) {
+    this.color = arg;
+    return this;
   }
 }
 
@@ -1028,6 +1086,9 @@ class BottomTabBarStyle {
     this.type = 'BottomTabBarStyle';
     this.icon = icon;
     this.text = text;
+  }
+  static of(icon, text) {
+    return new BottomTabBarStyle(icon, text);
   }
 }
 
@@ -1109,3 +1170,10 @@ class TransitionEffect {
     return this;
   }
 }
+
+var SliderBlockType;
+(function (SliderBlockType) {
+  SliderBlockType[SliderBlockType["DEFAULT"] = 0] = "DEFAULT";
+  SliderBlockType[SliderBlockType["IMAGE"] = 1] = "IMAGE";
+  SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
+})(SliderBlockType || (SliderBlockType = {}));

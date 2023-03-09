@@ -47,6 +47,9 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float mai
     mainDelta_ = AceType::MakeRefPtr<PropertyFloat>(mainDelta);
     isSelect_ = AceType::MakeRefPtr<PropertyBool>(isSelect);
     isHover_ = AceType::MakeRefPtr<PropertyBool>(false);
+    offset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    size_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
+    enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
 
     AttachProperty(animatableBoardColor_);
     AttachProperty(animateHoverColor_);
@@ -54,6 +57,9 @@ SwitchModifier::SwitchModifier(bool isSelect, const Color& boardColor, float mai
     AttachProperty(mainDelta_);
     AttachProperty(isSelect_);
     AttachProperty(isHover_);
+    AttachProperty(offset_);
+    AttachProperty(size_);
+    AttachProperty(enabled_);
 }
 
 void SwitchModifier::InitializeParam()
@@ -115,7 +121,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
     RSRoundRect roundRect(rect, radius, radius);
 
     RSBrush brush;
-    if (!enabled_) {
+    if (!enabled_->Get()) {
         brush.SetColor(
             ToRSColor(animatableBoardColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
     } else {

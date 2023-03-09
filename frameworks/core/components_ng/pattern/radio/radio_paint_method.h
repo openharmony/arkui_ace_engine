@@ -118,8 +118,8 @@ public:
     }
 
 private:
-    Color pointColor_ ;
-    Color activeColor_ ;
+    Color pointColor_;
+    Color activeColor_;
     Color inactiveColor_;
     bool enabled_ = true;
     float totalScale_ = 1.0f;

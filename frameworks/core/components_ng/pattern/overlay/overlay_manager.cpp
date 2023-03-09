@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -201,12 +201,6 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         overlayManager->FocusOverlayNode(menu);
     });
 
-    bool isSelectMenu = false;
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    if (menuWrapperPattern && menuWrapperPattern->IsSelectMenu()) {
-        isSelectMenu = true;
-    }
-
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateOpacity(0.0);
@@ -216,11 +210,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
-    if (isSelectMenu) {
-        context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
-    } else {
-        context->OnTransformTranslateUpdate({ 0.0f, menuAnimationOffset, 0.0f });
-    }
+    context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
 
     AnimationUtils::Animate(
         option,
@@ -260,12 +250,6 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
         menuPattern->RemoveParentHoverStyle();
     });
 
-    bool isSelectMenu = false;
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    if (menuWrapperPattern && menuWrapperPattern->IsSelectMenu()) {
-        isSelectMenu = true;
-    }
-
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -275,13 +259,9 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
     AnimationUtils::Animate(
         option,
-        [context, isSelectMenu, menuAnimationOffset]() {
+        [context, menuAnimationOffset]() {
             context->UpdateOpacity(0.0);
-            if (isSelectMenu) {
-                context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
-            } else {
-                context->OnTransformTranslateUpdate({ 0.0f, menuAnimationOffset, 0.0f });
-            }
+            context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
         },
         option.GetOnFinishEvent());
 
@@ -454,16 +434,12 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     CHECK_NULL_VOID(customNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        rootNode->RemoveChild(customPopupMap_[targetId]);
-        customPopupMap_.erase(it);
+    if (!customPopupMap_[targetId] || customPopupMap_[targetId] == customNode) {
+        customPopupMap_[targetId] = customNode;
+        customNode->MountToParent(rootNode);
+        customNode->MarkModifyDone();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    customPopupMap_[targetId] = customNode;
-    auto popupNode = customPopupMap_[targetId];
-    customNode->MountToParent(rootNode);
-    customNode->MarkModifyDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void OverlayManager::EraseIndexerPopup(int32_t targetId)
@@ -707,33 +683,33 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     return dialog;
 }
 
-void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
-    std::map<std::string, PickerDate> datePickerProperty, bool isLunar,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
+    std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     LOGI("OverlayManager::ShowDateDialogPicker");
     auto dialogNode = DatePickerDialogView::Show(
-        dialogProps, std::move(datePickerProperty), isLunar, std::move(dialogEvent), std::move(dialogCancelEvent));
+        dialogProps, std::move(settingData), std::move(dialogEvent), std::move(dialogCancelEvent));
     OpenDialogAnimation(dialogNode);
 }
 
-void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
-    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
-    std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
+void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
+    std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     LOGI("OverlayManager::ShowTimeDialogPicker");
-    auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
+    auto dialogNode = TimePickerDialogView::Show(dialogProps, settingData, std::move(timePickerProperty),
         std::move(dialogEvent), std::move(dialogCancelEvent));
     OpenDialogAnimation(dialogNode);
 }
 
-void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-    const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
+    std::map<std::string, NG::DialogTextEvent> dialogEvent,
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     LOGI("OverlayManager::ShowTextDialogPicker");
-    auto dialogNode = TextPickerDialogView::Show(
-        dialogProps, selected, height, getRangeVector, std::move(dialogEvent), std::move(dialogCancelEvent));
+    auto dialogNode = TextPickerDialogView::Show(dialogProps, settingData,
+        std::move(dialogEvent), std::move(dialogCancelEvent));
     OpenDialogAnimation(dialogNode);
 }
 
@@ -761,7 +737,11 @@ bool OverlayManager::RemoveOverlay()
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (AceType::DynamicCast<DialogPattern>(pattern)) {
+            if (FireBackPressEvent()) {
+                return true;
+            }
             CloseDialog(overlay);
+            SetBackPressEvent(nullptr);
             return true;
         } else if (AceType::DynamicCast<BubblePattern>(pattern)) {
             auto popupNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetChildAtIndex(childrenSize - 1));

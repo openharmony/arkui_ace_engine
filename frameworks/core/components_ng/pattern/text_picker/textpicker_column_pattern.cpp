@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_theme.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
@@ -39,6 +40,11 @@ const Dimension FOCUS_SIZE = Dimension(1.0);
 const int32_t MIDDLE_CHILD_INDEX = 2;
 const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
+constexpr size_t MIXTURE_CHILD_COUNT = 2;
+constexpr double HALF = 0.5;
+constexpr int32_t DOUBLE = 2;
+const Dimension ICON_SIZE = 24.0_vp;
+const Dimension ICON_TEXT_SPACE = 8.0_vp;
 } // namespace
 
 void TextPickerColumnPattern::OnAttachToFrameNode()
@@ -185,7 +191,7 @@ uint32_t TextPickerColumnPattern::GetShowOptionCount() const
     return showCount;
 }
 
-void TextPickerColumnPattern::FlushCurrentOptions()
+void TextPickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -193,95 +199,446 @@ void TextPickerColumnPattern::FlushCurrentOptions()
     CHECK_NULL_VOID(stackNode);
     auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
     CHECK_NULL_VOID(parentNode);
-    uint32_t showCount = GetShowOptionCount();
-    auto textPickerPattern = parentNode->GetPattern<TextPickerPattern>();
-    CHECK_NULL_VOID(textPickerPattern);
+    auto textPickerLayoutProperty = parentNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(textPickerLayoutProperty);
 
+    if (!isUpateTextContentOnly) {
+        animationProperties_.clear();
+    }
+    if (columnkind_ == TEXT) {
+        FlushCurrentTextOptions(textPickerLayoutProperty, isUpateTextContentOnly);
+    } else if (columnkind_ == ICON) {
+        FlushCurrentImageOptions();
+    } else if (columnkind_ == MIXTURE) {
+        FlushCurrentMixtureOptions(textPickerLayoutProperty, isUpateTextContentOnly);
+    }
+    if (isUpateTextContentOnly) {
+        FlushAnimationTextProperties(isDown);
+    }
+    if (isIndexChanged_) {
+        HandleEventCallback(true);
+    }
+}
+
+void TextPickerColumnPattern::FlushCurrentTextOptions(RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+    bool isUpateTextContentOnly)
+{
     uint32_t totalOptionCount = GetOptionCount();
     if (totalOptionCount == 0) {
         return;
     }
     uint32_t currentIndex = GetCurrentIndex();
     currentIndex = currentIndex % totalOptionCount;
-    uint32_t selectedIndex = showCount / 2; // the center option is selected.
-
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(pickerTheme);
-    auto middleIndex = showCount / 2;
+    uint32_t showCount = GetShowOptionCount();
+    auto middleIndex = showCount / 2; // the center option is selected.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto child = host->GetChildren();
     auto iter = child.begin();
     if (child.size() != showCount) {
         return;
     }
-    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
-    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     for (uint32_t index = 0; index < showCount; index++) {
-        uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
-        auto optionValue = textPickerPattern->GetOption(optionIndex);
+        uint32_t optionIndex = (totalOptionCount + currentIndex + index - middleIndex) % totalOptionCount;
+        RangeContent optionValue = options_[optionIndex];
+        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(middleIndex);
+        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
+        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);
         auto textPattern = textNode->GetPattern<TextPattern>();
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        auto render = textNode->GetRenderContext();
-        if (index < middleIndex) {
-            if (index == 0) {
-                textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-                textLayoutProperty->UpdateAdaptMinFontSize(
-                    pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
-            } else {
-                textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
-                textLayoutProperty->UpdateAdaptMinFontSize(
-                    pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
-            }
-            textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
-            textLayoutProperty->UpdateMaxLines(1);
+        if (!isUpateTextContentOnly) {
+            UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty,
+                index, middleIndex, showCount);
         }
-        if (index == middleIndex) {
-            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-            textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
-            textLayoutProperty->UpdateMaxLines(1);
-            textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-            textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
-            textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
-        }
-        if (index > middleIndex) {
-            if (index == showCount - 1) {
-                textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-                textLayoutProperty->UpdateAdaptMinFontSize(
-                    pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
-            } else {
-                textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
-                textLayoutProperty->UpdateAdaptMinFontSize(
-                    pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
-            }
-            textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
-            textLayoutProperty->UpdateMaxLines(1);
-        }
-
-        iter++;
-        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
-        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
-        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if (NotLoopOptions() && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent("");
-            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            textNode->MarkModifyDone();
-            continue;
+        } else {
+            textLayoutProperty->UpdateContent(optionValue.text_);
+            textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
-        textLayoutProperty->UpdateContent(optionValue);
         textNode->GetRenderContext()->SetClipToFrame(true);
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
+        iter++;
     }
     selectedIndex_ = currentIndex;
-    if (isIndexChanged_) {
-        HandleEventCallback(true);
+}
+
+void TextPickerColumnPattern::FlushCurrentImageOptions()
+{
+    uint32_t totalOptionCount = GetOptionCount();
+    if (totalOptionCount == 0) {
+        return;
     }
+    uint32_t currentIndex = GetCurrentIndex();
+    currentIndex = currentIndex % totalOptionCount;
+    uint32_t showCount = GetShowOptionCount();
+    auto middleIndex = showCount / 2; // the center option is selected.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto child = host->GetChildren();
+    auto iter = child.begin();
+    if (child.size() != showCount) {
+        return;
+    }
+    for (uint32_t index = 0; index < showCount; index++) {
+        uint32_t optionIndex = (totalOptionCount + currentIndex + index - middleIndex) % totalOptionCount;
+        RangeContent optionValue = options_[optionIndex];
+        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(middleIndex);
+        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
+        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
+        auto rangeNode = DynamicCast<FrameNode>(*iter);
+        CHECK_NULL_VOID(rangeNode);
+        auto iconNode = DynamicCast<FrameNode>(rangeNode->GetFirstChild());
+        CHECK_NULL_VOID(iconNode);
+        auto iconPattern = iconNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(iconPattern);
+        auto iconLayoutProperty = iconPattern->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(iconLayoutProperty);
+        CalcSize idealSize = { CalcSize(CalcLength(ICON_SIZE), CalcLength(ICON_SIZE)) };
+        MeasureProperty layoutConstraint;
+        layoutConstraint.selfIdealSize = idealSize;
+        iconLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+        if (NotLoopOptions() && !virtualIndexValidate) {
+            iconLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        } else {
+            iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
+        }
+        iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        iconNode->MarkModifyDone();
+
+        rangeNode->GetRenderContext()->SetClipToFrame(true);
+        rangeNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        rangeNode->MarkModifyDone();
+        iter++;
+    }
+    selectedIndex_ = currentIndex;
+}
+
+void TextPickerColumnPattern::FlushCurrentMixtureOptions(RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+    bool isUpateTextContentOnly)
+{
+    uint32_t totalOptionCount = GetOptionCount();
+    if (totalOptionCount == 0) {
+        return;
+    }
+    uint32_t currentIndex = GetCurrentIndex();
+    currentIndex = currentIndex % totalOptionCount;
+    uint32_t showCount = GetShowOptionCount();
+    auto middleIndex = showCount / 2; // the center option is selected.
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto child = host->GetChildren();
+    auto iter = child.begin();
+    if (child.size() != showCount) {
+        return;
+    }
+    for (uint32_t index = 0; index < showCount; index++) {
+        uint32_t optionIndex = (totalOptionCount + currentIndex + index - middleIndex) % totalOptionCount;
+        RangeContent optionValue = options_[optionIndex];
+        int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(middleIndex);
+        int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
+        bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
+        auto linearLayoutNode = DynamicCast<FrameNode>(*iter);
+        CHECK_NULL_VOID(linearLayoutNode);
+        auto children = linearLayoutNode->GetChildren();
+        if (children.size() != MIXTURE_CHILD_COUNT) {
+            LOGE("children number is wrong.");
+            continue;
+        }
+        auto iconNode = DynamicCast<FrameNode>(linearLayoutNode->GetFirstChild());
+        auto iconPattern = iconNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(iconPattern);
+        auto iconLayoutProperty = iconPattern->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(iconLayoutProperty);
+        CalcSize idealSize = { CalcSize(CalcLength(ICON_SIZE), CalcLength(ICON_SIZE)) };
+        MeasureProperty layoutConstraint;
+        layoutConstraint.selfIdealSize = idealSize;
+        iconLayoutProperty->UpdateCalcLayoutProperty(layoutConstraint);
+        MarginProperty margin;
+        margin.right = CalcLength(ICON_TEXT_SPACE);
+        iconLayoutProperty->UpdateMargin(margin);
+
+        auto textNode = DynamicCast<FrameNode>(linearLayoutNode->GetLastChild());
+        auto textPattern = textNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (!isUpateTextContentOnly) {
+            UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty,
+                index, middleIndex, showCount);
+        }
+        if (NotLoopOptions() && !virtualIndexValidate) {
+            iconLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+            textLayoutProperty->UpdateContent("");
+        } else {
+            textLayoutProperty->UpdateContent(optionValue.text_);
+            iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
+        }
+        iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        iconNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        textNode->MarkModifyDone();
+
+        linearLayoutNode->GetRenderContext()->SetClipToFrame(true);
+        linearLayoutNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        linearLayoutNode->MarkModifyDone();
+        iter++;
+    }
+    selectedIndex_ = currentIndex;
+}
+
+void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
+{
+    Dimension tmp;
+    Color tmpColor;
+    if (!animationProperties_.size()) {
+        return;
+    }
+    if (isDown) {
+        for (size_t i = 0; i < animationProperties_.size(); i++) {
+            if (i > 0) {
+                animationProperties_[i - 1].upFontSize = animationProperties_[i].upFontSize;
+                animationProperties_[i - 1].fontSize = animationProperties_[i].fontSize;
+                animationProperties_[i - 1].downFontSize = animationProperties_[i].downFontSize;
+
+                animationProperties_[i - 1].upColor = animationProperties_[i].upColor;
+                animationProperties_[i - 1].currentColor = animationProperties_[i].currentColor;
+                animationProperties_[i - 1].downColor = animationProperties_[i].downColor;
+            }
+            if (i == (animationProperties_.size() - 1)) {
+                animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
+                animationProperties_[i].fontSize = animationProperties_[i].fontSize * HALF;
+                animationProperties_[i].downFontSize = tmp;
+
+                animationProperties_[i].upColor = animationProperties_[i].currentColor;
+                auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+                animationProperties_[i].currentColor =
+                    colorEvaluator->Evaluate(tmpColor, animationProperties_[i].currentColor, HALF);
+                animationProperties_[i].downColor = tmpColor;
+            }
+        }
+    } else {
+        for (size_t i = animationProperties_.size() - 1; i >= 0; i--) {
+            if (i == 0) {
+                animationProperties_[i].upFontSize = tmp;
+                animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
+                animationProperties_[i].fontSize = animationProperties_[i].fontSize * HALF;
+
+                animationProperties_[i].upColor = tmpColor;
+                animationProperties_[i].downColor = animationProperties_[i].currentColor;
+                auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+                animationProperties_[i].currentColor =
+                    colorEvaluator->Evaluate(tmpColor, animationProperties_[i].currentColor, HALF);
+                break;
+            } else {
+                animationProperties_[i].upFontSize = animationProperties_[i - 1].upFontSize;
+                animationProperties_[i].fontSize = animationProperties_[i - 1].fontSize;
+                animationProperties_[i].downFontSize = animationProperties_[i - 1].downFontSize;
+
+                animationProperties_[i].upColor = animationProperties_[i - 1].upColor;
+                animationProperties_[i].currentColor = animationProperties_[i - 1].currentColor;
+                animationProperties_[i].downColor = animationProperties_[i - 1].downColor;
+            }
+        }
+    }
+}
+
+void TextPickerColumnPattern::UpdateDisappearTextProperties(RefPtr<PickerTheme>& pickerTheme,
+    RefPtr<TextLayoutProperty>& textLayoutProperty,
+    RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
+{
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    if (textPickerLayoutProperty->HasDisappearColor()) {
+        textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDisappearColor().value());
+    }
+    if (textPickerLayoutProperty->HasDisappearFontSize()) {
+        textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetDisappearFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(
+            pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
+    }
+    if (textPickerLayoutProperty->HasDisappearWeight()) {
+        textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetDisappearWeight().value());
+    }
+}
+
+void TextPickerColumnPattern::UpdateCandidateTextProperties(RefPtr<PickerTheme>& pickerTheme,
+    RefPtr<TextLayoutProperty>& textLayoutProperty,
+    RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
+{
+    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+    if (textPickerLayoutProperty->HasColor()) {
+        textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetColor().value());
+    }
+    if (textPickerLayoutProperty->HasFontSize()) {
+        textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(
+            pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
+    }
+    if (textPickerLayoutProperty->HasWeight()) {
+        textLayoutProperty->UpdateFontWeight(textPickerLayoutProperty->GetWeight().value());
+    }
+}
+
+void TextPickerColumnPattern::UpdateSelectedTextProperties(RefPtr<PickerTheme>& pickerTheme,
+    RefPtr<TextLayoutProperty>& textLayoutProperty,
+    RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
+{
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
+    Color themeSelectedColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+    Color selectedColor = textPickerLayoutProperty->GetSelectedColor().value_or(themeSelectedColor);
+    textLayoutProperty->UpdateTextColor(selectedColor);
+    FontWeight themeFontWeight = pickerTheme->GetOptionStyle(true, false).GetFontWeight();
+    FontWeight selectedFontWeight = textPickerLayoutProperty->GetSelectedWeight().value_or(themeFontWeight);
+    textLayoutProperty->UpdateFontWeight(selectedFontWeight);
+    if (textPickerLayoutProperty->HasSelectedFontSize()) {
+        textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
+    }
+}
+
+void TextPickerColumnPattern::AddAnimationTextProperties(uint32_t currentIndex,
+    RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    TextProperties properties;
+    if (textLayoutProperty->HasFontSize()) {
+        properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
+    }
+    if (textLayoutProperty->HasTextColor()) {
+        properties.currentColor = textLayoutProperty->GetTextColor().value();
+    }
+    if (currentIndex > 0) {
+        properties.upFontSize = animationProperties_[currentIndex - 1].fontSize;
+        animationProperties_[currentIndex - 1].downFontSize = properties.fontSize;
+
+        properties.upColor = animationProperties_[currentIndex - 1].currentColor;
+        animationProperties_[currentIndex - 1].downColor = properties.currentColor;
+    }
+    animationProperties_.emplace_back(properties);
+}
+
+void TextPickerColumnPattern::UpdatePickerTextProperties(RefPtr<TextLayoutProperty>& textLayoutProperty,
+    RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+    uint32_t currentIndex, uint32_t middleIndex, uint32_t showCount)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    if (currentIndex < middleIndex) {
+        if (currentIndex == 0) {
+            UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
+        } else {
+            UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
+        }
+        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    }
+    if (currentIndex == middleIndex) {
+        UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
+        textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    }
+    if (currentIndex > middleIndex) {
+        if (currentIndex == showCount - 1) {
+            UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
+        } else {
+            UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
+        }
+        textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+    }
+    textLayoutProperty->UpdateMaxLines(1);
+    AddAnimationTextProperties(currentIndex, textLayoutProperty);
+}
+
+void TextPickerColumnPattern::TextPropertiesLinearAnimation(RefPtr<TextLayoutProperty>& textLayoutProperty,
+    uint32_t index, uint32_t showCount, bool isDown, double scale)
+{
+    if (index >= animationProperties_.size()) {
+        LOGE("Animation Properties vactor is break.");
+        return;
+    }
+    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
+        return;
+    }
+    Dimension startFontSize = animationProperties_[index].fontSize;
+    Color startColor = animationProperties_[index].currentColor;
+    Dimension endFontSize;
+    Color endColor;
+    if (!isDown) {
+        endFontSize = animationProperties_[index].downFontSize;
+        endColor = animationProperties_[index].downColor;
+    } else {
+        endFontSize = animationProperties_[index].upFontSize;
+        endColor = animationProperties_[index].upColor;
+    }
+    Dimension updateSize = LinearFontSize(startFontSize, endFontSize, scale);
+    textLayoutProperty->UpdateFontSize(updateSize);
+    auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
+    textLayoutProperty->UpdateTextColor(updateColor);
+}
+
+void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
+{
+    if (columnkind_ == ICON) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    uint32_t showCount = GetShowOptionCount();
+    auto child = host->GetChildren();
+    auto iter = child.begin();
+    if (child.size() != showCount) {
+        return;
+    }
+    for (uint32_t index = 0; index < showCount; index++) {
+        auto rangeNode = DynamicCast<FrameNode>(*iter);
+        CHECK_NULL_VOID(rangeNode);
+        RefPtr<TextLayoutProperty> textLayoutProperty;
+        if (columnkind_ == TEXT) {
+            auto textPattern = rangeNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(textPattern);
+            textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+        } else if (columnkind_ == MIXTURE) {
+            auto children = rangeNode->GetChildren();
+            if (children.size() != MIXTURE_CHILD_COUNT) {
+                LOGE("children number is wrong.");
+                continue;
+            }
+            auto textNode = DynamicCast<FrameNode>(rangeNode->GetLastChild());
+            auto textPattern = textNode->GetPattern<TextPattern>();
+            textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_VOID(textLayoutProperty);
+            TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            textNode->MarkModifyDone();
+        }
+        rangeNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        rangeNode->MarkModifyDone();
+        iter++;
+    }
+}
+
+Dimension TextPickerColumnPattern::LinearFontSize(const Dimension& startFontSize,
+    const Dimension& endFontSize, double percent)
+{
+    Dimension linearFontSize = startFontSize + (endFontSize - startFontSize) * percent;
+    return linearFontSize;
 }
 
 void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -420,10 +777,31 @@ void TextPickerColumnPattern::HandleCurveStopped()
     fromController_->Play();
 }
 
-void TextPickerColumnPattern::ScrollOption(double delta)
+void TextPickerColumnPattern::ScrollOption(double delta, bool isJump)
 {
     UpdateScrollDelta(delta);
+    double oldDelta = scrollDelta_;
     scrollDelta_ = delta;
+
+    if ((isJump_ && ((delta * oldDelta) <= 0)) || NearZero(delta) || (isJump_ && isJump)) {
+        isJump_ = false;
+        FlushCurrentOptions();
+        return;
+    }
+    if (isJump) {
+        isJump_ = true;
+    }
+    if (NearZero(jumpInterval_)) {
+        return;
+    }
+    double scale = 0.0;
+    if (!isJump_) {
+        scale = fabs(delta) / (jumpInterval_ * DOUBLE);
+        UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), scale);
+    } else {
+        scale = ((DOUBLE * jumpInterval_) - fabs(delta))  / (jumpInterval_ * DOUBLE);
+        UpdateTextPropertiesLinear(!LessNotEqual(delta, 0.0), scale);
+    }
 }
 
 void TextPickerColumnPattern::UpdateScrollDelta(double delta)
@@ -485,9 +863,9 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         ScrollOption(dragDelta);
         return;
     }
-    InnerHandleScroll(LessNotEqual(dragDelta, 0.0));
+    InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
     double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_ : 0.0 - jumpInterval_);
-    ScrollOption(jumpDelta);
+    ScrollOption(jumpDelta, true);
     yOffset_ = offsetY - jumpDelta;
 }
 
@@ -511,7 +889,7 @@ bool TextPickerColumnPattern::NotLoopOptions() const
     return totalOptionCount <= showOptionCount / 2 + 1; // the critical value of loop condition.
 }
 
-bool TextPickerColumnPattern::InnerHandleScroll(bool isDown)
+bool TextPickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -528,7 +906,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(bool isDown)
         currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    FlushCurrentOptions();
+    FlushCurrentOptions(isDown, isUpatePropertiesOnly);
     return true;
 }
 

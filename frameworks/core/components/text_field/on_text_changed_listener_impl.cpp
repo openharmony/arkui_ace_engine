@@ -58,34 +58,6 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
     PostTaskToUI(task);
 }
 
-void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
-{
-    LOGI("[OnTextChangedListenerImpl] DeleteBackward length: %{public}d", length);
-    if (length <= 0) {
-        LOGE("Delete nothing.");
-        return;
-    }
-
-    auto task = [textField = field_, length] {
-        auto client = textField.Upgrade();
-        if (!client) {
-            LOGE("text field is null");
-            return;
-        }
-        ContainerScope scope(client->instanceId_);
-        auto value = client->GetEditingValue();
-        auto start = value.selection.GetStart();
-        auto end = value.selection.GetEnd();
-        client->SetLastInputAction(InputAction::DELETE_BACKWARD);
-        auto textEditingValue = std::make_shared<TextEditingValue>();
-        textEditingValue->text = value.text;
-        textEditingValue->UpdateSelection(start, end);
-        textEditingValue->Delete(start, start == end ? end + length : end);
-        client->UpdateEditingValue(textEditingValue, true);
-    };
-    PostTaskToUI(task);
-}
-
 void OnTextChangedListenerImpl::DeleteForward(int32_t length)
 {
     LOGI("[OnTextChangedListenerImpl] DeleteForward length: %{public}d", length);
@@ -105,6 +77,34 @@ void OnTextChangedListenerImpl::DeleteForward(int32_t length)
         auto start = value.selection.GetStart();
         auto end = value.selection.GetEnd();
         client->SetLastInputAction(InputAction::DELETE_FORWARD);
+        auto textEditingValue = std::make_shared<TextEditingValue>();
+        textEditingValue->text = value.text;
+        textEditingValue->UpdateSelection(start, end);
+        textEditingValue->Delete(start, start == end ? end + length : end);
+        client->UpdateEditingValue(textEditingValue, true);
+    };
+    PostTaskToUI(task);
+}
+
+void OnTextChangedListenerImpl::DeleteBackward(int32_t length)
+{
+    LOGI("[OnTextChangedListenerImpl] DeleteBackward length: %{public}d", length);
+    if (length <= 0) {
+        LOGE("Delete nothing.");
+        return;
+    }
+
+    auto task = [textField = field_, length] {
+        auto client = textField.Upgrade();
+        if (!client) {
+            LOGE("text field is null");
+            return;
+        }
+        ContainerScope scope(client->instanceId_);
+        auto value = client->GetEditingValue();
+        auto start = value.selection.GetStart();
+        auto end = value.selection.GetEnd();
+        client->SetLastInputAction(InputAction::DELETE_BACKWARD);
         auto textEditingValue = std::make_shared<TextEditingValue>();
         textEditingValue->text = value.text;
         textEditingValue->UpdateSelection(start, end);

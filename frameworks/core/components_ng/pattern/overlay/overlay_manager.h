@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components/picker/picker_data.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -79,14 +80,14 @@ public:
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft = false);
-    void ShowDateDialog(const DialogProperties& dialogProps, std::map<std::string, PickerDate> datePickerProperty,
-        bool isLunar, std::map<std::string, NG::DialogEvent> dialogEvent,
+    void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
+        std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> timePickerProperty,
-        bool isUseMilitaryTime, std::map<std::string, NG::DialogEvent> dialogEvent,
+    void ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
+        std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    void ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
+        std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
 
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);
@@ -101,6 +102,19 @@ public:
     void RegisterOnHideMenu(std::function<void()> callback)
     {
         onHideMenuCallback_ = callback;
+    }
+
+    void SetBackPressEvent(std::function<bool()> event)
+    {
+        backPressEvent_ = event;
+    }
+
+    bool FireBackPressEvent() const
+    {
+        if (backPressEvent_) {
+            return backPressEvent_();
+        }
+        return false;
     }
 
 private:
@@ -133,6 +147,7 @@ private:
 
     std::function<void()> onHideMenuCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;
+    std::function<bool()> backPressEvent_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -256,6 +256,22 @@ public:
 
     bool IsCurrentStateOn(UIState state);
 
+    void SetKeyboardShortcut(char value, uint8_t keys)
+    {
+        value_ = static_cast<char>(std::tolower(value));
+        keys_ = keys;
+    }
+
+    char GetKeyboardShortcutValue() const
+    {
+        return value_;
+    }
+
+    uint8_t GetKeyboardShortcutKeys() const
+    {
+        return keys_;
+    }
+
 protected:
     virtual void OnModifyDone() {}
 
@@ -277,6 +293,8 @@ private:
     OnDragFunc onDrop_;
 
     bool enabled_ { true };
+    char value_ = '\0';
+    uint8_t keys_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

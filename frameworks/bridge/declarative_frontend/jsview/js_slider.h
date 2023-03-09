@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,13 @@ public:
     static void SetMaxLabel(const JSCallbackInfo& info);
     static void SetShowSteps(const JSCallbackInfo& info);
     static void SetShowTips(const JSCallbackInfo& info);
+    static void SetBlockBorderColor(const JSCallbackInfo& info);
+    static void SetBlockBorderWidth(const JSCallbackInfo& info);
+    static void SetStepColor(const JSCallbackInfo& info);
+    static void SetTrackBorderRadius(const JSCallbackInfo& info);
+    static void SetBlockSize(const JSCallbackInfo& info);
+    static void SetBlockStyle(const JSCallbackInfo& info);
+    static void SetStepSize(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
 };
 

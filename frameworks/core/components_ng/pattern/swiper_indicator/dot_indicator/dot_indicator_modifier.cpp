@@ -103,6 +103,10 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
     }
     OffsetF leftCenter = { contentProperty.longPointLeftCenterX, centerY_ };
     OffsetF rightCenter = { contentProperty.longPointRightCenterX, centerY_ };
+    OffsetF centerDistance = rightCenter - leftCenter;
+    OffsetF centerDilateDistance = centerDistance * contentProperty.longPointDilateRatio;
+    leftCenter -= (centerDilateDistance - centerDistance) * HALF;
+    rightCenter += (centerDilateDistance - centerDistance) * HALF;
     PaintSelectedIndicator(
         canvas, leftCenter, rightCenter, contentProperty.pointRadius * contentProperty.longPointDilateRatio);
 }
@@ -177,6 +181,9 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& margin, cons
     longPointLeftCenterX_->Set(longPointCenterX.first);
     longPointRightCenterX_->Set(longPointCenterX.second);
     pointRadius_->Set(normalPointRadius);
+    normalToHoverPointDilateRatio_->Set(1.0f);
+    hoverToNormalPointDilateRatio_->Set(1.0f);
+    longPointDilateRatio_->Set(1.0f);
 }
 
 void DotIndicatorModifier::UpdateDilatePaintProperty(const float& hoverPointRadius,

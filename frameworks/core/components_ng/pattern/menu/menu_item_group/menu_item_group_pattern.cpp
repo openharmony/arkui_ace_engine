@@ -27,7 +27,7 @@ void MenuItemGroupPattern::OnMountToParentDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = host->GetChildren();
-    for (auto child : children) {
+    for (const auto& child : children) {
         if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
             auto itemNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemNode);

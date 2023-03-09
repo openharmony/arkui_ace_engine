@@ -71,11 +71,12 @@ public:
         if (paintProperty->HasCheckBoxCheckMarkWidth()) {
             checkboxModifier_->SetStrokeWidth(paintProperty->GetCheckBoxCheckMarkWidthValue().ConvertToPx());
         }
-        
+
         checkboxModifier_->SetSize(size);
         checkboxModifier_->SetOffset(offset);
         checkboxModifier_->SetEnabled(enabled_);
         checkboxModifier_->SetIsHover(isHover_);
+        checkboxModifier_->UpdateAnimatableProperty();
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)

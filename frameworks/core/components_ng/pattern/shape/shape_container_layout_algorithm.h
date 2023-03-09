@@ -30,6 +30,7 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
 private:
+    SizeF GetChildrenSize(LayoutWrapper* layoutWrapper, SizeF maxSize);
     ACE_DISALLOW_COPY_AND_MOVE(ShapeContainerLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

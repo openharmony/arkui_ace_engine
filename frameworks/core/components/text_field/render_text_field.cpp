@@ -1874,13 +1874,13 @@ bool RenderTextField::OnKeyEvent(const KeyEvent& event)
             obscureTickPendings_ = 0;
             return true;
         }
-        if (event.code == KeyCode::KEY_FORWARD_DEL) {
+        if (event.code == KeyCode::KEY_DEL) {
             int32_t startPos = GetEditingValue().selection.GetStart();
             int32_t endPos = GetEditingValue().selection.GetEnd();
             Delete(startPos, startPos == endPos ? startPos - 1 : endPos);
             return true;
         }
-        if (event.code == KeyCode::KEY_DEL) {
+        if (event.code == KeyCode::KEY_FORWARD_DEL) {
             int32_t startPos = GetEditingValue().selection.GetStart();
             int32_t endPos = GetEditingValue().selection.GetEnd();
             Delete(startPos, startPos == endPos ? startPos + 1 : endPos);

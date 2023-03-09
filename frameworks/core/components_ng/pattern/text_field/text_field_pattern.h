@@ -108,7 +108,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this));
+        if (!textFieldOverlayModifier_) {
+            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this));
+        }
+        if (!textFieldContentModifier_) {
+            textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
+        }
+        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier_, textFieldContentModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -505,6 +511,11 @@ public:
 
     void UpdateEditingValueToRecord();
 
+    RefPtr<TextFieldContentModifier> GetContentModifier()
+    {
+        return textFieldContentModifier_;
+    }
+
     // xts
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
@@ -524,7 +535,7 @@ public:
     std::string GetCopyOptionString() const;
     std::string GetShowPasswordIconString() const;
     std::string GetInputStyleString() const;
-    void SetSelectionFlag(bool flag, int32_t selectionStart, int32_t selectionEnd);
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
 
 private:
@@ -614,8 +625,7 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
     void ResetBackgroundColor();
-    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-        int32_t duration, const RefPtr<Curve>& curve);
+    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange = false);
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -699,6 +709,8 @@ private:
     TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
+    RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
+    RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
     RefPtr<Clipboard> clipboard_;
@@ -715,6 +727,9 @@ private:
     bool imeAttached_ = false;
 #endif
     int32_t instanceId_ = -1;
+#if defined(PREVIEW)
+    std::vector<std::wstring> clipRecords_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 
