@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_TAB_CONTENT_H
 #define FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_TAB_CONTENT_H
 
-#include "bridge/declarative_frontend/engine/bindings_defines.h"
-#include "bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/core/components/tab_bar/tab_content_component.h"
 #include "frameworks/core/components_v2/tabs/tab_content_item_component.h"
 #include "frameworks/core/components_v2/tabs/tabs_component.h"
-#include "frameworks/core/components_ng/pattern/tabs/tab_content_model.h"
-#include "frameworks/core/components_ng/pattern/tabs/tabs_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -56,12 +52,6 @@ private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);
     static void CreateForNG(const JSCallbackInfo& info);
     static void SetTabBarForNG(const JSCallbackInfo& info);
-    static void SetIndicator(JSRef<JSVal>& info);
-    static void SetBoard(JSRef<JSVal>& info);
-    static void SetSelectedMode(JSRef<JSVal>& info);
-    static void SetSubTabBarStyle(JSRef<JSObject>& paramObject);
-    static void SetLabelStyle(JSRef<JSVal>& info);
-    static void GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyle);
 };
 
 } // namespace OHOS::Ace::Framework
