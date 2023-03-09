@@ -50,6 +50,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t TOTAL_NUMBER = 1000;
+}
 void IndexerPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -498,7 +501,6 @@ void IndexerPattern::ShowBubble()
     if (!popupNode_) {
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
-        UpdateBubbleView();
         UpdatePopupOpacity(0.0f);
         overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     }
@@ -770,7 +772,9 @@ void IndexerPattern::OnListItemClick(int32_t index)
 
 void IndexerPattern::OnPopupTouchDown(const TouchEventInfo& info)
 {
-    StartBubbleAppearAnimation();
+    if (NeedShowPopupView()) {
+        StartBubbleAppearAnimation();
+    }
 }
 
 bool IndexerPattern::NeedShowBubble()
@@ -954,13 +958,23 @@ void IndexerPattern::IndexerPressOutAnimation()
 
 void IndexerPattern::StartBubbleAppearAnimation()
 {
+    animationId_ = GenerateAnimationId();
+    UpdatePopupVisibility(VisibleType::VISIBLE);
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     option.SetDuration(INDEXER_BUBBLE_APPEAR_DURATION);
     auto startTimeRatio = 1.0f * INDEXER_BUBBLE_ENTER_DURATION / INDEXER_BUBBLE_APPEAR_DURATION;
     auto middleTimeRatio =
         1.0f * (INDEXER_BUBBLE_WAIT_DURATION + INDEXER_BUBBLE_ENTER_DURATION) / INDEXER_BUBBLE_APPEAR_DURATION;
-    AnimationUtils::OpenImplicitAnimation(option, Curves::SHARP, nullptr);
+    AnimationUtils::OpenImplicitAnimation(option, Curves::SHARP,
+        [id = Container::CurrentId(), weak = AceType::WeakClaim(this), animationId = animationId_]() {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->animationId_ == animationId) {
+                pattern->UpdatePopupVisibility(VisibleType::GONE);
+            }
+        });
     AnimationUtils::AddKeyFrame(
         startTimeRatio, Curves::SHARP, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
             ContainerScope scope(id);
@@ -991,5 +1005,30 @@ void IndexerPattern::UpdatePopupOpacity(float ratio)
     auto rendercontext = popupNode_->GetRenderContext();
     CHECK_NULL_VOID(rendercontext);
     rendercontext->UpdateOpacity(ratio);
+}
+
+void IndexerPattern::UpdatePopupVisibility(VisibleType visible)
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto layoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto currentVisibility = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (currentVisibility != visible) {
+        layoutProperty->UpdateVisibility(visible);
+        popupNode_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    }
+}
+
+bool IndexerPattern::NeedShowPopupView()
+{
+    CHECK_NULL_RETURN(popupNode_, false);
+    auto layoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
+}
+
+int32_t IndexerPattern::GenerateAnimationId()
+{
+    return (++animationId_) % TOTAL_NUMBER;
 }
 } // namespace OHOS::Ace::NG
