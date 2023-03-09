@@ -29,6 +29,7 @@ public:
     void SetStrokeWidth(const Dimension& value) override;
     void SetScaleCount(int32_t value) override;
     void SetScaleWidth(const Dimension& value) override;
+    void SetBorderColor(const Color& value) override;
 };
 
 } // namespace OHOS::Ace::NG

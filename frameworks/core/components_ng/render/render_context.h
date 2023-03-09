@@ -36,6 +36,7 @@
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::NG {
 class GeometryNode;
@@ -309,6 +310,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipMask, RefPtr<BasicShape>);
 
+    // ProgressMask
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ProgressMask, RefPtr<ProgressMaskProperty>);
+
     // Gradient
     ACE_DEFINE_PROPERTY_GROUP(Gradient, GradientProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
@@ -360,6 +364,8 @@ protected:
     virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
     virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
+
+    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}

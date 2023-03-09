@@ -453,6 +453,11 @@ public:
         ViewAbstract::SetMask(shape);
     }
 
+    void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override
+    {
+        ViewAbstract::SetProgressMask(progress);
+    }
+
     void SetBackdropBlur(const Dimension& radius) override
     {
         ViewAbstract::SetBackdropBlur(radius);

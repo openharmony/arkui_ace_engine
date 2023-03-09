@@ -38,6 +38,7 @@ namespace OHOS::Ace::Framework {
 
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DEFAULT_TAP_COUNTS = 1;
+constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,

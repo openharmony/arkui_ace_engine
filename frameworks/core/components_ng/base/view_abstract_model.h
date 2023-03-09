@@ -37,6 +37,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace {
 
@@ -218,6 +219,8 @@ public:
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
 
+    // progress mask
+    virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;

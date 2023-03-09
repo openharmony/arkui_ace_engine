@@ -50,6 +50,7 @@
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
+#include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
@@ -1620,6 +1621,22 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
     }
 }
 
+void RosenRenderContext::PaintProgressMask()
+{
+    if (!moonProgressModifier_) {
+        moonProgressModifier_ = std::make_shared<MoonProgressModifier>();
+        rsNode_->AddModifier(moonProgressModifier_);
+    }
+    auto prgress = GetProgressMaskValue();
+    moonProgressModifier_->InitRatio();
+    moonProgressModifier_->SetMaskColor(LinearColor(prgress->GetColor()));
+    moonProgressModifier_->SetMaxValue(prgress->GetMaxValue());
+    if (prgress->GetValue() > moonProgressModifier_->GetMaxValue()) {
+        prgress->SetValue(moonProgressModifier_->GetMaxValue());
+    }
+    moonProgressModifier_->SetValue(prgress->GetValue());
+}
+
 void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -1658,6 +1675,14 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     if (!RectIsNull()) {
         PaintClip(SizeF(rect.Width(), rect.Height()));
     }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress)
+{
+    PaintProgressMask();
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetClipToBounds(true);
     RequestNextFrame();
 }
 

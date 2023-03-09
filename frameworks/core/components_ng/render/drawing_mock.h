@@ -66,6 +66,7 @@ using RSWordBreakType = Testing::WordBreakType;
 using RSTextStyle = Testing::TestingTextStyle;
 using RSColorQuad = uint32_t;
 using RSScalar = float;
+using RSPathFillType = Testing::TestingPathFillType;
 
 using RSParagraph = Testing::TestingTypography;
 using RSTypographyProperties = Testing::TestingTypographyProperties;
