@@ -43,6 +43,7 @@ RefPtr<FrameNode> RenderContext::GetHost() const
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propBdImage_, BorderImageProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propOverlay_, OverlayProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propPositionProperty_, RenderPositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propBackground_, BackgroundProperty);
@@ -66,5 +67,10 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
     json->Put("zIndex", propZIndex_.value_or(0));
     json->Put("opacity", propOpacity_.value_or(1));
+    static const char* STYLE[] = {"", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
+        "BlurStyle.BackgroundThin", "BlurStyle.BackgroundRegular",
+        "BlurStyle.BackgroundThick", "BlurStyle.BackgroundUltraThick"};
+    json->Put("backgroundBlurStyle", STYLE[static_cast<int>(
+        GetBackBlurStyle().value_or(BlurStyleOption()).blurStyle)]);
 }
 } // namespace OHOS::Ace::NG

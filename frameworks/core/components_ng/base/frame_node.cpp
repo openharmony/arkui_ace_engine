@@ -256,6 +256,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     FocusToJsonValue(json);
     MouseToJsonValue(json);
     TouchToJsonValue(json);
+    json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
 void FrameNode::OnAttachToMainTree()

@@ -62,6 +62,7 @@ public:
         auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
         CHECK_NULL_VOID(textChild);
         auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
         json->Put("src", textLayoutProperty->GetContent().value_or("").c_str());
         constexpr double DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0;
         json->Put("step", std::to_string(propScrollAmount_.value_or(DEFAULT_MARQUEE_SCROLL_AMOUNT)).c_str());
