@@ -41,8 +41,6 @@ const int32_t MIDDLE_CHILD_INDEX = 2;
 const float MOVE_DISTANCE = 5.0f;
 constexpr int32_t HOVER_ANIMATION_DURATION = 40;
 constexpr size_t MIXTURE_CHILD_COUNT = 2;
-constexpr double HALF = 0.5;
-constexpr int32_t DOUBLE = 2;
 const Dimension ICON_SIZE = 24.0_vp;
 const Dimension ICON_TEXT_SPACE = 8.0_vp;
 } // namespace
@@ -220,7 +218,7 @@ void TextPickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     }
 }
 
-void TextPickerColumnPattern::FlushCurrentTextOptions(RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+void TextPickerColumnPattern::FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
     bool isUpateTextContentOnly)
 {
     uint32_t totalOptionCount = GetOptionCount();
@@ -261,8 +259,8 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(RefPtr<TextPickerLayoutPro
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
         textNode->GetRenderContext()->SetClipToFrame(true);
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         iter++;
     }
     selectedIndex_ = currentIndex;
@@ -309,18 +307,19 @@ void TextPickerColumnPattern::FlushCurrentImageOptions()
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
-        iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         iconNode->MarkModifyDone();
+        iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         rangeNode->GetRenderContext()->SetClipToFrame(true);
-        rangeNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         rangeNode->MarkModifyDone();
+        rangeNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         iter++;
     }
     selectedIndex_ = currentIndex;
 }
 
-void TextPickerColumnPattern::FlushCurrentMixtureOptions(RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+void TextPickerColumnPattern::FlushCurrentMixtureOptions(
+    const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
     bool isUpateTextContentOnly)
 {
     uint32_t totalOptionCount = GetOptionCount();
@@ -381,14 +380,14 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(RefPtr<TextPickerLayout
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
-        iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         iconNode->MarkModifyDone();
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         linearLayoutNode->GetRenderContext()->SetClipToFrame(true);
-        linearLayoutNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         linearLayoutNode->MarkModifyDone();
+        linearLayoutNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         iter++;
     }
     selectedIndex_ = currentIndex;
@@ -396,8 +395,6 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(RefPtr<TextPickerLayout
 
 void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
 {
-    Dimension tmp;
-    Color tmpColor;
     if (!animationProperties_.size()) {
         return;
     }
@@ -414,28 +411,28 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
             }
             if (i == (animationProperties_.size() - 1)) {
                 animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
-                animationProperties_[i].fontSize = animationProperties_[i].fontSize * HALF;
-                animationProperties_[i].downFontSize = tmp;
+                animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
+                animationProperties_[i].downFontSize = Dimension();
 
                 animationProperties_[i].upColor = animationProperties_[i].currentColor;
                 auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
                 animationProperties_[i].currentColor =
-                    colorEvaluator->Evaluate(tmpColor, animationProperties_[i].currentColor, HALF);
-                animationProperties_[i].downColor = tmpColor;
+                    colorEvaluator->Evaluate(Color(), animationProperties_[i].currentColor, 0.5);
+                animationProperties_[i].downColor = Color();
             }
         }
     } else {
         for (size_t i = animationProperties_.size() - 1; i >= 0; i--) {
             if (i == 0) {
-                animationProperties_[i].upFontSize = tmp;
+                animationProperties_[i].upFontSize = Dimension();
                 animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
-                animationProperties_[i].fontSize = animationProperties_[i].fontSize * HALF;
+                animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
 
-                animationProperties_[i].upColor = tmpColor;
+                animationProperties_[i].upColor = Color();
                 animationProperties_[i].downColor = animationProperties_[i].currentColor;
                 auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
                 animationProperties_[i].currentColor =
-                    colorEvaluator->Evaluate(tmpColor, animationProperties_[i].currentColor, HALF);
+                    colorEvaluator->Evaluate(Color(), animationProperties_[i].currentColor, 0.5);
                 break;
             } else {
                 animationProperties_[i].upFontSize = animationProperties_[i - 1].upFontSize;
@@ -450,9 +447,9 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
     }
 }
 
-void TextPickerColumnPattern::UpdateDisappearTextProperties(RefPtr<PickerTheme>& pickerTheme,
-    RefPtr<TextLayoutProperty>& textLayoutProperty,
-    RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
+void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     if (textPickerLayoutProperty->HasDisappearColor()) {
@@ -470,9 +467,9 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(RefPtr<PickerTheme>&
     }
 }
 
-void TextPickerColumnPattern::UpdateCandidateTextProperties(RefPtr<PickerTheme>& pickerTheme,
-    RefPtr<TextLayoutProperty>& textLayoutProperty,
-    RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
+void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
     if (textPickerLayoutProperty->HasColor()) {
@@ -490,9 +487,9 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(RefPtr<PickerTheme>&
     }
 }
 
-void TextPickerColumnPattern::UpdateSelectedTextProperties(RefPtr<PickerTheme>& pickerTheme,
-    RefPtr<TextLayoutProperty>& textLayoutProperty,
-    RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
+void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     Color themeSelectedColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
@@ -510,7 +507,7 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(RefPtr<PickerTheme>& 
 }
 
 void TextPickerColumnPattern::AddAnimationTextProperties(uint32_t currentIndex,
-    RefPtr<TextLayoutProperty>& textLayoutProperty)
+    const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
     TextProperties properties;
     if (textLayoutProperty->HasFontSize()) {
@@ -529,8 +526,8 @@ void TextPickerColumnPattern::AddAnimationTextProperties(uint32_t currentIndex,
     animationProperties_.emplace_back(properties);
 }
 
-void TextPickerColumnPattern::UpdatePickerTextProperties(RefPtr<TextLayoutProperty>& textLayoutProperty,
-    RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
     uint32_t currentIndex, uint32_t middleIndex, uint32_t showCount)
 {
     auto host = GetHost();
@@ -563,7 +560,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(RefPtr<TextLayoutProper
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 
-void TextPickerColumnPattern::TextPropertiesLinearAnimation(RefPtr<TextLayoutProperty>& textLayoutProperty,
+void TextPickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
     uint32_t index, uint32_t showCount, bool isDown, double scale)
 {
     if (index >= animationProperties_.size()) {
@@ -625,11 +622,11 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
             TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
-            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             textNode->MarkModifyDone();
+            textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
-        rangeNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         rangeNode->MarkModifyDone();
+        rangeNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         iter++;
     }
 }
@@ -637,8 +634,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
 Dimension TextPickerColumnPattern::LinearFontSize(const Dimension& startFontSize,
     const Dimension& endFontSize, double percent)
 {
-    Dimension linearFontSize = startFontSize + (endFontSize - startFontSize) * percent;
-    return linearFontSize;
+    return startFontSize + (endFontSize - startFontSize) * percent;
 }
 
 void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -783,7 +779,7 @@ void TextPickerColumnPattern::ScrollOption(double delta, bool isJump)
     double oldDelta = scrollDelta_;
     scrollDelta_ = delta;
 
-    if ((isJump_ && ((delta * oldDelta) <= 0)) || NearZero(delta) || (isJump_ && isJump)) {
+    if ((isJump_ && LessOrEqual(delta * oldDelta, 0.0)) || NearZero(delta) || (isJump_ && isJump)) {
         isJump_ = false;
         FlushCurrentOptions();
         return;
@@ -796,10 +792,10 @@ void TextPickerColumnPattern::ScrollOption(double delta, bool isJump)
     }
     double scale = 0.0;
     if (!isJump_) {
-        scale = fabs(delta) / (jumpInterval_ * DOUBLE);
+        scale = fabs(delta) / (jumpInterval_ * 2);
         UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), scale);
     } else {
-        scale = ((DOUBLE * jumpInterval_) - fabs(delta))  / (jumpInterval_ * DOUBLE);
+        scale = ((2 * jumpInterval_) - fabs(delta))  / (jumpInterval_ * 2);
         UpdateTextPropertiesLinear(!LessNotEqual(delta, 0.0), scale);
     }
 }
