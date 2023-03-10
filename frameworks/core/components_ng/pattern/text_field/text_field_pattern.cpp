@@ -829,7 +829,13 @@ void TextFieldPattern::HandleFocusEvent()
         auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
         UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
         caretUpdateType_ = CaretUpdateType::EVENT;
-        HandleOnSelectAll();
+        auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        if (setSelectAllFlag_ && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
+            !textEditingValue_.GetWideText().empty()) {
+            setSelectAllFlag_ = false;
+            HandleOnSelectAll();
+        }
         CloseSelectOverlay();
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
