@@ -37,19 +37,18 @@ constexpr float ROTATEZ = 30.0f;
 constexpr float COUNT = 50.0f;
 constexpr float HALF = 0.5f;
 constexpr float DOUBLE = 2.0f;
+constexpr int32_t RING_ALPHA = 200;
 constexpr int32_t TOTAL_POINTS_COUNT = 20;
-constexpr int32_t TAIL_ANIAMTION_DURATION = 300;
+constexpr int32_t TAIL_ANIAMTION_DURATION = 400;
+constexpr int32_t TRANS_DURATION = 100;
 constexpr float TOTAL_TAIL_LENGTH = 60.0f;
-constexpr float TRANS_TO_RECYCLE_TAIL_LEN = 15.0f;
 constexpr float TAIL_ALPHA_RATIO = 0.82f;
 constexpr float INITIAL_SIZE_SCALE = 0.825f;
 constexpr float INITIAL_OPACITY_SCALE = 0.7f;
 constexpr float COMET_TAIL_ANGLE = 3.0f;
 constexpr int32_t LOADING_DURATION = 1200;
 constexpr float FOLLOW_START = 58.0f;
-constexpr float FOLLOW_SPAN = 14.0f;
-constexpr float FOLLOW_TO_RECYCLE_START = 72.0f;
-constexpr float FOLLOW_TO_RECYCLE_SPAN = 28.0f;
+constexpr float FOLLOW_SPAN = 10.0f;
 constexpr float FULL_COUNT = 100.0f;
 constexpr float STAGE1 = 0.25f;
 constexpr float STAGE2 = 0.65f;
@@ -64,6 +63,7 @@ constexpr float SIZE_SCALE2 = 0.825f;
 constexpr float SIZE_SCALE3 = 0.93f;
 constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
+constexpr float FULL_OPACITY = 255.0f;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
@@ -71,7 +71,7 @@ LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingPro
       centerDeviation_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
       cometOpacity_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_OPACITY_SCALE)),
       cometSizeScale_(AceType::MakeRefPtr<AnimatablePropertyFloat>(INITIAL_SIZE_SCALE)),
-      cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TRANS_TO_RECYCLE_TAIL_LEN)),
+      cometTailLen_(AceType::MakeRefPtr<AnimatablePropertyFloat>(TOTAL_TAIL_LENGTH)),
       loadingProgressOwner_(loadingProgressOwner)
 {
     AttachProperty(date_);
@@ -112,7 +112,8 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     auto& canvas = context.canvas;
     canvas.Save();
     RSPen pen;
-    pen.SetColor(ToRSColor(color_->Get()));
+    auto ringColor = color_->Get();
+    pen.SetColor(ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
@@ -139,9 +140,6 @@ void LoadingProgressModifier::DrawOrbit(
     auto center = RSPoint(width_ / 2, height_ / 2);
     RSBrush brush;
     brush.SetAntiAlias(true);
-    RSColor cometColor = ToRSColor(color_->Get());
-    float colorAlpha = cometColor.GetAlphaF();
-    auto baseAlpha = colorAlpha * cometParam.alphaScale;
     canvas.Save();
     canvas.Translate(center.GetX(), center.GetY());
     std::vector<RSPoint> points;
@@ -155,15 +153,17 @@ void LoadingProgressModifier::DrawOrbit(
     }
     std::vector<RSPoint> distPoints(points.size());
     matrix.MapPoints(distPoints, points, points.size());
-
+    auto cometColor = color_->Get();
+    float colorAlpha = cometColor.GetAlpha() / FULL_OPACITY;
+    auto baseAlpha = colorAlpha * cometParam.alphaScale;
     for (uint32_t i = 0; i < distPoints.size(); i++) {
         RSPoint pointCenter = distPoints[i];
         float setAlpha = GetCurentCometOpacity(baseAlpha, distPoints.size() - i, distPoints.size());
         if (NearZero(setAlpha)) {
             continue;
         }
-        cometColor.SetAlphaF(setAlpha);
-        brush.SetColor(cometColor);
+        brush.SetColor(
+            ToRSColor(Color::FromRGBO(cometColor.GetRed(), cometColor.GetGreen(), cometColor.GetBlue(), setAlpha)));
         canvas.AttachBrush(brush);
         canvas.DrawCircle(pointCenter, cometParam.radius * cometParam.sizeScale);
     }
@@ -204,7 +204,10 @@ void LoadingProgressModifier::StartRecycleCometAnimation()
         cometOpacity_->Set(OPACITY3);
         cometSizeScale_->Set(SIZE_SCALE3);
     });
-    AnimationUtils::AddKeyFrame(STAGE3, curve, [&]() { cometSizeScale_->Set(1.0f); });
+    AnimationUtils::AddKeyFrame(STAGE3, curve, [&]() {
+        cometOpacity_->Set(OPACITY3);
+        cometSizeScale_->Set(1.0f);
+    });
     AnimationUtils::AddKeyFrame(STAGE4, curve, [&]() {
         cometOpacity_->Set(OPACITY3);
         cometSizeScale_->Set(SIZE_SCALE3);
@@ -260,14 +263,26 @@ void LoadingProgressModifier::StartRecycle()
     }
     cometOpacity_->Set(INITIAL_OPACITY_SCALE);
     cometSizeScale_->Set(INITIAL_SIZE_SCALE);
-    if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH) {
-        cometTailLen_->Set(TRANS_TO_RECYCLE_TAIL_LEN);
-        StartCometTailAnimation();
-    } else {
-        cometTailLen_->Set(TOTAL_TAIL_LENGTH);
-    }
     StartRecycleRingAnimation();
     StartRecycleCometAnimation();
+}
+
+void LoadingProgressModifier::StartTransToRecycleAnimation()
+{
+    auto curve = AceType::MakeRefPtr<CubicCurve>(0.6f, 0.2f, 1.0f, 1.0f);
+    AnimationOption option;
+    option.SetDuration(TRANS_DURATION);
+    option.SetIteration(1);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(
+        option,
+        [&]() {
+            date_->Set(FULL_COUNT);
+            cometOpacity_->Set(1.0 - TRANS_OPACITY_SPAN);
+            cometSizeScale_->Set(INITIAL_SIZE_SCALE);
+        },
+        [&]() { StartRecycle(); });
+    StartCometTailAnimation();
 }
 
 void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
@@ -278,23 +293,6 @@ void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
     cometTailLen_->Set(COMET_TAIL_ANGLE);
     cometOpacity_->Set(1.0f);
     cometSizeScale_->Set(1.0f);
-}
-
-void LoadingProgressModifier::ChangeRefreshTansitionData(float refreshTransitionRatio)
-{
-    CHECK_NULL_VOID(date_);
-    auto ratio = CorrectNormalize(refreshTransitionRatio);
-    date_->Set(FOLLOW_TO_RECYCLE_START + FOLLOW_TO_RECYCLE_SPAN * ratio);
-    cometTailLen_->Set(TRANS_TO_RECYCLE_TAIL_LEN * ratio);
-    cometOpacity_->Set(1.0 - TRANS_OPACITY_SPAN * ratio);
-    cometSizeScale_->Set(1.0f - (1.0f - INITIAL_SIZE_SCALE) * ratio);
-}
-
-void LoadingProgressModifier::ChangeRefreshFadeAwayData(float refreshTransitionRatio)
-{
-    CHECK_NULL_VOID(date_);
-    auto ratio = CorrectNormalize(refreshTransitionRatio);
-    date_->Set(FOLLOW_TO_RECYCLE_START + FOLLOW_TO_RECYCLE_SPAN * ratio);
 }
 
 float LoadingProgressModifier::CorrectNormalize(float originData)

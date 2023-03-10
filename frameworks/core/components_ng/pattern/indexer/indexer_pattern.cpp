@@ -439,7 +439,8 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
                 Dimension borderWidth;
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
                 if (!fromTouchUp || animateSelected_ == lastSelected_) {
-                    childRenderContext->UpdateBackgroundColor(indexerTheme->GetSeclectedBackgroundColor());
+                    childRenderContext->UpdateBackgroundColor(paintProperty->GetSelectedBackgroundColor().value_or(
+                        indexerTheme->GetSeclectedBackgroundColor()));
                 }
                 childRenderContext->ResetBlendBorderColor();
             }
@@ -451,6 +452,8 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
+            nodeLayoutProperty->UpdateFontFamily(selectedFont.GetFontFamilies());
+            nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
             childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
             index++;
@@ -465,10 +468,11 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
         Dimension borderWidth;
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
-        nodeLayoutProperty->UpdateFontSize(
-            layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontSize());
-        nodeLayoutProperty->UpdateFontWeight(
-            layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontWeight());
+        auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
+        nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
+        nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
+        nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
+        nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         childNode->MarkModifyDone();
         index++;
@@ -566,6 +570,8 @@ RefPtr<FrameNode> IndexerPattern::InitBubbleView()
     letterLayoutProperty->UpdateFontSize(fontSize);
     auto fontWeight = popupTextFont.GetFontWeight();
     letterLayoutProperty->UpdateFontWeight(fontWeight);
+    letterLayoutProperty->UpdateFontFamily(popupTextFont.GetFontFamilies());
+    letterLayoutProperty->UpdateItalicFontStyle(popupTextFont.GetFontStyle());
     letterLayoutProperty->UpdateTextColor(popupTextColor);
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     auto textPadding = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
@@ -631,7 +637,7 @@ void IndexerPattern::InitBubbleList(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(currentListData.at(i));
-        textLayoutProperty->UpdateTextColor(indexerTheme->GetDefaultTextColor());
+        textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupDefaultColor());
         textLayoutProperty->UpdateFontSize(indexerTheme->GetPopupTextSize());
         textLayoutProperty->UpdateFontWeight(indexerTheme->GetPopupTextStyle().GetFontWeight());
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -679,7 +685,7 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
             textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupTextColor());
             listItemContext->UpdateBackgroundColor(Color(POPUP_LISTITEM_CLICKED_BG));
         } else {
-            textLayoutProperty->UpdateTextColor(indexerTheme->GetDefaultTextColor());
+            textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupDefaultColor());
             listItemContext->UpdateBackgroundColor(Color::TRANSPARENT);
         }
         
@@ -808,13 +814,20 @@ void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
     AnimationOption option;
     option.SetDuration(INDEXER_SELECT_DURATION);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
-        rendercontext->UpdateBackgroundColor(indexerTheme->GetSeclectedBackgroundColor());
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        rendercontext->UpdateBackgroundColor(
+            paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
     });
 }
 

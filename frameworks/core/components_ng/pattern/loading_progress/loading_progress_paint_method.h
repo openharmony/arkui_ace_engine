@@ -69,8 +69,7 @@ public:
                     paintProperty->GetRefreshFollowRatio().value_or(0.0f));
                 break;
             case REFRESH_STATE_FOLLOW_TO_RESYCLE:
-                loadingProgressModifier_->ChangeRefreshTansitionData(
-                    paintProperty->GetRefreshTransitionRatio().value_or(0.0f));
+                loadingProgressModifier_->StartTransToRecycleAnimation();
                 break;
             case REFRESH_STATE_RESYCLE:
             case REFRESH_STATE_FADEAWAY:

@@ -92,6 +92,7 @@ private:
     void ReplaceLoadingProgressNode();
     void LoadingProgressReset();
     void OnExitAnimationFinish();
+    void ResetLoadingProgressColor();
     float GetFollowRatio();
     float GetScrollOffset(float delta);
     bool ScrollComponentReactInMove();
