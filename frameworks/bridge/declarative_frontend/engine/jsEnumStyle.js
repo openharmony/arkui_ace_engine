@@ -568,6 +568,12 @@ var BarMode;
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
 
+var SelectedMode;
+(function (SelectedMode) {
+  SelectedMode[SelectedMode["INDICATOR"] = 0] = "INDICATOR";
+  SelectedMode[SelectedMode["BOARD"] = 1] = "BOARD";
+})(SelectedMode || (SelectedMode = {}));
+
 var SizeType;
 (function (SizeType) {
   SizeType[SizeType["Auto"] = 0] = "Auto";
@@ -1035,7 +1041,27 @@ class SubTabBarStyle {
     this.type = 'SubTabBarStyle';
     this.content = content;
   }
+  static of(content) {
+    return new SubTabBarStyle(content);
+  }
+  indicator(arg) {
+    this.indicator = arg;
+    return this;
+  }
+  selectedMode(arg) {
+    this.selectedMode = arg;
+    return this;
+  }
+  board(arg) {
+    this.board = arg;
+    return this;
+  }
+  labelStyle(arg) {
+    this.labelStyle = arg;
+    return this;
+  }
 }
+
 
 class ProgressMask {
   constructor(value, total, color) {
@@ -1061,6 +1087,9 @@ class BottomTabBarStyle {
     this.type = 'BottomTabBarStyle';
     this.icon = icon;
     this.text = text;
+  }
+  static of(icon, text) {
+    return new BottomTabBarStyle(icon, text);
   }
 }
 
