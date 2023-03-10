@@ -641,6 +641,11 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldManager && textfieldManager->OnBackPressed()) {
+        return true;
+    }
+
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(

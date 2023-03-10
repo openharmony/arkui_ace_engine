@@ -378,13 +378,13 @@ public:
 
     bool SelectOverlayIsOn();
     void CloseSelectOverlay();
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    void SetInputMethodStatus(bool imeAttached)
+    void SetInputMethodStatus(bool keyboardShown)
     {
-        imeAttached_ = imeAttached;
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        imeShown_ = keyboardShown;
+#endif
     }
 
-#endif
     bool HasConnection() const
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -537,6 +537,7 @@ public:
     std::string GetInputStyleString() const;
     void SetSelectionFlag(bool flag, int32_t selectionStart, int32_t selectionEnd);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    bool OnBackPressed();
 
 private:
     void HandleBlurEvent();
@@ -725,6 +726,7 @@ private:
 #endif
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
+    bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
 #if defined(PREVIEW)

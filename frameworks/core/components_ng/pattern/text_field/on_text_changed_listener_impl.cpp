@@ -84,6 +84,9 @@ void OnTextChangedListenerImpl::SendKeyEventFromInputMethod(const MiscServices::
 void OnTextChangedListenerImpl::SendKeyboardInfo(const MiscServices::KeyboardInfo& info)
 {
     LOGI("[OnTextChangedListenerImpl] KeyboardStatus status: %{public}d", info.GetKeyboardStatus());
+    // this keyboard status means shown or hidden but attachment is not closed, should be distinguished from
+    // imeAttached_
+    HandleKeyboardStatus(info.GetKeyboardStatus());
     HandleFunctionKey(info.GetFunctionKey());
 }
 
