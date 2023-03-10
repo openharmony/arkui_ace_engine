@@ -42,7 +42,7 @@ RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     return navBarNode;
 }
 
-void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);

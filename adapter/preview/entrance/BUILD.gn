@@ -28,6 +28,7 @@ template("preview_entrance_source") {
     defines += [ "INIT_ICU_DATA_PATH" ]
 
     sources = [
+      "$ace_root/adapter/ohos/entrance/ace_new_pipe_judgement.cpp",
       "ace_ability.cpp",
       "ace_application_info.cpp",
       "ace_container.cpp",

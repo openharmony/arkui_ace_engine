@@ -27,7 +27,6 @@
 #include "adapter/preview/inspector/inspector_client.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
-#include "third_party/skia/include/core/SkFontMgr.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "frameworks/core/components/common/painter/flutter_svg_painter.h"
@@ -114,15 +113,23 @@ AceAbility::AceAbility(const AceRunArgs& runArgs) : runArgs_(runArgs)
         LOGI("Initialize for current process.");
         Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
     });
-    if (runArgs_.formsEnabled) {
-        LOGI("CreateContainer with JS_CARD frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD, runArgs_);
-    } else if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
-        LOGI("CreateContainer with JS frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS, runArgs_);
+
+    if (runArgs_.aceVersion == AceVersion::ACE_1_0) {
+        if (runArgs_.formsEnabled) {
+            LOGI("CreateContainer with JS_CARD frontend");
+            AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS_CARD, runArgs_);
+        } else {
+            LOGI("CreateContainer with JS frontend");
+            AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::JS, runArgs_);
+        }
     } else if (runArgs_.aceVersion == AceVersion::ACE_2_0) {
-        LOGI("CreateContainer with JSDECLARATIVE frontend");
-        AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, runArgs_);
+        if (runArgs_.formsEnabled) {
+            LOGI("CreateContainer with ETS_CARD frontend");
+            AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::ETS_CARD, runArgs_);
+        } else {
+            LOGI("CreateContainer with JSDECLARATIVE frontend");
+            AceContainer::CreateContainer(ACE_INSTANCE_ID, FrontendType::DECLARATIVE_JS, runArgs_);
+        }
     } else {
         LOGE("UnKnown frontend type");
     }
@@ -222,7 +229,7 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     auto controller = FlutterDesktopCreateWindow(
         runArgs.deviceWidth, runArgs.deviceHeight, runArgs.windowTitle.c_str(), runArgs.onRender);
 
-    const auto &ctx = OHOS::Rosen::GlfwRenderContext::GetGlobal();
+    const auto& ctx = OHOS::Rosen::GlfwRenderContext::GetGlobal();
     if (ctx != nullptr) {
         ctx->InitFrom(FlutterDesktopGetWindow(controller));
     }
@@ -230,6 +237,7 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     EventDispatcher::GetInstance().Initialize();
     auto aceAbility = std::make_unique<AceAbility>(runArgs);
     aceAbility->SetGlfwWindowController(ctx);
+    aceAbility->SetFlutterWindowControllerRef(controller);
     return aceAbility;
 }
 #endif
@@ -255,10 +263,7 @@ void AceAbility::InitEnv()
     }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null, initialize the environment failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     if (runArgs_.projectModel == ProjectModel::STAGE) {
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
@@ -278,7 +283,7 @@ void AceAbility::InitEnv()
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight);
     }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
-        container->ParseStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
+        container->InitializeStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
     }
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
@@ -300,6 +305,10 @@ void AceAbility::InitEnv()
         appResourcesPath.append(DELIMITER);
     }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
+        // eTS Card
+        if (runArgs_.aceVersion == AceVersion::ACE_2_0 && runArgs_.formsEnabled) {
+            paths.push_back(runArgs_.assetPath + DELIMITER + "ets");
+        }
         paths.push_back(appResourcesPath);
         paths.push_back(appResourcesPath + ASSET_PATH_SHARE_STAGE);
     } else {
@@ -307,10 +316,7 @@ void AceAbility::InitEnv()
     }
     AceContainer::AddAssetPath(ACE_INSTANCE_ID, "", paths);
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
-    if (!container) {
-        LOGE("container is null, initialize the environment failed.");
-        return;
-    }
+    CHECK_NULL_VOID(container);
     if (runArgs_.projectModel == ProjectModel::STAGE) {
         if (runArgs_.formsEnabled) {
             container->SetStageCardConfig(runArgs_.pageProfile, runArgs_.url);
@@ -330,7 +336,7 @@ void AceAbility::InitEnv()
         AceContainer::SetView(view, runArgs_.deviceConfig.density, runArgs_.deviceWidth, runArgs_.deviceHeight, runArgs_.onRender);
     }
     if (runArgs_.projectModel == ProjectModel::STAGE) {
-        container->ParseStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
+        container->InitializeStageAppConfig(runArgs_.assetPath, runArgs_.formsEnabled);
     }
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
     OHOS::Ace::Framework::InspectorClient::GetInstance().RegisterFastPreviewErrorCallback(runArgs_.onError);
@@ -403,7 +409,10 @@ void AceAbility::RunEventLoop()
 void AceAbility::RunEventLoop()
 {
     while (controller_ != nullptr && !controller_->WindowShouldClose() && loopRunning_) {
-        controller_->WaitForEvents();
+        if (windowControllerRef_) {
+            FlutterDesktopWaitForEvents(windowControllerRef_);
+        }
+        controller_->PollEvents();
 
 #ifdef USE_GLFW_WINDOW
         int32_t width;
@@ -599,6 +608,7 @@ std::string AceAbility::GetDefaultJSONTree()
 
 bool AceAbility::OperateComponent(const std::string& attrsJson)
 {
+    LOGD("OperateComponent attrsJson %{public}s", attrsJson.c_str());
     auto root = JsonUtil::ParseJsonString(attrsJson);
     if (!root || !root->IsValid()) {
         LOGE("the attrsJson is illegal json format");

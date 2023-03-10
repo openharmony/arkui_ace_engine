@@ -76,12 +76,8 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(const std::string& packagenam
 }
 
 bool AceNewPipeJudgement::QueryAceNewPipeEnabledStage(const std::string& packagename, uint32_t apiCompatibleVersion,
-    uint32_t apiTargetVersion, const std::string& apiReleaseType,
-    const std::vector<OHOS::AppExecFwk::Metadata>& metaData)
+    uint32_t apiTargetVersion, const std::string& apiReleaseType, bool closeArkTSPartialUpdate)
 {
-    bool closeArkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
-    });
     if (closeArkTSPartialUpdate) {
         return false;
     }

@@ -42,7 +42,17 @@ void FormFrontendDelegateDeclarative::RunCard(const std::string& url,
     CHECK_NULL_VOID(container);
     auto weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline);
     container->SetCardPipeline(weakCardPipeline, cardId);
+#ifndef PREVIEW
     pageRouterManager->RunCard(url, params, cardId);
+#else
+    taskExecutor->PostTask(
+        [weak = WeakClaim<NG::PageRouterManager>(RawPtr(pageRouterManager)), url, params, cardId]() {
+            auto pageRouterManager = weak.Upgrade();
+            CHECK_NULL_VOID(pageRouterManager);
+            pageRouterManager->RunCard(url, params, cardId);
+        },
+        TaskExecutor::TaskType::JS);
+#endif
 }
 
 void FormFrontendDelegateDeclarative::FireCardEvent(const EventMarker& eventMarker, const std::string& params) {}

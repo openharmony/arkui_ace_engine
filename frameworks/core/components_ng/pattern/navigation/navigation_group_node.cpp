@@ -43,7 +43,7 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     return navigationGroupNode;
 }
 
-void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);

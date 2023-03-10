@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INSPECTOR_INSPECTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INSPECTOR_INSPECTOR_H
 
-#include "base/utils/macros.h"
-
 #include <string>
+
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT Inspector {
@@ -27,6 +27,7 @@ public:
     static std::string GetInspectorTree(bool isLayoutInspector = false);
     static bool SendEventByKey(const std::string& key, int action, const std::string& params);
     static std::string GetInspector(bool isLayoutInspector = false);
+    static void HideAllMenus();
 };
 } // namespace OHOS::Ace::NG
 

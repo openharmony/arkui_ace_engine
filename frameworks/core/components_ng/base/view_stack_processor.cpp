@@ -225,6 +225,11 @@ std::string ViewStackProcessor::ProcessViewId(const std::string& viewId)
     return viewKey_.empty() ? viewId : viewKey_ + "_" + viewId;
 }
 
+RefPtr<UINode> ViewStackProcessor::GetNewUINode()
+{
+    return Finish();
+}
+
 ScopedViewStackProcessor::ScopedViewStackProcessor()
 {
     std::swap(instance_, ViewStackProcessor::instance);

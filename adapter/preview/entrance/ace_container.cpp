@@ -19,6 +19,7 @@
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/lib/ui/ui_dart_state.h"
+
 #include "adapter/preview/entrance/dir_asset_provider.h"
 #include "core/common/flutter/flutter_asset_manager.h"
 #include "core/common/flutter/flutter_task_executor.h"
@@ -26,19 +27,26 @@
 #include <ui/rs_surface_node.h>
 #include <ui/rs_ui_director.h>
 
+#include "flutter/lib/ui/ui_dart_state.h"
 #include "adapter/preview/entrance/rs_dir_asset_provider.h"
 #include "core/common/rosen/rosen_asset_manager.h"
-#include "core/common/rosen/rosen_task_executor.h"
+#include "core/common/flutter/flutter_task_executor.h"
 #endif
 
 #include "adapter/preview/entrance/ace_application_info.h"
 #include "adapter/preview/osal/stage_card_parser.h"
-#include "adapter/preview/osal/stage_module_parser.h"
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/card_frontend/card_frontend.h"
+#include "bridge/card_frontend/card_frontend_declarative.h"
+#include "bridge/card_frontend/form_frontend_declarative.h"
+#include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/declarative_frontend.h"
+#include "bridge/js_frontend/engine/common/js_engine_loader.h"
+#include "bridge/js_frontend/js_frontend.h"
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
 #include "core/common/container_scope.h"
@@ -49,13 +57,13 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/render/adapter/window_prviewer.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/pipeline_context.h"
-#include "frameworks/bridge/card_frontend/card_frontend.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
-#include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
-#include "frameworks/bridge/js_frontend/js_frontend.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -70,31 +78,53 @@ const char LOCALE_KEY[] = "locale";
 
 std::once_flag AceContainer::onceFlag_;
 
-AceContainer::AceContainer(int32_t instanceId, FrontendType type)
-    : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type)
+AceContainer::AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context)
+    : instanceId_(instanceId), messageBridge_(AceType::MakeRefPtr<PlatformBridge>()), type_(type), context_(context)
 {
     ThemeConstants::InitDeviceType();
 
-#ifndef ENABLE_ROSEN_BACKEND
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
-    auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
-    if (type != FrontendType::DECLARATIVE_JS) {
-        flutterTaskExecutor->InitJsThread();
+    auto taskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>(state->GetTaskRunners());
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
+        taskExecutor->InitJsThread();
     }
-    taskExecutor_ = flutterTaskExecutor;
-#else
-    auto rsTaskExecutor = Referenced::MakeRefPtr<RSTaskExecutor>();
-    if (type != FrontendType::DECLARATIVE_JS) {
-        rsTaskExecutor->InitJsThread();
-    }
-    taskExecutor_ = rsTaskExecutor;
-#endif
+    taskExecutor_ = taskExecutor;
 }
 
 void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
-    if (type_ != FrontendType::DECLARATIVE_JS) {
+    auto stageContext = AceType::DynamicCast<StageContext>(context_);
+    auto faContext = AceType::DynamicCast<FaContext>(context_);
+    bool useNewPipe = true;
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
+        useNewPipe = false;
+    } else if (stageContext) {
+        auto appInfo = stageContext->GetAppInfo();
+        CHECK_NULL_VOID(appInfo);
+        auto hapModuleInfo = stageContext->GetHapModuleInfo();
+        CHECK_NULL_VOID(hapModuleInfo);
+        auto compatibleVersion = appInfo->GetMinAPIVersion();
+        auto targetVersion = appInfo->GetTargetAPIVersion();
+        auto releaseType = appInfo->GetApiReleaseType();
+        labelId_ = appInfo->GetLabelId();
+        bool enablePartialUpdate = hapModuleInfo->GetPartialUpdateFlag();
+        installationFree_ = hapModuleInfo->IsInstallationFree();
+        useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage("", compatibleVersion, targetVersion,
+            releaseType, !enablePartialUpdate);
+    } else if (faContext) {
+        auto appInfo = faContext->GetAppInfo();
+        CHECK_NULL_VOID(appInfo);
+        auto compatibleVersion = appInfo->GetMinAPIVersion();
+        auto targetVersion = appInfo->GetTargetAPIVersion();
+        auto releaseType = appInfo->GetApiReleaseType();
+        useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFA("", compatibleVersion, targetVersion, releaseType);
+    }
+    LOGI("Using %{public}s pipeline context ...", (useNewPipe ? "new" : "old"));
+    if (useNewPipe) {
+        SetUseNewPipeline();
+    }
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
         InitializeFrontend();
     }
 }
@@ -170,6 +200,17 @@ void AceContainer::InitializeFrontend()
     } else if (type_ == FrontendType::JS_CARD) {
         AceApplicationInfo::GetInstance().SetCardType();
         frontend_ = AceType::MakeRefPtr<CardFrontend>();
+    } else if (type_ == FrontendType::ETS_CARD) {
+        frontend_ = AceType::MakeRefPtr<FormFrontendDeclarative>();
+        auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+        auto jsEngine = Framework::JsEngineLoader::GetDeclarative().CreateJsEngine(instanceId_);
+        EngineHelper::AddEngine(instanceId_, jsEngine);
+        cardFrontend->SetJsEngine(jsEngine);
+        cardFrontend->SetPageProfile(pageProfile_);
+        cardFrontend->SetRunningCardId(0);
+        cardFrontend->SetIsFormRender(true);
+        cardFrontend->SetTaskExecutor(taskExecutor_);
+        SetIsFRSCardContainer(true);
     } else {
         LOGE("Frontend type not supported");
         return;
@@ -187,38 +228,31 @@ void AceContainer::RunNativeEngineLoop()
     taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
 }
 
-void AceContainer::ParseStageAppConfig(const std::string& assetPath, bool formsEnabled)
+void AceContainer::InitializeStageAppConfig(const std::string& assetPath, bool formsEnabled)
 {
-    const char* configFilename = "module.json";
-    std::string appConfig;
-    if (!Framework::GetAssetContentImpl(assetManager_, configFilename, appConfig)) {
-        LOGE("Can not load the application config of stage model.");
-        return;
-    }
-    RefPtr<StageModuleParser> stageModuleParser = AceType::MakeRefPtr<StageModuleParser>();
-    stageModuleParser->Parse(appConfig);
-    auto appInfo = stageModuleParser->GetAppInfo();
-    if (!appInfo) {
-        LOGE("Extract appInfo from module.json failed");
-        return;
-    }
-    std::string bundleName = appInfo->GetBundleName();
-    auto& moduleInfo = stageModuleParser->GetModuleInfo();
-    const std::string& compileMode = moduleInfo->GetCompileMode();
-    const std::string& moduleName = moduleInfo->GetModuleName();
-    bool isBundle = (compileMode != "esmodule");
-    if (frontend_) {
-        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
-        if (declarativeFrontend){
-            declarativeFrontend->InitializeModuleSearcher(bundleName, moduleName, assetPath, isBundle);
-        }
-    } else {
-        LOGE("frontend_ is nullptr");
-    }
+    auto stageContext = AceType::DynamicCast<StageContext>(context_);
+    CHECK_NULL_VOID(stageContext);
+    auto appInfo = stageContext->GetAppInfo();
+    CHECK_NULL_VOID(appInfo);
+    auto hapModuleInfo = stageContext->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
     if (pipelineContext_ && !formsEnabled) {
         LOGI("Set MinPlatformVersion to %{public}d", appInfo->GetMinAPIVersion());
         pipelineContext_->SetMinPlatformVersion(appInfo->GetMinAPIVersion());
     }
+    auto& bundleName = appInfo->GetBundleName();
+    auto& compileMode = hapModuleInfo->GetCompileMode();
+    auto& moduleName = hapModuleInfo->GetModuleName();
+    bool isBundle = (compileMode != "esmodule");
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+    CHECK_NULL_VOID(declarativeFrontend);
+    declarativeFrontend->InitializeModuleSearcher(bundleName, moduleName, assetPath, isBundle);
+
+    auto formFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+    CHECK_NULL_VOID(formFrontend);
+    formFrontend->SetBundleName(bundleName);
+    formFrontend->SetModuleName(moduleName);
+    formFrontend->SetIsBundle(isBundle);
 }
 
 void AceContainer::SetStageCardConfig(const std::string& pageProfile, const std::string& selectUrl)
@@ -407,7 +441,8 @@ void AceContainer::InitializeCallback()
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs)
 {
-    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type);
+    auto context = Context::CreateContext(runArgs.projectModel == ProjectModel::STAGE, runArgs.appResourcesPath);
+    auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, context);
     AceEngine::Get().AddContainer(aceContainer->GetInstanceId(), aceContainer);
     aceContainer->Initialize();
     ContainerScope scope(instanceId);
@@ -452,7 +487,8 @@ bool AceContainer::RunPage(int32_t instanceId, int32_t pageId, const std::string
     auto front = container->GetFrontend();
     if (front) {
         auto type = front->GetType();
-        if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD)) {
+        if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
+            (type == FrontendType::ETS_CARD)) {
             front->RunPage(pageId, url, params);
             return true;
         } else {
@@ -638,9 +674,7 @@ void AceContainer::AddAssetPath(
     int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
 {
     auto container = GetContainerInstance(instanceId);
-    if (!container) {
-        return;
-    }
+    CHECK_NULL_VOID(container);
 
     if (!container->assetManager_) {
         RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
@@ -654,7 +688,7 @@ void AceContainer::AddAssetPath(
         LOGD("Current path is: %{private}s", path.c_str());
         auto dirAssetProvider = AceType::MakeRefPtr<DirAssetProvider>(
             path, std::make_unique<flutter::DirectoryAssetBundle>(
-                        fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
+                      fml::OpenDirectory(path.c_str(), false, fml::FilePermission::kRead)));
         container->assetManager_->PushBack(std::move(dirAssetProvider));
     }
 }
@@ -663,9 +697,7 @@ void AceContainer::AddAssetPath(
     int32_t instanceId, const std::string& packagePath, const std::vector<std::string>& paths)
 {
     auto container = GetContainerInstance(instanceId);
-    if (!container) {
-        return;
-    }
+    CHECK_NULL_VOID(container);
 
     if (!container->assetManager_) {
         RefPtr<RSAssetManager> rsAssetManager = Referenced::MakeRefPtr<RSAssetManager>();
@@ -770,23 +802,16 @@ void AceContainer::SetView(FlutterAceView* view, double density, int32_t width, 
     container->AttachView(std::move(window), view, density, width, height);
 }
 #else
-void AceContainer::SetView(RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender)
+void AceContainer::SetView(
+    RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender)
 {
-    if (view == nullptr) {
-        return;
-    }
-
+    CHECK_NULL_VOID(view);
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(view->GetInstanceId()));
-    if (!container) {
-        return;
-    }
-    auto platformWindow = PlatformWindow::Create(view);
-    if (!platformWindow) {
-        LOGE("Create PlatformWindow failed!");
-        return;
-    }
-
-    std::unique_ptr<Window> window = std::make_unique<Window>(std::move(platformWindow));
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto rsWindow = new Rosen::Window(onRender);
+    auto window = std::make_unique<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
     container->AttachView(std::move(window), view, density, width, height, onRender);
 }
 #endif
@@ -877,15 +902,18 @@ void AceContainer::AttachView(
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
 #else
-void AceContainer::AttachView(
-    std::unique_ptr<Window> window, RSAceView* view, double density, int32_t width, int32_t height, SendRenderDataCallback onRender)
+void AceContainer::AttachView(std::unique_ptr<Window> window, RSAceView* view, double density, int32_t width,
+    int32_t height, SendRenderDataCallback onRender)
 {
     ContainerScope scope(instanceId_);
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
 
-    auto rsTaskExecutor = AceType::DynamicCast<RSTaskExecutor>(taskExecutor_);
-    if (type_ == FrontendType::DECLARATIVE_JS) {
+    auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
+    ACE_DCHECK(state != nullptr);
+    auto rsTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+    rsTaskExecutor->InitOtherThreads(state->GetTaskRunners());
+    if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::ETS_CARD) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
         rsTaskExecutor->InitJsThread(false);
         InitializeFrontend();
@@ -896,17 +924,34 @@ void AceContainer::AttachView(
         }
     }
     resRegister_ = aceView_->GetPlatformResRegister();
-    auto pipelineContext = AceType::MakeRefPtr<PipelineContext>(
-        std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
-    pipelineContext->SetRootSize(density, width, height);
-    pipelineContext->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
-    pipelineContext->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
-    pipelineContext->SetMessageBridge(messageBridge_);
-    pipelineContext->SetWindowModal(windowModal_);
-    pipelineContext->SetDrawDelegate(aceView_->GetDrawDelegate());
-    pipelineContext->SetIsJsCard(type_ == FrontendType::JS_CARD);
-    pipelineContext_ = pipelineContext;
+    if (useNewPipeline_) {
+        LOGI("New pipeline version creating...");
+        pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+        pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
+    } else {
+        pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(
+            std::move(window), taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
+        pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManager>());
+    }
+    pipelineContext_->SetRootSize(density, width, height);
+    pipelineContext_->SetIsRightToLeft(AceApplicationInfo::GetInstance().IsRightToLeft());
+    pipelineContext_->SetMessageBridge(messageBridge_);
+    pipelineContext_->SetWindowModal(windowModal_);
+    pipelineContext_->SetDrawDelegate(aceView_->GetDrawDelegate());
+    pipelineContext_->SetIsJsCard(type_ == FrontendType::JS_CARD);
+    if (installationFree_) {
+        LOGD("installationFree:%{public}d, labelId:%{public}d", installationFree_, labelId_);
+        pipelineContext_->SetInstallationFree(installationFree_);
+        pipelineContext_->SetAppLabelId(labelId_);
+    }
+    pipelineContext_->OnShow();
     InitializeCallback();
+
+    auto cardFrontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
+    if (cardFrontend) {
+        cardFrontend->SetLoadCardCallBack(WeakPtr<PipelineBase>(pipelineContext_));
+    }
 
     ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
@@ -928,7 +973,8 @@ void AceContainer::AttachView(
     }
 
     taskExecutor_->PostTask(
-        [pipelineContext, onRender, this]() {
+        [pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContext_), onRender, this]() {
+            CHECK_NULL_VOID(pipelineContext);
             auto director = Rosen::RSUIDirector::Create();
             if (director == nullptr) {
                 return;

@@ -354,6 +354,7 @@ public:
     }
 
     void IsFirstRender(const JSCallbackInfo& info);
+    void FindChildByIdForPreview(const JSCallbackInfo& info);
 
 private:
     void MarkNeedUpdate() override;

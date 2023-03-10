@@ -31,6 +31,9 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+#include "adapter/preview/external/ability/context.h"
+#include "adapter/preview/external/ability/fa/fa_context.h"
+#include "adapter/preview/external/ability/stage/stage_context.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "adapter/preview/entrance/flutter_ace_view.h"
@@ -72,7 +75,7 @@ public:
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
     static void NativeOnConfigurationUpdated(int32_t instanceId);
 
-    AceContainer(int32_t instanceId, FrontendType type);
+    AceContainer(int32_t instanceId, FrontendType type, RefPtr<Context> context);
     ~AceContainer() override = default;
 
     void Initialize() override;
@@ -220,7 +223,44 @@ public:
         pageProfile_ = pageProfile;
     }
 
-    void ParseStageAppConfig(const std::string& assetPath, bool formsEnabled);
+    void InitializeStageAppConfig(const std::string& assetPath, bool formsEnabled);
+
+    void SetCardFrontend(WeakPtr<Frontend> frontend, int64_t cardId) override
+    {
+        std::lock_guard<std::mutex> lock(cardFrontMutex_);
+        cardFrontendMap_.try_emplace(cardId, frontend);
+    }
+
+    WeakPtr<Frontend> GetCardFrontend(int64_t cardId) const override
+    {
+        std::lock_guard<std::mutex> lock(cardFrontMutex_);
+        auto it = cardFrontendMap_.find(cardId);
+        if (it != cardFrontendMap_.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+    void GetCardFrontendMap(std::unordered_map<int64_t, WeakPtr<Frontend>>& cardFrontendMap) const override
+    {
+        cardFrontendMap = cardFrontendMap_;
+    }
+
+    void SetCardPipeline(WeakPtr<PipelineBase> pipeline, int64_t cardId) override
+    {
+        std::lock_guard<std::mutex> lock(cardPipelineMutex_);
+        cardPipelineMap_.try_emplace(cardId, pipeline);
+    }
+
+    WeakPtr<PipelineBase> GetCardPipeline(int64_t cardId) const override
+    {
+        std::lock_guard<std::mutex> lock(cardPipelineMutex_);
+        auto it = cardPipelineMap_.find(cardId);
+        if (it == cardPipelineMap_.end()) {
+            return nullptr;
+        }
+        return it->second;
+    }
 
 private:
     void InitializeFrontend();
@@ -253,6 +293,15 @@ private:
     ResourceInfo resourceInfo_;
     static std::once_flag onceFlag_;
     std::string pageProfile_;
+    std::unordered_map<int64_t, WeakPtr<Frontend>> cardFrontendMap_;
+    std::unordered_map<int64_t, WeakPtr<PipelineBase>> cardPipelineMap_;
+    mutable std::mutex cardFrontMutex_;
+    mutable std::mutex cardPipelineMutex_;
+    RefPtr<Context> context_;
+
+    //app bar to use
+    bool installationFree_ = false;
+    int32_t labelId_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
 };

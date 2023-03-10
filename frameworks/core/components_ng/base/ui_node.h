@@ -288,6 +288,27 @@ public:
         return childrenUpdatedFrom_;
     }
 
+#ifdef PREVIEW
+    void SetDebugLine(const std::string& line)
+    {
+        debugLine_ = line;
+    }
+    std::string GetDebugLine() const
+    {
+        return debugLine_;
+    }
+
+    void SetViewId(const std::string& viewId)
+    {
+        viewId_ = viewId;
+    }
+
+    std::string GetViewId() const
+    {
+        return viewId_;
+    }
+#endif
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -336,6 +357,10 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
 
+#ifdef PREVIEW
+    std::string debugLine_;
+    std::string viewId_;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
 

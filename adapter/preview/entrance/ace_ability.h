@@ -18,9 +18,8 @@
 
 #include <atomic>
 
-#ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
-#else
+#ifdef ENABLE_ROSEN_BACKEND
 #include "glfw_render_context.h"
 #endif
 
@@ -91,6 +90,15 @@ private:
     {
         controller_ = controller;
     }
+
+#ifdef ENABLE_ROSEN_BACKEND
+    void SetFlutterWindowControllerRef(const FlutterDesktopWindowControllerRef &controller)
+    {
+        windowControllerRef_ = controller;
+    }
+
+    FlutterDesktopWindowControllerRef windowControllerRef_ = nullptr;
+#endif
 
     // flag indicating if the glfw message loop should be running.
     static std::atomic<bool> loopRunning_;

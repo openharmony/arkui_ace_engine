@@ -26,6 +26,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

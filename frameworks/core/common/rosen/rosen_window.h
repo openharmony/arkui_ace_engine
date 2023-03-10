@@ -22,39 +22,11 @@
 #include <thread>
 #include <vector>
 
+#include "base/thread/sem_queue.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/platform_window.h"
 
 namespace OHOS::Ace::Platform {
-
-template<class T>
-class SemQueue {
-public:
-    void PopFront(T &t)
-    {
-        std::unique_lock lock(mutex_);
-        if (queue_.empty()) {
-            const auto &func = [this]() {
-                return !queue_.empty();
-            };
-            cv_.wait(lock, func);
-        }
-        t = queue_.front();
-        queue_.pop();
-    }
-
-    void Push(const T &t)
-    {
-        std::unique_lock lock(mutex_);
-        queue_.push(std::move(t));
-        cv_.notify_all();
-    }
-
-private:
-    std::queue<T> queue_;
-    std::mutex mutex_;
-    std::condition_variable cv_;
-};
 
 class RSWindow final : public PlatformWindow {
 public:
@@ -67,8 +39,10 @@ private:
     void VsyncThreadMain();
 
     std::vector<AceVsyncCallback> vsyncCallbacks_;
+    std::vector<AceVsyncCallback> pendingVsyncCallbacks_;
     std::unique_ptr<std::thread> vsyncThread_ = nullptr;
     SemQueue<bool> vsyncRequests_;
+    std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace::Platform
