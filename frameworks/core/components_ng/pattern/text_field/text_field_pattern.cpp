@@ -1407,7 +1407,6 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     if (!focusHub->IsFocusable()) {
         return;
     }
-    StartTwinkling();
     lastTouchOffset_ = info.GetLocalLocation();
     caretUpdateType_ = CaretUpdateType::PRESSED;
     selectionMode_ = SelectionMode::NONE;
@@ -1423,6 +1422,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         return;
     }
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    StartTwinkling();
 
     if (isMousePressed_) {
         LOGI("TextFieldPattern::HandleTouchUp of mouse");
