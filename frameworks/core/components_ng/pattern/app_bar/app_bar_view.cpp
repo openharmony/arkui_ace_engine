@@ -41,6 +41,7 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
     auto titleBar = BuildBarTitle();
     column->AddChild(titleBar);
     column->AddChild(content);
+    content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     auto stagePattern = content->GetPattern<StagePattern>();
     if (stagePattern) {
         stagePattern->SetOnRebuildFrameCallback([titleBar, content]() {
