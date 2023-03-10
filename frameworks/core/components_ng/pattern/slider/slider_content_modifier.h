@@ -196,10 +196,7 @@ public:
         }
     }
 
-    void SetBlockShape(const RefPtr<BasicShape>& shape)
-    {
-        shape_ = shape;
-    }
+    void SetBlockShape(const RefPtr<BasicShape>& shape);
 
     void SetDirection(Axis axis)
     {
