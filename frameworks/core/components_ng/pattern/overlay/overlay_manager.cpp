@@ -482,24 +482,23 @@ RefPtr<FrameNode> OverlayManager::GetIndexerPopup(int32_t targetId)
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
 {
+    LOGI("begin pop");
     popupMap_[targetId] = popupInfo;
+    CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
+    popupMap_[targetId].markNeedUpdate = false;
+    CHECK_NULL_VOID_NOLOG(popupInfo.popupNode);
+    popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
+    CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
+    popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
+
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    CHECK_NULL_VOID_NOLOG(popupInfo.markNeedUpdate);
-    CHECK_NULL_VOID_NOLOG(popupInfo.popupNode);
-    popupMap_[targetId].markNeedUpdate = false;
     auto rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.begin(), rootChildren.end(), popupInfo.popupNode);
-    if (iter == rootChildren.end()) {
-        LOGW("OverlayManager: popupNode is not found in rootChildren");
-        return;
+    if (iter != rootChildren.end()) {
+        rootNode->RemoveChild(popupMap_[targetId].popupNode);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    CHECK_NULL_VOID_NOLOG(popupInfo.isCurrentOnShow);
-    LOGI("begin pop");
-    popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
-    rootNode->RemoveChild(popupMap_[targetId].popupNode);
-    popupMap_[targetId].isCurrentOnShow = !popupInfo.isCurrentOnShow;
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void OverlayManager::HideAllPopups()
