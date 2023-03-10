@@ -245,38 +245,50 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
 
 void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("PickerText Theme is null");
         return;
     }
     NG::PickerTextStyle textStyle;
-    JSTextPickerParser::ParseTextStyle(info[0], textStyle);
-
-    TextPickerModel::GetInstance()->SetDisappearTextStyle(textStyle);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+    }
+    TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
 void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("PickerText Theme is null");
         return;
     }
     NG::PickerTextStyle textStyle;
-    JSTextPickerParser::ParseTextStyle(info[0], textStyle);
-
-    TextPickerModel::GetInstance()->SetNormalTextStyle(textStyle);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+    }
+    TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
 void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("PickerText Theme is null");
         return;
     }
     NG::PickerTextStyle textStyle;
-    JSTextPickerParser::ParseTextStyle(info[0], textStyle);
-
-    TextPickerModel::GetInstance()->SetSelectedTextStyle(textStyle);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+    }
+    TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
 void JSTextPicker::OnAccept(const JSCallbackInfo& info) {}
@@ -439,66 +451,23 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
 
 void JSTextPickerDialog::ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result)
 {
-    LOGI();
     auto disappearProperty = paramObj->GetProperty("disappearTextStyle");
     auto normalProperty = paramObj->GetProperty("textStyle");
     auto selectedProperty = paramObj->GetProperty("selectedTextStyle");
 
     if (!disappearProperty->IsNull() && disappearProperty->IsObject()) {
         JSRef<JSObject> disappearObj = JSRef<JSObject>::Cast(disappearProperty);
-        NG::PickerTextStyle disappearTextStyle;
-        JSTextPickerParser::ParseTextStyle(disappearObj, disappearTextStyle);
-
-        if (disappearTextStyle.fontSize.has_value() && disappearTextStyle.fontSize->IsValid()) {
-            result.disappearFontSize_ = disappearTextStyle.fontSize.value();
-            result.hasValueFlag |= NG::FLAG_DISAPPEAR_FONTSIZE;
-        }
-        if (disappearTextStyle.textColor) {
-            result.disappearColor_ = disappearTextStyle.textColor.value();
-            result.hasValueFlag |= NG::FLAG_DISAPPEAR_COLOR;
-        }
-        if (disappearTextStyle.fontWeight) {
-            result.disappearWeight_ = disappearTextStyle.fontWeight.value();
-            result.hasValueFlag |= NG::FLAG_DISAPPEAR_WEIGHT;
-        }
+        JSTextPickerParser::ParseTextStyle(disappearObj, result.disappearTextStyle_);
     }
 
     if (!normalProperty->IsNull() && normalProperty->IsObject()) {
         JSRef<JSObject> noramlObj = JSRef<JSObject>::Cast(normalProperty);
-        NG::PickerTextStyle textStyle;
-        JSTextPickerParser::ParseTextStyle(noramlObj, textStyle);
-
-        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
-            result.fontSize_ = textStyle.fontSize.value();
-            result.hasValueFlag |= NG::FLAG_FONTSIZE;
-        }
-        if (textStyle.textColor) {
-            result.color_ = textStyle.textColor.value();
-            result.hasValueFlag |= NG::FLAG_COLOR;
-        }
-        if (textStyle.fontWeight) {
-            result.weight_ = textStyle.fontWeight.value();
-            result.hasValueFlag |= NG::FLAG_WEIGHT;
-        }
+        JSTextPickerParser::ParseTextStyle(noramlObj, result.normalTextStyle_);
     }
 
     if (!selectedProperty->IsNull() && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
-        NG::PickerTextStyle selectedTextStyle;
-        JSTextPickerParser::ParseTextStyle(selectedObj, selectedTextStyle);
-
-        if (selectedTextStyle.fontSize.has_value() && selectedTextStyle.fontSize->IsValid()) {
-            result.selectedFontSize_ = selectedTextStyle.fontSize.value();
-            result.hasValueFlag |= NG::FLAG_SELECTED_FONTSIZE;
-        }
-        if (selectedTextStyle.textColor) {
-            result.selectedColor_ = selectedTextStyle.textColor.value();
-            result.hasValueFlag |= NG::FLAG_SELECTED_COLOR;
-        }
-        if (selectedTextStyle.fontWeight) {
-            result.selectedWeight_ = selectedTextStyle.fontWeight.value();
-            result.hasValueFlag |= NG::FLAG_SELECTED_WEIGHT;
-        }
+        JSTextPickerParser::ParseTextStyle(selectedObj, result.selectedTextStyle_);
     }
 }
 

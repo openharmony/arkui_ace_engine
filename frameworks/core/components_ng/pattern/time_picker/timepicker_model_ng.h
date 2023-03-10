@@ -29,9 +29,9 @@ public:
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(TimeChangeEvent&& onChange) override;
     void SetHour24(bool isUseMilitaryTime) override;
-    void SetDisappearTextStyle(const PickerTextStyle& value) override;
-    void SetNormalTextStyle(const PickerTextStyle& value) override;
-    void SetSelectedTextStyle(const PickerTextStyle& value) override;
+    void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
+    void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
+    void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value) override;
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();

@@ -219,6 +219,9 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
+    if (!overlayManager_) {
+        overlayManager_ = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    }
     return overlayManager_;
 }
 void PipelineContext::AddPredictTask(PredictTask&& task) {}

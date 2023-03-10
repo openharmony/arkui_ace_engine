@@ -32,6 +32,9 @@ public:
     static void SetLunar(bool isLunar);
     static void OnChange(const JSCallbackInfo& info);
     static void PickerBackgroundColor(const JSCallbackInfo& info);
+    static void SetDisappearTextStyle(const JSCallbackInfo& info);
+    static void SetTextStyle(const JSCallbackInfo& info);
+    static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
     static void ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result);
     // keep compatible, need remove after
@@ -42,6 +45,7 @@ private:
     // keep compatible, need remove after
     static void CreateTimePicker(const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    static void SetDefaultAttributes();
     // keep compatible, need remove after
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
