@@ -75,7 +75,7 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
-    const auto& rect = GetGeometryNode()->GetFrameRect();
+    const auto& rect = GetRenderContext()->GetPaintRectWithTransform();
     if (!rect.IsInRegion(parentLocalPoint)) {
         return HitTestResult::OUT_OF_REGION;
     }
