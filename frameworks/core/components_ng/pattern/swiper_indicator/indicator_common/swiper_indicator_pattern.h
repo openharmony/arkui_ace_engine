@@ -130,9 +130,9 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
     void GetMouseClickIndex();
-    void InitTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
+    void UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
-    void InitTextContentSub(
+    void UpdateTextContentSub(
         const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
         const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode);
 
@@ -145,6 +145,7 @@ private:
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
+    SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
 };
 } // namespace OHOS::Ace::NG

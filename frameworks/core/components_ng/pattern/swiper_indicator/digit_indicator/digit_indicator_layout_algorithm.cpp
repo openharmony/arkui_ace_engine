@@ -31,9 +31,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float DIGIT_SIDE_DISTANCE = 8.0f;
-constexpr float DIGIT_TOTAL_DISTANCE  = 16.0f;
-constexpr float HALF = 0.5f;
+constexpr Dimension INDICATOR_PADDING = 8.0_vp;
 } // namespace
 
 void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -41,37 +39,22 @@ void DigitIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    CalculateTextContent(frameNode);
     auto layoutPropertyConstraint = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutPropertyConstraint);
     auto layoutConstraint = layoutPropertyConstraint->CreateChildConstraint();
-    indicatorWidth_ = DIGIT_TOTAL_DISTANCE;
-    indicatorHeight_ = 0.0f;
+    auto indicatorWidth = INDICATOR_PADDING.ConvertToPx() * 2;
+    auto indicatorHeight = 0.0f;
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
         auto textGeometryNode = child->GetGeometryNode();
         CHECK_NULL_VOID(textGeometryNode);
         auto textFrameSize = textGeometryNode->GetFrameSize();
-        indicatorWidth_ += textFrameSize.Width();
-        if (indicatorHeight_ < textFrameSize.Height()) {
-            indicatorHeight_ = textFrameSize.Height();
+        indicatorWidth += textFrameSize.Width();
+        if (indicatorHeight < textFrameSize.Height()) {
+            indicatorHeight = textFrameSize.Height();
         }
     }
-
-    auto layoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    const auto& frameNodeLayoutConstraint = layoutProperty->GetLayoutConstraint();
-    const auto& minSize = frameNodeLayoutConstraint->minSize;
-    const auto& maxSize = frameNodeLayoutConstraint->maxSize;
-    SizeF frameSize = { -1.0f, -1.0f };
-    do {
-        frameSize.SetSizeT(SizeF { indicatorWidth_, indicatorHeight_ });
-        if (frameSize.IsNonNegative()) {
-            break;
-        }
-        frameSize.Constrain(minSize, maxSize);
-    } while (false);
-
+    SizeF frameSize = { indicatorWidth, indicatorHeight };
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(frameSize);
@@ -82,136 +65,11 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
-    CHECK_NULL_VOID(swiperNode);
 
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto direction = swiperPattern->GetDirection();
-    auto layoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto left = layoutProperty->GetLeft();
-    auto right = layoutProperty->GetRight();
-    auto top = layoutProperty->GetTop();
-    auto bottom = layoutProperty->GetBottom();
-
-    auto layoutPropertyConstraint = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutPropertyConstraint);
-    const auto& layoutConstraint = layoutPropertyConstraint->GetLayoutConstraint();
-    auto swiperWidth = layoutConstraint->parentIdealSize.Width().value();
-    auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
-
-    Offset position;
-    if (left.has_value()) {
-        auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(left->Value()));
-        position.SetX(leftValue);
-    } else if (right.has_value()) {
-        auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(right->Value()));
-        position.SetX(swiperWidth - indicatorWidth_ - rightValue);
-    } else {
-        position.SetX(
-            direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) * HALF : swiperWidth - indicatorWidth_);
-    }
-    if (top.has_value()) {
-        auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(top->Value()));
-        position.SetY(topValue);
-    } else if (bottom.has_value()) {
-        auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(bottom->Value()));
-        position.SetY(swiperHeight - indicatorHeight_ - bottomValue);
-    } else {
-        if (direction == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight - indicatorHeight_);
-        } else {
-            position.SetY((swiperHeight - indicatorHeight_) * HALF);
-        }
-    }
-    auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(layoutGeometryNode);
-    auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};
-    CalculateTextFrameSize(frameNode, layoutWrapper);
-    layoutGeometryNode->SetMarginFrameOffset(currentOffset);
-}
-
-double DigitIndicatorLayoutAlgorithm::GetValidEdgeLength(
-    float swiperLength, float indicatorLength, const Dimension& edge)
-{
-    double edgeLength = edge.Unit() == DimensionUnit::PERCENT ? swiperLength * edge.Value() : edge.ConvertToPx();
-    if (!NearZero(edgeLength) && edgeLength > swiperLength - indicatorLength) {
-        edgeLength = swiperLength - indicatorLength;
-    }
-    if (edgeLength < 0.0) {
-        edgeLength = 0.0;
-    }
-    return edgeLength;
-}
-
-void DigitIndicatorLayoutAlgorithm::CalculateTextContent(const RefPtr<FrameNode>& frameNode)
-{
-    auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
-    CHECK_NULL_VOID(swiperNode);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto currentIndex = swiperPattern->GetCurrentIndex();
-    auto itemCount = swiperPattern->TotalCount();
-    auto lastFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetLastChild());
-    CHECK_NULL_VOID(lastFrameNode);
-    auto firstTextFrameNode = AceType::DynamicCast<FrameNode>(lastFrameNode->GetFirstChild());
-    CHECK_NULL_VOID(firstTextFrameNode);
-    auto firstTextLayoutProperty = DynamicCast<TextLayoutProperty>(firstTextFrameNode->GetLayoutProperty());
-    CHECK_NULL_VOID(firstTextLayoutProperty);
-    auto layoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto selectedFontColor = layoutProperty->GetSelectedFontColorValue(
-        theme->GetDigitalIndicatorTextStyle().GetTextColor());
-    auto selectedFontSize = layoutProperty->GetSelectedFontSizeValue(
-        theme->GetDigitalIndicatorTextStyle().GetFontSize());
-    if (!selectedFontSize.IsValid()) {
-        selectedFontSize = theme->GetDigitalIndicatorTextStyle().GetFontSize();
-    }
-    auto selectedFontWeight = layoutProperty->GetSelectedFontWeightValue(
-        theme->GetDigitalIndicatorTextStyle().GetFontWeight());
-    firstTextLayoutProperty->UpdateTextColor(selectedFontColor);
-    firstTextLayoutProperty->UpdateFontSize(selectedFontSize);
-    firstTextLayoutProperty->UpdateFontWeight(selectedFontWeight);
-    currentIndex += 1;
-    if (currentIndex > itemCount && itemCount > 0) {
-        currentIndex = currentIndex % itemCount;
-    }
-    firstTextLayoutProperty->UpdateContent(std::to_string(currentIndex));
-
-    auto lastTextFrameNode = AceType::DynamicCast<FrameNode>(lastFrameNode->GetLastChild());
-    auto lastTextLayoutProperty = DynamicCast<TextLayoutProperty>(lastTextFrameNode->GetLayoutProperty());
-    auto fontColor = layoutProperty->GetFontColorValue(theme->GetDigitalIndicatorTextStyle().GetTextColor());
-    auto fontSize = layoutProperty->GetFontSizeValue(theme->GetDigitalIndicatorTextStyle().GetFontSize());
-    if (!fontSize.IsValid()) {
-        fontSize = theme->GetDigitalIndicatorTextStyle().GetFontSize();
-    }
-    auto fontWeight = layoutProperty->GetFontWeightValue(theme->GetDigitalIndicatorTextStyle().GetFontWeight());
-    lastTextLayoutProperty->UpdateTextColor(fontColor);
-    lastTextLayoutProperty->UpdateFontSize(fontSize);
-    lastTextLayoutProperty->UpdateFontWeight(fontWeight);
-    lastTextLayoutProperty->UpdateContent("/" + std::to_string(itemCount));
-
-    firstTextFrameNode->MarkModifyDone();
-    firstTextFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    lastTextFrameNode->MarkModifyDone();
-    lastTextFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-}
-void DigitIndicatorLayoutAlgorithm::CalculateTextFrameSize(const RefPtr<FrameNode>& frameNode,
-    LayoutWrapper* layoutWrapper)
-{
     auto children = frameNode->GetChildren();
     if (children.empty()) {
         LOGW("text has no child node.");
         return;
-    }
-    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto textGeometryNode = child->GetGeometryNode();
-        CHECK_NULL_VOID(textGeometryNode);
     }
     auto textWrapperList = layoutWrapper->GetAllChildrenWithBuild();
     auto frontTextWrapper = textWrapperList.front();
@@ -220,8 +78,8 @@ void DigitIndicatorLayoutAlgorithm::CalculateTextFrameSize(const RefPtr<FrameNod
     CHECK_NULL_VOID(frontTextGeometryNode);
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(layoutGeometryNode);
-    auto frontCurrentOffset = OffsetF{ DIGIT_SIDE_DISTANCE, (layoutGeometryNode->GetMarginFrameSize().Height() -
-        frontTextGeometryNode->GetMarginFrameSize().Height()) * HALF };
+    auto frontCurrentOffset = OffsetF { INDICATOR_PADDING.Value(),(layoutGeometryNode->GetMarginFrameSize().Height() -
+        frontTextGeometryNode->GetMarginFrameSize().Height()) * 0.5 };
     frontTextGeometryNode->SetMarginFrameOffset(frontCurrentOffset);
     frontTextWrapper->Layout();
 
@@ -230,9 +88,9 @@ void DigitIndicatorLayoutAlgorithm::CalculateTextFrameSize(const RefPtr<FrameNod
     auto backTextGeometryNode = backTextWrapper->GetGeometryNode();
     CHECK_NULL_VOID(backTextGeometryNode);
     auto backTextCurrentOffset = OffsetF { layoutGeometryNode->GetMarginFrameSize().Width() -
-        backTextGeometryNode->GetMarginFrameSize().Width() - DIGIT_SIDE_DISTANCE,
+        backTextGeometryNode->GetMarginFrameSize().Width() - INDICATOR_PADDING.Value(),
         (layoutGeometryNode->GetMarginFrameSize().Height() -
-        backTextGeometryNode->GetMarginFrameSize().Height()) * HALF };
+        backTextGeometryNode->GetMarginFrameSize().Height()) * 0.5 };
     backTextGeometryNode->SetMarginFrameOffset(backTextCurrentOffset);
     backTextWrapper->Layout();
 }

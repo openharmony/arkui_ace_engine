@@ -50,7 +50,12 @@ int32_t FormRendererDelegateProxy::OnSurfaceCreate(
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(
+    auto remoteProxy = Remote();
+    if (!remoteProxy) {
+        HILOG_ERROR("Send surfaceNode failed, ipc remoteobj is null");
+        return IPC_PROXY_ERR;
+    }
+    int32_t error = remoteProxy->SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("register callback fail, error: %d", error);

@@ -26,8 +26,6 @@
 #include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float HALF = 0.5f;
-constexpr float DOUBLE = 2.0f;
 // for indicator
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
@@ -61,12 +59,13 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 
     auto paintProperty = DynamicCast<DotIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
     dotIndicatorModifier_->SetAxis(axis_);
+    dotIndicatorModifier_->SetCurrentIndex(currentIndex_);
     dotIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     dotIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
     dotIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     dotIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
     SizeF contentSize = geometryNode->GetFrameSize();
-    centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * HALF;
+    centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * 0.5;
     dotIndicatorModifier_->SetCenterY(centerY_);
 
     if (isPressed_) {
@@ -101,10 +100,10 @@ void DotIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrap
         paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     // use radius calculation
     LinearVector<float> itemHalfSizes;
-    itemHalfSizes.emplace_back(itemWidth * HALF);
-    itemHalfSizes.emplace_back(itemHeight * HALF);
-    itemHalfSizes.emplace_back(selectedItemWidth * HALF);
-    itemHalfSizes.emplace_back(selectedItemHeight * HALF);
+    itemHalfSizes.emplace_back(itemWidth * 0.5);
+    itemHalfSizes.emplace_back(itemHeight * 0.5);
+    itemHalfSizes.emplace_back(selectedItemWidth * 0.5);
+    itemHalfSizes.emplace_back(selectedItemHeight * 0.5);
     CalculateNormalMargin(itemHalfSizes, frameSize);
     CalculatePointCenterX(
         itemHalfSizes, normalMargin_.GetX(), static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()),
@@ -138,10 +137,10 @@ void DotIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapp
         paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     // use radius calculation
     LinearVector<float> itemHalfSizes;
-    itemHalfSizes.emplace_back(itemWidth * HALF);
-    itemHalfSizes.emplace_back(itemHeight * HALF);
-    itemHalfSizes.emplace_back(selectedItemWidth * HALF);
-    itemHalfSizes.emplace_back(selectedItemHeight * HALF);
+    itemHalfSizes.emplace_back(itemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(itemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(selectedItemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE);
+    itemHalfSizes.emplace_back(selectedItemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE);
     CalculatePointCenterX(itemHalfSizes, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
         static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
 
@@ -190,10 +189,10 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
     auto selectedItemHeight = static_cast<float>(
         paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     // use radius calculation
-    auto itemHalfWidth = itemWidth * HALF * INDICATOR_ZOOM_IN_SCALE;
-    auto itemHalfHeight = itemHeight * HALF * INDICATOR_ZOOM_IN_SCALE;
-    auto selectedItemHalfWidth = selectedItemWidth * HALF * INDICATOR_ZOOM_IN_SCALE;
-    auto selectedItemHalfHeight = selectedItemHeight * HALF * INDICATOR_ZOOM_IN_SCALE;
+    auto itemHalfWidth = itemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE;
+    auto itemHalfHeight = itemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE;
+    auto selectedItemHalfWidth = selectedItemWidth * 0.5 * INDICATOR_ZOOM_IN_SCALE;
+    auto selectedItemHalfHeight = selectedItemHeight * 0.5 * INDICATOR_ZOOM_IN_SCALE;
     LinearVector<float> itemHalfSizes;
     itemHalfSizes.emplace_back(itemHalfWidth);
     itemHalfSizes.emplace_back(itemHalfHeight);
@@ -215,15 +214,11 @@ void DotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapp
 void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& itemHalfSizes, const SizeF& frameSize)
 {
     // diameter calculation
-    auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * DOUBLE;
-    auto itemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * DOUBLE;
-    auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * DOUBLE;
-    auto selectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * DOUBLE;
-    auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
-    if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
-        !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
-        allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
-    }
+    auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
+    auto itemHeight = itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
+    auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
+    auto selectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
+    auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount_) + selectedItemWidth;
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - 1));
     auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
     auto contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
@@ -231,8 +226,8 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
     if (selectedItemHeight > itemHeight) {
         contentHeight = indicatorPadding + selectedItemHeight + indicatorPadding;
     }
-    float marginX = ((axis_ == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * HALF;
-    float marginY = ((axis_ == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - contentHeight) * HALF;
+    float marginX = ((axis_ == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * 0.5;
+    float marginY = ((axis_ == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - contentHeight) * 0.5;
     normalMargin_.SetX(marginX);
     normalMargin_.SetY(marginY);
 }
@@ -240,8 +235,8 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
 void DotIndicatorPaintMethod::CalculatePointCenterX(
     const LinearVector<float>& itemHalfSizes, float margin, float padding, float space, int32_t index)
 {
-    auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * DOUBLE;
-    auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * DOUBLE;
+    auto itemWidth = itemHalfSizes[ITEM_HALF_WIDTH] * 2;
+    auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
     // Calculate the data required for the current pages
     LinearVector<float> startVectorBlackPointCenterX(itemCount_);
     float startLongPointLeftCenterX = 0.0f;
@@ -259,9 +254,8 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
     if (index != itemCount_ - 1) {
         endCenterX = margin + padding + itemHalfSizes[ITEM_HALF_WIDTH];
     }
-    int32_t endCurrentIndex = turnPageRate_ == 0.0f || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f ?
+    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f ?
         endCurrentIndex = index : (turnPageRate_ < 0.0f ? index + 1 : index - 1);
-
     if (endCurrentIndex == -1) {
         endCurrentIndex = itemCount_ - 1;
     } else if (endCurrentIndex == itemCount_) {
@@ -276,13 +270,13 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
                 !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
                 startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 startLongPointLeftCenterX = startCenterX;
-                startLongPointRightCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                startCenterX += space + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * DOUBLE;
+                startLongPointRightCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
+                startCenterX += space + selectedItemWidth;
             } else {
                 startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 startLongPointLeftCenterX = startCenterX;
                 startLongPointRightCenterX = startCenterX + selectedItemWidth;
-                startCenterX += space + selectedItemWidth * DOUBLE;
+                startCenterX += space + selectedItemWidth * 2;
             }
         }
         if (i != endCurrentIndex) {
@@ -294,12 +288,12 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
                 endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 endLongPointLeftCenterX = endCenterX;
                 endLongPointRightCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-                endCenterX += space + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * DOUBLE;
+                endCenterX += space + selectedItemWidth;
             } else {
                 endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 endLongPointLeftCenterX = endCenterX;
                 endLongPointRightCenterX = endCenterX + selectedItemWidth;
-                endCenterX += space + selectedItemWidth * DOUBLE;
+                endCenterX += space + selectedItemWidth * 2;
             }
         }
     }
@@ -365,24 +359,11 @@ bool DotIndicatorPaintMethod::isHoverPoint(
     float tempLeftCenterY = axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX();
     float tempRightCenterX = axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY();
     float tempRightCenterY = axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX();
-    float itemHalfWidth = 0.0f;
-    float itemHalfHeight = 0.0f;
-    if (itemHalfSizes[ITEM_HALF_WIDTH] > itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) {
-        if (itemHalfSizes[ITEM_HALF_HEIGHT] > itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]) {
-            itemHalfWidth = itemHalfSizes[ITEM_HALF_WIDTH];
-            itemHalfHeight = itemHalfSizes[ITEM_HALF_HEIGHT];
-        } else {
-            itemHalfWidth = itemHalfSizes[ITEM_HALF_WIDTH];
-            itemHalfHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
-        }
-    } else {
-        if (itemHalfSizes[ITEM_HALF_HEIGHT] > itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]) {
-            itemHalfWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-            itemHalfHeight = itemHalfSizes[ITEM_HALF_HEIGHT];
-        } else {
-            itemHalfWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
-            itemHalfHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
-        }
+    float itemHalfWidth = itemHalfSizes[ITEM_HALF_WIDTH];
+    float itemHalfHeight = itemHalfSizes[ITEM_HALF_HEIGHT];
+    if (hoverIndex_ == currentIndex_) {
+        itemHalfWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+        itemHalfHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
     }
     return hoverPoint.GetX() >= (tempLeftCenterX - itemHalfWidth) && (hoverPoint.GetX() <=
                 (tempRightCenterX + itemHalfWidth)) && (hoverPoint.GetY() >= (tempLeftCenterY - itemHalfHeight)) &&

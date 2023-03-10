@@ -23,10 +23,8 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
-
 public:
     DotIndicatorModifier()
         : backgroundColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
@@ -123,6 +121,11 @@ public:
     void SetSelectedColor(const Color& selectedColor)
     {
         selectedColor_ = selectedColor;
+    }
+
+    void SetCurrentIndex(int32_t index)
+    {
+        currentIndex_ = index;
     }
 
     void SetNormalToHoverIndex(const std::optional<int32_t>& normalToHoverIndex)
@@ -242,6 +245,7 @@ private:
     bool isPressed_ = false;
 
     bool indicatorMask_ = false;
+    int32_t currentIndex_ = 0;
     OffsetF offset_;
     float itemWidth_ = 0.0f;
     float itemHeight_ = 0.0f;

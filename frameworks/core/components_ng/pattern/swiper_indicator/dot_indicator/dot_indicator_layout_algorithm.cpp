@@ -59,24 +59,29 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Diameter of a single indicator circle, item or selected-item width and height
     auto userItemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
     auto userItemHeight = paintProperty->GetItemHeightValue(theme->GetSize()).ConvertToPx();
-    if (LessNotEqual(userItemWidth, 0.0) || LessNotEqual(userItemHeight, 0.0)) {
+    auto userSelectedItemWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
+    auto userSelectedItemHeight = paintProperty->GetSelectedItemHeightValue(theme->GetSize()).ConvertToPx();
+    if (LessNotEqual(userItemWidth, 0.0) ||LessNotEqual(userItemHeight, 0.0) ||
+        LessNotEqual(userSelectedItemWidth, 0.0) || LessNotEqual(userSelectedItemHeight, 0.0)) {
         userItemWidth = theme->GetSize().ConvertToPx();
         userItemHeight = theme->GetSize().ConvertToPx();
+        userSelectedItemWidth = theme->GetSize().ConvertToPx();
+        userSelectedItemHeight = theme->GetSize().ConvertToPx();
     }
     auto indicatorPadding = INDICATOR_PADDING_DEFAULT;
 
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
     userItemWidth *= INDICATOR_ZOOM_IN_SCALE;
     userItemHeight *= INDICATOR_ZOOM_IN_SCALE;
+    userSelectedItemWidth *= INDICATOR_ZOOM_IN_SCALE;
+    userSelectedItemHeight *= INDICATOR_ZOOM_IN_SCALE;
     indicatorPadding = INDICATOR_PADDING_HOVER;
 
     // The width and height of the entire indicator.
-    auto indicatorHeight = static_cast<float>(userItemWidth + indicatorPadding.ConvertToPx() * 2);
-    if (userItemHeight * 2 > userItemWidth) {
-        indicatorHeight = static_cast<float>(userItemHeight * 2 + indicatorPadding.ConvertToPx() * 2);
-    }
-    auto indicatorWidth = static_cast<float>((indicatorPadding.ConvertToPx() * 2 +
-        (userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userItemWidth * 2);
+    auto indicatorHeight = static_cast<float>(((userItemHeight > userSelectedItemHeight) ?
+        userItemHeight : userSelectedItemHeight) + indicatorPadding.ConvertToPx() * 2);
+    auto indicatorWidth = static_cast<float>(indicatorPadding.ConvertToPx() * 2 +
+        ((userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userSelectedItemWidth);
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;
@@ -125,20 +130,21 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
 
     Offset position;
-    if (left.has_value()) {
+    Dimension indicatorPositionDefault = 0.0_vp;
+    if (left.has_value() && !NearEqual(left->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(left->Value()));
         position.SetX(leftValue);
-    } else if (right.has_value()) {
+    } else if (right.has_value() && !NearEqual(right->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(right->Value()));
         position.SetX(swiperWidth - indicatorWidth_ - rightValue);
     } else {
         position.SetX(
             direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) * 0.5f : swiperWidth - indicatorWidth_);
     }
-    if (top.has_value()) {
+    if (top.has_value() && !NearEqual(top->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(top->Value()));
         position.SetY(topValue);
-    } else if (bottom.has_value()) {
+    } else if (bottom.has_value() && !NearEqual(bottom->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(bottom->Value()));
         position.SetY(swiperHeight - indicatorHeight_ - bottomValue);
     } else {

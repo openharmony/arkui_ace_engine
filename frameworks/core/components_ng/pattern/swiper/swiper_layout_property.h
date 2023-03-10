@@ -46,6 +46,10 @@ public:
         value->propDisplayCount_ = CloneDisplayCount();
         value->propShowIndicator_ = CloneShowIndicator();
         value->propIndicatorType_ = CloneIndicatorType();
+        value->propLeft_ = CloneLeft();
+        value->propTop_ = CloneTop();
+        value->propRight_ = CloneRight();
+        value->propBottom_ = CloneBottom();
         return value;
     }
 
@@ -60,6 +64,10 @@ public:
         ResetDisplayCount();
         ResetShowIndicator();
         ResetIndicatorType();
+        ResetLeft();
+        ResetTop();
+        ResetRight();
+        ResetBottom();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -91,6 +99,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisplayCount, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowIndicator, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorType, SwiperIndicatorType, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Left, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Top, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Right, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Bottom, Dimension, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 

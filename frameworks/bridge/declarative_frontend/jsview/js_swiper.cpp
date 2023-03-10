@@ -19,6 +19,7 @@
 #include <iterator>
 
 #include "base/log/ace_scoring_log.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
@@ -232,24 +233,30 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     JSRef<JSVal> size = obj->GetProperty("size");
     Dimension fontSize;
     auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);  
+    CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
     bool parseOk = ParseJsDimensionFp(size, fontSize);
+    parseOk = !LessNotEqual(fontSize.Value(), 0.0);
     if (isSelected) {
-        digitalParameters.selectedFontSize = parseOk? fontSize :
-            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
-
+        digitalParameters.selectedFontSize =
+            parseOk ? fontSize : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
     } else {
-        digitalParameters.fontSize = parseOk? fontSize :
-            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+        digitalParameters.fontSize =
+            parseOk ? fontSize : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
     }
     JSRef<JSVal> weight = obj->GetProperty("weight");
-    if (weight->IsString()) {
-        if (isSelected) {
-            digitalParameters.selectedFontWeight = ConvertStrToFontWeight(weight->ToString());
+    std::string weightValue;
+    if (!weight->IsNull()) {
+        if (weight->IsNumber()) {
+            weightValue = std::to_string(weight->ToNumber<int32_t>());
         } else {
-            digitalParameters.fontWeight = ConvertStrToFontWeight(weight->ToString());
+            ParseJsString(weight, weightValue);
+        }
+        if (isSelected) {
+            digitalParameters.selectedFontWeight = ConvertStrToFontWeight(weightValue);
+        } else {
+            digitalParameters.fontWeight = ConvertStrToFontWeight(weightValue);
         }
     } else {
         if (isSelected) {
@@ -290,13 +297,13 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
     parseOk = ParseJsDimensionPx(itemWidthValue, dimPosition);
     auto defaultSize = swiperIndicatorTheme->GetSize();
-    swiperParameters.itemWidth = parseOk ? dimPosition : defaultSize;
+    swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(itemHeightValue, dimPosition);
-    swiperParameters.itemHeight = parseOk ? dimPosition : defaultSize;
+    swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(selectedItemWidthValue, dimPosition);
-    swiperParameters.selectedItemWidth = parseOk ? dimPosition : defaultSize;
+    swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     parseOk = ParseJsDimensionPx(selectedItemHeightValue, dimPosition);
-    swiperParameters.selectedItemHeight = parseOk ? dimPosition : defaultSize;
+    swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
@@ -348,8 +355,8 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
 
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
+    auto obj = JSRef<JSObject>::Cast(info[0]);
     if (info.Length() > 0 && info[0]->IsObject()) {
-        auto obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> typeParam = obj->GetProperty("type");
         if (typeParam->IsString()) {
             auto type = typeParam->ToString();
@@ -367,11 +374,14 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
             SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
             SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
         }
+    } else {
+        SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+        SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
+        SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
     }
     if (info[0]->IsBoolean()) {
-        JSRef<JSObject> showIndicatorValue = JSRef<JSObject>::Cast(info[0]);
         bool showIndicator = false;
-        ParseJsBool(showIndicatorValue, showIndicator);
+        ParseJsBool(obj, showIndicator);
         SwiperModel::GetInstance()->SetShowIndicator(showIndicator);
     } else {
         SwiperModel::GetInstance()->SetShowIndicator(true);
@@ -405,10 +415,12 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
         swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
         parseOk = ParseJsDimensionPx(sizeValue, dimPosition);
-        swiperParameters.itemWidth = parseOk ? dimPosition : swiperIndicatorTheme->GetSize();
-        swiperParameters.itemHeight = parseOk ? dimPosition : swiperIndicatorTheme->GetSize();
-        swiperParameters.selectedItemWidth = parseOk ? dimPosition : swiperIndicatorTheme->GetSize();
-        swiperParameters.selectedItemHeight = parseOk ? dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.itemWidth = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.itemHeight = parseOk && dimPosition > 0.0_vp ? dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.selectedItemWidth = parseOk && dimPosition > 0.0_vp ?
+            dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.selectedItemHeight = parseOk && dimPosition > 0.0_vp ?
+            dimPosition : swiperIndicatorTheme->GetSize();
         if (maskValue->IsBoolean()) {
             auto mask = maskValue->ToBoolean();
             swiperParameters.maskValue = mask;

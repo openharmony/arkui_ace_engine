@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_TABS_TAB_BAR_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_TABS_TAB_BAR_PAINT_METHOD_H
 
-#include "core/components_ng/pattern/tabs/tab_bar_modifier.h"
-#include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -26,37 +24,13 @@ class TabBarPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TabBarPaintMethod, NodePaintMethod)
 
 public:
-    TabBarPaintMethod(const RefPtr<TabBarModifier>& tabBarModifier,
-        const std::vector<bool>& gradientRegions, Color backgroundColor,
-        const IndicatorStyle& indicatorStyle, float currentIndicatorOffset, SelectedMode selectedMode)
-        : tabBarModifier_(tabBarModifier), gradientRegions_(gradientRegions),
-        backgroundColor_(backgroundColor), indicatorStyle_(indicatorStyle),
-        currentIndicatorOffset_(currentIndicatorOffset), selectedMode_(selectedMode) {}
+    explicit TabBarPaintMethod(float currentIndicatorOffset) : currentIndicatorOffset_(currentIndicatorOffset) {}
     ~TabBarPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    static void PaintGradient(
-        RSCanvas& canvas, RectF barRect, Color backgroundColor, std::vector<bool> gradientRegions);
-    static void PaintLeftGradient(RSCanvas& context, RectF barRect, Color backgroundColor, float shadowMargin,
-        float gradientWidth);
-    static void PaintRightGradient(RSCanvas& context, RectF barRect, Color backgroundColor, float shadowMargin,
-        float gradientWidth);
-    static void PaintTopGradient(RSCanvas& context, RectF barRect, Color backgroundColor, float shadowMargin,
-        float gradientWidth);
-    static void PaintBottomGradient(RSCanvas& context, RectF barRect, Color backgroundColor, float shadowMargin,
-        float gradientWidth);
-
-    RefPtr<TabBarModifier> tabBarModifier_;
-    std::vector<bool> gradientRegions_;
-    Color backgroundColor_;
-    IndicatorStyle indicatorStyle_;
-    float currentIndicatorOffset_;
-    SelectedMode selectedMode_ = SelectedMode::INDICATOR;
-    ACE_DISALLOW_COPY_AND_MOVE(TabBarPaintMethod);
+    float currentIndicatorOffset_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 

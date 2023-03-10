@@ -12,14 +12,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
-
-namespace OHOS::Ace::NG {
-constexpr int32_t SwiperAnimationStyle::DEFAULT_INTERVAL = 3000;
-constexpr int32_t SwiperAnimationStyle::DEFAULT_DURATION = 400;
-
-void SwiperPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
-{
-    (void)json;
-}
-} // namespace OHOS::Ace::NG
+  
+FUZZ

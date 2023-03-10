@@ -216,12 +216,12 @@ public:
 
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
-        *swiperParameters_ = swiperParameters;
+        swiperParameters_ = std::make_unique<SwiperParameters>(swiperParameters);
     }
 
     void SetSwiperDigitalParameters(const SwiperDigitalParameters& swiperDigitalParameters)
     {
-        *swiperDigitalParameters_ = swiperDigitalParameters;
+        swiperDigitalParameters_ = std::make_unique<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
     void ShowNext();

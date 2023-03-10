@@ -47,11 +47,6 @@ public:
     }
 
 private:
-    static double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
-    void CalculateTextContent(const RefPtr<FrameNode>& frameNode);
-    void CalculateTextFrameSize(const RefPtr<FrameNode>& frameNode, LayoutWrapper* layoutWrapper);
-    float indicatorWidth_ = 0.0f;
-    float indicatorHeight_ = 0.0f;
     bool isHoverOrPress_ = false;
     PointF hoverPoint_;
 };
