@@ -31,6 +31,7 @@ build_component_ng("window_scene") {
     "scene/container/window_pattern.cpp",
     "scene/container/window_scene.cpp",
     "scene/host/host_window_extension.cpp",
+    "scene/host/host_window_node.cpp",
     "scene/host/host_window_pattern.cpp",
     "scene/host/host_window_scene.cpp",
     "scene/host/host_window_scene_model.cpp",

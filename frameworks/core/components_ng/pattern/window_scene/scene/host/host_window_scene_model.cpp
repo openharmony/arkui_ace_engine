@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_scene_model.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/window_scene/scene/host/host_window_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -24,7 +25,7 @@ void HostWindowSceneModel::Create(const sptr<Rosen::Session>& session)
 {
     auto stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::HOST_WINDOW_SCENE_ETS_TAG, nodeId,
+    auto frameNode = HostWindowNode::GetOrCreateHostWindowNode(V2::HOST_WINDOW_SCENE_ETS_TAG, nodeId,
         [&session]() { return AceType::MakeRefPtr<HostWindowScene>(session); });
     stack->Push(frameNode);
 }

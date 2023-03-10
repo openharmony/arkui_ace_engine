@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
 
 #include "render_service_client/core/ui/rs_surface_node.h"
+#include "interfaces/include/ws_common.h"
 
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -158,4 +159,14 @@ void HostWindowPattern::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::Po
         LOGE("DispatchPointerEvent failed, errCode=%{public}d", static_cast<int>(errCode));
     }
 }
+
+void HostWindowPattern::DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
+{
+    CHECK_NULL_VOID(session_);
+    auto errCode = session_->TransferKeyEvent(keyEvent);
+    if (errCode != Rosen::WSError::WS_OK) {
+        LOGE("DispatchPointerEvent failed, errCode=%{public}d", static_cast<int>(errCode));
+    }
+}
+
 } // namespace OHOS::Ace::NG
