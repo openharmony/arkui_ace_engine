@@ -46,7 +46,6 @@
 #include "frameworks/core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "frameworks/core/components_ng/render/adapter/svg_canvas_image.h"
 #include "frameworks/core/components_ng/render/border_image_painter.h"
-#include "frameworks/core/components_ng/render/canvas.h"
 #include "frameworks/core/components_ng/render/render_context.h"
 #include "frameworks/core/components_ng/test/mock/render/mock_render_context.h"
 #undef priate
