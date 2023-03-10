@@ -71,7 +71,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("searchIcon", &JSSearch::SetSearchIcon, opt);
     JSClass<JSSearch>::StaticMethod("cancelButton", &JSSearch::SetCancelButton, opt);
     JSClass<JSSearch>::StaticMethod("fontColor", &JSSearch::SetTextColor, opt);
-    JSClass<JSSearch>::StaticMethod("cursorStyle", &JSSearch::SetCursor, opt);
+    JSClass<JSSearch>::StaticMethod("caretStyle", &JSSearch::SetCaret, opt);
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
     JSClass<JSSearch>::StaticMethod("textFont", &JSSearch::SetTextFont, opt);
@@ -328,34 +328,34 @@ void JSSearch::SetTextColor(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetTextColor(colorVal);
 }
 
-void JSSearch::SetCursor(const JSCallbackInfo& info)
+void JSSearch::SetCaret(const JSCallbackInfo& info)
 {
     if (info[0]->IsObject()) {
         auto param = JSRef<JSObject>::Cast(info[0]);
         auto textFieldTheme = GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID_NOLOG(textFieldTheme);
 
-        // set cursor width
-        Dimension cursorWidth;
-        auto cursorWidthProp = param->GetProperty("width");
-        if (!cursorWidthProp->IsUndefined() && !cursorWidthProp->IsNull() &&
-            ParseJsDimensionVp(cursorWidthProp, cursorWidth)) {
-            if (LessNotEqual(cursorWidth.Value(), 0.0)) {
-                cursorWidth = textFieldTheme->GetCursorWidth();
+        // set caret width
+        Dimension caretWidth;
+        auto caretWidthProp = param->GetProperty("width");
+        if (!caretWidthProp->IsUndefined() && !caretWidthProp->IsNull() &&
+            ParseJsDimensionVp(caretWidthProp, caretWidth)) {
+            if (LessNotEqual(caretWidth.Value(), 0.0)) {
+                caretWidth = textFieldTheme->GetCursorWidth();
             }
         } else {
-            cursorWidth = textFieldTheme->GetCursorWidth();
+            caretWidth = textFieldTheme->GetCursorWidth();
         }
-        SearchModel::GetInstance()->SetCaretWidth(cursorWidth);
+        SearchModel::GetInstance()->SetCaretWidth(caretWidth);
 
-        // set cursor color
-        Color cursorColor;
-        auto cursorColorProp = param->GetProperty("color");
-        if (cursorColorProp->IsUndefined() || cursorColorProp->IsNull() ||
-            !ParseJsColor(cursorColorProp, cursorColor)) {
-            cursorColor = textFieldTheme->GetCursorColor();
+        // set caret color
+        Color caretColor;
+        auto caretColorProp = param->GetProperty("color");
+        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() ||
+            !ParseJsColor(caretColorProp, caretColor)) {
+            caretColor = textFieldTheme->GetCursorColor();
         }
-        SearchModel::GetInstance()->SetCaretColor(cursorColor);
+        SearchModel::GetInstance()->SetCaretColor(caretColor);
     }
 }
 
