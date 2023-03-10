@@ -1629,7 +1629,15 @@ void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShap
 void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetClipToBounds(isClip);
+    if (isClip) {
+        rsNode_->SetClipToBounds(true);
+    } else {
+        // In the internal implementation, some nodes call SetClipToBounds(true), some call SetClipToFrame(true).
+        // If the developer set clip to false, we should disable all internal clips
+        // so that the child component can go beyond the parent component
+        rsNode_->SetClipToBounds(false);
+        rsNode_->SetClipToFrame(false);
+    }
     RequestNextFrame();
 }
 
