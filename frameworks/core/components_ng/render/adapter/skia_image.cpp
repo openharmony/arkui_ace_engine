@@ -17,6 +17,7 @@
 
 #include <utility>
 
+#include "image_painter_utils.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 #include "base/image/pixel_map.h"
@@ -27,13 +28,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint8_t RADIUS_POINTS_SIZE = 4;
-
-const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
-    0.30f, 0.59f, 0.11f, 0, 0,                                   // green
-    0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
-    0, 0, 0, 1.0f, 0 };                                          // alpha transparency
-
 SkPixmap CloneSkPixmap(SkPixmap& srcPixmap, const std::unique_ptr<uint8_t[]>& dstPixels)
 {
     // Media::PixelMap::Create only accepts BGRA ColorType pixmap, have to clone and change ColorType.
@@ -138,20 +132,6 @@ RefPtr<CanvasImage> SkiaImage::Clone()
     return clone;
 }
 
-void SkiaImage::AddFilter(SkPaint& paint)
-{
-    auto config = GetPaintConfig();
-    paint.setFilterQuality(SkFilterQuality(config.imageInterpolation_));
-    if (ImageRenderMode::TEMPLATE == config.renderMode_ || config.colorFilter_) {
-        RSColorMatrix colorFilterMatrix;
-        if (config.colorFilter_) {
-            paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_->data()));
-        } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
-            paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
-        }
-    }
-}
-
 RefPtr<PixelMap> SkiaImage::GetPixelMap()
 {
     CHECK_NULL_RETURN(GetImage(), nullptr);
@@ -171,7 +151,7 @@ RefPtr<PixelMap> SkiaImage::GetPixelMap()
 
 void SkiaImage::ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
 {
-    std::vector<RSPoint> radius(RADIUS_POINTS_SIZE);
+    std::vector<RSPoint> radius(ImagePainterUtils::RADIUS_POINTS_SIZE);
     for (size_t i = 0; i < radius.size(); ++i) {
         radius[i] = RSPoint(radiusXY[i].GetX(), radiusXY[i].GetY());
     }
@@ -204,24 +184,11 @@ bool SkiaImage::DrawWithRecordingCanvas(
     CHECK_NULL_RETURN(recordingCanvas, false);
 
     SkPaint paint;
-    AddFilter(paint);
-    SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
-    if (radiusXY.size() == RADIUS_POINTS_SIZE) {
-        radii[SkRRect::kUpperLeft_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kUpperRight_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kLowerLeft_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kLowerRight_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
-    }
-    recordingCanvas->ClipAdaptiveRRect(radii);
     auto config = GetPaintConfig();
+    ImagePainterUtils::AddFilter(paint, config);
+
+    SkVector* radii = ImagePainterUtils::ToSkRadius(radiusXY);
+    recordingCanvas->ClipAdaptiveRRect(radii);
     if (config.imageFit_ == ImageFit::TOP_LEFT) {
         SkAutoCanvasRestore acr(recordingCanvas, true);
         auto skSrcRect = SkRect::MakeXYWH(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetWidth(), srcRect.GetHeight());
