@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -135,11 +135,8 @@ public:
         return MakeRefPtr<TabBarPaintProperty>();
     }
 
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        return MakeRefPtr<TabBarPaintMethod>(currentIndicatorOffset_);
-    }
-
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
+    
     FocusPattern GetFocusPattern() const override
     {
         FocusPaintParam focusPaintParams;
@@ -169,6 +166,10 @@ public:
     void UpdateIndicator(int32_t indicator);
 
     void UpdateTextColor(int32_t indicator);
+
+    void UpdateSubTabBoard();
+
+    SelectedMode GetSelectedMode() const;
 
     void AddTabBarItemType(int32_t tabContentId, bool isBuilder)
     {
@@ -214,6 +215,32 @@ public:
     {
         changeByClick_ = changeByClick;
     }
+    void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
+    {
+        if (selectedModes_.size() == position) {
+            selectedModes_.emplace_back(selectedMode);
+        } else {
+            selectedModes_[position] = selectedMode;
+        }
+    }
+
+    void SetIndicatorStyle(const IndicatorStyle& indicatorStyle, uint32_t position)
+    {
+        if (indicatorStyles_.size() == position) {
+            indicatorStyles_.emplace_back(indicatorStyle);
+        } else {
+            indicatorStyles_[position] = indicatorStyle;
+        }
+    }
+
+    void SetTabBarStyle(TabBarStyle tabBarStyle, uint32_t position)
+    {
+        if (tabBarStyles_.size() == position) {
+            tabBarStyles_.emplace_back(tabBarStyle);
+        } else {
+            tabBarStyles_[position] = tabBarStyle;
+        }
+    }
 
 private:
     void OnModifyDone() override;
@@ -248,6 +275,7 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
     void FocusIndexChange(int32_t index);
+    void UpdateGradientRegions();
 
     float GetSpace(int32_t indicator);
     float CalculateFrontChildrenMainSize(int32_t indicator);
@@ -284,8 +312,15 @@ private:
     RefPtr<Animator> controller_;
     RefPtr<Animator> tabBarTranslateController_;
     float currentIndicatorOffset_ = 0.0f;
+    std::vector<SelectedMode> selectedModes_;
+    std::vector<IndicatorStyle> indicatorStyles_;
+    std::vector<TabBarStyle> tabBarStyles_;
+
+    RefPtr<TabBarModifier> tabBarModifier_;
+    std::vector<bool> gradientRegions_ = {false, false, false, false};
     bool isAnimating_ = false;
     bool changeByClick_ = false;
+    ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG
 

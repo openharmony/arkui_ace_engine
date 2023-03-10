@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,35 +21,159 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int8_t LEFT_GRADIENT = 0;
+constexpr int8_t RIGHT_GRADIENT = 1;
+constexpr int8_t TOP_GRADIENT = 2;
+constexpr int8_t BOTTOM_GRADIENT = 3;
+constexpr int8_t POS_NUM = 4;
+}
 
-void PaintIndicator(RSCanvas& canvas, RectF indicator, float currentIndicatorOffset)
+CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto paintProperty = AceType::DynamicCast<TabBarPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    if (!paintProperty->GetFadingEdge().value_or(true)) {
+        return nullptr;
+    }
+    
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, nullptr);
+    auto frameRect = geometryNode->GetFrameRect();
+
+    auto paintFunc = [gradientRegions = gradientRegions_, barRect = frameRect,
+        backgroundColor = backgroundColor_](
+                         RSCanvas& canvas) { PaintGradient(canvas, barRect, backgroundColor, gradientRegions); };
+    return paintFunc;
+}
+
+void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& barRect,
+    const Color& backgroundColor, std::vector<bool> gradientRegions)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    indicator.SetHeight(tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
-    indicator.SetLeft(currentIndicatorOffset);
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(tabTheme->GetActiveIndicatorColor()));
-    brush.SetBlendMode(RSBlendMode::SRC_OVER);
-    canvas.AttachBrush(brush);
-    canvas.DrawRect(ToRSRect(indicator));
-}
+    float shadowMargin = static_cast<float>(tabTheme->GetTabBarShadowMargin().ConvertToPx());
+    float gradientWidth = static_cast<float>(tabTheme->GetTabBarGradientWidth().ConvertToPx());
 
-} // namespace
-
-CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
-{
-    auto paintProperty = AceType::DynamicCast<TabBarPaintProperty>(paintWrapper->GetPaintProperty());
-    if (!paintProperty->GetIndicator()) {
-        return nullptr;
+    for (int8_t position = 0; position < POS_NUM; position++) {
+        if (gradientRegions[position]) {
+            switch (position) {
+                case LEFT_GRADIENT:
+                    PaintLeftGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth);
+                    break;
+                case RIGHT_GRADIENT:
+                    PaintRightGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth);
+                    break;
+                case TOP_GRADIENT:
+                    PaintTopGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth);
+                    break;
+                case BOTTOM_GRADIENT:
+                    PaintBottomGradient(canvas, barRect, backgroundColor, shadowMargin, gradientWidth);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
-    auto paintFunc = [indicator = paintProperty->GetIndicatorValue(), currentIndicatorOffset = currentIndicatorOffset_](
-                         RSCanvas& canvas) { PaintIndicator(canvas, indicator, currentIndicatorOffset); };
-
-    return paintFunc;
 }
 
+void TabBarPaintMethod::PaintLeftGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    float shadowMargin, float gradientWidth)
+{
+    RSRect gradientRect(0.0f, 0.0f, shadowMargin + gradientWidth, barRect.Height());
+    RSPoint leftStartPoint;
+    leftStartPoint.SetX(shadowMargin + gradientWidth);
+    leftStartPoint.SetY(0.0f);
+    RSPoint leftEndPoint;
+    leftEndPoint.SetX(0.0f);
+    leftEndPoint.SetY(0.0f);
+    PaintGradientRect(canvas, gradientRect, backgroundColor, leftStartPoint, leftEndPoint, shadowMargin,
+        gradientWidth);
+}
+
+void TabBarPaintMethod::PaintRightGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    float shadowMargin, float gradientWidth)
+{
+    RSRect gradientRect(barRect.Width() - shadowMargin - gradientWidth,
+                    0.0f, barRect.Width(), barRect.Height());
+    RSPoint rightStartPoint;
+    rightStartPoint.SetX(barRect.Width() - shadowMargin - gradientWidth);
+    rightStartPoint.SetY(0.0f);
+    RSPoint rightEndPoint;
+    rightEndPoint.SetX(barRect.Width());
+    rightEndPoint.SetY(0.0f);
+    PaintGradientRect(canvas, gradientRect, backgroundColor, rightStartPoint, rightEndPoint, shadowMargin,
+        gradientWidth);
+}
+
+void TabBarPaintMethod::PaintTopGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    float shadowMargin, float gradientWidth)
+{
+    RSRect gradientRect(0.0f, 0.0f, barRect.Width(), shadowMargin + gradientWidth);
+    RSPoint topStartPoint;
+    topStartPoint.SetX(0.0f);
+    topStartPoint.SetY(shadowMargin + gradientWidth);
+    RSPoint topEndPoint;
+    topEndPoint.SetX(0.0f);
+    topEndPoint.SetY(0.0f);
+    PaintGradientRect(canvas, gradientRect, backgroundColor, topStartPoint, topEndPoint, shadowMargin,
+        gradientWidth);
+}
+
+void TabBarPaintMethod::PaintBottomGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    float shadowMargin, float gradientWidth)
+{
+    RSRect gradientRect(0.0f, barRect.Height() - shadowMargin - gradientWidth,
+        barRect.Width(), barRect.Height());
+    RSPoint bottomStartPoint;
+    bottomStartPoint.SetX(0.0f);
+    bottomStartPoint.SetY(barRect.Height() - shadowMargin - gradientWidth);
+    RSPoint bottomEndPoint;
+    bottomEndPoint.SetX(0.0f);
+    bottomEndPoint.SetY(barRect.Height());
+    PaintGradientRect(canvas, gradientRect, backgroundColor, bottomStartPoint, bottomEndPoint, shadowMargin,
+        gradientWidth);
+}
+
+void TabBarPaintMethod::PaintGradientRect(RSCanvas& canvas, const RSRect& gradientRect, const Color& backgroundColor,
+    const RSPoint& startPoint, const RSPoint& endPoint, float shadowMargin, float gradientWidth)
+{
+    RSBrush brush;
+    Color endColor = backgroundColor;
+    Color startColor = endColor.ChangeAlpha(0);
+    std::vector<float> gradientPos { 0.0f, gradientWidth / (shadowMargin + gradientWidth), 1.0f };
+    std::vector<RSColorQuad> gradientColors { startColor.GetValue(), endColor.GetValue(), endColor.GetValue() };
+    brush.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(
+            startPoint, endPoint, gradientColors, gradientPos, RSTileMode::CLAMP));
+    canvas.DetachPen().AttachBrush(brush);
+    canvas.DrawRect(gradientRect);
+}
+
+RefPtr<Modifier> TabBarPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
+{
+    return tabBarModifier_;
+}
+
+void TabBarPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(tabBarModifier_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto paintProperty = DynamicCast<TabBarPaintProperty>(paintWrapper->GetPaintProperty());
+    if (paintProperty) {
+        RectF rect;
+        auto indicator = paintProperty->GetIndicator().value_or(rect);
+        indicator.SetLeft(currentIndicatorOffset_);
+        tabBarModifier_->SetIndicator(indicator);
+    }
+    tabBarModifier_->SetIndicatorColor(LinearColor(indicatorStyle_.color));
+    tabBarModifier_->SetIndicatorHeight(indicatorStyle_.height.ConvertToPx());
+    tabBarModifier_->SetIndicatorWidth(indicatorStyle_.width.ConvertToPx());
+    tabBarModifier_->SetIndicatorBorderRadius(indicatorStyle_.borderRadius.ConvertToPx());
+    tabBarModifier_->SetIndicatorMarginTop(indicatorStyle_.marginTop.ConvertToPx());
+    tabBarModifier_->SetSelectedMode(selectedMode_);
+}
 } // namespace OHOS::Ace::NG

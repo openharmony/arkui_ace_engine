@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,11 +19,19 @@
 
 #include "base/log/ace_trace.h"
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components/button/button_theme.h"
 
 namespace OHOS::Ace {
 
 std::unique_ptr<TabContentModel> TabContentModel::instance_ = nullptr;
+
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
+const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICIES = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 
 TabContentModel* TabContentModel::GetInstance()
 {
@@ -77,6 +85,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
 
     std::string infoStr;
     if (ParseJsString(info[0], infoStr)) {
+        TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(infoStr, std::nullopt, nullptr, true);
         return;
     }
@@ -105,19 +114,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     if (typeParam->IsString()) {
         auto type = typeParam->ToString();
         if (type == "SubTabBarStyle") {
-            JSRef<JSVal> contentParam = paramObject->GetProperty("content");
-            auto isContentEmpty = contentParam->IsEmpty() || contentParam->IsUndefined() || contentParam->IsNull();
-            if (isContentEmpty) {
-                LOGE("The content param is empty");
-                return;
-            }
-            std::optional<std::string> contentOpt = std::nullopt;
-            std::string content;
-            if (ParseJsString(contentParam, content)) {
-                contentOpt = content;
-            }
-            TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-            TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, nullptr, false);
+            SetSubTabBarStyle(paramObject);
             return;
         }
         if (type == "BottomTabBarStyle") {
@@ -176,6 +173,211 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
 void JSTabContent::Pop()
 {
     TabContentModel::GetInstance()->Pop();
+}
+
+void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+    IndicatorStyle indicator;
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), indicator.color)) {
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            indicator.color = tabTheme->GetActiveIndicatorColor();
+        }
+    }
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("height"), indicator.height) ||
+        indicator.height.Value() < 0.0f) {
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            indicator.height = tabTheme->GetActiveIndicatorWidth();
+        }
+    }
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("width"), indicator.width) ||
+        indicator.width.Value() < 0.0f) {
+        indicator.width = 0.0_vp;
+    }
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), indicator.borderRadius) ||
+        indicator.borderRadius.Value() < 0.0f) {
+        indicator.borderRadius = 0.0_vp;
+    }
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("marginTop"), indicator.marginTop) ||
+        indicator.marginTop.Value() < 0.0f) {
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            indicator.marginTop = tabTheme->GetSubTabIndicatorGap();
+        }
+    }
+    TabContentModel::GetInstance()->SetIndicator(indicator);
+}
+
+void JSTabContent::SetBoard(const JSRef<JSVal>& info)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+    BoardStyle board;
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), board.borderRadius) ||
+        board.borderRadius.Value() < 0.0f) {
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            board.borderRadius = tabTheme->GetFocusIndicatorRadius();
+        }
+    }
+    TabContentModel::GetInstance()->SetBoard(board);
+}
+
+void JSTabContent::SetSelectedMode(const JSRef<JSVal>& info)
+{
+    int32_t selectedMode;
+    if (!ConvertFromJSValue(info, selectedMode)) {
+        TabContentModel::GetInstance()->SetSelectedMode(SelectedMode::INDICATOR);
+    } else {
+        TabContentModel::GetInstance()->SetSelectedMode(static_cast<SelectedMode>(selectedMode));
+    }
+}
+
+void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyle)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
+    JSRef<JSVal> size = obj->GetProperty("size");
+    Dimension fontSize;
+    if (ParseJsDimensionFp(size, fontSize)) {
+        labelStyle.fontSize = fontSize;
+    }
+    
+    JSRef<JSVal> weight = obj->GetProperty("weight");
+    if (weight->IsString()) {
+        labelStyle.fontWeight = ConvertStrToFontWeight(weight->ToString());
+    }
+
+    JSRef<JSVal> family = obj->GetProperty("family");
+    std::vector<std::string> fontFamilies;
+    if (ParseJsFontFamilies(family, fontFamilies)) {
+        labelStyle.fontFamily = fontFamilies;
+    }
+
+    JSRef<JSVal> style = obj->GetProperty("style");
+    if (style->IsNumber()) {
+        int32_t value = style->ToNumber<int32_t>();
+        if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
+            labelStyle.fontStyle = FONT_STYLES[value];
+        }
+    }
+}
+
+void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
+{
+    if (!info->IsObject()) {
+        LOGE("info not is Object");
+        return;
+    }
+    
+    LabelStyle labelStyle;
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
+    JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
+    if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
+        auto overflow = overflowValue->ToNumber<int32_t>();
+        if (overflow >= 0 &&
+            overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+            labelStyle.textOverflow = TEXT_OVERFLOWS[overflow];
+        }
+    }
+
+    JSRef<JSVal> maxLines = obj->GetProperty("maxLines");
+    if (!maxLines->IsNull() && maxLines->IsNumber()) {
+        labelStyle.maxLines = maxLines->ToNumber<int32_t>();
+    }
+
+    JSRef<JSVal> minFontSizeValue = obj->GetProperty("minFontSize");
+    Dimension minFontSize;
+    if (ParseJsDimensionFp(minFontSizeValue, minFontSize)) {
+        labelStyle.minFontSize = minFontSize;
+    }
+
+    JSRef<JSVal> maxFontSizeValue = obj->GetProperty("maxFontSize");
+    Dimension maxFontSize;
+    if (ParseJsDimensionFp(maxFontSizeValue, maxFontSize)) {
+        labelStyle.maxFontSize = maxFontSize;
+    }
+
+    JSRef<JSVal> heightAdaptivePolicyValue = obj->GetProperty("heightAdaptivePolicy");
+    if (!heightAdaptivePolicyValue->IsNull() && heightAdaptivePolicyValue->IsNumber()) {
+        auto heightAdaptivePolicy = heightAdaptivePolicyValue->ToNumber<int32_t>();
+        if (heightAdaptivePolicy >= 0 && heightAdaptivePolicy < static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICIES.size())) {
+            labelStyle.heightAdaptivePolicy = HEIGHT_ADAPTIVE_POLICIES[heightAdaptivePolicy];
+        }
+    }
+
+    JSRef<JSVal> font = obj->GetProperty("font");
+    if (!font->IsNull() && font->IsObject()) {
+        TextStyle textStyle;
+        GetFontContent(font, labelStyle);
+    }
+    CompleteParameters(labelStyle);
+    TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
+}
+
+void JSTabContent::CompleteParameters(LabelStyle& labelStyle)
+{
+    auto buttonTheme = GetTheme<ButtonTheme>();
+    if (!buttonTheme) {
+        return;
+    }
+    auto textStyle = buttonTheme->GetTextStyle();
+    if (!labelStyle.maxLines.has_value()) {
+        labelStyle.maxLines = buttonTheme->GetTextMaxLines();
+    }
+    if (!labelStyle.minFontSize.has_value()) {
+        labelStyle.minFontSize = buttonTheme->GetMinFontSize();
+    }
+    if (!labelStyle.maxFontSize.has_value()) {
+        labelStyle.maxFontSize = buttonTheme->GetMaxFontSize();
+    }
+    if (!labelStyle.fontSize.has_value()) {
+        labelStyle.fontSize = textStyle.GetFontSize();
+    }
+    if (!labelStyle.fontWeight.has_value()) {
+        labelStyle.fontWeight = textStyle.GetFontWeight();
+    }
+    if (!labelStyle.fontStyle.has_value()) {
+        labelStyle.fontStyle = textStyle.GetFontStyle();
+    }
+    if (!labelStyle.heightAdaptivePolicy.has_value()) {
+        labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (!labelStyle.textOverflow.has_value()) {
+        labelStyle.textOverflow = TextOverflow::ELLIPSIS;
+    }
+}
+
+void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
+{
+    JSRef<JSVal> contentParam = paramObject->GetProperty("content");
+    auto isContentEmpty = contentParam->IsEmpty() || contentParam->IsUndefined() || contentParam->IsNull();
+    if (isContentEmpty) {
+        LOGW("The content param is empty");
+    }
+    std::optional<std::string> contentOpt;
+    std::string content;
+    if (ParseJsString(contentParam, content)) {
+        contentOpt = content;
+    }
+    JSRef<JSVal> indicatorParam = paramObject->GetProperty("indicator");
+    if (!indicatorParam->IsUndefined()) {
+        SetIndicator(indicatorParam);
+    }
+    JSRef<JSVal> selectedModeParam = paramObject->GetProperty("selectedMode");
+    if (!selectedModeParam->IsUndefined()) {
+        SetSelectedMode(selectedModeParam);
+    }
+    JSRef<JSVal> boardParam = paramObject->GetProperty("board");
+    if (!boardParam->IsUndefined()) {
+        SetBoard(boardParam);
+    }
+    JSRef<JSVal> labelStyleParam = paramObject->GetProperty("labelStyle");
+    if (!boardParam->IsUndefined()) {
+        SetLabelStyle(labelStyleParam);
+    }
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, nullptr, false);
 }
 
 void JSTabContent::JSBind(BindingTarget globalObj)

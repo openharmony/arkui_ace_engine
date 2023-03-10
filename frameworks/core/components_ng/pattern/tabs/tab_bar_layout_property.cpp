@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,10 +42,7 @@ RectF TabBarLayoutProperty::GetIndicatorRect(int32_t index)
     auto tabBarPattern = node->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(node, RectF());
     indicator.SetLeft(indicator.GetX() + childColumnRect.GetX());
-    indicator.SetTop(
-        tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE
-            ? (indicator.Bottom() + childColumnRect.GetY() + tabTheme->GetSubTabIndicatorGap().ConvertToPx())
-            : (indicator.Bottom() + childColumnRect.GetY()));
+    indicator.SetTop(indicator.Bottom() + childColumnRect.GetY());
     return indicator;
 }
 
