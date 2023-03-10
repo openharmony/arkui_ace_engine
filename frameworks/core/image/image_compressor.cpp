@@ -27,6 +27,15 @@
 #include "core/image/image_compressor.h"
 
 namespace OHOS::Ace {
+__attribute__((constructor)) void load(void)
+{
+#ifdef ENABLE_OPENCL
+#ifdef __MUSL__
+    OHOS::InitOpenCL();
+#endif
+#endif
+}
+
 std::shared_ptr<ImageCompressor> ImageCompressor::instance_ = nullptr;
 std::mutex ImageCompressor::instanceMutex_;
 std::shared_ptr<ImageCompressor> ImageCompressor::GetInstance()
