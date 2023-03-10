@@ -42,7 +42,10 @@ RectF TabBarLayoutProperty::GetIndicatorRect(int32_t index)
     auto tabBarPattern = node->GetPattern<TabBarPattern>();
     CHECK_NULL_RETURN(node, RectF());
     indicator.SetLeft(indicator.GetX() + childColumnRect.GetX());
-    indicator.SetTop(indicator.Bottom() + childColumnRect.GetY());
+    indicator.SetTop(
+        tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE
+            ? (indicator.Bottom() + childColumnRect.GetY() + tabTheme->GetSubTabIndicatorGap().ConvertToPx())
+            : (indicator.Bottom() + childColumnRect.GetY()));
     return indicator;
 }
 

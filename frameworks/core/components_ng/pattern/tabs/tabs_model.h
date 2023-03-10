@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,37 +24,9 @@
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_controller.h"
 #include "core/components/tab_bar/tabs_event.h"
-#include "core/components/tab_bar/tab_theme.h"
 #include "core/event/ace_events.h"
-#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
-
-struct TabsItemDivider final {
-    Dimension strokeWidth = 0.0_vp;
-    Dimension startMargin = 0.0_vp;
-    Dimension endMargin = 0.0_vp;
-    Color color = Color::BLACK;
-    TabsItemDivider()
-    {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (!pipelineContext) {
-            return;
-        }
-        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-        if (!tabTheme) {
-            return;
-        }
-        startMargin = tabTheme->GetDividerMargin();
-        endMargin = tabTheme->GetDividerMargin();
-        color = tabTheme->GetDividerColor();
-    }
-    bool operator==(const TabsItemDivider& itemDivider) const
-    {
-        return (strokeWidth == itemDivider.strokeWidth) && (startMargin == itemDivider.startMargin) &&
-               (endMargin == itemDivider.endMargin) && (color == itemDivider.color);
-    }
-};
 
 class TabsModel {
 public:
@@ -73,8 +45,6 @@ public:
     virtual void SetScrollable(bool scrollable) = 0;
     virtual void SetAnimationDuration(float duration) = 0;
     virtual void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) = 0;
-    virtual void SetDivider(const TabsItemDivider& divider) = 0;
-    virtual void SetFadingEdge(bool fadingEdge) = 0;
 
 private:
     static std::unique_ptr<TabsModel> instance_;
