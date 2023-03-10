@@ -257,6 +257,7 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
     // if m > n, we remove (m - n) children from the back of old container
     if (prevChildrenSize > newChildrenSize) {
         for (int32_t i = 0; i < prevChildrenSize - newChildrenSize; i++) {
+            oldBarContainer->RemoveChild(oldBarItems.back());
             oldBarItems.pop_back();
         }
     } else if (prevChildrenSize < newChildrenSize) {
@@ -268,11 +269,11 @@ void UpdateOldBarItems(const RefPtr<UINode>& oldBarContainer, const std::vector<
             UpdateBarItemNodeWithItem(barItemNode, *newIter);
             oldBarContainer->AddChild(barItemNode);
             newIter++;
-            auto container = AceType::DynamicCast<TitleBarNode>(oldBarContainer);
-            CHECK_NULL_VOID(container);
-            container->MarkModifyDone();
         }
     }
+    auto container = AceType::DynamicCast<TitleBarNode>(oldBarContainer);
+    CHECK_NULL_VOID(container);
+    container->MarkModifyDone();
 }
 } // namespace
 
@@ -503,14 +504,10 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
     } else {
         if (navBarNode->GetMenu()) {
-            auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-            CHECK_NULL_VOID(titleBarNode);
-            UpdateOldBarItems(titleBarNode->GetMenu(), menuItems);
-            navBarNode->SetMenu(titleBarNode->GetMenu());
-            navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
-            return;
+            navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        } else {
+            navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
         }
-        navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
     }
     int32_t menuNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::GetOrCreateFrameNode(
@@ -643,9 +640,6 @@ void NavigationView::SetCustomMenu(const RefPtr<UINode>& customMenu)
 
 void NavigationView::SetTitleMode(NavigationTitleMode mode)
 {
-    if (mode != NavigationTitleMode::MINI) {
-        return;
-    }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
