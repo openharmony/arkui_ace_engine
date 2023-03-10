@@ -46,6 +46,7 @@ private:
     uint32_t popupSize_ = 0;
     int32_t itemCount_ = 0;
     float itemSize_ = 0.0f;
+    float itemWidth_ = 0.0f;
     float itemSizeRender_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
