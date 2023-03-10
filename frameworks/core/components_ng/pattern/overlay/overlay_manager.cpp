@@ -683,10 +683,10 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     return dialog;
 }
 
-void OverlayManager::ShowRootDialog(const RefPtr<FrameNode>& rootNode)
+void OverlayManager::ShowCustomDialog(const RefPtr<FrameNode>& customNode)
 {
-    LOGI("OverlayManager::ShowRootDialog");
-    OpenDialogAnimation(rootNode);
+    LOGI("OverlayManager::ShowCustomDialog");
+    OpenDialogAnimation(customNode);
 }
 
 void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
