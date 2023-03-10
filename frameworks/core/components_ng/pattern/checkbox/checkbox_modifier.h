@@ -184,8 +184,8 @@ private:
     RefPtr<AnimatablePropertyFloat> strokeSize_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
-    RefPtr<PropertyOffsetF> offset_;
-    RefPtr<PropertySizeF> size_;
+    RefPtr<AnimatablePropertyOffsetF> offset_;
+    RefPtr<AnimatablePropertySizeF> size_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxModifier);
 };
