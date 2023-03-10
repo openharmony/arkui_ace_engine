@@ -13,17 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 
 namespace OHOS::Ace::NG {
+
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
     return nullptr;
 }
 
-void SkiaCanvasImage::AddFilter(SkPaint& paint) {}
-
-void SkiaCanvasImage::DrawToRSCanvas(
-    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
-{}
 } // namespace OHOS::Ace::NG
