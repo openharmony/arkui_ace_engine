@@ -52,9 +52,7 @@ public:
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
-    static void GetDotIndicatorPosition(JSRef<JSVal>& info, SwiperParameters& dotParameters);
-    static void GetDigitIndicatorPosition(JSRef<JSVal>& info, SwiperDigitalParameters& digitalParameters);
-    static void GetFontContent(const JSRef<JSVal> font, SwiperDigitalParameters& digitalParameters, bool isSelected);
+    static void GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters);
     static SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& obj);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
 };

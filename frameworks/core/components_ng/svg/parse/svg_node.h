@@ -25,7 +25,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/svg_animate.h"
 #include "core/components/declaration/svg/svg_base_declaration.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/svg/svg_context.h"
 
 namespace OHOS::Ace::NG {
@@ -73,10 +73,7 @@ public:
         return {};
     }
 
-    virtual RSPath AsRSPath(const Size& viewPort) const
-    {
-        return {};
-    }
+    virtual RSPath AsRSPath(const Size& viewPort) const;
 
     Rect AsBounds(const Size& viewPort) const
     {

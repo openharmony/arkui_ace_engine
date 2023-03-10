@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::NG {
 static SwiperIndicatorType swiperIndicatorType = SwiperIndicatorType::DOT;
+
 class SwiperIndicatorUtils {
 public:
     SwiperIndicatorUtils() = delete;

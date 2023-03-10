@@ -23,9 +23,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr uint32_t ITEM_SIZES_VECTOR_SIZE = 4;
-}
+
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
 
@@ -40,7 +38,7 @@ public:
           longPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
-          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(ITEM_SIZES_VECTOR_SIZE)))
+          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4)))
     {
         AttachProperty(vectorBlackPointCenterX_);
         AttachProperty(longPointLeftCenterX_);
@@ -192,22 +190,22 @@ public:
         return longPointIsHover_;
     }
 
-    void SetItemWidth(const float& itemWidth)
+    void SetItemWidth(const float itemWidth)
     {
         itemWidth_ = itemWidth;
     }
 
-    void SetItemHeight(const float& itemHeight)
+    void SetItemHeight(const float itemHeight)
     {
         itemHeight_ = itemHeight;
     }
 
-    void SetSelectedItemWidth(const float& selectedItemWidth)
+    void SetSelectedItemWidth(const float selectedItemWidth)
     {
         selectedItemWidth_ = selectedItemWidth;
     }
 
-    void SetSelectedItemHeight(const float& selectedItemHeight)
+    void SetSelectedItemHeight(const float selectedItemHeight)
     {
         selectedItemHeight_ = selectedItemHeight;
     }

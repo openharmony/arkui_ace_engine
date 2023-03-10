@@ -16,19 +16,31 @@
 #include "core/components/common/properties/shadow_config.h"
 
 namespace OHOS::Ace {
-const Shadow ShadowConfig::NoneShadow = Shadow(0.0f, Offset(), Color());
+const Shadow ShadowConfig::NoneShadow = Shadow(0.0f, Offset(), Color(), ShadowStyle::None);
 
-const Shadow ShadowConfig::DefaultShadowXS = Shadow(4.0f, Offset(0.0, 0.0), Color(0x26000000));
-const Shadow ShadowConfig::DefaultShadowS = Shadow(20.0f, Offset(0.0, 0.0), Color(0x14000000));
-const Shadow ShadowConfig::DefaultShadowM = Shadow(50.0f, Offset(0.0, 10.0), Color(0x26000000));
-const Shadow ShadowConfig::DefaultShadowL = Shadow(50.0f, Offset(0.0, 10.0), Color(0x4D000000));
-const Shadow ShadowConfig::FloatingShadowS = Shadow(55.0f, Offset(0.0, 10.0), Color(0x40000000));
-const Shadow ShadowConfig::FloatingShadowM = Shadow(70.0f, Offset(0.0, 10.0), Color(0x73000000));
+const Shadow ShadowConfig::DefaultShadowXS =
+    Shadow(4.0f, Offset(0.0, 0.0), Color(0x26000000), ShadowStyle::OuterDefaultXS);
+const Shadow ShadowConfig::DefaultShadowS =
+    Shadow(20.0f, Offset(0.0, 0.0), Color(0x14000000), ShadowStyle::OuterDefaultSM);
+const Shadow ShadowConfig::DefaultShadowM =
+    Shadow(50.0f, Offset(0.0, 10.0), Color(0x26000000), ShadowStyle::OuterDefaultMD);
+const Shadow ShadowConfig::DefaultShadowL =
+    Shadow(50.0f, Offset(0.0, 10.0), Color(0x4D000000), ShadowStyle::OuterDefaultLG);
+const Shadow ShadowConfig::FloatingShadowS =
+    Shadow(55.0f, Offset(0.0, 10.0), Color(0x40000000), ShadowStyle::OuterFloatingSM);
+const Shadow ShadowConfig::FloatingShadowM =
+    Shadow(70.0f, Offset(0.0, 10.0), Color(0x73000000), ShadowStyle::OuterFloatingMD);
 
-const Shadow ShadowConfig::DefaultShadowXSDark = Shadow(4.0f, Offset(0.0, 0.0), Color(0x4d000000));
-const Shadow ShadowConfig::DefaultShadowSDark = Shadow(20.0f, Offset(0.0, 0.0), Color(0x33000000));
-const Shadow ShadowConfig::DefaultShadowMDark = Shadow(50.0f, Offset(0.0, 10.0), Color(0x80000000));
-const Shadow ShadowConfig::DefaultShadowLDark = Shadow(50.0f, Offset(0.0, 10.0), Color(0xcc000000));
-const Shadow ShadowConfig::FloatingShadowSDark = Shadow(55.0f, Offset(0.0, 10.0), Color(0x4d000000));
-const Shadow ShadowConfig::FloatingShadowMDark = Shadow(70.0f, Offset(0.0, 10.0), Color(0x80000000));
+const Shadow ShadowConfig::DefaultShadowXSDark =
+    Shadow(4.0f, Offset(0.0, 0.0), Color(0x4d000000), ShadowStyle::OuterDefaultXS);
+const Shadow ShadowConfig::DefaultShadowSDark =
+    Shadow(20.0f, Offset(0.0, 0.0), Color(0x33000000), ShadowStyle::OuterDefaultSM);
+const Shadow ShadowConfig::DefaultShadowMDark =
+    Shadow(50.0f, Offset(0.0, 10.0), Color(0x80000000), ShadowStyle::OuterDefaultMD);
+const Shadow ShadowConfig::DefaultShadowLDark =
+    Shadow(50.0f, Offset(0.0, 10.0), Color(0xcc000000), ShadowStyle::OuterDefaultLG);
+const Shadow ShadowConfig::FloatingShadowSDark =
+    Shadow(55.0f, Offset(0.0, 10.0), Color(0x4d000000), ShadowStyle::OuterFloatingSM);
+const Shadow ShadowConfig::FloatingShadowMDark =
+    Shadow(70.0f, Offset(0.0, 10.0), Color(0x80000000), ShadowStyle::OuterFloatingMD);
 } // namespace OHOS::Ace

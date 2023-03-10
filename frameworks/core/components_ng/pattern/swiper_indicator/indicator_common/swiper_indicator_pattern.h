@@ -84,9 +84,9 @@ public:
             paintMethod->SetIsHover(isHover_);
             paintMethod->SetIsPressed(isPressed_);
             paintMethod->SetHoverPoint(hoverPoint_);
-        paintMethod->SetMouseClickIndex(mouseClickIndex_);
-        mouseClickIndex_ = std::nullopt;
-        return paintMethod;
+            paintMethod->SetMouseClickIndex(mouseClickIndex_);
+            mouseClickIndex_ = std::nullopt;
+            return paintMethod;
         } else {
             return nullptr;
         }

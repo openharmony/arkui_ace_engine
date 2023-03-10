@@ -20,6 +20,7 @@
 #define private public
 
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/svg_dom.h"
 
 using namespace testing;

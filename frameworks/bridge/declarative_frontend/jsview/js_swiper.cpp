@@ -27,6 +27,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/swiper/swiper_component.h"
+#include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 
 namespace OHOS::Ace {
@@ -225,19 +226,24 @@ void JSSwiper::SetVertical(bool isVertical)
     SwiperModel::GetInstance()->SetDirection(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
 }
 
-void JSSwiper::GetFontContent(const JSRef<JSVal> font, SwiperDigitalParameters& digitalParameters, bool isSelected)
+void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperDigitalParameters& digitalParameters)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
     Dimension fontSize;
-    if (ParseJsDimensionFp(size, fontSize)) {
-        if (isSelected) {
-            digitalParameters.selectedFontSize = fontSize;
-        } else {
-            digitalParameters.fontSize = fontSize;
-        }
-    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);  
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    bool parseOk = ParseJsDimensionFp(size, fontSize);
+    if (isSelected) {
+        digitalParameters.selectedFontSize = parseOk? fontSize :
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
 
+    } else {
+        digitalParameters.fontSize = parseOk? fontSize :
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+    }
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString()) {
         if (isSelected) {
@@ -245,59 +251,11 @@ void JSSwiper::GetFontContent(const JSRef<JSVal> font, SwiperDigitalParameters& 
         } else {
             digitalParameters.fontWeight = ConvertStrToFontWeight(weight->ToString());
         }
-    }
-}
-
-void JSSwiper::GetDotIndicatorPosition(JSRef<JSVal>& info, SwiperParameters& dotParameters)
-{
-    if (info->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
-        JSRef<JSVal> leftValue = obj->GetProperty("left");
-        JSRef<JSVal> topValue = obj->GetProperty("top");
-        JSRef<JSVal> rightValue = obj->GetProperty("right");
-        JSRef<JSVal> bottomValue = obj->GetProperty("bottom");
-        Dimension dimLeft;
-        if (ParseJsDimensionPx(leftValue, dimLeft)) {
-            dotParameters.dimLeft = dimLeft;
-        }
-        Dimension dimTop;
-        if (ParseJsDimensionPx(topValue, dimTop)) {
-            dotParameters.dimTop = dimTop;
-        }
-        Dimension dimRight;
-        if (ParseJsDimensionPx(rightValue, dimRight)) {
-            dotParameters.dimRight = dimRight;
-        }
-        Dimension dimBottom;
-        if (ParseJsDimensionPx(bottomValue, dimBottom)) {
-            dotParameters.dimBottom = dimBottom;
-        }
-    }
-}
-
-void JSSwiper::GetDigitIndicatorPosition(JSRef<JSVal>& info, SwiperDigitalParameters& digitalParameters)
-{
-    if (info->IsObject()) {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
-        JSRef<JSVal> leftValue = obj->GetProperty("left");
-        JSRef<JSVal> topValue = obj->GetProperty("top");
-        JSRef<JSVal> rightValue = obj->GetProperty("right");
-        JSRef<JSVal> bottomValue = obj->GetProperty("bottom");
-        Dimension dimLeft;
-        if (ParseJsDimensionPx(leftValue, dimLeft)) {
-            digitalParameters.dimLeft = dimLeft;
-        }
-        Dimension dimTop;
-        if (ParseJsDimensionPx(topValue, dimTop)) {
-            digitalParameters.dimTop = dimTop;
-        }
-        Dimension dimRight;
-        if (ParseJsDimensionPx(rightValue, dimRight)) {
-            digitalParameters.dimRight = dimRight;
-        }
-        Dimension dimBottom;
-        if (ParseJsDimensionPx(bottomValue, dimBottom)) {
-            digitalParameters.dimBottom = dimBottom;
+    } else {
+        if (isSelected) {
+            digitalParameters.selectedFontWeight = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
+        } else {
+            digitalParameters.fontWeight = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
         }
     }
 }
@@ -315,51 +273,39 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     JSRef<JSVal> maskValue = obj->GetProperty("mask");
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
+    bool parseOk = false;
     SwiperParameters swiperParameters;
-    Dimension dimLeft;
-    if (ParseJsDimensionPx(leftValue, dimLeft)) {
-        swiperParameters.dimLeft = dimLeft;
-    }
-    Dimension dimTop;
-    if (ParseJsDimensionPx(topValue, dimTop)) {
-        swiperParameters.dimTop = dimTop;
-    }
-    Dimension dimRight;
-    if (ParseJsDimensionPx(rightValue, dimRight)) {
-        swiperParameters.dimRight = dimRight;
-    }
-    Dimension dimBottom;
-    if (ParseJsDimensionPx(bottomValue, dimBottom)) {
-        swiperParameters.dimBottom = dimBottom;
-    }
-    Dimension dimItemWidth;
-    if (ParseJsDimensionPx(itemWidthValue, dimItemWidth)) {
-        swiperParameters.itemWidth = dimItemWidth;
-    }
-    Dimension dimItemHeight;
-    if (ParseJsDimensionPx(itemHeightValue, dimItemHeight)) {
-        swiperParameters.itemHeight = dimItemHeight;
-    }
-    Dimension dimSelectedItemWidth;
-    if (ParseJsDimensionPx(selectedItemWidthValue, dimSelectedItemWidth)) {
-        swiperParameters.selectedItemWidth = dimSelectedItemWidth;
-    }
-    Dimension dimSelectedItemHeight;
-    if (ParseJsDimensionPx(selectedItemHeightValue, dimSelectedItemHeight)) {
-        swiperParameters.selectedItemHeight = dimSelectedItemHeight;
-    }
+    Dimension dimPosition;
+    parseOk = ParseJsDimensionPx(leftValue, dimPosition);
+    swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
+    parseOk = ParseJsDimensionPx(topValue, dimPosition);
+    swiperParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
+    parseOk = ParseJsDimensionPx(rightValue, dimPosition);
+    swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
+    parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
+    swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
+    parseOk = ParseJsDimensionPx(itemWidthValue, dimPosition);
+    auto defaultSize = swiperIndicatorTheme->GetSize();
+    swiperParameters.itemWidth = parseOk ? dimPosition : defaultSize;
+    parseOk = ParseJsDimensionPx(itemHeightValue, dimPosition);
+    swiperParameters.itemHeight = parseOk ? dimPosition : defaultSize;
+    parseOk = ParseJsDimensionPx(selectedItemWidthValue, dimPosition);
+    swiperParameters.selectedItemWidth = parseOk ? dimPosition : defaultSize;
+    parseOk = ParseJsDimensionPx(selectedItemHeightValue, dimPosition);
+    swiperParameters.selectedItemHeight = parseOk ? dimPosition : defaultSize;
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
     }
     Color colorVal;
-    if (ParseJsColor(colorValue, colorVal)) {
-        swiperParameters.colorVal = colorVal;
-    }
-    Color selectedColorVal;
-    if (ParseJsColor(selectedColorValue, selectedColorVal)) {
-        swiperParameters.selectedColorVal = selectedColorVal;
-    }
+    parseOk = ParseJsColor(colorValue, colorVal);
+    swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
+    parseOk = ParseJsColor(selectedColorValue, colorVal);
+    swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
     return swiperParameters;
 }
 
@@ -373,34 +319,30 @@ SwiperDigitalParameters JSSwiper::GetDigitIndicatorInfo(const JSRef<JSObject>& o
     JSRef<JSVal> selectedFontColorValue = obj->GetProperty("selectedFontColor");
     JSRef<JSVal> digitFontValue = obj->GetProperty("digitFont");
     JSRef<JSVal> selectedDigitFontValue = obj->GetProperty("selectedDigitFont");
-
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
+    bool parseOk = false;
     SwiperDigitalParameters digitalParameters;
-    Dimension dimLeft;
-    if (ParseJsDimensionPx(dotLeftValue, dimLeft)) {
-        digitalParameters.dimLeft = dimLeft;
-    }
-    Dimension dimTop;
-    if (ParseJsDimensionPx(dotTopValue, dimTop)) {
-        digitalParameters.dimTop = dimTop;
-    }
-    Dimension dimRight;
-    if (ParseJsDimensionPx(dotRightValue, dimRight)) {
-        digitalParameters.dimRight = dimRight;
-    }
-    Dimension dimBottom;
-    if (ParseJsDimensionPx(dotBottomValue, dimBottom)) {
-        digitalParameters.dimBottom = dimBottom;
-    }
+    Dimension dimPosition;
+    parseOk = ParseJsDimensionPx(dotLeftValue, dimPosition);
+    digitalParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
+    parseOk = ParseJsDimensionPx(dotTopValue, dimPosition);
+    digitalParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
+    parseOk = ParseJsDimensionPx(dotRightValue, dimPosition);
+    digitalParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
+    parseOk = ParseJsDimensionPx(dotBottomValue, dimPosition);
+    digitalParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
     Color fontColor;
-    if (JSViewAbstract::ParseJsColor(fontColorValue, fontColor)) {
-        digitalParameters.fontColor = fontColor;
-    }
-    Color selectedFontColor;
-    if (JSViewAbstract::ParseJsColor(selectedFontColorValue, selectedFontColor)) {
-        digitalParameters.selectedFontColor = selectedFontColor;
-    }
-    GetFontContent(digitFontValue, digitalParameters, false);
-    GetFontContent(selectedDigitFontValue, digitalParameters, true);
+    parseOk = JSViewAbstract::ParseJsColor(fontColorValue, fontColor);
+    digitalParameters.fontColor = parseOk ? fontColor :
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    parseOk = JSViewAbstract::ParseJsColor(selectedFontColorValue, fontColor);
+    digitalParameters.selectedFontColor = parseOk ? fontColor :
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    GetFontContent(digitFontValue, false, digitalParameters);
+    GetFontContent(selectedDigitFontValue, true, digitalParameters);
     return digitalParameters;
 }
 
@@ -411,16 +353,19 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         JSRef<JSVal> typeParam = obj->GetProperty("type");
         if (typeParam->IsString()) {
             auto type = typeParam->ToString();
-            if (type == "DotIndicator") {
-                SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
-                SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
-                SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
-            }
             if (type == "DigitIndicator") {
                 SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(obj);
                 SwiperModel::GetInstance()->SetDigitIndicatorStyle(digitalParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DIGIT);
+            } else {
+                SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+                SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
+                SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
+        } else {
+            SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
+            SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
+            SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
         }
     }
     if (info[0]->IsBoolean()) {
@@ -428,6 +373,8 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         bool showIndicator = false;
         ParseJsBool(showIndicatorValue, showIndicator);
         SwiperModel::GetInstance()->SetShowIndicator(showIndicator);
+    } else {
+        SwiperModel::GetInstance()->SetShowIndicator(true);
     }
 }
 
@@ -444,46 +391,35 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
         JSRef<JSVal> maskValue = obj->GetProperty("mask");
         JSRef<JSVal> colorValue = obj->GetProperty("color");
         JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
-
-        Dimension dimLeft;
-        if (ParseJsDimensionPx(leftValue, dimLeft)) {
-            swiperParameters.dimLeft = dimLeft;
-        }
-        Dimension dimTop;
-        if (ParseJsDimensionPx(topValue, dimTop)) {
-            swiperParameters.dimTop = dimTop;
-        }
-        Dimension dimRight;
-        if (ParseJsDimensionPx(rightValue, dimRight)) {
-            swiperParameters.dimRight = dimRight;
-        }
-        Dimension dimBottom;
-        if (ParseJsDimensionPx(bottomValue, dimBottom)) {
-            swiperParameters.dimBottom = dimBottom;
-        }
-        Dimension dimSize;
-        if (ParseJsDimensionPx(sizeValue, dimSize)) {
-            swiperParameters.itemWidth = dimSize;
-            swiperParameters.itemHeight = dimSize;
-            swiperParameters.selectedItemWidth = dimSize;
-            swiperParameters.selectedItemHeight = dimSize;
-        }
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_VOID(swiperIndicatorTheme);
+        Dimension dimPosition;
+        bool parseOk = ParseJsDimensionPx(leftValue, dimPosition);
+        swiperParameters.dimLeft = parseOk ? dimPosition : 0.0_vp;
+        parseOk = ParseJsDimensionPx(topValue, dimPosition);
+        swiperParameters.dimTop = parseOk ? dimPosition : 0.0_vp;
+        parseOk = ParseJsDimensionPx(rightValue, dimPosition);
+        swiperParameters.dimRight = parseOk ? dimPosition : 0.0_vp;
+        parseOk = ParseJsDimensionPx(bottomValue, dimPosition);
+        swiperParameters.dimBottom = parseOk ? dimPosition : 0.0_vp;
+        parseOk = ParseJsDimensionPx(sizeValue, dimPosition);
+        swiperParameters.itemWidth = parseOk ? dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.itemHeight = parseOk ? dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.selectedItemWidth = parseOk ? dimPosition : swiperIndicatorTheme->GetSize();
+        swiperParameters.selectedItemHeight = parseOk ? dimPosition : swiperIndicatorTheme->GetSize();
         if (maskValue->IsBoolean()) {
             auto mask = maskValue->ToBoolean();
             swiperParameters.maskValue = mask;
         }
         Color colorVal;
-        if (ParseJsColor(colorValue, colorVal)) {
-            swiperParameters.colorVal = colorVal;
-        }
-        Color selectedColorVal;
-        if (ParseJsColor(selectedColorValue, selectedColorVal)) {
-            swiperParameters.selectedColorVal = selectedColorVal;
-        }
+        parseOk = ParseJsColor(colorValue, colorVal);
+        swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
+        parseOk = ParseJsColor(selectedColorValue, colorVal);
+        swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
     }
-
     SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
-
     info.ReturnSelf();
 }
 

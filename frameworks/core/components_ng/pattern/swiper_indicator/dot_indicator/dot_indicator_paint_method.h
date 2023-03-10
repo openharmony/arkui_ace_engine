@@ -19,7 +19,6 @@
 #include "core/components/common/properties/swiper_indicator.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"

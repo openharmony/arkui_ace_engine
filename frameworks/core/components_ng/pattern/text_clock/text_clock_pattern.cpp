@@ -23,7 +23,6 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {

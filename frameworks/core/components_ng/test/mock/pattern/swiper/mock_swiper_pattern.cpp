@@ -99,11 +99,7 @@ void SwiperPattern::InitSwiperController()
 {
 }
 
-void SwiperPattern::InitDotIndicator()
-{
-}
-
-void SwiperPattern::InitDigitIndicator()
+void SwiperPattern::InitIndicator()
 {
 }
 

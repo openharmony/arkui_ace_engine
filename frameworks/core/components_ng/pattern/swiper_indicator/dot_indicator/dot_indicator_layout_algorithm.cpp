@@ -32,8 +32,7 @@ constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
-constexpr float HALF = 0.5f;
-constexpr float DOUBLE = 2.0f;
+
 } // namespace
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -72,12 +71,12 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     indicatorPadding = INDICATOR_PADDING_HOVER;
 
     // The width and height of the entire indicator.
-    auto indicatorHeight = static_cast<float>(userItemWidth + indicatorPadding.ConvertToPx() * DOUBLE);
-    if (userItemHeight * DOUBLE > userItemWidth) {
-        indicatorHeight = static_cast<float>(userItemHeight * DOUBLE + indicatorPadding.ConvertToPx() * DOUBLE);
+    auto indicatorHeight = static_cast<float>(userItemWidth + indicatorPadding.ConvertToPx() * 2);
+    if (userItemHeight * 2 > userItemWidth) {
+        indicatorHeight = static_cast<float>(userItemHeight * 2 + indicatorPadding.ConvertToPx() * 2);
     }
-    auto indicatorWidth = static_cast<float>((indicatorPadding.ConvertToPx() * DOUBLE +
-        (userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userItemWidth * DOUBLE);
+    auto indicatorWidth = static_cast<float>((indicatorPadding.ConvertToPx() * 2 +
+        (userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userItemWidth * 2);
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;
@@ -134,7 +133,7 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         position.SetX(swiperWidth - indicatorWidth_ - rightValue);
     } else {
         position.SetX(
-            direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) * HALF : swiperWidth - indicatorWidth_);
+            direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) * 0.5f : swiperWidth - indicatorWidth_);
     }
     if (top.has_value()) {
         auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(top->Value()));
@@ -146,7 +145,7 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         if (direction == Axis::HORIZONTAL) {
             position.SetY(swiperHeight - indicatorHeight_);
         } else {
-            position.SetY((swiperHeight - indicatorHeight_) * HALF);
+            position.SetY((swiperHeight - indicatorHeight_) * 0.5f);
         }
     }
     auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};

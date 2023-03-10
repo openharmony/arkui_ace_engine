@@ -833,7 +833,7 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
     // color
     auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(Color());
     cursorJson->Put("color", caretColor.ColorToString().c_str());
-    auto caretwidth = textFieldPaintProperty->GetCursorWidth().value_or(SelectHandleInfo::GetDefaultLineWidth());
+    auto caretwidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
     cursorJson->Put("width", caretwidth.ToString().c_str());
     json->Put("cursorStyle", cursorJson);
 }

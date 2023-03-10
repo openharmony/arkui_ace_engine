@@ -320,11 +320,11 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
 void SwiperIndicatorPattern::InitTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
     const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode)
 {
+    CHECK_NULL_VOID(firstTextNode);
+    CHECK_NULL_VOID(lastTextNode);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(firstTextNode);
-    CHECK_NULL_VOID(lastTextNode);
     firstTextNode->SetInternal();
     lastTextNode->SetInternal();
     auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();

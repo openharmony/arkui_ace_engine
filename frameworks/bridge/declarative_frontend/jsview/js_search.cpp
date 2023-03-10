@@ -340,10 +340,13 @@ void JSSearch::SetCursor(const JSCallbackInfo& info)
         auto cursorWidthProp = param->GetProperty("width");
         if (!cursorWidthProp->IsUndefined() && !cursorWidthProp->IsNull() &&
             ParseJsDimensionVp(cursorWidthProp, cursorWidth)) {
-            if (GreatOrEqual(cursorWidth.Value(), 0.0)) {
-                SearchModel::GetInstance()->SetCaretWidth(cursorWidth);
+            if (LessNotEqual(cursorWidth.Value(), 0.0)) {
+                cursorWidth = textFieldTheme->GetCursorWidth();
             }
+        } else {
+            cursorWidth = textFieldTheme->GetCursorWidth();
         }
+        SearchModel::GetInstance()->SetCaretWidth(cursorWidth);
 
         // set cursor color
         Color cursorColor;

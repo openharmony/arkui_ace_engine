@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/svg/svg_fe_gaussianblur_declaration.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_fe_gaussian_blur.h"
 #include "core/components_ng/svg/parse/svg_filter.h"
 #include "core/components_ng/svg/parse/svg_svg.h"

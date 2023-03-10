@@ -99,11 +99,7 @@ void SwiperPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
 
     oldIndex_ = currentIndex_;
-    if (GetIndicatorType() == SwiperIndicatorType::DOT) {
-        InitDotIndicator();
-    } else {
-        InitDigitIndicator();
-    }
+    InitIndicator();
 
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
@@ -472,7 +468,7 @@ void SwiperPattern::InitSwiperController()
     });
 }
 
-void SwiperPattern::InitDigitIndicator()
+void SwiperPattern::InitIndicator()
 {
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
@@ -496,42 +492,13 @@ void SwiperPattern::InitDigitIndicator()
         }
     }
     CHECK_NULL_VOID(indicatorNode);
-    SaveDigitIndicatorProperty(indicatorNode);
-    auto renderContext = indicatorNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    BorderRadiusProperty radius;
-    radius.SetRadius(INDICATOR_BORDER_RADIUS);
-    renderContext->UpdateBorderRadius(radius);
-
-    indicatorNode->MarkModifyDone();
-    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void SwiperPattern::InitDotIndicator()
-{
-    auto swiperNode = GetHost();
-    CHECK_NULL_VOID(swiperNode);
-    RefPtr<FrameNode> indicatorNode;
-    CHECK_NULL_VOID(swiperNode->GetLastChild());
-    if (swiperNode->GetLastChild()->GetTag() != V2::SWIPER_INDICATOR_ETS_TAG) {
-        LOGI("Swiper create new indicator");
-        if (!IsShowIndicator()) {
-            return;
-        }
-        indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(),
-            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-        swiperNode->AddChild(indicatorNode);
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty(indicatorNode);
     } else {
-        LOGI("Swiper indicator already exist");
-        indicatorNode = DynamicCast<FrameNode>(swiperNode->GetLastChild());
-        if (!IsShowIndicator()) {
-            swiperNode->RemoveChild(indicatorNode);
-            return;
-        }
+        SaveDigitIndicatorProperty(indicatorNode);
     }
-    CHECK_NULL_VOID(indicatorNode);
-    SaveDotIndicatorProperty(indicatorNode);
 
     auto renderContext = indicatorNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1253,39 +1220,37 @@ void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorN
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (swiperParameters_.dimLeft.has_value()) {
-        layoutProperty->UpdateLeft(swiperParameters_.dimLeft.value());
-    }
-    if (swiperParameters_.dimTop.has_value()) {
-        layoutProperty->UpdateTop(swiperParameters_.dimTop.value());
-    }
-    if (swiperParameters_.dimRight.has_value()) {
-        layoutProperty->UpdateRight(swiperParameters_.dimRight.value());
-    }
-    if (swiperParameters_.dimBottom.has_value()) {
-        layoutProperty->UpdateBottom(swiperParameters_.dimBottom.value());
-    }
-    if (swiperParameters_.itemWidth.has_value()) {
-        paintProperty->UpdateItemWidth(swiperParameters_.itemWidth.value());
-    }
-    if (swiperParameters_.itemHeight.has_value()) {
-        paintProperty->UpdateItemHeight(swiperParameters_.itemHeight.value());
-    }
-    if (swiperParameters_.selectedItemWidth.has_value()) {
-        paintProperty->UpdateSelectedItemWidth(swiperParameters_.selectedItemWidth.value());
-    }
-    if (swiperParameters_.selectedItemHeight.has_value()) {
-        paintProperty->UpdateSelectedItemHeight(swiperParameters_.selectedItemHeight.value());
-    }
-    if (swiperParameters_.maskValue.has_value()) {
-        paintProperty->UpdateIndicatorMask(swiperParameters_.maskValue.value());
-    }
-    if (swiperParameters_.colorVal.has_value()) {
-        paintProperty->UpdateColor(swiperParameters_.colorVal.value());
-    }
-    if (swiperParameters_.selectedColorVal.has_value()) {
-        paintProperty->UpdateSelectedColor(swiperParameters_.selectedColorVal.value());
-    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    bool hasValue = swiperParameters_->dimLeft.has_value();
+    layoutProperty->UpdateLeft(hasValue ? swiperParameters_->dimLeft.value() : 0.0_vp);
+    hasValue = swiperParameters_->dimTop.has_value();
+    layoutProperty->UpdateTop(hasValue ? swiperParameters_->dimTop.value() : 0.0_vp);
+    hasValue = swiperParameters_->dimRight.has_value();
+    layoutProperty->UpdateRight(hasValue ? swiperParameters_->dimRight.value() : 0.0_vp);
+    hasValue = swiperParameters_->dimBottom.has_value();
+    layoutProperty->UpdateBottom(hasValue ? swiperParameters_->dimBottom.value() : 0.0_vp);
+    hasValue = swiperParameters_->itemWidth.has_value();
+    paintProperty->UpdateItemWidth(hasValue ? swiperParameters_->itemWidth.value() :
+        swiperIndicatorTheme->GetSize());
+    hasValue = swiperParameters_->itemHeight.has_value();
+    paintProperty->UpdateItemHeight(hasValue ? swiperParameters_->itemHeight.value() :
+        swiperIndicatorTheme->GetSize());
+    hasValue = swiperParameters_->selectedItemWidth.has_value();
+    paintProperty->UpdateSelectedItemWidth(hasValue ? swiperParameters_->selectedItemWidth.value() :
+        swiperIndicatorTheme->GetSize());
+    hasValue = swiperParameters_->selectedItemHeight.has_value();
+    paintProperty->UpdateSelectedItemHeight(hasValue ? swiperParameters_->selectedItemHeight.value() :
+        swiperIndicatorTheme->GetSize());
+    hasValue = swiperParameters_->maskValue.has_value();
+    paintProperty->UpdateIndicatorMask(hasValue ? swiperParameters_->maskValue.value() : false);
+    hasValue = swiperParameters_->colorVal.has_value();
+    paintProperty->UpdateColor(hasValue ? swiperParameters_->colorVal.value() : swiperIndicatorTheme->GetColor());
+    hasValue = swiperParameters_->selectedColorVal.has_value();
+    paintProperty->UpdateSelectedColor(hasValue ? swiperParameters_->selectedColorVal.value() :
+        swiperIndicatorTheme->GetSelectedColor());
 }
 
 void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
@@ -1295,35 +1260,35 @@ void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicato
     CHECK_NULL_VOID(indicatorPattern);
     auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (swiperDigitalParameters_.dimLeft.has_value()) {
-        layoutProperty->UpdateLeft(swiperDigitalParameters_.dimLeft.value());
-    }
-    if (swiperDigitalParameters_.dimTop.has_value()) {
-        layoutProperty->UpdateTop(swiperDigitalParameters_.dimTop.value());
-    }
-    if (swiperDigitalParameters_.dimRight.has_value()) {
-        layoutProperty->UpdateRight(swiperDigitalParameters_.dimRight.value());
-    }
-    if (swiperDigitalParameters_.dimBottom.has_value()) {
-        layoutProperty->UpdateBottom(swiperDigitalParameters_.dimBottom.value());
-    }
-    if (swiperDigitalParameters_.fontColor.has_value()) {
-        layoutProperty->UpdateFontColor(swiperDigitalParameters_.fontColor.value());
-    }
-    if (swiperDigitalParameters_.selectedFontColor.has_value()) {
-        layoutProperty->UpdateSelectedFontColor(swiperDigitalParameters_.selectedFontColor.value());
-    }
-    if (swiperDigitalParameters_.fontSize.has_value()) {
-        layoutProperty->UpdateFontSize(swiperDigitalParameters_.fontSize.value());
-    }
-    if (swiperDigitalParameters_.selectedFontSize.has_value()) {
-        layoutProperty->UpdateSelectedFontSize(swiperDigitalParameters_.selectedFontSize.value());
-    }
-    if (swiperDigitalParameters_.fontWeight.has_value()) {
-        layoutProperty->UpdateFontWeight(swiperDigitalParameters_.fontWeight.value());
-    }
-    if (swiperDigitalParameters_.selectedFontWeight.has_value()) {
-        layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters_.selectedFontWeight.value());
-    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    bool hasValue = swiperDigitalParameters_->dimLeft.has_value();
+    layoutProperty->UpdateLeft(hasValue ? swiperDigitalParameters_->dimLeft.value() : 0.0_vp);
+    hasValue = swiperDigitalParameters_->dimTop.has_value();
+    layoutProperty->UpdateTop(hasValue ? swiperDigitalParameters_->dimTop.value() : 0.0_vp);
+    hasValue = swiperDigitalParameters_->dimRight.has_value();
+    layoutProperty->UpdateRight(hasValue ? swiperDigitalParameters_->dimRight.value() : 0.0_vp);
+    hasValue = swiperDigitalParameters_->dimBottom.has_value();
+    layoutProperty->UpdateBottom(hasValue ? swiperDigitalParameters_->dimBottom.value() : 0.0_vp);
+    hasValue = swiperDigitalParameters_->fontColor.has_value();
+    layoutProperty->UpdateFontColor(hasValue ? swiperDigitalParameters_->fontColor.value() :
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor());
+    hasValue = swiperDigitalParameters_->selectedFontColor.has_value();
+    layoutProperty->UpdateSelectedFontColor(hasValue ? swiperDigitalParameters_->selectedFontColor.value() :
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor());
+    hasValue = swiperDigitalParameters_->fontSize.has_value();
+    layoutProperty->UpdateFontSize(hasValue ? swiperDigitalParameters_->fontSize.value() :
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize());
+    hasValue = swiperDigitalParameters_->selectedFontSize.has_value();
+    layoutProperty->UpdateSelectedFontSize(hasValue ? swiperDigitalParameters_->selectedFontSize.value() :
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize());
+    hasValue = swiperDigitalParameters_->fontWeight.has_value();
+    layoutProperty->UpdateFontWeight(hasValue ? swiperDigitalParameters_->fontWeight.value() :
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight());
+    hasValue = swiperDigitalParameters_->selectedFontWeight.has_value();
+    layoutProperty->UpdateSelectedFontWeight(hasValue ? swiperDigitalParameters_->selectedFontWeight.value() :
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight());
 }
 } // namespace OHOS::Ace::NG

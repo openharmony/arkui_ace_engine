@@ -295,7 +295,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
             break;
         }
     }
-    if (event.action == AxisAction::END || event.action == AxisAction::NONE) {
+    if (event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) {
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
                 refereeNG_->CleanGestureScope(event.id);

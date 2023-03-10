@@ -220,8 +220,8 @@ void DotIndicatorPaintMethod::CalculateNormalMargin(const LinearVector<float>& i
     auto selectedItemWidth = itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * DOUBLE;
     auto selectedItemHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * DOUBLE;
     auto allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ + 1);
-    if ((itemHalfSizes[ITEM_HALF_WIDTH] != itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
-        (itemHalfSizes[ITEM_HALF_HEIGHT] != itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
+    if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
+        !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
         allPointDiameterSum = itemWidth * static_cast<float>(itemCount_ - 1) + selectedItemWidth;
     }
     auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - 1));
@@ -272,8 +272,8 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
             startVectorBlackPointCenterX[i] = startCenterX;
             startCenterX += space + itemWidth;
         } else {
-            if ((itemHalfSizes[ITEM_HALF_WIDTH] != itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
-                (itemHalfSizes[ITEM_HALF_HEIGHT] != itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
+            if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
+                !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
                 startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 startLongPointLeftCenterX = startCenterX;
                 startLongPointRightCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
@@ -289,8 +289,8 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
             endVectorBlackPointCenterX[i] = endCenterX;
             endCenterX += space + itemWidth;
         } else {
-            if ((itemHalfSizes[ITEM_HALF_WIDTH] != itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
-                (itemHalfSizes[ITEM_HALF_HEIGHT] != itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
+            if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
+                !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
                 endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 endLongPointLeftCenterX = endCenterX;
                 endLongPointRightCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
@@ -367,7 +367,6 @@ bool DotIndicatorPaintMethod::isHoverPoint(
     float tempRightCenterY = axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX();
     float itemHalfWidth = 0.0f;
     float itemHalfHeight = 0.0f;
-
     if (itemHalfSizes[ITEM_HALF_WIDTH] > itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) {
         if (itemHalfSizes[ITEM_HALF_HEIGHT] > itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT]) {
             itemHalfWidth = itemHalfSizes[ITEM_HALF_WIDTH];
@@ -385,8 +384,8 @@ bool DotIndicatorPaintMethod::isHoverPoint(
             itemHalfHeight = itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
         }
     }
-    return hoverPoint.GetX() >= (tempLeftCenterX - itemHalfWidth) && hoverPoint.GetX() <=
-                (tempRightCenterX + itemHalfWidth) && hoverPoint.GetY() >= (tempLeftCenterY - itemHalfHeight) &&
-                hoverPoint.GetY() <= (tempRightCenterY + itemHalfHeight);
+    return hoverPoint.GetX() >= (tempLeftCenterX - itemHalfWidth) && (hoverPoint.GetX() <=
+                (tempRightCenterX + itemHalfWidth)) && (hoverPoint.GetY() >= (tempLeftCenterY - itemHalfHeight)) &&
+                (hoverPoint.GetY() <= (tempRightCenterY + itemHalfHeight));
 }
 } // namespace OHOS::Ace::NG

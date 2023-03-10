@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/svg/svg_declaration.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/parse/svg_use.h"
 #include "core/components_ng/svg/svg_dom.h"
