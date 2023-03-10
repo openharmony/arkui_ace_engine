@@ -265,6 +265,7 @@ build_component_ng("pattern_ng") {
     "search/search_node.cpp",
     "search/search_paint_method.cpp",
     "search/search_pattern.cpp",
+    "select/select_accessibility_property.cpp",
     "select/select_layout_algorithm.cpp",
     "select/select_pattern.cpp",
     "select/select_view.cpp",
