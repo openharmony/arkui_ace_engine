@@ -20,7 +20,6 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/components_ng/render/paint.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
