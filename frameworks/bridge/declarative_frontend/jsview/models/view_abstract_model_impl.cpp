@@ -652,7 +652,7 @@ void ViewAbstractModelImpl::SetScale(float x, float y, float z)
     transform->Scale(x, y, z, option);
 }
 
-void ViewAbstractModelImpl::SetPivot(const Dimension& x, const Dimension& y)
+void ViewAbstractModelImpl::SetPivot(const Dimension& x, const Dimension& y, const Dimension& /* z */)
 {
     RefPtr<TransformComponent> transform = ViewStackProcessor::GetInstance()->GetTransformComponent();
     transform->SetOriginDimension(DimensionOffset(x, y));

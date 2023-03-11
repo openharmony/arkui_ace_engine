@@ -325,9 +325,10 @@ public:
         ViewAbstract::SetScale(scale);
     }
 
-    void SetPivot(const Dimension& x, const Dimension& y) override
+    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override
     {
         DimensionOffset center(x, y);
+        center.SetZ(z);
         ViewAbstract::SetPivot(center);
     }
 

@@ -82,7 +82,7 @@ public:
     void MarkAnchor(const Dimension& x, const Dimension& y) override;
 
     void SetScale(float x, float y, float z) override;
-    void SetPivot(const Dimension& x, const Dimension& y) override;
+    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetRotate(float x, float y, float z, float angle) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;

@@ -59,10 +59,10 @@
 #endif
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/property/progress_mask_property.h"
-#include "core/components/progress/progress_theme.h"
 
 namespace OHOS::Ace {
 
@@ -209,8 +209,7 @@ void GetDefaultRotateVector(double& dx, double& dy, double& dz)
     }
 }
 
-void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy, float& dz, Dimension& centerX,
-    Dimension& centerY, std::optional<float>& angle)
+void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& rotate, std::optional<float>& angle)
 {
     // default: dx, dy, dz (0.0, 0.0, 0.0)
     double dxVal = 0.0;
@@ -222,17 +221,20 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), dxVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), dyVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), dzVal);
-    dx = static_cast<float>(dxVal);
-    dy = static_cast<float>(dyVal);
-    dz = static_cast<float>(dzVal);
+    rotate.xDirection = static_cast<float>(dxVal);
+    rotate.yDirection = static_cast<float>(dyVal);
+    rotate.zDirection = static_cast<float>(dzVal);
     // if specify centerX
     Dimension length;
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
-        centerX = length;
+        rotate.centerX = length;
     }
     // if specify centerY
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
-        centerY = length;
+        rotate.centerY = length;
+    }
+    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
+        rotate.centerZ = length;
     }
     // if specify angle
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
@@ -371,8 +373,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedRotateTransition(
         }
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(
-            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
+        ParseJsRotate(rotateArgs, rotate, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             return AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
@@ -898,7 +899,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             Dimension centerY = 0.5_pct;
             ParseJsScale(argsPtrItem, scaleX, scaleY, scaleZ, centerX, centerY);
             ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
-            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY);
+            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
             return;
         }
     }
@@ -1033,17 +1034,13 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return;
         }
-        float dx = 0.0f;
-        float dy = 0.0f;
-        float dz = 0.0f;
-        // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
+        ParseJsRotate(argsPtrItem, rotate, angle);
         if (angle) {
-            ViewAbstractModel::GetInstance()->SetRotate(dx, dy, dz, angle.value());
-            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY);
+            ViewAbstractModel::GetInstance()->SetRotate(
+                rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value());
+            ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
         } else {
             LOGE("Js JsRotate failed, not specify angle");
         }
@@ -1148,8 +1145,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
         // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(
-            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
+        ParseJsRotate(rotateArgs, rotate, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             transitionOption.UpdateRotate(rotate);
@@ -2961,7 +2957,7 @@ bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, Foregroun
     }
     if (jsValue->IsString()) {
         std::string colorStr = jsValue->ToString();
-         // Remove all " ".
+        // Remove all " ".
         colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
         std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
         if (colorStr.compare("invert") == 0) {

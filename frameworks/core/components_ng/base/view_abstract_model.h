@@ -117,7 +117,7 @@ public:
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;
-    virtual void SetPivot(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetRotate(float x, float y, float z, float angle) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
