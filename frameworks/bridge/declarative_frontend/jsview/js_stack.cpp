@@ -45,12 +45,14 @@ StackModel* StackModel::GetInstance()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
-#define SET_ALIGNMENT(info, name)              \
-    Alignment alignment = Alignment::TOP_LEFT; \
-    if (!GetAlignment(info, alignment)) {      \
-        return;                                \
-    }                                          \
-    StackModel::GetInstance()->Set##name(alignment);
+#define SET_ALIGNMENT(info, name)                        \
+    do {                                                 \
+        Alignment alignment = Alignment::TOP_LEFT;       \
+        if (!GetAlignment(info, alignment)) {            \
+            break;                                       \
+        }                                                \
+        StackModel::GetInstance()->Set##name(alignment); \
+    } while (false)
 
 const static std::array<Alignment, 9> ALIGNMENT_ARR { Alignment::TOP_LEFT, Alignment::TOP_CENTER, Alignment::TOP_RIGHT,
     Alignment::CENTER_LEFT, Alignment::CENTER, Alignment::CENTER_RIGHT, Alignment::BOTTOM_LEFT,
