@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -283,6 +284,16 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
     return overlayNode;
 }
 } // namespace
+
+RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+
+    return AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
+}
 
 std::string Inspector::GetInspectorNodeByKey(const std::string& key)
 {
