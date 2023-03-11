@@ -2893,6 +2893,20 @@ void TextFieldPattern::CaretMoveToLastNewLineChar()
     }
 }
 
+bool TextFieldPattern::OnBackPressed()
+{
+    LOGI("Textfield %{public}d receives back press event", GetHost()->GetId());
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (!imeAttached_ || (imeAttached_ && !imeShown_)) {
+        LOGI("Ime is not attached or is hidden, return for not consuming the back press event");
+        return false;
+    }
+#endif
+    LOGI("Closing keyboard on back press");
+    CloseKeyboard(true);
+    return true;
+}
+
 std::string TextFieldPattern::TextInputTypeToString() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
