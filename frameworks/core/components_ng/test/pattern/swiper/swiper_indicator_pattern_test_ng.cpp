@@ -801,4 +801,1054 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorGetContentModifier001, Tes
     RefPtr<Modifier> ptrModifier = paintMethod->GetContentModifier(&paintWrapper);
     EXPECT_FALSE(ptrModifier == nullptr);
 }
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedFontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    /**
+     * @tc.steps: step3. SelectedFontSize is 14.
+     */
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    EXPECT_FALSE(frontTextFrameNode == nullptr);
+    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(frontTextLayoutProperty == nullptr);
+    EXPECT_EQ(frontTextLayoutProperty->GetFontSize()->ConvertToPx(), 14);
+
+    /**
+     * @tc.steps: step4. SelectedFontSize is 60.
+     */
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    Dimension fontSize = 60.0_px;
+    layoutProperty->UpdateSelectedFontSize(fontSize);
+    indicatorPattern->OnModifyDone();
+    EXPECT_EQ(frontTextLayoutProperty->GetFontSize()->ConvertToPx(), 60);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedFontSize002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    EXPECT_FALSE(frontTextFrameNode == nullptr);
+    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(frontTextLayoutProperty == nullptr);
+
+    /**
+     * @tc.steps: step4. SelectedFontSize is -1.
+     */
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    Dimension fontSize = -1.0_px;
+    layoutProperty->UpdateSelectedFontSize(fontSize);
+    indicatorPattern->OnModifyDone();
+    EXPECT_EQ(frontTextLayoutProperty->GetFontSize()->ConvertToPx(), 14);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, FontSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    /**
+     * @tc.steps: step3. FontSize is 14.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
+    EXPECT_FALSE(backTextFrameNode == nullptr);
+    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(backTextLayoutProperty == nullptr);
+    EXPECT_EQ(backTextLayoutProperty->GetFontSize()->ConvertToPx(), 14);
+
+    /**
+     * @tc.steps: step3. FontSize is 30.
+     */
+
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    Dimension fontSize = 30.0_px;
+    layoutProperty->UpdateFontSize(fontSize);
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+
+    EXPECT_EQ(backTextLayoutProperty->GetFontSize()->ConvertToPx(), 30);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, FontSize002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
+    EXPECT_FALSE(backTextFrameNode == nullptr);
+    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(backTextLayoutProperty == nullptr);
+
+    /**
+     * @tc.steps: step3. FontSize is -10.
+     */
+
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    Dimension fontSize = -10.0_px;
+    layoutProperty->UpdateFontSize(fontSize);
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+
+    EXPECT_EQ(backTextLayoutProperty->GetFontSize()->ConvertToPx(), 14);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, FontColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    /**
+     * @tc.steps: step3. FontColor is 0xff000000.
+     */
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
+    EXPECT_FALSE(backTextFrameNode == nullptr);
+    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(backTextLayoutProperty == nullptr);
+    EXPECT_EQ(backTextLayoutProperty->GetTextColor()->GetValue(), 0xff000000);
+
+    /**
+     * @tc.steps: step3. FontColor is WHITE.
+     */
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateFontColor(Color::WHITE);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+    EXPECT_EQ(backTextLayoutProperty->GetTextColor()->GetValue(), 0xffffffff);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, FontColor002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
+    EXPECT_FALSE(backTextFrameNode == nullptr);
+    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(backTextLayoutProperty == nullptr);
+
+    /**
+     * @tc.steps: step3. FontColor is 0xff00ff00.
+     */
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateFontColor(Color());
+    swiperEventHub->FireIndicatorChangeEvent(0);
+    EXPECT_EQ(backTextLayoutProperty->GetTextColor()->GetValue(), 0xff000000);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedFontColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    /**
+     * @tc.steps: step3. SelectedFontColor001 is 0xff000000.
+     */
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    EXPECT_FALSE(frontTextFrameNode == nullptr);
+    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(frontTextLayoutProperty == nullptr);
+    EXPECT_EQ(frontTextLayoutProperty->GetTextColor()->GetValue(), 0xff000000);
+
+    /**
+     * @tc.steps: step4. SelectedFontColor is WHITE.
+     */
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateSelectedFontColor(Color::WHITE);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+    EXPECT_EQ(frontTextLayoutProperty->GetTextColor()->GetValue(), 0xffffffff);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedFontColor002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    EXPECT_FALSE(frontTextFrameNode == nullptr);
+    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(frontTextLayoutProperty == nullptr);
+    /**
+     * @tc.steps: step3. SelectedFontColor is Color().
+     */
+    layoutProperty->UpdateSelectedFontColor(Color());
+    swiperEventHub->FireIndicatorChangeEvent(0);
+    EXPECT_EQ(frontTextLayoutProperty->GetTextColor()->GetValue(), 0xff000000);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, FontWeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    /**
+     * @tc.steps: step3. FontWeight is NORMAL.
+     */
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto backTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
+    EXPECT_FALSE(backTextFrameNode == nullptr);
+    auto backTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(backTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(backTextLayoutProperty == nullptr);
+    EXPECT_EQ(backTextLayoutProperty->GetFontWeight(), FontWeight::NORMAL);
+    /**
+     * @tc.steps: step3. FontWeight is BOLDER.
+     */
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateFontWeight(FontWeight::BOLDER);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+    EXPECT_EQ(backTextLayoutProperty->GetFontWeight(), FontWeight::BOLDER);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedFontWeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    mode.SetIndicatorType(SwiperIndicatorType::DIGIT);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    /**
+     * @tc.steps: step3. SelectedFontWeight is NORMAL.
+     */
+    auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    EXPECT_FALSE(swiperEventHub == nullptr);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+
+    auto frontTextFrameNode = AceType::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    EXPECT_FALSE(frontTextFrameNode == nullptr);
+    auto frontTextLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(frontTextFrameNode->GetLayoutProperty());
+    EXPECT_FALSE(frontTextLayoutProperty == nullptr);
+    EXPECT_EQ(frontTextLayoutProperty->GetFontWeight(), FontWeight::NORMAL);
+    /**
+     * @tc.steps: step3. SelectedFontWeight is MEDIUM.
+     */
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    EXPECT_FALSE(layoutProperty == nullptr);
+    layoutProperty->UpdateSelectedFontWeight(FontWeight::MEDIUM);
+    swiperEventHub->FireIndicatorChangeEvent(0);
+    EXPECT_EQ(frontTextLayoutProperty->GetFontWeight(), FontWeight::MEDIUM);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, ItemWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateItemWidth(Dimension(-1.0, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3. ItemWidth is less not equal 0.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, ItemWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    mode.SetDirection(Axis::VERTICAL);
+    auto controller = mode.Create();
+    EXPECT_FALSE(controller == nullptr);
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+    frameNode->AddChild(indicatorNode);
+    frameNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDirection(Axis::VERTICAL);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateItemWidth(Dimension(SWIPER_INDICATOR_SIZE_MINUS, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3. ItemWidth is great then 0.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, ItemHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateItemHeight(Dimension(-1.0, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3. ItemHeight is less not equal 0.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, ItemHeight002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    mode.SetDirection(Axis::VERTICAL);
+    auto controller = mode.Create();
+    EXPECT_FALSE(controller == nullptr);
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+    frameNode->AddChild(indicatorNode);
+    frameNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDirection(Axis::VERTICAL);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateItemHeight(Dimension(SWIPER_INDICATOR_SIZE_MINUS, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3. ItemHeight is great then 0.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedItemWidth001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateSelectedItemWidth(Dimension(-1.0, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3. SelectedItemWidth is less not equal 0.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedItemWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    mode.SetDirection(Axis::VERTICAL);
+    auto controller = mode.Create();
+    EXPECT_FALSE(controller == nullptr);
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+    frameNode->AddChild(indicatorNode);
+    frameNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDirection(Axis::VERTICAL);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateSelectedItemWidth(Dimension(SWIPER_INDICATOR_SIZE_MINUS, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3. SelectedItemWidth is great then 0.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedItemHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    mode.SetDirection(Axis::HORIZONTAL);
+    EXPECT_FALSE(controller == nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetThemeManager(themeManager);
+    auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+    RefPtr<NodePaintMethod> nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateSelectedItemHeight(Dimension(-1.0, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3. SelectedItemHeight is less not equal 0.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+}
+
+HWTEST_F(SwiperIndicatorPatternTestNg, SelectedItemHeight002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Swiper node
+     */
+    SwiperModelNG mode;
+    mode.SetDirection(Axis::VERTICAL);
+    auto controller = mode.Create();
+    EXPECT_FALSE(controller == nullptr);
+
+    auto pipeline = MockPipelineBase::GetCurrent();
+    CHECK_NULL_VOID(pipeline);
+    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_FALSE(frameNode == nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    EXPECT_FALSE(swiperPattern == nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    EXPECT_FALSE(indicatorNode == nullptr);
+    frameNode->AddChild(indicatorNode);
+    frameNode->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDirection(Axis::VERTICAL);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    EXPECT_FALSE(indicatorPattern == nullptr);
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(algorithm == nullptr);
+
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    EXPECT_FALSE(paintProperty == nullptr);
+    paintProperty->UpdateSelectedItemHeight(Dimension(SWIPER_INDICATOR_SIZE_MINUS, DimensionUnit::PX));
+
+    /**
+     * @tc.steps: step3. SelectedItemHeight is great then 0.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    algorithm->Measure(&layoutWrapper);
+}
+
 } // namespace OHOS::Ace::NG
