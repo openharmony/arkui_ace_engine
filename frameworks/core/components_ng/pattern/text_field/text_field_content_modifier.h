@@ -43,6 +43,7 @@ public:
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
     void SetTextValue(std::string& value);
+    void SetTextObscured(bool value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
 
 private:
@@ -65,6 +66,7 @@ private:
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyString> textValue_;
+    RefPtr<PropertyBool> textObscured_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

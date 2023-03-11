@@ -70,6 +70,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextFieldTheme>();
