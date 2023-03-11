@@ -57,9 +57,13 @@ TextFieldContentModifier::TextFieldContentModifier(const WeakPtr<OHOS::Ace::NG::
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    textObscured_ = AceType::MakeRefPtr<PropertyBool>(textFieldPattern->GetTextObscured());
+
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
+    AttachProperty(textObscured_);
 }
 
 void TextFieldContentModifier::onDraw(DrawingContext& context)
@@ -68,7 +72,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto offset = contentOffset_->Get();
-    auto passwordIconCanvasImage = textFieldPattern->GetTextObscured()
+    auto passwordIconCanvasImage = textObscured_->Get()
                                        ? textFieldPattern->GetHidePasswordIconCanvasImage()
                                        : textFieldPattern->GetShowPasswordIconCanvasImage();
     auto paragraph = textFieldPattern->GetParagraph();
@@ -215,6 +219,13 @@ void TextFieldContentModifier::SetTextValue(std::string& value)
 {
     if (textValue_->Get() != value) {
         textValue_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetTextObscured(bool value)
+{
+    if (textObscured_) {
+        textObscured_->Set(value);
     }
 }
 
