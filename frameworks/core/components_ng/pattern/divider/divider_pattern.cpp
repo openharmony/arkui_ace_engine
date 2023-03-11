@@ -16,15 +16,6 @@
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 
 namespace OHOS::Ace::NG {
-void DividerPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->SetClipToFrame(true);
-}
-
 bool DividerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
