@@ -83,11 +83,13 @@ public:
         const RefPtr<LayoutWrapper>& dirty, bool /*skipMeasure*/, bool /*skipLayout*/) override
     {
         auto geometryNode = dirty->GetGeometryNode();
-        auto offset = geometryNode->GetContentOffset();
-        auto size = geometryNode->GetContentSize();
-        if (offset != offset_ || size != size_) {
-            offset_ = offset;
-            size_ = size;
+        offset_ = geometryNode->GetContentOffset();
+        size_ = geometryNode->GetContentSize();
+        if (isFirstAddhotZoneRect_) {
+            AddHotZoneRect();
+            isFirstAddhotZoneRect_ = false;
+        } else {
+            RemoveLastHotZoneRect();
             AddHotZoneRect();
         }
         return true;
@@ -168,6 +170,7 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
+    void RemoveLastHotZoneRect() const;
 
     std::optional<std::string> preName_;
     std::optional<std::string> preGroup_;
@@ -186,6 +189,7 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    bool isFirstAddhotZoneRect_ = true;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
 

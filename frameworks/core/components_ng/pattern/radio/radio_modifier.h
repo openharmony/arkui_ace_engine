@@ -85,8 +85,8 @@ public:
     }
 
     void InitializeParam();
-    void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
+    void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
+    void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
 
     void SetPointColor(const Color& pointColor)
     {
@@ -192,8 +192,8 @@ private:
     RefPtr<PropertyBool> isCheck_;
     RefPtr<PropertyInt> uiStatus_;
 
-    RefPtr<PropertyOffsetF> offset_;
-    RefPtr<PropertySizeF> size_;
+    RefPtr<AnimatablePropertyOffsetF> offset_;
+    RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<RadioModifier> radioModifier_;
     RefPtr<PropertyFloat> totalScale_;
     RefPtr<PropertyFloat> pointScale_;

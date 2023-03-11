@@ -50,8 +50,8 @@ RadioModifier::RadioModifier()
     enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
     isCheck_ = AceType::MakeRefPtr<PropertyBool>(false);
     uiStatus_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
-    offset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
-    size_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
+    offset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
+    size_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(SizeF());
     totalScale_ = AceType::MakeRefPtr<PropertyFloat>(1.0f);
     pointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.5f);
     ringPointScale_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
@@ -88,13 +88,12 @@ void RadioModifier::InitializeParam()
 }
 
 void RadioModifier::PaintRadio(
-    RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& offset) const
+    RSCanvas& canvas, bool /* checked */, const SizeF& contentSize, const OffsetF& contentOffset) const
 {
-    OffsetF paintOffset;
-    DrawTouchAndHoverBoard(canvas, contentSize, paintOffset);
+    DrawTouchAndHoverBoard(canvas, contentSize, contentOffset);
     float outCircleRadius = contentSize.Width() / CALC_RADIUS;
-    float centerX = paintOffset.GetX() + outCircleRadius;
-    float centerY = paintOffset.GetY() + outCircleRadius;
+    float centerX = contentOffset.GetX() + outCircleRadius;
+    float centerY = contentOffset.GetY() + outCircleRadius;
     RSPen pen;
     RSPen outPen;
     RSBrush brush;
