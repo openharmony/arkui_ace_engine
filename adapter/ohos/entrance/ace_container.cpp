@@ -1378,7 +1378,7 @@ std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t i
     return window->GetRSSurfaceNode();
 }
 
-void AceContainer::UpdateFormDate(const std::string& data)
+void AceContainer::UpdateFormData(const std::string& data)
 {
     auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
     CHECK_NULL_VOID(frontend);

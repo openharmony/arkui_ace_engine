@@ -44,6 +44,7 @@ constexpr char FORM_EVENT_ON_UPDATE_FORM[] = "onUpdateForm";
 constexpr char FORM_EVENT_ON_ERROR[] = "onFormError";
 constexpr char FORM_ADAPTOR_RESOURCE_NAME[] = "formAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "formAdaptor";
+constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_form_renderer_dispatcher";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
@@ -122,7 +123,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         OHOS::AppExecFwk::Constants::ACQUIRE_TYPE_CREATE_FORM);
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, info.width.Value());
     wantCache_.SetParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, info.height.Value());
-    wantCache_.SetParam("ohos.extra.param.key.form_comp_id", std::to_string(info.index));
+    wantCache_.SetParam(OHOS::AppExecFwk::Constants::FORM_COMP_ID, std::to_string(info.index));
     auto pipelineContext = context_.Upgrade();
     if (pipelineContext) {
         auto density = pipelineContext->GetDensity();
@@ -147,7 +148,6 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         while (iter != formInfos.end()) {
             auto formInfo = *iter;
             if (info.cardName == formInfo.name) {
-                LOGI("Query form uiSyntax: %{public}d", static_cast<int>(formJsInfo.uiSyntax));
                 uiSyntax = formInfo.uiSyntax;
                 break;
             }
@@ -157,7 +157,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
 
     if (uiSyntax == AppExecFwk::FormType::ETS) {
         CHECK_NULL_VOID(renderDelegate_);
-        wantCache_.SetParam("ohos.extra.param.key.process_on_add_surface", renderDelegate_->AsObject());
+        wantCache_.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate_->AsObject());
         wantCache_.SetParam(ALLOW_UPDATE, info.allowUpdate);
     }
 

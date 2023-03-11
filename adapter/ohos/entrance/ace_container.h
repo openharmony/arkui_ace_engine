@@ -383,7 +383,7 @@ public:
     sptr<IRemoteObject> GetToken();
 
     // ArkTSCard
-    void UpdateFormDate(const std::string& data);
+    void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
 
     void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
