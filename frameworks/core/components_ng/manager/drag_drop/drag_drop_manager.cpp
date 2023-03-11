@@ -127,6 +127,45 @@ void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY)
 #endif
 }
 
+RefPtr<FrameNode> DragDropManager::FindDragChildNodeByPosition(const RefPtr<UINode> parentNode,
+    float localX, float localY, const std::set<WeakPtr<FrameNode>>& frameNodes)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+
+    for (auto index = parentNode->TotalChildCount() - 1; index >= 0; index--) {
+        auto child = parentNode->GetChildAtIndex(index);
+        if (child == nullptr) {
+            continue;
+        }
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        OffsetF childOffset;
+        if (childFrameNode) {
+            auto childGeometryNode = childFrameNode->GetGeometryNode();
+            CHECK_NULL_RETURN(childGeometryNode, nullptr);
+            childOffset = childGeometryNode->GetFrameOffset();
+        }
+        auto childFindResult = FindDragChildNodeByPosition(
+            child, localX - childOffset.GetX(), localY - childOffset.GetY(), frameNodes);
+        auto weakChildFindResult = AceType::WeakClaim(AceType::RawPtr(childFindResult));
+        if (childFindResult && frameNodes.find(weakChildFindResult) != frameNodes.end()) {
+            return childFindResult;
+        }
+    }
+
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+    CHECK_NULL_RETURN(parentFrameNode, nullptr);
+    auto weakParentFrameNode = AceType::WeakClaim(AceType::RawPtr(parentFrameNode));
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, nullptr);
+    auto parentRect = parentGeometryNode->GetFrameRect();
+    PointF globalPoint = PointF(localX + parentRect.GetX(), localY + parentRect.GetY());
+    if (parentRect.IsInRegion(globalPoint)
+            && frameNodes.find(weakParentFrameNode) != frameNodes.end()) {
+                return parentFrameNode;
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType)
 {
     std::set<WeakPtr<FrameNode>> frameNodes;
@@ -151,28 +190,19 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
         return nullptr;
     }
 
-    PointF point(globalX, globalY);
-    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
+    RefPtr<UINode> rootNode = nullptr;
     for (const auto& weakNode : frameNodes) {
         auto frameNode = weakNode.Upgrade();
         if (!frameNode) {
             continue;
         }
-        auto geometryNode = frameNode->GetGeometryNode();
-        if (!geometryNode) {
-            continue;
+        rootNode = frameNode;
+        while (rootNode->GetParent()) {
+            rootNode = rootNode->GetParent();
         }
-        auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(frameNode->GetTransformRelativeOffset());
-        if (globalFrameRect.IsInRegion(point)) {
-            hitFrameNodes.insert(std::make_pair(frameNode->GetDepth(), frameNode));
-        }
+        break;
     }
-
-    if (hitFrameNodes.empty()) {
-        return nullptr;
-    }
-    return hitFrameNodes.rbegin()->second;
+    return FindDragChildNodeByPosition(rootNode, globalX, globalY, frameNodes);
 }
 
 bool DragDropManager::CheckDragDropProxy(int64_t id) const
