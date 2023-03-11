@@ -17,6 +17,7 @@
 
 #include "foundation/ability/ability_runtime/services/common/include/hilog_wrapper.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 
@@ -38,6 +39,10 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
+    if (layoutDirection == TextDirection::AUTO) {
+        layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
+    }
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
@@ -55,12 +60,18 @@ void StackLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto translate =
             Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+        if (layoutDirection == TextDirection::RTL) {
+            translate.SetX(size.Width() - translate.GetX() - child->GetGeometryNode()->GetMarginFrameSize().Width());
+        }
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     if (content) {
         auto translate = Alignment::GetAlignPosition(size, content->GetRect().GetSize(), align) + paddingOffset;
+        if (layoutDirection == TextDirection::RTL) {
+            translate.SetX(size.Width() - translate.GetX() - content->GetRect().GetSize().Width());
+        }
         content->SetOffset(translate);
     }
 }

@@ -45,6 +45,13 @@ StackModel* StackModel::GetInstance()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
+#define SET_ALIGNMENT(info, name)              \
+    Alignment alignment = Alignment::TOP_LEFT; \
+    if (!GetAlignment(info, alignment)) {      \
+        return;                                \
+    }                                          \
+    StackModel::GetInstance()->Set##name(alignment);
+
 const static std::array<Alignment, 9> ALIGNMENT_ARR { Alignment::TOP_LEFT, Alignment::TOP_CENTER, Alignment::TOP_RIGHT,
     Alignment::CENTER_LEFT, Alignment::CENTER, Alignment::CENTER_RIGHT, Alignment::BOTTOM_LEFT,
     Alignment::BOTTOM_CENTER, Alignment::BOTTOM_RIGHT };
@@ -67,9 +74,13 @@ void JSStack::SetOverflow(int value)
     }
 }
 
-void JSStack::SetAlignment(int value)
+bool GetAlignment(const JSCallbackInfo& info, Alignment& alignment)
 {
-    Alignment alignment = Alignment::TOP_LEFT;
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        return false;
+    }
+    auto value = info[0]->ToNumber<size_t>();
+    alignment = Alignment::TOP_LEFT;
 
     switch (value) {
         case 0:
@@ -101,49 +112,19 @@ void JSStack::SetAlignment(int value)
             break;
         default:
             LOGE("Invalid value for alignment");
-            return;
+            return false;
     }
-
-    StackModel::GetInstance()->SetAlignment(alignment);
+    return true;
 }
 
-void JSStack::SetAlignmentContent(int32_t value)
+void JSStack::SetAlignment(const JSCallbackInfo& info)
 {
-    Alignment alignment = Alignment::TOP_LEFT;
+    SET_ALIGNMENT(info, Alignment);
+}
 
-    switch (value) {
-        case 0:
-            alignment = Alignment::TOP_LEFT;
-            break;
-        case 1:
-            alignment = Alignment::TOP_CENTER;
-            break;
-        case 2:
-            alignment = Alignment::TOP_RIGHT;
-            break;
-        case 3:
-            alignment = Alignment::CENTER_LEFT;
-            break;
-        case 4:
-            alignment = Alignment::CENTER;
-            break;
-        case 5:
-            alignment = Alignment::CENTER_RIGHT;
-            break;
-        case 6:
-            alignment = Alignment::BOTTOM_LEFT;
-            break;
-        case 7:
-            alignment = Alignment::BOTTOM_CENTER;
-            break;
-        case 8:
-            alignment = Alignment::BOTTOM_RIGHT;
-            break;
-        default:
-            LOGE("Invalid value for alignment");
-            return;
-    }
-    StackModel::GetInstance()->SetAlignmentContent(alignment);
+void JSStack::SetAlignmentContent(const JSCallbackInfo& info)
+{
+    SET_ALIGNMENT(info, AlignmentContent);
 }
 
 void JSStack::SetWidth(const JSCallbackInfo& info)
