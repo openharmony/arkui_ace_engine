@@ -761,14 +761,12 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     auto searchIconJson = JsonUtil::Create(false);
 
     // icon size
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto defaultIconSize = searchTheme->GetIconHeight();
+    auto searchIconGeometryNode = imageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(searchIconGeometryNode);
+    auto searchIconFrameSize = searchIconGeometryNode->GetFrameSize().Width();
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
-    auto searchIconSize = searchLayoutProperty->GetSearchIconUDSize().value_or(defaultIconSize).ConvertToPx();
+    auto searchIconSize = searchLayoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameSize)).ConvertToPx();
     searchIconJson->Put("size", Dimension(searchIconSize, DimensionUnit::PX).ToString().c_str());
 
     // icon color
@@ -807,14 +805,13 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     auto cancelIconJson = JsonUtil::Create(false);
 
     // icon size
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto defaultIconSize = searchTheme->GetIconHeight();
+    auto cancelIconGeometryNode = cancelImageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(cancelIconGeometryNode);
+    auto cancelIconFrameSize = cancelIconGeometryNode->GetFrameSize().Width();
     auto searchLayoutproperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutproperty);
-    auto cancelIconSize = searchLayoutproperty->GetCancelButtonUDSize().value_or(defaultIconSize).ConvertToPx();
+    auto cancelIconSize =
+        searchLayoutproperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize)).ConvertToPx();
     cancelIconJson->Put("size", Dimension(cancelIconSize, DimensionUnit::PX).ToString().c_str());
 
     // icon color
