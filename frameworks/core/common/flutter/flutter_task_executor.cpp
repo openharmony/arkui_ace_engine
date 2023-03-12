@@ -158,6 +158,13 @@ void FlutterTaskExecutor::InitJsThread(bool newThread)
         jsRunner_, [weak = AceType::WeakClaim(this)] { FillTaskTypeTable(weak, TaskType::JS); }, 0);
 }
 
+void FlutterTaskExecutor::InitOtherThreads(FlutterThreadModel* threadModel)
+{
+    if (threadModel) {
+        InitOtherThreads(threadModel->GetTaskRunners());
+    }
+}
+
 void FlutterTaskExecutor::InitOtherThreads(const flutter::TaskRunners& taskRunners)
 {
     uiRunner_ = taskRunners.GetUITaskRunner();

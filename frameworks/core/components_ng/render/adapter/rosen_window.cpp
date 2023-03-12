@@ -19,6 +19,7 @@
 
 #include "base/thread/task_executor.h"
 #include "base/utils/time_util.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
@@ -69,7 +70,9 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); });
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+    if (window->GetSurfaceNode()) {
+        rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+    }
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
     rsUIDirector_->Init();
     rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
@@ -77,6 +80,15 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     });
+}
+
+void RosenWindow::Init()
+{
+    CHECK_NULL_VOID(rsWindow_);
+    auto surfaceNode = rsWindow_->GetSurfaceNode();
+    if (rsUIDirector_ && surfaceNode) {
+        rsUIDirector_->SetRSSurfaceNode(surfaceNode);
+    }
 }
 
 void RosenWindow::RequestFrame()

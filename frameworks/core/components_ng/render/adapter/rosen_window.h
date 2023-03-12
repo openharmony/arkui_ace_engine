@@ -17,11 +17,15 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_WINDOW_H
 
 #include "render_service_client/core/ui/rs_ui_director.h"
+
+#ifdef OHOS_PLATFORM
 #include "vsync_receiver.h"
-#ifdef PREVIEW
-#include "window_prviewer.h"
-#else
 #include "wm/window.h"
+#elif VIRTUAL_RS_WINDOW
+// use real rs window later
+#include "adapter/android/entrance/java/jni/virtual_rs_window.h"
+#else
+#include "window_prviewer.h"
 #endif
 
 #include "base/thread/task_executor.h"
@@ -36,6 +40,8 @@ public:
     ~RosenWindow() override = default;
 
     void RequestFrame() override;
+
+    void Init() override;
 
     void Destroy() override;
 

@@ -1,0 +1,81 @@
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "core/common/flutter/flutter_thread_model.h"
+
+#include <memory>
+
+#include "common/task_runners.h"
+#include "flutter/fml/message_loop.h"
+#include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
+#include "shell/common/thread_host.h"
+
+#include "base/log/log.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<FlutterThreadModel> FlutterThreadModel::CreateThreadModel(
+    bool useCurrentEventRunner, bool hasUiThread, bool hasGpuThread)
+{
+    LOGE("Create Flutter ThreadModel");
+    // Create threads
+    static size_t sCount = 1;
+    auto threadLabel = std::to_string(sCount++);
+    uint64_t typeMask = 0;
+
+    if (hasUiThread) {
+        typeMask |= flutter::ThreadHost::Type::UI;
+    }
+    if (hasGpuThread) {
+        typeMask |= flutter::ThreadHost::Type::GPU;
+    }
+    flutter::ThreadHost threadHost = { threadLabel, typeMask };
+
+    // Create Taskrunners
+    fml::MessageLoop::EnsureInitializedForCurrentThread();
+    fml::RefPtr<fml::TaskRunner> gpuRunner;
+    fml::RefPtr<fml::TaskRunner> uiRunner;
+    fml::RefPtr<fml::TaskRunner> platformRunner =
+#ifdef OHOS_PLATFORM
+        flutter::PlatformTaskRunnerAdapter::CurrentTaskRunner(useCurrentEventRunner);
+#else
+        fml::MessageLoop::GetCurrent().GetTaskRunner();
+#endif
+
+    if (hasUiThread) {
+        uiRunner = threadHost.ui_thread->GetTaskRunner();
+    } else {
+        uiRunner = platformRunner;
+    }
+    if (hasGpuThread) {
+        gpuRunner = threadHost.gpu_thread->GetTaskRunner();
+    } else {
+        gpuRunner = uiRunner;
+    }
+
+    flutter::TaskRunners taskRunners(threadLabel, // label
+        platformRunner,                           // platform
+        gpuRunner,                                // gpu
+        uiRunner,                                 // ui
+        uiRunner                                  // io
+    );
+
+    return std::make_unique<FlutterThreadModel>(std::move(threadHost), std::move(taskRunners));
+}
+
+FlutterThreadModel::FlutterThreadModel(flutter::ThreadHost threadHost, flutter::TaskRunners taskRunners)
+    : threadHost_(std::move(threadHost)), taskRunners_(std::move(taskRunners))
+{}
+} // namespace OHOS::Ace
