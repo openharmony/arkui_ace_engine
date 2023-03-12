@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
+#include "core/components/badge/badge_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components/badge/badge_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -76,7 +76,10 @@ void BadgePattern::OnModifyDone()
         }
         badgeVisible = true;
     }
-
+    auto circleSize = layoutProperty->GetBadgeCircleSize();
+    if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
+        badgeVisible = false;
+    }
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     textLayoutProperty->UpdateTextColor(badgeTextColor.value());
 
