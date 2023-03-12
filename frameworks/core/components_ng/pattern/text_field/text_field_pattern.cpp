@@ -79,6 +79,13 @@ const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
 const std::string EMAIL_WHITE_LIST = "[\\w.]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
 
+void SwapIfLarger(int32_t& a, int32_t& b)
+{
+    if (a > b) {
+        std::swap(a, b);
+    }
+}
+
 void RemoveErrorTextFromValue(const std::string& value, const std::string& errorText, std::string& result)
 {
     int32_t valuePtr = 0;
@@ -689,9 +696,7 @@ void TextFieldPattern::OnTextAreaScroll(float dy)
 void TextFieldPattern::GetTextRectsInRange(
     int32_t base, int32_t destination, std::vector<RSTypographyProperties::TextBox>& textBoxes)
 {
-    if (base > destination) {
-        std::swap(base, destination);
-    }
+    SwapIfLarger(base, destination);
     if (paragraph_) {
         textBoxes = paragraph_->GetRectsForRange(base, destination, RSTypographyProperties::RectHeightStyle::MAX,
             RSTypographyProperties::RectWidthStyle::TIGHT);
@@ -1170,6 +1175,7 @@ void TextFieldPattern::HandleOnPaste()
         if (textfield->InSelectMode()) {
             start = textSelector.GetStart();
             end = textSelector.GetEnd();
+            SwapIfLarger(start, end);
         } else {
             start = value.caretPosition;
             end = value.caretPosition;
@@ -1231,12 +1237,15 @@ void TextFieldPattern::HandleOnCut()
         LOGW("Copy option not allowed");
         return;
     }
-    if (!InSelectMode() || (textSelector_.IsValid() && textSelector_.GetStart() == textSelector_.GetEnd())) {
+    auto start = textSelector_.GetStart();
+    auto end = textSelector_.GetEnd();
+    SwapIfLarger(start, end);
+    if (!InSelectMode() || (textSelector_.IsValid() && start == end)) {
         LOGW("HandleOnCut nothing Selected");
         return;
     }
     auto value = GetEditingValue();
-    auto selectedText = value.GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd());
+    auto selectedText = value.GetSelectedText(start, end);
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Cut value is %{private}s", selectedText.c_str());
 #if defined(PREVIEW)
@@ -1248,9 +1257,9 @@ void TextFieldPattern::HandleOnCut()
         clipboard_->SetData(selectedText, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
 #endif
     }
-    textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) +
-                             textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
-    textEditingValue_.CursorMoveToPosition(textSelector_.GetStart());
+    textEditingValue_.text =
+        textEditingValue_.GetValueBeforePosition(start) + textEditingValue_.GetValueAfterPosition(end);
+    textEditingValue_.CursorMoveToPosition(start);
     SetEditingValueToProperty(textEditingValue_.text);
     selectionMode_ = SelectionMode::NONE;
     caretUpdateType_ = CaretUpdateType::EVENT;
@@ -1525,8 +1534,8 @@ void TextFieldPattern::OnModifyDone()
     textRect_.SetOffset(OffsetF(GetPaddingLeft(), GetPaddingTop()));
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     float caretWidth = paintProperty->GetCursorWidth().has_value()
-                            ? static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx())
-                            : static_cast<float>(CURSOR_WIDTH.ConvertToPx());
+                           ? static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx())
+                           : static_cast<float>(CURSOR_WIDTH.ConvertToPx());
     caretRect_.SetWidth(caretWidth);
     caretRect_.SetHeight(GetTextOrPlaceHolderFontSize());
     if (textEditingValue_.caretPosition == 0) {
@@ -1629,7 +1638,9 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
 
 void TextFieldPattern::ProcessOverlay()
 {
-    StopTwinkling();
+    if (caretUpdateType_ != CaretUpdateType::RIGHT_CLICK) {
+        StopTwinkling();
+    }
     auto renderContext = GetHost()->GetRenderContext();
     if (renderContext) {
         AnimatePressAndHover(renderContext, 0.0f);
@@ -2013,6 +2024,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
             isSingleHandle_ = false;
             isUsingMouse_ = true;
             mouseStatus_ = MouseStatus::RELEASED;
+            isMousePressed_ = false;
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         return;
@@ -2307,8 +2319,11 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     std::string result;
     auto textFieldLayoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto start = textSelector_.GetStart();
+    auto end = textSelector_.GetEnd();
+    SwapIfLarger(start, end);
     if (InSelectMode()) {
-        caretStart = textSelector_.GetStart();
+        caretStart = start;
     } else {
         caretStart = textEditingValue_.caretPosition;
     }
@@ -2317,8 +2332,8 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         return;
     }
     if (InSelectMode()) {
-        textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) + result +
-                                 textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
+        textEditingValue_.text =
+            textEditingValue_.GetValueBeforePosition(start) + result + textEditingValue_.GetValueAfterPosition(end);
     } else {
         textEditingValue_.text =
             textEditingValue_.GetValueBeforeCursor() + result + textEditingValue_.GetValueAfterCursor();
@@ -2556,6 +2571,7 @@ void TextFieldPattern::CursorMoveDown()
 
 void TextFieldPattern::Delete(int32_t start, int32_t end)
 {
+    SwapIfLarger(start, end);
     LOGI("Handle Delete within [%{public}d, %{public}d]", start, end);
     textEditingValue_.text =
         textEditingValue_.GetValueBeforePosition(start) + textEditingValue_.GetValueAfterPosition(end);
