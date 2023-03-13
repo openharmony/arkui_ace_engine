@@ -40,12 +40,16 @@ const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 constexpr float NEGATIVE_NUMBER = -100;
 constexpr bool SKIP_MEASURE = true;
 constexpr bool NO_SKIP_MEASURE = false;
+const Color TRUE_COLOR = Color(0x00000000);
+const Color ERROR_COLOR = Color();
+constexpr double DEFAULT_SHADOW_VALUE = 5.0;
 } // namespace
 
 class DataPanelPropertyTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    void GradientColorSet(std::vector<Gradient>& valueColors, const int& length);
 };
 
 void DataPanelPropertyTestNg::SetUpTestCase()
@@ -56,6 +60,22 @@ void DataPanelPropertyTestNg::SetUpTestCase()
 void DataPanelPropertyTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
+}
+
+void DataPanelPropertyTestNg::GradientColorSet(std::vector<Gradient>& valueColors, const int& length)
+{
+    Gradient gradient;
+    GradientColor gradientColorStart;
+    gradientColorStart.SetColor(Color(0x00000000));
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    GradientColor gradientColorEnd;
+    gradientColorEnd.SetColor(Color(0x000000FF));
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+    for (int i = 0; i < length; i++) {
+        valueColors.push_back(gradient);
+    }
 }
 
 /**
@@ -393,5 +413,219 @@ HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest005, TestSize.Level1
      */
     bool forth_case = dataPanelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_TRUE(forth_case);
+}
+
+/**
+ * @tc.name: DataPanelTest009
+ * @tc.desc: Test DataPanel PaintMethod SetTrackBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest006, TestSize.Level1)
+{
+    DataPanelModelNG dataPanelModelNG;
+    dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
+    dataPanelModelNG.SetTrackBackground(TRUE_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetTrackBackgroundValue(), TRUE_COLOR);
+
+    DataPanelModelNG dataPanelModelNG2;
+    dataPanelModelNG2.Create(VALUES, MAX, TYPE_CYCLE);
+    dataPanelModelNG2.SetTrackBackground(ERROR_COLOR);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+    auto dataPanelPaintProperty2 = frameNode2->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty2, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty2->GetTrackBackgroundValue(), ERROR_COLOR);
+}
+
+/**
+ * @tc.name: DataPanelTest010
+ * @tc.desc: Test DataPanel PaintMethod SetStrokeWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest007, TestSize.Level1)
+{
+    DataPanelModelNG dataPanelModelNG;
+    dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
+    Dimension strokeWidth = 50.0_vp;
+    dataPanelModelNG.SetStrokeWidth(strokeWidth);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetStrokeWidthValue(), strokeWidth);
+
+    // ErrorValue1
+    DataPanelModelNG dataPanelModelNG2;
+    dataPanelModelNG2.Create(VALUES, MAX, TYPE_CYCLE);
+    Dimension strokeWidth2 = 0.0_vp;
+    dataPanelModelNG2.SetStrokeWidth(strokeWidth2);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+    auto dataPanelPaintProperty2 = frameNode2->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty2, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty2->GetStrokeWidthValue(), strokeWidth2);
+
+    // ErrorValue2
+    DataPanelModelNG dataPanelModelNG3;
+    dataPanelModelNG3.Create(VALUES, MAX, TYPE_CYCLE);
+    Dimension strokeWidth3 = 500.0_vp;
+    dataPanelModelNG3.SetStrokeWidth(strokeWidth3);
+    auto frameNode3 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode3, nullptr);
+    auto dataPanelPaintProperty3 = frameNode3->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty3, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty3->GetStrokeWidthValue(), strokeWidth3);
+
+    // ErrorValue3
+    DataPanelModelNG dataPanelModelNG4;
+    dataPanelModelNG4.Create(VALUES, MAX, TYPE_CYCLE);
+    Dimension strokeWidth4 = -50.0_vp;
+    dataPanelModelNG4.SetStrokeWidth(strokeWidth4);
+    auto frameNode4 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode4, nullptr);
+    auto dataPanelPaintProperty4 = frameNode4->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty4, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty4->GetStrokeWidthValue(), strokeWidth4);
+}
+
+/**
+ * @tc.name: DataPanelTest011
+ * @tc.desc: Test DataPanel PaintMethod SetValueColors Normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest008, TestSize.Level1)
+{
+    DataPanelModelNG dataPanelModelNG;
+    dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
+    Gradient gradient;
+    GradientColor gradientColorStart;
+    gradientColorStart.SetColor(Color(0x00000000));
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    GradientColor gradientColorEnd;
+    gradientColorEnd.SetColor(Color(0x00000000));
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+    std::vector<Gradient> valueColors;
+    // test Solid color when the valueColors >0 and valueColors <=9
+    int length = 2;
+    for (int i = 0; i < length; i++) {
+        valueColors.push_back(gradient);
+    }
+    dataPanelModelNG.SetValueColors(valueColors);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetValueColorsValue(), valueColors);
+}
+
+/**
+ * @tc.name: DataPanelTest012
+ * @tc.desc: Test DataPanel PaintMethod SetValueColors Normal2
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest009, TestSize.Level1)
+{
+    DataPanelModelNG dataPanelModelNG;
+    dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
+    int length = 2;
+    std::vector<Gradient> valueColors;
+    GradientColorSet(valueColors, length);
+    // test Gradient  color when the valueColors >0 and valueColors <=9
+    dataPanelModelNG.SetValueColors(valueColors);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetValueColorsValue(), valueColors);
+
+    DataPanelModelNG dataPanelModelNG2;
+    dataPanelModelNG2.Create(VALUES, MAX, TYPE_CYCLE);
+    std::vector<Gradient> valueColors2;
+    GradientColorSet(valueColors2, 0);
+    // test Gradient  color when the valueColors = 0
+    dataPanelModelNG2.SetValueColors(valueColors2);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+    auto dataPanelPaintProperty2 = frameNode2->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty2, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty2->GetValueColorsValue(), valueColors2);
+
+    DataPanelModelNG dataPanelModelNG3;
+    dataPanelModelNG3.Create(VALUES, MAX, TYPE_CYCLE);
+    int length2 = 11;
+    std::vector<Gradient> valueColors3;
+    GradientColorSet(valueColors3, length2);
+    // test Gradient  color when the valueColors > 9
+    dataPanelModelNG3.SetValueColors(valueColors3);
+    auto frameNode3 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode3, nullptr);
+    auto dataPanelPaintProperty3 = frameNode3->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty3, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty3->GetValueColorsValue(), valueColors3);
+}
+
+/**
+ * @tc.name: DataPanelTest013
+ * @tc.desc: Test DataPanel PaintMethod SetShadowOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelPropertyTestNg, DataPanelPaintPropertyTest010, TestSize.Level1)
+{
+    DataPanelModelNG dataPanelModelNG;
+    dataPanelModelNG.Create(VALUES, MAX, TYPE_CYCLE);
+    int length = 3;
+    std::vector<Gradient> valueColors;
+    GradientColorSet(valueColors, length);
+    DataPanelShadow shadowOption { DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE, DEFAULT_SHADOW_VALUE, valueColors };
+    dataPanelModelNG.SetShadowOption(shadowOption);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto dataPanelPaintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty->GetShadowOptionValue(), shadowOption);
+
+    DataPanelModelNG dataPanelModelNG2;
+    dataPanelModelNG2.Create(VALUES, MAX, TYPE_CYCLE);
+    std::vector<Gradient> valueColors2;
+    GradientColorSet(valueColors2, length);
+    DataPanelShadow shadowOption2 { -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, valueColors2 };
+    dataPanelModelNG2.SetShadowOption(shadowOption2);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+    auto dataPanelPaintProperty2 = frameNode2->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty2, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty2->GetShadowOptionValue(), shadowOption2);
+
+    DataPanelModelNG dataPanelModelNG3;
+    dataPanelModelNG3.Create(VALUES, MAX, TYPE_CYCLE);
+    int length2 = 12;
+    std::vector<Gradient> valueColors3;
+    GradientColorSet(valueColors3, length2);
+    DataPanelShadow shadowOption3 { -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, -DEFAULT_SHADOW_VALUE, valueColors3 };
+    dataPanelModelNG3.SetShadowOption(shadowOption3);
+    auto frameNode3 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode3, nullptr);
+    auto dataPanelPaintProperty3 = frameNode3->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty3, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty3->GetShadowOptionValue(), shadowOption3);
+
+    DataPanelModelNG dataPanelModelNG4;
+    dataPanelModelNG4.Create(VALUES, MAX, TYPE_CYCLE);
+    int length3 = 8;
+    std::vector<Gradient> valueColors4;
+    GradientColorSet(valueColors4, length3);
+    DataPanelShadow shadowOption4 { 0.0, 0.0, 0.0, valueColors4 };
+    dataPanelModelNG4.SetShadowOption(shadowOption4);
+    auto frameNode4 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode4, nullptr);
+    auto dataPanelPaintProperty4 = frameNode4->GetPaintProperty<DataPanelPaintProperty>();
+    ASSERT_NE(dataPanelPaintProperty4, nullptr);
+    EXPECT_EQ(dataPanelPaintProperty4->GetShadowOptionValue(), shadowOption4);
 }
 } // namespace OHOS::Ace::NG
