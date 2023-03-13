@@ -47,7 +47,7 @@ public:
         return deltaY_;
     }
 
-    const Dimension& GetZ() const
+    const std::optional<Dimension>& GetZ() const
     {
         return deltaZ_;
     }
@@ -90,7 +90,7 @@ public:
 private:
     Dimension deltaX_;
     Dimension deltaY_;
-    Dimension deltaZ_;
+    std::optional<Dimension> deltaZ_;
 };
 
 } // namespace OHOS::Ace

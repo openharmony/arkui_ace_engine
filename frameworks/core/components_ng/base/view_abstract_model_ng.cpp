@@ -118,4 +118,13 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         return;
     }
 }
+
+void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const Dimension& z)
+{
+    DimensionOffset center(x, y);
+    if (!NearZero(z.Value())) {
+        center.SetZ(z);
+    }
+    ViewAbstract::SetPivot(center);
+}
 } // namespace OHOS::Ace::NG
