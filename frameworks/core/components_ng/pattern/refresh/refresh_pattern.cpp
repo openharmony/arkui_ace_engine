@@ -647,7 +647,7 @@ void RefreshPattern::CheckCustomBuilderDragEndStage()
     }
 
     if (GreatNotEqual(static_cast<double>(hostLayoutProperty->GetCustomBuilderOffsetValue().GetY()),
-            TRIGGER_REFRESH_DISTANCE.ConvertToPx())) {
+                      TRIGGER_REFRESH_DISTANCE.ConvertToPx())) {
         TriggerRefresh();
         CustomBuilderRefreshingAnimation();
         scrollOffset_.SetY(TRIGGER_REFRESH_DISTANCE.ConvertToPx() + customBuilderSize.Height());
@@ -681,7 +681,8 @@ void RefreshPattern::UpdateCustomBuilderProperty(RefreshState state, float ratio
     auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
     auto maxScroll = static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx());
     auto custombuilderOffset = verticalOffset - customBuilderSize.Height();
-    custombuilderOffset = std::clamp(custombuilderOffset, triggerLoadingDistance_, maxScroll - customBuilderSize.Height());
+    custombuilderOffset =
+        std::clamp(custombuilderOffset, triggerLoadingDistance_, maxScroll - customBuilderSize.Height());
     switch (state) {
         case RefreshState::STATE_LOADING:
             refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, triggerLoadingDistance_));
@@ -729,9 +730,10 @@ float RefreshPattern::GetCustomBuilderOpacityRatio()
     auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
     auto adjustOffset = verticalOffset - customBuilderSize.Height();
     float opacityRatio = 0.0f;
-    if(GreatOrEqual(static_cast<double>(customBuilderSize.Height() +
-            std::clamp(static_cast<double>(triggerLoadingDistance_), 0.0, TRIGGER_REFRESH_DISTANCE.ConvertToPx())),
-            TRIGGER_REFRESH_DISTANCE.ConvertToPx() + CUSTOM_BUILDER_HIGHT_LIGHT_SIZE.ConvertToPx())){
+    if (GreatOrEqual(
+            static_cast<double>(customBuilderSize.Height() + std::clamp(static_cast<double>(triggerLoadingDistance_),
+                                                                 0.0, TRIGGER_REFRESH_DISTANCE.ConvertToPx())),
+            TRIGGER_REFRESH_DISTANCE.ConvertToPx() + CUSTOM_BUILDER_HIGHT_LIGHT_SIZE.ConvertToPx())) {
         opacityRatio = 1.0f;
     } else {
         opacityRatio = (adjustOffset - std::clamp(triggerLoadingDistance_, 0.0f,
