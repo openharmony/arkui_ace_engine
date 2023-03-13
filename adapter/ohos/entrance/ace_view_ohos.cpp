@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
+#include <memory>
+
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
 
@@ -47,55 +49,17 @@ constexpr int32_t ROTATION_DIVISOR = 64;
 
 AceViewOhos* AceViewOhos::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    // Create threads
-    static size_t sCount = 1;
-    auto threadLabel = std::to_string(sCount++);
-    uint64_t typeMask = 0;
-
-    if (!usePlatformThread) {
-        typeMask |= flutter::ThreadHost::Type::UI;
-    }
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        typeMask |= flutter::ThreadHost::Type::GPU;
-    }
-    flutter::ThreadHost threadHost = { threadLabel, typeMask };
-
-    // Create Taskrunners
-    fml::MessageLoop::EnsureInitializedForCurrentThread();
-    fml::RefPtr<fml::TaskRunner> gpuRunner;
-    fml::RefPtr<fml::TaskRunner> uiRunner;
-    fml::RefPtr<fml::TaskRunner> platformRunner =
-        flutter::PlatformTaskRunnerAdapter::CurrentTaskRunner(useCurrentEventRunner);
-
-    if (usePlatformThread) {
-        uiRunner = platformRunner;
-    } else {
-        uiRunner = threadHost.ui_thread->GetTaskRunner();
-    }
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        gpuRunner = threadHost.gpu_thread->GetTaskRunner();
-    } else {
-        gpuRunner = uiRunner;
-    }
-
-    flutter::TaskRunners taskRunners(threadLabel, // label
-        platformRunner,                           // platform
-        gpuRunner,                                // gpu
-        uiRunner,                                 // ui
-        uiRunner                                  // io
-    );
-
-    auto* aceView = new AceViewOhos(instanceId, std::move(threadHost), std::move(taskRunners));
+    auto* aceView = new AceViewOhos(instanceId, FlutterThreadModel::CreateThreadModel(useCurrentEventRunner,
+                                                    !usePlatformThread, !SystemProperties::GetRosenBackendEnabled()));
     if (aceView != nullptr) {
         aceView->IncRefCount();
     }
     return aceView;
 }
 
-AceViewOhos::AceViewOhos(int32_t id, flutter::ThreadHost threadHost, flutter::TaskRunners taskRunners)
-    : instanceId_(id), threadHost_(std::move(threadHost)), taskRunners_(std::move(taskRunners))
-{
-}
+AceViewOhos::AceViewOhos(int32_t id, std::unique_ptr<FlutterThreadModel> threadModel)
+    : instanceId_(id), threadModel_(std::move(threadModel))
+{}
 
 void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window)
 {

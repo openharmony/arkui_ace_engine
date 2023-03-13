@@ -318,7 +318,7 @@ void DialogContainer::AttachView(
     auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
     auto* aceView = static_cast<AceViewOhos*>(aceView_);
     ACE_DCHECK(aceView != nullptr);
-    flutterTaskExecutor->InitOtherThreads(aceView->GetTaskRunners());
+    flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
     ContainerScope scope(instanceId);
     // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
     flutterTaskExecutor->InitJsThread(false);

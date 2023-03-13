@@ -17,6 +17,11 @@
 
 #include <memory>
 
+#ifdef FML_EMBEDDER_ONLY
+#undef FML_EMBEDDER_ONLY
+#define FML_EMBEDDER_ONLY
+#endif
+
 #include "common/task_runners.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
@@ -29,7 +34,6 @@ namespace OHOS::Ace {
 std::unique_ptr<FlutterThreadModel> FlutterThreadModel::CreateThreadModel(
     bool useCurrentEventRunner, bool hasUiThread, bool hasGpuThread)
 {
-    LOGE("Create Flutter ThreadModel");
     // Create threads
     static size_t sCount = 1;
     auto threadLabel = std::to_string(sCount++);
