@@ -641,8 +641,10 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
     if (showInSubWindowValue->IsBoolean()) {
         bool showInSubBoolean = showInSubWindowValue->ToBoolean();
 #if defined(PREVIEW)
-        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
-        showInSubBoolean = false;
+        if (showInSubBoolean) {
+            LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+            showInSubBoolean = false;
+        }
 #endif
         if (popupParam) {
             popupParam->SetShowInSubWindow(showInSubBoolean);
