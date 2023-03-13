@@ -39,7 +39,6 @@ constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t MULTIPLE_2 = 2;
 
-constexpr Dimension SPACE_WIDTH = 20.0_vp;
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -80,10 +79,20 @@ void SearchLayoutAlgorithm::CancelButtonMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(cancelButtonLayoutProperty);
     auto cancelButtonGeometryNode = cancelButtonWrapper->GetGeometryNode();
     CHECK_NULL_VOID(cancelButtonGeometryNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
 
+    // calculate theme space from cancel button to cancel image
+    auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
+        searchTheme->GetIconHeight().ConvertToPx();
+
+    // calculate cancel button height
     auto cancelButtonHeight =
         layoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconSizeMeasure_.Height())).ConvertToPx() +
-        SPACE_WIDTH.ConvertToPx();
+        spaceHeight;
+
     CalcSize cancelButtonCalcSize((CalcLength(cancelButtonHeight)), CalcLength(cancelButtonHeight));
     cancelButtonLayoutProperty->UpdateUserDefinedIdealSize(cancelButtonCalcSize);
 
@@ -155,10 +164,27 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
 {
     auto buttonWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_VOID(buttonWrapper);
+    auto buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(buttonWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(buttonLayoutProperty);
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto buttonGeometryNode = buttonWrapper->GetGeometryNode();
     CHECK_NULL_VOID(buttonGeometryNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+
+    // calculate theme space from search button to font
+    auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
+        searchTheme->GetFontSize().ConvertToPx();
+
+    // calculate search button height
+    auto searchButtonHeight =
+        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPx() + spaceHeight;
+    CalcSize searchButtonCalcSize;
+    searchButtonCalcSize.SetHeight(CalcLength(searchButtonHeight));
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize);
 
     // searchButton Measure
     auto buttonLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -175,18 +201,10 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     CHECK_NULL_RETURN(searchTheme, 0);
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, 0);
-    auto constraint = layoutProperty->GetLayoutConstraint();
     auto searchBtnWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
     CHECK_NULL_RETURN(searchBtnWrapper, 0);
     auto cancelBtnLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
     CHECK_NULL_RETURN(cancelBtnLayoutWrapper, 0);
-
-    // search theme height
-    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
-
-    // current search height
-    auto searchHeight =
-        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
 
     // search button height
     auto buttonNode = searchBtnWrapper->GetHostNode();
@@ -199,6 +217,7 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     // search icon height
     auto searchIconFrameHight = searchIconSizeMeasure_.Height();
     auto searchIconHeight = layoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameHight)).ConvertToPx();
+    searchIconHeight += searchTheme->GetHeight().ConvertToPx() - searchTheme->GetIconHeight().ConvertToPx();
 
     // cancel button height
     auto cancelButtonNode = cancelBtnLayoutWrapper->GetHostNode();
@@ -212,8 +231,7 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     auto textfieldHeight = textFieldSizeMeasure_.Height();
 
     // calculate the highest
-    searchHeightAdapt = std::max(searchHeight, searchButtonHeight);
-    searchHeightAdapt = std::max(searchHeightAdapt, searchIconHeight);
+    searchHeightAdapt = std::max(searchIconHeight, searchButtonHeight);
     searchHeightAdapt = std::max(searchHeightAdapt, cancelBtnHight);
     searchHeightAdapt = std::max(searchHeightAdapt, static_cast<double>(textfieldHeight));
 
