@@ -351,6 +351,8 @@ void SearchModelNG::SetSearchButtonFontSize(const Dimension& value)
 
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButtonFontSize, value);
 }
 
 void SearchModelNG::SetSearchButtonFontColor(const Color& color)
