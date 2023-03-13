@@ -206,8 +206,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateMainIndex(line->first);
             gridItemLayoutProperty->UpdateCrossIndex(iter->first);
         }
-        prevLineHeight +=
-            gridLayoutInfo_.lineHeightMap_[line->first] + GridUtils::GetMainGap(gridLayoutProperty, size, axis_);
+        prevLineHeight += gridLayoutInfo_.lineHeightMap_[line->first] + mainGap_;
     }
 }
 
@@ -219,10 +218,14 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
     auto columnsTemplate = layoutProperty->GetColumnsTemplate().value_or("");
     axis_ = columnsTemplate.empty() ? Axis::HORIZONTAL : Axis::VERTICAL;
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
     auto columnsGap =
-        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
     mainGap_ = axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap;
+    crossGap_ = axis_ == Axis::VERTICAL ? columnsGap : rowsGap;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    crossPaddingOffset_ = axis_ == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
+
     std::vector<float> crossLens;
     if (!rowsTemplate.empty()) {
         crossLens = GridUtils::ParseArgs(rowsTemplate, frameSize.Height(), rowsGap);
@@ -1059,24 +1062,13 @@ bool GridScrollLayoutAlgorithm::CheckGridPlaced(
 
 float GridScrollLayoutAlgorithm::ComputeItemCrossPosition(LayoutWrapper* layoutWrapper, int32_t crossStart) const
 {
-    auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(layoutProperty, 0);
-    auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-    auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
-    auto columnsGap =
-        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
-    auto crossGap = axis_ == Axis::VERTICAL ? columnsGap : rowsGap;
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto crossPaddingOffset = axis_ == Axis::HORIZONTAL ? padding.top.value_or(0) : padding.left.value_or(0);
-
     float position = 0.0f;
     for (int32_t index = 0; index < crossStart; ++index) {
         if (index >= 0 && index < static_cast<int32_t>(itemsCrossSize_.size())) {
             position += itemsCrossSize_.at(index);
         }
     }
-    position += crossStart * crossGap + crossPaddingOffset;
+    position += crossStart * crossGap_ + crossPaddingOffset_;
     return position;
 }
 
