@@ -197,6 +197,7 @@ build_component_ng("pattern_ng") {
     "navrouter/navrouter_group_node.cpp",
     "navrouter/navrouter_pattern.cpp",
     "navrouter/navrouter_view.cpp",
+    "option/option_accessibility_property.cpp",
     "option/option_layout_algorithm.cpp",
     "option/option_paint_method.cpp",
     "option/option_pattern.cpp",
