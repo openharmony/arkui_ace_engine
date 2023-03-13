@@ -701,6 +701,11 @@ void SubwindowOhos::ShowActionMenu(
     LOGI("SubwindowOhos::ShowActionMenu end");
 }
 
+void SubwindowOhos::CloseDialog(int32_t instanceId)
+{
+    Platform::DialogContainer::CloseWindow(instanceId);
+}
+
 void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId)
 {
     auto container = Platform::DialogContainer::GetContainer(containerId);
