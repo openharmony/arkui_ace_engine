@@ -234,6 +234,13 @@ void WebView::SetOnUrlLoadIntercept(OnWebSyncFunc&& onUrlLoadInterceptImpl)
     webEventHub->SetOnUrlLoadInterceptEvent(std::move(onUrlLoadInterceptImpl));
 }
 
+void WebView::SetOnLoadIntercept(OnWebSyncFunc&& onLoadInterceptImpl)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnLoadInterceptEvent(std::move(onLoadInterceptImpl));
+}
+
 void WebView::SetOnFileSelectorShow(OnWebSyncFunc&& onFileSelectorShowImpl)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();

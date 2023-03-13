@@ -935,6 +935,11 @@ public:
         request_ = eventInfo.GetRequest();
     }
 
+    void SetLoadInterceptEvent(const LoadInterceptEvent& eventInfo)
+    {
+        request_ = eventInfo.GetRequest();
+    }
+
     void IsRedirect(const JSCallbackInfo& args)
     {
         auto isRedirect = JSVal(ToJSValue(request_->IsRedirect()));
@@ -1414,6 +1419,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onHttpErrorReceive", &JSWeb::OnHttpErrorReceive);
     JSClass<JSWeb>::StaticMethod("onInterceptRequest", &JSWeb::OnInterceptRequest);
     JSClass<JSWeb>::StaticMethod("onUrlLoadIntercept", &JSWeb::OnUrlLoadIntercept);
+    JSClass<JSWeb>::StaticMethod("onLoadIntercept", &JSWeb::OnLoadIntercept);
     JSClass<JSWeb>::StaticMethod("onlineImageAccess", &JSWeb::OnLineImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("domStorageAccess", &JSWeb::DomStorageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
@@ -1587,6 +1593,16 @@ JSRef<JSVal> UrlLoadInterceptEventToJSValue(const UrlLoadInterceptEvent& eventIn
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("data", eventInfo.GetData());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    requestEvent->SetLoadInterceptEvent(eventInfo);
+    obj->SetPropertyObject("request", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2648,6 +2664,46 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(webComponent);
     webComponent->SetOnUrlLoadIntercept(std::move(jsCallback));
+}
+
+void JSWeb::OnLoadIntercept(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnLoadIntercept");
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<LoadInterceptEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), LoadInterceptEventToJSValue);
+    auto instanceId = Container::CurrentId();
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+            const std::shared_ptr<BaseEventInfo>& info) -> bool {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info.get());
+            JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+            if (message->IsBoolean()) {
+                return message->ToBoolean();
+            }
+            return false;
+        };
+        NG::WebView::SetOnLoadIntercept(std::move(uiCallback));
+        return;
+    }
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                          const BaseEventInfo* info) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        auto eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
+        JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
+        if (message->IsBoolean()) {
+            return message->ToBoolean();
+        }
+        return false;
+    };
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnLoadIntercept(std::move(jsCallback));
 }
 
 JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)

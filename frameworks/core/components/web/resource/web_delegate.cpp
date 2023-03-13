@@ -4030,6 +4030,36 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
     return result;
 }
 
+bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), request, &result]() {
+        auto delegate = weak.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        auto webRequest = AceType::MakeRefPtr<WebRequest>(request->RequestHeaders(),
+            request->Method(), request->Url(), request->FromGesture(),
+            request->IsAboutMainFrame(), request->IsRequestRedirect());
+        auto param = std::make_shared<LoadInterceptEvent>(webRequest);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            auto webEventHub = webPattern->GetWebEventHub();
+            CHECK_NULL_VOID(webEventHub);
+            auto propOnLoadInterceptEvent = webEventHub->GetOnLoadInterceptEvent();
+            CHECK_NULL_VOID(propOnLoadInterceptEvent);
+            result = propOnLoadInterceptEvent(param);
+        } else {
+            auto webCom = delegate->webComponent_.Upgrade();
+            CHECK_NULL_VOID(webCom);
+            result = webCom->OnLoadIntercept(param.get());
+        }
+    });
+    return result;
+}
+
 void WebDelegate::OnResourceLoad(const std::string& url)
 {
     auto context = context_.Upgrade();
