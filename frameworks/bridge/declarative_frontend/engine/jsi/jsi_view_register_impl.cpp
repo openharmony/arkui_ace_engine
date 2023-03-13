@@ -358,6 +358,132 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     });
 }
 
+static const std::unordered_map<std::string, std::function<void(BindingTarget)>> formBindFuncs = {
+    { "Flex", JSFlexImpl::JSBind },
+    { "Text", JSText::JSBind },
+    { "Animator", JSAnimator::JSBind },
+    { "SpringProp", JSAnimator::JSBind },
+    { "SpringMotion", JSAnimator::JSBind },
+    { "ScrollMotion", JSAnimator::JSBind },
+    { "Animator", JSAnimator::JSBind },
+    { "Span", JSSpan::JSBind },
+    { "Button", JSButton::JSBind },
+    { "Canvas", JSCanvas::JSBind },
+    { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
+    { "List", JSList::JSBind },
+    { "ListItem", JSListItem::JSBind },
+    { "ListItemGroup", JSListItemGroup::JSBind },
+    { "LoadingProgress", JSLoadingProgress::JSBind },
+    { "Image", JSImage::JSBind },
+    { "ImageAnimator", JSImageAnimator::JSBind },
+    { "Counter", JSCounter::JSBind },
+    { "Progress", JSProgress::JSBind },
+    { "Column", JSColumn::JSBind },
+    { "Row", JSRow::JSBind },
+    { "GridContainer", JSGridContainer::JSBind },
+    { "Slider", JSSlider::JSBind },
+    { "Stack", JSStack::JSBind },
+    { "ForEach", JSForEach::JSBind },
+    { "Divider", JSDivider::JSBind },
+    { "Swiper", JSSwiper::JSBind },
+    { "If", JSIfElse::JSBind },
+    { "GridRow", JSGridRow::JSBind },
+    { "GridCol", JSGridCol::JSBind },
+    { "Toggle", JSToggle::JSBind },
+    { "Blank", JSBlank::JSBind },
+    { "Calendar", JSCalendar::JSBind },
+    { "Rect", JSRect::JSBind },
+    { "Shape", JSShape::JSBind },
+    { "Path", JSPath::JSBind },
+    { "Circle", JSCircle::JSBind },
+    { "Line", JSLine::JSBind },
+    { "Polygon", JSPolygon::JSBind },
+    { "Polyline", JSPolyline::JSBind },
+    { "Ellipse", JSEllipse::JSBind },
+    { "PageTransitionEnter", JSPageTransition::JSBind },
+    { "PageTransitionExit", JSPageTransition::JSBind },
+    { "Radio", JSRadio::JSBind },
+    { "ActionSheet", JSActionSheet::JSBind },
+    { "AlertDialog", JSAlertDialog::JSBind },
+    { "ContextMenu", JSContextMenu::JSBind },
+#ifdef WINDOW_SCENE_SUPPORTED
+    { "UIExtensionComponent", JSUIExtension::JSBind },
+#endif
+#ifdef ABILITY_COMPONENT_SUPPORTED
+    { "AbilityComponent", JSAbilityComponent::JSBind },
+#endif
+    { "QRCode", JSQRCode::JSBind },
+#ifdef UICAST_COMPONENT_SUPPORTED
+    { "UICast", JSUICast::JSBind },
+#endif
+#ifdef FORM_SUPPORTED
+    { "FormComponent", JSForm::JSBind },
+#endif
+#ifdef WEB_SUPPORTED
+    { "WebController", JSWebController::JSBind },
+#endif
+#ifndef WEARABLE_PRODUCT
+    { "Camera", JSCamera::JSBind },
+    { "Piece", JSPiece::JSBind },
+    { "Rating", JSRating::JSBind },
+#endif
+
+    { "DataPanel", JSDataPanel::JSBind },
+    { "Badge", JSBadge::JSBind },
+    { "Gauge", JSGauge::JSBind },
+    { "Marquee", JSMarquee::JSBind },
+    { "Gesture", JSGesture::JSBind },
+    { "TapGesture", JSGesture::JSBind },
+    { "LongPressGesture", JSGesture::JSBind },
+    { "PanGesture", JSGesture::JSBind },
+    { "SwipeGesture", JSGesture::JSBind },
+    { "PinchGesture", JSGesture::JSBind },
+    { "RotationGesture", JSGesture::JSBind },
+    { "GestureGroup", JSGesture::JSBind },
+    { "PanGestureOption", JSPanGestureOption::JSBind },
+    { "PanGestureOptions", JSPanGestureOption::JSBind },
+    { "SwiperController", JSSwiperController::JSBind },
+    { "CalendarController", JSCalendarController::JSBind },
+
+#ifdef ABILITY_COMPONENT_SUPPORTED
+    { "AbilityController", JSAbilityComponentController::JSBind },
+#endif
+    { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
+    { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
+    { "CanvasGradient", JSCanvasGradient::JSBind },
+    { "ImageBitmap", JSRenderImage::JSBind },
+    { "ImageData", JSCanvasImageData::JSBind },
+    { "Path2D", JSPath2D::JSBind },
+    { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
+#ifdef VIDEO_SUPPORTED
+    { "VideoController", JSVideoController::JSBind },
+#endif
+    { "Sheet", JSSheet::JSBind },
+    { "JSClipboard", JSClipboard::JSBind },
+    { "TextTimer", JSTextTimer::JSBind },
+    { "TextTimerController", JSTextTimerController::JSBind },
+    { "Checkbox", JSCheckbox::JSBind },
+    { "CheckboxGroup", JSCheckboxGroup::JSBind },
+    { "FlowItem", JSWaterFlowItem::JSBind },
+    { "RelativeContainer", JSRelativeContainer::JSBind },
+    { "__Common__", JSCommonView::JSBind },
+    { "LinearGradient", JSLinearGradient::JSBind },
+#ifdef PREVIEW
+    { "FormComponent", JSForm::JSBind },
+    { "XComponent", JSXComponent::JSBind },
+    { "XComponentController", JSXComponentController::JSBind },
+    { "RichText", JSRichText::JSBind },
+    { "Web", JSWeb::JSBind },
+    { "WebController", JSWebController::JSBind },
+    { "Video", JSVideo::JSBind },
+    { "VideoController", JSVideoController::JSBind },
+    { "PluginComponent", JSPlugin::JSBind },
+#endif
+#if defined(MODEL_COMPONENT_SUPPORTED)
+    { "Model", JSSceneView::JSBind },
+#endif
+};
+
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "Text", JSText::JSBind },
@@ -579,6 +705,37 @@ void RegisterAllModule(BindingTarget globalObj)
     RegisterExtraViews(globalObj);
 }
 
+void RegisterAllFormModule(BindingTarget globalObj)
+{
+    JSColumn::JSBind(globalObj);
+    JSCommonView::JSBind(globalObj);
+    JSSwiperController::JSBind(globalObj);
+    JSScroller::JSBind(globalObj);
+    JSCalendarController::JSBind(globalObj);
+    JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
+    JSCanvasGradient::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
+    JSPath2D::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
+#ifdef ABILITY_COMPONENT_SUPPORTED
+    JSAbilityComponentController::JSBind(globalObj);
+#endif
+#ifdef VIDEO_SUPPORTED
+    JSVideoController::JSBind(globalObj);
+#endif
+    JSTextTimerController::JSBind(globalObj);
+    JSLinearGradient::JSBind(globalObj);
+#ifdef WEB_SUPPORTED
+    JSWebController::JSBind(globalObj);
+#endif
+    for (auto& iter : formBindFuncs) {
+        iter.second(globalObj);
+    }
+    RegisterExtraViews(globalObj);
+}
+
 void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 {
     auto func = bindFuncs.find(moduleName);
@@ -636,6 +793,35 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSCanvasImageData::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
+}
+
+void JsBindFormViews(BindingTarget globalObj)
+{
+    JSViewAbstract::JSBind();
+    JSContainerBase::JSBind();
+    JSShapeAbstract::JSBind();
+    JSView::JSBind(globalObj);
+    JSLocalStorage::JSBind(globalObj);
+
+    JSEnvironment::JSBind(globalObj);
+    JSViewContext::JSBind(globalObj);
+    JSViewStackProcessor::JSBind(globalObj);
+    JSTouchHandler::JSBind(globalObj);
+    JSPersistent::JSBind(globalObj);
+    JSDistributed::JSBind(globalObj);
+    JSScroller::JSBind(globalObj);
+
+    JSProfiler::JSBind(globalObj);
+
+    auto delegate = JsGetFrontendDelegate();
+    std::string jsModules;
+    if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
+        LOGI("JsRegisterViews register collection modules");
+        JsRegisterModules(globalObj, jsModules);
+    } else {
+        LOGI("JsRegisterViews register all modules");
+        RegisterAllFormModule(globalObj);
+    }
 }
 
 void JsBindViews(BindingTarget globalObj)

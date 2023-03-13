@@ -1946,7 +1946,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     LocalScope scope(vm);
     globalRuntime_ = arkRuntime;
     // preload js views
-    JsRegisterViews(JSNApi::GetGlobalObject(vm));
+    JsRegisterFormViews(JSNApi::GetGlobalObject(vm));
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
     shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
@@ -1958,13 +1958,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
     // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
-    // preload perfutil
-    shared_ptr<JsValue> perfObj = arkRuntime->NewObject();
-    perfObj->SetProperty(arkRuntime, "printlog", arkRuntime->NewFunction(JsPerfPrint));
-    perfObj->SetProperty(arkRuntime, "sleep", arkRuntime->NewFunction(JsPerfSleep));
-    perfObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsPerfBegin));
-    perfObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsPerfEnd));
-    global->SetProperty(arkRuntime, "perfutil", perfObj);
     // preload exports and requireNative
     shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
     global->SetProperty(arkRuntime, "exports", exportsUtilObj);
@@ -1992,6 +1985,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 
     globalRuntime_ = nullptr;
     cardRuntime_ = runtime;
+    JSNApi::TriggerGC(vm);
 }
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework
