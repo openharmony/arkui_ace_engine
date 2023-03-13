@@ -28,7 +28,6 @@ const int32_t TEXT_PICKER_CHILD_SIZE = 5;
 const float PICKER_HEIGHT_HALF = 2.5f;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t TEXT_PICKER_GRADIENT_CHILD_SIZE = 4;
-const Dimension TEXT_BOUNDARY = 4.0_vp;
 } // namespace
 void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -109,22 +108,15 @@ void TextPickerLayoutAlgorithm::ChangeTextStyle(uint32_t index, uint32_t showOpt
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     if (isDefaultPickerItemHeight_) {
         frameSize.SetHeight(static_cast<float>(defaultPickerItemHeight_));
-        childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     } else {
         if (index == selectedIndex) {
             frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
-            layoutChildConstraint.selfIdealSize = { frameSize.Width() - TEXT_BOUNDARY.ConvertToPx(),
-                frameSize.Height() - TEXT_BOUNDARY.ConvertToPx() };
-            childLayoutWrapper->Measure(layoutChildConstraint);
-            childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
         } else {
             frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
-            layoutChildConstraint.selfIdealSize = { frameSize.Width() - TEXT_BOUNDARY.ConvertToPx(),
-                frameSize.Height() - TEXT_BOUNDARY.ConvertToPx() };
-            childLayoutWrapper->Measure(layoutChildConstraint);
-            childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
         }
     }
+    layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
+    childLayoutWrapper->Measure(layoutChildConstraint);
 }
 
 void TextPickerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
