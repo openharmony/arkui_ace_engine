@@ -732,7 +732,7 @@ float RefreshPattern::GetCustomBuilderOpacityRatio()
     float opacityRatio = 0.0f;
     if (GreatOrEqual(
             static_cast<double>(customBuilderSize.Height() + std::clamp(static_cast<double>(triggerLoadingDistance_),
-                                                                 0.0, TRIGGER_REFRESH_DISTANCE.ConvertToPx())),
+            0.0, TRIGGER_REFRESH_DISTANCE.ConvertToPx())),
             TRIGGER_REFRESH_DISTANCE.ConvertToPx() + CUSTOM_BUILDER_HIGHT_LIGHT_SIZE.ConvertToPx())) {
         opacityRatio = 1.0f;
     } else {
@@ -744,7 +744,7 @@ float RefreshPattern::GetCustomBuilderOpacityRatio()
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& /*dirty*/, const DirtySwapConfig& /*changeConfig*/)
+    const RefPtr<LayoutWrapper>& /* dirty */, const DirtySwapConfig& /* changeConfig */)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
