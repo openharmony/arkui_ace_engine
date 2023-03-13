@@ -325,12 +325,7 @@ public:
         ViewAbstract::SetScale(scale);
     }
 
-    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override
-    {
-        DimensionOffset center(x, y);
-        center.SetZ(z);
-        ViewAbstract::SetPivot(center);
-    }
+    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
 
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override
     {
@@ -699,8 +694,8 @@ public:
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
-    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-        const MenuParam& menuParam) override;
+    void BindMenu(
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
     void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
 
@@ -718,7 +713,6 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-
 };
 } // namespace OHOS::Ace::NG
 

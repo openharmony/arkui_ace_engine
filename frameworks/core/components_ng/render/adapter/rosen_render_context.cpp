@@ -486,9 +486,13 @@ void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
     if (!RectIsNull()) {
         float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
         float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
-        float zPivot = ConvertDimensionToScaleBySize(center.GetZ(), rect.Width());
-        rsNode_->SetCameraDistance(zPivot);
         SetPivot(xPivot, yPivot);
+
+        auto z = center.GetZ();
+        if (z.has_value()) {
+            float zPivot = ConvertDimensionToScaleBySize(z.value(), rect.Width());
+            rsNode_->SetCameraDistance(zPivot);
+        }
     }
     RequestNextFrame();
 }
