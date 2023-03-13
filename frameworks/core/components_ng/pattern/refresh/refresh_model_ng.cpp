@@ -58,20 +58,22 @@ void RefreshModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TriggerRefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, false);
 }
 
 void RefreshModelNG::Pop()
 {
     auto refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(refreshNode);
-    if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
-        LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
-        return;
-    }
     auto layoutProperty = refreshNode->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto refreshRenderProperty = refreshNode->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
+    if (!layoutProperty->GetIsCustomBuilderExistValue()) {
+        if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
+            LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
+            return;
+        }
 
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(textChild);
@@ -103,6 +105,7 @@ void RefreshModelNG::Pop()
     refreshNode->AddChild(loadingProgressChild);
     auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
+	}
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 void RefreshModelNG::SetRefreshing(bool isRefreshing)

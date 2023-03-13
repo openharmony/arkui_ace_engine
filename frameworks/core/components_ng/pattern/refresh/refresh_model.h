@@ -52,6 +52,7 @@ public:
     virtual void SetOnStateChange(std::function<void(const int32_t)>&& stateChange) = 0;
     virtual void SetOnRefreshing(std::function<void()>&& refreshing) = 0;
     virtual void SetChangeEvent(std::function<void(const std::string)>&& changeEvent) = 0;
+    virtual void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) = 0;
 private:
     static std::unique_ptr<RefreshModel> instance_;
 };

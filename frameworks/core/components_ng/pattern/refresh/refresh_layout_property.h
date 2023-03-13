@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,12 @@ enum class RefreshStatus {
     DONE,
 };
 
+enum class RefreshState {
+    STATE_LOADING = 0,
+    STATE_DRAG,
+    STATE_RECYCLE,
+};
+
 class ACE_EXPORT RefreshLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(RefreshLayoutProperty, LayoutProperty);
 
@@ -56,6 +62,9 @@ public:
         value->propScrollableOffset_ = CloneScrollableOffset();
         value->propLoadingProcessOffset_ = CloneLoadingProcessOffset();
         value->propTriggerRefreshDistance_ = CloneTriggerRefreshDistance();
+        value->propIsCustomBuilderExist_ = CloneIsCustomBuilderExist();
+        value->propCustomBuilderIndex_ = CloneCustomBuilderIndex();
+        value->propCustomBuilderOffset_ = CloneCustomBuilderOffset();
         return value;
     }
 
@@ -73,6 +82,9 @@ public:
         ResetScrollableOffset();
         ResetLoadingProcessOffset();
         ResetTriggerRefreshDistance();
+        ResetIsCustomBuilderExist();
+        ResetCustomBuilderIndex();
+        ResetCustomBuilderOffset();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -93,6 +105,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollableOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LoadingProcessOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TriggerRefreshDistance, Dimension, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomBuilderExist, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CustomBuilderIndex, int32_t, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CustomBuilderOffset, OffsetF, PROPERTY_UPDATE_LAYOUT);
 
     ACE_DEFINE_PROPERTY_GROUP(RefreshStyle, RefreshStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(RefreshStyle, LoadingDistance, Dimension, PROPERTY_UPDATE_LAYOUT);
