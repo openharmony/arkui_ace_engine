@@ -172,12 +172,6 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         overlayManager->FocusOverlayNode(menu);
     });
 
-    bool isSelectMenu = false;
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    if (menuWrapperPattern && menuWrapperPattern->IsSelectMenu()) {
-        isSelectMenu = true;
-    }
-
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
     context->UpdateOpacity(0.0);
@@ -187,11 +181,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
-    if (isSelectMenu) {
-        context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
-    } else {
-        context->OnTransformTranslateUpdate({ 0.0f, menuAnimationOffset, 0.0f });
-    }
+    context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
 
     AnimationUtils::Animate(
         option,
@@ -231,12 +221,6 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
         menuPattern->RemoveParentHoverStyle();
     });
 
-    bool isSelectMenu = false;
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    if (menuWrapperPattern && menuWrapperPattern->IsSelectMenu()) {
-        isSelectMenu = true;
-    }
-
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -246,13 +230,9 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
     AnimationUtils::Animate(
         option,
-        [context, isSelectMenu, menuAnimationOffset]() {
+        [context, menuAnimationOffset]() {
             context->UpdateOpacity(0.0);
-            if (isSelectMenu) {
-                context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
-            } else {
-                context->OnTransformTranslateUpdate({ 0.0f, menuAnimationOffset, 0.0f });
-            }
+            context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
         },
         option.GetOnFinishEvent());
 
