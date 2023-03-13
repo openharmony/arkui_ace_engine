@@ -97,7 +97,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("interval", &JSSwiper::SetInterval, opt);
     JSClass<JSSwiper>::StaticMethod("loop", &JSSwiper::SetLoop, opt);
     JSClass<JSSwiper>::StaticMethod("vertical", &JSSwiper::SetVertical, opt);
-    JSClass<JSSwiper>::StaticMethod("indicator", &JSSwiper::SetIndicator);
+    JSClass<JSSwiper>::StaticMethod("indicator", &JSSwiper::SetIndicator, opt);
     JSClass<JSSwiper>::StaticMethod("displayMode", &JSSwiper::SetDisplayMode);
     JSClass<JSSwiper>::StaticMethod("effectMode", &JSSwiper::SetEffectMode);
     JSClass<JSSwiper>::StaticMethod("displayCount", &JSSwiper::SetDisplayCount);
@@ -231,19 +231,23 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(font);
     JSRef<JSVal> size = obj->GetProperty("size");
-    Dimension fontSize;
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
-    bool parseOk = ParseJsDimensionFp(size, fontSize);
-    parseOk = !LessNotEqual(fontSize.Value(), 0.0);
-    if (isSelected) {
-        digitalParameters.selectedFontSize =
-            parseOk ? fontSize : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+    // set font size, unit FP
+    Dimension fontSize;
+    if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFp(size, fontSize)) {
+        if (LessNotEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0)) {
+            fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+        }
     } else {
-        digitalParameters.fontSize =
-            parseOk ? fontSize : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+        fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+    }
+    if (isSelected) {
+        digitalParameters.selectedFontSize = fontSize;
+    } else {
+        digitalParameters.fontSize = fontSize;
     }
     JSRef<JSVal> weight = obj->GetProperty("weight");
     std::string weightValue;
