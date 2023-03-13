@@ -127,4 +127,23 @@ void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const
     }
     ViewAbstract::SetPivot(center);
 }
+
+void ViewAbstractModelNG::BindContentCover(
+    bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc, int32_t type)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), type, targetNode->GetId());
+}
 } // namespace OHOS::Ace::NG

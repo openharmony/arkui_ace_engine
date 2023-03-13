@@ -67,6 +67,7 @@
 namespace OHOS::Ace {
 
 std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
+using DoubleBindCallback = std::function<void(const std::string&)>;
 
 ViewAbstractModel* ViewAbstractModel::GetInstance()
 {
@@ -537,31 +538,24 @@ const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Pl
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT, Placement::LEFT_TOP,
     Placement::LEFT_BOTTOM, Placement::RIGHT_TOP, Placement::RIGHT_BOTTOM };
 
-void ParseShowObject(const JSCallbackInfo& info, const JSRef<JSObject>& showObj, const RefPtr<PopupParam>& popupParam)
+DoubleBindCallback ParseDoubleBindCallback(const JSCallbackInfo& info, const JSRef<JSObject>& callbackObj)
 {
-    JSRef<JSVal> changeEventVal = showObj->GetProperty("changeEvent");
-    if (!changeEventVal->IsFunction()) {
-        return;
+    JSRef<JSVal> changeEvent = callbackObj->GetProperty("changeEvent");
+    if (!changeEvent->IsFunction()) {
+        return {};
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-
-    if (popupParam) {
-        auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                                         const std::string& param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-
-            if (param != "true" && param != "false") {
-                LOGE("param is not equal true or false, invalid.");
-                return;
-            }
-
-            bool newValue = StringToBool(param);
-            JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        popupParam->SetOnStateChange(onStateChangeCallback);
-        return;
-    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEvent));
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        if (param != "true" && param != "false") {
+            LOGE("param is not equal true or false, invalid.");
+            return;
+        }
+        bool newValue = StringToBool(param);
+        JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    return callback;
 }
 
 void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPtr<PopupParam>& popupParam)
@@ -3725,7 +3719,8 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         popupParam->SetIsShow(info[0]->ToBoolean());
     } else {
         JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
-        ParseShowObject(info, showObj, popupParam);
+        auto callback = ParseDoubleBindCallback(info, showObj);
+        popupParam->SetOnStateChange(std::move(callback));
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
 
@@ -4447,6 +4442,49 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc));
 }
 
+void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
+{
+    if (info.Length() != 2 && info.Length() != 3) {
+        LOGE("BindContentCover params number are not correct.");
+        return;
+    }
+
+    // parse isShow
+    bool isShow = false;
+    DoubleBindCallback callback = nullptr;
+    if (info[0]->IsBoolean()) {
+        isShow = info[1]->ToBoolean();
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        callback = ParseDoubleBindCallback(info, callbackObj);
+        auto isShowObj = callbackObj->GetProperty("value");
+        isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
+    }
+
+    // parse builder
+    if (!info[1]->IsObject()) {
+        LOGE("builder is invalid.");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+    auto builder = obj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("builder param is not a function.");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("BindContentCover");
+        func->Execute();
+    };
+
+    // parse ModalTransition
+    auto type = (info.Length() == 3 && info[2]->IsNumber()) ? info[2]->ToNumber<int32_t>() : 0;
+    ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), type);
+}
+
 void JSViewAbstract::JSBind()
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -4532,6 +4570,7 @@ void JSViewAbstract::JSBind()
 
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
+    JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);

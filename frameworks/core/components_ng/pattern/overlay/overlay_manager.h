@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
 #include <unordered_map>
+#include <utility>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -119,6 +120,9 @@ public:
         return false;
     }
 
+    void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
+
 private:
     void PopToast(int32_t targetId);
 
@@ -145,6 +149,7 @@ private:
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
+    std::stack<WeakPtr<FrameNode>> modalStack_;
     WeakPtr<UINode> rootNodeWeak_;
 
     std::function<void()> onHideMenuCallback_ = nullptr;
