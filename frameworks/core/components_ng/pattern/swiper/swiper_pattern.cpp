@@ -77,9 +77,9 @@ void SwiperPattern::OnIndexChange() const
         return;
     }
 
-    auto oldIndex = (oldIndex_ + totalCount) % totalCount;
+    auto currentIndex = (currentIndex_ + totalCount) % totalCount;
     auto targetIndex = (CurrentIndex() + totalCount) % totalCount;
-    if (oldIndex != targetIndex) {
+    if (currentIndex != targetIndex) {
         auto swiperEventHub = GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         swiperEventHub->FireChangeEvent(targetIndex);
@@ -97,8 +97,12 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    oldIndex_ = currentIndex_;
     InitSwiperIndicator();
+    if (isInit_) {
+        isInit_ = false;
+    } else {
+        OnIndexChange();
+    }
 
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
@@ -234,12 +238,6 @@ WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (isInit_) {
-        isInit_ = false;
-    } else {
-        OnIndexChange();
-    }
-
     auto curChild = dirty->GetOrCreateChildByIndex(currentIndex_);
     CHECK_NULL_RETURN(curChild, false);
     auto curChildFrame = curChild->GetHostNode();

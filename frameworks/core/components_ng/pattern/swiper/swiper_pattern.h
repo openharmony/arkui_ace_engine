@@ -279,7 +279,6 @@ private:
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;
     int32_t currentIndex_ = 0;
-    int32_t oldIndex_ = 0;
     std::optional<int32_t> targetIndex_;
     std::set<int32_t> preItemRange_;
 
