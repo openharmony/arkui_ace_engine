@@ -129,6 +129,10 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         HILOG_ERROR("Not allow update");
         return;
     }
+    if (!uiContent_) {
+        HILOG_ERROR("uiContent_ is null");
+        return;
+    }
 
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormDate(formJsInfo.formData);
@@ -143,8 +147,10 @@ void FormRenderer::Destroy()
     renderDelegateDeathRecipient_ = nullptr;
     formRendererDelegate_ = nullptr;
     formRendererDispatcherImpl_ = nullptr;
-    uiContent_->Destroy();
-    uiContent_ = nullptr;
+    if (uiContent_) {
+        uiContent_->Destroy();
+        uiContent_ = nullptr;
+    }
     context_ = nullptr;
     runtime_ = nullptr;
     HILOG_INFO("Destroy FormRenderer finish.");

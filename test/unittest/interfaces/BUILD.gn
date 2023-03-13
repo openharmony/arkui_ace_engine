@@ -17,6 +17,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 group("interfaces_unittest") {
   testonly = true
   deps = [
+    "inner_api:form_render_test",
     "inner_api:ui_content_test",
     "inner_api:viewport_config_test",
   ]
