@@ -51,7 +51,7 @@ public:
 
 private:
     void CalculateBlockOffset(
-        LayoutWrapper* layoutWrapper, const SizeF& selfSize, float borderBlank, Axis axis, bool reverse);
+        LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse);
 
 private:
     float trackThickness_ = 0.0f;
