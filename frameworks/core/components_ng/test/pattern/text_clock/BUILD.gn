@@ -28,6 +28,7 @@ ohos_unittest("text_clock_pattern_test_ng") {
     "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components_ng/event/event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
