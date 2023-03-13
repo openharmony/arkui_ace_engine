@@ -431,6 +431,33 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
     auto halfHeight = blockSize_.Height() * HALF + static_cast<float>(focusDistance.ConvertToPx());
     paintRect.SetRect(RectF(circleCenter_.GetX() - halfWidth + contentOffset.GetX(),
         circleCenter_.GetY() - halfHeight + contentOffset.GetY(), halfWidth / HALF, halfHeight / HALF));
+    paintRect.SetCornerRadius(focusDistance.ConvertToPx());
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto blockType = paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT);
+    if (blockType == SliderModelNG::BlockStyleType::DEFAULT) {
+        auto focusRadius =
+            std::min(blockSize_.Width(), blockSize_.Height()) * HALF + static_cast<float>(focusDistance.ConvertToPx());
+        paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
+            circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
+        paintRect.SetCornerRadius(focusRadius);
+    } else if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
+        auto shape = paintProperty->GetBlockShape();
+        if (shape.has_value() && shape.value()->GetBasicShapeType() == BasicShapeType::CIRCLE) {
+            auto circle = DynamicCast<Circle>(shape.value());
+            CHECK_NULL_VOID(circle);
+            float focusRadius;
+            if (circle->GetRadius().IsValid()) {
+                focusRadius = circle->GetRadius().ConvertToPx() + focusDistance.ConvertToPx();
+            } else {
+                focusRadius = std::min(circle->GetWidth().ConvertToPx(), circle->GetHeight().ConvertToPx()) * HALF +
+                              focusDistance.ConvertToPx();
+            }
+            paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
+                circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
+            paintRect.SetCornerRadius(focusRadius);
+        }
+    }
 }
 
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
