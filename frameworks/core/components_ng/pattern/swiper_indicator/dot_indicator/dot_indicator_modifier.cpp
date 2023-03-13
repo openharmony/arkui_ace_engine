@@ -22,8 +22,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float HALF = 0.5f;
-constexpr float DOUBLE = 2.0f;
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
@@ -40,6 +38,10 @@ constexpr float LONG_POINT_RIGHT_CENTER_BEZIER_CURVE_VELOCITY = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_MASS = 0.0f;
 constexpr float CENTER_BEZIER_CURVE_STIFFNESS = 1.0f;
 constexpr float CENTER_BEZIER_CURVE_DAMPING = 1.0f;
+constexpr uint32_t ITEM_HALF_WIDTH = 0;
+constexpr uint32_t ITEM_HALF_HEIGHT = 1;
+constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
+constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -49,12 +51,12 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
-    contentProperty.pointRadius = pointRadius_->Get();
     contentProperty.normalToHoverPointDilateRatio = normalToHoverPointDilateRatio_->Get();
     contentProperty.hoverToNormalPointDilateRatio = hoverToNormalPointDilateRatio_->Get();
     contentProperty.longPointDilateRatio = longPointDilateRatio_->Get();
     contentProperty.indicatorPadding = indicatorPadding_->Get();
     contentProperty.indicatorMargin = indicatorMargin_->Get();
+    contentProperty.itemHalfSizes = itemHalfSizes_->Get();
     PaintBackground(context, contentProperty);
     if (indicatorMask_) {
         PaintMask(context);
@@ -65,21 +67,34 @@ void DotIndicatorModifier::onDraw(DrawingContext& context)
 void DotIndicatorModifier::PaintBackground(DrawingContext& context, const ContentProperty& contentProperty)
 {
     CHECK_NULL_VOID_NOLOG(contentProperty.backgroundColor.GetAlpha());
-    float diameter = contentProperty.pointRadius * DOUBLE;
+    auto itemWidth = contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] * 2;
+    auto itemHeight = contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] * 2;
+    auto selectedItemWidth = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
+    auto selectedItemHeight = contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] * 2;
     auto pointNumber = static_cast<float>(contentProperty.vectorBlackPointCenterX.size());
-    float allPointDiameterSum = diameter * (pointNumber + 1);
+    float allPointDiameterSum = itemWidth * static_cast<float>(pointNumber + 1);
+    if (!NearEqual(contentProperty.itemHalfSizes[ITEM_HALF_WIDTH],
+        contentProperty. itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
+        !NearEqual(contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT],
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
+        allPointDiameterSum = itemWidth * static_cast<float>(pointNumber - 1) + selectedItemWidth;
+    }
     float allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) * (pointNumber - 1);
 
     // Background necessary property
     float rectWidth =
         contentProperty.indicatorPadding + allPointDiameterSum + allPointSpaceSum + contentProperty.indicatorPadding;
-    float rectHeight = contentProperty.indicatorPadding + diameter + contentProperty.indicatorPadding;
-    float rectRadius = rectHeight * HALF;
+    float rectHeight = contentProperty.indicatorPadding + itemHeight + contentProperty.indicatorPadding;
+    if (selectedItemHeight > itemHeight) {
+        rectHeight = contentProperty.indicatorPadding + selectedItemHeight + contentProperty.indicatorPadding;
+    }
+
     // Property to get the rectangle offset
     float rectLeft =
         axis_ == Axis::HORIZONTAL ? contentProperty.indicatorMargin.GetX() : contentProperty.indicatorMargin.GetY();
     float rectTop =
         axis_ == Axis::HORIZONTAL ? contentProperty.indicatorMargin.GetY() : contentProperty.indicatorMargin.GetX();
+    // Adapter circle and rect
     float rectRight = rectLeft + (axis_ == Axis::HORIZONTAL ? rectWidth : rectHeight);
     float rectBottom = rectTop + (axis_ == Axis::HORIZONTAL ? rectHeight : rectWidth);
     // Paint background
@@ -88,63 +103,88 @@ void DotIndicatorModifier::PaintBackground(DrawingContext& context, const Conten
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(contentProperty.backgroundColor));
     canvas.AttachBrush(brush);
-    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, rectRadius, rectRadius });
+    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, rectHeight * 0.5, rectHeight * 0.5 });
 }
 
 void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty& contentProperty)
 {
     RSCanvas canvas = context.canvas;
-    auto swiperTheme = GetSwiperIndicatorTheme();
-    CHECK_NULL_VOID(swiperTheme);
     for (size_t i = 0; i < contentProperty.vectorBlackPointCenterX.size(); ++i) {
-        OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
-        float radius = GetRadius(i, contentProperty);
-        PaintUnselectedIndicator(canvas, center, radius);
+        if (i != currentIndex_) {
+            LinearVector<float> itemHalfSizes = GetItemHalfSizes(i, contentProperty);
+            OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
+            PaintUnselectedIndicator(canvas, center, itemHalfSizes);
+        }
     }
     OffsetF leftCenter = { contentProperty.longPointLeftCenterX, centerY_ };
     OffsetF rightCenter = { contentProperty.longPointRightCenterX, centerY_ };
     OffsetF centerDistance = rightCenter - leftCenter;
     OffsetF centerDilateDistance = centerDistance * contentProperty.longPointDilateRatio;
-    leftCenter -= (centerDilateDistance - centerDistance) * HALF;
-    rightCenter += (centerDilateDistance - centerDistance) * HALF;
+    leftCenter -= (centerDilateDistance - centerDistance) * 0.5;
+    rightCenter += (centerDilateDistance - centerDistance) * 0.5;
     PaintSelectedIndicator(
-        canvas, leftCenter, rightCenter, contentProperty.pointRadius * contentProperty.longPointDilateRatio);
+        canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
 }
 
-float DotIndicatorModifier::GetRadius(size_t index, ContentProperty& contentProperty)
+LinearVector<float> DotIndicatorModifier::GetItemHalfSizes(size_t index, ContentProperty& contentProperty)
 {
     if (normalToHoverIndex_.has_value() && normalToHoverIndex_ == index) {
-        return contentProperty.pointRadius * contentProperty.normalToHoverPointDilateRatio;
+        contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] *= contentProperty.normalToHoverPointDilateRatio;
+        contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] *= contentProperty.normalToHoverPointDilateRatio;
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] *= contentProperty.normalToHoverPointDilateRatio;
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] *= contentProperty.normalToHoverPointDilateRatio;
+        return contentProperty.itemHalfSizes;
     }
     if (hoverToNormalIndex_.has_value() && hoverToNormalIndex_ == index) {
-        return contentProperty.pointRadius * contentProperty.hoverToNormalPointDilateRatio;
+        contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] *= contentProperty.hoverToNormalPointDilateRatio;
+        contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] *= contentProperty.hoverToNormalPointDilateRatio;
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] *= contentProperty.hoverToNormalPointDilateRatio;
+        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] *= contentProperty.hoverToNormalPointDilateRatio;
+        return contentProperty.itemHalfSizes;
     }
-    return contentProperty.pointRadius;
+    return contentProperty.itemHalfSizes;
 }
 
-void DotIndicatorModifier::PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, float radius)
+void DotIndicatorModifier::PaintUnselectedIndicator(
+    RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(unselectedColor_));
     canvas.AttachBrush(brush);
-    float pointX = axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY();
-    float pointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
-    canvas.DrawCircle({ pointX, pointY }, radius);
+    if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
+        !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
+        float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) - itemHalfSizes[ITEM_HALF_WIDTH];
+        float rectTop = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) - itemHalfSizes[ITEM_HALF_HEIGHT];
+        float rectRight = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) + itemHalfSizes[ITEM_HALF_WIDTH];
+        float rectBottom = (axis_ == Axis::HORIZONTAL ? center.GetY() :
+            center.GetX()) + itemHalfSizes[ITEM_HALF_HEIGHT];
+        canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
+            itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[ITEM_HALF_HEIGHT] });
+    } else {
+        float pointX = axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY();
+        float pointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
+        canvas.DrawCircle({ pointX, pointY }, itemHalfSizes[ITEM_HALF_HEIGHT]);
+    }
 }
 
 void DotIndicatorModifier::PaintSelectedIndicator(
-    RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter, float radius)
+    RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes)
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
     brush.SetColor(ToRSColor(selectedColor_));
     canvas.AttachBrush(brush);
-    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY()) - radius;
-    float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX()) - radius;
-    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY()) + radius;
-    float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX()) + radius;
-    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom }, radius, radius });
+    float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() :
+        leftCenter.GetY()) - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() :
+        leftCenter.GetX()) - itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() :
+        rightCenter.GetY()) + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+    float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() :
+        rightCenter.GetX()) + itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
+    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
+        itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] });
 }
 
 void DotIndicatorModifier::PaintMask(DrawingContext& context)
@@ -171,7 +211,8 @@ void DotIndicatorModifier::PaintMask(DrawingContext& context)
     canvas.DrawRect({ startPt.GetX(), startPt.GetY(), endPt.GetX(), endPt.GetY() });
 }
 
-void DotIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+void DotIndicatorModifier::UpdateShrinkPaintProperty(
+    const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set(margin);
@@ -180,14 +221,15 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(const OffsetF& margin, cons
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
     longPointLeftCenterX_->Set(longPointCenterX.first);
     longPointRightCenterX_->Set(longPointCenterX.second);
-    pointRadius_->Set(normalPointRadius);
+    itemHalfSizes_->Set(normalItemHalfSizes);
     normalToHoverPointDilateRatio_->Set(1.0f);
     hoverToNormalPointDilateRatio_->Set(1.0f);
     longPointDilateRatio_->Set(1.0f);
 }
 
-void DotIndicatorModifier::UpdateDilatePaintProperty(const float& hoverPointRadius,
-    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+void DotIndicatorModifier::UpdateDilatePaintProperty(
+    const LinearVector<float>& hoverItemHalfSizes, const LinearVector<float>& vectorBlackPointCenterX,
+    const std::pair<float, float>& longPointCenterX)
 {
     indicatorMargin_->Set({ 0, 0 });
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()));
@@ -195,7 +237,7 @@ void DotIndicatorModifier::UpdateDilatePaintProperty(const float& hoverPointRadi
     vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
     longPointLeftCenterX_->Set(longPointCenterX.first);
     longPointRightCenterX_->Set(longPointCenterX.second);
-    pointRadius_->Set(hoverPointRadius);
+    itemHalfSizes_->Set(hoverItemHalfSizes);
 }
 
 void DotIndicatorModifier::UpdateBackgroundColor(const Color& backgroundColor)
@@ -203,75 +245,96 @@ void DotIndicatorModifier::UpdateBackgroundColor(const Color& backgroundColor)
     backgroundColor_->Set(LinearColor(backgroundColor));
 }
 
-void DotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+void DotIndicatorModifier::UpdateNormalPaintProperty(
+    const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
     auto backgroundColor = swiperTheme->GetHoverColor().ChangeOpacity(0);
-    UpdateShrinkPaintProperty(margin, normalPointRadius, vectorBlackPointCenterX, longPointCenterX);
+    UpdateShrinkPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     UpdateBackgroundColor(backgroundColor);
 }
 
-void DotIndicatorModifier::UpdateHoverPaintProperty(const float& hoverPointRadius,
+void DotIndicatorModifier::UpdateHoverPaintProperty(
+    const LinearVector<float>& hoverItemHalfSizes,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
     auto backgroundColor = swiperTheme->GetHoverColor();
-    UpdateDilatePaintProperty(hoverPointRadius, vectorBlackPointCenterX, longPointCenterX);
+    UpdateDilatePaintProperty(hoverItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     UpdateBackgroundColor(backgroundColor);
 }
 
-void DotIndicatorModifier::UpdatePressPaintProperty(const float& hoverPointRadius,
+void DotIndicatorModifier::UpdatePressPaintProperty(
+    const LinearVector<float>& hoverItemHalfSizes,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     auto swiperTheme = GetSwiperIndicatorTheme();
     CHECK_NULL_VOID(swiperTheme);
     auto backgroundColor = swiperTheme->GetPressedColor();
-    UpdateDilatePaintProperty(hoverPointRadius, vectorBlackPointCenterX, longPointCenterX);
+    UpdateDilatePaintProperty(hoverItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     UpdateBackgroundColor(backgroundColor);
 }
 
-void DotIndicatorModifier::UpdateNormalToHoverPaintProperty(const float& hoverPointRadius,
-    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+void DotIndicatorModifier::UpdateNormalToHoverPaintProperty(
+    const LinearVector<float>& hoverItemHalfSizes, const LinearVector<float>& vectorBlackPointCenterX,
+    const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(
-        option, [&]() { this->UpdateHoverPaintProperty(hoverPointRadius, vectorBlackPointCenterX, longPointCenterX); });
-}
-
-void DotIndicatorModifier::UpdateHoverToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
-    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
-{
-    AnimationOption option;
-    option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
-    option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [&]() {
-        this->UpdateNormalPaintProperty(margin, normalPointRadius, vectorBlackPointCenterX, longPointCenterX);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), hoverItemHalfSizes, vectorBlackPointCenterX,
+        longPointCenterX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->UpdateHoverPaintProperty(hoverItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     });
 }
 
-void DotIndicatorModifier::UpdateNormalToPressPaintProperty(const float& hoverPointRadius,
-    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
-{
-    AnimationOption option;
-    option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
-    option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(
-        option, [&]() { this->UpdatePressPaintProperty(hoverPointRadius, vectorBlackPointCenterX, longPointCenterX); });
-}
-
-void DotIndicatorModifier::UpdatePressToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+void DotIndicatorModifier::UpdateHoverToNormalPaintProperty(
+    const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
     const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
 {
     AnimationOption option;
     option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [&]() {
-        this->UpdateNormalPaintProperty(margin, normalPointRadius, vectorBlackPointCenterX, longPointCenterX);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), margin, normalItemHalfSizes, vectorBlackPointCenterX,
+        longPointCenterX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->UpdateNormalPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    });
+}
+
+void DotIndicatorModifier::UpdateNormalToPressPaintProperty(
+    const LinearVector<float>& hoverItemHalfSizes, const LinearVector<float>& vectorBlackPointCenterX,
+    const std::pair<float, float>& longPointCenterX)
+{
+    AnimationOption option;
+    option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), hoverItemHalfSizes, vectorBlackPointCenterX,
+        longPointCenterX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->UpdatePressPaintProperty(hoverItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    });
+}
+
+void DotIndicatorModifier::UpdatePressToNormalPaintProperty(
+    const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
+    const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX)
+{
+    AnimationOption option;
+    option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
+    option.SetCurve(Curves::SHARP);
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), margin, normalItemHalfSizes, vectorBlackPointCenterX,
+        longPointCenterX]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->UpdateNormalPaintProperty(margin, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
     });
 }
 
@@ -283,7 +346,11 @@ void DotIndicatorModifier::UpdateHoverAndPressConversionPaintProperty()
     AnimationOption option;
     option.SetDuration(MOUSE_PRESS_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
-    AnimationUtils::Animate(option, [&]() { this->UpdateBackgroundColor(backgroundColor); });
+    AnimationUtils::Animate(option, [weak = WeakClaim(this), backgroundColor]() {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        modifier->UpdateBackgroundColor(backgroundColor); 
+    });
 }
 
 void DotIndicatorModifier::UpdateNormalToHoverPointDilateRatio()

@@ -101,6 +101,9 @@ private:
     void InitInActiveItems(float translateLength);
     int32_t ClampIndex(int32_t index);
 
+    void PlaceDigitChild(const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty);
+    double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
+
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;
     int32_t startIndex_;

@@ -43,10 +43,12 @@ public:
     void PaintNormalIndicator(const PaintWrapper* paintWrapper);
     void PaintHoverIndicator(const PaintWrapper* paintWrapper);
     void PaintPressIndicator(const PaintWrapper* paintWrapper);
-    void CalculateNormalMargin(float radius, const SizeF& frameSize);
-    void CalculatePointCenterX(float radius, float margin, float padding, float space, int32_t index);
-    void CalculateHoverIndex(float radius);
-    bool isHoverPoint(const PointF& hoverPoint, const OffsetF& leftCenter, const OffsetF& rightCenter, float radius);
+    void CalculateNormalMargin(const LinearVector<float>& itemHalfSizes, const SizeF& frameSize);
+    void CalculatePointCenterX(const LinearVector<float>& itemHalfSizes, float margin,
+        float padding, float space, int32_t index);
+    void CalculateHoverIndex(const LinearVector<float>& itemHalfSizes);
+    bool isHoverPoint(const PointF& hoverPoint, const OffsetF& leftCenter,
+        const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
 
     void SetCurrentIndex(int32_t index)
     {
