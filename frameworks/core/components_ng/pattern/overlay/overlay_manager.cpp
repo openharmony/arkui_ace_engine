@@ -31,17 +31,14 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_dialog_view.h"
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
@@ -456,6 +453,9 @@ void OverlayManager::EraseIndexerPopup(int32_t targetId)
 
 void OverlayManager::RemoveIndexerPopup(RefPtr<FrameNode>& overlayNode)
 {
+    if (customPopupMap_.empty()) {
+        return;
+    }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     for (const auto& popup : customPopupMap_) {
@@ -754,6 +754,7 @@ bool OverlayManager::RemoveOverlay()
         // stage node is at index 0, remove overlay at index 1
         auto overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(overlay, false);
+        RemoveIndexerPopup(overlay);
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (AceType::DynamicCast<DialogPattern>(pattern)) {
@@ -777,8 +778,22 @@ bool OverlayManager::RemoveOverlay()
                 }
             }
             return false;
-        } else {
-            RemoveIndexerPopup(overlay);
+        }
+        if (!modalStack_.empty()) {
+            auto topModalNode = modalStack_.top().Upgrade();
+            CHECK_NULL_RETURN(topModalNode, false);
+            topModalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
+            auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+            CHECK_NULL_RETURN(topModalNode, false);
+            if (builder->GetRenderContext()->HasTransition()) {
+                topModalNode->Clean();
+                topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            } else {
+                rootNode->RemoveChild(topModalNode);
+                rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+            }
+            modalStack_.pop();
+            return true;
         }
         rootNode->RemoveChildAtIndex(1);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -870,6 +885,57 @@ void OverlayManager::BlurOverlayNode()
     CHECK_NULL_VOID(pageFocusHub);
     pageFocusHub->SetParentFocusable(true);
     pageFocusHub->RequestFocus();
+}
+
+void OverlayManager::BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+    std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId)
+{
+    LOGI("BindContentCover isShow: %{public}d, type: %{public}d, targetId: %{public}d", isShow, type, targetId);
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+
+    if (isShow) {
+        if (!modalStack_.empty()) {
+            auto topModalNode = modalStack_.top().Upgrade();
+            CHECK_NULL_VOID(topModalNode);
+            if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() == targetId) {
+                LOGW("current modal is existed.");
+                return;
+            }
+        }
+        // builder content
+        auto builder = AceType::DynamicCast<FrameNode>(buildNodeFunc());
+        CHECK_NULL_VOID(builder);
+        builder->GetRenderContext()->SetIsModalRootNode(true);
+
+        // create modal page
+        auto modalNode = FrameNode::CreateFrameNode("ModalPage", ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<ModalPresentationPattern>(
+                targetId, static_cast<ModalTransition>(type), std::move(callback)));
+        modalStack_.push(WeakClaim(RawPtr(modalNode)));
+        modalNode->MountToParent(rootNode);
+        modalNode->AddChild(builder);
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        return;
+    }
+    if (!modalStack_.empty()) {
+        auto topModalNode = modalStack_.top().Upgrade();
+        CHECK_NULL_VOID(topModalNode);
+        if (topModalNode->GetPattern<ModalPresentationPattern>()->GetTargetId() != targetId) {
+            LOGW("current modal is not existed.");
+            return;
+        }
+        auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
+        CHECK_NULL_VOID(builder);
+        if (builder->GetRenderContext()->HasTransition()) {
+            topModalNode->Clean();
+            topModalNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        } else {
+            rootNode->RemoveChild(topModalNode);
+            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+        }
+        modalStack_.pop();
+    }
 }
 
 } // namespace OHOS::Ace::NG

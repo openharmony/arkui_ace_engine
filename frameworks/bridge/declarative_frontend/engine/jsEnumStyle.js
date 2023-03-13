@@ -1029,6 +1029,13 @@ var TransitionEdge;
     TransitionEdge['END']  = 3;
 })(TransitionEdge || (TransitionEdge = {}));
 
+var ModalTransition;
+(function (ModalTransition) {
+  ModalTransition[ModalTransition["Default"] = 0] = "Default";
+  ModalTransition[ModalTransition["None"] = 1] = "None";
+  ModalTransition[ModalTransition["Alpha"] = 2] = "Alpha";
+})(ModalTransition || (ModalTransition = {}));
+
 var CtrlKey;
 (function (CtrlKey) {
   CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";

@@ -2031,6 +2031,12 @@ void RosenRenderContext::OnTransitionOutFinish()
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
         }
+        if (isModalRootNode_ && parent->GetChildren().empty()) {
+            auto grandParent = parent->GetParent();
+            CHECK_NULL_VOID(grandParent);
+            grandParent->RemoveChild(parent);
+            grandParent->RebuildRenderContextTree();
+        }
     }
 }
 

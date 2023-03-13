@@ -145,6 +145,11 @@ public:
         return false;
     }
 
+    virtual bool HasTransition() const
+    {
+        return false;
+    }
+
     virtual bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish)
     {
         return false;
@@ -211,6 +216,10 @@ public:
         return sharedTransitionOption_ != nullptr;
     }
 
+    void SetIsModalRootNode(bool isModalRootNode)
+    {
+        isModalRootNode_ = isModalRootNode;
+    }
     std::optional<BlurStyleOption> GetBackBlurStyle() const
     {
         return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
@@ -329,6 +338,7 @@ protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     ShareId shareId_;
+    bool isModalRootNode_ = false;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}

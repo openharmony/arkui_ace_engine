@@ -699,6 +699,9 @@ public:
 
     void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
 
+    void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, int32_t type) override;
+
     void SetAccessibilityGroup(bool accessible) override {}
     void SetAccessibilityText(const std::string& text) override {}
     void SetAccessibilityDescription(const std::string& description) override {}
