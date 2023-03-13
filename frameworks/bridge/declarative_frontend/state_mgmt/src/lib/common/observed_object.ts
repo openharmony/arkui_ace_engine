@@ -179,6 +179,39 @@ class SubscribableHandler {
   }
 }
 
+class SubscribableArrayHandler extends SubscribableHandler {
+    // In-place array modification functions
+    private readonly arrFunctions: Array<string> = ["copyWithin", "fill", "reverse", "sort", "splice"];
+    constructor(owningProperty: IPropertySubscriber) {
+      super(owningProperty);
+    }
+  
+    /**
+     * Get trap for Array type proxy
+     * Functions that modify array in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * In general, functions that change the array length or return a new array, don't
+     * need to be intercepted.
+     * @param target Original array
+     * @param property 
+     * @returns 
+     */
+    public get(target: Object, property: PropertyKey): any {
+      let ret = super.get(target, property);
+      if (this.arrFunctions.includes(property.toString()) &&
+          typeof ret === "function" && target["length"] > 0) {
+        const self = this;
+        return function() {
+            // execute original function with given arguments
+            ret.apply(this, arguments);
+            self.notifyObjectPropertyHasChanged(property.toString(), this[0]);
+        }.bind(target) // bind "this" to target inside the function
+      }
+  
+      return ret;
+    }
+}
+
 
 class ExtendableProxy {
   constructor(obj: Object, handler: SubscribableHandler) {
@@ -347,7 +380,8 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     if (ObservedObject.IsObservedObject(obj)) {
       throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
     }
-    let handler = new SubscribableHandler(objectOwningProperty);
+    let handler = Array.isArray(obj) ? new SubscribableArrayHandler(objectOwningProperty)
+                                     : new SubscribableHandler(objectOwningProperty);
     super(obj, handler);
 
     if (ObservedObject.IsObservedObject(obj)) {

@@ -1826,6 +1826,36 @@ SubscribableHandler.IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 SubscribableHandler.RAW_OBJECT = Symbol("_____raw_object__");
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
+class SubscribableArrayHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+        // In-place array modification functions
+        this.arrFunctions = ["copyWithin", "fill", "reverse", "sort", "splice"];
+    }
+    /**
+     * Get trap for Array type proxy
+     * Functions that modify array in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * In general, functions that change the array length or return a new array, don't
+     * need to be intercepted.
+     * @param target Original array
+     * @param property
+     * @returns
+     */
+    get(target, property) {
+        let ret = super.get(target, property);
+        if (this.arrFunctions.includes(property.toString()) &&
+            typeof ret === "function" && target["length"] > 0) {
+            const self = this;
+            return function () {
+                // execute original function with given arguments
+                ret.apply(this, arguments);
+                self.notifyObjectPropertyHasChanged(property.toString(), this[0]);
+            }.bind(target); // bind "this" to target inside the function
+        }
+        return ret;
+    }
+}
 class ExtendableProxy {
     constructor(obj, handler) {
         return new Proxy(obj, handler);
@@ -1978,7 +2008,8 @@ class ObservedObject extends ExtendableProxy {
         if (ObservedObject.IsObservedObject(obj)) {
             throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
         }
-        let handler = new SubscribableHandler(objectOwningProperty);
+        let handler = Array.isArray(obj) ? new SubscribableArrayHandler(objectOwningProperty)
+            : new SubscribableHandler(objectOwningProperty);
         super(obj, handler);
         if (ObservedObject.IsObservedObject(obj)) {
             stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
