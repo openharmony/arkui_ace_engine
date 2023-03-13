@@ -102,7 +102,7 @@ void RosenRenderContext::OnNodeAppear()
 {
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
     // to calculate the pivot, so just mark need to perform appearing transition.
-    if (!propTransitionDisappearing_ && !transitionEffect_) {
+    if (!propTransitionAppearing_ && !transitionEffect_) {
         return;
     }
     firstTransitionIn_ = true;
