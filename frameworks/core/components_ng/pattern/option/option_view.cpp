@@ -57,8 +57,9 @@ RefPtr<FrameNode> Create(int32_t index)
     props->UpdatePress(false);
     return node;
 }
+} // namespace
 
-RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent)
+RefPtr<FrameNode> OptionView::CreateText(const std::string& value, const RefPtr<FrameNode>& parent)
 {
     // create child text node
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -86,7 +87,7 @@ RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& 
     return textNode;
 }
 
-RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
+RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent)
 {
     auto iconNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -115,7 +116,6 @@ RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& p
     iconNode->MarkModifyDone();
     return iconNode;
 }
-} // namespace
 
 RefPtr<FrameNode> OptionView::CreateMenuOption(
     const std::string& value, std::function<void()>&& onClickFunc, int32_t index, const std::string& icon)
@@ -123,17 +123,18 @@ RefPtr<FrameNode> OptionView::CreateMenuOption(
     auto option = Create(index);
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto pattern = option->GetPattern<OptionPattern>();
+    CHECK_NULL_RETURN(pattern, option);
+
     if (!icon.empty()) {
-        (void)CreateIcon(icon, row);
+        auto iconNode = CreateIcon(icon, row);
+        pattern->SetIconNode(iconNode);
+        pattern->SetIcon(icon);
     }
     auto textNode = CreateText(value, row);
     row->MountToParent(option);
     row->MarkModifyDone();
-
-    auto pattern = option->GetPattern<OptionPattern>();
-    CHECK_NULL_RETURN(pattern, option);
     pattern->SetTextNode(textNode);
-    pattern->SetIcon(icon);
 
     auto eventHub = option->GetEventHub<OptionEventHub>();
     CHECK_NULL_RETURN(eventHub, nullptr);
@@ -149,16 +150,17 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     row->MountToParent(option);
 
+    auto pattern = option->GetPattern<OptionPattern>();
+    CHECK_NULL_RETURN(pattern, option);
     // create icon node
     if (!icon.empty()) {
-        CreateIcon(icon, row);
+        auto iconNode = CreateIcon(icon, row);
+        pattern->SetIconNode(iconNode);
+        pattern->SetIcon(icon);
     }
 
     auto text = CreateText(value, row);
-    auto pattern = option->GetPattern<OptionPattern>();
     pattern->SetTextNode(text);
-    pattern->SetIcon(icon);
-
     return option;
 }
 

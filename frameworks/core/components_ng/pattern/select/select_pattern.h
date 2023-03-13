@@ -70,6 +70,11 @@ public:
         menu_ = menu;
     }
 
+    const RefPtr<FrameNode> GetMenuNode()
+    {
+        return menu_;
+    }
+
     void SetSelectSize(const SizeF& selectSize)
     {
         selectSize_ = selectSize;

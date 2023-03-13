@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,11 @@ public:
         text_ = text;
     }
 
+    void SetIconNode(const RefPtr<FrameNode>& icon)
+    {
+        icon_ = icon;
+    }
+
     void SetBgColor(const Color& color);
     // set font props
     void SetFontSize(const Dimension& value);
@@ -127,6 +132,9 @@ public:
 
     void PlayBgColorAnimation(bool isHoverChange = true);
 
+    void UpdateText(const std::string& content);
+    void UpdateIcon(const std::string& src);
+
 private:
     void OnModifyDone() override;
 
@@ -148,9 +156,10 @@ private:
 
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
-    RefPtr<FrameNode> text_ = nullptr;
-    RefPtr<TextTheme> textTheme_ = nullptr;
-    RefPtr<SelectTheme> selectTheme_ = nullptr;
+    RefPtr<FrameNode> text_;
+    RefPtr<FrameNode> icon_;
+    RefPtr<TextTheme> textTheme_;
+    RefPtr<SelectTheme> selectTheme_;
     // this option node's index in the menu
     int index_ = -1;
 
