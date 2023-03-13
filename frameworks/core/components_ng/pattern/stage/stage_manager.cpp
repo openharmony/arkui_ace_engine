@@ -395,6 +395,7 @@ RefPtr<FrameNode> StageManager::GetLastPage()
 
 void StageManager::ReloadStage()
 {
+    CHECK_NULL_VOID(stageNode_);
     const auto& children = stageNode_->GetChildren();
     for (const auto& child : children) {
         auto frameNode = DynamicCast<FrameNode>(child);
