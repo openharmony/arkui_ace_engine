@@ -104,10 +104,24 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
 void SlidingPanelPattern::Update()
 {
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
-    mode_ = layoutProperty->GetPanelMode() == PanelMode::AUTO
-                ? PanelMode::FULL
-                : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     type_ = layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
+    if (!mode_.has_value()) {
+        mode_ = layoutProperty->GetPanelMode() == PanelMode::AUTO
+                    ? PanelMode::FULL
+                    : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
+        return;
+    }
+    auto mode = layoutProperty->GetPanelMode() == PanelMode::AUTO
+                    ? PanelMode::FULL
+                    : layoutProperty->GetPanelMode().value_or(PanelMode::HALF);
+    if (mode_.value() != mode) {
+        mode_ = mode;
+        CheckPanelModeAndType();
+        AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
+        if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
+            FireSizeChangeEvent();
+        }
+    }
 }
 
 void SlidingPanelPattern::InitializeLayoutProps()
@@ -162,8 +176,8 @@ void SlidingPanelPattern::FirstLayout()
     if (layoutProperty->GetIsShowValue(false) == true) {
         CheckPanelModeAndType();
         UpdateCurrentOffset(maxSize.Height());
-        AnimateTo(defaultBlankHeights_[mode_], mode_);
-        if (previousMode_ != mode_) {
+        AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
+        if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
             FireSizeChangeEvent();
         }
         isShow_ = true;
@@ -172,7 +186,7 @@ void SlidingPanelPattern::FirstLayout()
             CHECK_NULL_VOID(dragBar);
             auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
             CHECK_NULL_VOID(dragBarPattern);
-            dragBarPattern->ShowInPanelMode(mode_);
+            dragBarPattern->ShowInPanelMode(mode_.value_or(PanelMode::HALF));
         }
         return;
     }
@@ -194,8 +208,8 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
     if (isShow) {
         isShow_ = true;
         CheckPanelModeAndType();
-        AnimateTo(defaultBlankHeights_[mode_], mode_);
-        if (previousMode_ != mode_) {
+        AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
+        if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
             FireSizeChangeEvent();
         }
         if (hasDragBar) {
@@ -203,20 +217,20 @@ void SlidingPanelPattern::IsShowChanged(bool isShow)
             CHECK_NULL_VOID(dragBar);
             auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
             CHECK_NULL_VOID(dragBarPattern);
-            dragBarPattern->ShowInPanelMode(mode_);
+            dragBarPattern->ShowInPanelMode(mode_.value_or(PanelMode::HALF));
         }
         return;
     }
     isShow_ = false;
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto paintRectOffset = host->GetPaintRectOffset().GetY();
-    AnimateTo(rootHeight - paintRectOffset, mode_);
+    AnimateTo(rootHeight - paintRectOffset, mode_.value_or(PanelMode::HALF));
     if (hasDragBar) {
         auto dragBar = GetDragBarNode();
         CHECK_NULL_VOID(dragBar);
         auto dragBarPattern = dragBar->GetPattern<DragBarPattern>();
         CHECK_NULL_VOID(dragBarPattern);
-        dragBarPattern->ShowInPanelMode(mode_);
+        dragBarPattern->ShowInPanelMode(mode_.value_or(PanelMode::HALF));
     }
 }
 
@@ -261,12 +275,12 @@ void SlidingPanelPattern::CheckHeightValidity()
 void SlidingPanelPattern::CheckPanelModeAndType()
 {
     // This parameter does not take effect when PanelMode is set to Half and PanelType is set to minibar
-    if (mode_ == PanelMode::HALF && type_ == PanelType::MINI_BAR) {
+    if (mode_.value_or(PanelMode::HALF) == PanelMode::HALF && type_ == PanelType::MINI_BAR) {
         mode_ = PanelMode::MINI;
     }
 
     // This parameter does not take effect when PanelMode is set to Mini and PanelType is set to temporary
-    if (mode_ == PanelMode::MINI && type_ == PanelType::TEMP_DISPLAY) {
+    if (mode_.value_or(PanelMode::HALF) == PanelMode::MINI && type_ == PanelType::TEMP_DISPLAY) {
         mode_ = PanelMode::HALF;
     }
 }
@@ -375,10 +389,10 @@ void SlidingPanelPattern::HandleDragEnd(float dragVelocity)
             return;
         }
     }
-    AnimateTo(defaultBlankHeights_[mode_], mode_);
-    if (previousMode_ != mode_) {
+    AnimateTo(defaultBlankHeights_[mode_.value_or(PanelMode::HALF)], mode_.value_or(PanelMode::HALF));
+    if (previousMode_ != mode_.value_or(PanelMode::HALF)) {
         FireSizeChangeEvent();
-        previousMode_ = mode_;
+        previousMode_ = mode_.value_or(PanelMode::HALF);
     }
     isDrag_ = false;
 }
@@ -603,12 +617,13 @@ void SlidingPanelPattern::FireSizeChangeEvent()
         auto dragBar = GetDragBarNode();
         CHECK_NULL_VOID(dragBar);
         auto dragBarFrameSize = dragBar->GetGeometryNode()->GetFrameSize();
-        height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_] - dragBarFrameSize.Height());
+        height = std::floor(
+            frameSize.Height() - defaultBlankHeights_[mode_.value_or(PanelMode::HALF)] - dragBarFrameSize.Height());
     }
-    height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_]);
+    height = std::floor(frameSize.Height() - defaultBlankHeights_[mode_.value_or(PanelMode::HALF)]);
     float width = std::floor(frameSize.Width());
-    slidingPanelEventHub->FireSizeChangeEvent(mode_, width, height);
-    previousMode_ = mode_;
+    slidingPanelEventHub->FireSizeChangeEvent(mode_.value_or(PanelMode::HALF), width, height);
+    previousMode_ = mode_.value_or(PanelMode::HALF);
 }
 
 void SlidingPanelPattern::FireHeightChangeEvent()
@@ -633,16 +648,17 @@ void SlidingPanelPattern::SetDragBarCallBack()
     dragBarPattern->SetClickArrowCallback([weak = WeakClaim(this)]() {
         auto panel = weak.Upgrade();
         CHECK_NULL_VOID(panel);
-        panel->previousMode_ = panel->mode_;
-        if (panel->mode_ == PanelMode::MINI) {
+        panel->previousMode_ = panel->mode_.value_or(PanelMode::HALF);
+        if (panel->mode_.value_or(PanelMode::HALF) == PanelMode::MINI) {
             panel->mode_ = panel->type_ == PanelType::MINI_BAR ? PanelMode::FULL : PanelMode::HALF;
-        } else if (panel->mode_ == PanelMode::FULL) {
+        } else if (panel->mode_.value_or(PanelMode::HALF) == PanelMode::FULL) {
             panel->mode_ = panel->type_ == PanelType::MINI_BAR ? PanelMode::MINI : PanelMode::HALF;
         } else {
             LOGD("not support click in half mode");
         }
-        panel->AnimateTo(panel->defaultBlankHeights_[panel->mode_], panel->mode_);
-        if (panel->previousMode_ != panel->mode_) {
+        panel->AnimateTo(panel->defaultBlankHeights_[panel->mode_.value_or(PanelMode::HALF)],
+            panel->mode_.value_or(PanelMode::HALF));
+        if (panel->previousMode_ != panel->mode_.value_or(PanelMode::HALF)) {
             panel->FireSizeChangeEvent();
         }
     });
