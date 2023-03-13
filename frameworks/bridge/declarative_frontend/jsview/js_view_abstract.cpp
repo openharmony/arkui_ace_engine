@@ -2779,6 +2779,12 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
         return true;
     }
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
+    }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
 }
