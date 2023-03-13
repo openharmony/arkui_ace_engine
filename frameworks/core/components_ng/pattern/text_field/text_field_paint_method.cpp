@@ -66,6 +66,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
     std::string text = textEditingValue.text;
     textFieldContentModifier_->SetTextValue(text);
+    textFieldContentModifier_->SetTextRectY(textFieldPattern->GetTextRect().GetY());
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
@@ -93,6 +94,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetContentOffset(contentOffset);
     SizeF contentSize = paintWrapper->GetContentSize();
     textFieldOverlayModifier_->SetContentSize(contentSize);
+    auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
+    textFieldOverlayModifier_->SetFrameSize(frameSize);
 
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
@@ -100,6 +103,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetCursorVisible(cursorVisible);
     auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
     textFieldOverlayModifier_->SetCursorOffsetX(cursorOffsetX);
+    auto currentOffset = textFieldPattern->GetCurrentOffset();
+    textFieldOverlayModifier_->SetCurrentOffset(currentOffset);
 
     auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);

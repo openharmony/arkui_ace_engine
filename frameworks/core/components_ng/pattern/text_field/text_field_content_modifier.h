@@ -43,6 +43,7 @@ public:
     void SetContentOffset(OffsetF& value);
     void SetContentSize(SizeF& value);
     void SetTextValue(std::string& value);
+    void SetTextRectY(const float value);
     void SetTextObscured(bool value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
 
@@ -51,6 +52,7 @@ private:
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
+    void SetDefaultPropertyValue();
 
 private:
     WeakPtr<Pattern> pattern_;
@@ -63,6 +65,7 @@ private:
     std::optional<Color> textColor_;
     RefPtr<AnimatablePropertyColor> animatableTextColor_;
 
+    RefPtr<PropertyFloat> textRectY_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyString> textValue_;
