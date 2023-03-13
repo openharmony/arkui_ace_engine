@@ -56,6 +56,7 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/digit_indicator/digit_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.cpp",

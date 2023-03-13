@@ -25,39 +25,38 @@
 namespace OHOS::Ace::NG {
 class DotIndicatorModifier : public ContentModifier {
     DECLARE_ACE_TYPE(DotIndicatorModifier, ContentModifier);
-
 public:
     DotIndicatorModifier()
         : backgroundColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
           vectorBlackPointCenterX_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(0))),
           longPointLeftCenterX_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           longPointRightCenterX_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          pointRadius_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           normalToHoverPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           hoverToNormalPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           longPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
-          indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0)))
+          indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
+          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4)))
     {
         AttachProperty(vectorBlackPointCenterX_);
         AttachProperty(longPointLeftCenterX_);
         AttachProperty(longPointRightCenterX_);
-        AttachProperty(pointRadius_);
         AttachProperty(normalToHoverPointDilateRatio_);
         AttachProperty(hoverToNormalPointDilateRatio_);
         AttachProperty(longPointDilateRatio_);
         AttachProperty(backgroundColor_);
         AttachProperty(indicatorPadding_);
         AttachProperty(indicatorMargin_);
+        AttachProperty(itemHalfSizes_);
     }
     ~DotIndicatorModifier() override = default;
 
     struct ContentProperty {
         Color backgroundColor = Color::TRANSPARENT;
         LinearVector<float> vectorBlackPointCenterX;
+        LinearVector<float> itemHalfSizes = {};
         float longPointLeftCenterX = 0;
         float longPointRightCenterX = 0;
-        float pointRadius = 0;
         float normalToHoverPointDilateRatio = 1;
         float hoverToNormalPointDilateRatio = 1;
         float longPointDilateRatio = 0;
@@ -68,32 +67,33 @@ public:
     void onDraw(DrawingContext& context) override;
     // paint
     void PaintContent(DrawingContext& context, ContentProperty& contentProperty);
-    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, float radius);
-    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter, float radius);
+    void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center, const LinearVector<float>& itemHalfSizes);
+    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
+        const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
-    float GetRadius(size_t index, ContentProperty& contentProperty);
+    LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
     // Update property
-    void UpdateShrinkPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+    void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
-    void UpdateDilatePaintProperty(const float& hoverPointRadius, const LinearVector<float>& vectorBlackPointCenterX,
-        const std::pair<float, float>& longPointCenterX);
+    void UpdateDilatePaintProperty(const LinearVector<float>& hoverItemHalfSizes,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateBackgroundColor(const Color& backgroundColor);
 
-    void UpdateNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+    void UpdateNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
-    void UpdateHoverPaintProperty(const float& hoverPointRadius, const LinearVector<float>& vectorBlackPointCenterX,
-        const std::pair<float, float>& longPointCenterX);
-    void UpdatePressPaintProperty(const float& hoverPointRadius, const LinearVector<float>& vectorBlackPointCenterX,
-        const std::pair<float, float>& longPointCenterX);
+    void UpdateHoverPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
+    void UpdatePressPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
+        const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     // Update
-    void UpdateNormalToHoverPaintProperty(const float& hoverPointRadius,
+    void UpdateNormalToHoverPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
-    void UpdateHoverToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+    void UpdateHoverToNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
-    void UpdateNormalToPressPaintProperty(const float& hoverPointRadius,
+    void UpdateNormalToPressPaintProperty(const LinearVector<float>& hoverItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
-    void UpdatePressToNormalPaintProperty(const OffsetF& margin, const float& normalPointRadius,
+    void UpdatePressToNormalPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
     void UpdateHoverAndPressConversionPaintProperty();
 
@@ -121,6 +121,11 @@ public:
     void SetSelectedColor(const Color& selectedColor)
     {
         selectedColor_ = selectedColor;
+    }
+
+    void SetCurrentIndex(int32_t index)
+    {
+        currentIndex_ = index;
     }
 
     void SetNormalToHoverIndex(const std::optional<int32_t>& normalToHoverIndex)
@@ -188,6 +193,26 @@ public:
         return longPointIsHover_;
     }
 
+    void SetItemWidth(const float itemWidth)
+    {
+        itemWidth_ = itemWidth;
+    }
+
+    void SetItemHeight(const float itemHeight)
+    {
+        itemHeight_ = itemHeight;
+    }
+
+    void SetSelectedItemWidth(const float selectedItemWidth)
+    {
+        selectedItemWidth_ = selectedItemWidth;
+    }
+
+    void SetSelectedItemHeight(const float selectedItemHeight)
+    {
+        selectedItemHeight_ = selectedItemHeight;
+    }
+
 private:
     static RefPtr<OHOS::Ace::SwiperIndicatorTheme> GetSwiperIndicatorTheme()
     {
@@ -202,12 +227,12 @@ private:
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
     RefPtr<AnimatablePropertyFloat> longPointLeftCenterX_;
     RefPtr<AnimatablePropertyFloat> longPointRightCenterX_;
-    RefPtr<AnimatablePropertyFloat> pointRadius_;
     RefPtr<AnimatablePropertyFloat> normalToHoverPointDilateRatio_;
     RefPtr<AnimatablePropertyFloat> hoverToNormalPointDilateRatio_;
     RefPtr<AnimatablePropertyFloat> longPointDilateRatio_;
     RefPtr<AnimatablePropertyFloat> indicatorPadding_;
     RefPtr<AnimatablePropertyOffsetF> indicatorMargin_;
+    RefPtr<AnimatablePropertyVectorFloat> itemHalfSizes_;
 
     float centerY_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
@@ -220,7 +245,12 @@ private:
     bool isPressed_ = false;
 
     bool indicatorMask_ = false;
+    int32_t currentIndex_ = 0;
     OffsetF offset_;
+    float itemWidth_ = 0.0f;
+    float itemHeight_ = 0.0f;
+    float selectedItemWidth_ = 0.0f;
+    float selectedItemHeight_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };
 } // namespace OHOS::Ace::NG
