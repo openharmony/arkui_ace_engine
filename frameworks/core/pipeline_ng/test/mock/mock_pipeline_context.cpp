@@ -79,7 +79,10 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action) 
 
 void PipelineContext::OnIdle(int64_t deadline) {}
 
-void PipelineContext::Destroy() {}
+void PipelineContext::Destroy()
+{
+    pipelineContext = nullptr;
+}
 
 void PipelineContext::OnShow() {}
 
@@ -224,6 +227,7 @@ const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
     }
     return overlayManager_;
 }
+
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::FlushPipelineImmediately() {}

@@ -231,9 +231,9 @@ inline ImageRepeat ConvertStrToImageRepeat(const std::string& repeat)
     return index < 0 ? ImageRepeat::NO_REPEAT : imageRepeatTable[index].value;
 }
 
-inline FontWeight ConvertStrToFontWeight(const std::string& weight)
+inline FontWeight ConvertStrToFontWeight(const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
-    return StringUtils::StringToFontWeight(weight);
+    return StringUtils::StringToFontWeight(weight, defaultFontWeight);
 }
 
 inline TextDecoration ConvertStrToTextDecoration(const std::string& textDecoration)

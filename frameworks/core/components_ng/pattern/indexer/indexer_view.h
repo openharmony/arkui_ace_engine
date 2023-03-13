@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,6 @@
 #include "core/components_v2/indexer/indexer_component.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -43,6 +42,12 @@ public:
     static void SetOnSelected(OnSelectedEvent&& onSelected);
     static void SetOnRequestPopupData(OnRequestPopupDataEvent&& onRequestPopupData);
     static void SetOnPopupSelected(OnPopupSelectedEvent&& onPopupSelectedEvent);
+    static void SetPopupSelectedColor(const std::optional<Color>& popupSelectedColor);
+    static void SetPopupUnselectedColor(const std::optional<Color>& popupUnselectedColor);
+    static void SetFontSize(const Dimension& fontSize);
+    static void SetFontWeight(FontWeight weight);
+    static void SetPopupItemBackground(const std::optional<Color>& popupItemBackground);
+    static void SetPopupHorizontalSpace(const Dimension& popupHorizontalSpace);
 };
 
 } // namespace OHOS::Ace::NG
