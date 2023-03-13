@@ -697,6 +697,7 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     bool setSelectionFlag_ = false;
+    bool setSelectAllFlag_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;
 
