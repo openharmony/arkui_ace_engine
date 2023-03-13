@@ -32,6 +32,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
@@ -41,6 +42,7 @@ namespace OHOS::Ace::NG {
 class BorderImageModifier;
 class DebugBoundaryModifier;
 class MouseSelectModifier;
+class MoonProgressModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
@@ -85,9 +87,6 @@ public:
 
     void ClearFocusState() override;
 
-    RefPtr<Canvas> GetCanvas() override;
-    void Restore() override;
-
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
@@ -95,14 +94,6 @@ public:
     void StartRecording() override;
 
     void StopRecordingIfNeeded() override;
-
-    bool IsRecording()
-    {
-        return !!recordingCanvas_;
-    }
-
-    void StartPictureRecording(float x, float y, float width, float height);
-    sk_sp<SkPicture> FinishRecordingAsPicture();
 
     void SetDrawContentAtLast(bool useDrawContentLastOrder) override
     {
@@ -249,6 +240,8 @@ private:
     void OnClipEdgeUpdate(bool isClip) override;
     void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
+    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) override;
+
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
     void OnRadialGradientUpdate(const NG::Gradient& value) override;
@@ -285,6 +278,7 @@ private:
 
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
+    void PaintProgressMask();
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
     void PaintOverlayText();
@@ -328,9 +322,6 @@ private:
     RefPtr<CanvasImage> bdImage_;
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
-    SkPictureRecorder* recorder_ = nullptr;
-    RefPtr<Canvas> recordingCanvas_;
-    RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
@@ -346,6 +337,7 @@ private:
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
+    std::shared_ptr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;

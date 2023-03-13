@@ -49,17 +49,15 @@
 #include "core/components_ng/render/adapter/debug_boundary_modifier.h"
 #include "core/components_ng/render/adapter/focus_state_modifier.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
+#include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/mouse_select_modifier.h"
 #include "core/components_ng/render/adapter/overlay_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
-#include "core/components_ng/render/adapter/skia_canvas.h"
-#include "core/components_ng/render/adapter/skia_canvas_image.h"
 #include "core/components_ng/render/adapter/skia_decoration_painter.h"
 #include "core/components_ng/render/adapter/skia_image.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/border_image_painter.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
@@ -89,28 +87,14 @@ void RosenRenderContext::StartRecording()
     CHECK_NULL_VOID(rsNode_);
     auto rsCanvasNode = rsNode_->ReinterpretCastTo<Rosen::RSCanvasNode>();
     CHECK_NULL_VOID_NOLOG(rsCanvasNode);
-    rosenCanvas_ = Canvas::Create(
-        rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()), ceil(rsCanvasNode->GetPaintHeight())));
-}
-
-void RosenRenderContext::StartPictureRecording(float x, float y, float width, float height)
-{
-    recorder_ = new SkPictureRecorder();
-    recordingCanvas_ = Canvas::Create(recorder_->beginRecording(SkRect::MakeXYWH(x, y, width, height)));
+    rsCanvasNode->BeginRecording(ceil(rsCanvasNode->GetPaintWidth()), ceil(rsCanvasNode->GetPaintHeight()));
 }
 
 void RosenRenderContext::StopRecordingIfNeeded()
 {
     auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
-    if (rosenCanvas_ && rsCanvasNode) {
+    if (rsCanvasNode) {
         rsCanvasNode->FinishRecording();
-        rosenCanvas_ = nullptr;
-    }
-
-    if (IsRecording()) {
-        delete recorder_;
-        recorder_ = nullptr;
-        recordingCanvas_.Reset();
     }
 }
 
@@ -502,6 +486,8 @@ void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
     if (!RectIsNull()) {
         float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
         float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
+        float zPivot = ConvertDimensionToScaleBySize(center.GetZ(), rect.Width());
+        rsNode_->SetCameraDistance(zPivot);
         SetPivot(xPivot, yPivot);
     }
     RequestNextFrame();
@@ -1155,28 +1141,9 @@ void RosenRenderContext::FlushOverlayModifier(const RefPtr<Modifier>& modifier)
     modifierAdapter->AttachProperties();
 }
 
-RefPtr<Canvas> RosenRenderContext::GetCanvas()
-{
-    // if picture recording, return recording canvas
-    return recordingCanvas_ ? recordingCanvas_ : rosenCanvas_;
-}
-
 const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
 {
     return rsNode_;
-}
-
-sk_sp<SkPicture> RosenRenderContext::FinishRecordingAsPicture()
-{
-    CHECK_NULL_RETURN_NOLOG(recorder_, nullptr);
-    return recorder_->finishRecordingAsPicture();
-}
-
-void RosenRenderContext::Restore()
-{
-    const auto& canvas = GetCanvas();
-    CHECK_NULL_VOID(canvas);
-    canvas->Restore();
 }
 
 void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
@@ -1620,11 +1587,27 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
     }
 }
 
+void RosenRenderContext::PaintProgressMask()
+{
+    if (!moonProgressModifier_) {
+        moonProgressModifier_ = std::make_shared<MoonProgressModifier>();
+        rsNode_->AddModifier(moonProgressModifier_);
+    }
+    auto prgress = GetProgressMaskValue();
+    moonProgressModifier_->InitRatio();
+    moonProgressModifier_->SetMaskColor(LinearColor(prgress->GetColor()));
+    moonProgressModifier_->SetMaxValue(prgress->GetMaxValue());
+    if (prgress->GetValue() > moonProgressModifier_->GetMaxValue()) {
+        prgress->SetValue(moonProgressModifier_->GetMaxValue());
+    }
+    moonProgressModifier_->SetValue(prgress->GetValue());
+}
+
 void RosenRenderContext::SetClipBoundsWithCommands(const std::string& commands)
 {
     CHECK_NULL_VOID(rsNode_);
     SkPath skPath;
-    SkParsePath::FromSVGString(commands.c_str(),&skPath);
+    SkParsePath::FromSVGString(commands.c_str(), &skPath);
     rsNode_->SetClipBounds(Rosen::RSPath::CreateRSPath(skPath));
 }
 
@@ -1648,7 +1631,15 @@ void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShap
 void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetClipToBounds(isClip);
+    if (isClip) {
+        rsNode_->SetClipToBounds(true);
+    } else {
+        // In the internal implementation, some nodes call SetClipToBounds(true), some call SetClipToFrame(true).
+        // If the developer set clip to false, we should disable all internal clips
+        // so that the child component can go beyond the parent component
+        rsNode_->SetClipToBounds(false);
+        rsNode_->SetClipToFrame(false);
+    }
     RequestNextFrame();
 }
 
@@ -1658,6 +1649,14 @@ void RosenRenderContext::OnClipMaskUpdate(const RefPtr<BasicShape>& /*basicShape
     if (!RectIsNull()) {
         PaintClip(SizeF(rect.Width(), rect.Height()));
     }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress)
+{
+    PaintProgressMask();
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetClipToBounds(true);
     RequestNextFrame();
 }
 
@@ -1812,7 +1811,7 @@ void RosenRenderContext::OnMotionPathUpdate(const MotionPathOption& motionPath)
     motionOption.SetEndFraction(motionPath.GetEnd());
     motionOption.SetRotationMode(
         motionPath.GetRotate() ? Rosen::RotationMode::ROTATE_AUTO : Rosen::RotationMode::ROTATE_NONE);
-    motionOption.SetPathNeedAddOrigin(true);
+    motionOption.SetPathNeedAddOrigin(HasOffset());
     rsNode_->SetMotionPathOption(std::make_shared<Rosen::RSMotionPathOption>(motionOption));
     RequestNextFrame();
 }

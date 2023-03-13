@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -204,8 +204,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
     }
-    HandleVisibleAreaChangeEvent();
     HandleOnAreaChangeEvent();
+    HandleVisibleAreaChangeEvent();
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -641,6 +641,11 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldManager && textfieldManager->OnBackPressed()) {
+        return true;
+    }
+
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
@@ -981,6 +986,11 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
+    eventManager_->SetPressedKeyCodes(event.pressedCodes);
+    CHECK_NULL_RETURN(eventManager_, false);
+    if (event.action == KeyAction::DOWN) {
+        eventManager_->DispatchKeyboardShortcut(event);
+    }
     // Need update while key tab pressed
     if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
         (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
@@ -1084,14 +1094,11 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
-    // Need develop here: CTRL+AXIS = Pinch event
-
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), horizontalAxis: %{public}f, verticalAxis: %{public}f, action: "
-         "%{public}d",
-        scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
-
-    // Need update here: zoom(ctrl+axis) event
+    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), action: %{public}d, horizontalAxis: %{public}f, verticalAxis: "
+         "%{public}f, pinchAxisScale: %{public}f",
+        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.horizontalAxis, scaleEvent.verticalAxis,
+        scaleEvent.pinchAxisScale);
 
     if (event.action == AxisAction::BEGIN) {
         TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -1297,6 +1304,7 @@ void PipelineContext::FlushReload()
     AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
+        CHECK_NULL_VOID(pipeline->stageManager_);
         pipeline->stageManager_->ReloadStage();
         pipeline->FlushUITasks();
     });

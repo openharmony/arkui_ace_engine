@@ -59,8 +59,10 @@
 #endif
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace {
 
@@ -207,8 +209,7 @@ void GetDefaultRotateVector(double& dx, double& dy, double& dz)
     }
 }
 
-void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy, float& dz, Dimension& centerX,
-    Dimension& centerY, std::optional<float>& angle)
+void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& rotate, std::optional<float>& angle)
 {
     // default: dx, dy, dz (0.0, 0.0, 0.0)
     double dxVal = 0.0;
@@ -220,17 +221,20 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), dxVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), dyVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), dzVal);
-    dx = static_cast<float>(dxVal);
-    dy = static_cast<float>(dyVal);
-    dz = static_cast<float>(dzVal);
+    rotate.xDirection = static_cast<float>(dxVal);
+    rotate.yDirection = static_cast<float>(dyVal);
+    rotate.zDirection = static_cast<float>(dzVal);
     // if specify centerX
     Dimension length;
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
-        centerX = length;
+        rotate.centerX = length;
     }
     // if specify centerY
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
-        centerY = length;
+        rotate.centerY = length;
+    }
+    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
+        rotate.centerZ = length;
     }
     // if specify angle
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
@@ -369,8 +373,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedRotateTransition(
         }
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(
-            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
+        ParseJsRotate(rotateArgs, rotate, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             return AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
@@ -896,7 +899,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             Dimension centerY = 0.5_pct;
             ParseJsScale(argsPtrItem, scaleX, scaleY, scaleZ, centerX, centerY);
             ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
-            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY);
+            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
             return;
         }
     }
@@ -1031,17 +1034,13 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return;
         }
-        float dx = 0.0f;
-        float dy = 0.0f;
-        float dz = 0.0f;
-        // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
+        ParseJsRotate(argsPtrItem, rotate, angle);
         if (angle) {
-            ViewAbstractModel::GetInstance()->SetRotate(dx, dy, dz, angle.value());
-            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY);
+            ViewAbstractModel::GetInstance()->SetRotate(
+                rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value());
+            ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
         } else {
             LOGE("Js JsRotate failed, not specify angle");
         }
@@ -1146,8 +1145,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
         // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(
-            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
+        ParseJsRotate(rotateArgs, rotate, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             transitionOption.UpdateRotate(rotate);
@@ -1829,15 +1827,17 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsBackgroundBlurStyle", info, checkList)) {
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have at least 1 argument");
         return;
     }
     BlurStyleOption styleOption;
-    auto blurStyle = info[0]->ToNumber<int32_t>();
-    if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
-        blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
-        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
@@ -2957,7 +2957,7 @@ bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, Foregroun
     }
     if (jsValue->IsString()) {
         std::string colorStr = jsValue->ToString();
-         // Remove all " ".
+        // Remove all " ".
         colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
         std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
         if (colorStr.compare("invert") == 0) {
@@ -4165,7 +4165,41 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsObject()) {
+    if (info.Length() <= 0) {
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> typeParam = paramObject->GetProperty("type");
+    if (!typeParam->IsNull()) {
+        if (typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
+            auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+            JSRef<JSVal> jValue = paramObject->GetProperty("value");
+            auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+            if (value < 0.0f) {
+                value = 0.0f;
+            }
+            progressMask->SetValue(value);
+            JSRef<JSVal> jTotal = paramObject->GetProperty("total");
+            auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+            if (total < 0.0f) {
+                total = DEFAULT_PROGRESS_TOTAL;
+            }
+            progressMask->SetMaxValue(total);
+            JSRef<JSVal> jColor = paramObject->GetProperty("color");
+            Color colorVal;
+            if (ParseJsColor(jColor, colorVal)) {
+                progressMask->SetColor(colorVal);
+            } else {
+                RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+                progressMask->SetColor(theme->GetMaskColor());
+            }
+            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+        }
+    } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
             return;
@@ -4544,6 +4578,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
+    JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
@@ -5097,6 +5132,31 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
+void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
+{
+    if (info.Length() != 2) {
+        LOGE("JsKeyboardShortcut: The arg is wrong, it is supposed to have 2 arguments");
+        return;
+    }
+    if (!info[0]->IsString() || !info[1]->IsArray()) {
+        LOGE("JsKeyboardShortcut: The param type is invalid.");
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>());
+        return;
+    }
+    std::string value = info[0]->ToString();
+    auto keysArray = JSRef<JSArray>::Cast(info[1]);
+    size_t size = keysArray->Length();
+    std::vector<CtrlKey> keys(size);
+    keys.clear();
+    for (size_t i = 0; i < size; i++) {
+        JSRef<JSVal> key = keysArray->GetValueAt(i);
+        if (key->IsNumber()) {
+            keys.emplace_back(static_cast<CtrlKey>(key->ToNumber<int32_t>()));
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys);
 }
 
 } // namespace OHOS::Ace::Framework

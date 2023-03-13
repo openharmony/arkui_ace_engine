@@ -29,10 +29,10 @@
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
 #include "core/pipeline/base/constants.h"
@@ -132,10 +132,6 @@ public:
     virtual void MarkDrivenRender(bool flag) {}
     virtual void MarkDrivenRenderItemIndex(int32_t index) {}
     virtual void MarkDrivenRenderFramePaintState(bool flag) {}
-
-    virtual RefPtr<Canvas> GetCanvas() = 0;
-
-    virtual void Restore() = 0;
 
     virtual void AnimateHoverEffectScale(bool isHovered) {}
     virtual void AnimateHoverEffectBoard(bool isHovered) {}
@@ -309,6 +305,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipEdge, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Clip, ClipMask, RefPtr<BasicShape>);
 
+    // ProgressMask
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ProgressMask, RefPtr<ProgressMaskProperty>);
+
     // Gradient
     ACE_DEFINE_PROPERTY_GROUP(Gradient, GradientProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Gradient, LinearGradient, NG::Gradient);
@@ -360,6 +359,8 @@ protected:
     virtual void OnClipShapeUpdate(const RefPtr<BasicShape>& basicShape) {}
     virtual void OnClipEdgeUpdate(bool isClip) {}
     virtual void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) {}
+
+    virtual void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) {}
 
     virtual void OnLinearGradientUpdate(const NG::Gradient& value) {}
     virtual void OnSweepGradientUpdate(const NG::Gradient& value) {}

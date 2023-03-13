@@ -50,6 +50,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t TOTAL_NUMBER = 1000;
+}
 void IndexerPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -162,12 +165,7 @@ void IndexerPattern::OnHover(bool isHover)
 void IndexerPattern::OnChildHover(int32_t index, bool isHover)
 {
     childHoverIndex_ = isHover ? index : -1;
-    auto refreshBubble = false;
-    if (selected_ != childFocusIndex_) {
-        selected_ = childFocusIndex_;
-        refreshBubble = true;
-    }
-    ApplyIndexChanged(refreshBubble);
+    ApplyIndexChanged(childHoverIndex_ >= 0);
 }
 
 void IndexerPattern::InitInputEvent()
@@ -225,11 +223,9 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     }
     auto nextSelectIndex = GetSelectChildIndex(info.GetTouches().front().GetLocalLocation());
     auto refreshBubble = false;
-    if (nextSelectIndex != selected_) {
-        selected_ = nextSelectIndex;
-        refreshBubble = true;
-        ResetStatus();
-    }
+    selected_ = nextSelectIndex;
+    refreshBubble = true;
+    ResetStatus();
     ApplyIndexChanged(refreshBubble, true);
     OnSelect(refreshBubble);
 }
@@ -251,14 +247,9 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
     if (isHover_ && childPressIndex_ >= 0) {
         IndexerPressInAnimation();
     }
-    auto refreshBubble = false;
-    if (selected_ != childPressIndex_) {
-        selected_ = childPressIndex_;
-        refreshBubble = true;
-    }
     childFocusIndex_ = -1;
     childHoverIndex_ = -1;
-    ApplyIndexChanged(refreshBubble);
+    ApplyIndexChanged(true);
 }
 
 int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
@@ -379,22 +370,18 @@ void IndexerPattern::OnSelect(bool changed)
     if (onSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
         onSelected(selected_);
     }
-    if (changed) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        animateSelected_ = selected_;
-        if (animateSelected_ >= 0) {
-            auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
-            CHECK_NULL_VOID(selectedFrameNode);
-            ItemSelectedInAnimation(selectedFrameNode);
-        }
-        if (lastSelected_ >= 0) {
-            auto lastFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(lastSelected_));
-            CHECK_NULL_VOID(lastFrameNode);
-            ItemSelectedOutAnimation(lastFrameNode);
-        }
-        lastSelected_ = selected_;
+    animateSelected_ = selected_;
+    if (animateSelected_ >= 0) {
+        auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
+        CHECK_NULL_VOID(selectedFrameNode);
+        ItemSelectedInAnimation(selectedFrameNode);
     }
+    if (lastSelected_ >= 0 && lastSelected_ != animateSelected_) {
+        auto lastFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(lastSelected_));
+        CHECK_NULL_VOID(lastFrameNode);
+        ItemSelectedOutAnimation(lastFrameNode);
+    }
+    lastSelected_ = selected_;
 }
 
 void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
@@ -498,7 +485,6 @@ void IndexerPattern::ShowBubble()
     if (!popupNode_) {
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
-        UpdateBubbleView();
         UpdatePopupOpacity(0.0f);
         overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     }
@@ -747,12 +733,14 @@ void IndexerPattern::AddListItemClickListener(RefPtr<FrameNode>& listItemNode, i
     CHECK_NULL_VOID(listItemNode);
     auto gestureHub = listItemNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto clickEventFunc = [weak = WeakClaim(this), index](GestureEvent& gestureEvent) {
+    auto touchCallback = [weak = WeakClaim(this), index](const TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
-        indexerPattern->OnListItemClick(index);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            indexerPattern->OnListItemClick(index);
+        }
     };
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchCallback)));
 }
 
 void IndexerPattern::OnListItemClick(int32_t index)
@@ -770,7 +758,9 @@ void IndexerPattern::OnListItemClick(int32_t index)
 
 void IndexerPattern::OnPopupTouchDown(const TouchEventInfo& info)
 {
-    StartBubbleAppearAnimation();
+    if (NeedShowPopupView()) {
+        StartBubbleAppearAnimation();
+    }
 }
 
 bool IndexerPattern::NeedShowBubble()
@@ -954,13 +944,23 @@ void IndexerPattern::IndexerPressOutAnimation()
 
 void IndexerPattern::StartBubbleAppearAnimation()
 {
+    animationId_ = GenerateAnimationId();
+    UpdatePopupVisibility(VisibleType::VISIBLE);
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     option.SetDuration(INDEXER_BUBBLE_APPEAR_DURATION);
     auto startTimeRatio = 1.0f * INDEXER_BUBBLE_ENTER_DURATION / INDEXER_BUBBLE_APPEAR_DURATION;
     auto middleTimeRatio =
         1.0f * (INDEXER_BUBBLE_WAIT_DURATION + INDEXER_BUBBLE_ENTER_DURATION) / INDEXER_BUBBLE_APPEAR_DURATION;
-    AnimationUtils::OpenImplicitAnimation(option, Curves::SHARP, nullptr);
+    AnimationUtils::OpenImplicitAnimation(option, Curves::SHARP,
+        [id = Container::CurrentId(), weak = AceType::WeakClaim(this), animationId = animationId_]() {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->animationId_ == animationId) {
+                pattern->UpdatePopupVisibility(VisibleType::GONE);
+            }
+        });
     AnimationUtils::AddKeyFrame(
         startTimeRatio, Curves::SHARP, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
             ContainerScope scope(id);
@@ -991,5 +991,30 @@ void IndexerPattern::UpdatePopupOpacity(float ratio)
     auto rendercontext = popupNode_->GetRenderContext();
     CHECK_NULL_VOID(rendercontext);
     rendercontext->UpdateOpacity(ratio);
+}
+
+void IndexerPattern::UpdatePopupVisibility(VisibleType visible)
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto layoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto currentVisibility = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (currentVisibility != visible) {
+        layoutProperty->UpdateVisibility(visible);
+        popupNode_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    }
+}
+
+bool IndexerPattern::NeedShowPopupView()
+{
+    CHECK_NULL_RETURN(popupNode_, false);
+    auto layoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
+}
+
+int32_t IndexerPattern::GenerateAnimationId()
+{
+    return (++animationId_) % TOTAL_NUMBER;
 }
 } // namespace OHOS::Ace::NG

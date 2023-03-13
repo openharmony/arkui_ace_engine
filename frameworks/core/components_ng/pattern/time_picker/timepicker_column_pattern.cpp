@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -201,7 +201,7 @@ bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     return true;
 }
 
-void TimePickerColumnPattern::FlushCurrentOptions()
+void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextContentOnly)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -218,6 +218,8 @@ void TimePickerColumnPattern::FlushCurrentOptions()
     CHECK_NULL_VOID(timePickerRowPattern);
     auto showOptionCount = GetShowCount();
     uint32_t totalOptionCount = timePickerRowPattern->GetOptionCount(host);
+    auto timePickerLayoutProperty = parentNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(timePickerLayoutProperty);
     uint32_t currentIndex = host->GetPattern<TimePickerColumnPattern>()->GetCurrentIndex();
     currentIndex = currentIndex % totalOptionCount;
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
@@ -225,6 +227,9 @@ void TimePickerColumnPattern::FlushCurrentOptions()
     auto iter = child.begin();
     if (child.size() != showOptionCount) {
         return;
+    }
+    if (!isUpateTextContentOnly) {
+        animationProperties_.clear();
     }
     for (uint32_t index = 0; index < showOptionCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
@@ -234,101 +239,277 @@ void TimePickerColumnPattern::FlushCurrentOptions()
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        ChangeTextStyle(index, showOptionCount, textLayoutProperty);
-        ChangeAmPmTextStyle(index, showOptionCount, textLayoutProperty);
+        if (!isUpateTextContentOnly) {
+            ChangeTextStyle(index, showOptionCount, textLayoutProperty, timePickerLayoutProperty);
+            ChangeAmPmTextStyle(index, showOptionCount, textLayoutProperty, timePickerLayoutProperty);
+            AddAnimationTextProperties(index, textLayoutProperty);
+        }
         iter++;
         int32_t diffIndex = static_cast<int32_t>(index) - static_cast<int32_t>(selectedIndex);
         int32_t virtualIndex = static_cast<int32_t>(currentIndex) + diffIndex;
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if (NotLoopOptions() && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent("");
-            textNode->MarkDirtyNode();
-            textNode->MarkModifyDone();
-            continue;
+        } else {
+            auto optionValue = timePickerRowPattern->GetAllOptions(host)[optionIndex];
+            textLayoutProperty->UpdateContent(optionValue);
+            textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
-        auto optionValue = timePickerRowPattern->GetAllOptions(host)[optionIndex];
-        textLayoutProperty->UpdateContent(optionValue);
-        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        textNode->MarkDirtyNode();
         textNode->MarkModifyDone();
+        textNode->MarkDirtyNode();
+    }
+    if (isUpateTextContentOnly) {
+        FlushAnimationTextProperties(isDown);
+    }
+}
+
+void TimePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
+{
+    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
+    if (timePickerLayoutProperty->HasDisappearColor()) {
+        textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetDisappearColor().value());
+    }
+    if (timePickerLayoutProperty->HasDisappearFontSize()) {
+        textLayoutProperty->UpdateFontSize(timePickerLayoutProperty->GetDisappearFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(
+            pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
+    }
+    if (timePickerLayoutProperty->HasDisappearWeight()) {
+        textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetDisappearWeight().value());
+    }
+}
+
+void TimePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
+{
+    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
+    if (timePickerLayoutProperty->HasColor()) {
+        textLayoutProperty->UpdateTextColor(timePickerLayoutProperty->GetColor().value());
+    }
+    if (timePickerLayoutProperty->HasFontSize()) {
+        textLayoutProperty->UpdateFontSize(timePickerLayoutProperty->GetFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(
+            pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
+    }
+    if (timePickerLayoutProperty->HasWeight()) {
+        textLayoutProperty->UpdateFontWeight(timePickerLayoutProperty->GetWeight().value());
+    }
+}
+
+void TimePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
+{
+    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
+    Color themeSelectedColor = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+    Color selectedColor = timePickerLayoutProperty->GetSelectedColor().value_or(themeSelectedColor);
+    textLayoutProperty->UpdateTextColor(selectedColor);
+    FontWeight themeFontWeight = pickerTheme->GetOptionStyle(true, false).GetFontWeight();
+    FontWeight selectedFontWeight = timePickerLayoutProperty->GetSelectedWeight().value_or(themeFontWeight);
+    textLayoutProperty->UpdateFontWeight(selectedFontWeight);
+    if (timePickerLayoutProperty->HasSelectedFontSize()) {
+        textLayoutProperty->UpdateFontSize(timePickerLayoutProperty->GetSelectedFontSize().value());
+    } else {
+        textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
+        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
     }
 }
 
 void TimePickerColumnPattern::ChangeAmPmTextStyle(
-    uint32_t index, uint32_t showOptionCount, RefPtr<TextLayoutProperty>& textLayoutProperty)
+    uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
+    if (showOptionCount != CHILD_SIZE) {
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
-    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
-    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    if (index == selectedIndex && showOptionCount == CHILD_SIZE) {
-        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
-        textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
+    if (index == selectedIndex) {
+        UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
-    if (index == 0 && showOptionCount == CHILD_SIZE) {
-        textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    if ((index == 0) || (index == showOptionCount - 1)) {
+        UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
+        if (index == 0) {
+            textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+        } else {
+            textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+        }
     }
-    if (index == showOptionCount - 1 && showOptionCount == CHILD_SIZE) {
-        textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
-    }
+    textLayoutProperty->UpdateMaxLines(1);
 }
 
 void TimePickerColumnPattern::ChangeTextStyle(
-    uint32_t index, uint32_t showOptionCount, RefPtr<TextLayoutProperty>& textLayoutProperty)
+    uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty)
 {
+    if (showOptionCount == CHILD_SIZE) {
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
-    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
-    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    if (index < selectedIndex && showOptionCount != CHILD_SIZE) {
-        if (index == 0) {
-            textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-            textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
+    if (index != selectedIndex) {
+        if ((index == 0) || (index == showOptionCount - 1)) {
+            UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
         } else {
-            textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
-            textLayoutProperty->UpdateAdaptMinFontSize(
-                pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
+            UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
         }
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+        if (index < selectedIndex) {
+            textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+        } else {
+            textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+        }
     }
-    if (index == selectedIndex && showOptionCount != CHILD_SIZE) {
-        textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-        textLayoutProperty->UpdateFontWeight(pickerTheme->GetOptionStyle(true, false).GetFontWeight());
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
+    if (index == selectedIndex) {
+        UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, timePickerLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
     }
-    if (index > selectedIndex && showOptionCount != CHILD_SIZE) {
-        if (index == showOptionCount - 1) {
-            textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-            textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
-        } else {
-            textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
-            textLayoutProperty->UpdateAdaptMinFontSize(
-                pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
-        }
-        textLayoutProperty->UpdateMaxLines(1);
-        textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
+    textLayoutProperty->UpdateMaxLines(1);
+}
+
+void TimePickerColumnPattern::AddAnimationTextProperties(uint32_t currentIndex,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    TextProperties properties;
+    if (textLayoutProperty->HasFontSize()) {
+        properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
     }
+    if (textLayoutProperty->HasTextColor()) {
+        properties.currentColor = textLayoutProperty->GetTextColor().value();
+    }
+    if (currentIndex > 0) {
+        properties.upFontSize = animationProperties_[currentIndex - 1].fontSize;
+        animationProperties_[currentIndex - 1].downFontSize = properties.fontSize;
+
+        properties.upColor = animationProperties_[currentIndex - 1].currentColor;
+        animationProperties_[currentIndex - 1].downColor = properties.currentColor;
+    }
+    animationProperties_.emplace_back(properties);
+}
+
+void TimePickerColumnPattern::FlushAnimationTextProperties(bool isDown)
+{
+    if (!animationProperties_.size()) {
+        return;
+    }
+    if (isDown) {
+        for (size_t i = 0; i < animationProperties_.size(); i++) {
+            if (i > 0) {
+                animationProperties_[i - 1].upFontSize = animationProperties_[i].upFontSize;
+                animationProperties_[i - 1].fontSize = animationProperties_[i].fontSize;
+                animationProperties_[i - 1].downFontSize = animationProperties_[i].downFontSize;
+
+                animationProperties_[i - 1].upColor = animationProperties_[i].upColor;
+                animationProperties_[i - 1].currentColor = animationProperties_[i].currentColor;
+                animationProperties_[i - 1].downColor = animationProperties_[i].downColor;
+            }
+            if (i == (animationProperties_.size() - 1)) {
+                animationProperties_[i].upFontSize = animationProperties_[i].fontSize;
+                animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
+                animationProperties_[i].downFontSize = Dimension();
+
+                animationProperties_[i].upColor = animationProperties_[i].currentColor;
+                auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+                animationProperties_[i].currentColor =
+                    colorEvaluator->Evaluate(Color(), animationProperties_[i].currentColor, 0.5);
+                animationProperties_[i].downColor = Color();
+            }
+        }
+    } else {
+        for (size_t i = animationProperties_.size() - 1; i >= 0; i--) {
+            if (i == 0) {
+                animationProperties_[i].upFontSize = Dimension();
+                animationProperties_[i].downFontSize = animationProperties_[i].fontSize;
+                animationProperties_[i].fontSize = animationProperties_[i].fontSize * 0.5;
+
+                animationProperties_[i].upColor = Color();
+                animationProperties_[i].downColor = animationProperties_[i].currentColor;
+                auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+                animationProperties_[i].currentColor =
+                    colorEvaluator->Evaluate(Color(), animationProperties_[i].currentColor, 0.5);
+                break;
+            } else {
+                animationProperties_[i].upFontSize = animationProperties_[i - 1].upFontSize;
+                animationProperties_[i].fontSize = animationProperties_[i - 1].fontSize;
+                animationProperties_[i].downFontSize = animationProperties_[i - 1].downFontSize;
+
+                animationProperties_[i].upColor = animationProperties_[i - 1].upColor;
+                animationProperties_[i].currentColor = animationProperties_[i - 1].currentColor;
+                animationProperties_[i].downColor = animationProperties_[i - 1].downColor;
+            }
+        }
+    }
+}
+
+void TimePickerColumnPattern::TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    uint32_t index, uint32_t showCount, bool isDown, double scale)
+{
+    if (index >= animationProperties_.size()) {
+        LOGE("Animation Properties vactor is break.");
+        return;
+    }
+    if ((!index && isDown) || ((index == (showCount - 1)) && !isDown)) {
+        return;
+    }
+    Dimension startFontSize = animationProperties_[index].fontSize;
+    Color startColor = animationProperties_[index].currentColor;
+    Dimension endFontSize;
+    Color endColor;
+    if (!isDown) {
+        endFontSize = animationProperties_[index].downFontSize;
+        endColor = animationProperties_[index].downColor;
+    } else {
+        endFontSize = animationProperties_[index].upFontSize;
+        endColor = animationProperties_[index].upColor;
+    }
+    Dimension updateSize = LinearFontSize(startFontSize, endFontSize, scale);
+    textLayoutProperty->UpdateFontSize(updateSize);
+    auto colorEvaluator = AceType::MakeRefPtr<LinearEvaluator<Color>>();
+    Color updateColor = colorEvaluator->Evaluate(startColor, endColor, scale);
+    textLayoutProperty->UpdateTextColor(updateColor);
+}
+
+void TimePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    uint32_t showCount = GetShowCount();
+    auto child = host->GetChildren();
+    auto iter = child.begin();
+    if (child.size() != showCount) {
+        return;
+    }
+    for (uint32_t index = 0; index < showCount; index++) {
+        auto textNode = DynamicCast<FrameNode>(*iter);
+        CHECK_NULL_VOID(textNode);
+        auto textPattern = textNode->GetPattern<TextPattern>();
+        CHECK_NULL_VOID(textPattern);
+        RefPtr<TextLayoutProperty> textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        iter++;
+    }
+}
+
+Dimension TimePickerColumnPattern::LinearFontSize(const Dimension& startFontSize,
+    const Dimension& endFontSize, double percent)
+{
+    return startFontSize + (endFontSize - startFontSize) * percent;
 }
 
 void TimePickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -463,10 +644,31 @@ void TimePickerColumnPattern::HandleCurveStopped()
     fromController_->Play();
 }
 
-void TimePickerColumnPattern::ScrollOption(double delta)
+void TimePickerColumnPattern::ScrollOption(double delta, bool isJump)
 {
     UpdateScrollDelta(delta);
+    double oldDelta = scrollDelta_;
     scrollDelta_ = delta;
+
+    if ((isJump_ && LessOrEqual(delta * oldDelta, 0.0)) || NearZero(delta) || (isJump_ && isJump)) {
+        isJump_ = false;
+        FlushCurrentOptions();
+        return;
+    }
+    if (isJump) {
+        isJump_ = true;
+    }
+    if (NearZero(jumpInterval_)) {
+        return;
+    }
+    double scale = 0.0;
+    if (!isJump_) {
+        scale = fabs(delta) / (jumpInterval_ * 2);
+        UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), scale);
+    } else {
+        scale = ((2 * jumpInterval_) - fabs(delta))  / (jumpInterval_ * 2);
+        UpdateTextPropertiesLinear(!LessNotEqual(delta, 0.0), scale);
+    }
 }
 
 void TimePickerColumnPattern::UpdateScrollDelta(double delta)
@@ -518,7 +720,7 @@ bool TimePickerColumnPattern::NotLoopOptions() const
     return totalOptionCount <= showOptionCount / 2 + 1; // the critical value of loop condition.
 }
 
-bool TimePickerColumnPattern::InnerHandleScroll(bool isDown)
+bool TimePickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -535,7 +737,7 @@ bool TimePickerColumnPattern::InnerHandleScroll(bool isDown)
         currentIndex = (totalOptionCount + currentIndex - 1) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
-    FlushCurrentOptions();
+    FlushCurrentOptions(isDown, isUpatePropertiesOnly);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
     return true;
@@ -559,9 +761,9 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
         ScrollOption(dragDelta);
         return;
     }
-    InnerHandleScroll(LessNotEqual(dragDelta, 0.0));
+    InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
     double jumpDelta = (LessNotEqual(dragDelta, 0.0) ? jumpInterval_ : 0.0 - jumpInterval_);
-    ScrollOption(jumpDelta);
+    ScrollOption(jumpDelta, true);
     yOffset_ = offsetY - jumpDelta;
 }
 

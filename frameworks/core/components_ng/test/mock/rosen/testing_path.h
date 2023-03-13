@@ -23,6 +23,12 @@ enum class TestingPathDirection {
     CW_DIRECTION,
     CCW_DIRECTION,
 };
+enum class TestingPathFillType {
+    WINDING,
+    EVENTODD,
+    INVERSE_WINDING,
+    INVERSE_EVENTODD,
+};
 class TestingPath {
 public:
     TestingPath() = default;
@@ -53,6 +59,7 @@ public:
     {
         return TestingRect();
     }
+    virtual void SetFillStyle(TestingPathFillType  fillstyle) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PATH_H

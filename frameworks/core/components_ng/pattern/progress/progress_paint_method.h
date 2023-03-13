@@ -30,68 +30,72 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/progress/progress_modifier.h"
 
 namespace OHOS::Ace::NG {
+constexpr double DEFAULT_BORDER_WIDTH = 1.0;
+
 class ACE_EXPORT ProgressPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(ProgressPaintMethod, NodePaintMethod)
 public:
-    ProgressPaintMethod(ProgressType progressType, float strokeWidth)
-        : strokeWidth_(strokeWidth), progressType_(progressType)
-    {}
+    explicit ProgressPaintMethod(ProgressType progressType, float strokeWidth,
+        const RefPtr<ProgressModifier>& progressModifier)
+        : strokeWidth_(strokeWidth), progressType_(progressType),
+          progressModifier_(progressModifier)
+    {
+        progressModifier_->SetProgressType(progressType_);
+        progressModifier_->SetStrokeWidth(strokeWidth_);
+    }
     ~ProgressPaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
     {
-        auto frameSize = paintWrapper->GetContentSize();
-        auto offset = paintWrapper->GetContentOffset();
-        auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_RETURN(progressModifier_, nullptr);
+        return progressModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(progressModifier_);
         GetThemeDate();
-        if (paintProperty) {
-            color_ = paintProperty->GetColor().value_or(color_);
-            bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
-            maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
-            value_ = paintProperty->GetValue().value_or(value_);
-            scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
-            scaleWidth_ = paintProperty->GetScaleWidth().value_or(Dimension(scaleWidth_)).ConvertToPx();
-        }
-        if (progressType_ == ProgressType::LINEAR) {
-            return [frameSize, offset, this](RSCanvas& canvas) { PaintLinear(canvas, offset, frameSize); };
-        }
-        if (progressType_ == ProgressType::RING) {
-            return [frameSize, offset, this](RSCanvas& canvas) { PaintRing(canvas, offset, frameSize); };
-        }
-        if (progressType_ == ProgressType::SCALE) {
-            return [frameSize, offset, this](RSCanvas& canvas) { PaintScaleRing(canvas, offset, frameSize); };
-        }
-        if (progressType_ == ProgressType::MOON) {
-            return [frameSize, offset, this](RSCanvas& canvas) { PaintMoon(canvas, offset, frameSize); };
-        }
-        if (progressType_ == ProgressType::CAPSULE) {
-            if (frameSize.Width() >= frameSize.Height()) {
-                return [frameSize, offset, this](RSCanvas& canvas) { PaintCapsule(canvas, offset, frameSize); };
-            }
-            return [frameSize, offset, this](RSCanvas& canvas) { PaintVerticalCapsule(canvas, offset, frameSize); };
-        }
-        return [frameSize, offset, this](RSCanvas& canvas) { PaintLinear(canvas, offset, frameSize); };
+        auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
+        auto offset = paintWrapper->GetContentOffset();
+        color_ = paintProperty->GetColor().value_or(color_);
+        bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
+        borderColor_ = paintProperty->GetBorderColor().value_or(borderColor_);
+        maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
+        value_ = paintProperty->GetValue().value_or(value_);
+        scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
+
+        progressModifier_->SetBorderWidth(capsuleBorderWidth_);
+        progressModifier_->SetOffset(offset);
+        progressModifier_->SetStrokeWidth(strokeWidth_);
+        progressModifier_->SetColor(LinearColor(color_));
+        progressModifier_->SetBackgroundColor(LinearColor(bgColor_));
+        progressModifier_->SetBorderColor(LinearColor(borderColor_));
+        progressModifier_->SetProgressType(progressType_);
+        progressModifier_->SetMaxValue(maxValue_);
+        progressModifier_->SetValue(value_);
+        progressModifier_->SetScaleWidth(scaleWidth_);
+        progressModifier_->SetScaleCount(scaleCount_);
     }
 
     void GetThemeDate();
-    void PaintLinear(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
-    void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
-    void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
-    void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
-    void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
-    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& frameSize) const;
 
 private:
-    float maxValue_ = 100.0f;
-    float value_ = 0.0f;
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;
+    Color borderColor_ = Color::GRAY;
     float strokeWidth_ = 2.0f;
     float scaleWidth_ = 10.0f;
     int32_t scaleCount_ = 100;
+    float maxValue_ = 100.0f;
+    float value_ = 0.0f;
+    Dimension capsuleBorderWidth_ = Dimension(DEFAULT_BORDER_WIDTH,  DimensionUnit::VP);
+
     ProgressType progressType_ = ProgressType::LINEAR;
+    RefPtr<ProgressModifier> progressModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPaintMethod);
 };

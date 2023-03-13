@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -697,7 +698,9 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     CHECK_NULL_VOID(host);
     if (!host->GetChildren().empty()) {
         auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        CHECK_NULL_VOID(row);
         auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_VOID(rowProps);
         json->Put("space", rowProps->GetSpace()->ToString().c_str());
 
         if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
@@ -805,5 +808,13 @@ void SelectPattern::SetArrowPosition(const ArrowPosition value)
         row->MarkModifyDone();
         row->MarkDirtyNode();
     }
+}
+
+std::string SelectPattern::GetValue()
+{
+    CHECK_NULL_RETURN(text_, "");
+    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textProps, "");
+    return textProps->GetContentValue("");
 }
 } // namespace OHOS::Ace::NG

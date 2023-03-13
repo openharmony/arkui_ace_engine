@@ -167,6 +167,7 @@ void SearchPattern::OnModifyDone()
     InitCancelButtonClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    InitTextFieldMouseEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
     InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
@@ -516,6 +517,27 @@ void SearchPattern::InitMouseEvent()
     inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
+void SearchPattern::InitTextFieldMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleTextFieldHoverEvent(isHover);
+        }
+    };
+    textFieldHoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(textFieldHoverEvent_);
+}
+
 void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId)
 {
     if (inputEvent) {
@@ -594,13 +616,14 @@ void SearchPattern::OnButtonTouchUp(int32_t childId)
     }
 }
 
-void SearchPattern::SetMouseStyle(MouseFormat& format)
+void SearchPattern::SetMouseStyle(MouseFormat format)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(windowId, format);
+    CHECK_NULL_VOID(mouseStyle);
+
     int32_t currentPointerStyle = 0;
     mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
     if (currentPointerStyle != static_cast<int32_t>(format)) {
@@ -643,6 +666,13 @@ void SearchPattern::HandleMouseEvent(const MouseInfo& info)
         renderContext->AnimateHoverEffectBoard(true);
     } else {
         renderContext->AnimateHoverEffectBoard(false);
+    }
+}
+
+void SearchPattern::HandleTextFieldHoverEvent(bool isHoverOverTextField)
+{
+    if (!isHoverOverTextField && isHover_) {
+        SetMouseStyle(MouseFormat::TEXT_CURSOR);
     }
 }
 
@@ -833,9 +863,9 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
     // color
     auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(Color());
     cursorJson->Put("color", caretColor.ColorToString().c_str());
-    auto caretwidth = textFieldPaintProperty->GetCursorWidth().value_or(SelectHandleInfo::GetDefaultLineWidth());
+    auto caretwidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
     cursorJson->Put("width", caretwidth.ToString().c_str());
-    json->Put("cursorStyle", cursorJson);
+    json->Put("caretStyle", cursorJson);
 }
 
 void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

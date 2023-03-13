@@ -64,11 +64,11 @@ void ListPattern::OnModifyDone()
     if (!GetScrollableEvent()) {
         InitScrollableEvent();
     }
-
-    SetEdgeEffect(listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING));
+    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    SetEdgeEffect(edgeEffect);
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
     SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF));
-    SetChainAnimation(listLayoutProperty->GetChainAnimation().value_or(false));
+    SetChainAnimation(edgeEffect == EdgeEffect::SPRING && listLayoutProperty->GetChainAnimation().value_or(false));
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
@@ -717,7 +717,7 @@ void ListPattern::ProcessDragStart(float startPosition)
     CHECK_NULL_VOID(chainAnimation_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto globalOffset = host->GetOffsetRelativeToWindow();
+    auto globalOffset = host->GetTransformRelativeOffset();
     int32_t index = -1;
     auto offset = startPosition - GetMainAxisOffset(globalOffset, GetAxis());
     for (auto & pos : itemPosition_) {

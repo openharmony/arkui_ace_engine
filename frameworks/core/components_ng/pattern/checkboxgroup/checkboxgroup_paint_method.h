@@ -21,8 +21,6 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_modifier.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/radio/radio_paint_method.h"
-#include "core/components_ng/render/canvas.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -50,9 +48,9 @@ public:
         CHECK_NULL_VOID(checkboxGroupModifier_);
         CHECK_NULL_VOID(paintWrapper);
         auto paintProperty = DynamicCast<CheckBoxGroupPaintProperty>(paintWrapper->GetPaintProperty());
-        auto contentSize = paintWrapper->GetContentSize();
+        auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
-        float strokePaintSize = contentSize.Width();
+        float strokePaintSize = size.Width();
         if (paintProperty->GetCheckBoxGroupSelectedColor().has_value()) {
             checkboxGroupModifier_->SetActiveColor(paintProperty->GetCheckBoxGroupSelectedColor().value());
         }
@@ -82,6 +80,7 @@ public:
         checkboxGroupModifier_->SetUiStatus(uiStatus_);
         checkboxGroupModifier_->SetSelectStatus(selectStatus);
         checkboxGroupModifier_->SetOffset(offset);
+        checkboxGroupModifier_->SetSize(size);
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)

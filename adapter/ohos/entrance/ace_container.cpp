@@ -1224,7 +1224,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
     } else {
         auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
         if (declarativeFrontend) {
-            declarativeFrontend->AttachSubPipelineContext(AceType::DynamicCast<PipelineContext>(pipelineContext_));
+            declarativeFrontend->AttachSubPipelineContext(pipelineContext_);
         }
         return;
     }
@@ -1599,7 +1599,12 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         auto ace = AceType::DynamicCast<AceContainer>(container);
-        if (ace) {
+        CHECK_NULL_VOID(ace);
+        if (ace->IsUseNewPipeline()) {
+            auto frontend = ace->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            frontend->RebuildAllPages();
+        } else {
             ace->NotifyConfigurationChange(true);
         }
         LOGI("frontend rebuild finished");

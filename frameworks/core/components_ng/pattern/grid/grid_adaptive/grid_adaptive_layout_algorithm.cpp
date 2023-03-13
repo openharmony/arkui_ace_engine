@@ -158,9 +158,9 @@ OffsetF GridAdaptiveLayoutAlgorithm::CalculateChildOffset(int32_t index, LayoutW
     auto padding = layoutProperty->CreatePaddingAndBorder();
     auto layoutDirection = layoutProperty->GetGridDirection().value_or(FlexDirection::ROW);
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
     auto columnsGap =
-        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
 
     int32_t rowIndex = 0;
     int32_t columnIndex = 0;

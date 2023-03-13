@@ -19,6 +19,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -81,7 +82,7 @@ public:
     void MarkAnchor(const Dimension& x, const Dimension& y) override;
 
     void SetScale(float x, float y, float z) override;
-    void SetPivot(const Dimension& x, const Dimension& y) override;
+    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetRotate(float x, float y, float z, float angle) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
@@ -162,6 +163,7 @@ public:
     void SetDebugLine(const std::string& line) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetHitTestMode(NG::HitTestMode hitTestMode) override;
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) override {};
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
@@ -173,6 +175,7 @@ public:
     void SetAccessibilityDescription(const std::string& description) override;
     void SetAccessibilityImportance(const std::string& importance) override;
 
+    void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
     void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override {}
 };

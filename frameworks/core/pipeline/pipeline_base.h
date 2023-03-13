@@ -60,9 +60,7 @@ class Window;
 class FontManager;
 class ManagerInterface;
 enum class FrontendType;
-using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
-    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-    const std::string& abilityName)>;
+using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -433,12 +431,10 @@ public:
         sharePanelCallback_ = std::move(callback);
     }
 
-    void FireSharePanelCallback(const std::string& faBundleName, const std::string& faAbilityName,
-        const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-        const std::string& abilityName)
+    void FireSharePanelCallback(const std::string& bundleName, const std::string& abilityName)
     {
         if (sharePanelCallback_) {
-            sharePanelCallback_(faBundleName, faAbilityName, faModuleName, faHostPkgName, bundleName, abilityName);
+            sharePanelCallback_(bundleName, abilityName);
         }
     }
 

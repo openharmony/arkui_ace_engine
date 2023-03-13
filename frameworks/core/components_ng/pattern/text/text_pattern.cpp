@@ -28,7 +28,6 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/render_context.h"
 #include "frameworks/base/window/drag_window.h"

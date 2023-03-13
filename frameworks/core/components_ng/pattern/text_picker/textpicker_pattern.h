@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
@@ -91,18 +92,29 @@ public:
         return selectedIndex_;
     }
 
-    void SetRange(const std::vector<std::string>& value)
+    void SetRange(const std::vector<NG::RangeContent>& value)
     {
         if (value.empty()) {
             LOGE("input value of range is empty.");
             return;
         }
-        range_ = value;
+        range_.clear();
+        for (size_t i = 0; i < value.size(); i++) {
+            RangeContent content;
+            content.icon_ = value[i].icon_;
+            content.text_ = value[i].text_;
+            range_.emplace_back(content);
+        }
     }
 
-    const std::vector<std::string>& GetRange() const
+    std::vector<NG::RangeContent> GetRange() const
     {
         return range_;
+    }
+
+    void SetColumnsKind(uint32_t columnKind)
+    {
+        columnsKind_ = columnKind;
     }
 
     void ClearOption()
@@ -110,7 +122,7 @@ public:
         options_.clear();
     }
 
-    void AppendOption(const std::string& value)
+    void AppendOption(const NG::RangeContent& value)
     {
         options_.emplace_back(value);
     }
@@ -128,7 +140,7 @@ public:
             LOGE("index out of range.");
             return "";
         }
-        return options_[index];
+        return options_[index].text_;
     }
 
     FocusPattern GetFocusPattern() const override
@@ -146,6 +158,7 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -160,12 +173,14 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState();
     void SetButtonIdeaSize();
+    std::string GetRangeStr() const;
 
     bool enabled_ = true;
     double defaultPickerItemHeight_;
     uint32_t selectedIndex_ = 0;
-    std::vector<std::string> range_ { "" };
-    std::vector<std::string> options_;
+    std::vector<NG::RangeContent> range_;
+    std::vector<NG::RangeContent> options_;
+    uint32_t columnsKind_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerPattern);
 };

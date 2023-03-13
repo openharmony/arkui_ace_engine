@@ -35,7 +35,7 @@ public:
     virtual void SetStrokeWidth(const Dimension& value) = 0;
     virtual void SetScaleCount(int32_t value) = 0;
     virtual void SetScaleWidth(const Dimension& value) = 0;
-
+    virtual void SetBorderColor(const Color& value) = 0;
 private:
     static std::unique_ptr<ProgressModel> instance_;
 };

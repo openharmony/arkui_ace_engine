@@ -76,4 +76,9 @@ void ProgressModelNG::SetScaleWidth(const Dimension& value)
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, ScaleWidth, value);
 }
 
+void ProgressModelNG::SetBorderColor(const Color& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, value);
+}
+
 } // namespace OHOS::Ace::NG

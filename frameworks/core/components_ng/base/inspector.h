@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,12 @@
 #include <string>
 
 #include "base/utils/macros.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT Inspector {
 public:
+    static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key);
     static std::string GetInspectorNodeByKey(const std::string& key);
     static std::string GetInspectorTree(bool isLayoutInspector = false);
     static bool SendEventByKey(const std::string& key, int action, const std::string& params);

@@ -44,6 +44,7 @@ namespace {
 constexpr int32_t NODE_ID = 143;
 } // namespace
 
+static RefPtr<PipelineContext> pipelineContext = nullptr;
 // static method
 float PipelineContext::GetCurrentRootWidth()
 {
@@ -57,7 +58,10 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<PipelineContext>();
+    if (!pipelineContext) {
+        pipelineContext = AceType::MakeRefPtr<PipelineContext>();
+    }
+    return pipelineContext;
 }
 
 // non-static method
@@ -215,6 +219,9 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
+    if (!overlayManager_) {
+        overlayManager_ = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    }
     return overlayManager_;
 }
 void PipelineContext::AddPredictTask(PredictTask&& task) {}

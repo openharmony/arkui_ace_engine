@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "bridge/declarative_frontend/jsview/js_textpicker.h"
+
+#include <securec.h>
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -59,6 +61,9 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextPicker>::StaticMethod("create", &JSTextPicker::Create, opt);
     JSClass<JSTextPicker>::StaticMethod("defaultPickerItemHeight", &JSTextPicker::SetDefaultPickerItemHeight);
+    JSClass<JSTextPicker>::StaticMethod("disappearTextStyle", &JSTextPicker::SetDisappearTextStyle);
+    JSClass<JSTextPicker>::StaticMethod("textStyle", &JSTextPicker::SetTextStyle);
+    JSClass<JSTextPicker>::StaticMethod("selectedTextStyle", &JSTextPicker::SetSelectedTextStyle);
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
     JSClass<JSTextPicker>::StaticMethod("onChange", &JSTextPicker::OnChange);
@@ -81,20 +86,53 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
     }
 
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    std::vector<NG::RangeContent> rangeResult;
+    uint32_t selected = 0;
+    uint32_t kind = 0;
+    std::string value = "";
+    if (!JSTextPickerParser::ParseTextArray(paramObject, rangeResult, kind, selected, value)) {
+        if (!JSTextPickerParser::ParseIconTextArray(paramObject, rangeResult, kind, selected)) {
+            LOGE("parse range error.");
+            return;
+        }
+    }
+
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("PickerText Theme is null");
+        return;
+    }
+    TextPickerModel::GetInstance()->Create(theme, kind);
+    TextPickerModel::GetInstance()->SetRange(rangeResult);
+    TextPickerModel::GetInstance()->SetSelected(selected);
+    TextPickerModel::GetInstance()->SetValue(value);
+    TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
+    JSInteractableView::SetFocusable(false);
+    JSInteractableView::SetFocusNode(true);
+}
+
+bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject,
+    std::vector<NG::RangeContent>& result, uint32_t& kind, uint32_t& selected, std::string& value)
+{
     auto getSelected = paramObject->GetProperty("selected");
     auto getValue = paramObject->GetProperty("value");
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
     if (!ParseJsStrArray(getRange, getRangeVector)) {
-        LOGE("parse range failed");
-        return;
+        LOGE("parse str array error.");
+        return false;
     }
-
-    std::string value = "";
+    result.clear();
+    for (const auto& text : getRangeVector) {
+        NG::RangeContent content;
+        content.icon_ = "";
+        content.text_ = text;
+        result.emplace_back(content);
+    }
+    kind = NG::TEXT;
     if (!ParseJsString(getValue, value)) {
         value = getRangeVector.front();
     }
-    uint32_t selected = 0;
     if (!ParseJsInteger(getSelected, selected) && !value.empty()) {
         auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
         if (valueIterator != getRangeVector.end()) {
@@ -106,17 +144,88 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         LOGE("selected is out of range");
         selected = 0;
     }
-    auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("PickerText Theme is null");
+    return true;
+}
+
+bool JSTextPickerParser::ParseIconTextArray(const JSRef<JSObject>& paramObject,
+    std::vector<NG::RangeContent>& result, uint32_t& kind, uint32_t& selected)
+{
+    auto getSelected = paramObject->GetProperty("selected");
+    auto getRange = paramObject->GetProperty("range");
+    if (!getRange->IsArray()) {
+        LOGE("arg is not array.");
+        return false;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(getRange);
+    result.clear();
+    kind = 0;
+    for (size_t i = 0; i < array->Length(); i++) {
+        auto jsObj = JSRef<JSObject>::Cast(array->GetValueAt(i));
+        auto rangeIcon = jsObj->GetProperty("icon");
+        auto rangeText = jsObj->GetProperty("text");
+        NG::RangeContent content;
+        std::string icon;
+        std::string text;
+        if (ParseJsMedia(rangeIcon, icon)) {
+            content.icon_ = icon;
+            kind |= NG::ICON;
+        }
+
+        if (ParseJsString(rangeText, text)) {
+            content.text_ = text;
+            kind |= NG::TEXT;
+        }
+        result.emplace_back(content);
+    }
+    if (!kind) {
+        LOGE("kind is wrong.");
+        return false;
+    }
+
+    if (!ParseJsInteger(getSelected, selected)) {
+        selected = 0;
+    }
+    return true;
+}
+
+void JSTextPickerParser::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
+{
+    auto fontColor = paramObj->GetProperty("color");
+    auto fontStyle = paramObj->GetProperty("font");
+
+    Color textColor;
+    if (ParseJsColor(fontColor, textColor)) {
+        textStyle.textColor = textColor;
+    }
+
+    if (!fontStyle->IsObject()) {
+        LOGE("fontStyle is not obj.");
         return;
     }
-    TextPickerModel::GetInstance()->Create(theme);
-    TextPickerModel::GetInstance()->SetRange(getRangeVector);
-    TextPickerModel::GetInstance()->SetSelected(selected);
-    TextPickerModel::GetInstance()->SetValue(value);
-    JSInteractableView::SetFocusable(false);
-    JSInteractableView::SetFocusNode(true);
+    JSRef<JSObject> fontObj = JSRef<JSObject>::Cast(fontStyle);
+    auto fontSize = fontObj->GetProperty("size");
+    auto fontWeight = fontObj->GetProperty("weight");
+    if (fontSize->IsNull() || fontSize->IsUndefined()) {
+        textStyle.fontSize = Dimension(-1);
+    } else {
+        Dimension size;
+        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+            textStyle.fontSize = Dimension(-1);
+            LOGW("Parse to dimension FP failed.");
+        } else {
+            textStyle.fontSize = size;
+        }
+    }
+
+    if (!fontWeight->IsNull() && !fontWeight->IsUndefined()) {
+        std::string weight;
+        if (fontWeight->IsNumber()) {
+            weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(fontWeight, weight);
+        }
+        textStyle.fontWeight = ConvertStrToFontWeight(weight);
+    }
 }
 
 void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
@@ -132,6 +241,54 @@ void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
         }
     }
     TextPickerModel::GetInstance()->SetDefaultPickerItemHeight(height);
+}
+
+void JSTextPicker::SetDisappearTextStyle(const JSCallbackInfo& info)
+{
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("PickerText Theme is null");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+    }
+    TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+}
+
+void JSTextPicker::SetTextStyle(const JSCallbackInfo& info)
+{
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("PickerText Theme is null");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+    }
+    TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+}
+
+void JSTextPicker::SetSelectedTextStyle(const JSCallbackInfo& info)
+{
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("PickerText Theme is null");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle);
+    }
+    TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
 void JSTextPicker::OnAccept(const JSCallbackInfo& info) {}
@@ -218,40 +375,14 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
         return;
     }
 
-    auto getSelected = paramObj->GetProperty("selected");
-    auto defaultHeight = paramObj->GetProperty("defaultPickerItemHeight");
-    JSRef<JSArray> getRange = paramObj->GetProperty("range");
-    std::vector<std::string> getRangeVector;
-    if (!JSViewAbstract::ParseJsStrArray(getRange, getRangeVector)) {
-        LOGE("parse range failed");
+    auto theme = JSTextPicker::GetTheme<DialogTheme>();
+    if (!theme) {
+        LOGE("DialogTheme is null");
         return;
     }
 
-    std::string value;
-    uint32_t selected = 0;
-    auto getValue = paramObj->GetProperty("value");
-    if (!JSViewAbstract::ParseJsInteger(getSelected, selected) && JSViewAbstract::ParseJsString(getValue, value)) {
-        auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
-        if (valueIterator != getRangeVector.end()) {
-            selected = std::distance(getRangeVector.begin(), valueIterator);
-        }
-    }
-
-    if (selected < 0 || selected >= getRangeVector.size()) {
-        LOGE("selected is out of range");
-        selected = 0;
-    }
-
-    Dimension height;
-    if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
-        if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
-            return;
-        }
-    }
-
-    auto theme = JSDatePicker::GetTheme<DialogTheme>();
-    if (!theme) {
-        LOGE("DialogTheme is null");
+    NG::TextPickerSettingData settingData;
+    if (!ParseShowData(paramObj, settingData)) {
         return;
     }
 
@@ -268,14 +399,76 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, selected, getRangeVector, dialogEvent, height, dialogCancelEvent,
+        [properties, settingData, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
-            overlayManager->ShowTextDialog(
-                properties, selected, height, getRangeVector, dialogEvent, dialogCancelEvent);
+            overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
+}
+
+bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::TextPickerSettingData& settingData)
+{
+    std::vector<NG::RangeContent> rangeResult;
+    uint32_t selected = 0;
+    uint32_t kind = 0;
+    std::string value = "";
+    if (!JSTextPickerParser::ParseTextArray(paramObject, rangeResult, kind, selected, value)) {
+        if (!JSTextPickerParser::ParseIconTextArray(paramObject, rangeResult, kind, selected)) {
+            LOGE("parse range error.");
+            return false;
+        }
+    }
+
+    Dimension height;
+    auto defaultHeight = paramObject->GetProperty("defaultPickerItemHeight");
+    if (defaultHeight->IsNumber() || defaultHeight->IsString()) {
+        if (!JSViewAbstract::ParseJsDimensionFp(defaultHeight, height)) {
+            return false;
+        }
+    }
+
+    NG::PickerTextProperties textProperties;
+    ParseTextProperties(paramObject, textProperties);
+    if (memset_s(&settingData, sizeof(NG::TextPickerSettingData), 0, sizeof(NG::TextPickerSettingData)) != EOK) {
+        LOGE("memset settingData error.");
+        return false;
+    }
+    settingData.height = height;
+    settingData.selected = selected;
+    settingData.columnKind = kind;
+    if (memcpy_s(&settingData.properties, sizeof(NG::PickerTextProperties),
+        &textProperties, sizeof(NG::PickerTextProperties)) != EOK) {
+        LOGE("memcpy properties error.");
+        return false;
+    }
+    for (const auto& item : rangeResult) {
+        settingData.rangeVector.emplace_back(item);
+    }
+    return true;
+}
+
+void JSTextPickerDialog::ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result)
+{
+    auto disappearProperty = paramObj->GetProperty("disappearTextStyle");
+    auto normalProperty = paramObj->GetProperty("textStyle");
+    auto selectedProperty = paramObj->GetProperty("selectedTextStyle");
+
+    if (!disappearProperty->IsNull() && disappearProperty->IsObject()) {
+        JSRef<JSObject> disappearObj = JSRef<JSObject>::Cast(disappearProperty);
+        JSTextPickerParser::ParseTextStyle(disappearObj, result.disappearTextStyle_);
+    }
+
+    if (!normalProperty->IsNull() && normalProperty->IsObject()) {
+        JSRef<JSObject> noramlObj = JSRef<JSObject>::Cast(normalProperty);
+        JSTextPickerParser::ParseTextStyle(noramlObj, result.normalTextStyle_);
+    }
+
+    if (!selectedProperty->IsNull() && selectedProperty->IsObject()) {
+        JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
+        JSTextPickerParser::ParseTextStyle(selectedObj, result.selectedTextStyle_);
+    }
 }
 
 std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const JSCallbackInfo& info)

@@ -28,6 +28,9 @@ public:
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(ChangeEvent&& onChange) override;
     void SetHour24(bool isUseMilitaryTime) override;
+    void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
+    void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
+    void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TIMEPICKER_MODEL_IMPL_H

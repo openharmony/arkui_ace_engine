@@ -45,6 +45,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/ace_engine.h"
 
@@ -2384,6 +2385,13 @@ void FrontendDelegateDeclarative::SetColorMode(ColorMode colorMode)
 
 void FrontendDelegateDeclarative::RebuildAllPages()
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_VOID(pageRouterManager_);
+        auto url = pageRouterManager_->GetCurrentPageUrl();
+        pageRouterManager_->Clear();
+        pageRouterManager_->RunPage(url, "");
+        return;
+    }
     std::unordered_map<int32_t, RefPtr<JsAcePage>> pages;
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -2623,6 +2631,14 @@ void FrontendDelegateDeclarative::AttachPipelineContext(const RefPtr<PipelineBas
     jsAccessibilityManager_->InitializeCallback();
 }
 
+void FrontendDelegateDeclarative::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
+{
+    if (!context) {
+        return;
+    }
+    jsAccessibilityManager_->AddSubPipelineContext(context);
+}
+
 RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()
 {
     return pipelineContextHolder_.Get();
@@ -2681,6 +2697,13 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
     jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
 
     return jsonContentInfo->ToString();
+}
+
+void FrontendDelegateDeclarative::GetSnapshot(
+    const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
+{
+    NG::ComponentSnapshot snapshot(componentId);
+    snapshot.Get(std::move(callback));
 }
 
 } // namespace OHOS::Ace::Framework

@@ -15,10 +15,10 @@
 
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
+#include "core/components/badge/badge_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components/badge/badge_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +47,7 @@ void BadgePattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto badgeCount = layoutProperty->GetBadgeCount();
     auto badgeValue = layoutProperty->GetBadgeValue();
+    bool badgeVisible = false;
     if (badgeCount.has_value()) {
         if (badgeCount.value() > 0) {
             const int32_t maxCountNum = 99;
@@ -58,6 +59,7 @@ void BadgePattern::OnModifyDone()
             } else {
                 textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()));
             }
+            badgeVisible = true;
         } else {
             textLayoutProperty->ResetContent();
         }
@@ -72,8 +74,12 @@ void BadgePattern::OnModifyDone()
         if (badgeValue.value().empty()) {
             textLayoutProperty->UpdateContent(" ");
         }
+        badgeVisible = true;
     }
-
+    auto circleSize = layoutProperty->GetBadgeCircleSize();
+    if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
+        badgeVisible = false;
+    }
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     textLayoutProperty->UpdateTextColor(badgeTextColor.value());
 
@@ -93,6 +99,7 @@ void BadgePattern::OnModifyDone()
 
     auto badgeColor = layoutProperty->GetBadgeColorValue();
     auto textRenderContext = lastFrameNode->GetRenderContext();
+    textRenderContext->SetVisible(badgeVisible);
     textRenderContext->UpdateBackgroundColor(badgeColor);
 
     Color color = layoutProperty->GetBadgeBorderColorValue(badgeTheme->GetBadgeBorderColor());

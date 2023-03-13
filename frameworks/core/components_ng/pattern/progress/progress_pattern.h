@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,11 +24,14 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/progress/progress_accessibility_property.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_paint_method.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/progress/progress_modifier.h"
+#include "core/components_ng/base/geometry_node.h"
 
 namespace OHOS::Ace::NG {
 // ProgressPattern is the base class for progress render node to perform paint progress.
@@ -44,7 +47,10 @@ public:
         auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
         CHECK_NULL_RETURN(progressLayoutProperty, nullptr);
         ProgressType progressType_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
-        return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_);
+        if (!progressModifier_) {
+            progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
+        }
+        return MakeRefPtr<ProgressPaintMethod>(progressType_, strokeWidth_, progressModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -62,12 +68,18 @@ public:
         return MakeRefPtr<ProgressPaintProperty>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ProgressAccessibilityProperty>();
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
 
     double strokeWidth_ = 2;
+    RefPtr<ProgressModifier> progressModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };

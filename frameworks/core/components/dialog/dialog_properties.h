@@ -31,6 +31,8 @@ enum class DialogType {
     COMMON = 0,
     ALERT_DIALOG,
     ACTION_SHEET,
+    CHECKBOX_DIALOG,
+    PROGRESS_DIALOG,
 };
 
 // Alignment of dialog in vertical.
@@ -121,6 +123,7 @@ struct DialogProperties {
     DialogType type = DialogType::COMMON; // type of dialog, current support common dialog and alert dialog.
     std::string title;                    // title of dialog.
     std::string content;                  // message of dialog.
+    std::string checkboxContent;          // message of checkbox.
     bool autoCancel = true;               // pop dialog when click mask if autoCancel is true.
     bool customStyle = false;             // when true, dialog doesn't paint background or constraint child size.
     bool isMenu = false;
@@ -128,6 +131,7 @@ struct DialogProperties {
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
     std::function<void()> onCancel;                         // NG cancel callback
     std::function<void(int32_t, int32_t)> onSuccess;        // NG prompt success callback
+    std::function<void(const bool)> onChange;               // onChange success callback
     DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
     DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
     int32_t gridCount = 0;

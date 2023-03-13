@@ -20,7 +20,6 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/components_ng/render/paint.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -63,7 +62,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto offset = contentOffset_->Get();
-    auto passwordIconCanvasImage = textFieldPattern->GetTextObscured()
+    auto passwordIconCanvasImage = textObscured_->Get()
                                        ? textFieldPattern->GetHidePasswordIconCanvasImage()
                                        : textFieldPattern->GetShowPasswordIconCanvasImage();
     auto paragraph = textFieldPattern->GetParagraph();
@@ -133,7 +132,9 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     CHECK_NULL_VOID(pipelineContext);
     theme = pipelineContext->GetTheme<TextFieldTheme>();
     auto themePaddingTop = theme->GetPadding().Top().ConvertToPx();
-    
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+
+    textObscured_ = AceType::MakeRefPtr<PropertyBool>(textFieldPattern->GetTextObscured());
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
@@ -142,6 +143,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
     AttachProperty(textRectY_);
+    AttachProperty(textObscured_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -240,6 +242,13 @@ void TextFieldContentModifier::SetTextRectY(const float value)
 {
     if (textRectY_->Get() != value) {
         textRectY_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetTextObscured(bool value)
+{
+    if (textObscured_) {
+        textObscured_->Set(value);
     }
 }
 

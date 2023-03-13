@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1237,7 +1237,7 @@ HWTEST_F(ListTestNg, ListItemGroupLayoutTest002, TestSize.Level1)
 
 /**
  * @tc.name: ListEventTest001
- * @tc.desc: Verify callback function
+ * @tc.desc: Verify onScroll, onScrollIndex, onReachStart, onReachEnd callback
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
@@ -1287,8 +1287,8 @@ HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
      * @tc.steps: step5. Scroll 100px, RunMeasureAndLayout and check onScroll, onScrollIndex called.
      * @tc.expected: The onScroll, onScrollIndex callback is called.
      */
-    constexpr float SCROLL_OFFSET1 = -100.f;
-    pattern->UpdateCurrentOffset(SCROLL_OFFSET1, SCROLL_FROM_UPDATE);
+    const float scrollOffset1 = -100.f;
+    pattern->UpdateCurrentOffset(scrollOffset1, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
     EXPECT_TRUE(isScrollEventCalled);
     EXPECT_TRUE(isScrollIndexEventCalled);
@@ -1297,9 +1297,100 @@ HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
      * @tc.steps: step6. Scroll 100px, RunMeasureAndLayout and check onReachEnd called.
      * @tc.expected: The onReachEnd callback is called.
      */
-    constexpr float SCROLL_OFFSET2 = -100.f;
-    pattern->UpdateCurrentOffset(SCROLL_OFFSET2, SCROLL_FROM_UPDATE);
+    const float scrollOffset2 = -100.f;
+    pattern->UpdateCurrentOffset(scrollOffset2, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
     EXPECT_TRUE(isReachEndEventCalled);
+}
+
+/**
+ * @tc.name: ListEventTest002
+ * @tc.desc: Verify onItemDragStart, onItemDragEnter, onItemDragMove, onItemDragLeave, onItemDrop callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListEventTest002, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 10;
+
+    /**
+     * @tc.steps: step1. Create List.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Create listItem.
+     */
+    RefPtr<FrameNode> dragItem;
+    for (int32_t i = 0; i < ITEM_COUNT; i++) {
+        ListItemModelNG listItemModel;
+        listItemModel.Create();
+        SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+        SetWidth(DEFAULT_ITEM_CROSS_SIZE);
+        if (i == 0) {
+            dragItem = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    /**
+     * @tc.steps: step3. Set callback founction to list.
+     */
+    bool isItemDragStartEventCalled = false;
+    auto itemDragStartEvent = [&isItemDragStartEventCalled, &dragItem](const ItemDragInfo&, int32_t) {
+        isItemDragStartEventCalled = true;
+        return dragItem;
+    };
+    auto itemDragEnterEvent = [](const ItemDragInfo&) {};
+    auto itemDragLeaveEvent = [](const ItemDragInfo&, int32_t) {};
+    auto itemDragMoveEvent = [](const ItemDragInfo&, int32_t, int32_t) {};
+    auto itemDropEvent = [](const ItemDragInfo&, int32_t, int32_t, bool) {};
+    listModelNG.SetOnItemDragStart(itemDragStartEvent);
+    listModelNG.SetOnItemDragEnter(itemDragEnterEvent);
+    listModelNG.SetOnItemDragLeave(itemDragLeaveEvent);
+    listModelNG.SetOnItemDragMove(itemDragMoveEvent);
+    listModelNG.SetOnItemDrop(itemDropEvent);
+
+    /**
+     * @tc.steps: step4. Get frameNode, eventHub.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step5. Check callback is set.
+     * @tc.expected: Callback is Set.
+     */
+    EXPECT_NE(eventHub->GetOnItemDragStart(), nullptr);
+    EXPECT_NE(eventHub->GetOnItemDragEnter(), nullptr);
+    EXPECT_NE(eventHub->GetOnItemDragLeave(), nullptr);
+    EXPECT_NE(eventHub->GetOnItemDragMove(), nullptr);
+    EXPECT_NE(eventHub->GetOnItemDrop(), nullptr);
+
+    /**
+     * @tc.steps: step6. Trigger HandleOnItemDragStart.
+     * @tc.expected: Callback is called.
+     */
+    GestureEvent info;
+    Point globalPoint = Point(50.f, 150.f);
+    info.SetGlobalPoint(globalPoint);
+    eventHub->HandleOnItemDragStart(info);
+    EXPECT_TRUE(isItemDragStartEventCalled);
+
+    /**
+     * @tc.steps: step7. Trigger HandleOnItemDragUpdate and HandleOnItemDragEnd.
+     */
+    eventHub->HandleOnItemDragUpdate(info);
+    eventHub->HandleOnItemDragEnd(info);
+
+    /**
+     * @tc.steps: step8. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate and HandleOnItemDragCancel.
+     */
+    eventHub->HandleOnItemDragStart(info);
+    eventHub->HandleOnItemDragUpdate(info);
+    eventHub->HandleOnItemDragCancel();
 }
 } // namespace OHOS::Ace::NG

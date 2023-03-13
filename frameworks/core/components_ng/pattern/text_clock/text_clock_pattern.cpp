@@ -23,7 +23,6 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/pipeline/base/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -193,6 +192,10 @@ int32_t TextClockPattern::GetHoursWest() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_RETURN(textClockLayoutProperty, GetSystemTimeZone());
-    return textClockLayoutProperty->GetHoursWest().value_or(GetSystemTimeZone());
+    if (textClockLayoutProperty->GetHoursWest().has_value()) {
+        return NearEqual(textClockLayoutProperty->GetHoursWest().value(), INT_MAX) ?
+            GetSystemTimeZone() : textClockLayoutProperty->GetHoursWest().value();
+    }
+    return GetSystemTimeZone();
 }
 } // namespace OHOS::Ace::NG

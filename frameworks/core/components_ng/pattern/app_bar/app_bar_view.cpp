@@ -41,6 +41,7 @@ RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
     auto titleBar = BuildBarTitle();
     column->AddChild(titleBar);
     column->AddChild(content);
+    content->GetLayoutProperty()->UpdateLayoutWeight(1.0f);
     auto stagePattern = content->GetPattern<StagePattern>();
     if (stagePattern) {
         stagePattern->SetOnRebuildFrameCallback([titleBar, content]() {
@@ -115,9 +116,9 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
                  "emulator or a real device instead.");
 #else
             if (pipeline && appBarTheme) {
-                pipeline->FireSharePanelCallback(appBarTheme->GetServiceBundleName(),
-                    appBarTheme->GetServiceAbilityName(), appBarTheme->GetServiceModuleName(),
-                    appBarTheme->GetServiceHostPkgName(), appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
+                LOGI("start panel bundleName is %{public}s, abilityName is %{public}s",
+                    appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
+                pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
             }
 #endif
         }, false));

@@ -55,6 +55,7 @@ public:
     }
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void EraseIndexerPopup(int32_t targetId);
+    void RemoveIndexerPopup(RefPtr<FrameNode>& overlaynode);
     RefPtr<FrameNode> GetIndexerPopup(int32_t targetId);
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
@@ -80,14 +81,15 @@ public:
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft = false);
+    void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> timePickerProperty,
-        bool isUseMilitaryTime, std::map<std::string, NG::DialogEvent> dialogEvent,
+    void ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
+        std::map<std::string, PickerTime> timePickerProperty, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
-    void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
-        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    void ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
+        std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
 
     void CloseDialog(const RefPtr<FrameNode>& dialogNode);

@@ -127,6 +127,7 @@ private:
     bool IsOutOfBoundary(double mainOffset) const;
     void OnClick();
     void AddHotZoneRect();
+    void RemoveLastHotZoneRect() const;
 
     RefPtr<PanEvent> panEvent_;
 
@@ -151,6 +152,7 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    bool isFirstAddhotZoneRect_ = true;
 
     RefPtr<SwitchModifier> switchModifier_;
 

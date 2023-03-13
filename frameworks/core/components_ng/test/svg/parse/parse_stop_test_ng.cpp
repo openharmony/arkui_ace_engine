@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/svg/svg_stop_declaration.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
 #include "core/components_ng/svg/parse/svg_defs.h"
 #include "core/components_ng/svg/parse/svg_stop.h"

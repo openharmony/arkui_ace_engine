@@ -24,7 +24,6 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_object.h"

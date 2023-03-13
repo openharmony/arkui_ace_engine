@@ -88,11 +88,25 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("backdropBlur", propBlurRadius.value_or(0.0_vp).Value());
     auto jsonShadow = JsonUtil::Create(true);
     auto shadow = propBackShadow.value_or(Shadow());
-    jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
-    jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
-    jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
-    jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
-    json->Put("shadow", jsonShadow);
+    if (shadow.GetStyle() == ShadowStyle::OuterDefaultXS) {
+        json->Put("shadow", "ShadowStyle.OuterDefaultXS");
+    } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultSM) {
+        json->Put("shadow", "ShadowStyle.OuterDefaultSM");
+    } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultMD) {
+        json->Put("shadow", "ShadowStyle.OuterDefaultMD");
+    } else if (shadow.GetStyle() == ShadowStyle::OuterDefaultLG) {
+        json->Put("shadow", "ShadowStyle.OuterDefaultLG");
+    } else if (shadow.GetStyle() == ShadowStyle::OuterFloatingSM) {
+        json->Put("shadow", "ShadowStyle.OuterFloatingSM");
+    } else if (shadow.GetStyle() == ShadowStyle::OuterFloatingMD) {
+        json->Put("shadow", "ShadowStyle.OuterFloatingMD");
+    } else {
+        jsonShadow->Put("radius", std::to_string(shadow.GetBlurRadius()).c_str());
+        jsonShadow->Put("color", shadow.GetColor().ColorToString().c_str());
+        jsonShadow->Put("offsetX", std::to_string(shadow.GetOffset().GetX()).c_str());
+        jsonShadow->Put("offsetY", std::to_string(shadow.GetOffset().GetY()).c_str());
+        json->Put("shadow", jsonShadow);
+    }
 }
 
 void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const

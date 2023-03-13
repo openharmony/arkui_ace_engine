@@ -19,6 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/svg/svg_context.h"
+#include "frameworks/core/components_ng/render/drawing.h"
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"

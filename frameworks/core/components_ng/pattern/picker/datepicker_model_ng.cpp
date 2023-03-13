@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -194,5 +194,50 @@ void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
     auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void DatePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(theme);
+    auto disappearStyle = theme->GetDisappearOptionStyle();
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DisappearFontSize, value.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, DisappearWeight, value.fontWeight.value_or(disappearStyle.GetFontWeight()));
+}
+
+void DatePickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(theme);
+    auto normalStyle = theme->GetOptionStyle(false, false);
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontSize, value.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, FontSize, normalStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
+}
+
+void DatePickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
+{
+    CHECK_NULL_VOID(theme);
+    auto selectedStyle = theme->GetOptionStyle(true, false);
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedFontSize, value.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        DataPickerRowLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
@@ -144,6 +145,31 @@ public:
         return refereeNG_;
     }
 
+    void DispatchKeyboardShortcut(const KeyEvent& event);
+
+    void AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node);
+
+    void DelKeyboardShortcutNode(int32_t nodeId);
+
+    bool IsSameKeyboardShortcutNode(char value, uint8_t keys);
+
+    bool IsSystemKeyboardShortcut(char value, uint8_t keys);
+
+    uint8_t GetKeyboardShortcutKeys(const std::vector<CtrlKey>& keys);
+
+    void AddKeyboardShortcutKeys(uint8_t keys, std::vector<KeyCode>& leftKeyCode, std::vector<KeyCode>& rightKeyCode,
+        std::vector<uint8_t>& permutation);
+
+    bool IsKeyInPressed(KeyCode tarCode) const
+    {
+        return std::any_of(pressedKeyCodes_.begin(), pressedKeyCodes_.end(),
+            [tarCode](const KeyCode& code) { return code == tarCode; });
+    }
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -163,6 +189,8 @@ private:
     bool inSelectedRect_ = false;
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
+    std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 } // namespace OHOS::Ace
