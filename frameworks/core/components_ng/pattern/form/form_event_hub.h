@@ -52,6 +52,11 @@ public:
         onRouter_ = std::move(onRouter);
     }
 
+    void SetOnLoad(FormCallback&& onLoad)
+    {
+        onLoad_ = std::move(onLoad);
+    }
+
     void FireOnAcquired(const std::string& param) const
     {
         if (onAcquired_) {
@@ -80,11 +85,19 @@ public:
         }
     }
 
+    void FireOnLoad(const std::string& param) const
+    {
+        if (onLoad_) {
+            onLoad_(param);
+        }
+    }
+
 private:
     FormCallback onAcquired_;
     FormCallback onError_;
     FormCallback onUninstall_;
     FormCallback onRouter_;
+    FormCallback onLoad_;
 };
 
 } // namespace OHOS::Ace::NG

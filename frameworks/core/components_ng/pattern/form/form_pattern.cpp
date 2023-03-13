@@ -249,6 +249,7 @@ void FormPattern::InitFormManagerDelegate()
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
             host->GetRenderContext()->RequestNextFrame();
+            formComponent->OnLoadEvent();
     });
 
     formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height) {
@@ -315,6 +316,12 @@ void FormPattern::CreateCardContainer()
             LOGI("card id:%{public}zu", id);
             pattern->FireOnAcquiredEvent(id);
         });
+    });
+
+    subContainer_->SetFormLoadCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnLoadEvent();
     });
 }
 
@@ -405,6 +412,30 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) co
     auto json = JsonUtil::Create(true);
     json->Put("action", action);
     eventHub->FireOnRouter(json->ToString());
+}
+
+void FormPattern::FireOnLoadEvent() const
+{
+    LOGI("FireOnLoadEvent");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnLoad("");
+}
+
+void FormPattern::OnLoadEvent()
+{
+    LOGI("OnLoadEvent");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uiTaskExecutor =
+        SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireOnLoadEvent();
+    });
 }
 
 void FormPattern::OnActionEvent(const std::string& action) const
