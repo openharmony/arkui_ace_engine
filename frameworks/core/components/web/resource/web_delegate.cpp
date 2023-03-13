@@ -4051,11 +4051,10 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
             auto propOnLoadInterceptEvent = webEventHub->GetOnLoadInterceptEvent();
             CHECK_NULL_VOID(propOnLoadInterceptEvent);
             result = propOnLoadInterceptEvent(param);
-        } else {
-            auto webCom = delegate->webComponent_.Upgrade();
-            CHECK_NULL_VOID(webCom);
-            result = webCom->OnLoadIntercept(param.get());
         }
+        auto webCom = delegate->webComponent_.Upgrade();
+        CHECK_NULL_VOID(webCom);
+        result = webCom->OnLoadIntercept(param.get());
     });
     return result;
 }
