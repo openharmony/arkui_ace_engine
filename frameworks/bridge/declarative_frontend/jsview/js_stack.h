@@ -28,6 +28,7 @@ public:
     static void SetStackFit(int value);
     static void SetOverflow(int value);
     static void SetAlignment(int value);
+    static void SetAlignmentContent(int value);
     static void SetWidth(const JSCallbackInfo& info);
     static void SetHeight(const JSCallbackInfo& info);
     static void SetWidth(const JSRef<JSVal>& jsValue);
