@@ -129,18 +129,10 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
 LinearVector<float> DotIndicatorModifier::GetItemHalfSizes(size_t index, ContentProperty& contentProperty)
 {
     if (normalToHoverIndex_.has_value() && normalToHoverIndex_ == index) {
-        contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] *= contentProperty.normalToHoverPointDilateRatio;
-        contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] *= contentProperty.normalToHoverPointDilateRatio;
-        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] *= contentProperty.normalToHoverPointDilateRatio;
-        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] *= contentProperty.normalToHoverPointDilateRatio;
-        return contentProperty.itemHalfSizes;
+        return contentProperty.itemHalfSizes * contentProperty.normalToHoverPointDilateRatio;
     }
     if (hoverToNormalIndex_.has_value() && hoverToNormalIndex_ == index) {
-        contentProperty.itemHalfSizes[ITEM_HALF_WIDTH] *= contentProperty.hoverToNormalPointDilateRatio;
-        contentProperty.itemHalfSizes[ITEM_HALF_HEIGHT] *= contentProperty.hoverToNormalPointDilateRatio;
-        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] *= contentProperty.hoverToNormalPointDilateRatio;
-        contentProperty.itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] *= contentProperty.hoverToNormalPointDilateRatio;
-        return contentProperty.itemHalfSizes;
+        return contentProperty.itemHalfSizes * contentProperty.hoverToNormalPointDilateRatio;
     }
     return contentProperty.itemHalfSizes;
 }
@@ -176,11 +168,11 @@ void DotIndicatorModifier::PaintSelectedIndicator(
     brush.SetColor(ToRSColor(selectedColor_));
     canvas.AttachBrush(brush);
     float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() :
-        leftCenter.GetY()) - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+        leftCenter.GetY()) - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5f;
     float rectTop = (axis_ == Axis::HORIZONTAL ? leftCenter.GetY() :
         leftCenter.GetX()) - itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
     float rectRight = (axis_ == Axis::HORIZONTAL ? rightCenter.GetX() :
-        rightCenter.GetY()) + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+        rightCenter.GetY()) + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5f;
     float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() :
         rightCenter.GetX()) + itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
     canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },

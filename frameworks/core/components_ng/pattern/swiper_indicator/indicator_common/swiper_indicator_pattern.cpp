@@ -355,7 +355,8 @@ void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayou
 
 void SwiperIndicatorPattern::UpdateTextContentSub(
     const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
-    const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode) {
+    const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode)
+{
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto pipeline = PipelineBase::GetCurrentContext();
