@@ -86,5 +86,6 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         "BlurStyle.BackgroundThick", "BlurStyle.BackgroundUltraThick"};
     json->Put("backgroundBlurStyle", STYLE[static_cast<int>(
         GetBackBlurStyle().value_or(BlurStyleOption()).blurStyle)]);
+    json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
 }
 } // namespace OHOS::Ace::NG
