@@ -107,6 +107,7 @@ void MountTitleBar(const RefPtr<NavDestinationGroupNode>& hostNode)
 
 void NavDestinationPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     MountTitleBar(hostNode);

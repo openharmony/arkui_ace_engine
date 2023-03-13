@@ -19,6 +19,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
 #include "bridge/declarative_frontend/jsview/models/plugin_model_impl.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components_ng/pattern/plugin/plugin_model.h"
 #include "core/components_ng/pattern/plugin/plugin_model_ng.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
@@ -73,7 +74,10 @@ void JSPlugin::Create(const JSCallbackInfo& info)
         LOGD("JSPlugin::Create: source=%{public}s bundleName=%{public}s", pluginInfo.pluginName.c_str(),
             pluginInfo.bundleName.c_str());
     }
-
+    if (pluginInfo.bundleName.size() > PATH_MAX || pluginInfo.pluginName.size() > PATH_MAX) {
+        LOGE("the source path or the bundleName is too long");
+        return;
+    }
     // Parse data
     auto dataValue = obj->GetProperty("data");
 
@@ -85,11 +89,6 @@ void JSPlugin::Create(const JSCallbackInfo& info)
 
 void JSPlugin::JsSize(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsSize(info);
-        return;
-    }
-
     if (info.Length() == 0) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
@@ -114,6 +113,44 @@ void JSPlugin::JsSize(const JSCallbackInfo& info)
         return;
     }
     PluginModel::GetInstance()->SetPluginSize(width.IsValid() ? width : 0.0_vp, height.IsValid() ? height : 0.0_vp);
+}
+
+void JSPlugin::JsWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+
+    PluginModel::GetInstance()->SetWidth(value.IsValid() ? value : 0.0_vp);
+}
+
+void JSPlugin::JsHeight(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Dimension value;
+    if (!ParseJsDimensionVp(info[0], value)) {
+        return;
+    }
+
+    if (LessNotEqual(value.Value(), 0.0)) {
+        value.SetValue(0.0);
+    }
+
+    PluginModel::GetInstance()->SetHeight(value.IsValid() ? value : 0.0_vp);
 }
 
 void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
@@ -155,7 +192,8 @@ void JSPlugin::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSPlugin>::StaticMethod("create", &JSPlugin::Create, opt);
     JSClass<JSPlugin>::StaticMethod("size", &JSPlugin::JsSize, opt);
-
+    JSClass<JSPlugin>::StaticMethod("width", &JSPlugin::JsWidth);
+    JSClass<JSPlugin>::StaticMethod("height", &JSPlugin::JsHeight);
     JSClass<JSPlugin>::StaticMethod("onComplete", &JSPlugin::JsOnComplete);
     JSClass<JSPlugin>::StaticMethod("onError", &JSPlugin::JsOnError);
     JSClass<JSPlugin>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);

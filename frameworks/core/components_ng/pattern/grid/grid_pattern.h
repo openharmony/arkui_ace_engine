@@ -20,6 +20,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -49,12 +50,14 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<ScrollablePaintProperty>();
-    }
+    RefPtr<PaintProperty> CreatePaintProperty() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<GridAccessibilityProperty>();
+    }
 
     bool IsScrollable() const override
     {
@@ -148,12 +151,27 @@ public:
 
     bool OnScrollCallback(float offset, int32_t source) override;
 
+    int32_t GetInsertPosition(float x, float y) const;
+    int32_t GetOriginalIndex() const;
+    int32_t GetCrossCount() const;
+    int32_t GetChildrenCount() const;
+    void MoveItems(int32_t itemIndex, int32_t insertIndex);
+    void ClearDragState();
+    void UpdateRectOfDraggedInItem(int32_t insertIndex);
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     float GetMainContentSize() const;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    std::pair<int32_t, int32_t> GetNextIndexByStep(
+        int32_t curMainIndex, int32_t curCrossIndex, int32_t curMainSpan, int32_t curCrossSpan, FocusStep step);
+    WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t mainIndex, int32_t crossIndex, int32_t maxCrossCount);
+    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex);
+    void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
+    std::pair<FocusStep, FocusStep> GetFocusSteps(
+        int32_t curCrossIndex, int32_t curMaxCrossCount, FocusStep step) const;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);

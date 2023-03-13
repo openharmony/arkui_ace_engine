@@ -75,6 +75,33 @@ void FormRendererDispatcherProxy::SetAllowUpdate(bool allowUpdate)
     }
 }
 
+void FormRendererDispatcherProxy::DispatchSurfaceChangeEvent(float width, float height)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return;
+    }
+
+    if (!data.WriteFloat(width)) {
+        HILOG_ERROR("write width fail, action error");
+        return;
+    }
+
+    if (!data.WriteFloat(height)) {
+        HILOG_ERROR("write height fail, action error");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_SURFACE_CHANGE_EVENT), data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+    }
+}
+
 bool FormRendererDispatcherProxy::WriteInterfaceToken(MessageParcel &data)
 {
     if (!data.WriteInterfaceToken(FormRendererDispatcherProxy::GetDescriptor())) {

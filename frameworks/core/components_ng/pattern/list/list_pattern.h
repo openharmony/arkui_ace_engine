@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_PATTERN_H
 
-#include "core/animation/bilateral_spring_adapter.h"
-#include "core/animation/simple_spring_chain.h"
+#include "core/animation/chain_animation.h"
 #include "core/components_ng/event/event_hub.h"
+#include "core/components_ng/pattern/list/list_accessibility_property.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
@@ -84,7 +84,14 @@ public:
         return MakeRefPtr<ListEventHub>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ListAccessibilityProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
@@ -120,6 +127,7 @@ public:
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    bool OutBoundaryCallback() override;
 
     FocusPattern GetFocusPattern() const override
     {
@@ -160,15 +168,15 @@ public:
     void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
+    void ScrollBy(float offset);
     Offset GetCurrentOffset() const;
 
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation(bool enable);
-    void InitChainAnimation(int32_t nodeCount);
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
-    void ProcessDragUpdate(float dragOffset);
+    void ProcessDragUpdate(float dragOffset, int32_t source);
     float GetChainDelta(int32_t index) const;
 
     // multiSelectable
@@ -192,7 +200,7 @@ private:
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
     float GetMainContentSize() const;
-    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump);
+    void ProcessEvent(bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true);
     bool OnScrollCallback(float offset, int32_t source) override;
@@ -200,6 +208,9 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void FireOnScrollStart();
+    void FireOnScrollStop();
+    void CheckRestartSpring();
+    void StopAnimate();
 
     // multiSelectable
     void InitMouseEvent();
@@ -207,6 +218,8 @@ private:
     void ClearSelectedZone();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     void MultiSelectWithoutKeyboard(const RectF& selectedZone);
+
+    void DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     RefPtr<Animator> animator_;
     RefPtr<ListPositionController> positionController_;
@@ -220,16 +233,21 @@ private:
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
+    float contentMainSize_ = 0.0f;
 
     float currentDelta_ = 0.0f;
+    bool crossMatchChild_ = false;
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
     int32_t scrollIndex_ = 0;
     bool scrollable_ = true;
+    bool paintStateFlag_ = false;
+    bool isFramePaintStateValid_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
     bool scrollStop_ = false;
+    bool scrollAbort_ = false;
     int32_t scrollState_ = SCROLL_FROM_NONE;
 
     std::list<WeakPtr<FrameNode>> itemGroupList_;
@@ -237,13 +255,9 @@ private:
     int32_t lanes_ = 1;
 
     // chain animation
-    SpringChainProperty chainProperty_;
-    RefPtr<SpringProperty> overSpringProperty_;
-    RefPtr<BilateralSpringAdapter> chainAdapter_;
-    RefPtr<SimpleSpringChain> chain_;
-    bool chainOverScroll_ = false;
-    int32_t dragStartIndexPending_ = 0;
-    int32_t dragStartIndex_ = 0;
+    RefPtr<ChainAnimation> chainAnimation_;
+    bool dragFromSpring_ = false;
+    RefPtr<SpringProperty> springProperty_;
 
     // multiSelectable
     bool multiSelectable_ = false;

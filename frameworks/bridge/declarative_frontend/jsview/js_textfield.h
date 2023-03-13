@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,10 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/core/components/text_field/text_field_controller.h"
 #include "frameworks/core/components/text_field/text_field_component.h"
+#include "frameworks/core/components/text_field/text_field_controller.h"
 #include "frameworks/core/components/text_field/textfield_theme.h"
+#include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -35,7 +36,10 @@ public:
     static void SetEnterKeyType(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetCaretColor(const JSCallbackInfo& info);
-    static void SetMaxLength(uint32_t value);
+    static void SetCaretStyle(const JSCallbackInfo &info);
+    static void SetCaretPosition(const JSCallbackInfo& info);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
+    static void SetMaxLength(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
@@ -64,6 +68,8 @@ public:
     static void SetCopyOption(const JSCallbackInfo& info);
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,
         const Border& boxBorder, const RefPtr<TextFieldTheme>& textFieldTheme);
+    static void JsMenuOptionsExtension(const JSCallbackInfo& info);
+    static void SetForegroundColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

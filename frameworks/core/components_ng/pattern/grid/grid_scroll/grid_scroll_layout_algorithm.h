@@ -77,8 +77,7 @@ private:
     void InitialItemsCrossSize(const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize);
     bool IsIndexInMatrix(int32_t index, int32_t& startLine);
     void UpdateGridLayoutInfo(LayoutWrapper* layoutWrapper, float mainSize);
-    void GetTargetIndexInfoWithBenchMark(
-        LayoutWrapper* layoutWrapper, int32_t benchmarkIndex, int32_t mainStartIndex, int32_t targetIndex);
+    void GetTargetIndexInfoWithBenchMark(LayoutWrapper* layoutWrapper, bool isTargetBackward, int32_t targetIndex);
 
     void UpdateOffsetOnVirtualKeyboardHeightChange(LayoutWrapper* layoutWrapper, float mainSize);
     void AdaptToChildMainSize(LayoutWrapper* layoutWrapper, RefPtr<GridLayoutProperty>& gridLayoutProperty,
@@ -89,10 +88,13 @@ private:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
+    int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.
     Axis axis_ = Axis::VERTICAL;
 
     float mainGap_ = 0;
+    float crossGap_ = 0;
+    float crossPaddingOffset_ = 0;
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;

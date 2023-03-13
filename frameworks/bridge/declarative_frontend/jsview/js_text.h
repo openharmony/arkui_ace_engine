@@ -21,6 +21,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/pattern/text/text_menu_extension.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -33,10 +34,11 @@ public:
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
+    static void SetTextShadow(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);
-    static void SetAlign(const JSCallbackInfo &info);
+    static void SetAlign(const JSCallbackInfo& info);
     static void SetTextAlign(int32_t value);
     static void SetLineHeight(const JSCallbackInfo& info);
     static void SetFontFamily(const JSCallbackInfo& info);
@@ -47,6 +49,7 @@ public:
     static void SetBaselineOffset(const JSCallbackInfo& info);
     static void SetDecoration(const JSCallbackInfo& info);
     static void SetCopyOption(const JSCallbackInfo& info);
+    static void SetHeightAdaptivePolicy(int32_t value);
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void JsOnDragStart(const JSCallbackInfo& info);
@@ -55,6 +58,8 @@ public:
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
+    static void JsDraggable(const JSCallbackInfo& info);
+    static void JsMenuOptionsExtension(const JSCallbackInfo& info);
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

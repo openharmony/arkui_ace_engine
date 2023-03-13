@@ -104,9 +104,20 @@ void JSVideo::JsLoop(bool loop)
     VideoModel::GetInstance()->SetLoop(loop);
 }
 
-void JSVideo::JsObjectFit(int32_t objectFit)
+void JSVideo::JsObjectFit(const JSCallbackInfo& info)
 {
-    VideoModel::GetInstance()->SetObjectFit(static_cast<ImageFit>(objectFit));
+    ImageFit imageFit = ImageFit::COVER;
+    // The default value of Imagefit is FILL, but in the video the default value is COVER.
+    // So the default value need to be converted.
+    if (info[0]->IsUndefined()) {
+        LOGW("JSVideo: objectfit is undefined.");
+        VideoModel::GetInstance()->SetObjectFit(imageFit);
+        return;
+    }
+    if (info[0]->IsNumber()) {
+        imageFit = static_cast<ImageFit>(info[0]->ToNumber<int>());
+    }
+    VideoModel::GetInstance()->SetObjectFit(imageFit);
 }
 
 void JSVideo::JsOnStart(const JSCallbackInfo& args)

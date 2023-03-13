@@ -23,8 +23,6 @@
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/canvas.h"
-#include "core/pipeline/base/render_context.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
@@ -106,6 +104,7 @@ bool MarqueePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*dir
 
 void MarqueePattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();

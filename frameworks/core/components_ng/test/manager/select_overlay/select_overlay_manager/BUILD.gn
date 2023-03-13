@@ -40,7 +40,6 @@ ohos_unittest("select_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
 
     # mock
-    "$ace_root/frameworks/core/common/test/mock/mock_container.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_ui_node.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/layout/mock_box_layout_algorithm.cpp",
@@ -51,6 +50,7 @@ ohos_unittest("select_overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
 
     # self
     "select_overlay_manager_test_ng.cpp",
@@ -60,13 +60,13 @@ ohos_unittest("select_overlay_manager_test_ng") {
 
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$cjson_root:cjson",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics:2d_graphics",
     "//third_party/googletest:gmock_main",
   ]
 
   configs = [
-    "$ace_root:ace_test_coverage_config",
     "$ace_root:ace_test_config",
     "$ace_root:ace_config",
     "$ace_flutter_engine_root/skia:skia_config",

@@ -20,11 +20,18 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
+#include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float START_OPACITY = 0.0f;
+constexpr float END_OPACITY = 0.1f;
+constexpr int32_t DURATION = 100;
+} // namespace
+
 void ButtonPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -52,6 +59,46 @@ void ButtonPattern::SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, co
     renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor());
 }
 
+void ButtonPattern::UpdateTextLayoutProperty(RefPtr<ButtonLayoutProperty> layoutProperty,
+    RefPtr<TextLayoutProperty> textLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    auto label = layoutProperty->GetLabelValue("");
+    textLayoutProperty->UpdateContent(label);
+    if (layoutProperty->GetFontSize().has_value()) {
+        textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
+    }
+    if (layoutProperty->GetFontWeight().has_value()) {
+        textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
+    }
+    if (layoutProperty->GetFontColor().has_value()) {
+        textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value());
+    }
+    if (layoutProperty->GetFontStyle().has_value()) {
+        textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetFontStyle().value());
+    }
+    if (layoutProperty->GetFontFamily().has_value()) {
+        textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
+    }
+    if (layoutProperty->GetTextOverflow().has_value()) {
+        textLayoutProperty->UpdateTextOverflow(layoutProperty->GetTextOverflow().value());
+    }
+    if (layoutProperty->GetMaxLines().has_value()) {
+        textLayoutProperty->UpdateMaxLines(layoutProperty->GetMaxLines().value());
+    }
+    if (layoutProperty->GetMinFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(layoutProperty->GetMinFontSize().value());
+    }
+    if (layoutProperty->GetMaxFontSize().has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(layoutProperty->GetMaxFontSize().value());
+    }
+    if (layoutProperty->GetHeightAdaptivePolicy().has_value()) {
+        textLayoutProperty->UpdateHeightAdaptivePolicy(layoutProperty->GetHeightAdaptivePolicy().value());
+    }
+}
+
 void ButtonPattern::InitButtonLabel()
 {
     auto host = GetHost();
@@ -75,30 +122,14 @@ void ButtonPattern::InitButtonLabel()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto label = layoutProperty->GetLabelValue("");
-    textLayoutProperty->UpdateContent(label);
-
-    if (layoutProperty->GetFontSize().has_value()) {
-        textLayoutProperty->UpdateFontSize(layoutProperty->GetFontSize().value());
-    }
-    if (layoutProperty->GetFontWeight().has_value()) {
-        textLayoutProperty->UpdateFontWeight(layoutProperty->GetFontWeight().value());
-    }
-    if (layoutProperty->GetFontColor().has_value()) {
-        textLayoutProperty->UpdateTextColor(layoutProperty->GetFontColor().value());
-    }
-    if (layoutProperty->GetFontStyle().has_value()) {
-        textLayoutProperty->UpdateItalicFontStyle(layoutProperty->GetFontStyle().value());
-    }
-    if (layoutProperty->GetFontFamily().has_value()) {
-        textLayoutProperty->UpdateFontFamily(layoutProperty->GetFontFamily().value());
-    }
+    UpdateTextLayoutProperty(layoutProperty, textLayoutProperty);
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
 }
 
 void ButtonPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitButtonLabel();
@@ -117,6 +148,7 @@ void ButtonPattern::InitTouchEvent()
     CHECK_NULL_VOID(gesture);
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto buttonPattern = weak.Upgrade();
+        CHECK_NULL_VOID(buttonPattern);
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             buttonPattern->OnTouchDown();
         }
@@ -145,7 +177,7 @@ void ButtonPattern::OnTouchDown()
             return;
         }
         // for system default
-        renderContext->BlendBgColor(clickedColor_);
+        AnimateTouchEffectBoard(START_OPACITY, END_OPACITY, DURATION, Curves::SHARP);
     }
 }
 
@@ -161,7 +193,7 @@ void ButtonPattern::OnTouchUp()
             renderContext->UpdateBackgroundColor(backgroundColor_);
             return;
         }
-        renderContext->ResetBlendBgColor();
+        AnimateTouchEffectBoard(END_OPACITY, START_OPACITY, DURATION, Curves::SHARP);
     }
 }
 
@@ -178,12 +210,38 @@ void ButtonPattern::HandleEnabled()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
+    auto alpha = theme->GetBgDisabledAlpha();
+    auto backgroundColor = renderContext->GetBackgroundColor().value_or(theme->GetBgColor());
     if (!enabled) {
-        auto alpha = theme->GetBgDisabledAlpha();
-        renderContext->BlendBgColor(Color::WHITE.BlendOpacity(alpha));
+        renderContext->OnBackgroundColorUpdate(backgroundColor.BlendOpacity(alpha));
     } else {
-        renderContext->ResetBlendBgColor();
+        renderContext->OnBackgroundColorUpdate(backgroundColor);
     }
+}
+
+void ButtonPattern::AnimateTouchEffectBoard(
+    float startOpacity, float endOpacity, int32_t duration, const RefPtr<Curve>& curve)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
+    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
+    if (startOpacity > endOpacity) {
+        auto toggleButtonPattern = host->GetPattern<ToggleButtonPattern>();
+        if (toggleButtonPattern) {
+            toggleButtonPattern->OnClick();
+        }
+    }
+    Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
+    Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
+    renderContext->OnBackgroundColorUpdate(highlightStart);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(duration);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
 }
 
 } // namespace OHOS::Ace::NG

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "render_service_client/core/animation/rs_animation.h"
 #include "render_service_client/core/ui/rs_node.h"
 
 #include "core/animation/native_curve_helper.h"
@@ -37,6 +38,13 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
 }
 } // namespace
 
+class AnimationUtils::Animation {
+private:
+    std::vector<std::shared_ptr<OHOS::Rosen::RSAnimation>> animations_;
+
+    friend AnimationUtils;
+};
+
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& wrapFinishCallback)
 {
@@ -56,5 +64,41 @@ void AnimationUtils::Animate(
     const auto& timingProtocol = OptionToTimingProtocol(option);
     Rosen::RSNode::Animate(
         timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback);
+}
+
+void AnimationUtils::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    Rosen::RSNode::AddKeyFrame(fraction, NativeCurveHelper::ToNativeCurve(curve), callback);
+}
+
+void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callback)
+{
+    Rosen::RSNode::AddKeyFrame(fraction, callback);
+}
+
+std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(
+    const AnimationOption& option, const PropertyCallback& callback, const FinishCallback& finishCallback)
+{
+    std::shared_ptr<AnimationUtils::Animation> animation = std::make_shared<AnimationUtils::Animation>();
+    CHECK_NULL_RETURN(animation, nullptr);
+    const auto& timingProtocol = OptionToTimingProtocol(option);
+    animation->animations_ = Rosen::RSNode::Animate(
+        timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback, finishCallback);
+    if (animation->animations_.size()) {
+        return animation;
+    } else {
+        return nullptr;
+    }
+}
+
+void AnimationUtils::StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation)
+{
+    CHECK_NULL_VOID(animation);
+    if (animation->animations_.size()) {
+        for (auto& ani: animation->animations_) {
+            ani->Finish();
+        }
+        animation->animations_.clear();
+    }
 }
 } // namespace OHOS::Ace

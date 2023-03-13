@@ -117,12 +117,6 @@ RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(const WeakPtr<PipelineBas
     cacheBitmap_.eraseColor(SK_ColorTRANSPARENT);
     skCanvas_ = std::make_unique<SkCanvas>(skBitmap_);
     cacheCanvas_ = std::make_unique<SkCanvas>(cacheBitmap_);
-
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
-    }
-
     InitFilterFunc();
     InitImageCallbacks();
 }
@@ -376,7 +370,7 @@ void RosenRenderOffscreenCanvas::InitImageCallbacks()
     };
 
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-        ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {};
+        ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {};
 
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
 }
@@ -410,7 +404,7 @@ void RosenRenderOffscreenCanvas::DrawSvgImage(const CanvasImage& canvasImage)
     // get the ImageObject
     if (currentSource_ != loadingSource_) {
         ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, pipelineContext_, true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+            failedCallback_, pipelineContext_, true, true, true, onPostBackgroundTask_);
     }
 
     // draw the svg
@@ -455,10 +449,6 @@ void RosenRenderOffscreenCanvas::DrawSvgImage(const CanvasImage& canvasImage)
 
 void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, double width, double height)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;
@@ -515,10 +505,6 @@ void RosenRenderOffscreenCanvas::DrawImage(const CanvasImage& canvasImage, doubl
 
 void RosenRenderOffscreenCanvas::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;
@@ -735,10 +721,6 @@ void RosenRenderOffscreenCanvas::ResetTransform()
 
 void RosenRenderOffscreenCanvas::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = pipelineContext_.Upgrade();
     if (!context) {
         return;

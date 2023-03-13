@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,8 @@ public:
             theme->selectHideTime_ = 250; // unit is ms.
             theme->menuShowTime_ = 250;   // unit is ms.
             theme->menuHideTime_ = 250;   // unit is ms.
+            theme->hoverAnimationDuration_ = 250;
+            theme->pressAnimationDuration_ = 100;
             theme->titleLeftPadding_ = Dimension(16.0, DimensionUnit::VP);
             theme->titleTopPadding_ = Dimension(8.0, DimensionUnit::VP);
             theme->titleRightPadding_ = Dimension(8.0, DimensionUnit::VP);
@@ -126,6 +128,9 @@ public:
 
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, theme->fontSize_);
             theme->menuFontSize_ = pattern->GetAttr<Dimension>("menu_text_font_size", theme->menuFontSize_);
+            theme->menuTitleFontSize_ =
+                pattern->GetAttr<Dimension>("menu_title_text_font_size", theme->menuTitleFontSize_);
+            theme->menuTitleHeight_ = pattern->GetAttr<Dimension>("menu_title_height", theme->menuTitleHeight_);
             theme->fontColor_ =
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
                     .BlendOpacity(pattern->GetAttr<double>("menu_text_primary_alpha", defaultTextColorAlpha));
@@ -213,6 +218,8 @@ public:
         theme->menuShowTime_ = menuShowTime_;
         theme->selectShowTime_ = selectShowTime_;
         theme->selectHideTime_ = selectHideTime_;
+        theme->hoverAnimationDuration_ = hoverAnimationDuration_;
+        theme->pressAnimationDuration_ = pressAnimationDuration_;
         theme->optionPadding_ = optionPadding_;
         theme->optionInterval_ = optionInterval_;
         theme->optionMinHeight_ = optionMinHeight_;
@@ -235,6 +242,8 @@ public:
         theme->menuBorderRadius_ = menuBorderRadius_;
         theme->innerBorderRadius_ = innerBorderRadius_;
         theme->menuFontSize_ = menuFontSize_;
+        theme->menuTitleFontSize_ = menuTitleFontSize_;
+        theme->menuTitleHeight_ = menuTitleHeight_;
         theme->menuFontColor_ = menuFontColor_;
         theme->disabledMenuFontColor_ = disabledMenuFontColor_;
         theme->menuIconPadding_ = menuIconPadding_;
@@ -539,6 +548,16 @@ public:
         }
     }
 
+    int32_t GetHoverAnimationDuration() const
+    {
+        return hoverAnimationDuration_;
+    }
+
+    int32_t GetPressAnimationDuration() const
+    {
+        return pressAnimationDuration_;
+    }
+
     SelectTheme() = default;
 
     bool IsAllowScale() const
@@ -639,6 +658,16 @@ public:
     const Dimension& GetMenuFontSize() const
     {
         return menuFontSize_;
+    }
+
+    const Dimension& GetMenuTitleFontSize() const
+    {
+        return menuTitleFontSize_;
+    }
+
+    const Dimension& GetMenuTitleHeight() const
+    {
+        return menuTitleHeight_;
     }
 
     const Color& GetMenuFontColor() const
@@ -770,6 +799,8 @@ private:
     Dimension menuBorderRadius_;
     Dimension innerBorderRadius_;
     Dimension menuFontSize_;
+    Dimension menuTitleFontSize_;
+    Dimension menuTitleHeight_;
     Dimension menuIconPadding_;
     Dimension iconContentPadding_;
     Dimension dividerPaddingVertical_;
@@ -803,6 +834,8 @@ private:
     uint32_t selectShowTime_ = 0;
     uint32_t menuHideTime_ = 0;
     uint32_t selectHideTime_ = 0;
+    int32_t hoverAnimationDuration_ = 0;
+    int32_t pressAnimationDuration_ = 0;
 
     Edge optionPadding_;
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_DATA_PANEL_MODEL_H
 
 #include "base/geometry/dimension.h"
-
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
+#include "core/components_ng/property/gradient_property.h"
 
 namespace OHOS::Ace {
 
@@ -28,7 +30,10 @@ public:
 
     virtual void Create(const std::vector<double>& values, double max, int32_t dataPanelType) = 0;
     virtual void SetEffect(bool isCloseEffect) = 0;
-    
+    virtual void SetValueColors(const std::vector<NG::Gradient>& valueColors) = 0;
+    virtual void SetTrackBackground(const Color& trackBackgroundColor) = 0;
+    virtual void SetStrokeWidth(const Dimension& strokeWidth) = 0;
+    virtual void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) = 0;
 private:
     static std::unique_ptr<DataPanelModel> instance_;
 };

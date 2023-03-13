@@ -19,18 +19,13 @@
 #include <unordered_map>
 
 #include "flutter/fml/memory/ref_counted.h"
-#ifdef FLUTTER_2_5
-#include "flutter/lib/ui/io_manager.h"
-#else
-#include "flutter/lib/ui/painting/image.h"
-#endif
 #include "third_party/skia/include/codec/SkCodec.h"
 
 #include "base/memory/ace_type.h"
 #include "core/animation/animator.h"
 #include "core/animation/picture_animation.h"
-#include "core/image/image_source_info.h"
 #include "core/image/image_provider.h"
+#include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -39,19 +34,12 @@ class AnimatedImagePlayer : public virtual AceType {
     DECLARE_ACE_TYPE(AnimatedImagePlayer, AceType);
 
 public:
-    AnimatedImagePlayer(
-        ImageSourceInfo source,
-        UploadSuccessCallback successCallback,
-        const WeakPtr<PipelineBase>& weakContext,
-        const fml::WeakPtr<flutter::IOManager>& ioManager,
-        const fml::RefPtr<flutter::SkiaUnrefQueue>& gpuQueue,
-        std::unique_ptr<SkCodec> codec,
-        int32_t dstWidth = -1,
+    AnimatedImagePlayer(ImageSourceInfo source, UploadSuccessCallback successCallback,
+        const WeakPtr<PipelineBase>& weakContext, std::unique_ptr<SkCodec> codec, int32_t dstWidth = -1,
         int32_t dstHeight = -1)
-        : imageSource_(source), successCallback_(successCallback), context_(weakContext), ioManager_(ioManager),
-          unrefQueue_(gpuQueue), codec_(std::move(codec)), frameCount_(codec_->getFrameCount()),
-          repetitionCount_(codec_->getRepetitionCount()), frameInfos_(codec_->getFrameInfo()),
-          dstWidth_(dstWidth), dstHeight_(dstHeight)
+        : imageSource_(source), successCallback_(successCallback), context_(weakContext), codec_(std::move(codec)),
+          frameCount_(codec_->getFrameCount()), repetitionCount_(codec_->getRepetitionCount()),
+          frameInfos_(codec_->getFrameInfo()), dstWidth_(dstWidth), dstHeight_(dstHeight)
     {
         LOGD("animated image frameCount_ : %{public}d, repetitionCount_ : %{public}d", frameCount_, repetitionCount_);
         auto context = context_.Upgrade();
@@ -96,8 +84,7 @@ public:
             animator_->AddInterpolator(pictureAnimation);
             animator_->SetDuration(totalFrameDuration);
             auto repetitionCount = context->IsJsCard() ? 1 : repetitionCount_;
-            animator_->SetIteration(
-                repetitionCount > 0 ? repetitionCount : ANIMATION_REPEAT_INFINITE);
+            animator_->SetIteration(repetitionCount > 0 ? repetitionCount : ANIMATION_REPEAT_INFINITE);
             animator_->Play();
         }
     }
@@ -122,10 +109,6 @@ private:
     UploadSuccessCallback successCallback_;
     WeakPtr<PipelineBase> context_;
 
-    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
-    fml::WeakPtr<flutter::IOManager> ioManager_;
-    
-    fml::RefPtr<flutter::SkiaUnrefQueue> unrefQueue_;
     const std::unique_ptr<SkCodec> codec_;
     const int32_t frameCount_;
     const int32_t repetitionCount_;

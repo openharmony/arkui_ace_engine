@@ -82,14 +82,12 @@ class SynchedPropertyObjectTwoWayPU<C extends Object>
 
 
   public getUnmonitored(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${(this.source_ ? JSON.stringify(this.source_.getUnmonitored()) : "undefined")}' .`);
-    // unmonitored get access , no call to otifyPropertyRead !
+    // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
     return (this.source_ ? this.source_.getUnmonitored() : undefined);
   }
 
   // get 'read through` from the ObservedProperty
   public get(): C {
-    stateMgmtConsole.debug(`SynchedPropertyObjectTwoWayPU[${this.id__()}, '${this.info() || "unknown"}']: get`)
     this.notifyPropertryHasBeenReadPU()
     return this.getUnmonitored();
   }

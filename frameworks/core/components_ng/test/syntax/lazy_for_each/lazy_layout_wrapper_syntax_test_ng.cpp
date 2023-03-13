@@ -241,7 +241,6 @@ HWTEST_F(
     auto lazyForEachNode = CreateLazyForEachNode();
     auto lazyLayoutWrapperBuilder = AceType::MakeRefPtr<LazyLayoutWrapperBuilder>(
         lazyForEachNode->builder_, AceType::WeakClaim(AceType::RawPtr(lazyForEachNode)));
-    lazyLayoutWrapperBuilder->SwapDirtyAndUpdateBuildCache();
     EXPECT_EQ(lazyLayoutWrapperBuilder->startIndex_.value_or(DEFAULT_INDEX), NEW_START_ID);
     EXPECT_EQ(lazyLayoutWrapperBuilder->endIndex_.value_or(DEFAULT_INDEX), NEW_START_ID);
 

@@ -38,156 +38,85 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+TextFieldPaintMethod::TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,
+                                           const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
+                                           const RefPtr<TextFieldContentModifier>& textFieldContentModifier)
+    : pattern_(pattern), textFieldOverlayModifier_(textFieldOverlayModifier),
+    textFieldContentModifier_(textFieldContentModifier)
+{}
 
-CanvasDrawFunction TextFieldPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+RefPtr<Modifier> TextFieldPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_RETURN(textFieldPattern, nullptr);
-    CHECK_NULL_RETURN(textFieldPattern->GetParagraph(), nullptr);
-    auto offset = paintWrapper->GetContentOffset();
-    auto passwordIconCanvasImage = textFieldPattern->GetTextObscured()
-                                       ? textFieldPattern->GetHidePasswordIconCanvasImage()
-                                       : textFieldPattern->GetShowPasswordIconCanvasImage();
-    auto drawFunction = [paragraph = textFieldPattern->GetParagraph(), offset, textFieldPattern,
-                            contentSize = paintWrapper->GetContentSize(),
-                            contentOffset = paintWrapper->GetContentOffset(),
-                            passwordIconCanvasImage](RSCanvas& canvas) {
-        CHECK_NULL_VOID_NOLOG(textFieldPattern);
-        auto frameRect = textFieldPattern->GetFrameRect();
-        auto iconRect = textFieldPattern->GetImageRect();
-        RSRect clipInnerRect;
-        if (textFieldPattern->IsTextArea()) {
-            clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(),
-                contentOffset.GetY() + contentSize.Height());
-        } else {
-            clipInnerRect = RSRect(offset.GetX(), 0.0f,
-                textFieldPattern->NeedShowPasswordIcon() ? frameRect.Width()
-                                                         : contentSize.Width() + contentOffset.GetX(),
-                frameRect.Height());
-        }
-        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-        if (paragraph) {
-            if (textFieldPattern->IsTextArea()) {
-                paragraph->Paint(
-                    &canvas, textFieldPattern->GetTextRect().GetX(), textFieldPattern->GetTextRect().GetY());
-            } else {
-                paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(), contentOffset.GetY());
-            }
-        }
-        canvas.Restore();
-        if (!textFieldPattern->NeedShowPasswordIcon()) {
-            return;
-        }
-        CHECK_NULL_VOID_NOLOG(passwordIconCanvasImage);
-        const ImagePainter passwordIconImagePainter(passwordIconCanvasImage);
-        passwordIconImagePainter.DrawImage(canvas, iconRect.GetOffset(), iconRect.GetSize());
-    };
-    return drawFunction;
+    return textFieldContentModifier_;
 }
 
-CanvasDrawFunction TextFieldPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
-{
-    return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto textField = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(textField);
-        textField->PaintCursor(canvas, paintWrapper);
-        textField->PaintSelection(canvas, paintWrapper);
-    };
-}
-
-void TextFieldPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintWrapper)
+void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(textFieldContentModifier_);
+    auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    OffsetF contentOffset = paintWrapper->GetContentOffset();
+    textFieldContentModifier_->SetContentOffset(contentOffset);
+    SizeF contentSize = paintWrapper->GetContentSize();
+    textFieldContentModifier_->SetContentSize(contentSize);
+
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    if (!textFieldPattern->InSelectMode()) {
-        return;
+    auto textEditingValue = textFieldPattern->GetTextEditingValue();
+    std::string text = textEditingValue.text;
+    textFieldContentModifier_->SetTextValue(text);
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    textFieldContentModifier_->SetTextObscured(textFieldPattern->GetTextObscured());
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextFieldTheme>();
+    PropertyChangeFlag flag = 0;
+    if (textFieldContentModifier_->NeedMeasureUpdate(flag)) {
+        frameNode->MarkDirtyNode(flag);
     }
+}
+
+RefPtr<Modifier> TextFieldPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
+{
+    return textFieldOverlayModifier_;
+}
+
+void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(textFieldOverlayModifier_);
+    OffsetF contentOffset = paintWrapper->GetContentOffset();
+    textFieldOverlayModifier_->SetContentOffset(contentOffset);
+    SizeF contentSize = paintWrapper->GetContentSize();
+    textFieldOverlayModifier_->SetContentSize(contentSize);
+
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto cursorVisible = textFieldPattern->GetCursorVisible();
+    textFieldOverlayModifier_->SetCursorVisible(cursorVisible);
+    auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
+    textFieldOverlayModifier_->SetCursorOffsetX(cursorOffsetX);
+
+    auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    InputStyle inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
+    textFieldOverlayModifier_->SetInputStyle(inputStyle);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto theme = themeManager->GetTheme<TextFieldTheme>();
-    auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(theme->GetSelectedColor().GetValue());
-    canvas.AttachBrush(brush);
-    auto startOffset =
-        std::min(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
-    auto endOffset =
-        std::max(textFieldPattern->GetSelectionBaseOffsetX(), textFieldPattern->GetSelectionDestinationOffsetX());
-    auto paintOffset = paintWrapper->GetContentOffset() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
-    RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
-        paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
-        paintOffset.GetY() + paintWrapper->GetContentSize().Height());
-    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-    auto textBoxes = textFieldPattern->GetTextBoxes();
-    auto textRect = textFieldPattern->GetTextRect();
-    bool isTextArea = textFieldPattern->IsTextArea();
-    switch (paintProperty->GetInputStyleValue(InputStyle::DEFAULT)) {
-        case InputStyle::DEFAULT:
-            // for default style, selection height is equal to the content height
-            for (const auto& textBox : textBoxes) {
-                canvas.DrawRect(RSRect(
-                    textBox.rect_.GetLeft() + (isTextArea ? paintWrapper->GetContentOffset().GetX() : textRect.GetX()),
-                    textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : paintWrapper->GetContentOffset().GetY()),
-                    textBox.rect_.GetRight() + (isTextArea ? paintWrapper->GetContentOffset().GetX() : textRect.GetX()),
-                    textBox.rect_.GetBottom() +
-                        (isTextArea ? textRect.GetY() : paintWrapper->GetContentOffset().GetY())));
-            }
-            break;
-        case InputStyle::INLINE:
-            // for inline style, selection height is equal to the frame height
-            canvas.DrawRect(RSRect(startOffset, textFieldPattern->GetFrameRect().GetY(), endOffset,
-                textFieldPattern->GetFrameRect().GetY() + textFieldPattern->GetFrameRect().Height()));
-            break;
-        default:
-            LOGE("Unsupported style");
+    auto cursorColor = paintProperty->GetCursorColorValue(theme->GetCursorColor());
+    textFieldOverlayModifier_->SetCursorColor(cursorColor);
+    auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
+    textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
+    if (paintProperty->GetCursorWidth().has_value()) {
+        float cursorWidth = static_cast<float>(paintProperty->GetCursorWidthValue().ConvertToPx());
+        textFieldOverlayModifier_->SetCursorWidth(cursorWidth);
     }
-
-    canvas.Restore();
 }
-
-void TextFieldPaintMethod::PaintCursor(RSCanvas& canvas, PaintWrapper* paintWrapper)
-{
-    CHECK_NULL_VOID(paintWrapper);
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    if (!textFieldPattern->GetCursorVisible() || textFieldPattern->GetSelectMode() == SelectionMode::SELECT_ALL) {
-        return;
-    }
-    auto paragraph = textFieldPattern->GetParagraph();
-    CHECK_NULL_VOID(paragraph);
-    auto paintProperty = DynamicCast<TextFieldPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-
-    auto cursorColor = paintProperty->GetCursorColorValue();
-    canvas.Save();
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(cursorColor.GetValue());
-    canvas.AttachBrush(brush);
-    auto paintOffset = paintWrapper->GetContentOffset() - OffsetF(0.0f, textFieldPattern->GetBaseLineOffset());
-    RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
-        paintOffset.GetX() + paintWrapper->GetContentSize().Width(),
-        paintOffset.GetY() + paintWrapper->GetContentSize().Height());
-    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-    float caretHeight = textFieldPattern->GetCaretRect().Height();
-    if (!textFieldPattern->IsTextArea()) {
-        auto top = static_cast<float>(
-            paintWrapper->GetContentOffset().GetY() + (paintWrapper->GetContentSize().Height() - caretHeight) / 2);
-        auto cursorOffsetX = textFieldPattern->GetCaretOffsetX();
-        canvas.DrawRect(RSRect(
-            cursorOffsetX, top, cursorOffsetX + static_cast<float>(CURSOR_WIDTH.ConvertToPx()), top + caretHeight));
-        canvas.Restore();
-        return;
-    }
-    auto cursorOffset = textFieldPattern->GetCaretRect().GetOffset();
-    canvas.DrawRect(RSRect(cursorOffset.GetX(), cursorOffset.GetY(),
-        cursorOffset.GetX() + static_cast<float>(CURSOR_WIDTH.ConvertToPx()), cursorOffset.GetY() + caretHeight));
-    canvas.Restore();
-}
-
 } // namespace OHOS::Ace::NG

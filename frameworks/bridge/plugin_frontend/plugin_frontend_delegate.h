@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,8 @@ class PluginFrontendDelegate : public FrontendDelegate {
     DECLARE_ACE_TYPE(PluginFrontendDelegate, FrontendDelegate);
 
 public:
+    using onPluginUpdateWithValueParams = std::function<void(const std::string&)>;
+
     PluginFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor, const LoadJsCallback& loadCallback,
         const JsMessageDispatcherSetterCallback& transferCallback, const EventCallback& asyncEventCallback,
         const EventCallback& syncEventCallback, const UpdatePageCallback& updatePageCallback,
@@ -196,6 +198,10 @@ public:
 
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
+    void GetSnapshot(const std::string& componentId,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) override
+    {}
+
     void RequestAnimationFrame(const std::string& callbackId) override;
 
     void CancelAnimationFrame(const std::string& callbackId) override;
@@ -226,6 +232,20 @@ public:
     void RebuildAllPages();
 
     void UpdatePlugin(const std::string& content);
+
+    void SetDeclarativeOnUpdateWithValueParamsCallback(onPluginUpdateWithValueParams&& callback)
+    {
+        if (callback) {
+            onPluginUpdateWithValueParams_ = callback;
+        }
+    }
+
+    void FireDeclarativeOnUpdateWithValueParamsCallback(const std::string& params) const
+    {
+        if (onPluginUpdateWithValueParams_) {
+            onPluginUpdateWithValueParams_(params);
+        }
+    }
 
 private:
     int32_t GenerateNextPageId();
@@ -306,6 +326,7 @@ private:
     OnActiveCallBack onActive_;
     OnInactiveCallBack onInactive_;
     OnMemoryLevelCallBack onMemoryLevel_;
+    onPluginUpdateWithValueParams onPluginUpdateWithValueParams_;
     OnStartContinuationCallBack onStartContinuationCallBack_;
     OnCompleteContinuationCallBack onCompleteContinuationCallBack_;
     OnRemoteTerminatedCallBack onRemoteTerminatedCallBack_;

@@ -47,7 +47,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SelectOverlayLayoutAlgorithm>(info_);
+        return MakeRefPtr<SelectOverlayLayoutAlgorithm>(info_, defaultMenuEndOffset_);
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -69,6 +69,16 @@ public:
     void UpdateSelectMenuInfo(const SelectMenuInfo& info);
 
     void UpdateShowArea(const RectF& area);
+
+    void SetSelectInfo(const std::string& selectInfo)
+    {
+        selectInfo_ = selectInfo;
+    }
+
+    const std::string& GetSelectInfo() const
+    {
+        return selectInfo_;
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -96,6 +106,12 @@ private:
 
     bool firstHandleDrag_ = false;
     bool secondHandleDrag_ = false;
+
+    int32_t greatThanMaxWidthIndex_ = -1;
+
+    std::string selectInfo_;
+
+    OffsetF defaultMenuEndOffset_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

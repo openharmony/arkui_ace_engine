@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,20 +18,18 @@
 
 #include <list>
 
-#include "base/log/ace_trace.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/hyperlink/hyperlink_component.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSHyperlink : public JSContainerBase {
+class JSHyperlink : public JSViewAbstract, public JSInteractableView {
 public:
-    static void Create(const JSCallbackInfo& args);
     static void JSBind(BindingTarget globalObj);
-    static void Pop();
+
+    static void Create(const JSCallbackInfo& args);
     static void SetColor(const JSCallbackInfo& info);
-    static RefPtr<HyperlinkComponent> GetComponent();
+    static void Pop();
 };
 
 } // namespace OHOS::Ace::Framework

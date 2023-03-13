@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
@@ -82,7 +83,7 @@ void InitTextAreaDefaultStyle()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
     if (!boxComponent || !textAreaComponent || !theme) {
-        LOGE("boxComponent or textAreaComponent or theme is null");
+        LOGI("boxComponent or textAreaComponent or theme is null");
         return;
     }
 
@@ -230,11 +231,11 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
 void JSTextField::SetType(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("SetType create error, info is non-valid");
+        LOGI("SetType create error, info is non-valid");
         return;
     }
     if (!info[0]->IsNumber()) {
-        LOGE("The inputType is not number");
+        LOGI("The inputType is not number");
         return;
     }
     TextInputType textInputType = static_cast<TextInputType>(info[0]->ToNumber<int32_t>());
@@ -244,13 +245,13 @@ void JSTextField::SetType(const JSCallbackInfo& info)
 void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetPlaceholderColor) is wrong, it is supposed to have atleast 1 argument");
+        LOGI("The arg(SetPlaceholderColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        LOGE("the info[0] is null");
+        LOGI("the info[0] is null");
         return;
     }
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
@@ -259,7 +260,7 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
 void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("PlaceholderFont create error, info is non-valid");
+        LOGI("PlaceholderFont create error, info is non-valid");
         return;
     }
     Font font;
@@ -309,7 +310,7 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsNumber()) {
-        LOGE("Info(SetEnterKeyType) is not number");
+        LOGI("Info(SetEnterKeyType) is not number");
         return;
     }
     TextInputAction textInputAction = static_cast<TextInputAction>(info[0]->ToNumber<int32_t>());
@@ -321,14 +322,14 @@ void JSTextField::SetTextAlign(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(TEXT_ALIGNS.size())) {
         TextFieldModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
     } else {
-        LOGE("the value is error");
+        LOGI("the value is error");
     }
 }
 
 void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetInputStyle) is wrong, it is supposed to have at least 1 argument");
+        LOGI("The arg(SetInputStyle) is wrong, it is supposed to have at least 1 argument");
         return;
     }
     auto styleString = info[0]->ToString();
@@ -342,33 +343,125 @@ void JSTextField::SetInputStyle(const JSCallbackInfo& info)
 void JSTextField::SetCaretColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The arg(SetCareColor) is wrong, it is supposed to have atleast 1 argument");
+        LOGI("The arg(SetCareColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
-        LOGE("info[0] is null");
+        LOGI("info[0] is null");
         return;
     }
 
     TextFieldModel::GetInstance()->SetCaretColor(color);
 }
 
-void JSTextField::SetMaxLength(uint32_t value)
+void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
 {
-    TextFieldModel::GetInstance()->SetMaxLength(value);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGW("CaretStyle create error, info is non-valid");
+        return;
+    }
+    CaretStyle caretStyle;
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto caretWidth = paramObject->GetProperty("caretWidth");
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    if (caretWidth->IsNull() || caretWidth->IsUndefined()) {
+        caretStyle.caretWidth = theme->GetCursorWidth();
+    } else {
+        Dimension width;
+        if (!ParseJsDimensionVp(caretWidth, width)) {
+            caretStyle.caretWidth = theme->GetCursorWidth();
+        }
+        if (LessNotEqual(width.Value(), 0.0)) {
+            return;
+        }
+        caretStyle.caretWidth = width;
+    }
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        TextFieldModel::GetInstance()->SetCaretStyle(caretStyle);
+        return;
+    }
+}
+
+void JSTextField::SetCaretPosition(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg(SetCaretPosition) is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    int32_t caretPosition = 0;
+    if (!ParseJsInt32(info[0], caretPosition)) {
+        return;
+    }
+    if (caretPosition < 0) {
+        return;
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        TextFieldModel::GetInstance()->SetCaretPosition(caretPosition);
+        return;
+    }
+}
+
+void JSTextField::SetSelectedBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg(SetSelectedBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
+        return;
+    }
+
+    Color selectedColor;
+    if (!ParseJsColor(info[0], selectedColor)) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        selectedColor = theme->GetSelectedColor();
+    }
+    if (Container::IsCurrentUseNewPipeline()) {
+        TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
+        return;
+    }
+}
+
+void JSTextField::SetMaxLength(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The arg(SetMaxLength) is wrong, it is supposed to have atleast 1 argument");
+        return;
+    }
+    int32_t maxLength = 0;
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->ResetMaxLength();
+        return;
+    } else if (!info[0]->IsNumber()) {
+        LOGI("Max length should be number");
+        TextFieldModel::GetInstance()->ResetMaxLength();
+        return;
+    }
+    maxLength = info[0]->ToNumber<int32_t>();
+    if (GreatOrEqual(maxLength, 0)) {
+        TextFieldModel::GetInstance()->SetMaxLength(maxLength);
+    } else {
+        TextFieldModel::GetInstance()->ResetMaxLength();
+    }
 }
 
 void JSTextField::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("JSTextField::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("JSTextField::SetFontSize The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
-        LOGE("Parse to dimension FP failed!");
+        LOGI("Parse to dimension FP failed!");
         return;
     }
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
@@ -382,15 +475,35 @@ void JSTextField::SetFontWeight(const std::string& value)
 void JSTextField::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        LOGE("Parse to dimension FP failed!");
+        LOGI("Parse to dimension FP failed!");
         return;
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);
+}
+
+void JSTextField::SetForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        TextFieldModel::GetInstance()->SetForegroundColor(Color::FOREGROUND);
+        return;
+    }
+    Color foregroundColor;
+    if (!ParseJsColor(info[0], foregroundColor)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+    TextFieldModel::GetInstance()->SetForegroundColor(foregroundColor);
 }
 
 void JSTextField::SetFontStyle(int32_t value)
@@ -398,19 +511,19 @@ void JSTextField::SetFontStyle(int32_t value)
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
         TextFieldModel::GetInstance()->SetFontStyle(FONT_STYLES[value]);
     } else {
-        LOGE("TextInput fontStyle(%{public}d) illegal value", value);
+        LOGI("TextInput fontStyle(%{public}d) illegal value", value);
     }
 }
 
 void JSTextField::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
+        LOGI("Parse FontFamilies failed");
         return;
     }
     TextFieldModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -419,12 +532,12 @@ void JSTextField::SetFontFamily(const JSCallbackInfo& info)
 void JSTextField::SetInputFilter(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::string inputFilter;
     if (!ParseJsString(info[0], inputFilter)) {
-        LOGE("Parse inputFilter failed");
+        LOGI("Parse inputFilter failed");
         return;
     }
     if (info[1]->IsFunction()) {
@@ -442,7 +555,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
 void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
-        LOGE("The info is wrong, it is supposed to be an boolean");
+        LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
 
@@ -453,17 +566,31 @@ void JSTextField::SetShowPasswordIcon(const JSCallbackInfo& info)
 void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBackgroundColor(info);
+        if (info.Length() < 1) {
+            LOGI("The argv is wrong, it is supposed to have at least 1 argument");
+            return;
+        }
+        Color backgroundColor;
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto themeManager = pipeline->GetThemeManager();
+            CHECK_NULL_VOID_NOLOG(themeManager);
+            auto theme = themeManager->GetTheme<TextFieldTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            backgroundColor = theme->GetBgColor();
+        }
+        ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
         return;
     }
     if (info.Length() < 1) {
-        LOGE("The arg(SetBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
+        LOGI("The arg(SetBackgroundColor) is wrong, it is supposed to have atleast 1 argument");
         return;
     }
 
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        LOGE("the info[0] is null");
+        LOGI("the info[0] is null");
         return;
     }
 
@@ -472,7 +599,7 @@ void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
     if (component) {
         component->SetBgColor(backgroundColor);
     } else {
-        LOGE("The component(SetPlaceholderColor) is null");
+        LOGI("The component(SetPlaceholderColor) is null");
     }
 }
 
@@ -483,22 +610,22 @@ void JSTextField::JsHeight(const JSCallbackInfo& info)
         return;
     }
     if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        LOGI("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        LOGE("Parse to dimension VP failed!");
+        LOGI("Parse to dimension VP failed!");
         return;
     }
     if (LessNotEqual(value.Value(), 0.0)) {
-        LOGE("dimension value: %{public}f is invalid!", value.Value());
+        LOGI("dimension value: %{public}f is invalid!", value.Value());
         return;
     }
     auto* stack = ViewStackProcessor::GetInstance();
     auto textInputComponent = AceType::DynamicCast<TextFieldComponent>(stack->GetMainComponent());
     if (!textInputComponent) {
-        LOGE("JSTextInput set height failed, textInputComponent is null.");
+        LOGI("JSTextInput set height failed, textInputComponent is null.");
         return;
     }
     textInputComponent->SetHeight(value);
@@ -545,7 +672,7 @@ void JSTextField::JsPadding(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
-        LOGE("arg is not a string, number or object.");
+        LOGI("arg is not a string, number or object.");
         return;
     }
     Edge padding;
@@ -582,7 +709,7 @@ void JSTextField::JsBorder(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject()) {
-        LOGE("args is not a object. %s", info[0]->ToString().c_str());
+        LOGI("args is not a object. %s", info[0]->ToString().c_str());
         return;
     }
     RefPtr<Decoration> decoration = nullptr;
@@ -621,7 +748,7 @@ void JSTextField::JsBorderWidth(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
-        LOGE("args need a string or number or object");
+        LOGI("args need a string or number or object");
         return;
     }
     RefPtr<Decoration> decoration = nullptr;
@@ -643,7 +770,7 @@ void JSTextField::JsBorderColor(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
-        LOGE("args need a string or number or object");
+        LOGI("args need a string or number or object");
         return;
     }
     RefPtr<Decoration> decoration = nullptr;
@@ -665,7 +792,7 @@ void JSTextField::JsBorderStyle(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject() && !info[0]->IsNumber()) {
-        LOGE("args need a string or number or object");
+        LOGI("args need a string or number or object");
         return;
     }
     RefPtr<Decoration> decoration = nullptr;
@@ -687,7 +814,7 @@ void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
         return;
     }
     if (!info[0]->IsObject() && !info[0]->IsString() && !info[0]->IsNumber()) {
-        LOGE("args need a string or number or object");
+        LOGI("args need a string or number or object");
         return;
     }
     RefPtr<Decoration> decoration = nullptr;
@@ -705,7 +832,7 @@ void JSTextField::JsBorderRadius(const JSCallbackInfo& info)
 void JSTextField::JsHoverEffect(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
-        LOGE("info[0] is not a number");
+        LOGI("info[0] is not a number");
         return;
     }
     if (Container::IsCurrentUseNewPipeline()) {
@@ -785,12 +912,25 @@ void JSTextField::SetCopyOption(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetCopyOption(copyOptions);
 }
 
+void JSTextField::JsMenuOptionsExtension(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsArray()) {
+            std::vector<NG::MenuOptionsParam> menuOptionsItems;
+            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
+            TextFieldModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
+        }
+    } else {
+        LOGI("only newPipeline supply");
+    }
+}
+
 void JSTextField::UpdateDecoration(const RefPtr<BoxComponent>& boxComponent,
     const RefPtr<TextFieldComponent>& component, const Border& boxBorder,
     const OHOS::Ace::RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme)
 {
     if (!textFieldTheme) {
-        LOGE("UpdateDecoration: textFieldTheme is null.");
+        LOGI("UpdateDecoration: textFieldTheme is null.");
         return;
     }
 

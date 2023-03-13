@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
+#include <mutex>
 #include <optional>
 #include <regex>
 #include <unistd.h>
@@ -59,6 +60,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_base_utils.h"
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 #if defined(PREVIEW)
@@ -84,6 +86,7 @@ const std::string MERGE_SOURCEMAPS_PATH = "sourceMaps.map";
 const std::string FORM_ES_MODULE_PATH = "ets/widgets.abc";
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
+std::mutex loadFormMutex_;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
@@ -228,7 +231,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 #endif
 
     LocalScope scope(std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm());
-    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin() || isUnique_) { // ArtTsCard
+    if (!isModulePreloaded_ || !usingSharedRuntime_ || IsPlugin()) {
         InitGlobalObjectTemplate();
     }
 
@@ -254,7 +257,7 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
     // load resourceConfig
     currentConfigResourceData_ = JsonUtil::CreateArray(true);
     frontendDelegate_->LoadResourceConfiguration(mediaResourceFileMap_, currentConfigResourceData_);
-
+    isEngineInstanceInitialized_ = true;
     return true;
 }
 
@@ -645,20 +648,44 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
 
 shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::GetCurrentRuntime()
 {
+    auto jsRuntime = InnerGetCurrentRuntime();
+    if (isUnique_ && jsRuntime) {
+        return jsRuntime;
+    }
+
+    // ArkTsCard
+    if (isUnique_ && localRuntime_) {
+        return localRuntime_;
+    }
+
+    // Preload
     if (globalRuntime_) {
         return globalRuntime_;
     }
+
+    return jsRuntime == nullptr ? localRuntime_ : jsRuntime;
+}
+
+shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::InnerGetCurrentRuntime()
+{
     auto engine = EngineHelper::GetCurrentEngine();
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {
         LOGE("jsiEngine is null");
-        return localRuntime_;
+        return nullptr;
     }
+
     auto engineInstance = jsiEngine->GetEngineInstance();
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
-        return localRuntime_;
+        return nullptr;
     }
+
+    if (isUnique_ && !engineInstance->IsEngineInstanceInitialized()) {
+        LOGI("engineInstance is not Initialized");
+        return nullptr;
+    }
+
     return engineInstance->GetJsRuntime();
 }
 
@@ -759,6 +786,10 @@ void JsiDeclarativeEngine::Destroy()
 
     engineInstance_->GetDelegate()->RemoveTaskObserver();
     engineInstance_->DestroyAllRootViewHandle();
+    if (isUnique_) {
+        RunFullGarbageCollection();
+    }
+
     if (!runtime_ && nativeEngine_ != nullptr) {
 #if !defined(PREVIEW)
         nativeEngine_->CancelCheckUVLoop();
@@ -1027,7 +1058,11 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         }
         const std::string bundleName = frontEnd->GetBundleName();
         const std::string moduleName = frontEnd->GetModuleName();
-        const std::string assetPath = ASSET_PATH_PREFIX + moduleName + "/" + FORM_ES_MODULE_PATH;
+#ifdef PREVIEW
+        const std::string assetPath = delegate->GetAssetPath(FORM_ES_MODULE_PATH).append(FORM_ES_MODULE_PATH);
+#else
+        const std::string assetPath = ASSET_PATH_PREFIX + bundleName + "/" + moduleName + "/" + FORM_ES_MODULE_PATH;
+#endif
         LOGI("bundleName = %{public}s, moduleName = %{public}s, assetPath = %{public}s", bundleName.c_str(),
             moduleName.c_str(), assetPath.c_str());
         auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
@@ -1041,9 +1076,12 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
             abcPath = fileName.substr(PREFIX_LETTER_NUMBER);
         }
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
-        if (!runtime->ExecuteModuleBufferForForm(content.data(), content.size(), abcPath)) {
-            LOGE("ExecuteCardAbc ExecuteModuleBufferForForm \"%{public}s\" failed.", fileName.c_str());
-            return false;
+        {
+            std::lock_guard<std::mutex> lock(loadFormMutex_);
+            if (!runtime->ExecuteModuleBufferForForm(content.data(), content.size(), abcPath)) {
+                LOGE("ExecuteCardAbc ExecuteModuleBufferForForm \"%{public}s\" failed.", fileName.c_str());
+                return false;
+            }
         }
         return true;
     } else {
@@ -1206,9 +1244,32 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
         LOGE("fail to find abc file");
         return false;
     }
+
+#if !defined(PREVIEW)
     if (LoadJsWithModule(urlName.value())) {
         return true;
     }
+#else
+    auto runtime = engineInstance_->GetJsRuntime();
+    auto delegate = engineInstance_->GetDelegate();
+    if (!assetPath_.empty() && !isBundle_) {
+        auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
+        arkRuntime->SetBundleName(bundleName_);
+        arkRuntime->SetAssetPath(assetPath_);
+        arkRuntime->SetBundle(isBundle_);
+        arkRuntime->SetModuleName(moduleName_);
+        std::vector<uint8_t> content;
+        if (!delegate->GetAssetContent("modules.abc", content)) {
+            LOGE("GetAssetContent \"%{public}s\" failed.", urlName.value().c_str());
+            return false;
+        }
+        if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), urlName.value())) {
+            LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.value().c_str());
+            return false;
+        }
+        return true;
+    }
+#endif
     return ExecuteAbc(urlName.value());
 }
 
@@ -1249,6 +1310,20 @@ RefPtr<Component> JsiDeclarativeEngine::GetNewComponentWithJsCode(const std::str
     auto component = ViewStackProcessor::GetInstance()->GetNewComponent();
     return component;
 }
+
+bool JsiDeclarativeEngine::ExecuteJsForFastPreview(const std::string& jsCode, const std::string& viewID)
+{
+    std::string dest;
+    if (!Base64Util::Decode(jsCode, dest)) {
+        return false;
+    }
+    NG::ViewStackProcessor::GetInstance()->ClearStack();
+    NG::ViewStackProcessor::GetInstance()->PushKey(viewID);
+    bool result = engineInstance_->InitAceModule((uint8_t*)dest.data(), dest.size());
+    NG::ViewStackProcessor::GetInstance()->PopKey();
+    return result;
+}
+
 #endif
 
 void JsiDeclarativeEngine::UpdateRunningPage(const RefPtr<JsAcePage>& page)
@@ -1548,8 +1623,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s, state: %{public}d",
-        packageName.c_str(), static_cast<int32_t>(state));
+    LOGI("JsiDeclarativeEngine UpdateApplicationState, packageName %{public}s, state: %{public}d", packageName.c_str(),
+        static_cast<int32_t>(state));
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
         LOGE("update app state failed, runtime is null.");
@@ -1629,6 +1704,13 @@ void JsiDeclarativeEngine::RunGarbageCollection()
 {
     if (engineInstance_ && engineInstance_->GetJsRuntime()) {
         engineInstance_->GetJsRuntime()->RunGC();
+    }
+}
+
+void JsiDeclarativeEngine::RunFullGarbageCollection()
+{
+    if (engineInstance_ && engineInstance_->GetJsRuntime()) {
+        engineInstance_->GetJsRuntime()->RunFullGC();
     }
 }
 
@@ -1764,6 +1846,11 @@ void JsiDeclarativeEngine::OnCompleteContinuation(int32_t code)
     CallAppFunc("onCompleteContinuation", argv);
 }
 
+void JsiDeclarativeEngine::ClearCache()
+{
+    JSNApi::CleanJSVMCache();
+}
+
 void JsiDeclarativeEngine::OnRemoteTerminated()
 {
     LOGI("JsiDeclarativeEngine OnRemoteTerminated");
@@ -1844,6 +1931,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
         return;
     }
     std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    localRuntime_ = arkRuntime;
     auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
     EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
     if (vm == nullptr) {
@@ -1902,7 +1990,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     isModulePreloaded_ = evalResult;
 
     globalRuntime_ = nullptr;
-    localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
 }
 // ArkTsCard end

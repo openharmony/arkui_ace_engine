@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,18 +41,20 @@ namespace OHOS::Ace::NG {
 
 void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
     position_ = props->GetMenuOffset().value_or(OffsetF());
+    positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
 
-    CHECK_NULL_VOID(layoutWrapper);
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
+    auto constraint = props->GetLayoutConstraint();
+    auto wrapperIdealSize =
+        CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    screenSize_ = wrapperIdealSize;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    screenSize_ = SizeF(pipeline->GetRootWidth(), pipeline->GetRootHeight());
-
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     outPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
@@ -135,16 +137,14 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    LOGD("MenuLayout: clickPosition = %{public}f, %{public}f", position_.GetX(), position_.GetY());
-    CHECK_NULL_VOID(props);
-
-    float x = HorizontalLayout(size, position_.GetX());
-    float y = VerticalLayout(size, position_.GetY());
+    float x = HorizontalLayout(size, position_.GetX()) + positionOffset_.GetX();
+    float y = VerticalLayout(size, position_.GetY()) + positionOffset_.GetY();
     if (!menuPattern->IsContextMenu()) {
         x -= pageOffset_.GetX();
         y -= pageOffset_.GetY();
     }
+    x = std::clamp(x, 0.0f, screenSize_.Width() - size.Width() - outPadding_ * 2.0f);
+    y = std::clamp(y, 0.0f, screenSize_.Height() - size.Height() - outPadding_* 2.0f);
 
     MarginPropertyF margin;
     if (!menuPattern->IsMultiMenu()) {

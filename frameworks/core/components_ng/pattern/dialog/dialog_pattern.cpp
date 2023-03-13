@@ -55,7 +55,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
-constexpr Dimension SHEET_IMAGE_PADDING = 16.0_vp;
+constexpr Dimension SHEET_IMAGE_MARGIN = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
 constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
@@ -66,6 +66,7 @@ const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
 
 void DialogPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
@@ -74,6 +75,9 @@ void DialogPattern::OnModifyDone()
     if (!onClick_) {
         InitClickEvent(gestureHub);
     }
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    RegisterOnKeyEvent(focusHub);
 }
 
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -344,6 +348,7 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     auto layoutProps = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
     layoutProps->UpdateFlexGrow(1.0);
+    layoutProps->UpdateFlexShrink(1.0);
     // set button default height
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
@@ -398,6 +403,8 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     auto textProps = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProps, nullptr);
     textProps->UpdateContent(text);
+    textProps->UpdateMaxLines(1);
+    textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize =
         dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize() : DIALOG_BUTTON_TEXT_SIZE;
     textProps->UpdateFontSize(buttonTextSize);
@@ -432,16 +439,15 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
         auto iconId = ElementRegister::GetInstance()->MakeUniqueId();
         auto iconNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, iconId, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_RETURN(iconNode, nullptr);
-        // add image padding
-        CalcLength padding(SHEET_IMAGE_PADDING.ConvertToPx());
-        PaddingProperty imagePadding = {
-            .left = padding,
-            .right = padding,
-            .top = padding,
-            .bottom = padding,
+        // add image margin
+        MarginProperty margin = {
+            .left = CalcLength(SHEET_IMAGE_MARGIN),
+            .right = CalcLength(SHEET_IMAGE_MARGIN),
+            .top = CalcLength(SHEET_IMAGE_MARGIN),
+            .bottom = CalcLength(SHEET_IMAGE_MARGIN),
         };
         auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        iconProps->UpdatePadding(imagePadding);
+        iconProps->UpdateMargin(margin);
         LOGD("item icon src = %s", item.icon.c_str());
         auto imageSrc = ImageSourceInfo(item.icon);
         iconProps->UpdateImageSourceInfo(imageSrc);
@@ -528,6 +534,28 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         button->MountToParent(menu);
     }
     return menu;
+}
+
+void DialogPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        CHECK_NULL_RETURN_NOLOG(pattern, false);
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool DialogPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_ESCAPE) {
+        PopDialog();
+        return true;
+    }
+    return false;
 }
 
 // XTS inspector

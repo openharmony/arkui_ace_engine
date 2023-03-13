@@ -67,4 +67,20 @@ void InputEventHub::BindContextMenu(OnMouseEventFunc&& showMenu)
     AddOnMouseEvent(showMenu_);
 }
 
+std::string InputEventHub::GetHoverEffectStr() const
+{
+    switch (hoverEffectType_) {
+        case HoverEffectType::AUTO:
+            return "HoverEffect.Auto";
+        case HoverEffectType::SCALE:
+            return "HoverEffect.Scale";
+        case HoverEffectType::BOARD:
+            return "HoverEffect.Highlight";
+        case HoverEffectType::NONE:
+            return "HoverEffect.None";
+        default:
+            return "HoverEffect.Auto";
+    }
+}
+
 } // namespace OHOS::Ace::NG

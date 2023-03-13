@@ -31,6 +31,7 @@ namespace OHOS::Ace::NG {
 
 void OptionPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
@@ -86,6 +87,28 @@ void OptionPattern::OnSelectProcess()
     CHECK_NULL_VOID(menuPattern);
     auto targetId = menuPattern->GetTargetId();
     overlayManager->HideMenu(targetId);
+}
+
+void OptionPattern::PlayBgColorAnimation(bool isHoverChange)
+{
+    AnimationOption option = AnimationOption();
+    if (isHoverChange) {
+        option.SetDuration(selectTheme_->GetHoverAnimationDuration());
+        option.SetCurve(Curves::FRICTION);
+    } else {
+        option.SetDuration(selectTheme_->GetPressAnimationDuration());
+        option.SetCurve(Curves::SHARP);
+    }
+
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID_NOLOG(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID_NOLOG(renderContext);
+        renderContext->BlendBgColor(pattern->GetBgBlendColor());
+    });
 }
 
 void OptionPattern::RegisterOnClick()
@@ -163,20 +186,22 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
+    const auto& renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto props = GetPaintProperty<OptionPaintProperty>();
     CHECK_NULL_VOID(props);
     auto touchType = info.GetTouches().front().GetTouchType();
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
     // enter press status
     if (touchType == TouchType::DOWN) {
         LOGD("triggers option press");
         // change background color, update press status
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<SelectTheme>();
-        auto clickedColor = theme->GetClickedColor();
-        renderContext->UpdateBackgroundColor(clickedColor);
+        SetBgBlendColor(theme->GetClickedColor());
+        PlayBgColorAnimation(false);
+
         props->UpdatePress(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         // disable next option node's divider
@@ -184,7 +209,13 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
     }
     // leave press status
     else if (touchType == TouchType::UP) {
-        renderContext->UpdateBackgroundColor(GetBgColor());
+        if (IsHover()) {
+            SetBgBlendColor(theme->GetHoverColor());
+        } else {
+            SetBgBlendColor(Color::TRANSPARENT);
+        }
+        PlayBgColorAnimation(false);
+
         props->UpdatePress(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         UpdateNextNodeDivider(true);
@@ -193,6 +224,8 @@ void OptionPattern::OnPress(const TouchEventInfo& info)
 
 void OptionPattern::OnHover(bool isHover)
 {
+    SetIsHover(isHover);
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -204,16 +237,19 @@ void OptionPattern::OnHover(bool isHover)
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         auto hoverColor = theme->GetHoverColor();
-        renderContext->UpdateBackgroundColor(hoverColor);
+        SetBgBlendColor(hoverColor);
+
         props->UpdateHover(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         UpdateNextNodeDivider(false);
     } else {
-        renderContext->UpdateBackgroundColor(GetBgColor());
+        SetBgBlendColor(Color::TRANSPARENT);
+
         props->UpdateHover(false);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         UpdateNextNodeDivider(true);
     }
+    PlayBgColorAnimation();
 }
 
 void OptionPattern::UpdateNextNodeDivider(bool needDivider)
@@ -250,7 +286,8 @@ void OptionPattern::SetFontSize(const Dimension& value)
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateFontSize(value);
+    CHECK_NULL_VOID(selectTheme_);
+    props->UpdateFontSize(value.IsNegative() ? selectTheme_->GetMenuFontSize() : value);
 }
 
 void OptionPattern::SetItalicFontStyle(const Ace::FontStyle& value)
@@ -287,6 +324,7 @@ void OptionPattern::SetFontColor(const Color& color)
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     props->UpdateTextColor(color);
+    text_->GetRenderContext()->UpdateForegroundColor(color);
 }
 
 std::string OptionPattern::InspectorGetFont()

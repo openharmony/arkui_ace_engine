@@ -17,8 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_FLUTTER_RENDER_IMAGE_H
 
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/image.h"
 
 #include "core/components/image/render_image.h"
 #include "core/image/image_provider.h"
@@ -74,14 +72,13 @@ public:
     static void UploadImageObjToGpuForRender(
         const RefPtr<ImageObject>& imageObj,
         const WeakPtr<PipelineContext> context,
-        RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
         UploadSuccessCallback uploadSuccessCallback,
         FailedCallback failedCallback,
         Size resizeTarget,
         bool forceResize,
         bool syncMode = false);
 
-    void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
+    void ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed(const std::string& errorMsg);
     bool NeedUploadImageObjToGpu();
@@ -150,7 +147,7 @@ private:
     RefPtr<ImageObject> imageObj_;
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
-    fml::RefPtr<flutter::CanvasImage> image_;
+    RefPtr<NG::CanvasImage> image_;
     bool loadSvgAfterLayout_ = false;
     bool loadSvgOnPaint_ = false; // only load svg trees without box and bind
     RefPtr<Flutter::OffsetLayer> layer_;
@@ -163,7 +160,6 @@ private:
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     CancelableTask fetchImageObjTask_;
     bool backgroundTaskCanceled_ = false;

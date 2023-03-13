@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -105,6 +105,19 @@ public:
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) override
     {
         ViewAbstract::SetBackgroundBlurStyle(bgBlurStyle);
+    }
+
+    void SetSphericalEffect(float radio) override
+    {
+        ViewAbstract::SetSphericalEffect(radio);
+    }
+    void SetPixelStretchEffect(PixStretchEffectOption& option) override
+    {
+        ViewAbstract::SetPixelStretchEffect(option);
+    }
+    void SetLightUpEffect(float radio) override
+    {
+        ViewAbstract::SetLightUpEffect(radio);
     }
 
     void SetPadding(const Dimension& value) override
@@ -312,9 +325,10 @@ public:
         ViewAbstract::SetScale(scale);
     }
 
-    void SetPivot(const Dimension& x, const Dimension& y) override
+    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override
     {
         DimensionOffset center(x, y);
+        center.SetZ(z);
         ViewAbstract::SetPivot(center);
     }
 
@@ -343,6 +357,11 @@ public:
     void SetTransition(const NG::TransitionOptions& transitionOptions, bool passThrough = false) override
     {
         ViewAbstract::SetTransition(transitionOptions);
+    }
+
+    void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect, bool passThrough = false) override
+    {
+        ViewAbstract::SetChainedTransition(effect);
     }
 
     void SetOverlay(const std::string& text, const std::optional<Alignment>& align,
@@ -433,6 +452,11 @@ public:
     void SetMask(const RefPtr<BasicShape>& shape) override
     {
         ViewAbstract::SetMask(shape);
+    }
+
+    void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override
+    {
+        ViewAbstract::SetProgressMask(progress);
     }
 
     void SetBackdropBlur(const Dimension& radius) override
@@ -649,7 +673,10 @@ public:
 
     void SetRestoreId(int32_t restoreId) override {}
 
-    void SetDebugLine(const std::string& line) override {}
+    void SetDebugLine(const std::string& line) override
+    {
+        ViewAbstract::SetDebugLine(line);
+    }
 
     void SetHoverEffect(HoverEffectType hoverEffect) override
     {
@@ -661,13 +688,19 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) override
+    {
+        ViewAbstract::SetKeyboardShortcut(value, keys);
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
-    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc) override;
+    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+        const MenuParam& menuParam) override;
 
     void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
 
@@ -675,6 +708,16 @@ public:
     void SetAccessibilityText(const std::string& text) override {}
     void SetAccessibilityDescription(const std::string& description) override {}
     void SetAccessibilityImportance(const std::string& importance) override {}
+
+    void SetForegroundColor(const Color& color) override
+    {
+        ViewAbstract::SetForegroundColor(color);
+    }
+
+    void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) override
+    {
+        ViewAbstract::SetForegroundColorStrategy(strategy);
+    }
 
 };
 } // namespace OHOS::Ace::NG

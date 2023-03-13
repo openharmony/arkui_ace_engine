@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,23 +67,39 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
     modifier_->onDraw(context_);
 }
 
-#define CONVERT_PROP(prop, srcType, propType)                                                     \
-    if (AceType::InstanceOf<srcType>(prop)) {                                                     \
-        auto castProp = AceType::DynamicCast<srcType>(prop);                                      \
-        auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());          \
-        castProp->SetUpCallbacks([rsProp]()->propType { return rsProp->Get(); },                \
-            [rsProp](const propType& value) { rsProp->Set(value); });                             \
-        return rsProp;                                                                            \
+#define CONVERT_PROP(prop, srcType, propType)                                                 \
+    if (AceType::InstanceOf<srcType>(prop)) {                                                 \
+        auto castProp = AceType::DynamicCast<srcType>(prop);                                  \
+        auto rsProp = std::make_shared<RSProperty<propType>>(castProp->Get());                \
+        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },            \
+            [rsProp](const propType& value) { rsProp->Set(value); });                         \
+        return rsProp;                                                                        \
     }
 
-inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<AnimatablePropertyBase>& property)
+#define CONVERT_ANIMATABLE_PROP(prop, srcType, propType)                                      \
+    if (AceType::InstanceOf<srcType>(prop)) {                                                 \
+        auto castProp = AceType::DynamicCast<srcType>(prop);                                  \
+        auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get());      \
+        castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },            \
+            [rsProp](const propType& value) { rsProp->Set(value); });                         \
+        return rsProp;                                                                        \
+    }
+
+inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<PropertyBase>& property)
 {
     // should manually add convert type here
-    CONVERT_PROP(property, AnimatablePropertyBool, bool);
-    CONVERT_PROP(property, AnimatablePropertyFloat, float);
-    CONVERT_PROP(property, AnimatablePropertyColor, LinearColor);
-    CONVERT_PROP(property, AnimatablePropertySizeF, SizeF);
-    CONVERT_PROP(property, AnimatablePropertyOffsetF, OffsetF);
+    CONVERT_PROP(property, PropertyBool, bool);
+    CONVERT_PROP(property, PropertySizeF, SizeF);
+    CONVERT_PROP(property, PropertyOffsetF, OffsetF);
+    CONVERT_PROP(property, PropertyInt, int32_t);
+    CONVERT_PROP(property, PropertyFloat, float);
+    CONVERT_PROP(property, PropertyString, std::string);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyOffsetF, OffsetF);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyFloat, float);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyColor, LinearColor);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorColor, GradientArithmetic);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertyVectorFloat, LinearVector<float>);
+    CONVERT_ANIMATABLE_PROP(property, AnimatablePropertySizeF, SizeF);
     LOGE("ConvertToRSProperty failed!");
     return nullptr;
 }

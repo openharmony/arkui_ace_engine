@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -35,7 +36,9 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
@@ -105,7 +108,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this));
+        if (!textFieldOverlayModifier_) {
+            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this));
+        }
+        if (!textFieldContentModifier_) {
+            textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
+        }
+        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier_, textFieldContentModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -121,6 +130,11 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<TextFieldPaintProperty>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<TextFieldAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -331,7 +345,7 @@ public:
 
     bool InSelectMode() const
     {
-        return selectionMode_ != SelectionMode::NONE;
+        return selectionMode_ != SelectionMode::NONE && !textSelector_.StartEqualToDest();
     }
 
     bool IsUsingMouse() const
@@ -344,6 +358,7 @@ public:
     void CursorMoveUp();
     void CursorMoveDown();
     void SetCaretPosition(int32_t position);
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void HandleSetSelection(int32_t start, int32_t end);
     void HandleExtendAction(int32_t action);
     void HandleSelect(int32_t keyCode, int32_t cursorMoveSkip);
@@ -363,13 +378,13 @@ public:
 
     bool SelectOverlayIsOn();
     void CloseSelectOverlay();
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    void SetInputMethodStatus(bool imeAttached)
+    void SetInputMethodStatus(bool keyboardShown)
     {
-        imeAttached_ = imeAttached;
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        imeShown_ = keyboardShown;
+#endif
     }
 
-#endif
     bool HasConnection() const
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -473,9 +488,8 @@ public:
     void ProcessInnerPadding();
     void OnCursorMoveDone();
     bool IsDisabled();
+    bool AllowCopy();
 
-    bool LastInputIsNewLine() const;
-    void OnHandleReverse(bool isReverse);
     bool GetIsMousePressed() const
     {
         return isMousePressed_;
@@ -484,14 +498,53 @@ public:
     {
         return mouseStatus_;
     }
+
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
+    {
+        menuOptionItems_ = std::move(menuOptionItems);
+    }
+
+    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
+    {
+        return std::move(menuOptionItems_);
+    }
+
     void UpdateEditingValueToRecord();
+
+    RefPtr<TextFieldContentModifier> GetContentModifier()
+    {
+        return textFieldContentModifier_;
+    }
+
+    // xts
+    std::string TextInputTypeToString() const;
+    std::string TextInputActionToString() const;
+    std::string GetPlaceholderFont() const;
+    RefPtr<TextFieldTheme> GetTheme() const;
+    std::string GetTextColor() const;
+    std::string GetCaretColor() const;
+    std::string GetPlaceholderColor() const;
+    std::string GetFontSize() const;
+    Ace::FontStyle GetItalicFontStyle() const;
+    FontWeight GetFontWeight() const;
+    std::string GetFontFamily() const;
+    TextAlign GetTextAlign() const;
+    std::string GetPlaceHolder() const;
+    uint32_t GetMaxLength() const;
+    std::string GetInputFilter() const;
+    std::string GetCopyOptionString() const;
+    std::string GetShowPasswordIconString() const;
+    std::string GetInputStyleString() const;
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
+    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    bool OnBackPressed();
 
 private:
     void HandleBlurEvent();
     bool HasFocus() const;
     void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
-    bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void ParseAppendValue(KeyCode keycode, std::string& appendElement);
     void HandleDirectionalKey(const KeyEvent& keyEvent);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
@@ -527,6 +580,7 @@ private:
     void UpdateTextSelectorByHandleMove(bool isMovingBase, int32_t position, OffsetF& offsetToParagraphBeginning);
     void UpdateCaretByRightClick();
 
+    void AfterSelection();
     void HandleSelectionUp();
     void HandleSelectionDown();
     void HandleSelectionLeft();
@@ -540,6 +594,7 @@ private:
     void HandleOnCut();
 
     void FireEventHubOnChange(const std::string& text);
+    void FireOnChangeIfNeeded();
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
@@ -554,26 +609,11 @@ private:
     void StartTwinkling();
     void StopTwinkling();
 
-    void SetCaretOffsetXForEmptyText();
+    float PreferredTextHeight(bool isPlaceholder);
+
+    void SetCaretOffsetForEmptyTextOrPositionZero();
     void UpdateTextFieldManager(const Offset& offset, float height);
     void OnTextInputActionUpdate(TextInputAction value);
-
-    // xts
-    std::string TextInputTypeToString() const;
-    std::string TextInputActionToString() const;
-    std::string GetPlaceholderFont() const;
-    RefPtr<TextFieldTheme> GetTheme() const;
-    std::string GetTextColor() const;
-    std::string GetCaretColor() const;
-    std::string GetPlaceholderColor() const;
-    std::string GetFontSize() const;
-    Ace::FontStyle GetItalicFontStyle() const;
-    FontWeight GetFontWeight() const;
-    std::string GetFontFamily() const;
-    TextAlign GetTextAlign() const;
-    std::string GetPlaceHolder() const;
-    uint32_t GetMaxLength() const;
-    std::string GetInputFilter() const;
 
     void Delete(int32_t start, int32_t end);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -586,6 +626,7 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
     void ResetBackgroundColor();
+    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange = false);
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -597,13 +638,15 @@ private:
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
 
+    bool IsSearchParentNode();
+
     RectF frameRect_;
     RectF contentRect_;
     RectF textRect_;
     RectF imageRect_;
     std::shared_ptr<RSParagraph> paragraph_;
-    TextStyle lineHeightMeasureUtilTextStyle_;
-    std::shared_ptr<RSParagraph> lineHeightMeasureUtilParagraph_;
+    std::shared_ptr<RSParagraph> textLineHeightUtilParagraph_;
+    std::shared_ptr<RSParagraph> placeholderLineHeightUtilParagraph_;
     TextStyle nextLineUtilTextStyle_;
     std::shared_ptr<RSParagraph> nextLineUtilParagraph_;
 
@@ -639,14 +682,13 @@ private:
     RectF caretRect_;
     bool cursorVisible_ = false;
     bool focusEventInitialized_ = false;
-    bool preferredLineHeightNeedToUpdate = true;
     bool isMousePressed_ = false;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     bool needCloseOverlay_ = true;
     bool textObscured_ = true;
     bool enableTouchAndHoverEffect_ = true;
-    bool newLineInserted_ = false;
     bool isUsingMouse_ = false;
+    bool isOnHover_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
@@ -654,7 +696,10 @@ private:
     CaretUpdateType caretUpdateType_ = CaretUpdateType::NONE;
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
-    float placeholderParagraphHeight_ = 0.0f;
+    bool setSelectionFlag_ = false;
+    bool setSelectAllFlag_ = true;
+    int32_t selectionStart_ = 0;
+    int32_t selectionEnd_ = 0;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
@@ -666,6 +711,8 @@ private:
     TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
+    RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
+    RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
     RefPtr<Clipboard> clipboard_;
@@ -673,14 +720,19 @@ private:
     std::vector<TextEditingValueNG> redoOperationRecords_;
     std::vector<TextSelector> textSelectorRecords_;
     std::vector<TextSelector> redoTextSelectorRecords_;
+    std::vector<MenuOptionsParam> menuOptionItems_;
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> textChangeListener_;
 
 #endif
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
+    bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
+#if defined(PREVIEW)
+    std::vector<std::wstring> clipRecords_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

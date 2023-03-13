@@ -202,7 +202,13 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         if (ParseCommonTitle(info[0])) {
             return;
         }
-
+        if (Container::IsCurrentUseNewPipeline()) {
+            std::string title;
+            if (ParseJsString(info[0], title)) {
+                NG::NavigationView::SetTitle(title);
+                return;
+            }
+        }
         // CustomBuilder | NavigationCustomTitle
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> builderObject = jsObj->GetProperty("builder");

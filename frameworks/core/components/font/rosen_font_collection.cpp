@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,9 @@
 
 #include "core/components/font/rosen_font_collection.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/third_party/txt/src/minikin/FontFamily.h"
 #include "flutter/third_party/txt/src/minikin/FontLanguageListCache.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 
 #include "base/i18n/localization.h"
 #include "base/log/ace_trace.h"
@@ -32,34 +32,13 @@ RosenFontCollection RosenFontCollection::instance;
 
 std::shared_ptr<txt::FontCollection> RosenFontCollection::GetFontCollection()
 {
-    if (!isUseRosenEngine) {
-        if (!isCompleted_) {
-            isCompleted_ = future_.get();
-        }
-        return fontCollection_->GetFontCollection();
-    }
-
-    auto* windowClient = GetRosenEngineWindowClient();
-    if (windowClient == nullptr) {
-        return nullptr;
-    }
-    auto& fontCollection = windowClient->GetFontCollection();
-    return fontCollection.GetFontCollection();
-}
-
-flutter::WindowClient* RosenFontCollection::GetRosenEngineWindowClient()
-{
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return nullptr;
-    }
-
-    auto* window = flutter::UIDartState::Current()->window();
-    if (window == nullptr) {
-        LOGW("UpdateParagraph: window or client is null");
-        return nullptr;
-    }
-    return window->client();
+    std::call_once(fontFlag_, [this]() {
+        fontCollection_ = std::make_shared<txt::FontCollection>();
+        fontCollection_->SetupDefaultFontManager();
+        dynamicFontManager_ = sk_make_sp<txt::DynamicFontManager>();
+        fontCollection_->SetDynamicFontManager(dynamicFontManager_);
+    });
+    return fontCollection_;
 }
 
 void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName)
@@ -71,57 +50,17 @@ void RosenFontCollection::LoadFontFromList(const uint8_t* fontData, size_t lengt
 
     families_.emplace_back(familyName);
 
-    if (!isUseRosenEngine) {
-        if (!isCompleted_) {
-            isCompleted_ = future_.get();
+    if (fontCollection_) {
+        std::unique_ptr<SkStreamAsset> font_stream = std::make_unique<SkMemoryStream>(fontData, length, true);
+        sk_sp<SkTypeface> typeface = SkTypeface::MakeFromStream(std::move(font_stream));
+        txt::TypefaceFontAssetProvider& font_provider = dynamicFontManager_->font_provider();
+        if (familyName.empty()) {
+            font_provider.RegisterTypeface(typeface);
+        } else {
+            font_provider.RegisterTypeface(typeface, familyName);
         }
-        fontCollection_->LoadFontFromList(fontData, length, familyName);
-        return;
+        fontCollection_->ClearFontFamilyCache();
     }
-
-    auto* windowClient = GetRosenEngineWindowClient();
-    if (windowClient == nullptr) {
-        return;
-    }
-    auto& fontCollection = windowClient->GetFontCollection();
-    fontCollection.LoadFontFromList(fontData, length, familyName);
-}
-
-void RosenFontCollection::CreateFontCollection(const fml::RefPtr<fml::TaskRunner>& ioTaskRunner)
-{
-    Localization::GetInstance()->SetOnMymrChange([ioTaskRunner](bool isZawgyiMyanmar) {
-        if (ioTaskRunner) {
-            ioTaskRunner->PostTask(
-                [isZawgyiMyanmar]() { RosenFontCollection::GetInstance().SetIsZawgyiMyanmar(isZawgyiMyanmar); });
-        }
-    });
-
-    if (isInit_ || !ioTaskRunner) {
-        return;
-    }
-    isInit_ = true;
-    isUseRosenEngine = false;
-
-    ioTaskRunner->PostTask([&fontCollection = fontCollection_, &promise = promise_]() mutable {
-        fontCollection = std::make_unique<flutter::FontCollection>();
-        if (fontCollection->GetFontCollection()) {
-            // Initialize weight scale
-            float fontWeightScale = SystemProperties::GetFontWeightScale();
-            if (GreatNotEqual(fontWeightScale, 0.0)) {
-                fontCollection->GetFontCollection()->VaryFontCollectionWithFontWeightScale(fontWeightScale);
-            }
-
-            auto locale = Localization::GetInstance()->GetFontLocale();
-            uint32_t langListId = locale.empty() ? minikin::FontLanguageListCache::kEmptyListId
-                                                 : minikin::FontStyle::registerLanguageList(locale);
-            const minikin::FontLanguages& langs = minikin::FontLanguageListCache::getById(langListId);
-            locale = langs.size() ? langs[0].getString() : "";
-            // 0x4e2d is unicode for '中'.
-            fontCollection->GetFontCollection()->MatchFallbackFont(0x4e2d, locale);
-            fontCollection->GetFontCollection()->GetMinikinFontCollectionForFamilies({ "sans-serif" }, locale);
-        }
-        promise.set_value(true);
-    });
 }
 
 RosenFontCollection& RosenFontCollection::GetInstance()
@@ -135,57 +74,18 @@ void RosenFontCollection::VaryFontCollectionWithFontWeightScale(float fontWeight
         return;
     }
 
-    if (!isUseRosenEngine) {
-        if (!isCompleted_) {
-            return;
-        }
-        if (fontCollection_ && fontCollection_->GetFontCollection()) {
-            fontCollection_->GetFontCollection()->VaryFontCollectionWithFontWeightScale(fontWeightScale);
-        }
-        return;
+    if (fontCollection_) {
+        fontCollection_->VaryFontCollectionWithFontWeightScale(fontWeightScale);
     }
-
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return;
-    }
-
-    auto* window = flutter::UIDartState::Current()->window();
-    if (window == nullptr || window->client() == nullptr) {
-        LOGW("UpdateParagraph: window or client is null");
-        return;
-    }
-
-    auto& fontCollection = window->client()->GetFontCollection();
-    fontCollection.GetFontCollection()->VaryFontCollectionWithFontWeightScale(fontWeightScale);
 }
 
 void RosenFontCollection::LoadSystemFont()
 {
     ACE_FUNCTION_TRACE();
-    if (!isUseRosenEngine) {
-        if (!isCompleted_) {
-            return;
-        }
-        if (fontCollection_ && fontCollection_->GetFontCollection()) {
-            fontCollection_->GetFontCollection()->LoadSystemFont();
-        }
-        return;
-    }
 
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return;
+    if (fontCollection_) {
+        fontCollection_->LoadSystemFont();
     }
-
-    auto* window = flutter::UIDartState::Current()->window();
-    if (window == nullptr || window->client() == nullptr) {
-        LOGW("UpdateParagraph: window or client is null");
-        return;
-    }
-
-    auto& fontCollection = window->client()->GetFontCollection();
-    fontCollection.GetFontCollection()->LoadSystemFont();
 }
 
 void RosenFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
@@ -197,29 +97,9 @@ void RosenFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
     }
     isZawgyiMyanmar_ = isZawgyiMyanmar;
 
-    if (!isUseRosenEngine) {
-        if (!isCompleted_) {
-            isCompleted_ = future_.get();
-        }
-        if (fontCollection_ && fontCollection_->GetFontCollection()) {
-            fontCollection_->GetFontCollection()->SetIsZawgyiMyanmar(isZawgyiMyanmar);
-        }
-        return;
+    if (fontCollection_) {
+        fontCollection_->SetIsZawgyiMyanmar(isZawgyiMyanmar);
     }
-
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return;
-    }
-
-    auto* window = flutter::UIDartState::Current()->window();
-    if (window == nullptr || window->client() == nullptr) {
-        LOGW("UpdateParagraph: window or client is null");
-        return;
-    }
-
-    auto& fontCollection = window->client()->GetFontCollection();
-    fontCollection.GetFontCollection()->SetIsZawgyiMyanmar(isZawgyiMyanmar);
 
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         if (container) {

@@ -19,7 +19,6 @@
 #include <functional>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "include/core/SkColor.h"
 #include "include/core/SkMaskFilter.h"
 #include "include/effects/Sk1DPathEffect.h"

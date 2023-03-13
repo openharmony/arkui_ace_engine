@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,8 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H
+
+#include <map>
 
 #include "core/event/ace_events.h"
 
@@ -433,6 +435,10 @@ enum class KeyAction : int32_t {
 
 constexpr int32_t ASCII_START_UPPER_CASE_LETTER = 65;
 constexpr int32_t ASCII_START_LOWER_CASE_LETTER = 97;
+const std::map<int, char> VISIBILITY_CODE = { { 2043, ',' }, { 2044, '.' }, { 2056, '`' }, { 2057, '-' },
+    { 2058, '=' }, { 2059, '[' }, { 2060, ']' }, { 2061, '\\' }, { 2062, ';' }, { 2063, '\'' }, { 2064, '/' },
+    { 2065, '@' }, { 2066, '+' }, { 2113, '/' }, { 2113, '/' }, { 2114, '*' }, { 2115, '-' }, { 2116, '+' },
+    { 2117, '.' }, { 2118, ',' }, { 2120, '=' }, { 2049, '\t' }, { 2050, ' ' } };
 
 ACE_FORCE_EXPORT_WITH_PREVIEW const char* KeyToString(int32_t code);
 
@@ -515,6 +521,25 @@ struct KeyEvent final {
                 return std::string(1, static_cast<char>(codeValue + ASCII_START_UPPER_CASE_LETTER));
             }
             return std::string(1, static_cast<char>(codeValue + ASCII_START_LOWER_CASE_LETTER));
+        }
+        return "";
+    }
+
+    std::string ConvertInputCodeToString() const
+    {
+        if (KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) {
+            return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_0));
+        }
+        if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
+            return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
+        }
+        if (IsLetterKey()) {
+            int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);
+            return std::string(1, static_cast<char>(codeValue + ASCII_START_LOWER_CASE_LETTER));
+        }
+        auto iter = VISIBILITY_CODE.find(static_cast<int32_t>(code));
+        if (iter != VISIBILITY_CODE.end()) {
+            return std::string(1, iter->second);
         }
         return "";
     }

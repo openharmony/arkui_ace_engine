@@ -25,10 +25,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
@@ -39,27 +41,20 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t START_YEAR_BEFORE = 1899;
-constexpr int32_t START_YEAR = 1900;
-constexpr int32_t END_YEAR = 2100;
-constexpr int32_t END_YEAR_BEHIND = 2101;
-constexpr int32_t END_MONTH = 12;
-constexpr int32_t END_MONTH_BEHIND = 13;
-constexpr int32_t END_DAY = 31;
-constexpr int32_t END_DAY_BEHIND = 32;
-constexpr int32_t CURRENT_YEAR = 2022;
-constexpr int32_t CURRENT_MONTH = 12;
-constexpr int32_t CURRENT_DAY = 6;
+constexpr double PATTERN_OFFSET = 1000;
+constexpr double TEST_FONT_SIZE = 10;
+
+constexpr int32_t START_YEAR_BEFORE = 1990;
+constexpr int32_t START_YEAR = 1980;
+constexpr int32_t SELECTED_YEAR = 2000;
+constexpr int32_t END_YEAR = 2090;
+constexpr int32_t CURRENT_DAY = 5;
 } // namespace
 
 class PickerPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
-
-protected:
 };
 
 class TestNode : public UINode {
@@ -70,7 +65,7 @@ public:
     {
         auto spanNode = MakeRefPtr<TestNode>(nodeId);
         return spanNode;
-    };
+    }
 
     bool IsAtomicNode() const override
     {
@@ -84,1750 +79,653 @@ public:
 void PickerPatternTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    // set themeManager before using themeManager to get Theme
+    auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PickerTheme>()));
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
 }
 
 void PickerPatternTestNg::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
+    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
-
-void PickerPatternTestNg::SetUp() {}
-void PickerPatternTestNg::TearDown() {}
 
 /**
  * @tc.name: DatePickerPatternOnAttachToFrameNode001
  * @tc.desc: Test DatePickerPattern OnAttachToFrameNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnAttachToFrameNode001, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGCreateDatePicker001, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    datePickerPattern->OnAttachToFrameNode();
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    columnPattern->FlushCurrentOptions();
 }
 
 /**
- * @tc.name: DatePickerPatternOnDirtyLayoutWrapperSwap001
- * @tc.desc: Test DatePickerPattern OnDirtyLayoutWrapperSwap.
+ * @tc.name: DatePickerModelNGSetDisappearTextStyle001
+ * @tc.desc: Test DatePickerModelNG SetDisappearTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetDisappearTextStyle001, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    DirtySwapConfig config;
-    auto ret = datePickerPattern->OnDirtyLayoutWrapperSwap(nullptr, config);
-    EXPECT_EQ(ret, false);
-    config.frameSizeChange = true;
-    ret = datePickerPattern->OnDirtyLayoutWrapperSwap(nullptr, config);
-    EXPECT_EQ(ret, false);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    ret = datePickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_EQ(ret, true);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    DatePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
+    EXPECT_TRUE(pickerProperty->HasDisappearColor());
+    EXPECT_TRUE(pickerProperty->HasDisappearWeight());
 }
 
 /**
- * @tc.name: DatePickerPatternOnModifyDone001
- * @tc.desc: Test DatePickerPattern OnModifyDone.
+ * @tc.name: DatePickerModelNGSetDisappearTextStyle002
+ * @tc.desc: Test DatePickerModelNG SetDisappearTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnModifyDone001, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetDisappearTextStyle002, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(TEST_FONT_SIZE);
+    data.textColor = Color::RED;
+    data.fontWeight = Ace::FontWeight::BOLD;
+    DatePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->OnModifyDone();
-
-    auto children = host->GetChildren();
-    for (const auto& child : children) {
-        auto childNode = AceType::DynamicCast<FrameNode>(child);
-        EXPECT_NE(childNode, nullptr);
-        auto datePickerColumnPattern = childNode->GetPattern<DatePickerColumnPattern>();
-        EXPECT_NE(datePickerColumnPattern, nullptr);
-        auto changeCallback = datePickerColumnPattern->GetChangeCallback();
-        EXPECT_NE(changeCallback, nullptr);
-        changeCallback(frameNode, false, 1, false);
-
-        auto eventCallback = datePickerColumnPattern->GetEventCallback();
-        EXPECT_NE(eventCallback, nullptr);
-        eventCallback(false);
-    }
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(Color::RED, pickerProperty->GetDisappearColor().value());
+    EXPECT_EQ(Dimension(TEST_FONT_SIZE), pickerProperty->GetDisappearFontSize().value());
+    EXPECT_EQ(Ace::FontWeight::BOLD, pickerProperty->GetDisappearWeight().value());
 }
 
 /**
- * @tc.name: DatePickerPatternOnModifyDone002
- * @tc.desc: Test DatePickerPattern OnModifyDone when there is a title node.
+ * @tc.name: DatePickerModelNGSetDisappearTextStyle003
+ * @tc.desc: Test DatePickerModelNG SetDisappearTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnModifyDone002, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetDisappearTextStyle003, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(0);
+    DatePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->titleId_ = std::make_optional(0);
-    datePickerPattern->OnModifyDone();
-
-    auto children = host->GetChildren();
-    for (const auto& child : children) {
-        auto childNode = AceType::DynamicCast<FrameNode>(child);
-        EXPECT_NE(childNode, nullptr);
-        auto datePickerColumnPattern = childNode->GetPattern<DatePickerColumnPattern>();
-        EXPECT_NE(datePickerColumnPattern, nullptr);
-        auto changeCallback = datePickerColumnPattern->GetChangeCallback();
-        EXPECT_NE(changeCallback, nullptr);
-        changeCallback(frameNode, false, 1, false);
-
-        auto eventCallback = datePickerColumnPattern->GetEventCallback();
-        EXPECT_NE(eventCallback, nullptr);
-        eventCallback(false);
-    }
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
 }
 
 /**
- * @tc.name: DatePickerPatternHandleColumnChange001
- * @tc.desc: Test DatePickerPattern HandleColumnChange when frameNode is not nullptr.
+ * @tc.name: DatePickerModelNGSetNormalTextStyle001
+ * @tc.desc: Test DatePickerModelNG SetNormalTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleColumnChange001, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetNormalTextStyle001, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleColumnChange(frameNode, false, 1, false);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    DatePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->HasFontSize());
+    EXPECT_TRUE(pickerProperty->HasColor());
+    EXPECT_TRUE(pickerProperty->HasWeight());
 }
 
 /**
- * @tc.name: DatePickerPatternHandleColumnChange002
- * @tc.desc: Test DatePickerPattern HandleColumnChange when frameNode is nullptr.
+ * @tc.name: DatePickerModelNGSetNormalTextStyle002
+ * @tc.desc: Test DatePickerModelNG SetNormalTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleColumnChange002, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetNormalTextStyle002, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(nullptr);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_EQ(host, nullptr);
-    datePickerPattern->HandleColumnChange(frameNode, false, 1, false);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(TEST_FONT_SIZE);
+    data.textColor = Color::RED;
+    data.fontWeight = Ace::FontWeight::BOLD;
+    DatePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(Color::RED, pickerProperty->GetColor().value());
+    EXPECT_EQ(Dimension(10), pickerProperty->GetFontSize().value());
+    EXPECT_EQ(Ace::FontWeight::BOLD, pickerProperty->GetWeight().value());
 }
 
 /**
- * @tc.name: DatePickerPatternOnKeyEvent001
- * @tc.desc: Test DatePickerPattern OnKeyEvent when KeyEvent is KeyAction::DOWN.
+ * @tc.name: DatePickerModelNGSetNormalTextStyle003
+ * @tc.desc: Test DatePickerModelNG SetNormalTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnKeyEvent001, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetNormalTextStyle003, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    KeyEvent event;
-    event.action = KeyAction::UP;
-    datePickerPattern->OnKeyEvent(event);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(0);
+    DatePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->HasFontSize());
 }
 
 /**
- * @tc.name: DatePickerPatternOnKeyEvent002
- * @tc.desc: Test DatePickerPattern OnKeyEvent when KeyEvent is KeyAction::UP.
+ * @tc.name: DatePickerModelNGSetSelectedTextStyle001
+ * @tc.desc: Test DatePickerModelNG SetSelectedTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnKeyEvent002, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetSelectedTextStyle001, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_DPAD_UP;
-    datePickerPattern->OnKeyEvent(event);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
+    EXPECT_TRUE(pickerProperty->HasSelectedColor());
+    EXPECT_TRUE(pickerProperty->HasSelectedWeight());
 }
 
 /**
- * @tc.name: DatePickerPatternOnKeyEvent003
- * @tc.desc: Test DatePickerPattern OnKeyEvent when KeyCode is KeyCode::KEY_DPAD_DOWN.
+ * @tc.name: DatePickerModelNGSetSelectedTextStyle002
+ * @tc.desc: Test DatePickerModelNG SetSelectedTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnKeyEvent003, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetSelectedTextStyle002, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_DPAD_DOWN;
-    datePickerPattern->OnKeyEvent(event);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(TEST_FONT_SIZE);
+    data.textColor = Color::RED;
+    data.fontWeight = Ace::FontWeight::BOLD;
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(Color::RED, pickerProperty->GetSelectedColor().value());
+    EXPECT_EQ(Dimension(TEST_FONT_SIZE), pickerProperty->GetSelectedFontSize().value());
+    EXPECT_EQ(Ace::FontWeight::BOLD, pickerProperty->GetSelectedWeight().value());
 }
 
 /**
- * @tc.name: DatePickerPatternOnKeyEvent004
- * @tc.desc: Test DatePickerPattern OnKeyEvent when KeyCode is KeyCode::KEY_BACK.
+ * @tc.name: DatePickerModelNGSetSelectedTextStyle003
+ * @tc.desc: Test DatePickerModelNG SetSelectedTextStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnKeyEvent004, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerModelNGSetSelectedTextStyle003, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_BACK;
-    datePickerPattern->OnKeyEvent(event);
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(0);
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
 }
 
 /**
- * @tc.name: DatePickerPatternHandleDirectionKey001
- * @tc.desc: Test DatePickerPattern HandleDirectionKey when KeyCode is KeyCode::KEY_DPAD_UP.
+ * @tc.name: DatePickerDialogViewShow001
+ * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDirectionKey001, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerDialogViewShow001, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    KeyCode code = KeyCode::KEY_DPAD_UP;
-    datePickerPattern->HandleDirectionKey(code);
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) {
+        (void)info;
+    };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) {
+        (void)info;
+    };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
 }
 
 /**
- * @tc.name: DatePickerPatternHandleDirectionKey002
- * @tc.desc: Test DatePickerPattern HandleDirectionKey when KeyCode is KeyCode::KEY_DPAD_DOWN.
+ * @tc.name: DatePickerDialogViewShow002
+ * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDirectionKey002, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerDialogViewShow002, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    KeyCode code = KeyCode::KEY_DPAD_DOWN;
-    datePickerPattern->HandleDirectionKey(code);
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(START_YEAR_BEFORE, CURRENT_DAY, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) {
+        (void)info;
+    };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) {
+        (void)info;
+    };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+
+    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+
+    ASSERT_NE(dialogNode, nullptr);
+    auto titleNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetFirstChild());
+    auto titleEventHub = titleNode->GetOrCreateGestureEventHub();
+    titleEventHub->ActClick();
+    titleEventHub->ActClick();
+    titleEventHub->ActClick();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto overlayManger = pipeline->GetOverlayManager();
+    overlayManger->FireBackPressEvent();
+    overlayManger->FireBackPressEvent();
 }
 
 /**
- * @tc.name: DatePickerPatternHandleDirectionKey003
- * @tc.desc: Test DatePickerPattern HandleDirectionKey when KeyCode is KeyCode::KEY_DPAD_DOWN.
+ * @tc.name: DatePickerDialogViewShow003
+ * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDirectionKey003, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerDialogViewShow003, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    DatePickerSettingData settingData;
+    settingData.isLunar = true;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    KeyCode code = KeyCode::KEY_BACK;
-    datePickerPattern->HandleDirectionKey(code);
+    std::map<std::string, PickerDate> datePickerProperty;
+    settingData.datePickerProperty = datePickerProperty;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    settingData.timePickerProperty = timePickerProperty;
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) {
+        (void)info;
+    };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) {
+        (void)info;
+    };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto overlayManger = pipeline->GetOverlayManager();
+    overlayManger->FireBackPressEvent();
+
+    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
 }
 
 /**
- * @tc.name: DatePickerPatternGetAllChildNode001
- * @tc.desc: Test DatePickerPattern GetAllChildNod when child is three nodes.
+ * @tc.name: DatePickerDialogViewShow004
+ * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode001, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerDialogViewShow004, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    auto child = datePickerPattern->GetAllChildNode();
-    EXPECT_EQ(child.size(), 3UL);
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(START_YEAR, CURRENT_DAY, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(END_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
+
+    DialogProperties dialogProperties;
+
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) {
+        (void)info;
+    };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) {
+        (void)info;
+    };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+
+    ASSERT_NE(dialogNode, nullptr);
+    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    columnPattern->SetCurrentIndex(0);
+    columnPattern->UpdateColumnChildPosition(PATTERN_OFFSET);
 }
 
 /**
- * @tc.name: DatePickerPatternGetAllChildNode002
- * @tc.desc: Test DatePickerPattern GetAllChildNod when child is not three nodes.
+ * @tc.name: DatePickerDialogViewShow005
+ * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode002, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerDialogViewShow005, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(START_YEAR_BEFORE, 1, CURRENT_DAY);
+    settingData.datePickerProperty["selected"] = PickerDate(END_YEAR, CURRENT_DAY, CURRENT_DAY);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = true;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
 
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
+    DialogProperties dialogProperties;
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 6UL);
-    auto child = datePickerPattern->GetAllChildNode();
-    EXPECT_EQ(child.size(), 0UL);
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) {
+        (void)info;
+    };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) {
+        (void)info;
+    };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+
+    ASSERT_NE(dialogNode, nullptr);
+    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    columnPattern->SetCurrentIndex(0);
+    columnPattern->HandleChangeCallback(true, true);
 }
 
 /**
- * @tc.name: DatePickerPatternGetAllChildNode003
- * @tc.desc: Test DatePickerPattern GetAllChildNod when child node of year is not FrameNode.
+ * @tc.name: DatePickerDialogViewShow006
+ * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode003, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerDialogViewShow006, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = TestNode::CreateTestNode(1);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
 
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
+    DialogProperties dialogProperties;
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    auto child = datePickerPattern->GetAllChildNode();
-    EXPECT_EQ(child.size(), 0UL);
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) {
+        (void)info;
+    };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) {
+        (void)info;
+    };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+
+
+    ASSERT_NE(dialogNode, nullptr);
+    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    columnPattern->SetCurrentIndex(0);
+    columnPattern->HandleChangeCallback(true, true);
 }
 
 /**
- * @tc.name: DatePickerPatternGetAllChildNode004
- * @tc.desc: Test DatePickerPattern GetAllChildNod when child node of month is not FrameNode.
+ * @tc.name: DatePickerDialogViewShow007
+ * @tc.desc: Test DatePickerDialogView Show.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode004, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerDialogViewShow007, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
+    DatePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
 
-    auto monthFrameNodeChild = TestNode::CreateTestNode(2);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(TEST_FONT_SIZE);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.datePickerProperty["start"] = PickerDate(START_YEAR_BEFORE, 1, 1);
+    settingData.datePickerProperty["end"] = PickerDate(END_YEAR, 1, 1);
+    settingData.datePickerProperty["selected"] = PickerDate(SELECTED_YEAR, 1, 1);
+    settingData.timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    settingData.isLunar = false;
+    settingData.showTime = true;
+    settingData.useMilitary = false;
 
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
+    DialogProperties dialogProperties;
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    auto child = datePickerPattern->GetAllChildNode();
-    EXPECT_EQ(child.size(), 0UL);
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) {
+        (void)info;
+    };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) {
+        (void)info;
+    };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    auto dialogNode = DatePickerDialogView::Show(dialogProperties, settingData, dialogEvent, dialogCancelEvent);
+
+    ASSERT_NE(dialogNode, nullptr);
+    auto midStackNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild()->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<FrameNode>(midStackNode->GetLastChild()->GetFirstChild());
+    auto columnNode = AceType::DynamicCast<FrameNode>(dateNode->GetFirstChild()->GetChildAtIndex(1));
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    auto opt = columnPattern->GetOptions();
+    columnPattern->SetCurrentIndex(opt[columnNode].size() - 1);
+    columnPattern->HandleChangeCallback(false, true);
 }
 
 /**
- * @tc.name: DatePickerPatternGetAllChildNode005
- * @tc.desc: Test DatePickerPattern GetAllChildNod when child node of day is not FrameNode.
+ * @tc.name: DatePickerRowLayoutPropertyToJsonValue001
+ * @tc.desc: Test DatePickerRowLayoutProperty ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetAllChildNode005, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerRowLayoutPropertyToJsonValue001, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(0);
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
+    ASSERT_NE(frameNode, nullptr);
 
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = TestNode::CreateTestNode(3);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    auto child = datePickerPattern->GetAllChildNode();
-    EXPECT_EQ(child.size(), 0UL);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto disappearFont = JsonUtil::Create(true);
+    pickerProperty->ToJsonValue(disappearFont);
+    EXPECT_NE(disappearFont, nullptr);
 }
 
 /**
- * @tc.name: DatePickerPatternFlushColumn001
- * @tc.desc: Test DatePickerPattern FlushColumn when child is three nodes.
+ * @tc.name: DatePickerRowLayoutPropertyReset001
+ * @tc.desc: Test DatePickerRowLayoutProperty Reset.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn001, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerRowLayoutPropertyReset001, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
 
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    datePickerPattern->FlushColumn();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(0);
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->Reset();
 }
 
 /**
- * @tc.name: DatePickerPatternFlushColumn002
- * @tc.desc: Test DatePickerPattern FlushColumn when child node of year is not FrameNode.
+ * @tc.name: DatePickerRowLayoutPropertyClone001
+ * @tc.desc: Test DatePickerRowLayoutProperty Clone.
  * @tc.type: FUNC
  */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn002, TestSize.Level1)
+HWTEST_F(PickerPatternTestNg, DatePickerRowLayoutPropertyClone001, TestSize.Level1)
 {
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    PickerTextStyle data;
+    data.fontSize = Dimension(0);
+    DatePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = TestNode::CreateTestNode(1);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    datePickerPattern->FlushColumn();
-}
-
-/**
- * @tc.name: DatePickerPatternFlushColumn003
- * @tc.desc: Test DatePickerPattern FlushColumn when child node of month is not FrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn003, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = TestNode::CreateTestNode(2);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    datePickerPattern->FlushColumn();
-}
-
-/**
- * @tc.name: DatePickerPatternFlushColumn004
- * @tc.desc: Test DatePickerPattern FlushColumn when child node of day is not FrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn004, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = TestNode::CreateTestNode(3);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    datePickerPattern->FlushColumn();
-}
-
-/**
- * @tc.name: DatePickerPatternFlushColumn005
- * @tc.desc: Test DatePickerPattern FlushColumn when Lunar is true.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternFlushColumn005, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    auto property = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
-    EXPECT_NE(property, nullptr);
-    property->UpdateLunar(true);
-    datePickerPattern->FlushColumn();
-}
-
-/**
- * @tc.name: DatePickerPatternOnDataLinking001
- * @tc.desc: Test DatePickerPattern OnDataLinking.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternOnDataLinking001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    EXPECT_EQ(host->GetChildren().size(), 3UL);
-    std::vector<RefPtr<FrameNode>> resultTags;
-    datePickerPattern->OnDataLinking(yearFrameNodeChild, false, 1, resultTags);
-    datePickerPattern->OnDataLinking(monthFrameNodeChild, false, 2, resultTags);
-    datePickerPattern->OnDataLinking(dayFrameNodeChild, false, 3, resultTags);
-}
-
-/**
- * @tc.name: DatePickerPatternFireChangeEvent001
- * @tc.desc: Test DatePickerPattern FireChangeEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternFireChangeEvent001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->FireChangeEvent(false);
-    datePickerPattern->FireChangeEvent(true);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleDayChange001
- * @tc.desc: Test DatePickerPattern HandleDayChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDayChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    std::vector<RefPtr<FrameNode>> resultTags;
-    datePickerPattern->SetShowLunar(true);
-    datePickerPattern->HandleDayChange(false, 1, resultTags);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleDayChange002
- * @tc.desc: Test DatePickerPattern HandleDayChange when SetShowLunar is false.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleDayChange002, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    std::vector<RefPtr<FrameNode>> resultTags;
-    datePickerPattern->SetShowLunar(false);
-    datePickerPattern->HandleDayChange(false, 1, resultTags);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleSolarDayChange001
- * @tc.desc: Test DatePickerPattern HandleSolarDayChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleSolarDayChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleSolarDayChange(false, 0);
-    datePickerPattern->HandleSolarDayChange(true, 0);
-    datePickerPattern->HandleSolarDayChange(false, 1);
-    datePickerPattern->HandleSolarDayChange(true, 1);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleSolarDayChange002
- * @tc.desc: Test DatePickerPattern HandleSolarDayChange when DatePickerColumnPattern is invalid.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleSolarDayChange002, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<TextPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 2, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleSolarDayChange(false, 0);
-    datePickerPattern->HandleSolarDayChange(true, 0);
-    datePickerPattern->HandleSolarDayChange(false, 1);
-    datePickerPattern->HandleSolarDayChange(true, 1);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleLunarDayChange001
- * @tc.desc: Test DatePickerPattern HandleLunarDayChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleLunarDayChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleLunarDayChange(false, 0);
-    datePickerPattern->HandleLunarDayChange(true, 0);
-    datePickerPattern->HandleLunarDayChange(false, 1);
-    datePickerPattern->HandleLunarDayChange(true, 1);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleReduceLunarDayChange001
- * @tc.desc: Test DatePickerPattern HandleReduceLunarDayChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleReduceLunarDayChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleReduceLunarDayChange(0);
-    datePickerPattern->HandleReduceLunarDayChange(1);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleReduceLunarDayChange002
- * @tc.desc: Test DatePickerPattern HandleReduceLunarDayChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleReduceLunarDayChange002, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleReduceLunarDayChange(0);
-    datePickerPattern->HandleReduceLunarDayChange(1);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleYearChange001
- * @tc.desc: Test DatePickerPattern HandleYearChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleYearChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    std::vector<RefPtr<FrameNode>> resultTags;
-    datePickerPattern->SetShowLunar(true);
-    datePickerPattern->HandleYearChange(false, 0, resultTags);
-    datePickerPattern->HandleYearChange(false, 1, resultTags);
-    datePickerPattern->HandleYearChange(true, 0, resultTags);
-    datePickerPattern->HandleYearChange(true, 1, resultTags);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleYearChange002
- * @tc.desc: Test DatePickerPattern HandleYearChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleYearChange002, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    std::vector<RefPtr<FrameNode>> resultTags;
-    datePickerPattern->SetShowLunar(false);
-    datePickerPattern->HandleYearChange(false, 0, resultTags);
-    datePickerPattern->HandleYearChange(false, 1, resultTags);
-    datePickerPattern->HandleYearChange(true, 0, resultTags);
-    datePickerPattern->HandleYearChange(true, 1, resultTags);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleMonthChange001
- * @tc.desc: Test DatePickerPattern HandleMonthChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleMonthChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    std::vector<RefPtr<FrameNode>> resultTags;
-    datePickerPattern->SetShowLunar(true);
-    datePickerPattern->HandleMonthChange(false, 0, resultTags);
-    datePickerPattern->HandleMonthChange(false, 1, resultTags);
-    datePickerPattern->HandleMonthChange(true, 0, resultTags);
-    datePickerPattern->HandleMonthChange(true, 1, resultTags);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleMonthChange002
- * @tc.desc: Test DatePickerPattern HandleMonthChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleMonthChange002, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    std::vector<RefPtr<FrameNode>> resultTags;
-    datePickerPattern->SetShowLunar(false);
-    datePickerPattern->HandleMonthChange(false, 0, resultTags);
-    datePickerPattern->HandleMonthChange(false, 1, resultTags);
-    datePickerPattern->HandleMonthChange(true, 0, resultTags);
-    datePickerPattern->HandleMonthChange(true, 1, resultTags);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleSolarMonthChange001
- * @tc.desc: Test DatePickerPattern HandleSolarMonthChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleSolarMonthChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleSolarMonthChange(false, 0);
-    datePickerPattern->HandleSolarMonthChange(false, 1);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleLunarMonthChange001
- * @tc.desc: Test DatePickerPattern HandleLunarMonthChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleLunarMonthChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleLunarMonthChange(false, 0);
-    datePickerPattern->HandleLunarMonthChange(false, 1);
-}
-
-/**
- * @tc.name: DatePickerPatternHandleLunarYearChange001
- * @tc.desc: Test DatePickerPattern HandleLunarYearChange.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternHandleLunarYearChange001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    datePickerPattern->HandleLunarYearChange(false, 0);
-    datePickerPattern->HandleLunarYearChange(false, 1);
-}
-
-/**
- * @tc.name: DatePickerPatternGetCurrentLunarDate001
- * @tc.desc: Test DatePickerPattern GetCurrentLunarDate when year is not FrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentLunarDate001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<TextPattern>();
-    auto yearFrameNodeChild = TestNode::CreateTestNode(1);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    LunarDate lunarResult;
-    auto ret = datePickerPattern->GetCurrentLunarDate(CURRENT_YEAR);
-    EXPECT_NE(ret, lunarResult);
-}
-
-/**
- * @tc.name: DatePickerPatternGetCurrentLunarDate002
- * @tc.desc: Test DatePickerPattern GetCurrentLunarDate when month is not FrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentLunarDate002, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<TextPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = TestNode::CreateTestNode(2);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    LunarDate lunarResult;
-    auto ret = datePickerPattern->GetCurrentLunarDate(CURRENT_YEAR);
-    EXPECT_NE(ret, lunarResult);
-}
-
-/**
- * @tc.name: DatePickerPatternGetCurrentLunarDate003
- * @tc.desc: Test DatePickerPattern GetCurrentLunarDate when day is not FrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentLunarDate003, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<TextPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = TestNode::CreateTestNode(3);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    LunarDate lunarResult;
-    auto ret = datePickerPattern->GetCurrentLunarDate(CURRENT_YEAR);
-    EXPECT_NE(ret, lunarResult);
-}
-
-/**
- * @tc.name: DatePickerPatternGetCurrentDate001
- * @tc.desc: Test DatePickerPattern GetCurrentDate when year is not FrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentDate001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<TextPattern>();
-    auto yearFrameNodeChild = TestNode::CreateTestNode(1);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    datePickerPattern->SetShowLunar(true);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    PickerDate currentDate;
-    auto ret = datePickerPattern->GetCurrentDate();
-    EXPECT_EQ(ret.GetYear(), currentDate.GetYear());
-    EXPECT_EQ(ret.GetMonth(), currentDate.GetMonth());
-    EXPECT_EQ(ret.GetDay(), currentDate.GetDay());
-}
-
-/**
- * @tc.name: DatePickerPatternGetCurrentDate002
- * @tc.desc: Test DatePickerPattern GetCurrentDate when month is not FrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentDate002, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<TextPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = TestNode::CreateTestNode(2);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 3, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->SetShowLunar(false);
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    PickerDate currentDate;
-    auto ret = datePickerPattern->GetCurrentDate();
-    EXPECT_EQ(ret.GetYear(), currentDate.GetYear());
-    EXPECT_EQ(ret.GetMonth(), currentDate.GetMonth());
-    EXPECT_EQ(ret.GetDay(), currentDate.GetDay());
-}
-
-/**
- * @tc.name: DatePickerPatternGetCurrentDate003
- * @tc.desc: Test DatePickerPattern GetCurrentDate when day is not FrameNode.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetCurrentDate003, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<TextPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 1, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 2, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = TestNode::CreateTestNode(3);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->SetShowLunar(false);
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    PickerDate currentDate;
-    auto ret = datePickerPattern->GetCurrentDate();
-    EXPECT_EQ(ret.GetYear(), currentDate.GetYear());
-    EXPECT_EQ(ret.GetMonth(), currentDate.GetMonth());
-    EXPECT_EQ(ret.GetDay(), currentDate.GetDay());
-}
-
-/**
- * @tc.name: DatePickerPatternLunarDateCompare001
- * @tc.desc: Test DatePickerPattern LunarDateCompare when left.year > right.year.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternLunarDateCompare001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-
-    LunarDate left;
-    left.year = CURRENT_YEAR;
-    left.month = CURRENT_MONTH;
-    left.day = CURRENT_DAY;
-    LunarDate right;
-    right.year = CURRENT_YEAR - 1;
-    right.month = CURRENT_MONTH;
-    right.day = CURRENT_DAY;
-    auto ret = datePickerPattern->LunarDateCompare(left, right);
-    EXPECT_EQ(ret, 1);
-
-    right.year = CURRENT_YEAR + 1;
-    ret = datePickerPattern->LunarDateCompare(left, right);
-    EXPECT_EQ(ret, -1);
-
-    left.year = CURRENT_YEAR;
-    left.month = CURRENT_MONTH - 1;
-    right.year = CURRENT_YEAR;
-    right.month = CURRENT_MONTH;
-    ret = datePickerPattern->LunarDateCompare(left, right);
-    EXPECT_EQ(ret, -1);
-
-    left.year = CURRENT_YEAR;
-    left.month = CURRENT_MONTH;
-    left.day = CURRENT_DAY + 1;
-    right.year = CURRENT_YEAR;
-    right.month = CURRENT_MONTH;
-    right.day = CURRENT_DAY;
-    ret = datePickerPattern->LunarDateCompare(left, right);
-    EXPECT_EQ(ret, 1);
-
-    left.year = CURRENT_YEAR;
-    left.month = CURRENT_MONTH;
-    left.day = CURRENT_DAY;
-    right.year = CURRENT_YEAR;
-    right.month = CURRENT_MONTH;
-    right.day = CURRENT_DAY + 1;
-    ret = datePickerPattern->LunarDateCompare(left, right);
-    EXPECT_EQ(ret, -1);
-}
-
-/**
- * @tc.name: DatePickerPatternLunarColumnsBuilding001
- * @tc.desc: Test DatePickerPattern LunarColumnsBuilding.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternLunarColumnsBuilding001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 0, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 1, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 2, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    datePickerPattern->SetColumn(yearFrameNodeChild);
-    datePickerPattern->SetColumn(monthFrameNodeChild);
-    datePickerPattern->SetColumn(dayFrameNodeChild);
-    LunarDate current;
-    datePickerPattern->LunarColumnsBuilding(current);
-}
-
-/**
- * @tc.name: DatePickerPatternSolarColumnsBuilding001
- * @tc.desc: Test DatePickerPattern SolarColumnsBuilding.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternSolarColumnsBuilding001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    frameNode->Clean();
-
-    auto patternChild = AceType::MakeRefPtr<DatePickerColumnPattern>();
-    auto yearFrameNodeChild = FrameNode::CreateFrameNode("year", 0, patternChild);
-    EXPECT_NE(yearFrameNodeChild, nullptr);
-    frameNode->AddChild(yearFrameNodeChild);
-
-    auto monthFrameNodeChild = FrameNode::CreateFrameNode("month", 1, patternChild);
-    EXPECT_NE(monthFrameNodeChild, nullptr);
-    frameNode->AddChild(monthFrameNodeChild);
-
-    auto dayFrameNodeChild = FrameNode::CreateFrameNode("day", 2, patternChild);
-    EXPECT_NE(dayFrameNodeChild, nullptr);
-    frameNode->AddChild(dayFrameNodeChild);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    datePickerPattern->SetColumn(yearFrameNodeChild);
-    datePickerPattern->SetColumn(monthFrameNodeChild);
-    datePickerPattern->SetColumn(dayFrameNodeChild);
-    PickerDate current;
-    datePickerPattern->SolarColumnsBuilding(current);
-}
-
-/**
- * @tc.name: DatePickerPatternGetYear001
- * @tc.desc: Test DatePickerPattern GetYear.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetYear001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    auto ret = datePickerPattern->GetYear(START_YEAR_BEFORE);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetYear(START_YEAR);
-    EXPECT_EQ(ret, "08:00:00");
-    ret = datePickerPattern->GetYear(END_YEAR);
-    EXPECT_EQ(ret, "08:00:00");
-    ret = datePickerPattern->GetYear(END_YEAR_BEHIND);
-    EXPECT_EQ(ret, "");
-}
-
-/**
- * @tc.name: DatePickerPatternGetSolarMonth001
- * @tc.desc: Test DatePickerPattern GetSolarMonth.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetSolarMonth001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    auto ret = datePickerPattern->GetSolarMonth(0);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetSolarMonth(1);
-    EXPECT_EQ(ret, "08:00:00");
-    ret = datePickerPattern->GetSolarMonth(END_MONTH);
-    EXPECT_EQ(ret, "08:00:00");
-    ret = datePickerPattern->GetSolarMonth(END_MONTH_BEHIND);
-    EXPECT_EQ(ret, "");
-}
-
-/**
- * @tc.name: DatePickerPatternGetSolarDay001
- * @tc.desc: Test DatePickerPattern GetSolarDay.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetSolarDay001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    auto ret = datePickerPattern->GetSolarDay(0);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetSolarDay(1);
-    EXPECT_EQ(ret, "08:00:00");
-    ret = datePickerPattern->GetSolarDay(END_DAY);
-    EXPECT_EQ(ret, "08:00:00");
-    ret = datePickerPattern->GetSolarDay(END_DAY_BEHIND);
-    EXPECT_EQ(ret, "");
-}
-
-/**
- * @tc.name: DatePickerPatternGetLunarMonth001
- * @tc.desc: Test DatePickerPattern GetLunarMonth.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetLunarMonth001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    auto ret = datePickerPattern->GetLunarMonth(0, false);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarMonth(1, false);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarMonth(END_MONTH, false);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarMonth(END_MONTH_BEHIND, false);
-    EXPECT_EQ(ret, "");
-
-    ret = datePickerPattern->GetLunarMonth(0, true);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarMonth(1, true);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarMonth(END_MONTH, true);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarMonth(END_MONTH_BEHIND, true);
-    EXPECT_EQ(ret, "");
-}
-
-/**
- * @tc.name: DatePickerPatternGetLunarDay001
- * @tc.desc: Test DatePickerPattern GetLunarDay.
- * @tc.type: FUNC
- */
-HWTEST_F(PickerPatternTestNg, DatePickerPatternGetLunarDay001, TestSize.Level1)
-{
-    DatePickerView::CreateDatePicker();
-    PickerDate startDate(START_YEAR, 1, 1);
-    DatePickerView::SetStartDate(startDate);
-    PickerDate endDate(END_YEAR, END_MONTH, END_DAY);
-    DatePickerView::SetEndDate(endDate);
-    PickerDate selectedDate(CURRENT_YEAR, CURRENT_MONTH, CURRENT_DAY);
-    DatePickerView::SetSelectedDate(selectedDate);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-
-    auto datePickerPattern = AceType::MakeRefPtr<DatePickerPattern>();
-    datePickerPattern->AttachToFrameNode(frameNode);
-    auto host = datePickerPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    auto ret = datePickerPattern->GetLunarDay(0);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarDay(1);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarDay(END_DAY - 1);
-    EXPECT_EQ(ret, "");
-    ret = datePickerPattern->GetLunarDay(END_DAY);
-    EXPECT_EQ(ret, "");
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_NE(pickerProperty->Clone(), nullptr);
 }
 } // namespace OHOS::Ace::NG

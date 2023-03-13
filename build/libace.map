@@ -34,11 +34,7 @@
       non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnRequestCallBack*;
       non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnReturnRequest*;
 
-      OHOS_ACE_CreateSubWindowUIContent;
-      OHOS_ACE_CreateUIContent;
-      OHOS_ACE_HotReloadPage;
-      OHOS_ACE_PreloadAceModule;
-      OHOS_ACE_PreloadAceModuleCard;
+      OHOS_ACE_*;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -69,6 +65,8 @@
       OHOS::Ace::SystemProperties::*;
       OHOS::Ace::ThemeConstants::*;
       OHOS::Ace::UIContentImpl::*;
+      OHOS::Ace::MemoryMonitor::*;
+      OHOS::Ace::DumpLog::*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
 

@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/button/button_layout_algorithm.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 enum class ComponentButtonType { POPUP, BUTTON };
@@ -88,6 +89,76 @@ public:
         buttonType_ = buttonType;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        Pattern::ToJsonValue(json);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        json->Put("type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
+        json->Put("fontSize", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
+        json->Put("fontWeight",
+            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
+        json->Put("fontColor", layoutProperty->GetFontColor().value_or(Color::BLACK).ColorToString().c_str());
+        auto fontFamilyVector =
+            layoutProperty->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+        std::string fontFamily = fontFamilyVector.at(0);
+        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+            fontFamily += ',' + fontFamilyVector.at(i);
+        }
+        json->Put("fontFamily", fontFamily.c_str());
+        json->Put("fontStyle", layoutProperty->GetFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                                   ? "FontStyle.Normal"
+                                   : "FontStyle.Italic");
+        json->Put("label", layoutProperty->GetLabelValue("").c_str());
+        auto eventHub = host->GetEventHub<ButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        json->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
+        auto optionJson = JsonUtil::Create(true);
+        optionJson->Put(
+            "type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
+        optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
+        json->Put("options", optionJson->ToString().c_str());
+        auto fontJsValue = JsonUtil::Create(true);
+        fontJsValue->Put("size", layoutProperty->GetFontSizeValue(Dimension(0)).ToString().c_str());
+        fontJsValue->Put("weight",
+            V2::ConvertWrapFontWeightToStirng(layoutProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
+        fontJsValue->Put("family", fontFamily.c_str());
+        fontJsValue->Put("style", layoutProperty->GetFontStyle().value_or(
+            Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
+        auto labelJsValue = JsonUtil::Create(true);
+        labelJsValue->Put("overflow", V2::ConvertWrapTextOverflowToString(
+            layoutProperty->GetTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+        labelJsValue->Put("maxLines", std::to_string(layoutProperty->GetMaxLines().value_or(
+            DEFAULT_MAXLINES)).c_str());
+        labelJsValue->Put("minFontSize", layoutProperty->GetMinFontSizeValue(Dimension(0)).ToString().c_str());
+        labelJsValue->Put("maxFontSize", layoutProperty->GetMaxFontSizeValue(Dimension(0)).ToString().c_str());
+        labelJsValue->Put("heightAdaptivePolicy", V2::ConvertWrapTextHeightAdaptivePolicyToString(
+            layoutProperty->GetHeightAdaptivePolicy().value_or(TextHeightAdaptivePolicy::MAX_LINES_FIRST)).c_str());
+        labelJsValue->Put("font", fontJsValue->ToString().c_str());
+        json->Put("labelStyle", labelJsValue->ToString().c_str());
+    }
+
+    static std::string ConvertButtonTypeToString(ButtonType buttonType)
+    {
+        std::string result;
+        switch (buttonType) {
+            case ButtonType::NORMAL:
+                result = "ButtonType.Normal";
+                break;
+            case ButtonType::CAPSULE:
+                result = "ButtonType.Capsule";
+                break;
+            case ButtonType::CIRCLE:
+                result = "ButtonType.Circle";
+                break;
+            default:
+                LOGD("The input does not match any ButtonType");
+        }
+        return result;
+    }
+
 protected:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -96,11 +167,13 @@ protected:
     void OnTouchUp();
     void HandleEnabled();
     void InitButtonLabel();
+    void AnimateTouchEffectBoard(float startOpacity, float endOpacity, int32_t duration, const RefPtr<Curve>& curve);
     Color clickedColor_;
 
 private:
     static void SetDefaultAttributes(const RefPtr<FrameNode>& buttonNode, const RefPtr<PipelineBase>& pipeline);
-    
+    static void UpdateTextLayoutProperty(RefPtr<ButtonLayoutProperty> layoutProperty,
+        RefPtr<TextLayoutProperty> textLayoutProperty);
     Color backgroundColor_;
     Color FocusBorderColor_;
     bool isSetClickedColor_ = false;

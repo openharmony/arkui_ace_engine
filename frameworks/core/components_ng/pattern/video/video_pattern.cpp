@@ -328,11 +328,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 
 void VideoPattern::OnError(const std::string& errorId)
 {
-#if defined(PREVIEW)
-    std::string errorcode = "This component is not supported on PC Preview.";
-#else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
-#endif
     auto json = JsonUtil::Create(true);
     json->Put("error", "");
     auto param = json->ToString();
@@ -535,10 +531,12 @@ void VideoPattern::OnAttachToFrameNode()
     renderContextForMediaPlayer_->InitContext(false, "MediaPlayerSurface");
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
+    renderContext->SetClipToBounds(true);
 }
 
 void VideoPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     if (!hiddenChangeEvent_) {
         SetHiddenChangeEvent([weak = WeakClaim(this)](bool hidden) {
             auto videoPattern = weak.Upgrade();

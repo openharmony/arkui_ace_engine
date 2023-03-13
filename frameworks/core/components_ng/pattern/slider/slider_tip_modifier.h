@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_TIP_MODIFIER_H
 
 #include "core/components_ng/base/modifier.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
@@ -89,11 +88,11 @@ public:
     }
 
 private:
-    RefPtr<AnimatablePropertyBool> tipFlag_;
-    RefPtr<AnimatablePropertyOffsetF> contentOffset_;
-    RefPtr<AnimatablePropertySizeF> bubbleSize_;
-    RefPtr<AnimatablePropertyOffsetF> bubbleOffset_;
-    RefPtr<AnimatablePropertyOffsetF> textOffset_;
+    RefPtr<PropertyBool> tipFlag_;
+    RefPtr<PropertyOffsetF> contentOffset_;
+    RefPtr<PropertySizeF> bubbleSize_;
+    RefPtr<PropertyOffsetF> bubbleOffset_;
+    RefPtr<PropertyOffsetF> textOffset_;
     RefPtr<NG::Paragraph> paragraph_;
     Axis axis_ = Axis::HORIZONTAL;
     Color tipColor_ = Color::BLACK;

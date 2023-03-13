@@ -261,6 +261,8 @@ public:
 
     void OnContextAttached() {}
 
+    std::string GetHitTestModeStr() const;
+
     HitTestMode GetHitTestMode() const
     {
         return hitTestMode_;
@@ -331,6 +333,7 @@ public:
     void HandleOnDragCancel();
 
     void OnModifyDone();
+    bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,

@@ -28,7 +28,7 @@ struct DividerInfo {
     float crossSize;
     float startMargin;
     float endMargin;
-    float halfSpaceWidth;
+    float space;
     float mainPadding;
     float crossPadding;
     bool isVertical;
@@ -48,6 +48,7 @@ public:
     ~ListPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     static void PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas);
 

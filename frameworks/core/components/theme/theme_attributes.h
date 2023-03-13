@@ -121,6 +121,7 @@ extern const char DATA_PANEL_LOADING_COLOR_START[];
 extern const char DATA_PANEL_LOADING_COLOR_END[];
 extern const char DATA_PANEL_PROGRESS_COLOR_START[];
 extern const char DATA_PANEL_PROGRESS_COLOR_END[];
+extern const char DATA_PANEL_TRACK_SHADOW_RADIU[];
 
 // pattern attributes for dialog
 extern const char DIALOG_CONTENT_TOP_PADDING[];
@@ -142,5 +143,12 @@ extern const char POPUP_BORDER_RADIUS[];
 extern const char POPUP_HORIZONTAL_PADDING[];
 extern const char POPUP_VERTICAL_PADDING[];
 extern const char POPUP_BUTTON_TEXT_FONT_SIZE[];
+
+// pattern attributes for badge
+extern const char BADGE_BORDER_COLOR[];
+extern const char BADGE_BORDER_WIDTH[];
+// swiper attributes
+extern const char INDICATOR_TEXT_FONT_SIZE[];
+extern const char INDICATOR_TEXT_FONT_COLOR[];
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_ATTRIBUTES_H

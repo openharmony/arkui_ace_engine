@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/search/search_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,6 +35,10 @@ public:
         auto value = MakeRefPtr<SearchLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(AceType::DynamicCast<LayoutProperty>(this));
         value->propSearchButton_ = CloneSearchButton();
+        value->propCancelButtonStyle_ = CloneCancelButtonStyle();
+        value->propCancelButtonUDSize_ = CloneCancelButtonUDSize();
+        value->propSearchIconUDSize_ = CloneSearchIconUDSize();
+        value->propCaretUDWidth_ = CloneCaretUDWidth();
         return value;
     }
 
@@ -41,6 +46,10 @@ public:
     {
         LayoutProperty::Reset();
         ResetSearchButton();
+        ResetCancelButtonStyle();
+        ResetCancelButtonUDSize();
+        ResetSearchIconUDSize();
+        ResetCaretUDWidth();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -50,6 +59,10 @@ public:
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchButton, std::optional<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CancelButtonStyle, CancelButtonStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CancelButtonUDSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SearchIconUDSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CaretUDWidth, Dimension, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

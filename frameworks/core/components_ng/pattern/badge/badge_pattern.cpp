@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
+#include "core/components/badge/badge_theme.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -23,6 +24,7 @@ namespace OHOS::Ace::NG {
 
 void BadgePattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetChildren().empty()) {
@@ -45,6 +47,7 @@ void BadgePattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
     auto badgeCount = layoutProperty->GetBadgeCount();
     auto badgeValue = layoutProperty->GetBadgeValue();
+    bool badgeVisible = false;
     if (badgeCount.has_value()) {
         if (badgeCount.value() > 0) {
             const int32_t maxCountNum = 99;
@@ -56,9 +59,14 @@ void BadgePattern::OnModifyDone()
             } else {
                 textLayoutProperty->UpdateContent(std::to_string(badgeCount.value()));
             }
+            badgeVisible = true;
         } else {
             textLayoutProperty->ResetContent();
         }
+    }
+
+    if (layoutProperty->GetBadgeFontWeight().has_value()) {
+        textLayoutProperty->UpdateFontWeight(layoutProperty->GetBadgeFontWeightValue());
     }
 
     if (badgeValue.has_value()) {
@@ -66,8 +74,12 @@ void BadgePattern::OnModifyDone()
         if (badgeValue.value().empty()) {
             textLayoutProperty->UpdateContent(" ");
         }
+        badgeVisible = true;
     }
-
+    auto circleSize = layoutProperty->GetBadgeCircleSize();
+    if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
+        badgeVisible = false;
+    }
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     textLayoutProperty->UpdateTextColor(badgeTextColor.value());
 
@@ -75,9 +87,25 @@ void BadgePattern::OnModifyDone()
     textLayoutProperty->UpdateFontSize(badgeFontSize.value());
 
     textLayoutProperty->UpdateMaxLines(1);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
+    Dimension width = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(width);
+    textLayoutProperty->UpdateBorderWidth(borderWidth);
+
     auto badgeColor = layoutProperty->GetBadgeColorValue();
     auto textRenderContext = lastFrameNode->GetRenderContext();
+    textRenderContext->SetVisible(badgeVisible);
     textRenderContext->UpdateBackgroundColor(badgeColor);
+
+    Color color = layoutProperty->GetBadgeBorderColorValue(badgeTheme->GetBadgeBorderColor());
+    BorderColorProperty borderColor;
+    borderColor.SetColor(color);
+    textRenderContext->UpdateBorderColor(borderColor);
     lastFrameNode->MarkModifyDone();
 }
 

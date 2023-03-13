@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,9 @@
 
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 
+#include "dm/display_manager.h"
+#include "interfaces/inner_api/ace/viewport_config.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 #include "window.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
@@ -23,19 +26,15 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
-#include "dm/display_manager.h"
-#include "interfaces/inner_api/ace/viewport_config.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/dialog_container.h"
-#include "adapter/ohos/entrance/flutter_ace_view.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/log/frame_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/connect_server_manager.h"
 #include "core/common/container_scope.h"
-#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/frontend.h"
 #include "core/common/hdc_register.h"
 #include "core/common/text_field_manager.h"
@@ -113,9 +112,9 @@ void SubwindowOhos::InitContainer()
     container->InitializeSubContainer(parentContainerId_);
     ViewportConfig config;
     // create ace_view
-    auto flutterAceView =
-        Platform::FlutterAceView::CreateView(childContainerId_, false, container->GetSettings().usePlatformAsUIThread);
-    Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
+    auto* aceView =
+        Platform::AceViewOhos::CreateView(childContainerId_, false, container->GetSettings().usePlatformAsUIThread);
+    Platform::AceViewOhos::SurfaceCreated(aceView, window_);
 
     int32_t width = static_cast<int32_t>(window_->GetRequestRect().width_);
     int32_t height = static_cast<int32_t>(window_->GetRequestRect().height_);
@@ -123,8 +122,8 @@ void SubwindowOhos::InitContainer()
 
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
-    Platform::AceContainer::SetView(flutterAceView, config.Density(), width, height, window_, callback);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, config.Orientation());
+    Platform::AceContainer::SetView(aceView, config.Density(), width, height, window_, callback);
+    Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -156,6 +155,14 @@ void SubwindowOhos::InitContainer()
     subPipelineContext->SetupSubRootElement();
 }
 
+void SubwindowOhos::ResizeWindow()
+{
+    LOGI("SubwindowOhos::ResizeWindow");
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    CHECK_NULL_VOID(defaultDisplay);
+    window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+}
+
 void SubwindowOhos::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
     ShowWindow();
@@ -185,7 +192,6 @@ bool SubwindowOhos::CancelPopup(const std::string& id)
 
 void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
 {
-    ShowWindow();
     popupTargetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -193,6 +199,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    ShowWindow();
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
@@ -273,12 +280,14 @@ void SubwindowOhos::HideWindow()
         rootNode->SetIsDefaultHasFocused(false);
     }
 
-    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
-    auto parentWindowName = parentContainer->GetWindowName();
-    sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
-    CHECK_NULL_VOID(parentWindow);
-    parentWindow->RequestFocus();
+    if (window_->IsFocused()) {
+        auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+        CHECK_NULL_VOID(parentContainer);
+        auto parentWindowName = parentContainer->GetWindowName();
+        sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
+        CHECK_NULL_VOID(parentWindow);
+        parentWindow->RequestFocus();
+    }
 
     OHOS::Rosen::WMError ret = window_->Hide();
 
@@ -322,13 +331,13 @@ void SubwindowOhos::ClearMenu()
 void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
 {
     LOGI("SubwindowOhos::ShowMenuNG");
-    ShowWindow();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
+    ShowWindow();
     overlay->ShowMenuInSubWindow(targetId, offset, menuNode);
 }
 
@@ -438,6 +447,38 @@ void SubwindowOhos::RectConverter(const Rect& rect, Rosen::Rect& rosenRect)
         rosenRect.posX_, rosenRect.posY_, rosenRect.width_, rosenRect.height_);
 }
 
+RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
+    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+{
+    LOGI("SubwindowOhos::ShowDialogNG");
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_RETURN(aceContainer, nullptr);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_RETURN(context, nullptr);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlay, nullptr);
+    ShowWindow();
+    ContainerScope scope(childContainerId_);
+    return overlay->ShowDialog(dialogProps, customNode);
+}
+
+void SubwindowOhos::HideSubWindowNG()
+{
+    LOGI("SubwindowOhos::HideDialogNG");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsDialogContainer()) {
+        if (IsToastWindow()) {
+            Platform::DialogContainer::HideWindow(Container::CurrentId());
+        } else {
+            Platform::DialogContainer::CloseWindow(Container::CurrentId());
+            Platform::DialogContainer::DestroyContainer(Container::CurrentId());
+        }
+    } else {
+        HideWindow();
+    }
+}
+
 void SubwindowOhos::GetToastDialogWindowProperty(
     int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const
 {
@@ -479,21 +520,19 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     dialogWindow_->SetUIContent("", nullptr, nullptr, false);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(dialogWindow_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
+    ContainerScope scope(childContainerId_);
 
     auto container = Platform::DialogContainer::GetContainer(childContainerId_);
     CHECK_NULL_RETURN(container, false);
     // create ace_view
-    auto* flutterAceView = Platform::FlutterAceView::CreateView(childContainerId_, true, true);
-    Platform::FlutterAceView::SurfaceCreated(flutterAceView, dialogWindow_);
+    auto* aceView = Platform::AceViewOhos::CreateView(childContainerId_, true, true);
+    Platform::AceViewOhos::SurfaceCreated(aceView, dialogWindow_);
     // set view
-    Platform::DialogContainer::SetView(flutterAceView, density, width, height, dialogWindow_);
+    Platform::DialogContainer::SetView(aceView, density, width, height, dialogWindow_);
     Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, dialogWindow_);
-    flutter::ViewportMetrics metrics;
-    metrics.physical_width = width;
-    metrics.physical_height = height;
-    metrics.device_pixel_ratio = density;
-    Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
+    ViewportConfig config(width, height, density);
+    Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+    Platform::AceViewOhos::SurfaceChanged(aceView, width, height, 0);
 
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled()) {
@@ -511,7 +550,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     }
 #endif
 
-    auto pipelineContext = DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->SetupRootElement();
     LOGI("SubwindowOhos::InitToastDialogView end");
@@ -563,19 +602,8 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
             subwindowOhos->SetIsToastWindow(true);
         }
         childContainerId = subwindowOhos->GetChildContainerId();
-
-        auto container = Platform::DialogContainer::GetContainer(childContainerId);
-        CHECK_NULL_VOID(container);
-        auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-        CHECK_NULL_VOID(flutterAceView);
-        if (flutterAceView->GetWidth() != width || flutterAceView->GetHeight() != height) {
-            flutter::ViewportMetrics metrics;
-            metrics.physical_width = width;
-            metrics.physical_height = height;
-            metrics.device_pixel_ratio = density;
-            Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-            Platform::FlutterAceView::SurfaceChanged(flutterAceView, width, height, 0);
-        }
+        ContainerScope scope(childContainerId);
+        subwindowOhos->UpdateAceView(width, height, density, childContainerId);
 
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height, true);
         Platform::DialogContainer::ShowToast(childContainerId, message, duration, bottom);
@@ -618,6 +646,7 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
             return;
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
+        ContainerScope scope(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
         Platform::DialogContainer::ShowDialog(childContainerId, title, message, buttons, autoCancel,
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
@@ -659,6 +688,7 @@ void SubwindowOhos::ShowActionMenu(
             return;
         }
         auto childContainerId = subwindowOhos->GetChildContainerId();
+        ContainerScope scope(childContainerId);
         Platform::DialogContainer::ShowToastDialogWindow(childContainerId, posX, posY, width, height);
         Platform::DialogContainer::ShowActionMenu(childContainerId, title, button,
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)));
@@ -674,5 +704,18 @@ void SubwindowOhos::ShowActionMenu(
 void SubwindowOhos::CloseDialog(int32_t instanceId)
 {
     Platform::DialogContainer::CloseWindow(instanceId);
+}
+
+void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId)
+{
+    auto container = Platform::DialogContainer::GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    CHECK_NULL_VOID(aceView);
+    if (aceView->GetWidth() != width || aceView->GetHeight() != height) {
+        ViewportConfig config(width, height, density);
+        Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+        Platform::AceViewOhos::SurfaceChanged(aceView, width, height, 0);
+    }
 }
 } // namespace OHOS::Ace

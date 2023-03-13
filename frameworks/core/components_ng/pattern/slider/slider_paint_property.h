@@ -22,7 +22,6 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
-
 // PaintProperty are used to set render properties.
 class SliderPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(SliderPaintProperty, PaintProperty)
@@ -47,6 +46,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
     {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(theme);
         PaintProperty::ToJsonValue(json);
         auto jsonConstructor = JsonUtil::Create(true);
         jsonConstructor->Put("value", std::to_string(GetValue().value_or(0.0f)).c_str());
@@ -57,12 +60,34 @@ public:
         jsonConstructor->Put("direction",
             (GetDirection().value_or(Axis::HORIZONTAL)) == Axis::VERTICAL ? "Axis.Vertical" : "Axis.Horizontal");
         json->Put("constructor", jsonConstructor);
-        json->Put("blockColor", GetBlockColor().value_or(Color(0xffffffff)).ColorToString().c_str());
-        json->Put(
-            "trackBackgroundColor", GetTrackBackgroundColor().value_or(Color(0xafdbdbdb)).ColorToString().c_str());
-        json->Put("selectColor", GetSelectColor().value_or(Color(0xff007dff)).ColorToString().c_str());
+        json->Put("blockColor", GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str());
+        json->Put("trackColor", GetTrackBackgroundColor().value_or(theme->GetTrackBgColor()).ColorToString().c_str());
+        json->Put("selectedColor", GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str());
         json->Put("showSteps", GetShowSteps().value_or(false) ? "true" : "false");
         json->Put("showTips", GetShowTips().value_or(false) ? "true" : "false");
+        auto sliderMode = GetSliderModeValue(SliderModelNG::SliderMode::OUTSET);
+        json->Put("blockBorderColor", GetBlockBorderColorValue(Color::TRANSPARENT).ColorToString().c_str());
+        json->Put("blockBorderWidth", GetBlockBorderWidthValue(Dimension()).ToString().c_str());
+        json->Put("stepColor", GetStepColorValue(Color::TRANSPARENT).ColorToString().c_str());
+        if (GetTrackBorderRadius().has_value()) {
+            json->Put("trackBorderRadius", GetTrackBorderRadius().value().ToString().c_str());
+        }
+        auto themeBlockSize =
+            sliderMode == SliderModelNG::SliderMode::OUTSET ? theme->GetOutsetBlockSize() : theme->GetInsetBlockSize();
+        json->Put("blockSizeWidth", GetBlockSize().has_value() ? std::to_string(GetBlockSize().value().Width()).c_str()
+                                                               : themeBlockSize.ToString().c_str());
+        json->Put("blockSizeHeight", GetBlockSize().has_value()
+                                         ? std::to_string(GetBlockSize().value().Height()).c_str()
+                                         : themeBlockSize.ToString().c_str());
+        static const std::array<std::string, 3> SLIDER_BLOCK_TYPE_TO_STRING = {
+            "BlockStyleType.DEFAULT",
+            "BlockStyleType.IMAGE",
+            "BlockStyleType.SHAPE",
+        };
+        json->Put("blockType",
+            SLIDER_BLOCK_TYPE_TO_STRING.at(static_cast<int>(GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT)))
+                .c_str());
+        json->Put("stepSize", GetStepSizeValue(Dimension()).ToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_GROUP(SliderPaintStyle, SliderPaintStyle)
@@ -76,6 +101,17 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockBorderWidth, Dimension, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBorderRadius, Dimension, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockSize, SizeF, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SliderPaintStyle, BlockType, SliderModel::BlockStyleType, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockImage, std::string, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, BlockShape, RefPtr<BasicShape>, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, StepSize, Dimension, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_GROUP(SliderTipStyle, SliderTipStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, ShowTips, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, Padding, Dimension, PROPERTY_UPDATE_RENDER)

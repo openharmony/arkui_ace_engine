@@ -17,10 +17,9 @@
 
 #include <cmath>
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "flutter/third_party/icu/source/common/unicode/uchar.h"
+#include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_txt.h"
+#include "unicode/uchar.h"
 
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
@@ -88,12 +87,12 @@ void FlutterRenderText::Paint(RenderContext& context, const Offset& offset)
             case VerticalAlign::TOP:
                 break;
             case VerticalAlign::BOTTOM:
-                newY = offset.GetY() + (GetLayoutSize().Height() - textRealHeight)
-                    - std::max(NormalizeToPx(textStyle_.GetBaselineOffset()), 0.0);
+                newY = offset.GetY() + (GetLayoutSize().Height() - textRealHeight) -
+                       std::max(NormalizeToPx(textStyle_.GetBaselineOffset()), 0.0);
                 break;
             case VerticalAlign::CENTER:
-                newY = offset.GetY() - NormalizeToPx(textStyle_.GetBaselineOffset())
-                    + (GetLayoutSize().Height() - textRealHeight) / 2.0;
+                newY = offset.GetY() - NormalizeToPx(textStyle_.GetBaselineOffset()) +
+                       (GetLayoutSize().Height() - textRealHeight) / 2.0;
                 break;
             default:
                 break;
@@ -381,7 +380,8 @@ Size FlutterRenderText::GetSize()
         height + std::fabs(NormalizeToPx(textStyle_.GetBaselineOffset())), GetLayoutParam().GetMaxSize().Height());
     const auto& VerticalAlign = textStyle_.GetTextVerticalAlign();
     if (((VerticalAlign == VerticalAlign::TOP || VerticalAlign == VerticalAlign::CENTER ||
-        VerticalAlign == VerticalAlign::BOTTOM)) && text_->GetDeclarationHeight().IsValid()) {
+            VerticalAlign == VerticalAlign::BOTTOM)) &&
+        text_->GetDeclarationHeight().IsValid()) {
         heightFinal = GetLayoutParam().GetMaxSize().Height();
     }
 
@@ -560,8 +560,7 @@ bool FlutterRenderText::ChangeDirectionIfNeeded(const std::string& data)
                    u_charDirection(charOfShowingText) == UCharDirection::U_RIGHT_TO_LEFT_ARABIC) {
             defaultTextDirection_ = TextDirection::RTL;
             return true;
-        } else if (!IsCompatibleVersion() &&
-                   u_charDirection(charOfShowingText) == UCharDirection::U_ARABIC_NUMBER) {
+        } else if (!IsCompatibleVersion() && u_charDirection(charOfShowingText) == UCharDirection::U_ARABIC_NUMBER) {
             defaultTextDirection_ = TextDirection::RTL;
             return true;
         }

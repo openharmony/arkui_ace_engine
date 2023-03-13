@@ -81,6 +81,7 @@ if (defined(global_parts_info.distributeddatamgr_pasteboard)) {
 }
 enable_image_compression = true
 model_component_support = false
+window_scene_support = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -153,6 +154,10 @@ if (model_component_support) {
 
 if (use_build_in_js_engine) {
   defines += [ "HIDDEN_SYMBOL" ]
+}
+
+if (window_scene_support) {
+  defines += [ "WINDOW_SCENE_SUPPORTED" ]
 }
 
 cflags_cc = [

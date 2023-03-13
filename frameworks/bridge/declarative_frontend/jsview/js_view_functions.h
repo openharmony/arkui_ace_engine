@@ -61,6 +61,7 @@ public:
     bool ExecuteOnBackPress();
     void ExecuteShow();
     void ExecuteHide();
+    void ExecuteInitiallyProvidedValue(const std::string& jsonData);
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
 #ifdef UICAST_COMPONENT_SUPPORTED
     void ExecuteCreateChildView(const std::string& jsonData);
@@ -106,6 +107,7 @@ private:
     JSWeak<JSFunc> jsOnShowFunc_;
     JSWeak<JSFunc> jsBackPressFunc_;
     JSWeak<JSFunc> jsUpdateWithValueParamsFunc_;
+    JSWeak<JSFunc> jsSetInitiallyProvidedValueFunc_;
 #ifdef UICAST_COMPONENT_SUPPORTED
     JSWeak<JSFunc> jsCreateChildViewFunc_;
     JSWeak<JSFunc> jsRouterHandleFunc_;

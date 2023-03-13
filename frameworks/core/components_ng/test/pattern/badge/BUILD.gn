@@ -12,26 +12,35 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("badge_pattern_test_ng") {
   module_out_path = "$pattern_test_output_path/badge"
 
   sources = [
+    "$ace_root/frameworks/base/geometry/least_square_impl.cpp",
+    "$ace_root/frameworks/base/geometry/matrix3.cpp",
+    "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/select_overlay/select_overlay_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
+    "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # components_ng_event
     "$ace_root/frameworks/core/components_ng/event/long_press_event.cpp",
 
     # mock
+    "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_text_layout_adapter.cpp",

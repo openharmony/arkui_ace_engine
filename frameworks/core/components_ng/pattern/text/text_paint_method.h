@@ -22,6 +22,9 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/text/text_content_modifier.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paragraph.h"
 
@@ -29,28 +32,24 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT TextPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextPaintMethod, NodePaintMethod)
 public:
-    TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset)
-        : pattern_(pattern), paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset)
-    {}
+    TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset,
+        RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier);
+
     ~TextPaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paragraph_, nullptr);
-        auto offset = paintWrapper->GetContentOffset();
-        auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-        return [paragraph = paragraph_, paintOffset](
-                   RSCanvas& canvas) { paragraph->Paint(canvas, paintOffset.GetX(), paintOffset.GetY()); };
-    }
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
-    CanvasDrawFunction GetOverlayDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
+    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void PaintSelection(RSCanvas& canvas, PaintWrapper* paintWrapper);
-
     WeakPtr<Pattern> pattern_;
     RefPtr<Paragraph> paragraph_;
     float baselineOffset_;
+
+    RefPtr<TextContentModifier> textContentModifier_;
+    RefPtr<TextOverlayModifier> textOverlayModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPaintMethod);
 };

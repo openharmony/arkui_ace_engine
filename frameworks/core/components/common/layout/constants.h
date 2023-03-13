@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -198,9 +198,10 @@ enum class WhiteSpace {
 };
 
 enum class TextOverflow {
+    NONE,
     CLIP,
     ELLIPSIS,
-    NONE,
+    MARQUEE,
 };
 
 enum class TextDirection {
@@ -216,6 +217,12 @@ enum class TextDecoration {
     OVERLINE,
     LINE_THROUGH,
     INHERIT,
+};
+
+enum class TextHeightAdaptivePolicy {
+    MAX_LINES_FIRST,
+    MIN_FONT_SIZE_FIRST,
+    LAYOUT_CONSTRAINT_FIRST,
 };
 
 enum class MarqueeDirection {
@@ -568,6 +575,12 @@ enum class TabBarStyle {
     NOSTYLE = 0,
     SUBTABBATSTYLE,
     BOTTOMTABBATSTYLE,
+};
+
+enum class CtrlKey {
+    CTRL = 0,
+    SHIFT = 1,
+    ALT = 2,
 };
 
 } // namespace OHOS::Ace

@@ -43,7 +43,7 @@ RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
     return navigationGroupNode;
 }
 
-void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -64,6 +64,7 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
 
 void NavigationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
+    FrameNode::ToJsonValue(json);
     auto navBarNode = DynamicCast<NavBarNode>(GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->ToJsonValue(json);

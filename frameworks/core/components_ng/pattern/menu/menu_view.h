@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,11 +30,12 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT MenuView {
 public:
     // create menu with menuItems
-    static RefPtr<FrameNode> Create(
-        std::vector<OptionParam>&& params, int32_t targetId, MenuType type = MenuType::MENU);
+    static RefPtr<FrameNode> Create(std::vector<OptionParam>&& params,
+        int32_t targetId, MenuType type = MenuType::MENU, const MenuParam& menuParam = MenuParam());
 
     // create menu with custom node from a builder
-    static RefPtr<FrameNode> Create(const RefPtr<UINode>& customNode, int32_t targetId, MenuType type = MenuType::MENU);
+    static RefPtr<FrameNode> Create(const RefPtr<UINode>& customNode,
+        int32_t targetId, MenuType type = MenuType::MENU, const MenuParam& menuParam = MenuParam());
 
     // create select's popup menu
     static RefPtr<FrameNode> Create(const std::vector<SelectParam>& params, int32_t targetId);
@@ -43,6 +44,8 @@ public:
     static void Create();
 
     static void SetFontSize(const Dimension& fontSize);
+    static void SetFontColor(const std::optional<Color>& color);
+    static void SetFontWeight(FontWeight weight);
 };
 } // namespace OHOS::Ace::NG
 

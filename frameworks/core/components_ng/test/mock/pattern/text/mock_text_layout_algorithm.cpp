@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
+#include "core/components_ng/render/paragraph.h"
+
 namespace OHOS::Ace::NG {
 TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
 
@@ -78,5 +80,10 @@ SizeF TextLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraintF& contentCon
 std::list<RefPtr<SpanItem>>&& TextLayoutAlgorithm::GetSpanItemChildren()
 {
     return std::move(spanItemChildren_);
+}
+
+std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
+{
+    return std::optional<TextStyle>(TextStyle());
 }
 } // namespace OHOS::Ace::NG

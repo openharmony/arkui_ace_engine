@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ class Window;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 class RSSurfaceNode;
+class RSTransaction;
 }
 
 namespace AAFwk {
@@ -51,6 +52,10 @@ class PointerEvent;
 class KeyEvent;
 class AxisEvent;
 } // namespace MMI
+
+namespace Ace {
+class Window;
+}
 
 } // namespace OHOS
 
@@ -75,6 +80,7 @@ public:
 
     // UI content life-cycles
     virtual void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) = 0;
+    virtual void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) = 0;
     virtual void Foreground() = 0;
     virtual void Background() = 0;
     virtual void Focus() = 0;
@@ -94,7 +100,8 @@ public:
     virtual bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) = 0;
     virtual bool ProcessVsyncEvent(uint64_t timeStampNanos) = 0;
     virtual void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) = 0;
-    virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) = 0;
+    virtual void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) = 0;
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
 
@@ -124,11 +131,11 @@ public:
     virtual void SetFormHeight(const float height) = 0;
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
+    virtual void ReloadForm() {};
+    virtual void OnFormSurfaceChange(float width, float height) {}
 
-    virtual void SetActionEventHandler(
-        std::function<void(const std::string&)>&& actionCallback) = 0;
-    virtual void SetErrorEventHandler(
-        std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
+    virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) = 0;
+    virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) = 0;
 };
 
 } // namespace OHOS::Ace

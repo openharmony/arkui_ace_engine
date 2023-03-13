@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/radio/radio_accessibility_property.h"
 #include "core/components_ng/pattern/radio/radio_event_hub.h"
 #include "core/components_ng/pattern/radio/radio_layout_algorithm.h"
 #include "core/components_ng/pattern/radio/radio_paint_method.h"
@@ -52,15 +53,21 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        if (!radioModifier_) {
+            radioModifier_ = AceType::MakeRefPtr<RadioModifier>();
+        }
+        auto paintMethod = MakeRefPtr<RadioPaintMethod>(radioModifier_);
+        paintMethod->SetTotalScale(totalScale_);
+        paintMethod->SetPointScale(pointScale_);
+        paintMethod->SetRingPointScale(ringPointScale_);
+        paintMethod->SetUIStatus(uiStatus_);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();
-        auto paintMethod =
-            MakeRefPtr<RadioPaintMethod>(enabled, isTouch_, isHover_, totalScale_, pointScale_, uiStatus_);
-        paintMethod->SetHotZoneOffset(hotZoneOffset_);
-        paintMethod->SetHotZoneSize(hotZoneSize_);
+        paintMethod->SetEnabled(enabled);
+        paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         return paintMethod;
     }
 
@@ -69,6 +76,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<RadioEventHub>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<RadioAccessibilityProperty>();
     }
 
     const std::optional<std::string>& GetPreValue()
@@ -103,10 +115,8 @@ public:
         auto radioEventHub = host->GetEventHub<NG::RadioEventHub>();
         auto value = radioEventHub ? radioEventHub->GetValue() : "";
         auto group = radioEventHub ? radioEventHub->GetGroup() : "";
-        auto resultJson = JsonUtil::Create(true);
-        resultJson->Put("value", value.c_str());
-        resultJson->Put("group", group.c_str());
-        json->Put("value", resultJson->ToString().c_str());
+        json->Put("value", value.c_str());
+        json->Put("group", group.c_str());
     }
 
 private:
@@ -127,6 +137,7 @@ private:
     void StopAnimation();
     void UpdateTotalScale(float scale);
     void UpdatePointScale(float scale);
+    void UpdateRingPointScale(float scale);
     void UpdateUIStatus(bool check);
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -149,6 +160,7 @@ private:
     bool isHover_ = false;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
+    float ringPointScale_ = 0.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -157,7 +169,9 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool isFirstAddhotZoneRect_ = true;
-    
+    TouchHoverAnimationType touchHoverType_;
+
+    RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };
 } // namespace OHOS::Ace::NG

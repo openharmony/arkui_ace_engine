@@ -24,6 +24,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/event/mouse_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -59,10 +60,9 @@ void DragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) con
     auto barRightPoint = paintProperty->GetBarRightPoint().value_or(POINT_R_INITIAL);
     auto dragOffset = paintProperty->GetDragOffset().value_or(OffsetF());
     auto opacity = paintProperty->GetOpacity().value_or(OPACITY);
-    // paint size
-    auto contentSize = paintWrapper->GetContentSize();
-    auto width = contentSize.Width();
-    auto height = contentSize.Height();
+    auto panelMode = panelMode_ == PanelMode::FULL   ? PanelMode::FULL
+                     : panelMode_ == PanelMode::MINI ? PanelMode::MINI
+                                                     : PanelMode::HALF;
     // paint offset
     auto paintOffset = paintWrapper->GetContentOffset();
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -78,21 +78,21 @@ void DragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) con
     pen.SetWidth(BAR_WIDTH.ConvertToPx() * scaleWidth_);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas.AttachPen(pen);
+    auto scaleRatio = scaleWidth_ - 1.0f;
+    auto verticalOffset = panelMode == PanelMode::MINI   ? 2 * scaleRatio
+                          : panelMode == PanelMode::FULL ? -2 * scaleRatio
+                                                         : 0.0f;
 
     OffsetF totalOffset = paintOffset + iconOffset_ + dragOffset;
     RSPath path;
     path.MoveTo(
-        barLeftPoint.GetX().ConvertToPx() + totalOffset.GetX(), barLeftPoint.GetY().ConvertToPx() + totalOffset.GetY());
+        (barLeftPoint.GetX() - Dimension(4 * scaleRatio, DimensionUnit::VP)).ConvertToPx() + totalOffset.GetX(),
+        (barLeftPoint.GetY() + Dimension(verticalOffset, DimensionUnit::VP)).ConvertToPx() + totalOffset.GetY());
     path.LineTo(barCenterPoint.GetX().ConvertToPx() + totalOffset.GetX(),
         barCenterPoint.GetY().ConvertToPx() + totalOffset.GetY());
-    path.LineTo(barRightPoint.GetX().ConvertToPx() + totalOffset.GetX(),
-        barRightPoint.GetY().ConvertToPx() + totalOffset.GetY());
-    if (!NearEqual(scaleIcon_, 1.0)) {
-        LOGD("NearEqual scaleIcon_, 1.0 ");
-        canvas.Scale(scaleIcon_, scaleIcon_);
-        Size translate = Size(width, height) * ((scaleIcon_ - 1.0) / 2.0);
-        canvas.Translate(-translate.Width(), -translate.Height());
-    }
+    path.LineTo(
+        (barRightPoint.GetX() + Dimension(4 * scaleRatio, DimensionUnit::VP)).ConvertToPx() + totalOffset.GetX(),
+        (barRightPoint.GetY() + Dimension(verticalOffset, DimensionUnit::VP)).ConvertToPx() + totalOffset.GetY());
     canvas.DrawPath(path);
 }
 

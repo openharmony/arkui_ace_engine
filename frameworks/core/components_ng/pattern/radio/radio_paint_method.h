@@ -18,70 +18,118 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
-#include "core/components_ng/render/canvas.h"
+#include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/pattern/radio/radio_modifier.h"
+#include "core/components_ng/pattern/radio/radio_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
-enum class UIStatus {
-    SELECTED = 0,
-    UNSELECTED,
-    FOCUS,
-    ON_TO_OFF,
-    OFF_TO_ON,
-    PART,
-    PART_TO_OFF,
-    OFF_TO_PART,
-    PART_TO_ON,
-    ON_TO_PART,
-};
 class RadioPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(RadioPaintMethod, NodePaintMethod)
 
 public:
-    RadioPaintMethod(bool enabled, bool isTouch, bool isHover, float totalScale, float pointScale, UIStatus uiStatus)
-        : enabled_(enabled), isTouch_(isTouch), isHover_(isHover), totalScale_(totalScale), pointScale_(pointScale),
-          uiStatus_(uiStatus) {};
-    ~RadioPaintMethod() override = default;
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    explicit RadioPaintMethod(const RefPtr<RadioModifier>& radioModifier) : radioModifier_(radioModifier) {}
 
-    void SetHotZoneOffset(OffsetF& hotZoneOffset)
+    ~RadioPaintMethod() override = default;
+
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(radioModifier_, nullptr);
+        return radioModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_VOID(radioModifier_);
+        auto paintProperty = DynamicCast<RadioPaintProperty>(paintWrapper->GetPaintProperty());
+        bool checked = false;
+        if (paintProperty->HasRadioCheck()) {
+            checked = paintProperty->GetRadioCheckValue();
+        } else {
+            paintProperty->UpdateRadioCheck(false);
+        }
+
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto radioTheme = pipeline->GetTheme<RadioTheme>();
+        activeColor_ = paintProperty->GetRadioCheckedBackgroundColor().value_or(Color(radioTheme->GetActiveColor()));
+        inactiveColor_ = paintProperty->GetRadioUncheckedBorderColor().value_or(Color(radioTheme->GetInactiveColor()));
+        pointColor_ = paintProperty->GetRadioIndicatorColor().value_or(Color(radioTheme->GetPointColor()));
+
+        auto size = paintWrapper->GetContentSize();
+        auto offset = paintWrapper->GetContentOffset();
+        radioModifier_->InitializeParam();
+        radioModifier_->SetPointColor(pointColor_);
+        radioModifier_->SetactiveColor(activeColor_);
+        radioModifier_->SetinactiveColor(inactiveColor_);
+        radioModifier_->SetSize(size);
+        radioModifier_->SetOffset(offset);
+        radioModifier_->SetEnabled(enabled_);
+        radioModifier_->SetTotalScale(totalScale_);
+        radioModifier_->SetPointScale(pointScale_);
+        radioModifier_->SetRingPointScale(ringPointScale_);
+        radioModifier_->SetIsCheck(checked);
+        radioModifier_->SetUIStatus(uiStatus_);
+        radioModifier_->SetTouchHoverAnimationType(touchHoverType_);
+        radioModifier_->UpdateAnimatableProperty();
+    }
+
+    void SetHotZoneOffset(const OffsetF& hotZoneOffset)
     {
         hotZoneOffset_ = hotZoneOffset;
     }
 
-    void SetHotZoneSize(SizeF& hotZoneSize)
+    void SetHotZoneSize(const SizeF& hotZoneSize)
     {
         hotZoneSize_ = hotZoneSize;
     }
 
-private:
-    void InitializeParam();
-    void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, SizeF& paintSize) const;
-    void DrawTouchBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
+    void SetEnabled(const bool enabled)
+    {
+        enabled_ = enabled;
+    }
 
-    float shadowWidth_ = 1.5f;
-    float borderWidth_ = 1.5f;
+    void SetTotalScale(const float totalScale)
+    {
+        totalScale_ = totalScale;
+    }
+
+    void SetPointScale(const float pointScale)
+    {
+        pointScale_ = pointScale;
+    }
+
+    void SetRingPointScale(const float ringPointScale)
+    {
+        ringPointScale_ = ringPointScale;
+    }
+
+    void SetUIStatus(const UIStatus uiStatus)
+    {
+        uiStatus_ = uiStatus;
+    }
+
+    void SetTouchHoverAnimationType(const TouchHoverAnimationType touchHoverType)
+    {
+        touchHoverType_ = touchHoverType;
+    }
+
+private:
     Color pointColor_;
     Color activeColor_;
     Color inactiveColor_;
-    Color inactivePointColor_;
-    Color shadowColor_;
-    Color clickEffectColor_;
-    Color hoverColor_;
-    Dimension hotZoneHorizontalPadding_;
-
     bool enabled_ = true;
-    bool isTouch_ = false;
-    bool isHover_ = false;
     float totalScale_ = 1.0f;
     float pointScale_ = 0.5f;
+    float ringPointScale_ = 0.0f;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    TouchHoverAnimationType touchHoverType_;
+
+    RefPtr<RadioModifier> radioModifier_;
 };
 } // namespace OHOS::Ace::NG
 

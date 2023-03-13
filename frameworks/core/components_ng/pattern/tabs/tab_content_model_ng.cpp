@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -117,7 +117,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     auto tabBarNode = tabsNode->GetTabBar();
     CHECK_NULL_VOID(tabBarNode);
-    const auto& tabBarParam = tabContentNode->GetPattern<TabContentPattern>()->GetTabBarParam();
+    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(tabContentPattern);
+    const auto& tabBarParam = tabContentPattern->GetTabBarParam();
 
     // Create column node to contain image and text or builder.
     auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabContentNode->GetTabBarItemId(),
@@ -136,6 +138,25 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle());
+    auto selectedMode = tabContentPattern->GetSelectedMode();
+    auto indicatorStyle = tabContentPattern->GetIndicatorStyle();
+    auto boardStyle = tabContentPattern->GetBoardStyle();
+    auto renderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderRadiusProperty borderRadiusProperty;
+    borderRadiusProperty.SetRadius(boardStyle.borderRadius);
+    renderContext->UpdateBorderRadius(borderRadiusProperty);
+	
+    auto myIndex = tabContentNode->GetParent()->GetChildFlatIndex(tabContentId).second;
+    tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
+    auto tabBarStyle = tabContentPattern->GetTabBarStyle();
+    if (tabBarStyle != TabBarStyle::SUBTABBATSTYLE) {
+        indicatorStyle.marginTop = 0.0_vp;
+    }
+    tabBarPattern->SetSelectedMode(selectedMode, myIndex);
+    tabBarPattern->SetIndicatorStyle(indicatorStyle, myIndex);
+    tabBarPattern->UpdateSubTabBoard();
+
     // Create tab bar with builder.
     if (tabBarParam.HasBuilder()) {
         ScopedViewStackProcessor builderViewStackProcessor;
@@ -149,22 +170,17 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         tabBarPattern->AddTabBarItemType(tabContentId, true);
         return;
     }
-
     if (tabBarParam.GetText().empty()) {
         LOGW("Text is empty.");
-        return;
+    } else {
+        LOGD("Text %{public}s", tabBarParam.GetText().c_str());
     }
-
-    LOGD("Text %{public}s", tabBarParam.GetText().c_str());
 
     // Create text node and image node.
     RefPtr<FrameNode> textNode;
     RefPtr<FrameNode> imageNode;
     auto layoutProperty = columnNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
-    CHECK_NULL_VOID(tabContentPattern);
-    auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle == TabBarStyle::SUBTABBATSTYLE) {
         auto horizontalPadding = tabTheme->GetSubTabHorizontalPadding();
         layoutProperty->UpdatePadding({ CalcLength(horizontalPadding), CalcLength(horizontalPadding),
@@ -198,7 +214,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(textNode);
     CHECK_NULL_VOID(imageNode);
 
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabContentNode->GetParent());
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
@@ -216,6 +232,9 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     } else {
         textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
     }
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    textRenderContext->UpdateClipEdge(true);
     textLayoutProperty->UpdateContent(tabBarParam.GetText());
     textLayoutProperty->UpdateFontSize(tabTheme->GetSubTabTextDefaultFontSize());
     textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
@@ -235,11 +254,14 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     if (tabBarStyle == TabBarStyle::BOTTOMTABBATSTYLE) {
         textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     }
+    auto labelStyle = tabContentPattern->GetLabelStyle();
+    UpdateLabelStyle(labelStyle, textLayoutProperty);
     ImageSourceInfo imageSourceInfo(tabBarParam.GetIcon());
     imageProperty->UpdateImageSourceInfo(imageSourceInfo);
     columnNode->MarkModifyDone();
     textNode->MarkModifyDone();
     imageNode->MarkModifyDone();
+    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     tabBarPattern->AddTabBarItemType(tabContentId, false);
 }
 
@@ -277,4 +299,64 @@ void TabContentModelNG::SetTabBarStyle(TabBarStyle tabBarStyle)
     frameNodePattern->SetTabBarStyle(tabBarStyle);
 }
 
+void TabContentModelNG::SetIndicator(const IndicatorStyle& indicator)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetIndicatorStyle(indicator);
+}
+
+void TabContentModelNG::SetBoard(const BoardStyle& board)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetBoardStyle(board);
+}
+
+void TabContentModelNG::SetSelectedMode(SelectedMode selectedMode)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetSelectedMode(selectedMode);
+}
+
+void TabContentModelNG::SetLabelStyle(const LabelStyle& labelStyle)
+{
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetLabelStyle(labelStyle);
+}
+
+void TabContentModelNG::UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    if (labelStyle.fontSize.has_value()) {
+        textLayoutProperty->UpdateFontSize(labelStyle.fontSize.value());
+    }
+    if (labelStyle.fontWeight.has_value()) {
+        textLayoutProperty->UpdateFontWeight(labelStyle.fontWeight.value());
+    }
+    if (labelStyle.fontStyle.has_value()) {
+        textLayoutProperty->UpdateItalicFontStyle(labelStyle.fontStyle.value());
+    }
+    if (labelStyle.fontFamily.has_value()) {
+        textLayoutProperty->UpdateFontFamily(labelStyle.fontFamily.value());
+    }
+    if (labelStyle.textOverflow.has_value()) {
+        textLayoutProperty->UpdateTextOverflow(labelStyle.textOverflow.value());
+    }
+    if (labelStyle.maxLines.has_value()) {
+        textLayoutProperty->UpdateMaxLines(labelStyle.maxLines.value());
+    }
+    if (labelStyle.minFontSize.has_value()) {
+        textLayoutProperty->UpdateAdaptMinFontSize(labelStyle.minFontSize.value());
+    }
+    if (labelStyle.maxFontSize.has_value()) {
+        textLayoutProperty->UpdateAdaptMaxFontSize(labelStyle.maxFontSize.value());
+    }
+    if (labelStyle.heightAdaptivePolicy.has_value()) {
+        textLayoutProperty->UpdateHeightAdaptivePolicy(labelStyle.heightAdaptivePolicy.value());
+    }
+}
 } // namespace OHOS::Ace::NG

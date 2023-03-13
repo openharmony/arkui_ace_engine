@@ -71,6 +71,7 @@ void TextModelNG::SetFontSize(const Dimension& value)
 {
     if (!value.IsValid()) {
         LOGE("FontSize value is not valid");
+        ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, Dimension());
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontSize, value);
@@ -79,6 +80,13 @@ void TextModelNG::SetFontSize(const Dimension& value)
 void TextModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
+}
+
+void TextModelNG::SetTextShadow(const Shadow& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextShadow, value);
 }
 
 void TextModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -151,6 +159,11 @@ void TextModelNG::SetAdaptMaxFontSize(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, AdaptMaxFontSize, value);
 }
 
+void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, value);
+}
+
 void TextModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& click)
 {
     LOGE("no support OnClick");
@@ -164,6 +177,19 @@ void TextModelNG::SetRemoteMessage(std::function<void()>&& event)
 void TextModelNG::SetCopyOption(CopyOptions copyOption)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
+}
+
+void TextModelNG::SetDraggable(bool draggable)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Draggable, draggable);
+}
+
+void TextModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->SetMenuOptionItems(std::move(menuOptionsItems));
 }
 
 void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
@@ -199,5 +225,4 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 {
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
-
 } // namespace OHOS::Ace::NG

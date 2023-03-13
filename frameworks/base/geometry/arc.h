@@ -19,6 +19,8 @@
 #include "base/geometry/point.h"
 #include "base/utils/utils.h"
 
+#define PI_NUM 3.1415926f
+
 namespace OHOS::Ace {
 
 class Arc {

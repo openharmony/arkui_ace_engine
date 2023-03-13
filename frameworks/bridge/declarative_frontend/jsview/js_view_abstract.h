@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,8 +27,10 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/transition_property.h"
 
@@ -36,6 +38,7 @@ namespace OHOS::Ace::Framework {
 
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DEFAULT_TAP_COUNTS = 1;
+constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,
@@ -80,6 +83,9 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
+    static void JsSphericalEffect(const JSCallbackInfo& info);
+    static void JsPixelStretchEffect(const JSCallbackInfo& info);
+    static void JsLightUpEffect(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
@@ -123,6 +129,7 @@ public:
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsHitTestBehavior(const JSCallbackInfo& info);
+    static void JsForegroundColor(const JSCallbackInfo& info);
 
     // response region
     static void JsResponseRegion(const JSCallbackInfo& info);
@@ -137,6 +144,7 @@ public:
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsColor(const JSRef<JSVal>& jsValue, Color& result);
+    static bool ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy);
     static bool ParseJsFontFamilies(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
 
     static bool ParseJsonDimension(
@@ -221,11 +229,15 @@ public:
 #endif
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
+    static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
     static void JsAccessibilityDescription(const std::string& description);
     static void JsAccessibilityImportance(const std::string& importance);
+
+    static void ParseMenuOptions(
+        const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::MenuOptionsParam>& items);
 
 #ifndef WEARABLE_PRODUCT
     static void JsBindPopup(const JSCallbackInfo& info);

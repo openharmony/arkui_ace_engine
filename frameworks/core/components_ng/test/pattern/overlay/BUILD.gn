@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("overlay_manager_test_ng") {
   module_out_path = "$pattern_test_output_path/overlay"
@@ -37,6 +37,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/bubble/bubble_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/button/button_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_view.cpp",

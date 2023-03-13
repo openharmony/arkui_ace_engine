@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,6 +74,21 @@ Dimension GetMaxWith()
     return maxWidth;
 }
 
+void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayoutProperty>& textLayoutProps)
+{
+    auto textColor = param->GetTextColor();
+    if (textColor.has_value()) {
+        textLayoutProps->UpdateTextColor(textColor.value());
+    }
+    auto fontSize = param->GetFontSize();
+    if (fontSize.has_value()) {
+        textLayoutProps->UpdateFontSize(fontSize.value());
+    }
+    auto fontWeight = param->GetFontWeight();
+    if (fontWeight.has_value()) {
+        textLayoutProps->UpdateFontWeight(fontWeight.value());
+    }
+}
 } // namespace
 
 RefPtr<FrameNode> BubbleView::CreateBubbleNode(
@@ -100,6 +115,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    if (param->GetTargetSpace().has_value()) {
+        popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
+    }
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
     if (param->GetArrowOffset().has_value()) {
@@ -113,6 +131,10 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     }
     popupPaintProp->UpdateAutoCancel(!param->HasAction());
     popupPaintProp->UpdatePlacement(param->GetPlacement());
+
+    auto bubbleAccessibilityProperty = popupNode->GetAccessibilityProperty<BubbleAccessibilityProperty>();
+    CHECK_NULL_RETURN(bubbleAccessibilityProperty, nullptr);
+    bubbleAccessibilityProperty->SetText(message);
 
     // Create child
     RefPtr<FrameNode> child;
@@ -134,6 +156,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         textPadding.bottom = CalcLength(padding.Bottom());
         layoutProps->UpdatePadding(textPadding);
         layoutProps->UpdateAlignment(Alignment::CENTER);
+        UpdateTextProperties(param, layoutProps);
         auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
         layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
         textNode->MarkModifyDone();
@@ -166,6 +189,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     layoutProps->UpdateShowInSubWindow(param->IsShowInSubWindow());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     layoutProps->UpdateDisplayWindowOffset(displayWindowOffset);
+    if (param->GetTargetSpace().has_value()) {
+        layoutProps->UpdateTargetSpace(param->GetTargetSpace().value());
+    }
     auto popupPaintProps = popupNode->GetPaintProperty<BubbleRenderProperty>();
     popupPaintProps->UpdateUseCustom(param->IsUseCustom());
     popupPaintProps->UpdateEnableArrow(param->EnableArrow());
@@ -208,6 +234,9 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
+    if (param->GetTargetSpace().has_value()) {
+        popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
+    }
     // Update paint props
     if (param->GetArrowOffset().has_value()) {
         popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
@@ -246,7 +275,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(const RefPtr<PopupParam>& para
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto layoutProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     layoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START); // mainAxisAlign
-    layoutProps->UpdateCrossAxisAlign(FlexAlign::FLEX_END);  // crossAxisAlign
     auto message = BubbleView::CreateMessage(param->GetMessage(), param->IsUseCustom());
 
     auto popupTheme = GetPopupTheme();
@@ -257,10 +285,15 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(const RefPtr<PopupParam>& para
     textPadding.right = CalcLength(padding.Right());
     textPadding.top = CalcLength(padding.Top());
     textLayoutProps->UpdatePadding(textPadding);
+    textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
+    UpdateTextProperties(param, textLayoutProps);
     message->MarkModifyDone();
     message->MountToParent(columnNode);
 
     auto buttonRow = BubbleView::CreateButtons(param, popupId, targetId);
+    auto buttonRowLayoutProperty = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
+    buttonRowLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
+    buttonRow->MarkModifyDone();
     auto maxWidth = GetMaxWith();
     auto childLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
@@ -374,5 +407,4 @@ RefPtr<FrameNode> BubbleView::CreateButton(
 
     return buttonNode;
 }
-
 } // namespace OHOS::Ace::NG

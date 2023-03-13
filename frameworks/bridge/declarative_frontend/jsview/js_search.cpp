@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,6 +68,10 @@ void JSSearch::JSBind(BindingTarget globalObj)
 
     JSClass<JSSearch>::StaticMethod("create", &JSSearch::Create, opt);
     JSClass<JSSearch>::StaticMethod("searchButton", &JSSearch::SetSearchButton, opt);
+    JSClass<JSSearch>::StaticMethod("searchIcon", &JSSearch::SetSearchIcon, opt);
+    JSClass<JSSearch>::StaticMethod("cancelButton", &JSSearch::SetCancelButton, opt);
+    JSClass<JSSearch>::StaticMethod("fontColor", &JSSearch::SetTextColor, opt);
+    JSClass<JSSearch>::StaticMethod("caretStyle", &JSSearch::SetCaret, opt);
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
     JSClass<JSSearch>::StaticMethod("textFont", &JSSearch::SetTextFont, opt);
@@ -91,6 +95,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onCut", &JSSearch::SetOnCut);
     JSClass<JSSearch>::StaticMethod("onPaste", &JSSearch::SetOnPaste);
     JSClass<JSSearch>::StaticMethod("copyOption", &JSSearch::SetCopyOption);
+    JSClass<JSSearch>::StaticMethod("textMenuOptions", &JSSearch::JsMenuOptionsExtension);
     JSClass<JSSearch>::Inherit<JSViewAbstract>();
     JSClass<JSSearch>::Bind(globalObj);
 }
@@ -136,9 +141,222 @@ void JSSearch::Create(const JSCallbackInfo& info)
     }
 }
 
-void JSSearch::SetSearchButton(const std::string& text)
+void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 {
-    SearchModel::GetInstance()->SetSearchButton(text);
+    if (info.Length() < 1) {
+        LOGI("The arg is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    std::string buttonValue;
+    if (info.Length() == 1) {
+        if (!ParseJsString(info[0], buttonValue)) {
+            LOGI("buttonValue is null");
+            return;
+        }
+        SearchModel::GetInstance()->SetSearchButton(buttonValue);
+        SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
+        SearchModel::GetInstance()->SetSearchButtonFontColor(theme->GetSearchButtonTextColor());
+    }
+
+    int32_t expect_argvs = 2;
+    if (info.Length() != expect_argvs) {
+        return;
+    }
+
+    if (!ParseJsString(info[0], buttonValue)) {
+        LOGI("buttonValue is null");
+        return;
+    }
+    SearchModel::GetInstance()->SetSearchButton(buttonValue);
+    if (info[1]->IsObject()) {
+        auto param = JSRef<JSObject>::Cast(info[1]);
+
+        // set button font size, unit FP
+        Dimension fontSize;
+        auto fontSizeProp = param->GetProperty("fontSize");
+        if (!fontSizeProp->IsUndefined() && !fontSizeProp->IsNull() && ParseJsDimensionFp(fontSizeProp, fontSize)) {
+            if (LessNotEqual(fontSize.Value(), 0.0)) {
+                fontSize = theme->GetFontSize();
+            }
+        } else {
+            fontSize = theme->GetFontSize();
+        }
+        SearchModel::GetInstance()->SetSearchButtonFontSize(fontSize);
+
+        // set font color
+        Color fontColor;
+        auto fontColorProp = param->GetProperty("fontColor");
+        if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
+            fontColor = theme->GetSearchButtonTextColor();
+        }
+        SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
+    }
+}
+
+void JSSearch::SetSearchIcon(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        auto theme = GetTheme<SearchTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+
+        // set icon size
+        Dimension size;
+        auto sizeProp = param->GetProperty("size");
+        if (!sizeProp->IsUndefined() && !sizeProp->IsNull() && ParseJsDimensionVp(sizeProp, size)) {
+            if (LessNotEqual(size.Value(), 0.0)) {
+                size = theme->GetIconHeight();
+            }
+        } else {
+            size = theme->GetIconHeight();
+        }
+        SearchModel::GetInstance()->SetSearchIconSize(size);
+
+        // set icon color
+        Color colorVal;
+        auto colorProp = param->GetProperty("color");
+        if (colorProp->IsUndefined() || colorProp->IsNull() || !ParseJsColor(colorProp, colorVal)) {
+            colorVal = theme->GetSearchIconColor();
+        }
+        SearchModel::GetInstance()->SetSearchIconColor(colorVal);
+
+        // set icon src
+        std::string src;
+        auto srcPathProp = param->GetProperty("src");
+        if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src)) {
+            src = "";
+        }
+        SearchModel::GetInstance()->SetSearchSrcPath(src);
+    }
+}
+
+static CancelButtonStyle ConvertStrToCancelButtonStyle(const std::string& value)
+{
+    if (value == "CONSTANT") {
+        return CancelButtonStyle::CONSTANT;
+    } else if (value == "INVISIBLE") {
+        return CancelButtonStyle::INVISIBLE;
+    } else {
+        return CancelButtonStyle::INPUT;
+    }
+}
+
+void JSSearch::SetCancelButton(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsObject()) {
+        LOGI("ivalid argvs");
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+
+    // set style
+    std::string styleStr;
+    CancelButtonStyle cancelButtonStyle;
+    auto styleProp = param->GetProperty("style");
+    if (!styleProp->IsUndefined() && !styleProp->IsNull() && ParseJsString(styleProp, styleStr)) {
+        cancelButtonStyle = ConvertStrToCancelButtonStyle(styleStr);
+    } else {
+        cancelButtonStyle = theme->GetCancelButtonStyle();
+    }
+    SearchModel::GetInstance()->SetCancelButtonStyle(cancelButtonStyle);
+
+    auto iconProp = param->GetProperty("icon");
+    if (iconProp->IsUndefined() || iconProp->IsNull()) {
+        LOGI("icon is null");
+        SearchModel::GetInstance()->SetCancelIconSize(theme->GetIconHeight());
+        SearchModel::GetInstance()->SetCancelIconColor(theme->GetSearchIconColor());
+        SearchModel::GetInstance()->SetRightIconSrcPath("");
+    } else {
+        SetIconStyle(info);
+    }
+}
+
+void JSSearch::SetIconStyle(const JSCallbackInfo& info)
+{
+    auto param = JSRef<JSObject>::Cast(info[0]);
+    auto theme = GetTheme<SearchTheme>();
+    auto iconParam = JSRef<JSObject>::Cast(param->GetProperty("icon"));
+
+    // set icon size
+    Dimension iconSize;
+    auto iconSizeProp = iconParam->GetProperty("size");
+    if (!iconSizeProp->IsUndefined() && !iconSizeProp->IsNull() && ParseJsDimensionVp(iconSizeProp, iconSize)) {
+        if (LessNotEqual(iconSize.Value(), 0.0)) {
+            iconSize = theme->GetIconHeight();
+        }
+    } else {
+        iconSize = theme->GetIconHeight();
+    }
+    SearchModel::GetInstance()->SetCancelIconSize(iconSize);
+
+    // set icon color
+    Color iconColor;
+    auto iconColorProp = iconParam->GetProperty("color");
+    if (iconColorProp->IsUndefined() || iconColorProp->IsNull() || !ParseJsColor(iconColorProp, iconColor)) {
+        iconColor = theme->GetSearchIconColor();
+    }
+    SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+
+    // set icon src
+    std::string iconSrc;
+    auto iconSrcProp = iconParam->GetProperty("src");
+    if (iconSrcProp->IsUndefined() || iconSrcProp->IsNull() || !ParseJsMedia(iconSrcProp, iconSrc)) {
+        iconSrc = "";
+    }
+    SearchModel::GetInstance()->SetRightIconSrcPath(iconSrc);
+}
+
+void JSSearch::SetTextColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    auto theme = GetTheme<SearchTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+
+    auto value = JSRef<JSVal>::Cast(info[0]);
+    Color colorVal;
+    if (!ParseJsColor(value, colorVal)) {
+        colorVal = theme->GetTextColor();
+    }
+    SearchModel::GetInstance()->SetTextColor(colorVal);
+}
+
+void JSSearch::SetCaret(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        auto param = JSRef<JSObject>::Cast(info[0]);
+        auto textFieldTheme = GetTheme<TextFieldTheme>();
+        CHECK_NULL_VOID_NOLOG(textFieldTheme);
+
+        // set caret width
+        Dimension caretWidth;
+        auto caretWidthProp = param->GetProperty("width");
+        if (!caretWidthProp->IsUndefined() && !caretWidthProp->IsNull() &&
+            ParseJsDimensionVp(caretWidthProp, caretWidth)) {
+            if (LessNotEqual(caretWidth.Value(), 0.0)) {
+                caretWidth = textFieldTheme->GetCursorWidth();
+            }
+        } else {
+            caretWidth = textFieldTheme->GetCursorWidth();
+        }
+        SearchModel::GetInstance()->SetCaretWidth(caretWidth);
+
+        // set caret color
+        Color caretColor;
+        auto caretColorProp = param->GetProperty("color");
+        if (caretColorProp->IsUndefined() || caretColorProp->IsNull() ||
+            !ParseJsColor(caretColorProp, caretColor)) {
+            caretColor = textFieldTheme->GetCursorColor();
+        }
+        SearchModel::GetInstance()->SetCaretColor(caretColor);
+    }
 }
 
 void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
@@ -511,6 +729,19 @@ void JSSearch::SetCopyOption(const JSCallbackInfo& info)
         copyOptions = static_cast<CopyOptions>(emunNumber);
     }
     SearchModel::GetInstance()->SetCopyOption(copyOptions);
+}
+
+void JSSearch::JsMenuOptionsExtension(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsArray()) {
+            std::vector<NG::MenuOptionsParam> menuOptionsItems;
+            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
+            SearchModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
+        }
+    } else {
+        LOGI("only newPipeline supply");
+    }
 }
 
 void JSSearchController::JSBind(BindingTarget globalObj)

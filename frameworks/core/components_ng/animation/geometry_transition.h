@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/geometry/ng/rect_t.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -27,29 +28,33 @@ class GeometryTransition : public AceType {
     DECLARE_ACE_TYPE(GeometryTransition, AceType);
 
 public:
-    GeometryTransition(const WeakPtr<FrameNode>& frameNode, bool forceOutAnim);
+    GeometryTransition(const WeakPtr<FrameNode>& frameNode);
     ~GeometryTransition() override = default;
 
-    bool IsNodeActive(const WeakPtr<FrameNode>& frameNode) const;
-    bool IsNodeIdentity(const WeakPtr<FrameNode>& frameNode) const;
-    bool IsNodeOutAndIdentity(const WeakPtr<FrameNode>& frameNode) const;
     bool IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const;
-    bool IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const;
-    bool IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const;
-
+    bool IsRunning(const WeakPtr<FrameNode>& frameNode) const;
+    std::string ToString() const;
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);
     void WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
-    void DidLayout(const WeakPtr<FrameNode>& frameNode);
+    void DidLayout(const RefPtr<LayoutWrapper>& root, const WeakPtr<FrameNode>& frameNode);
+
+    static void OnLayout(bool layoutStarted)
+    {
+        layoutStarted_ = layoutStarted;
+    }
 
 private:
     enum class State {
         IDLE,
-        INITIAL_LAYOUT,
-        FINAL_LAYOUT,
+        ACTIVE,
+        IDENTITY,
     };
 
-    void TryToSetState(bool condition, State state);
+    bool IsNodeInAndIdentity(const WeakPtr<FrameNode>& frameNode) const;
+    bool IsNodeOutAndActive(const WeakPtr<FrameNode>& frameNode) const;
+    void SwapInAndOut(bool condition);
+    std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> GetMatchedPair(bool isNodeIn) const;
     void ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& layoutWrapper, bool isNodeIn);
     void SyncGeometry(bool isNodeIn);
 
@@ -58,8 +63,9 @@ private:
     State state_ = State::IDLE;
     bool hasInAnim_ = false;
     bool hasOutAnim_ = false;
-    bool forceOutAnim_ = false;
-    bool forceState_ = false;
+    bool buildDuringLayout_ = false;
+    SizeF size_;
+    static bool layoutStarted_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);
 };

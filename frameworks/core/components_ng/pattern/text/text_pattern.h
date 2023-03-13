@@ -16,21 +16,25 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_PATTERN_H
 
+#include <optional>
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
+#include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
@@ -44,7 +48,14 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextPaintMethod>(WeakClaim(this), paragraph_, baselineOffset_);
+        if (!textContentModifier_) {
+            textContentModifier_ = MakeRefPtr<TextContentModifier>(textStyle_);
+        }
+        if (!textOverlayModifier_) {
+            textOverlayModifier_ = MakeRefPtr<TextOverlayModifier>();
+        }
+        return MakeRefPtr<TextPaintMethod>(
+            WeakClaim(this), paragraph_, baselineOffset_, textContentModifier_, textOverlayModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -93,6 +104,50 @@ public:
         return textForDisplay_;
     }
 
+    const OffsetF& GetStartOffset() const
+    {
+        return textSelector_.selectionBaseOffset;
+    }
+
+    const OffsetF& GetEndOffset() const
+    {
+        return textSelector_.selectionDestinationOffset;
+    }
+
+    double GetSelectHeight() const
+    {
+        return textSelector_.GetSelectHeight();
+    }
+
+    void GetGlobalOffset(Offset& offset);
+
+    const RectF& GetTextContentRect() const
+    {
+        return contentRect_;
+    }
+
+    float GetBaselineOffset() const
+    {
+        return baselineOffset_;
+    }
+
+    RefPtr<TextContentModifier> GetContentModifier()
+    {
+        return textContentModifier_;
+    }
+
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionItems)
+    {
+        menuOptionItems_ = std::move(menuOptionItems);
+    }
+
+    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
+    {
+        return std::move(menuOptionItems_);
+    }
+
+    void OnVisibleChange(bool isVisible) override;
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -108,10 +163,16 @@ private:
     void OnHandleTouchUp();
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClickEvent(GestureEvent& info);
+    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandlePanStart(const GestureEvent& info);
+    void HandlePanUpdate(const GestureEvent& info);
+    void HandlePanEnd(const GestureEvent& info);
 
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle);
     void InitSelection(const Offset& pos);
     void CalcuateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+
+    bool IsDraggable(const Offset& offset);
 
     int32_t GetGraphemeClusterLength(int32_t extend) const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight);
@@ -120,10 +181,13 @@ private:
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     std::string textForDisplay_;
+    std::vector<MenuOptionsParam> menuOptionItems_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<LongPressEvent> longPressEvent_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     RefPtr<Clipboard> clipboard_;
+    RefPtr<DragWindow> dragWindow_;
+    RefPtr<DragDropProxy> dragDropProxy_;
     CopyOptions copyOption_ = CopyOptions::None;
     TextSelector textSelector_;
     OffsetF contentOffset_;
@@ -131,6 +195,12 @@ private:
     float baselineOffset_ = 0.0f;
     bool clickEventInitialized_ = false;
     bool mouseEventInitialized_ = false;
+    bool panEventInitialized_ = false;
+    bool draggable_ = false;
+    std::optional<TextStyle> textStyle_;
+
+    RefPtr<TextContentModifier> textContentModifier_;
+    RefPtr<TextOverlayModifier> textOverlayModifier_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };

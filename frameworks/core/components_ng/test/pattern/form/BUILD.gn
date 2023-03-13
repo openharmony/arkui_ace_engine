@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("form_pattern_test_ng") {
   module_out_path = "$pattern_test_output_path/form"
@@ -25,6 +25,7 @@ ohos_unittest("form_pattern_test_ng") {
 
     #mock
     "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_form_manager_delegate.cpp",
+    "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_rosen_render_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/pattern/form/mock/mock_sub_container.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
 

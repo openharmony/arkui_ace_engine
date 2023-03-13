@@ -33,6 +33,7 @@ enum class ShadowStyle {
     OuterDefaultLG,
     OuterFloatingSM,
     OuterFloatingMD,
+    None,
 };
 
 // A style class indicates the way to render shadow effect
@@ -44,7 +45,8 @@ public:
     ~Shadow() = default;
 
     // create shadow for hardware rending.
-    Shadow(float elevation, Offset offset, Color spotColor) : offset_(offset), color_(spotColor)
+    Shadow(float elevation, Offset offset, Color spotColor, ShadowStyle style)
+        : offset_(offset), color_(spotColor), style_(style)
     {
         SetElevation(elevation);
     };
@@ -174,6 +176,11 @@ public:
         return lightRadius_;
     }
 
+    ShadowStyle GetStyle() const
+    {
+        return style_;
+    }
+
     bool IsValid() const
     {
         if (isHardwareAcceleration_) {
@@ -191,6 +198,7 @@ private:
     Offset offset_;
     Color color_ = Color::BLACK;
     bool isHardwareAcceleration_ = false;
+    ShadowStyle style_ = ShadowStyle::None;
 };
 
 } // namespace OHOS::Ace

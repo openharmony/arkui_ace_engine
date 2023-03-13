@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,10 +45,10 @@ public:
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using PredictTask = std::function<void(int64_t)>;
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+    PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+    PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineContext() = default;
 
@@ -128,6 +128,7 @@ public:
     void HandleOnAreaChangeEvent();
 
     void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+    void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent();
 
@@ -148,7 +149,8 @@ public:
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
@@ -213,6 +215,12 @@ public:
     void AddWindowSizeChangeCallback(int32_t nodeId);
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
+
+    bool IsKeyInPressed(KeyCode tarCode) const
+    {
+        CHECK_NULL_RETURN(eventManager_, false);
+        return eventManager_->IsKeyInPressed(tarCode);
+    }
 
     bool GetIsFocusingByTab() const
     {
@@ -308,7 +316,8 @@ public:
     }
 
 protected:
-    void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
+    void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
 
     void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;

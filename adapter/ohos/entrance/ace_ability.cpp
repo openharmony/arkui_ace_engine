@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
 #include "adapter/ohos/entrance/capability_registry.h"
-#include "adapter/ohos/entrance/flutter_ace_view.h"
+#include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
 #include "base/geometry/rect.h"
@@ -166,10 +166,11 @@ uint32_t AceWindowListener::GetBackgroundColor()
     return callbackOwner_->GetBackgroundColor();
 }
 
-void AceWindowListener::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason)
+void AceWindowListener::OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
 {
     CHECK_NULL_VOID(callbackOwner_);
-    callbackOwner_->OnSizeChange(rect, reason);
+    callbackOwner_->OnSizeChange(rect, reason, rsTransaction);
 }
 
 void AceWindowListener::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -213,6 +214,7 @@ void AceAbility::OnStart(const Want& want)
         CapabilityRegistry::Register();
         AceApplicationInfo::GetInstance().SetPackageName(abilityContext->GetBundleName());
         AceApplicationInfo::GetInstance().SetDataFileDirPath(abilityContext->GetFilesDir());
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(abilityContext->GetApplicationInfo()->apiTargetVersion);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
         ImageCache::SetImageCacheFilePath(cacheDir);
@@ -223,10 +225,12 @@ void AceAbility::OnStart(const Want& want)
     // TODO: now choose pipeline using param set as package name, later enable for all.
     auto apiCompatibleVersion = abilityContext->GetApplicationInfo()->apiCompatibleVersion;
     auto apiReleaseType = abilityContext->GetApplicationInfo()->apiReleaseType;
+    auto apiTargetVersion = abilityContext->GetApplicationInfo()->apiTargetVersion;
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledFA(
-        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiReleaseType);
-    LOGI("AceAbility: apiCompatibleVersion: %{public}d, and apiReleaseType: %{public}s, useNewPipe: %{public}d",
-        apiCompatibleVersion, apiReleaseType.c_str(), useNewPipe);
+        AceApplicationInfo::GetInstance().GetPackageName(), apiCompatibleVersion, apiTargetVersion, apiReleaseType);
+    LOGI("AceAbility: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
+         "useNewPipe: %{public}d",
+        apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
     OHOS::sptr<OHOS::Rosen::Window> window = Ability::GetWindow();
     std::shared_ptr<AceAbility> self = std::static_pointer_cast<AceAbility>(shared_from_this());
     OHOS::sptr<AceWindowListener> aceWindowListener = new AceWindowListener(self);
@@ -302,6 +306,9 @@ void AceAbility::OnStart(const Want& want)
     std::string& packagePath = isHap ? moduleInfo->hapPath : packagePathStr;
     FrontendType frontendType = GetFrontendTypeFromManifest(packagePath, srcPath, isHap);
     useNewPipe = useNewPipe && (frontendType == FrontendType::ETS_CARD || frontendType == FrontendType::DECLARATIVE_JS);
+    if (frontendType != FrontendType::ETS_CARD && frontendType != FrontendType::DECLARATIVE_JS) {
+        LOGI("AceAbility: JS project use old pipeline");
+    }
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
     if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe) {
@@ -379,14 +386,15 @@ void AceAbility::OnStart(const Want& want)
     container->SetWindowId(window->GetWindowId());
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), abilityId_);
     // create view.
-    auto flutterAceView = Platform::FlutterAceView::CreateView(abilityId_);
-    Platform::FlutterAceView::SurfaceCreated(flutterAceView, window);
+    auto aceView = Platform::AceViewOhos::CreateView(abilityId_);
+    Platform::AceViewOhos::SurfaceCreated(aceView, window);
 
     if (srcPath.empty()) {
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     } else {
-        auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/") };
+        auto assetBasePathStr = { "assets/js/" + srcPath + "/", std::string("assets/js/share/"),
+                                  std::string("assets/js/") };
         Platform::AceContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
 
@@ -411,7 +419,7 @@ void AceAbility::OnStart(const Want& want)
     if (!useNewPipe) {
         Ace::Platform::UIEnvCallback callback = nullptr;
 #ifdef ENABLE_ROSEN_BACKEND
-        callback = [window, id = abilityId_, flutterAceView, rsUiDirector](
+        callback = [window, id = abilityId_, aceView, rsUiDirector](
                        const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) mutable {
             if (rsUiDirector) {
                 rsUiDirector->SetUITaskRunner(
@@ -423,7 +431,6 @@ void AceAbility::OnStart(const Want& want)
                 if (context != nullptr) {
                     context->SetRSUIDirector(rsUiDirector);
                 }
-                flutterAceView->InitIOManager(Platform::AceContainer::GetContainer(id)->GetTaskExecutor());
                 LOGI("Init Rosen Backend");
             } else {
                 LOGI("not Init Rosen Backend");
@@ -431,12 +438,12 @@ void AceAbility::OnStart(const Want& want)
         };
 #endif
         // set view
-        Platform::AceContainer::SetView(flutterAceView, density_, 0, 0, window, callback);
+        Platform::AceContainer::SetView(aceView, density_, 0, 0, window, callback);
     } else {
-        Platform::AceContainer::SetViewNew(flutterAceView, density_, 0, 0, window);
+        Platform::AceContainer::SetViewNew(aceView, density_, 0, 0, window);
     }
 
-    Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
+    Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
 
     // action event handler
     auto&& actionEventHandler = [this](const std::string& action) {
@@ -673,7 +680,8 @@ void AceAbility::OnRemoteTerminated()
     LOGI("AceAbility::OnRemoteTerminated finish.");
 }
 
-void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason)
+void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
+    const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction)
 {
     LOGI("width: %{public}u, height: %{public}u, left: %{public}d, top: %{public}d", rect.width_, rect.height_,
         rect.posX_, rect.posY_);
@@ -689,16 +697,13 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [rect, density = density_, reason, container]() {
-            auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-            CHECK_NULL_VOID(flutterAceView);
-            flutter::ViewportMetrics metrics;
-            metrics.physical_width = rect.width_;
-            metrics.physical_height = rect.height_;
-            metrics.device_pixel_ratio = density;
-            Platform::FlutterAceView::SetViewportMetrics(flutterAceView, metrics);
-            Platform::FlutterAceView::SurfaceChanged(flutterAceView, rect.width_, rect.height_,
-                rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason));
+        [rect, density = density_, reason, container, rsTransaction]() {
+            auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+            CHECK_NULL_VOID(aceView);
+            ViewportConfig config(rect.width_, rect.height_, density);
+            Platform::AceViewOhos::SetViewportMetrics(aceView, config);
+            Platform::AceViewOhos::SurfaceChanged(aceView, rect.width_, rect.height_,
+                rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -761,8 +766,8 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
     LOGI("AceAbility::OnDrag called ");
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_VOID(container);
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-    CHECK_NULL_VOID(flutterAceView);
+    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    CHECK_NULL_VOID(aceView);
     DragEventAction action;
     switch (event) {
         case OHOS::Rosen::DragEvent::DRAG_EVENT_END:
@@ -780,16 +785,16 @@ void AceAbility::OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event)
             break;
     }
 
-    flutterAceView->ProcessDragEvent(x, y, action);
+    aceView->ProcessDragEvent(x, y, action);
 }
 
 bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_RETURN(container, false);
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-    CHECK_NULL_RETURN(flutterAceView, false);
-    flutterAceView->DispatchTouchEvent(flutterAceView, pointerEvent);
+    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    CHECK_NULL_RETURN(aceView, false);
+    aceView->DispatchTouchEvent(aceView, pointerEvent);
     return true;
 }
 
@@ -797,8 +802,8 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) co
 {
     auto container = Platform::AceContainer::GetContainer(abilityId_);
     CHECK_NULL_RETURN(container, false);
-    auto flutterAceView = static_cast<Platform::FlutterAceView*>(container->GetView());
-    CHECK_NULL_RETURN(flutterAceView, false);
+    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    CHECK_NULL_RETURN(aceView, false);
     int32_t keyCode = keyEvent->GetKeyCode();
     int32_t keyAction = keyEvent->GetKeyAction();
     if (keyCode == MMI::KeyEvent::KEYCODE_BACK && keyAction == MMI::KeyEvent::KEY_ACTION_UP) {
@@ -811,7 +816,7 @@ bool AceAbility::OnInputEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) co
         return false;
     }
     LOGI("OnInputEvent: dispatch key to arkui");
-    if (flutterAceView->DispatchKeyEvent(flutterAceView, keyEvent)) {
+    if (aceView->DispatchKeyEvent(aceView, keyEvent)) {
         LOGI("OnInputEvent: arkui consumed this key event");
         return true;
     }

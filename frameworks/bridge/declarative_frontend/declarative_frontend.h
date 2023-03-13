@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,7 +99,7 @@ public:
     }
 
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
-
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID);
     void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
                                   const std::string& assetPath, bool isBundle)
     {
@@ -144,7 +144,6 @@ public:
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;
-    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID);
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return handler_;
@@ -215,7 +214,7 @@ public:
         return jsEngine_;
     }
 
-    void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
+    void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     void FlushReload() override
     {

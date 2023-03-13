@@ -192,7 +192,7 @@ RefPtr<NG::GeometryTransition> ElementRegister::GetOrCreateGeometryTransition(co
     CHECK_NULL_RETURN(frameNode.Upgrade(), nullptr);
     RefPtr<NG::GeometryTransition> geometryTransition;
     if (geometryTransitionMap_.find(id) == geometryTransitionMap_.end()) {
-        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode, false);
+        geometryTransition = AceType::MakeRefPtr<NG::GeometryTransition>(frameNode);
         geometryTransitionMap_.emplace(id, geometryTransition);
     } else {
         geometryTransition = geometryTransitionMap_[id];

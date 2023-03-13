@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,12 @@
 
 namespace OHOS::Ace {
 
+enum class CancelButtonStyle {
+    CONSTANT,
+    INVISIBLE,
+    INPUT,
+};
+
 class SearchModel {
 public:
     static SearchModel* GetInstance();
@@ -29,11 +35,24 @@ public:
     virtual RefPtr<TextFieldControllerBase> Create(const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
     virtual void SetSearchButton(const std::string& text);
+    virtual void SetCaretWidth(const Dimension& value);
+    virtual void SetCaretColor(const Color& color);
+    virtual void SetSearchIconSize(const Dimension& value);
+    virtual void SetSearchIconColor(const Color& color);
+    virtual void SetSearchSrcPath(const std::string& src);
+    virtual void SetRightIconSrcPath(const std::string& src);
+    virtual void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle);
+    virtual void SetCancelIconSize(const Dimension& value);
+    virtual void SetCancelIconColor(const Color& color);
+    virtual void SetSearchButtonFontSize(const Dimension& value);
+    virtual void SetSearchButtonFontColor(const Color& color);
     virtual void SetPlaceholderColor(const Color& color);
     virtual void SetPlaceholderFont(const Font& font);
     virtual void SetTextFont(const Font& font);
+    virtual void SetTextColor(const Color& color);
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
+    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
     virtual void SetOnChange(std::function<void(const std::string&)>&& onChange);
     virtual void SetOnCopy(std::function<void(const std::string&)>&& func);

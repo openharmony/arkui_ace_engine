@@ -22,7 +22,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-const float PROGRSS_MAX_VALUE = 100.f;
+constexpr float PROGRSS_MAX_VALUE = 100.f;
 
 void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
@@ -41,16 +41,18 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("color", (GetColor().value_or(progressTheme->GetTrackSelectedColor())).ColorToString().c_str());
     json->Put(
         "backgroundColor", (GetBackgroundColor().value_or(progressTheme->GetTrackBgColor())).ColorToString().c_str());
+    json->Put(
+        "capsuleBorderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
 }
 
 std::string ProgressPaintProperty::ProgressOptions() const
 {
-    auto JsonValue = JsonUtil::Create(true);
-    JsonValue->Put("value", std::to_string(GetValue().value_or(0.f)).c_str());
-    JsonValue->Put("total", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str());
-    JsonValue->Put("type",
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("value", std::to_string(GetValue().value_or(0.f)).c_str());
+    jsonValue->Put("total", std::to_string(GetMaxValue().value_or(PROGRSS_MAX_VALUE)).c_str());
+    jsonValue->Put("type",
         ProgressTypeUtils::ConvertProgressTypeToString(GetProgressType().value_or(ProgressType::LINEAR)).c_str());
-    return JsonValue->ToString();
+    return jsonValue->ToString();
 }
 
 } // namespace OHOS::Ace::NG

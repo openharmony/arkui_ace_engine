@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,6 @@
 
 #include "core/components/font/flutter_font_collection.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/third_party/txt/src/minikin/FontFamily.h"
 #include "flutter/third_party/txt/src/minikin/FontLanguageListCache.h"
 
@@ -39,27 +38,16 @@ std::shared_ptr<txt::FontCollection> FlutterFontCollection::GetFontCollection()
         return fontCollection_->GetFontCollection();
     }
 
-    auto* windowClient = GetFlutterEngineWindowClient();
-    if (windowClient == nullptr) {
-        return nullptr;
-    }
-    auto& fontCollection = windowClient->GetFontCollection();
-    return fontCollection.GetFontCollection();
-}
-
-flutter::WindowClient* FlutterFontCollection::GetFlutterEngineWindowClient()
-{
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return nullptr;
-    }
-
-    auto* window = flutter::UIDartState::Current()->window();
-    if (window == nullptr) {
-        LOGW("UpdateParagraph: window or client is null");
-        return nullptr;
-    }
-    return window->client();
+    std::call_once(fontFlag_, [this]() {
+        fontCollection_ = std::make_unique<flutter::FontCollection>();
+        if (fontCollection_->GetFontCollection()) {
+            std::string emptyLocale;
+            // 0x4e2d is unicode for '中'.
+            fontCollection_->GetFontCollection()->MatchFallbackFont(0x4e2d, emptyLocale);
+            fontCollection_->GetFontCollection()->GetMinikinFontCollectionForFamilies({ "sans-serif" }, emptyLocale);
+        }
+    });
+    return fontCollection_->GetFontCollection();
 }
 
 void FlutterFontCollection::LoadFontFromList(const uint8_t* fontData, size_t length, std::string familyName)
@@ -79,12 +67,9 @@ void FlutterFontCollection::LoadFontFromList(const uint8_t* fontData, size_t len
         return;
     }
 
-    auto* windowClient = GetFlutterEngineWindowClient();
-    if (windowClient == nullptr) {
-        return;
+    if (fontCollection_) {
+        fontCollection_->LoadFontFromList(fontData, length, familyName);
     }
-    auto& fontCollection = windowClient->GetFontCollection();
-    fontCollection.LoadFontFromList(fontData, length, familyName);
 }
 
 void FlutterFontCollection::CreateFontCollection(const fml::RefPtr<fml::TaskRunner>& ioTaskRunner)
@@ -145,19 +130,9 @@ void FlutterFontCollection::VaryFontCollectionWithFontWeightScale(float fontWeig
         return;
     }
 
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return;
+    if (fontCollection_ && fontCollection_->GetFontCollection()) {
+        fontCollection_->GetFontCollection()->VaryFontCollectionWithFontWeightScale(fontWeightScale);
     }
-
-    auto* window = flutter::UIDartState::Current()->window();
-    if (window == nullptr || window->client() == nullptr) {
-        LOGW("UpdateParagraph: window or client is null");
-        return;
-    }
-
-    auto& fontCollection = window->client()->GetFontCollection();
-    fontCollection.GetFontCollection()->VaryFontCollectionWithFontWeightScale(fontWeightScale);
 }
 
 void FlutterFontCollection::LoadSystemFont()
@@ -173,19 +148,9 @@ void FlutterFontCollection::LoadSystemFont()
         return;
     }
 
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return;
+    if (fontCollection_ && fontCollection_->GetFontCollection()) {
+        fontCollection_->GetFontCollection()->LoadSystemFont();
     }
-
-    auto* window = flutter::UIDartState::Current()->window();
-    if (window == nullptr || window->client() == nullptr) {
-        LOGW("UpdateParagraph: window or client is null");
-        return;
-    }
-
-    auto& fontCollection = window->client()->GetFontCollection();
-    fontCollection.GetFontCollection()->LoadSystemFont();
 }
 
 void FlutterFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
@@ -207,19 +172,9 @@ void FlutterFontCollection::SetIsZawgyiMyanmar(bool isZawgyiMyanmar)
         return;
     }
 
-    if (!flutter::UIDartState::Current()) {
-        LOGE("uiDartState is null");
-        return;
+    if (fontCollection_ && fontCollection_->GetFontCollection()) {
+        fontCollection_->GetFontCollection()->SetIsZawgyiMyanmar(isZawgyiMyanmar);
     }
-
-    auto* window = flutter::UIDartState::Current()->window();
-    if (window == nullptr || window->client() == nullptr) {
-        LOGW("UpdateParagraph: window or client is null");
-        return;
-    }
-
-    auto& fontCollection = window->client()->GetFontCollection();
-    fontCollection.GetFontCollection()->SetIsZawgyiMyanmar(isZawgyiMyanmar);
 
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         if (container) {

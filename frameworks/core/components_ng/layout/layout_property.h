@@ -194,6 +194,11 @@ public:
             CHECK_NULL_VOID(geometryTransition_);
             geometryTransition_->Build(host_, true);
         }
+
+        for (const auto& [id, geometryTransition] : ElementRegister::GetInstance()->GetGeometryTransitionMap()) {
+            LOGD("GeometryTransition map item: id: %{public}s, %{public}s",
+                id.c_str(), geometryTransition ? geometryTransition->ToString().c_str() : "null");
+        }
     }
 
     void UpdateAspectRatio(float ratio)
@@ -228,12 +233,12 @@ public:
         }
     }
 
-    void ClearUserDefinedIdealSize(bool isWidth)
+    void ClearUserDefinedIdealSize(bool clearWidth, bool clearHeight)
     {
         if (!calcLayoutConstraint_) {
-            calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+            return;
         }
-        if (calcLayoutConstraint_->ClearSelfIdealSize(isWidth)) {
+        if (calcLayoutConstraint_->ClearSelfIdealSize(clearWidth, clearHeight)) {
             propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
         }
     }

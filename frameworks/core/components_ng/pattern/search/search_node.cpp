@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::NG {
 
-void SearchNode::AddChildToGroup(const RefPtr<UINode>& child)
+void SearchNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     if (searchChildren_.find(child->GetId()) != searchChildren_.end()) {
         LOGW("Child has already exist.");

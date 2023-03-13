@@ -63,6 +63,8 @@ public:
 
     void ControlAnimators(bool play);
 
+    size_t GetAnimatorCount();
+
     void SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx);
 
     double NormalizeToPx(const Dimension& value);

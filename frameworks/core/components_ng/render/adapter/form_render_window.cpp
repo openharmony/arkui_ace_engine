@@ -40,6 +40,11 @@ float GetDisplayRefreshRate()
 } // namespace
 
 namespace OHOS::Ace {
+
+#ifdef ENABLE_ROSEN_BACKEND
+std::mutex FormRenderWindow::globalMutex_;
+#endif
+
 FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : taskExecutor_(taskExecutor), id_(id)
 {
@@ -91,7 +96,10 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
     receiver_->RequestNextVSync(frameCallback_);
 
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector_->Init();
+    {
+        std::lock_guard<std::mutex> lock(globalMutex_);
+        rsUIDirector_->Init(); // Func Init Thread unsafe.
+    }
 
     std::string surfaceNodeName = "ArkTSCardNode";
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = surfaceNodeName};

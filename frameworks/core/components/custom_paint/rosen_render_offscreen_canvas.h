@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CUSTOM_PAINT_ROSEN_RENDER_OFFSCREEN_CANVAS_H
 
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/lib/ui/painting/path.h"
 #include "flutter/third_party/txt/src/txt/paragraph.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
@@ -96,7 +95,6 @@ private:
     std::unique_ptr<SkCanvas> cacheCanvas_;
     std::unique_ptr<SkCanvas> skCanvas_;
     std::map<std::string, setColorFunc> filterFunc_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
     ImageSourceInfo loadingSource_;
     ImageSourceInfo currentSource_;
     ImageObjSuccessCallback imageObjSuccessCallback_;

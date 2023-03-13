@@ -31,6 +31,7 @@
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
+#include "render_service_client/core/transaction/rs_transaction.h"
 
 #include "core/animation/native_curve_helper.h"
 #endif
@@ -133,10 +134,10 @@ void ThreadStuckTask(int32_t seconds)
 
 } // namespace
 
-PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
-    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId,
           (std::move(platformResRegister))),
       timeProvider_(g_defaultTimeProvider)
 {
@@ -157,9 +158,9 @@ PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExec
     textOverlayManager_ = AceType::MakeRefPtr<TextOverlayManager>(WeakClaim(this));
 }
 
-PipelineContext::PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
+PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend)
-    : PipelineBase(std::move(window), std::move(taskExecutor), std::move(assetManager), frontend, 0),
+    : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, 0),
       timeProvider_(g_defaultTimeProvider)
 {
     RegisterEventHandler(frontend->GetEventHandler());
@@ -1422,6 +1423,14 @@ bool PipelineContext::PopPageStackOverlay()
     return true;
 }
 
+void PipelineContext::HideOverlays()
+{
+    CloseContextMenu();
+    if (textOverlayManager_) {
+        textOverlayManager_->PopTextOverlay();
+    }
+}
+
 void PipelineContext::ScheduleUpdate(const RefPtr<ComposedComponent>& compose)
 {
     CHECK_RUN_ON(UI);
@@ -2125,7 +2134,8 @@ void PipelineContext::FlushPipelineImmediately()
     }
 }
 
-void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type)
+void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     static const bool IsWindowSizeAnimationEnabled = SystemProperties::IsWindowSizeAnimationEnabled();
     if (!rootElement_ || !rootElement_->GetRenderNode() || !IsWindowSizeAnimationEnabled) {
@@ -2181,6 +2191,11 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
+#ifdef ENABLE_ROSEN_BACKEND
+            if (rsTransaction) {
+                rsTransaction->Begin();
+            }
+#endif
             LOGD("PipelineContext::Root node ROTATION animation, width = %{private}d, height = %{private}d", width,
                 height);
             AnimationOption option;
@@ -2211,6 +2226,9 @@ void PipelineContext::WindowSizeChangeAnimate(int32_t width, int32_t height, Win
 #ifdef ENABLE_ROSEN_BACKEND
             // to improve performance, duration rotation animation, draw text as bitmap
             Rosen::RSSystemProperties::SetDrawTextAsBitmap(true);
+            if (rsTransaction) {
+                rsTransaction->Commit();
+            }
 #endif
             break;
         }
@@ -2233,7 +2251,8 @@ void PipelineContext::NotifyWebPaint() const
     }
 }
 
-void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
 {
     CHECK_RUN_ON(UI);
     LOGD("PipelineContext: OnSurfaceChanged start.");
@@ -2292,7 +2311,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
         }
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    WindowSizeChangeAnimate(width, height, type);
+    WindowSizeChangeAnimate(width, height, type, rsTransaction);
 #else
     SetRootSizeWithWidthHeight(width, height);
 #endif

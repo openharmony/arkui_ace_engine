@@ -14,11 +14,11 @@
  */
 
 #include "gtest/gtest.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "base/memory/ace_type.h"
 #include "bridge/common/manifest/manifest_parser.h"
 #include "core/common/ace_engine.h"
-#include "core/common/test/mock/mock_container.h"
 #include "core/components/test/mock/mock_resource_adapter.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_interface.h"

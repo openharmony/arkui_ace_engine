@@ -61,18 +61,10 @@ HWTEST_F(InspectorTestNg, InspectorTestNg001, TestSize.Level1)
     auto strResult2 = Inspector::GetInspectorNodeByKey("one");
     EXPECT_EQ(strResult2, "");
     /**
-     * @tc.steps: step3. GetInspectorNodeByKey by key ""
-     * @tc.expected: step3. return "one"
+     * @tc.steps: step3. GetInspectorTree
+     * @tc.expected: step3. return substr(10, 4)="root"
      */
-    auto strResult3 = Inspector::GetInspectorNodeByKey("");
-    EXPECT_EQ(strResult3.substr(10, 3), "one");
-    /**
-     * @tc.steps: step4. GetInspectorTree
-     * @tc.expected: step4. return substr(10, 4)="root"
-     */
-    auto strResult4 = Inspector::GetInspectorTree(false);
-    EXPECT_EQ(strResult4.substr(10, 4), "root");
-    auto strResult5 = Inspector::GetInspectorTree(true);
-    EXPECT_EQ(strResult5.substr(9, 4), "root");
+    auto strResult3 = Inspector::GetInspectorTree(true);
+    EXPECT_EQ(strResult3.substr(10, 4), "root");
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #include <memory>
 
 #ifdef ENABLE_ROSEN_BACKEND
+#include <mutex>
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "vsync_receiver.h"
 #endif
@@ -52,6 +53,11 @@ public:
     {
         return rsSurfaceNode_;
     }
+
+    bool FlushCustomAnimation(uint64_t timeStamp) override
+    {
+        return rsUIDirector_->RunningCustomAnimation(timeStamp);
+    }
 #endif
 
     void OnShow() override;
@@ -62,6 +68,7 @@ private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
 #ifdef ENABLE_ROSEN_BACKEND
+    static std::mutex globalMutex_;
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;
     Rosen::VSyncReceiver::FrameCallback frameCallback_;
     OnVsyncCallback onVsyncCallback_;

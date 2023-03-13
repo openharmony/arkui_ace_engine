@@ -17,8 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_IMAGE_ROSEN_RENDER_IMAGE_H
 
 #include "experimental/svg/model/SkSVGDOM.h"
-#include "flutter/fml/memory/ref_counted.h"
-#include "flutter/lib/ui/painting/image.h"
 
 #include "core/components/image/render_image.h"
 #include "core/image/image_provider.h"
@@ -57,11 +55,10 @@ public:
     static SkImageInfo MakeSkImageInfoFromPixelMap(const RefPtr<PixelMap>& pixmap);
     static sk_sp<SkColorSpace> ColorSpaceToSkColorSpace(const RefPtr<PixelMap>& pixmap);
     static void UploadImageObjToGpuForRender(const RefPtr<ImageObject>& imageObj,
-        const WeakPtr<PipelineContext> context, RefPtr<FlutterRenderTaskHolder>& renderTaskHolder,
-        UploadSuccessCallback uploadSuccessCallback, FailedCallback failedCallback, Size resizeTarget, bool forceResize,
-        bool syncMode = false);
+        const WeakPtr<PipelineContext> context, UploadSuccessCallback uploadSuccessCallback,
+        FailedCallback failedCallback, Size resizeTarget, bool forceResize, bool syncMode = false);
 
-    void ImageDataPaintSuccess(const fml::RefPtr<flutter::CanvasImage>& image);
+    void ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& image);
     void ImageObjReady(const RefPtr<ImageObject>& imageObj);
     void ImageObjFailed(const std::string& errorMsg);
     bool NeedUploadImageObjToGpu();
@@ -89,12 +86,13 @@ protected:
     bool MaybeRelease() override;
     void ClearRenderObject() override;
     void LayoutImageObject() override;
-    void* GetSkImage() override {
-        return reinterpret_cast<void *>(&image_);
+    void* GetSkImage() override
+    {
+        return reinterpret_cast<void*>(&image_);
     }
 
     RefPtr<PixelMap> GetPixmapFromSkImage() override;
-    SkPixmap CloneSkPixmap(SkPixmap &srcPixmap);
+    SkPixmap CloneSkPixmap(SkPixmap& srcPixmap);
 
 private:
     void InitializeCallbacks();
@@ -103,8 +101,7 @@ private:
     void SetSkRadii(const Radius& radius, SkVector& radii);
     void SetClipRadius();
     void CanvasDrawImageRect(SkPaint& paint, const Offset& offset, SkCanvas* canvas, const Rect& paintRect);
-    void DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect, const SkPaint& paint,
-        SkCanvas* canvas) const;
+    void DrawImageOnCanvas(const Rect& srcRect, const Rect& dstRect, const SkPaint& paint, SkCanvas* canvas) const;
     void PaintSVGImage(const sk_sp<SkData>& skData, bool onlyLayoutSelf = false);
     void DrawSVGImage(const Offset& offset, SkCanvas* canvas);
     void DrawSVGImageCustom(RenderContext& context, const Offset& offset);
@@ -131,7 +128,7 @@ private:
     RefPtr<ImageObject> imageObj_;
     sk_sp<SkSVGDOM> skiaDom_;
     RefPtr<SvgDom> svgDom_;
-    fml::RefPtr<flutter::CanvasImage> image_;
+    RefPtr<NG::CanvasImage> image_;
     SkVector radii_[4] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
     Size formerRawImageSize_;
     bool imageDataNotReady_ = false;
@@ -141,7 +138,6 @@ private:
     UploadSuccessCallback uploadSuccessCallback_;
     FailedCallback failedCallback_;
     OnPostBackgroundTask onPostBackgroundTask_;
-    RefPtr<FlutterRenderTaskHolder> renderTaskHolder_;
 
     SvgRenderTree svgRenderTree_;
 

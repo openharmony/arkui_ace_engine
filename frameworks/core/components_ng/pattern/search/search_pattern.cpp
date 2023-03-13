@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,22 +17,72 @@
 
 #include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/search/search_model.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
-
-const Color DEFAULT_PLACEHOLD_COLOR = Color::GRAY;
 constexpr int32_t TEXTFIELD_INDEX = 0;
 constexpr int32_t IMAGE_INDEX = 1;
+constexpr int32_t CANCEL_IMAGE_INDEX = 2;
 constexpr int32_t CANCEL_BUTTON_INDEX = 3;
 constexpr int32_t BUTTON_INDEX = 4;
+
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
 constexpr Dimension UP_AND_DOWN_PADDING = 8.0_vp;
+constexpr float HOVER_OPACITY = 0.05f;
+constexpr float TOUCH_OPACITY = 0.1f;
+constexpr int32_t HOVER_TO_TOUCH_DURATION = 100;
+constexpr int32_t HOVER_DURATION = 250;
+constexpr int32_t TOUCH_DURATION = 250;
 } // namespace
+
+void SearchPattern::UpdateChangeEvent(const std::string& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto buttonHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    CHECK_NULL_VOID(buttonHost);
+    auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_VOID(imageHost);
+
+    auto cancelButtonrenderContext = buttonHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelButtonrenderContext);
+    auto cancelImagerenderContext = imageHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelImagerenderContext);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(cancelButtonEvent);
+    auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
+    CHECK_NULL_VOID(imageEvent);
+
+    auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
+    if ((style == CancelButtonStyle::CONSTANT)
+        || ((style == CancelButtonStyle::INPUT) && !value.empty())) {
+        cancelButtonrenderContext->UpdateOpacity(1.0);
+        cancelImagerenderContext->UpdateOpacity(1.0);
+        cancelButtonEvent->SetEnabled(true);
+        imageEvent->SetEnabled(true);
+    } else {
+        cancelButtonrenderContext->UpdateOpacity(0.0);
+        cancelImagerenderContext->UpdateOpacity(0.0);
+        cancelButtonEvent->SetEnabled(false);
+        imageEvent->SetEnabled(false);
+    }
+    buttonHost->MarkModifyDone();
+    imageHost->MarkModifyDone();
+    buttonHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    imageHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
 
 bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
 {
@@ -45,20 +95,41 @@ bool SearchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(buttonLayoutWrapper, true);
     auto buttonGeometryNode = buttonLayoutWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(buttonGeometryNode, true);
-    buttonSize_ = buttonGeometryNode->GetFrameSize();
     buttonOffset_ = buttonGeometryNode->GetFrameOffset();
+
+    auto buttonNode = buttonLayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(buttonNode, true);
+    auto searchButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(searchButtonEvent, true);
+
+    if (!searchButtonEvent->IsEnabled()) {
+        buttonSize_.Reset();
+    } else {
+        buttonSize_ = buttonGeometryNode->GetFrameSize();
+    }
 
     auto cancelButtonLayoutWrapper = dirty->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
     CHECK_NULL_RETURN(cancelButtonLayoutWrapper, true);
     auto cancelButtonGeometryNode = cancelButtonLayoutWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(cancelButtonGeometryNode, true);
-    cancelButtonSize_ = cancelButtonGeometryNode->GetFrameSize();
+
+    auto cancelButtonNode = cancelButtonLayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(cancelButtonNode, true);
+    auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_RETURN(cancelButtonEvent, true);
     cancelButtonOffset_ = cancelButtonGeometryNode->GetFrameOffset();
+    if (!cancelButtonEvent->IsEnabled()) {
+        cancelButtonSize_.Reset();
+    } else {
+        cancelButtonSize_ = cancelButtonGeometryNode->GetFrameSize();
+    }
+
     return true;
 }
 
 void SearchPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
@@ -82,6 +153,9 @@ void SearchPattern::OnModifyDone()
     buttonLayoutProperty->UpdateLabel(searchButton_);
     buttonFrameNode->MarkModifyDone();
 
+    auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    isSearchButtonEnabled_ = searchButtonEvent->IsEnabled();
+
     auto cancelButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_BUTTON_INDEX));
     CHECK_NULL_VOID(cancelButtonFrameNode);
     auto cancelButtonLayoutProperty = cancelButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -93,8 +167,11 @@ void SearchPattern::OnModifyDone()
     InitCancelButtonClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    InitTextFieldMouseEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
+    InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
+    InitButtonTouchEvent(cancelButtonTouchListener_, CANCEL_BUTTON_INDEX);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -280,7 +357,15 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         PaintFocusState();
         return true;
     }
-    return false;
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldFrameNode, false);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, false);
+
+    return textFieldPattern->HandleKeyEvent(event);
 }
 
 void SearchPattern::PaintFocusState()
@@ -361,16 +446,46 @@ void SearchPattern::InitTouchEvent()
         auto touchType = info.GetTouches().front().GetTouchType();
         auto touchLocalPosition = info.GetTouches().front().GetLocalLocation();
         auto touchPoint = PointF(touchLocalPosition.GetX(), touchLocalPosition.GetY());
-        RectF rect(searchPattern->cancelButtonOffset_, searchPattern->cancelButtonSize_);
-        if (touchType == TouchType::DOWN && !rect.IsInRegion(touchPoint)) {
+        RectF cancelRect(searchPattern->cancelButtonOffset_, searchPattern->cancelButtonSize_);
+        RectF searchRect(searchPattern->buttonOffset_, searchPattern->buttonSize_);
+        if (touchType == TouchType::DOWN && !cancelRect.IsInRegion(touchPoint) && !searchRect.IsInRegion(touchPoint)) {
             searchPattern->OnTouchDown();
         }
-        if (touchType == TouchType::UP) {
+        if (touchType == TouchType::UP && !cancelRect.IsInRegion(touchPoint) && !searchRect.IsInRegion(touchPoint)) {
             searchPattern->OnTouchUp();
         }
     };
     touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gesture->AddTouchEvent(touchListener_);
+}
+
+void SearchPattern::InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId)
+{
+    if (touchEvent) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto gesture = buttonFrameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto eventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetStateEffect(false);
+    auto touchTask = [weak = WeakClaim(this), childId](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
+            pattern->OnButtonTouchDown(childId);
+        }
+        if (touchType == TouchType::UP) {
+            pattern->OnButtonTouchUp(childId);
+        }
+    };
+    touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(touchEvent);
 }
 
 void SearchPattern::InitMouseEvent()
@@ -402,6 +517,27 @@ void SearchPattern::InitMouseEvent()
     inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
+void SearchPattern::InitTextFieldMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleTextFieldHoverEvent(isHover);
+        }
+    };
+    textFieldHoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(textFieldHoverEvent_);
+}
+
 void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId)
 {
     if (inputEvent) {
@@ -426,69 +562,31 @@ void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t
 
 void SearchPattern::OnTouchDown()
 {
-    isHover_ = false;
-    isTouch_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(theme);
-    auto touchColor = theme->GetTouchColor();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->BlendBgColor(touchColor);
+    if (isHover_) {
+        AnimateTouchAndHover(renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+    } else {
+        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION);
+    }
 }
 
 void SearchPattern::OnTouchUp()
 {
-    isTouch_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->ResetBlendBgColor();
-}
-
-void SearchPattern::HandleHoverEvent(bool isHover)
-{
-    isHover_ = isHover;
-    if (!isHover) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->ResetBlendBgColor();
-    }
-}
-
-void SearchPattern::HandleMouseEvent(MouseInfo& info)
-{
-    if (isTouch_) {
-        return;
-    }
-    const auto& mousePosition = info.GetLocalLocation();
-    PointF mousePoint(mousePosition.GetX(), mousePosition.GetY());
-    RectF rect(cancelButtonOffset_, cancelButtonSize_);
-    isMouseInCancelButton_ = rect.IsInRegion(mousePoint);
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(theme);
-    auto hoverColor = theme->GetHoverColor();
-    if (isHover_ && !isMouseInCancelButton_) {
-        renderContext->BlendBgColor(hoverColor);
+    if (isHover_) {
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
     } else {
-        renderContext->ResetBlendBgColor();
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
     }
 }
 
-void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
+void SearchPattern::OnButtonTouchDown(int32_t childId)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -496,37 +594,289 @@ void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
     CHECK_NULL_VOID(buttonFrameNode);
     auto renderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(theme);
-    auto hoverColor = theme->GetHoverColor();
-    if (isHover) {
-        renderContext->BlendBgColor(hoverColor);
+    if (childId == CANCEL_BUTTON_INDEX ? isCancelButtonHover_ : isSearchButtonHover_) {
+        AnimateTouchAndHover(renderContext, HOVER_OPACITY, TOUCH_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
     } else {
-        renderContext->ResetBlendBgColor();
+        AnimateTouchAndHover(renderContext, 0.0f, TOUCH_OPACITY, TOUCH_DURATION, Curves::FRICTION);
     }
 }
 
-void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::OnButtonTouchUp(int32_t childId)
 {
-    Pattern::ToJsonValue(json);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (childId == CANCEL_BUTTON_INDEX ? isCancelButtonHover_ : isSearchButtonHover_) {
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, HOVER_OPACITY, HOVER_TO_TOUCH_DURATION, Curves::SHARP);
+    } else {
+        AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0f, TOUCH_DURATION, Curves::FRICTION);
+    }
+}
 
+void SearchPattern::SetMouseStyle(MouseFormat format)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    CHECK_NULL_VOID(mouseStyle);
+
+    int32_t currentPointerStyle = 0;
+    mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
+    if (currentPointerStyle != static_cast<int32_t>(format)) {
+        mouseStyle->SetPointerStyle(windowId, format);
+    }
+}
+
+void SearchPattern::HandleHoverEvent(bool isHover)
+{
+    MouseFormat fmt;
+    isHover_ = isHover;
+    if (!isHover) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->AnimateHoverEffectBoard(false);
+        fmt = MouseFormat::DEFAULT;
+    } else {
+        fmt = MouseFormat::TEXT_CURSOR;
+    }
+
+    SetMouseStyle(fmt);
+}
+
+void SearchPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    const auto& mousePosition = info.GetLocalLocation();
+    PointF mousePoint(mousePosition.GetX(), mousePosition.GetY());
+    RectF cancelRect(cancelButtonOffset_, cancelButtonSize_);
+    RectF searchRect(buttonOffset_, buttonSize_);
+    auto isMouseInCancelButton = cancelRect.IsInRegion(mousePoint);
+    auto isMouseInSearchButton = searchRect.IsInRegion(mousePoint);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (isHover_ && !isMouseInCancelButton && !isMouseInSearchButton) {
+        renderContext->AnimateHoverEffectBoard(true);
+    } else {
+        renderContext->AnimateHoverEffectBoard(false);
+    }
+}
+
+void SearchPattern::HandleTextFieldHoverEvent(bool isHoverOverTextField)
+{
+    if (!isHoverOverTextField && isHover_) {
+        SetMouseStyle(MouseFormat::TEXT_CURSOR);
+    }
+}
+
+void SearchPattern::HandleButtonMouseEvent(bool isHover, int32_t childId)
+{
+    if (childId == CANCEL_BUTTON_INDEX) {
+        isCancelButtonHover_ = isHover;
+    } else {
+        isSearchButtonHover_ = isHover;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childId));
+    CHECK_NULL_VOID(buttonFrameNode);
+    auto renderContext = buttonFrameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (isHover) {
+        AnimateTouchAndHover(renderContext, 0.0f, HOVER_OPACITY, HOVER_DURATION, Curves::FRICTION);
+    } else {
+        AnimateTouchAndHover(renderContext, HOVER_OPACITY, 0.0f, HOVER_DURATION, Curves::FRICTION);
+    }
+}
+
+void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+    int32_t duration, const RefPtr<Curve>& curve)
+{
+    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
+    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
+    Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
+    Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
+    renderContext->OnBackgroundColorUpdate(highlightStart);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(duration);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(
+        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+}
+
+bool SearchPattern::HandleInputChildOnFocus() const
+{
+#if !defined(PREVIEW)
+    return false;
+#endif
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+    return true;
+}
+
+void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-    auto placeHoldColor = textFieldLayoutProperty->GetPlaceholderTextColor();
-    json->Put("placeholderColor", placeHoldColor.value_or(DEFAULT_PLACEHOLD_COLOR).ColorToString().c_str());
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
 
+    json->Put("value", textFieldPattern->GetTextEditingValue().text.c_str());
+    json->Put("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str());
+    json->Put("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str());
+    json->Put("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str());
+    auto textColor = textFieldLayoutProperty->GetTextColor().value_or(Color());
+    json->Put("fontColor", textColor.ColorToString().c_str());
+    auto textFontJson = JsonUtil::Create(true);
+    textFontJson->Put("fontSize", textFieldPattern->GetFontSize().c_str());
+    textFontJson->Put("fontStyle",
+        textFieldPattern->GetItalicFontStyle() == Ace::FontStyle::NORMAL ? "FontStyle.Normal" : "FontStyle.Italic");
+    textFontJson->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textFieldPattern->GetFontWeight()).c_str());
+    textFontJson->Put("fontFamily", textFieldPattern->GetFontFamily().c_str());
+    json->Put("textFont", textFontJson->ToString().c_str());
+    json->Put("copyOption",
+        ConvertCopyOptionsToString(textFieldLayoutProperty->GetCopyOptionsValue(CopyOptions::None)).c_str());
+    textFieldLayoutProperty->HasCopyOptions();
+}
+
+void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto imageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
     CHECK_NULL_VOID(imageFrameNode);
     auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto icon = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
-    json->Put("icon", icon.c_str());
+    auto searchIconJson = JsonUtil::Create(false);
+
+    // icon size
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto defaultIconSize = searchTheme->GetIconHeight();
+    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutProperty);
+    auto searchIconSize = searchLayoutProperty->GetSearchIconUDSize().value_or(defaultIconSize).ConvertToPx();
+    searchIconJson->Put("size", Dimension(searchIconSize, DimensionUnit::PX).ToString().c_str());
+
+    // icon color
+    auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(imageRenderProperty);
+    auto searchIconColor = imageRenderProperty->GetSvgFillColor().value_or(Color());
+    searchIconJson->Put("color", searchIconColor.ColorToString().c_str());
+
+    // icon path
+    auto searchIconPath = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
+    searchIconJson->Put("src", searchIconPath.c_str());
+    json->Put("searchIcon", searchIconJson);
+}
+
+void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto cancelImageFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_VOID(cancelImageFrameNode);
+    auto cancelImageLayoutProperty = cancelImageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(cancelImageLayoutProperty);
+    auto cancelButtonJson = JsonUtil::Create(false);
+
+    // style
+    if (layoutProperty->GetCancelButtonStyle() == CancelButtonStyle::CONSTANT) {
+        cancelButtonJson->Put("style", "CancelButtonStyle.CONSTANT");
+    } else if (layoutProperty->GetCancelButtonStyle() == CancelButtonStyle::INVISIBLE) {
+        cancelButtonJson->Put("style", "CancelButtonStyle.INVISIBLE");
+    } else {
+        cancelButtonJson->Put("style", "CancelButtonStyle.INPUT");
+    }
+
+    auto cancelIconJson = JsonUtil::Create(false);
+
+    // icon size
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_VOID(searchTheme);
+    auto defaultIconSize = searchTheme->GetIconHeight();
+    auto searchLayoutproperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutproperty);
+    auto cancelIconSize = searchLayoutproperty->GetCancelButtonUDSize().value_or(defaultIconSize).ConvertToPx();
+    cancelIconJson->Put("size", Dimension(cancelIconSize, DimensionUnit::PX).ToString().c_str());
+
+    // icon color
+    auto cancelImageRenderProperty = cancelImageFrameNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(cancelImageRenderProperty);
+    auto cancelIconColor = cancelImageRenderProperty->GetSvgFillColor().value_or(Color());
+    cancelIconJson->Put("color", cancelIconColor.ColorToString().c_str());
+
+    // right icon src path
+    auto cancelImageSrc = cancelImageLayoutProperty->GetImageSourceInfo()->GetSrc();
+    cancelIconJson->Put("src", cancelImageSrc.c_str());
+    cancelButtonJson->Put("icon", cancelIconJson);
+    json->Put("cancelButton", cancelButtonJson);
+}
+
+void SearchPattern::ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto searchButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(searchButtonFrameNode);
+    auto searchButtonLayoutProperty = searchButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(searchButtonLayoutProperty);
+    auto searchButtonJson = JsonUtil::Create(false);
+
+    // font size
+    auto searchButtonFontSize = searchButtonLayoutProperty->GetFontSize().value_or(Dimension(0, DimensionUnit::VP));
+    searchButtonJson->Put("fontSize", searchButtonFontSize.ToString().c_str());
+
+    // font color
+    auto searchButtonFontColor = searchButtonLayoutProperty->GetFontColor().value_or(Color());
+    searchButtonJson->Put("fontColor", searchButtonFontColor.ColorToString().c_str());
+    json->Put("searchButton", searchButtonJson);
+}
+
+void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPaintProperty = textFieldFrameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    auto cursorJson = JsonUtil::Create(false);
+
+    // color
+    auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(Color());
+    cursorJson->Put("color", caretColor.ColorToString().c_str());
+    auto caretwidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
+    cursorJson->Put("width", caretwidth.ToString().c_str());
+    json->Put("caretStyle", cursorJson);
+}
+
+void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    Pattern::ToJsonValue(json);
+
+    ToJsonValueForTextField(json);
+    ToJsonValueForSearchIcon(json);
+    ToJsonValueForCancelButton(json);
+    ToJsonValueForCursor(json);
+    ToJsonValueForSearchButton(json);
 }
 
 } // namespace OHOS::Ace::NG

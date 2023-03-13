@@ -26,9 +26,10 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
-#include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
+class TextFieldContentModifier;
 
 class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(TextFieldLayoutAlgorithm, LayoutAlgorithm);
@@ -84,15 +85,11 @@ public:
 
     static TextDirection GetTextDirection(const std::string& content);
 
-    static void UpdateTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
+    static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+        TextStyle& textStyle, bool isDisabled);
     static void UpdatePlaceholderTextStyle(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
         const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle, bool isDisabled);
-
-    float GetPlaceholderParagraphHeight()
-    {
-        return placeholderParagraphHeight_;
-    }
 
 private:
     void CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText);
@@ -101,6 +98,7 @@ private:
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline);
     bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
+    void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
     float GetTextFieldDefaultHeight();
     float GetTextFieldDefaultImageHeight();
@@ -112,7 +110,6 @@ private:
     RectF textRect_;
     RectF imageRect_;
     OffsetF parentGlobalOffset_;
-    float placeholderParagraphHeight_ = 0.0f;
 
     float caretOffsetX_ = 0.0f;
 

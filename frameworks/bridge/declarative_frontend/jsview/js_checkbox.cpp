@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+}
 std::unique_ptr<CheckBoxModel> CheckBoxModel::instance_ = nullptr;
 
 CheckBoxModel* CheckBoxModel::GetInstance()
@@ -79,6 +81,8 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("select", &JSCheckbox::SetSelect);
     JSClass<JSCheckbox>::StaticMethod("onChange", &JSCheckbox::SetOnChange);
     JSClass<JSCheckbox>::StaticMethod("selectedColor", &JSCheckbox::SelectedColor);
+    JSClass<JSCheckbox>::StaticMethod("unselectedColor", &JSCheckbox::UnSelectedColor);
+    JSClass<JSCheckbox>::StaticMethod("mark", &JSCheckbox::Mark);
     JSClass<JSCheckbox>::StaticMethod("width", &JSCheckbox::JsWidth);
     JSClass<JSCheckbox>::StaticMethod("height", &JSCheckbox::JsHeight);
     JSClass<JSCheckbox>::StaticMethod("size", &JSCheckbox::JsSize);
@@ -194,6 +198,61 @@ void JSCheckbox::SelectedColor(const JSCallbackInfo& info)
         selectedColor = theme->GetActiveColor();
     }
     CheckBoxModel::GetInstance()->SetSelectedColor(selectedColor);
+}
+
+void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    Color unSelectedColor;
+    auto theme = GetTheme<CheckboxTheme>();
+    if (!ParseJsColor(info[0], unSelectedColor)) {
+        unSelectedColor = theme->GetInactiveColor();
+    }
+
+    CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
+}
+
+void JSCheckbox::Mark(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGE("arg is not Object.");
+        return;
+    }
+
+    auto markObj = JSRef<JSObject>::Cast(info[0]);
+    auto strokeColorValue = markObj->GetProperty("strokeColor");
+    Color strokeColor;
+    auto theme = GetTheme<CheckboxTheme>();
+    if (!ParseJsColor(strokeColorValue, strokeColor)) {
+        strokeColor = theme->GetPointColor();
+    }
+    CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColor);
+
+    auto sizeValue = markObj->GetProperty("size");
+    Dimension size;
+    if ((ParseJsDimensionVp(sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&
+        (size.ConvertToVp() >= 0)) {
+        CheckBoxModel::GetInstance()->SetCheckMarkSize(size);
+    } else {
+        CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
+    }
+    
+    auto strokeWidthValue = markObj->GetProperty("strokeWidth");
+    Dimension strokeWidth;
+    if ((ParseJsDimensionVp(strokeWidthValue, strokeWidth)) && (strokeWidth.Unit() != DimensionUnit::PERCENT) &&
+        (strokeWidth.ConvertToVp() >= 0)) {
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(strokeWidth);
+    } else {
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+    }
 }
 
 void JSCheckbox::JsPadding(const JSCallbackInfo& info)

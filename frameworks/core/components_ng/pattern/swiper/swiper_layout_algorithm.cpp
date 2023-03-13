@@ -33,6 +33,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr Dimension INDICATOR_PADDING = 8.0_vp;
+} // namespace
+
 void SwiperLayoutAlgorithm::AddToItemRange(int32_t index)
 {
     if (index != currentIndex_) {
@@ -99,7 +103,6 @@ void SwiperLayoutAlgorithm::InitInActiveItems(float translateLength)
 
 void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
 {
-    ACE_SCOPED_TRACE("SwiperLayoutAlgorithm::InitItemRange");
     itemRange_.clear();
 
     if (currentIndex_ < 0 || currentIndex_ > totalCount_ - 1) {
@@ -224,6 +227,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
+    auto rightPadding = padding.right.value_or(0.0f);
+    auto bottomPadding = padding.bottom.value_or(0.0f);
     OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     // Effect when difference between current index and target index is greater than 1.
@@ -274,11 +279,12 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto geometryNode = wrapper->GetGeometryNode();
-        auto frameSize = geometryNode->GetMarginFrameSize();
-        preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
+        preOffset -=
+            (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width(), 0) : OffsetF(0, maxChildSize_.Height()));
         geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
         wrapper->Layout();
         preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
+        preOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
     }
 
     // Layout items after current item.
@@ -291,21 +297,28 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto geometryNode = wrapper->GetGeometryNode();
         geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
         wrapper->Layout();
-        auto frameSize = geometryNode->GetMarginFrameSize();
-        nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width() + itemSpace, 0)
-                                                : OffsetF(0, frameSize.Height() + itemSpace));
+        nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width() + itemSpace, 0)
+                                                : OffsetF(0, maxChildSize_.Height() + itemSpace));
+        nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
     }
 
     // Layout swiper indicator
     if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
         auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_);
         if (indicatorWrapper) {
+            if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DIGIT) {
+                PlaceDigitChild(indicatorWrapper, swiperLayoutProperty);
+            }
             indicatorWrapper->Layout();
         }
     }
 
     // Mark inactive in wrapper.
     for (const auto& index : inActiveItems_) {
+        if (!NearZero(currentOffset_)) {
+            continue;
+        }
+
         if (swiperLayoutProperty->GetShowIndicatorValue(true) && index == totalCount_) {
             continue;
         }
@@ -325,12 +338,12 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_ - index - 1);
             if (lastWrapper) {
                 auto geometryNode = lastWrapper->GetGeometryNode();
-                auto frameSize = geometryNode->GetMarginFrameSize();
                 preOffset -=
-                    (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
+                    (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width(), 0) : OffsetF(0, maxChildSize_.Height()));
                 geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
                 lastWrapper->Layout();
                 preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
+                preOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
             }
         }
     } else if (currentIndex_ >= (totalCount_ - displayCount_) && LessOrEqual(currentOffset_, 0.0)) {
@@ -341,14 +354,82 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
             if (firstWrapper) {
                 auto geometryNode = firstWrapper->GetGeometryNode();
-                auto frameSize = geometryNode->GetMarginFrameSize();
                 geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
                 firstWrapper->Layout();
-                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width() + itemSpace, 0)
-                                                        : OffsetF(0, frameSize.Height() + itemSpace));
+                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width() + itemSpace, 0)
+                                                        : OffsetF(0, maxChildSize_.Height() + itemSpace));
+                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
             }
         }
     }
+}
+
+void SwiperLayoutAlgorithm::PlaceDigitChild(
+    const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty)
+{
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutProperty);
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto indicatorGeometryNode = indicatorWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(indicatorGeometryNode);
+    auto indicatorWidth = INDICATOR_PADDING.ConvertToPx() * 2.0;
+    auto indicatorHeight = 0.0f;
+    for (auto&& child : indicatorWrapper->GetAllChildrenWithBuild()) {
+        auto textGeometryNode = child->GetGeometryNode();
+        CHECK_NULL_VOID(textGeometryNode);
+        auto textFrameSize = textGeometryNode->GetFrameSize();
+        indicatorWidth += textFrameSize.Width();
+        if (indicatorHeight < textFrameSize.Height()) {
+            indicatorHeight = textFrameSize.Height();
+        }
+    }
+    auto layoutPropertyConstraint = indicatorWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutPropertyConstraint);
+    const auto& layoutConstraint = layoutPropertyConstraint->GetLayoutConstraint();
+    auto swiperWidth = layoutConstraint->parentIdealSize.Width().value();
+    auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
+    auto left = swiperLayoutProperty->GetLeft();
+    auto right = swiperLayoutProperty->GetRight();
+    auto top = swiperLayoutProperty->GetTop();
+    auto bottom = swiperLayoutProperty->GetBottom();
+    auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    Offset position;
+    Dimension indicatorPositionDefault = 0.0_vp;
+    if (left.has_value() && !NearEqual(left->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
+        auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth, Dimension(left->Value()));
+        position.SetX(leftValue);
+    } else if (right.has_value() && !NearEqual(right->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
+        auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth, Dimension(right->Value()));
+        position.SetX(swiperWidth - indicatorWidth - rightValue);
+    } else {
+        position.SetX(axis == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth) * 0.5 : swiperWidth - indicatorWidth);
+    }
+    if (top.has_value() && !NearEqual(top->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
+        auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight, Dimension(top->Value()));
+        position.SetY(topValue);
+    } else if (bottom.has_value() && !NearEqual(bottom->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
+        auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight, Dimension(bottom->Value()));
+        position.SetY(swiperHeight - indicatorHeight - bottomValue);
+    } else {
+        if (axis == Axis::HORIZONTAL) {
+            position.SetY(swiperHeight - indicatorHeight);
+        } else {
+            position.SetY((swiperHeight - indicatorHeight) * 0.5);
+        }
+    }
+    auto currentOffset = OffsetF{ static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
+    indicatorGeometryNode->SetMarginFrameOffset(currentOffset);
+}
+
+double SwiperLayoutAlgorithm::GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge)
+{
+    double edgeLength = edge.Unit() == DimensionUnit::PERCENT ? swiperLength * edge.Value() : edge.ConvertToPx();
+    if (!NearZero(edgeLength) && edgeLength > swiperLength - indicatorLength) {
+        edgeLength = swiperLength - indicatorLength;
+    }
+    if (edgeLength < 0.0) {
+        edgeLength = 0.0;
+    }
+    return edgeLength;
 }
 
 } // namespace OHOS::Ace::NG

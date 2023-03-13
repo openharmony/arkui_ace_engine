@@ -45,26 +45,6 @@ napi_value GetReturnObject(napi_env env, std::string callbackString)
     return returnObj;
 }
 
-void GetNapiString(napi_env env, napi_value value, std::string& retStr)
-{
-    size_t ret = 0;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, value, &valueType);
-    if (valueType == napi_string) {
-        size_t valueLen = GetParamLen(value) + 1;
-        std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(valueLen);
-        napi_get_value_string_utf8(env, value, titleChar.get(), valueLen, &ret);
-        retStr = titleChar.get();
-    } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (ParseResourceParam(env, value, id, type, params)) {
-            ParseString(id, type, params, retStr);
-        }
-    }
-}
-
 static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;

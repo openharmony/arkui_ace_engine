@@ -93,6 +93,8 @@ size_t TxtParagraph::GetLineCount()
 
 void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y) {}
 
+void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y) {}
+
 int32_t TxtParagraph::GetHandlePositionForClick(const Offset& offset)
 {
     return 0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,13 +223,20 @@ void DeclarativeFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& cont
     delegate_->AttachPipelineContext(context);
 }
 
-void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineContext>& context)
+void DeclarativeFrontend::AttachSubPipelineContext(const RefPtr<PipelineBase>& context)
 {
     LOGI("DeclarativeFrontend AttachSubPipelineContext.");
     if (!context) {
         return;
     }
-    context->RegisterEventHandler(handler_);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(context);
+    if (pipelineContext) {
+        pipelineContext->RegisterEventHandler(handler_);
+    }
+    if (!delegate_) {
+        return;
+    }
+    delegate_-> AttachSubPipelineContext(context);
 }
 
 void DeclarativeFrontend::SetAssetManager(const RefPtr<AssetManager>& assetManager)
@@ -646,6 +653,14 @@ void DeclarativeFrontend::TransferJsResponseDataPreview(int callbackId, int32_t 
 {
     delegate_->TransferJsResponseDataPreview(callbackId, code, responseData);
 }
+
+RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
+{
+    if (jsEngine_) {
+        return jsEngine_->GetNewComponentWithJsCode(jsCode, viewID);
+    }
+    return nullptr;
+}
 #endif
 
 void DeclarativeFrontend::TransferJsPluginGetError(int callbackId, int32_t errorCode, std::string&& errorMessage) const
@@ -925,14 +940,6 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
-}
-
-RefPtr<Component> DeclarativeFrontend::GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID)
-{
-    if (jsEngine_) {
-        return jsEngine_->GetNewComponentWithJsCode(jsCode, viewID);
-    }
-    return nullptr;
 }
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,12 +247,6 @@ void RenderNode::UpdateTouchRect()
         touchRect_ = GetTransformRect(touchRect_);
         touchRectList_.emplace_back(touchRect_);
         SetTouchRectList(touchRectList_);
-        std::vector<Rect> tmplist;
-        for (auto& rect : touchRectList_) {
-            auto trasrect = GetTransformRect(rect);
-            tmplist.push_back(trasrect);
-        }
-        touchRectList_ = tmplist;
         return;
     }
 
@@ -732,12 +726,11 @@ bool RenderNode::TouchTest(const Point& globalPoint, const Point& parentLocalPoi
         return false;
     }
 
-    Point transformPoint = parentLocalPoint;
+    Point transformPoint = GetTransformPoint(parentLocalPoint);
     if (!InTouchRectList(transformPoint, GetTouchRectList())) {
         return false;
     }
 
-    transformPoint = GetTransformPoint(transformPoint);
     const auto localPoint = transformPoint - GetPaintRect().GetOffset();
 
     bool dispatchSuccess = DispatchTouchTestToChildren(localPoint, globalPoint, touchRestrict, result);
@@ -2120,12 +2113,14 @@ bool RenderNode::ProcessExternalRSNode(const RefPtr<Component>& component)
             return false;
         }
     }
+#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(LINUX_PLATFORM)
     // extract RSNode from tail component.
     auto rsNode = RosenRenderRemoteWindow::ExtractRSNode(tailComponent);
     SyncRSNode(rsNode);
     // avoid redundant function call.
     component->MarkUseExternalRSNode(false);
     return rsNode != nullptr;
+#endif
 #endif
     return false;
 }

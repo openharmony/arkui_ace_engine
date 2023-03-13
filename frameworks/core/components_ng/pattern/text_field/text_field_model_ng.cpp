@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,6 +94,7 @@ void TextFieldModelNG::CreateNode(
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
     textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Distributed);
+    AddDragFrameNodeToManager();
     PaddingProperty paddings;
     ProcessDefaultPadding(paddings);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Padding, paddings);
@@ -178,7 +179,7 @@ void TextFieldModelNG::SetPlaceholderFont(const Font& value)
     if (!value.fontFamilies.empty()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderFontFamily, value.fontFamilies);
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredPlaceholderLineHeightNeedToUpdate, true);
 }
 
 void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
@@ -193,6 +194,30 @@ void TextFieldModelNG::SetCaretColor(const Color& value)
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value);
 }
 
+void TextFieldModelNG::SetCaretStyle(const CaretStyle& value)
+{
+    if (value.caretWidth.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value());
+    }
+}
+
+void TextFieldModelNG::SetCaretPosition(const int32_t& value)
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto caretPosition = layoutProperty->GetPlaceholderValue() == "" ? value : 0;
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, caretPosition);
+    pattern->SetCaretPosition(caretPosition);
+    pattern->UpdateCaretPositionByTextEdit();
+}
+
+void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value);
+}
+
 void TextFieldModelNG::SetTextAlign(TextAlign value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextAlign, value);
@@ -201,6 +226,15 @@ void TextFieldModelNG::SetMaxLength(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLength, value);
 }
+void TextFieldModelNG::ResetMaxLength()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    if (textFieldLayoutProperty) {
+        textFieldLayoutProperty->ResetMaxLength();
+    }
+}
 void TextFieldModelNG::SetMaxLines(uint32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxLines, value);
@@ -208,26 +242,27 @@ void TextFieldModelNG::SetMaxLines(uint32_t value)
 void TextFieldModelNG::SetFontSize(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontSize, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetFontWeight(FontWeight value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontWeight, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 void TextFieldModelNG::SetFontStyle(Ace::FontStyle value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ItalicFontStyle, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 void TextFieldModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, value);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredLineHeightNeedToUpdate, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 
 void TextFieldModelNG::SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError)
@@ -293,6 +328,31 @@ void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func
 void TextFieldModelNG::SetCopyOption(CopyOptions copyOption)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CopyOptions, copyOption);
+}
+
+void TextFieldModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFielePattern = frameNode->GetPattern<TextFieldPattern>();
+    textFielePattern->SetMenuOptionItems(std::move(menuOptionsItems));
+}
+
+void TextFieldModelNG::AddDragFrameNodeToManager() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+
+    dragDropManager->AddTextFieldDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+}
+
+void TextFieldModelNG::SetForegroundColor(const Color& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value);
 }
 
 } // namespace OHOS::Ace::NG

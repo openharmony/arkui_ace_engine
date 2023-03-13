@@ -97,6 +97,8 @@ CanvasDrawFunction CanvasPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
 
 void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWrapper)
 {
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
     SkCanvas* skCanvas = canvas.GetImpl<Rosen::Drawing::SkiaCanvas>()->ExportSkCanvas();
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     if (lastLayoutSize_ != frameSize) {
@@ -108,7 +110,7 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
         return;
     }
 
-    auto viewScale = context_->GetViewScale();
+    auto viewScale = context->GetViewScale();
     skCanvas_->scale(viewScale, viewScale);
 
     for (const auto& task : tasks_) {
@@ -126,7 +128,9 @@ void CanvasPaintMethod::PaintCustomPaint(RSCanvas& canvas, PaintWrapper* paintWr
 
 void CanvasPaintMethod::CreateBitmap(SizeF frameSize)
 {
-    auto viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto viewScale = context->GetViewScale();
     auto imageInfo = SkImageInfo::Make(frameSize.Width() * viewScale, frameSize.Height() * viewScale,
         SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
     canvasCache_.reset();
@@ -164,8 +168,6 @@ void CanvasPaintMethod::ImageObjFailed()
 void CanvasPaintMethod::DrawImage(
     PaintWrapper* paintWrapper, const Ace::CanvasImage& canvasImage, double width, double height)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
     std::string::size_type tmp = canvasImage.src.find(".svg");
     if (tmp != std::string::npos) {
         DrawSvgImage(paintWrapper, canvasImage);
@@ -199,25 +201,12 @@ void CanvasPaintMethod::DrawImage(
 
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     // get skImage form pixelMap
     auto imageInfo = Ace::ImageProvider::MakeSkImageInfoFromPixelMap(pixelMap);
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image;
-    if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    } else {
-#ifndef GPU_DISABLED
-        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-#endif
-    }
+    sk_sp<SkImage> image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     CHECK_NULL_VOID(image);
     InitImagePaint();
     InitPaintBlend(imagePaint_);
@@ -249,17 +238,15 @@ sk_sp<SkImage> CanvasPaintMethod::GetImage(const std::string& src)
     }
     auto cacheImage = imageCache_->GetCacheImage(src);
     if (cacheImage && cacheImage->imagePtr) {
-        return cacheImage->imagePtr->image();
+        return cacheImage->imagePtr;
     }
 
-    CHECK_NULL_RETURN(context_, nullptr);
-
-    auto image = Ace::ImageProvider::GetSkImage(src, context_);
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto image = Ace::ImageProvider::GetSkImage(src, context);
     CHECK_NULL_RETURN(image, nullptr);
     auto rasterizedImage = image->makeRasterImage();
-    auto canvasImage = flutter::CanvasImage::Create();
-    canvasImage->set_image({ rasterizedImage, renderTaskHolder_->unrefQueue });
-    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(canvasImage));
+    imageCache_->CacheImage(src, std::make_shared<Ace::CachedImage>(rasterizedImage));
     return rasterizedImage;
 }
 
@@ -267,8 +254,9 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     double left, double top, double width, double height)
 {
     double viewScale = 1.0;
-    CHECK_NULL_RETURN(context_, nullptr);
-    viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, nullptr);
+    viewScale = context->GetViewScale();
     // copy the bitmap to tempCanvas
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kBGRA_8888_SkColorType, SkAlphaType::kOpaque_SkAlphaType);
@@ -577,7 +565,9 @@ void CanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArgs& args)
 
 void CanvasPaintMethod::SetTransform(const TransformParam& param)
 {
-    double viewScale = context_->GetViewScale();
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    double viewScale = context->GetViewScale();
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX * viewScale, param.skewY * viewScale, param.translateX * viewScale,
         param.skewX * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);

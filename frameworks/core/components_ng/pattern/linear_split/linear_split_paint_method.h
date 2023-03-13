@@ -20,7 +20,6 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 

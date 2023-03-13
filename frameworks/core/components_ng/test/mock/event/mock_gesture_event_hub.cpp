@@ -32,4 +32,9 @@ void GestureEventHub::OnModifyDone() {}
 void GestureEventHub::AddClickEvent(const RefPtr<ClickEvent>& clickEvent) {}
 void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent) {}
 void GestureEventHub::BindMenu(GestureEventFunc&& showMenu) {}
+
+std::string GestureEventHub::GetHitTestModeStr() const
+{
+    return "HitTestMode.Default";
+}
 } // namespace OHOS::Ace::NG

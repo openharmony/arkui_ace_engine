@@ -35,16 +35,6 @@ constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 
 } // namespace
 
-void ContainerModalPattern::OnModifyDone()
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_VOID(windowManager);
-    windowMode_ = windowManager->GetWindowMode();
-    ShowTitle(windowMode_ == WindowMode::WINDOW_MODE_FLOATING, hasDeco_);
-}
-
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
 {
     auto containerNode = GetHost();

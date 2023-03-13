@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
@@ -247,17 +248,35 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::Bind<>(globalObj);
 }
 
-void JSScroll::SetScrollBar(int displayMode)
+void JSScroll::SetScrollBar(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1) {
+        LOGE("args is invalid");
+        return;
+    }
+    int32_t displayMode;
+    if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], displayMode)) {
+        displayMode = static_cast<int32_t>(NG::DisplayMode::AUTO);
+    }
     ScrollModel::GetInstance()->SetDisplayMode(displayMode);
 }
 
-void JSScroll::SetScrollBarWidth(const std::string& scrollBarWidth)
+void JSScroll::SetScrollBarWidth(const JSCallbackInfo& args)
 {
-    if (scrollBarWidth.empty()) {
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID_NOLOG(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID_NOLOG(theme);
+    Dimension scrollBarWidth;
+    if (args.Length() < 1) {
+        LOGE("args is invalid");
         return;
     }
-    ScrollModel::GetInstance()->SetScrollBarWidth(StringUtils::StringToDimension(scrollBarWidth));
+    if (!ParseJsDimensionVp(args[0], scrollBarWidth) || args[0]->IsNull() || args[0]->IsUndefined() ||
+        (args[0]->IsString() && args[0]->ToString().empty()) || LessNotEqual(scrollBarWidth.Value(), 0.0)) {
+        scrollBarWidth = theme->GetNormalWidth();
+    }
+    ScrollModel::GetInstance()->SetScrollBarWidth(scrollBarWidth);
 }
 
 void JSScroll::SetScrollBarColor(const std::string& scrollBarColor)

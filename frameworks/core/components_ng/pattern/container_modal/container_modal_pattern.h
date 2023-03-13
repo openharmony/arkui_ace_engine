@@ -61,8 +61,6 @@ public:
     void SetAppIcon(const RefPtr<PixelMap>& icon);
 
 private:
-    void OnModifyDone() override;
-
     void WindowFocus(bool isFocus);
 
     void ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus = true);

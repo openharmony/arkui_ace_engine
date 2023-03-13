@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,10 +43,32 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::NG {
+struct OptionParam {
+    std::string value;
+    std::string icon;
+    std::function<void()> action;
 
-using OptionParam = std::pair<std::string, std::function<void()>>;
+    OptionParam() = default;
+    OptionParam(
+        const std::string& valueParam, const std::string& iconParam, const std::function<void()>& actionParam)
+        : value(valueParam),
+          icon(iconParam),
+          action(actionParam) {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam)
+        : value(valueParam),
+          icon(""),
+          action(actionParam) {}
+
+    ~OptionParam() = default;
+};
+
+struct MenuParam {
+    std::string title;
+    OffsetF positionOffset;
+};
 
 class ACE_EXPORT ViewAbstract {
 public:
@@ -68,6 +90,9 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
+    static void SetSphericalEffect(float radio);
+    static void SetPixelStretchEffect(PixStretchEffectOption& option);
+    static void SetLightUpEffect(float radio);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetMargin(const CalcLength& value);
@@ -174,19 +199,23 @@ public:
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
+    static void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys);
 
     // Bind properties
     static void BindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
     static void BindMenuWithItems(std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode,
-        const NG::OffsetF& offset);
+        const NG::OffsetF& offset, const MenuParam& menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-        bool isContextMenu, const NG::OffsetF& offset);
+        bool isContextMenu, const NG::OffsetF& offset, const MenuParam& menuParam);
     static void ShowMenu(int32_t targetId, const NG::OffsetF& offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string& inspectorId);
+    // inspector debugLine
+    static void SetDebugLine(const std::string& line);
     // transition
     static void SetTransition(const TransitionOptions& options);
+    static void SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect);
     // sharedTransition
     static void SetSharedTransition(const std::string& shareId, const std::shared_ptr<SharedTransitionOption>& option);
     // geometryTransition
@@ -199,8 +228,14 @@ public:
     static void SetOverlay(const NG::OverlayOptions& overlay);
     // motionPath
     static void SetMotionPath(const MotionPathOption& motionPath);
+    // progress mask
+    static void SetProgressMask(const RefPtr<ProgressMaskProperty>& progress);
 
     static void Pop();
+
+    // foregroundColor
+    static void SetForegroundColor(const Color& color);
+    static void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy);
 
 private:
     static void AddDragFrameNodeToManager();

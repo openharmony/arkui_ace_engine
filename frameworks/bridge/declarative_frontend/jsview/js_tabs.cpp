@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
+#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 
@@ -137,27 +138,22 @@ void JSTabs::SetVertical(const std::string& value)
     TabsModel::GetInstance()->SetIsVertical(StringToBool(value));
 }
 
-void JSTabs::SetScrollable(const JSCallbackInfo& info)
+void JSTabs::SetScrollable(const std::string& value)
 {
-    bool scrollable = true;
-    if (info.Length() < 1) {
-        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
+    if (value == "undefined") {
+        TabsModel::GetInstance()->SetScrollable(true);
         return;
     }
-    if (info[0]->IsBoolean()) {
-        scrollable = info[0]->ToBoolean();
-    }
-    TabsModel::GetInstance()->SetScrollable(scrollable);
+    TabsModel::GetInstance()->SetScrollable(StringToBool(value));
 }
 
-void JSTabs::SetBarMode(const JSCallbackInfo& info)
+void JSTabs::SetBarMode(const std::string& value)
 {
-    auto barMode = TabBarMode::FIXED;
-    if (info.Length() > 0 && info[0]->IsString()) {
-        auto barModeVal = info[0]->ToString();
-        barMode = barModeVal == "Scrollable" ? TabBarMode::SCROLLABLE : TabBarMode::FIXED;
+    if (value == "undefined") {
+        TabsModel::GetInstance()->SetTabBarMode(TabBarMode::FIXED);
+        return;
     }
-    TabsModel::GetInstance()->SetTabBarMode(barMode);
+    TabsModel::GetInstance()->SetTabBarMode(ConvertStrToTabBarMode(value));
 }
 
 void JSTabs::SetBarWidth(const JSCallbackInfo& info)
@@ -167,10 +163,9 @@ void JSTabs::SetBarWidth(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension width;
+    Dimension width = Dimension(-1.0, DimensionUnit::VP);
     if (!ParseJsDimensionVp(info[0], width)) {
         LOGE("The arg is wrong, fail to parse dimension");
-        return;
     }
 
     TabsModel::GetInstance()->SetTabBarWidth(width);
@@ -182,10 +177,9 @@ void JSTabs::SetBarHeight(const JSCallbackInfo& info)
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
     }
-    Dimension height;
+    Dimension height = Dimension(-1.0, DimensionUnit::VP);
     if (!ParseJsDimensionVp(info[0], height)) {
         LOGE("The arg is wrong, fail to parse dimension");
-        return;
     }
 
     TabsModel::GetInstance()->SetTabBarHeight(height);
@@ -196,21 +190,61 @@ void JSTabs::SetIndex(int32_t index)
     TabsModel::GetInstance()->SetIndex(index);
 }
 
-void JSTabs::SetAnimationDuration(const JSCallbackInfo& info)
+void JSTabs::SetAnimationDuration(float value)
 {
-    if (info.Length() < 1) {
-        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+    if (std::isnan(value)) {
+        LOGI("The arg is nan, use default value");
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        TabsModel::GetInstance()->SetAnimationDuration(static_cast<float>(tabTheme->GetTabContentAnimationDuration()));
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto tabTheme = pipelineContext->GetTheme<TabTheme>();
-    CHECK_NULL_VOID(tabTheme);
-    double animationDuration = tabTheme->GetTabContentAnimationDuration();
-    if (!ParseJsDouble(info[0], animationDuration)) {
-        LOGE("The arg is wrong, fail to parse double");
+    TabsModel::GetInstance()->SetAnimationDuration(value);
+}
+
+void JSTabs::SetFadingEdge(const JSCallbackInfo& info)
+{
+    bool fadingEdge = true;
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
     }
-    TabsModel::GetInstance()->SetAnimationDuration(static_cast<float>(animationDuration));
+    if (!ParseJsBool(info[0], fadingEdge)) {
+        LOGE("The arg is wrong, fail to parse bool");
+    }
+    TabsModel::GetInstance()->SetFadingEdge(fadingEdge);
+}
+
+void JSTabs::SetDivider(const JSCallbackInfo& info)
+{
+    TabsItemDivider divider;
+    if (info.Length() < 1) {
+        LOGW("Invalid params");
+    } else {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
+            divider.strokeWidth.Value() < 0.0f) {
+            divider.strokeWidth.Reset();
+        }
+        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+            if (tabTheme) {
+                divider.color = tabTheme->GetDividerColor();
+            }
+        }
+
+        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
+            divider.startMargin.Value() < 0.0f) {
+            divider.startMargin.Reset();
+        }
+        
+        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
+            divider.endMargin.Value() < 0.0f) {
+            divider.endMargin.Reset();
+        }
+    }
+    TabsModel::GetInstance()->SetDivider(divider);
 }
 
 void JSTabs::JSBind(BindingTarget globalObj)
@@ -226,6 +260,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barHeight", &JSTabs::SetBarHeight);
     JSClass<JSTabs>::StaticMethod("index", &JSTabs::SetIndex);
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
+    JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -235,6 +270,8 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSTabs>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSTabs>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
+    JSClass<JSTabs>::StaticMethod("fadingEdge", &JSTabs::SetFadingEdge);
+
     JSClass<JSTabs>::Inherit<JSContainerBase>();
     JSClass<JSTabs>::Bind<>(globalObj);
 }

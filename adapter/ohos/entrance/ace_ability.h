@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +47,8 @@ public:
     uint32_t GetBackgroundColor() override;
 
     // override Rosen::IWindowChangeListener virtual callback function
-    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason) override;
+    void OnSizeChange(OHOS::Rosen::Rect rect, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) override;
     void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
 
     // override Rosen::IInputEventConsumer virtual callback function
@@ -86,7 +87,8 @@ public:
     void OnDrag(int32_t x, int32_t y, OHOS::Rosen::DragEvent event);
 
     // handle window Rosen::IWindowChangeListener
-    void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason);
+    void OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr);
     void OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco = true);
 
     // handle window Rosen::IOccupiedAreaChangeListener

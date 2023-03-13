@@ -20,11 +20,9 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
-#include "core/image/image_provider.h"
-
-#ifdef FLUTTER_2_5
+#include "base/memory/ace_type.h"
 #include "core/components_ng/render/canvas_image.h"
-#endif
+#include "core/image/image_provider.h"
 
 namespace OHOS::Ace {
 
@@ -53,21 +51,16 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
             if (!player) {
                 return;
             }
-#ifdef FLUTTER_2_5
-            auto canvasImage = NG::CanvasImage::Create(nullptr);
-#else
-            auto canvasImage = flutter::CanvasImage::Create();
+
             sk_sp<SkImage> skImage = player->DecodeFrameImage(index);
             if (dstWidth > 0 && dstHeight > 0) {
                 skImage = ImageProvider::ApplySizeToSkImage(skImage, dstWidth, dstHeight);
             }
-            if (skImage) {
-                canvasImage->set_image({ skImage, player->unrefQueue_ });
-            } else {
+            if (!skImage) {
                 LOGW("animated player cannot get the %{public}d skImage!", index);
                 return;
             }
-#endif
+            auto canvasImage = NG::CanvasImage::Create(&skImage);
 #ifdef PREVIEW
             player->successCallback_(player->imageSource_, canvasImage);
         },
@@ -79,7 +72,6 @@ void AnimatedImagePlayer::RenderFrame(const int32_t& index)
         },
         TaskExecutor::TaskType::IO);
 #endif
-
 }
 
 sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
@@ -125,18 +117,6 @@ sk_sp<SkImage> AnimatedImagePlayer::DecodeFrameImage(const int32_t& index)
         LOGD("index %{private}d cached.", index);
         iterator->second = std::make_unique<SkBitmap>(bitmap);
     }
-#ifndef GPU_DISABLED
-#ifndef PREVIEW
-    // weak reference of io manager must be check and used on io thread, because io manager is created on io thread.
-    if (ioManager_) {
-        auto resourceContext = ioManager_->GetResourceContext();
-        if (resourceContext) {
-            SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(), bitmap.pixelRef()->rowBytes());
-            return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap, true, pixmap.colorSpace());
-        }
-    }
-#endif
-#endif
     return SkImage::MakeFromBitmap(bitmap);
 }
 

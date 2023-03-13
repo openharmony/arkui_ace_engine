@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,15 +22,9 @@
 #include "key_event.h"
 #include "native_engine/native_value.h"
 #include "native_engine/native_engine.h"
-
-#include "base/utils/macros.h"
 #include "wm/window.h"
 
-namespace OHOS {
-
-class Window;
-
-} // namespace OHOS
+#include "core/common/flutter/flutter_asset_manager.h"
 
 namespace OHOS::Ace {
 
@@ -47,6 +41,7 @@ public:
 
     // UI content lifecycles
     void Initialize(OHOS::Rosen::Window* window, const std::string& url, NativeValue* storage) override;
+    void Initialize(const std::shared_ptr<Window>& aceWindow, const std::string& url, NativeValue* storage) override;
     void Foreground() override;
     void Background() override;
     void Focus() override;
@@ -66,7 +61,8 @@ public:
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
-    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason) override;
+    void UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
+        const std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction = nullptr) override;
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
@@ -90,6 +86,7 @@ public:
     void UpdateFormDate(const std::string& data) override;
     void UpdateFormSharedImage(
         const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
+    void ReloadForm() override;
 
     void SetFormWidth(float width) override
     {
@@ -113,8 +110,11 @@ public:
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
+    void OnFormSurfaceChange(float width, float height) override;
+
 private:
-    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
+    void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage,
+        const std::shared_ptr<Window>& aceWindow = nullptr);
     void CommonInitializeForm(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;

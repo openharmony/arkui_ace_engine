@@ -18,14 +18,12 @@
 
 #include <set>
 #include <string>
-#include "application_info.h"
 
 namespace OHOS::Ace {
 enum class AceNewPipeEnabledType {
     ACE_NEW_PIPE_DISABLED = 0,
     ACE_NEW_PIPE_ENABLED_FOR_ALL,
     ACE_NEW_PIPE_PARTIALLY_ENABLED,
-    ACE_NEW_PIPE_DEFAULT,
 };
 
 class AceNewPipeJudgement final {
@@ -33,10 +31,10 @@ public:
     ~AceNewPipeJudgement() = default;
 
     // Decide if it's a new framework
-    static bool QueryAceNewPipeEnabledFA(
-        const std::string& packagename, uint32_t apiCompatibleVersion, const std::string& apiReleaseType);
+    static bool QueryAceNewPipeEnabledFA(const std::string& packagename, uint32_t apiCompatibleVersion,
+        uint32_t apiTargetVersion, const std::string& apiReleaseType);
     static bool QueryAceNewPipeEnabledStage(const std::string& packagename, uint32_t apiCompatibleVersion,
-        const std::string& apiReleaseType, const std::vector<OHOS::AppExecFwk::Metadata>& metaData);
+        uint32_t apiTargetVersion, const std::string& apiReleaseType, bool closeArkTSPartialUpdate);
     // Load acenewpipe.config
     static void InitAceNewPipeConfig();
 
@@ -47,7 +45,7 @@ private:
     static std::ifstream& SafeGetLine(std::ifstream& configFile, std::string& line);
     static void InitAceNewPipeWithConfigFile();
 
-    static inline AceNewPipeEnabledType aceNewPipeEnabledType_ = AceNewPipeEnabledType::ACE_NEW_PIPE_DEFAULT;
+    static inline AceNewPipeEnabledType aceNewPipeEnabledType_ = AceNewPipeEnabledType::ACE_NEW_PIPE_DISABLED;
     static inline std::set<std::string> aceNewPipeEnabledList_ {};
     static inline bool InitedAceNewPipeConfig_ = false;
 };

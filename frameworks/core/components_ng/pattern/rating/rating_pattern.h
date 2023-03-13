@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 #include "core/components_ng/pattern/rating/rating_layout_property.h"
+#include "core/components_ng/pattern/rating/rating_modifier.h"
 #include "core/components_ng/pattern/rating/rating_render_property.h"
 #include "core/components_ng/render/canvas_image.h"
 
@@ -145,6 +146,7 @@ private:
     RefPtr<ImageLoadingContext> secondaryImageLoadingCtx_;
     RefPtr<ImageLoadingContext> backgroundImageLoadingCtx_;
 
+    RefPtr<RatingModifier> ratingModifier_;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
@@ -156,6 +158,7 @@ private:
     bool hasInit_ = false;
     bool isHover_ = false;
     double lastRatingScore_ = 0.0;
+    RatingModifier::RatingAnimationType state_;
 
     bool isForegroundImageInfoFromTheme_ = false;
     bool isSecondaryImageInfoFromTheme_ = false;

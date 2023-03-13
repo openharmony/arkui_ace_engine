@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1169,11 +1169,7 @@ void VideoElement::UpdateChildInner(const RefPtr<Component>& childComponent)
 void VideoElement::OnError(const std::string& errorId, const std::string& param)
 {
     isError_ = true;
-#if defined(PREVIEW)
-    std::string errorcode = "This component is not supported on PC Preview.";
-#else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
-#endif
     UpdateChildInner(CreateErrorText(errorcode));
 
     if (onError_) {
@@ -1191,7 +1187,7 @@ void VideoElement::OnError(const std::string& errorId, const std::string& param)
 
 void VideoElement::OnResolutionChange() const
 {
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && defined(OHOS_STANDARD_SYSTEM)
     if (!mediaPlayer_ || !renderNode_) {
         LOGE("player or render is null");
         return;

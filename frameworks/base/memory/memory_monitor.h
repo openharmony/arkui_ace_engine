@@ -26,8 +26,7 @@ namespace OHOS::Ace {
 
 void PurgeMallocCache();
 
-#ifdef ACE_MEMORY_MONITOR
-class ACE_FORCE_EXPORT MemoryMonitor {
+class ACE_FORCE_EXPORT_WITH_PREVIEW MemoryMonitor {
 public:
     static MemoryMonitor& GetInstance();
 
@@ -44,6 +43,11 @@ public:
         if (ptr != nullptr && ptr->RefCount() == 0) {
             Update(refPtr, TypeInfo<T>::Size(ptr), TypeInfo<T>::Name(ptr));
         }
+    }
+
+    static bool IsEnable()
+    {
+        return isEnable_;
     }
 
 private:
@@ -75,9 +79,8 @@ private:
             return TypeInfoHelper::TypeSize(rawPtr);
         }
     };
+    static bool isEnable_;
 };
-#endif // ACE_MEMORY_MONITOR
-
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_H

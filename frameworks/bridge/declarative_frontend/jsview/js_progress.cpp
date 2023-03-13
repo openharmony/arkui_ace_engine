@@ -26,6 +26,8 @@ namespace OHOS::Ace {
 
 std::unique_ptr<ProgressModel> ProgressModel::instance_ = nullptr;
 
+OHOS::Ace::Framework::ProgressStyle g_progressStyle = OHOS::Ace::Framework::ProgressStyle::Linear;
+
 ProgressModel* ProgressModel::GetInstance()
 {
     if (!instance_) {
@@ -92,6 +94,7 @@ void JSProgress::Create(const JSCallbackInfo& info)
     } else if (progressStyle == ProgressStyle::ScaleRing) {
         progressType = ProgressType::SCALE;
     } else if (progressStyle == ProgressStyle::Capsule) {
+        g_progressStyle = ProgressStyle::Capsule;
         progressType = ProgressType::CAPSULE;
     }
 
@@ -116,6 +119,7 @@ void JSProgress::JSBind(BindingTarget globalObj)
     JSClass<JSProgress>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSProgress>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSProgress>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSProgress>::StaticMethod("borderColor", &JSProgress::JsBorderColor, opt);
     JSClass<JSProgress>::Inherit<JSViewAbstract>();
     JSClass<JSProgress>::Bind(globalObj);
 }
@@ -203,6 +207,27 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     }
 
     ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
+}
+
+void JSProgress::JsBorderColor(const JSCallbackInfo& info)
+{
+    if (g_progressStyle != ProgressStyle::Capsule) {
+        JSViewAbstract::JsBorderColor(info);
+        return;
+    }
+    
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
+
+    Color colorVal;
+    if (ParseJsColor(info[0], colorVal)) {
+        ProgressModel::GetInstance()->SetBorderColor(colorVal);
+    } else {
+        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+        ProgressModel::GetInstance()->SetBorderColor(theme->GetBorderColor());
+    }
 }
 
 } // namespace OHOS::Ace::Framework

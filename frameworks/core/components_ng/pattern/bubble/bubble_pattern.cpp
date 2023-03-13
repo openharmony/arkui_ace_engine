@@ -20,7 +20,6 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
@@ -57,6 +56,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void BubblePattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     InitTouchEvent();
     RegisterButtonOnHover();
     RegisterButtonOnTouch();
@@ -92,14 +92,17 @@ void BubblePattern::InitTouchEvent()
 
 void BubblePattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    if (info.GetTouches().empty()) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     auto clickPos = info.GetTouches().front().GetLocalLocation();
-    if (touchType == TouchType::DOWN) {
-        HandleTouchDown(clickPos);
+    if (touchType == TouchType::UP) {
+        HandleTouchUp(clickPos);
     }
 }
 
-void BubblePattern::HandleTouchDown(const Offset& clickPosition)
+void BubblePattern::HandleTouchUp(const Offset& clickPosition)
 {
     // TODO: need to check click position
     auto host = GetHost();
@@ -159,14 +162,15 @@ void BubblePattern::ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& but
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PopupTheme>();
+    isHover_ = isHover;
+    auto hoverColor = theme->GetButtonHoverColor();
+    auto backgroundColor = theme->GetButtonBackgroundColor();
     if (isHover) {
-        auto hoverColor = theme->GetButtonHoverColor();
-        renderContext->UpdateBackgroundColor(hoverColor);
-        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        // normal to hover
+        Animation(renderContext, hoverColor, theme->GetHoverAnimationDuration(), Curves::FRICTION);
     } else {
-        auto backgroundColor = theme->GetButtonBackgroundColor();
-        renderContext->UpdateBackgroundColor(backgroundColor);
-        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        // hover to normal
+        Animation(renderContext, backgroundColor, theme->GetHoverAnimationDuration(), Curves::FRICTION);
     }
 }
 
@@ -216,14 +220,25 @@ void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::F
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(theme);
+    auto pressColor = theme->GetButtonPressColor();
+    auto hoverColor = theme->GetButtonHoverColor();
+    auto backgroundColor = theme->GetButtonBackgroundColor();
     if (touchType == TouchType::DOWN) {
-        auto pressColor = theme->GetButtonPressColor();
-        renderContext->UpdateBackgroundColor(pressColor);
-        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        if (isHover_) {
+            // hover to press
+            Animation(renderContext, pressColor, theme->GetHoverToPressAnimationDuration(), Curves::SHARP);
+        } else {
+            // normal to press
+            Animation(renderContext, pressColor, theme->GetHoverAnimationDuration(), Curves::SHARP);
+        }
     } else if (touchType == TouchType::UP) {
-        auto backgroundColor = theme->GetButtonBackgroundColor();
-        renderContext->UpdateBackgroundColor(backgroundColor);
-        buttonNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        if (isHover_) {
+            // press to hover
+            Animation(renderContext, hoverColor, theme->GetHoverToPressAnimationDuration(), Curves::SHARP);
+        } else {
+            // press to normal
+            Animation(renderContext, backgroundColor, theme->GetHoverAnimationDuration(), Curves::SHARP);
+        }
     }
 }
 
@@ -269,4 +284,23 @@ void BubblePattern::PopBubble()
     }
 }
 
+RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
+{
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, nullptr);
+    return popupTheme;
+}
+
+void BubblePattern::Animation(
+    RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve)
+{
+    AnimationOption option = AnimationOption();
+    option.SetCurve(curve);
+    option.SetDuration(duration);
+    option.SetFillMode(FillMode::FORWARDS);
+    AnimationUtils::Animate(
+        option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); });
+}
 } // namespace OHOS::Ace::NG

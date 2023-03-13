@@ -35,10 +35,21 @@ void ScrollBarPattern::OnAttachToFrameNode()
 
 void ScrollBarPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ScrollBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+
+    auto oldDisplayMode = displayMode_;
+    displayMode_ = layoutProperty->GetDisplayMode().value_or(DisplayMode::AUTO);
+    if (scrollBarProxy_ &&
+        (!scrollEndAnimator_ || (oldDisplayMode != displayMode_ && displayMode_ == DisplayMode::AUTO))) {
+        scrollBarProxy_->StartScrollBarAnimator();
+    }
+    if (displayMode_ == DisplayMode::ON) {
+        SetOpacity(UINT8_MAX);
+    }
 
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     if (axis_ == axis && scrollableEvent_) {
@@ -47,7 +58,6 @@ void ScrollBarPattern::OnModifyDone()
     }
 
     axis_ = axis;
-    displayMode_ = layoutProperty->GetDisplayMode().value_or(DisplayMode::AUTO);
     // scrollPosition callback
     auto offsetTask = [weak = WeakClaim(this)](double offset, int32_t source) {
         auto pattern = weak.Upgrade();
@@ -61,7 +71,9 @@ void ScrollBarPattern::OnModifyDone()
     auto scrollEndTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->StartAnimator();
+        if (pattern->GetDisplayMode() == DisplayMode::AUTO) {
+            pattern->StartAnimator();
+        }
     };
 
     auto hub = host->GetEventHub<EventHub>();
@@ -75,7 +87,6 @@ void ScrollBarPattern::OnModifyDone()
     scrollableEvent_->SetScrollPositionCallback(std::move(offsetTask));
     scrollableEvent_->SetScrollEndCallback(std::move(scrollEndTask));
     gestureHub->AddScrollableEvent(scrollableEvent_);
-    scrollBarProxy_->StartScrollBarAnimator();
 }
 
 bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)

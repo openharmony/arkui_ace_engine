@@ -52,6 +52,10 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 context->SetIsNeedShowFocus(false);
+                auto pageFocusHub = page->GetFocusHub();
+                CHECK_NULL_VOID(pageFocusHub);
+                pageFocusHub->SetParentFocusable(false);
+                pageFocusHub->LostFocus();
                 if (transitionType == PageTransitionType::EXIT_POP && page->GetParent()) {
                     auto stageNode = page->GetParent();
                     stageNode->RemoveChild(page);
@@ -64,10 +68,6 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
                 CHECK_NULL_VOID(pattern);
                 pattern->SetPageInTransition(false);
                 pattern->ProcessHideState();
-
-                auto pageFocusHub = page->GetFocusHub();
-                CHECK_NULL_VOID(pageFocusHub);
-                pageFocusHub->SetParentFocusable(false);
             });
         return;
     }
@@ -113,6 +113,7 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
 
 StageManager::StageManager(const RefPtr<FrameNode>& stage) : stageNode_(stage)
 {
+    CHECK_NULL_VOID(stageNode_);
     stagePattern_ = DynamicCast<StagePattern>(stageNode_->GetPattern());
 }
 
@@ -216,6 +217,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
         return true;
     }
     stageNode_->RemoveChild(pageNode);
+    pageNode->SetChildrenInDestroying();
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;
@@ -394,6 +396,7 @@ RefPtr<FrameNode> StageManager::GetLastPage()
 
 void StageManager::ReloadStage()
 {
+    CHECK_NULL_VOID(stageNode_);
     const auto& children = stageNode_->GetChildren();
     for (const auto& child : children) {
         auto frameNode = DynamicCast<FrameNode>(child);

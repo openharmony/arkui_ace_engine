@@ -18,8 +18,8 @@
 #include "base/utils/utils.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/render/adapter/skia_canvas.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -157,6 +157,12 @@ void TxtParagraph::Paint(const RSCanvas& canvas, float x, float y)
 {
     CHECK_NULL_VOID(paragraph_);
     SkCanvas* skCanvas = canvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
+    CHECK_NULL_VOID(skCanvas);
+    paragraph_->Paint(skCanvas, x, y);
+}
+
+void TxtParagraph::Paint(SkCanvas* skCanvas, float x, float y)
+{
     CHECK_NULL_VOID(skCanvas);
     paragraph_->Paint(skCanvas, x, y);
 }

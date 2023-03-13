@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("data_panel_pattern_test_ng") {
   module_out_path = "$pattern_test_output_path/data_panel"
@@ -24,8 +24,10 @@ ohos_unittest("data_panel_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/spring_motion.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/data_panel/data_panel_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/property/gradient_property.cpp",
     "data_panel_paint_method_test_ng.cpp",
     "data_panel_pattern_test_ng.cpp",
   ]

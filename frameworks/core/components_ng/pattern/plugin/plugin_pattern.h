@@ -71,7 +71,7 @@ private:
     void CreatePluginSubContainer();
 
     void FireOnCompleteEvent() const;
-    void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
+    void FireOnErrorEvent(const std::string& code, const std::string& msg);
 
     bool ISAllowUpdate() const;
 
@@ -79,7 +79,7 @@ private:
     std::string GetPackagePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
     std::string GetPackagePathByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
     std::string GetPackagePathByAbsolutePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
-    void GetModuleNameByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
+    void GetAbilityNameByWant(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const;
     std::string GerPackagePathByBms(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info,
         const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const;
 
@@ -88,6 +88,7 @@ private:
 
     std::string data_;
     RequestPluginInfo pluginInfo_;
+    bool loadFialState_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(PluginPattern);
 };

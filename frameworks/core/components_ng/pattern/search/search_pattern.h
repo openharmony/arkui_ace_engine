@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SEARCH_SEARCH_PATTERN_H
 
 #include "base/memory/referenced.h"
+#include "base/mousestyle/mouse_style.h"
 #include "core/components/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -53,7 +54,7 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paintMethod = MakeRefPtr<SearchPaintMethod>(buttonSize_, searchButton_);
+        auto paintMethod = MakeRefPtr<SearchPaintMethod>(buttonSize_, searchButton_, isSearchButtonEnabled_);
         return paintMethod;
     }
 
@@ -76,9 +77,35 @@ public:
 
     FocusPattern GetFocusPattern() const override;
 
+    bool HandleInputChildOnFocus() const;
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
+    static std::string ConvertCopyOptionsToString(CopyOptions copyOptions)
+    {
+        std::string result;
+        switch (copyOptions) {
+            case CopyOptions::None:
+                result = "CopyOptions.None";
+                break;
+            case CopyOptions::InApp:
+                result = "CopyOptions.InApp";
+                break;
+            case CopyOptions::Local:
+                result = "CopyOptions.Local";
+                break;
+            case CopyOptions::Distributed:
+                result = "CopyOptions.Distributed";
+                break;
+            default:
+                LOGD("The input does not match any CopyOptions");
+        }
+        return result;
+    }
+
     enum class FocusChoice { SEARCH = 0, CANCEL_BUTTON, SEARCH_BUTTON };
+
+    void UpdateChangeEvent(const std::string& value);
 
 private:
     void OnModifyDone() override;
@@ -97,12 +124,27 @@ private:
     // Init touch and hover event
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitTextFieldMouseEvent();
+    void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void OnTouchDown();
     void OnTouchUp();
+    void SetMouseStyle(MouseFormat format);
+    void OnButtonTouchDown(int32_t childId);
+    void OnButtonTouchUp(int32_t childId);
     void HandleHoverEvent(bool isHover);
-    void HandleMouseEvent(MouseInfo& info);
+    void HandleMouseEvent(const MouseInfo& info);
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
+    void HandleTextFieldHoverEvent(bool isHoverOverTextField);
+
+    void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const;
+
+    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+        int32_t duration, const RefPtr<Curve>& curve);
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;
@@ -117,14 +159,18 @@ private:
     FocusChoice focusChoice_ = FocusChoice::SEARCH;
 
     RefPtr<TouchEventImpl> touchListener_;
+    RefPtr<TouchEventImpl> searchButtonTouchListener_;
+    RefPtr<TouchEventImpl> cancelButtonTouchListener_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> searchButtonMouseEvent_;
     RefPtr<InputEvent> cancelButtonMouseEvent_;
+    RefPtr<InputEvent> textFieldHoverEvent_ = nullptr;
 
     bool isHover_ = false;
-    bool isTouch_ = false;
-    bool isMouseInCancelButton_ = false;
+    bool isCancelButtonHover_ = false;
+    bool isSearchButtonHover_ = false;
+    bool isSearchButtonEnabled_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -28,8 +28,10 @@ public:
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
     void SetPadding(const NG::PaddingPropertyF& args) override;
+    void SetCheckedBackgroundColor(const Color& color) override;
+    void SetUncheckedBorderColor(const Color& color) override;
+    void SetIndicatorColor(const Color& color) override;
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_MODEL_NG_H

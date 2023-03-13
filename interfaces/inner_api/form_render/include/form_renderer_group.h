@@ -58,7 +58,10 @@ public:
 
     void AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void DeleteForm();
     void DeleteForm(const std::string& compId);
+    void ReloadForm();
+    bool IsEmpty();
 
 private:
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;

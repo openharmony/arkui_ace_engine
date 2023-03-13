@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,11 @@
 
 #include "adapter/preview/inspector/inspector_client.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
+#include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/shape_composed_element.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -99,6 +103,10 @@ void JsInspectorManager::InitializeCallback()
 // resourse the child from root node to assemble the JSON tree
 void JsInspectorManager::AssembleJSONTree(std::string& jsonStr)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        jsonStr = NG::Inspector::GetInspector(false);
+        return;
+    }
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
 
@@ -202,21 +210,39 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
     auto operateType = root->GetString("type", "");
     auto parentID = root->GetInt("parentID", -1);
     auto slot = root->GetInt("slot", -1);
-    auto newComponent = GetNewComponentWithJsCode(root);
-    if (parentID <= 0) {
-        auto rootElement = GetRootElement().Upgrade();
-        if (!rootElement) {
-            return false;
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGD("parentID:%{public}d slot:%{public}d", parentID, slot);
+        auto newUINode = GetNewFrameNodeWithJsCode(root);
+        CHECK_NULL_RETURN(newUINode, false);
+        NG::Inspector::HideAllMenus();
+        if (parentID <= 0) {
+            return OperateRootUINode(newUINode);
+        } else {
+            return OperateGeneralUINode(parentID, slot, newUINode);
         }
-        auto child = rootElement->GetChildBySlot(-1); // rootElement only has one child,and use the default slot -1
-        if (!newComponent) {
-            LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
-            return false;
+
+    } else {
+        auto newComponent = GetNewComponentWithJsCode(root);
+        if (parentID <= 0) {
+            return OperateRootComponent(newComponent);
+        } else {
+            return OperateGeneralComponent(parentID, slot, operateType, newComponent);
         }
-        rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
-        return true;
     }
-    return OperateGeneralComponent(parentID, slot, operateType, newComponent);
+}
+
+bool JsInspectorManager::OperateRootComponent(RefPtr<Component> newComponent)
+{
+    if (!newComponent) {
+        LOGE("operateType:UpdateComponent, newComponent should not be nullptr");
+        return false;
+    }
+    auto rootElement = GetRootElement().Upgrade();
+    auto child = rootElement->GetChildBySlot(-1); // rootElement only has one child,and use the default slot -1
+
+    rootElement->UpdateChildWithSlot(child, newComponent, -1, -1);
+    return true;
 }
 
 bool JsInspectorManager::OperateGeneralComponent(
@@ -245,6 +271,46 @@ bool JsInspectorManager::OperateGeneralComponent(
     return false;
 }
 
+bool JsInspectorManager::OperateRootUINode(RefPtr<NG::UINode> newUINode)
+{
+    auto rootNode = GetRootUINode();
+    CHECK_NULL_RETURN(rootNode, false);
+    rootNode->RemoveChildAtIndex(0); // rootNode is Entry View Node which only has one child,and use the default slot 0
+    newUINode->MountToParent(rootNode, 0, false);
+    auto newFrameNode = AceType::DynamicCast<NG::FrameNode>(newUINode);
+    if (newFrameNode) {
+        newFrameNode->OnMountToParentDone();
+    }
+    newUINode->FlushUpdateAndMarkDirty();
+    rootNode->FlushUpdateAndMarkDirty();
+    return true;
+}
+
+bool JsInspectorManager::OperateGeneralUINode(int32_t parentID, int32_t slot, RefPtr<NG::UINode> newUINode)
+{
+    auto parent = ElementRegister::GetInstance()->GetUINodeById(parentID);
+    CHECK_NULL_RETURN(parent, false);
+    auto parentGroupNode = AceType::DynamicCast<NG::GroupNode>(parent);
+    if (parentGroupNode) {
+        LOGD("parentNode is GroupNode");
+        parentGroupNode->DeleteChildFromGroup(slot);
+        parentGroupNode->AddChildToGroup(newUINode, slot);
+    } else {
+        parent->RemoveChildAtIndex(slot);
+        newUINode->MountToParent(parent, slot, false);
+    }
+    auto newFrameNode = AceType::DynamicCast<NG::FrameNode>(newUINode);
+    auto newSpanNode = AceType::DynamicCast<NG::SpanNode>(newUINode);
+    if (newFrameNode) {
+        newFrameNode->OnMountToParentDone();
+    } else if (newSpanNode) {
+        newSpanNode->RequestTextFlushDirty();
+    }
+    newUINode->FlushUpdateAndMarkDirty();
+    parent->FlushUpdateAndMarkDirty();
+    return true;
+}
+
 RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root)
 {
     std::string jsCode = root->GetString("jsCode", "");
@@ -270,6 +336,27 @@ RefPtr<Component> JsInspectorManager::GetNewComponentWithJsCode(const std::uniqu
     }
     auto component = declarativeFrontend->GetNewComponentWithJsCode(jsCode, viewID);
     return component;
+}
+
+RefPtr<NG::UINode> JsInspectorManager::GetNewFrameNodeWithJsCode(const std::unique_ptr<JsonValue>& root)
+{
+    std::string jsCode = root->GetString("jsCode", "");
+    std::string viewID = root->GetString("viewID", "");
+    if (jsCode.empty() || viewID.empty()) {
+        LOGE("Get jsCode Failed");
+        return nullptr;
+    }
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(pipeline->GetFrontend());
+
+    CHECK_NULL_RETURN(declarativeFrontend, nullptr);
+    auto jsEngine = declarativeFrontend->GetJsEngine();
+    CHECK_NULL_RETURN(jsEngine, nullptr);
+    if (!jsEngine->ExecuteJsForFastPreview(jsCode, viewID)) {
+        return nullptr;
+    }
+    return NG::ViewStackProcessor::GetInstance()->GetNewUINode();
 }
 
 RefPtr<V2::InspectorComposedElement> JsInspectorManager::GetInspectorElementById(NodeId nodeId)
@@ -304,6 +391,18 @@ const WeakPtr<Element>& JsInspectorManager::GetRootElement()
         return nullptr;
     }
     return InspectorComponentElement->GetElementParent();
+}
+
+const RefPtr<NG::UINode> JsInspectorManager::GetRootUINode()
+{
+    auto context = context_.Upgrade();
+    auto ngContext = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_RETURN(ngContext, nullptr);
+
+    auto node = ngContext->GetStageManager()->GetLastPage();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto child = node->GetLastChild();
+    return child;
 }
 
 // get attrs and styles from AccessibilityNode to JsonValue

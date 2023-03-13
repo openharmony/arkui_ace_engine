@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,11 @@ var Color;
   Color["Transparent"] = "#00000000";
 })(Color || (Color = {}));
 
+var ColoringStrategy;
+(function (ColoringStrategy){
+  ColoringStrategy["Invert"] = "Invert";
+})(ColoringStrategy || (ColoringStrategy = {}));
+
 var TextInputStyle;
 (function (TextInputStyle) {
   TextInputStyle["Default"] = "Default";
@@ -41,6 +46,7 @@ var TextAlign;
   TextAlign[TextAlign["Start"] = 0] = "Start";
   TextAlign[TextAlign["Center"] = 1] = "Center";
   TextAlign[TextAlign["End"] = 2] = "End";
+  TextAlign[TextAlign["Justify"] = 3] = "Justify";
 })(TextAlign || (TextAlign = {}));
 
 var DataPanelType;
@@ -232,9 +238,10 @@ var Alignment;
 
 var TextOverflow;
 (function (TextOverflow) {
-  TextOverflow[TextOverflow["Clip"] = 0] = "Clip";
-  TextOverflow[TextOverflow["Ellipsis"] = 1] = "Ellipsis";
-  TextOverflow[TextOverflow["None"] = 2] = "None";
+  TextOverflow[TextOverflow["None"] = 0] = "None";
+  TextOverflow[TextOverflow["Clip"] = 1] = "Clip";
+  TextOverflow[TextOverflow["Ellipsis"] = 2] = "Ellipsis";
+  TextOverflow[TextOverflow["Marquee"] = 3] = "Marquee";
 })(TextOverflow || (TextOverflow = {}));
 
 var TextDecorationType;
@@ -561,6 +568,12 @@ var BarMode;
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
 
+var SelectedMode;
+(function (SelectedMode) {
+  SelectedMode[SelectedMode["INDICATOR"] = 0] = "INDICATOR";
+  SelectedMode[SelectedMode["BOARD"] = 1] = "BOARD";
+})(SelectedMode || (SelectedMode = {}));
+
 var SizeType;
 (function (SizeType) {
   SizeType[SizeType["Auto"] = 0] = "Auto";
@@ -569,6 +582,13 @@ var SizeType;
   SizeType[SizeType["MD"] = 3] = "MD";
   SizeType[SizeType["LG"] = 4] = "LG";
 })(SizeType || (SizeType = {}));
+
+var CancelButtonStyle;
+(function (CancelButtonStyle) {
+  CancelButtonStyle["CONSTANT"] = "CONSTANT";
+  CancelButtonStyle["INVISIBLE"] = "INVISIBLE";
+  CancelButtonStyle["INPUT"] = "INPUT";
+})(CancelButtonStyle || (CancelButtonStyle = {}));
 
 var ColorMode;
 (function (ColorMode) {
@@ -1001,10 +1021,64 @@ var ContextMenuEditStateFlags;
   ContextMenuEditStateFlags[ContextMenuEditStateFlags["CAN_SELECT_ALL"] = 8] = "CAN_SELECT_ALL";
 })(ContextMenuEditStateFlags || (ContextMenuEditStateFlags = {}));
 
+var TransitionEdge;
+(function (TransitionEdge) {
+    TransitionEdge['TOP'] = 0;
+    TransitionEdge['BOTTOM'] = 1;
+    TransitionEdge['START']  = 2;
+    TransitionEdge['END']  = 3;
+})(TransitionEdge || (TransitionEdge = {}));
+
+var CtrlKey;
+(function (CtrlKey) {
+  CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
+  CtrlKey[CtrlKey["SHIFT"] = 1] = "SHIFT";
+  CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
+})(CtrlKey || (CtrlKey = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
     this.content = content;
+  }
+  static of(content) {
+    return new SubTabBarStyle(content);
+  }
+  indicator(arg) {
+    this.indicator = arg;
+    return this;
+  }
+  selectedMode(arg) {
+    this.selectedMode = arg;
+    return this;
+  }
+  board(arg) {
+    this.board = arg;
+    return this;
+  }
+  labelStyle(arg) {
+    this.labelStyle = arg;
+    return this;
+  }
+}
+
+
+class ProgressMask {
+  constructor(value, total, color) {
+    this.type = 'ProgressMask';
+    this.value = value;
+    this.total = total;
+    this.color = color;
+  }
+
+  updateProgress(arg) {
+    this.value = arg;
+    return this;
+  }
+
+  updateColor(arg) {
+    this.color = arg;
+    return this;
   }
 }
 
@@ -1014,4 +1088,214 @@ class BottomTabBarStyle {
     this.icon = icon;
     this.text = text;
   }
+  static of(icon, text) {
+    return new BottomTabBarStyle(icon, text);
+  }
 }
+
+class Indicator {
+  top(value) {
+    this.top = value;
+    return this;
+  }
+  left(value) {
+    this.left = value;
+    return this;
+  }
+  right(value) {
+    this.right = value;
+    return this;
+  }
+  bottom(value) {
+    this.bottom = value;
+    return this;
+  }
+  static dot() {
+    return new DotIndicator();
+  }
+  static digit() {
+    return new DigitIndicator();
+  }
+}
+
+class DotIndicator extends Indicator {
+  constructor() {
+    super();
+    this.type = 'DotIndicator';
+  }
+  itemWidth(value) {
+    this.itemWidth = value;
+    return this;
+  }
+  itemHeight(value) {
+    this.itemHeight = value;
+    return this;
+  }
+  selectedItemWidth(value) {
+    this.selectedItemWidth = value;
+    return this;
+  }
+  selectedItemHeight(value) {
+    this.selectedItemHeight = value;
+    return this;
+  }
+  mask(value) {
+    this.mask = value;
+    return this;
+  }
+  color(value) {
+    this.color = value;
+    return this;
+  }
+  selectedColor(value) {
+    this.selectedColor = value;
+    return this;
+  }
+}
+
+class DigitIndicator extends Indicator{
+  constructor() {
+    super();
+    this.type = 'DigitIndicator';
+  }
+  fontColor(value) {
+    this.fontColor = value;
+    return this;
+  }
+  selectedFontColor(value) {
+    this.selectedFontColor = value;
+    return this;
+  }
+  digitFont(value) {
+    this.digitFont = value;
+    return this;
+  }
+  selectedDigitFont(value) {
+    this.selectedDigitFont = value;
+    return this;
+  }
+}
+
+var TextHeightAdaptivePolicy;
+(function (TextHeightAdaptivePolicy) {
+  TextHeightAdaptivePolicy[TextHeightAdaptivePolicy["MAX_LINES_FIRST"] = 0] = "MAX_LINES_FIRST";
+  TextHeightAdaptivePolicy[TextHeightAdaptivePolicy["MIN_FONT_SIZE_FIRST"] = 1] = "MIN_FONT_SIZE_FIRST";
+  TextHeightAdaptivePolicy[TextHeightAdaptivePolicy["LAYOUT_CONSTRAINT_FIRST"] = 2] = "LAYOUT_CONSTRAINT_FIRST";
+})(TextHeightAdaptivePolicy || (TextHeightAdaptivePolicy = {}));
+
+var ArrowPosition ;
+(function (ArrowPosition ) {
+  ArrowPosition[ArrowPosition["END"] = 0] = "END";
+  ArrowPosition[ArrowPosition["START"] = 1] = "START";
+})(ArrowPosition  || (ArrowPosition  = {}));
+
+class TransitionEffect {
+  type_ = '';
+  effect_ = undefined;
+  animation_ = undefined;
+  // use successor_ to mark whether this is an instance of TransitionEffect
+  successor_ = null;
+
+  constructor(type, effect) {
+    this.type_ = type;
+    this.effect_ = effect;
+  }
+
+  static get IDENTITY() {
+    return new TransitionEffect('identity', undefined);
+  }
+  static get OPACITY() {
+    return new TransitionEffect('opacity', 0);
+  }
+  static get SLIDE() {
+    return new TransitionEffect('asymmetric', {
+      appear: new TransitionEffect('move', TransitionEdge.START),
+      disappear: new TransitionEffect('move', TransitionEdge.END)
+    });
+  }
+  static get SLIDE_SWITCH() {
+    return new TransitionEffect('slideSwitch', undefined);
+  }
+  static translate(option) {
+    return new TransitionEffect('translate', option);
+  }
+  static rotate(option) {
+    return new TransitionEffect('rotate', option);
+  }
+  static scale(option) {
+    return new TransitionEffect('scale', option);
+  }
+  static opacity(value) {
+    return new TransitionEffect('opacity', value);
+  }
+  static move(edge) {
+    return new TransitionEffect('move', edge);
+  }
+  static asymmetric(appearEffect, disappearEffect) {
+    return new TransitionEffect('asymmetric', {
+      appear: appearEffect,
+      disappear: disappearEffect
+    });
+  }
+
+  animation(option) {
+    this.animation_ = option;
+    return this;
+  }
+  combine(nextEffect) {
+    if (nextEffect == null || nextEffect == undefined) {
+      return this;
+    }
+    var lastEffect = this;
+    while (lastEffect.successor_ != null) {
+      lastEffect = lastEffect.successor_;
+    }
+    lastEffect.successor_ = nextEffect;
+    return this;
+  }
+}
+
+var SliderBlockType;
+(function (SliderBlockType) {
+  SliderBlockType[SliderBlockType["DEFAULT"] = 0] = "DEFAULT";
+  SliderBlockType[SliderBlockType["IMAGE"] = 1] = "IMAGE";
+  SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
+})(SliderBlockType || (SliderBlockType = {}));
+
+var TitleStyle;
+(function (TitleStyle) {
+  TitleStyle[TitleStyle["ListMode"] = 0] = "ListMode";
+  TitleStyle[TitleStyle["ContentMode"] = 1] = "ContentMode";
+})(TitleStyle || (TitleStyle = {}));
+
+var OperationStyle;
+(function (OperationStyle) {
+  OperationStyle[OperationStyle["TextArrow"] = 0] = "TextArrow";
+  OperationStyle[OperationStyle["Button"] = 1] = "Button";
+  OperationStyle[OperationStyle["IconGroup"] = 2] = "IconGroup";
+})(OperationStyle || (OperationStyle = {}));
+
+var TabItemType;
+(function (TabItemType) {
+  TabItemType[TabItemType["Tex"] = 0] = "Text";
+  TabItemType[TabItemType["Icon"] = 1] = "Icon";
+})(TabItemType || (TabItemType = {}));
+
+var EditableLeftIconType;
+(function (EditableLeftIconType) {
+  EditableLeftIconType[EditableLeftIconType["Back"] = 0] = "Back";
+  EditableLeftIconType[EditableLeftIconType["Cancel"] = 1] = "Cancel";
+})(EditableLeftIconType || (EditableLeftIconType = {}));
+
+var ContentIconPosition;
+(function (ContentIconPosition) {
+  ContentIconPosition[ContentIconPosition["Top"] = 0] = "Top";
+  ContentIconPosition[ContentIconPosition["Center"] = 1] = "Center";
+})(ContentIconPosition || (ContentIconPosition = {}));
+
+var ContentTextStyle;
+(function (ContentTextStyle) {
+  ContentTextStyle[ContentTextStyle["SingleLine"] = 0] = "SingleLine";
+  ContentTextStyle[ContentTextStyle["DoubleLine"] = 1] = "DoubleLine";
+  ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
+})(ContentTextStyle || (ContentTextStyle = {}));

@@ -61,7 +61,7 @@ public:
     RefPtr<FrameNode> GetFocusParent() const;
     RefPtr<FocusHub> GetFirstFocusHubChild() const;
     void GetFocusChildren(std::list<RefPtr<FrameNode>>& children) const;
-    void Clean();
+    void Clean(bool cleanDirectly = false);
     void RemoveChildAtIndex(int32_t index);
     RefPtr<UINode> GetChildAtIndex(int32_t index) const;
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
@@ -99,6 +99,7 @@ public:
     }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
+    void GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>& visibleList);
     void GenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& visibleList);
 
     int32_t GetChildIndexById(int32_t id);
@@ -196,6 +197,28 @@ public:
         return isRemoving_;
     }
 
+    int32_t GetLayoutPriority() const
+    {
+        return layoutPriority_;
+    }
+
+    void SetLayoutPriority(int32_t priority)
+    {
+        layoutPriority_ = priority;
+    }
+
+    void SetInDestroying()
+    {
+        isInDestroying_ = true;
+    }
+
+    bool IsInDestroying() const
+    {
+        return isInDestroying_;
+    }
+
+    void SetChildrenInDestroying();
+
     virtual HitTestResult TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
         const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId);
     virtual HitTestMode GetHitTestMode() const
@@ -285,6 +308,29 @@ public:
         return childrenUpdatedFrom_;
     }
 
+    bool RemoveDisappearingChild(const RefPtr<UINode>& child);
+
+#ifdef PREVIEW
+    void SetDebugLine(const std::string& line)
+    {
+        debugLine_ = line;
+    }
+    std::string GetDebugLine() const
+    {
+        return debugLine_;
+    }
+
+    void SetViewId(const std::string& viewId)
+    {
+        viewId_ = viewId;
+    }
+
+    std::string GetViewId() const
+    {
+        return viewId_;
+    }
+#endif
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -295,6 +341,20 @@ protected:
     {
         for (const auto& child : children_) {
             child->OnGenerateOneDepthVisibleFrame(visibleList);
+        }
+    }
+
+    virtual void OnGenerateOneDepthVisibleFrameWithTransition(
+        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index = UINT_MAX)
+    {
+        for (const auto& child : children_) {
+            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList);
+        }
+        // disappearing children
+        for (const auto& pair : disappearingChildren_) {
+            auto& child = pair.first;
+            auto index = pair.second;
+            child->OnGenerateOneDepthVisibleFrameWithTransition(visibleList, index);
         }
     }
 
@@ -314,12 +374,14 @@ protected:
     virtual void OnDetachFromMainTree();
 
     bool isRemoving_ = false;
+    // return value: return true if node has disappearing transition
+    virtual bool OnRemoveFromParent();
 
 private:
-    void OnRemoveFromParent();
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false);
 
     std::list<RefPtr<UINode>> children_;
+    std::list<std::pair<RefPtr<UINode>, uint32_t>> disappearingChildren_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
     int32_t depth_ = 0;
@@ -327,13 +389,19 @@ private:
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int32_t accessibilityId_ = -1;
+    int32_t layoutPriority_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
+    bool isInDestroying_ = false;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
 
+#ifdef PREVIEW
+    std::string debugLine_;
+    std::string viewId_;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
 

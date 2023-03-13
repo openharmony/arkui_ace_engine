@@ -12,10 +12,16 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_unittest.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("side_bar_pattern_test_ng") {
   module_out_path = "$pattern_test_output_path/side_bar"
+
+  include_dirs = [
+    "//commonlibrary/c_utils/base/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
+    "//foundation/arkui/ace_engine/frameworks/base/mousestyle",
+  ]
 
   sources = [
     # inner
@@ -29,14 +35,33 @@ ohos_unittest("side_bar_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/scheduler.cpp",
     "$ace_root/frameworks/core/common/container.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_modifier.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
+
+    # components_ng_pattern
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/render/divider_painter.cpp",
+
+    # mock
+    "$ace_root/frameworks/base/test/mock/mock_mouse_style.cpp",
+    "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/side_bar_container_view.cpp",
+    "side_bar_layout_test_ng.cpp",
     "side_bar_pattern_test_ng.cpp",
+    "side_bar_view_test_ng.cpp",
   ]
 
   sources += test_pattern_sources

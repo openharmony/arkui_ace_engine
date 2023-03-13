@@ -45,4 +45,20 @@ void FormManagerDelegate::AddFormUninstallCallback(const OnFormUninstallCallback
 void FormManagerDelegate::OnActionEvent(const std::string& action) {}
 
 void FormManagerDelegate::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils) {}
+
+void FormManagerDelegate::AddRenderDelegate() {}
+
+void FormManagerDelegate::RegisterRenderDelegateEvent() {}
+
+void FormManagerDelegate::AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback &callback) {}
+
+void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle &callback) {}
+
+void FormManagerDelegate::SetAllowUpdate(bool allowUpdate) {}
+
+void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
+
+void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
+
+void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback &&callback) {}
 } // namespace OHOS::Ace

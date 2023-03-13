@@ -15,8 +15,6 @@
 
 #include "adapter/ohos/entrance/pa_container.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
-
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider.h"

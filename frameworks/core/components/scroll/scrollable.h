@@ -287,6 +287,8 @@ public:
 
     bool IsStopped() const;
 
+    bool IsSpringStopped() const;
+
     void StopScrollable();
 
     bool Available() const

@@ -118,6 +118,7 @@ const char DATA_PANEL_LOADING_COLOR_START[] = "loading_fg_color_start";
 const char DATA_PANEL_LOADING_COLOR_END[] = "loading_fg_color_end";
 const char DATA_PANEL_PROGRESS_COLOR_START[] = "progress_fg_color_start";
 const char DATA_PANEL_PROGRESS_COLOR_END[] = "progress_fg_color_end";
+const char DATA_PANEL_TRACK_SHADOW_RADIU[] = "track_shadow_radiu";
 
 // pattern attributes for toggle
 const char DIALOG_CONTENT_TOP_PADDING[] = "dialog_content_top_padding";
@@ -139,4 +140,11 @@ const char POPUP_BORDER_RADIUS[] = "popup_border_radius";
 const char POPUP_HORIZONTAL_PADDING[] = "popup_horizontal_padding";
 const char POPUP_VERTICAL_PADDING[] = "popup_vertical_padding";
 const char POPUP_BUTTON_TEXT_FONT_SIZE[] = "popup_button_text_font_size";
+
+// pattern attributes for badge
+const char BADGE_BORDER_COLOR[] = "border_color";
+const char BADGE_BORDER_WIDTH[] = "border_width";
+// swiper attributes
+const char INDICATOR_TEXT_FONT_SIZE[] = "indicator_text_font_size";
+const char INDICATOR_TEXT_FONT_COLOR[] = "indicator_text_font_color";
 } // namespace OHOS::Ace

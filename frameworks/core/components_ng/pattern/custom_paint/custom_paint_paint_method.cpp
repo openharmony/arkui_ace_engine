@@ -18,7 +18,6 @@
 #include <cmath>
 
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
-#include "flutter/lib/ui/text/font_collection.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
 #include "third_party/bounds_checking_function/include/securec.h"
@@ -134,9 +133,6 @@ void CustomPaintPaintMethod::UpdatePaintShader(const OffsetF& offset, SkPaint& p
 
 void CustomPaintPaintMethod::UpdatePaintShader(const Ace::Pattern& pattern, SkPaint& paint)
 {
-    auto* currentDartState = flutter::UIDartState::Current();
-    CHECK_NULL_VOID(currentDartState);
-
     auto width = pattern.GetImageWidth();
     auto height = pattern.GetImageHeight();
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
@@ -260,7 +256,7 @@ void CustomPaintPaintMethod::InitImageCallbacks()
     };
 
     uploadSuccessCallback_ = [weak = AceType::WeakClaim(this)](
-                                 ImageSourceInfo sourceInfo, const fml::RefPtr<flutter::CanvasImage>& image) {};
+                                 ImageSourceInfo sourceInfo, const RefPtr<NG::CanvasImage>& image) {};
 
     onPostBackgroundTask_ = [weak = AceType::WeakClaim(this)](CancelableTask task) {};
 }
@@ -273,7 +269,7 @@ void CustomPaintPaintMethod::DrawSvgImage(PaintWrapper* paintWrapper, const Ace:
     // get the ImageObject
     if (currentSource_ != loadingSource_) {
         ImageProvider::FetchImageObject(loadingSource_, imageObjSuccessCallback_, uploadSuccessCallback_,
-            failedCallback_, context_, true, true, true, renderTaskHolder_, onPostBackgroundTask_);
+            failedCallback_, context_, true, true, true, onPostBackgroundTask_);
     }
 
     CHECK_NULL_VOID(skiaDom_);

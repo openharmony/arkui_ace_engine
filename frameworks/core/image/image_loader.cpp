@@ -193,7 +193,7 @@ sk_sp<SkData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& s
     auto imageCache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(imageCache, nullptr);
     auto cacheData = imageCache->GetCacheImageData(sourceInfo.GetSrc());
-    CHECK_NULL_RETURN(cacheData, nullptr);
+    CHECK_NULL_RETURN_NOLOG(cacheData, nullptr);
     // TODO: add adapter layer and use [SkiaCachedImageData] there
     auto skiaCachedImageData = AceType::DynamicCast<SkiaCachedImageData>(cacheData);
     CHECK_NULL_RETURN(skiaCachedImageData, nullptr);

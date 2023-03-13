@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace {
@@ -38,6 +39,10 @@ struct Font {
     std::optional<Dimension> fontSize;
     std::optional<FontStyle> fontStyle;
     std::vector<std::string> fontFamilies;
+};
+
+struct CaretStyle {
+    std::optional<Dimension> caretWidth;
 };
 
 enum class InputStyle {
@@ -56,6 +61,7 @@ public:
     virtual void Insert(const std::string& args) {}
 
     virtual void CaretPosition(int32_t caretPosition) {}
+    virtual void SetTextSelection(int32_t selectionStart, int32_t selectionEnd) {}
 
     void SetCaretPosition(std::function<void(const int32_t)>&& setCaretPosition)
     {
@@ -112,6 +118,9 @@ public:
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetCaretColor(const Color& value) = 0;
+    virtual void SetCaretPosition(const int32_t& value) = 0;
+    virtual void SetSelectedBackgroundColor(const Color& value) = 0;
+    virtual void SetCaretStyle(const CaretStyle& value) = 0;
     virtual void SetMaxLength(uint32_t value) = 0;
     virtual void SetMaxLines(uint32_t value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
@@ -129,6 +138,10 @@ public:
     virtual void SetOnCut(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetOnPaste(std::function<void(const std::string&)>&& func) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
+    virtual void ResetMaxLength() = 0;
+    virtual void SetForegroundColor(const Color& value) = 0;
+
+    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

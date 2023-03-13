@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SEARCH_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SEARCH_MODEL_IMPL_H
 
+#include "core/components/image/image_component.h"
 #include "core/components/search/search_component.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/text_field_component.h"
@@ -28,11 +29,24 @@ public:
     RefPtr<TextFieldControllerBase> Create(const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon) override;
     void SetSearchButton(const std::string& text) override;
+    void SetCaretWidth(const Dimension& value) override {}
+    void SetCaretColor(const Color& color) override {}
+    void SetSearchIconSize(const Dimension& value) override {}
+    void SetSearchIconColor(const Color& color) override {}
+    void SetSearchSrcPath(const std::string& src) override {}
+    void SetRightIconSrcPath(const std::string& src) override {}
+    void SetCancelButtonStyle(OHOS::Ace::CancelButtonStyle cancelButtonStyle) override {}
+    void SetCancelIconSize(const Dimension& value) override {}
+    void SetCancelIconColor(const Color& color) override {}
+    void SetSearchButtonFontSize(const Dimension& value) override {}
+    void SetSearchButtonFontColor(const Color& color) override {}
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
+    void SetTextColor(const Color& color) override {}
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
+    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnChange(std::function<void(const std::string&)>&& onChange) override;
     void SetOnCopy(std::function<void(const std::string&)>&& func) override;

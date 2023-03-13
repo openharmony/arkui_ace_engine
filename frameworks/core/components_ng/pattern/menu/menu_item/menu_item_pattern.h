@@ -16,13 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_PATTERN_H
 
-#include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/slider/render_slider.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -49,6 +49,11 @@ public:
         return MakeRefPtr<MenuItemEventHub>();
     }
 
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<MenuItemLayoutProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<MenuItemLayoutAlgorithm>();
@@ -63,17 +68,6 @@ public:
     bool IsSelected() const
     {
         return isSelected_;
-    }
-
-    void SetSelectIcon(bool isShow)
-    {
-        isSelectIconShow_ = isShow;
-        GetHost()->MarkModifyDone();
-    }
-
-    bool IsSelectIconShow() const
-    {
-        return isSelectIconShow_;
     }
 
     void SetSubBuilder(const std::function<void()>& subBuilderFunc)
@@ -132,22 +126,20 @@ public:
 
     void CloseMenu();
 
-    void SetContentNode(const RefPtr<FrameNode>& content)
+    RefPtr<FrameNode> GetContentNode()
     {
-        content_ = content;
+        return content_;
     }
-    void SetLabelNode(const RefPtr<FrameNode>& label)
+
+    RefPtr<FrameNode> GetLabelNode()
     {
-        label_ = label;
+        return label_;
     }
 
     void UpdateBackgroundColor(const Color& color);
 
     RefPtr<FrameNode> GetMenu();
-
-    void ModifyFontSize();
-
-    void ModifyFontSize(const Dimension& fontSize);
+    void UpdateTextNodes();
 
 protected:
     void OnModifyDone() override;
@@ -166,7 +158,9 @@ private:
 
     void RegisterWrapperMouseEvent();
 
-    void AddSelectIcon();
+    void AddSelectIcon(RefPtr<FrameNode>& row);
+    void UpdateIcon(RefPtr<FrameNode>& row, bool isStart);
+    void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
 
     RefPtr<FrameNode> GetMenuWrapper();
 
@@ -181,8 +175,6 @@ private:
     RefPtr<InputEvent> wrapperMouseEvent_;
 
     bool isSelected_ = false;
-    bool isSelectIconShow_ = false;
-
     bool isSubMenuShowed_ = false;
     bool isSubMenuHovered_ = false;
 
@@ -194,6 +186,8 @@ private:
     RefPtr<FrameNode> subMenu_;
     RefPtr<FrameNode> content_ = nullptr;
     RefPtr<FrameNode> label_ = nullptr;
+    RefPtr<FrameNode> startIcon_ = nullptr;
+    RefPtr<FrameNode> endIcon_ = nullptr;
     RefPtr<FrameNode> selectIcon_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);

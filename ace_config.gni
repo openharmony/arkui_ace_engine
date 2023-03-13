@@ -81,6 +81,9 @@ jsoncpp_root = "//third_party/jsoncpp"
 ark_tools_root = "//prebuilts/ace-toolkit/ace-loader/panda"
 node_js_path = "//prebuilts/ace-toolkit/nodejs/node-v12.18.4-linux-x64/bin/"
 ark_toolchain_path = "//arkcompiler/toolchain"
+window_manager_path = "//foundation/window/window_manager"
+graphic_standard_path = "//foundation/graphic/graphic_2d"
+ark_ets_path = "//arkcompiler/ets_runtime"
 
 # Config toolchain
 windows_buildtool = "//build/toolchain/mingw:mingw_x86_64"
@@ -139,7 +142,6 @@ if (is_standard_system) {
 ace_wearable_defines = [ "WEARABLE_PRODUCT" ]
 ace_ivi_defines = [ "IVI_PRODUCT" ]
 
-# memory flag: [ "ACE_MEMORY_MONITOR" ]
 ace_common_defines = [ "ACE_LOG_TAG=\"Ace\"" ]
 
 if (enable_glfw_window) {
@@ -179,6 +181,15 @@ if (!defined(global_parts_info) ||
   ace_common_defines += [ "OS_ACCOUNT_EXISTS" ]
 } else {
   os_account_exists = false
+}
+
+if (defined(global_parts_info)) {
+  if (defined(global_parts_info.resourceschedule_frame_aware_sched) || defined(
+          global_parts_info.hmosresourceschedule_resourceschedule_frame_aware_sched_override)) {
+    frame_trace_support = true
+  } else {
+    frame_trace_support = false
+  }
 }
 
 ace_platforms = []

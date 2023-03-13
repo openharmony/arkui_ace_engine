@@ -38,6 +38,7 @@ RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool
     auto iter = childrenMap_.find(index);
     if (iter != childrenMap_.end()) {
         if (addToRenderTree) {
+            iter->second->BuildLazyItem();
             iter->second->isActive_ = true;
         }
         return iter->second;
@@ -72,6 +73,7 @@ const std::list<RefPtr<LayoutWrapper>>& LayoutWrapper::GetAllChildrenWithBuild(b
     }
     if (addToRenderTree) {
         for (const auto& child : cachedList_) {
+            child->BuildLazyItem();
             if (!child->isActive_) {
                 child->isActive_ = true;
             }
@@ -140,16 +142,17 @@ void LayoutWrapper::WillLayout()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        LOGD("GeometryTransition: node%{public}d will layout", host->GetId());
+        LOGD("GeometryTransition: node%{public}d will layout, priority: %{public}d",
+            host->GetId(), host->GetLayoutPriority());
         geometryTransition->WillLayout(Claim(this));
     }
-    
+
     for (const auto& child : children_) {
         child->WillLayout();
     }
 }
 
-void LayoutWrapper::DidLayout()
+void LayoutWrapper::DidLayout(const RefPtr<LayoutWrapper>& root)
 {
     auto host = GetHostNode();
     if (!layoutProperty_ || !geometryNode_ || !host) {
@@ -158,12 +161,21 @@ void LayoutWrapper::DidLayout()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        geometryTransition->DidLayout(hostNode_);
+        geometryTransition->DidLayout(root, hostNode_);
         LOGD("GeometryTransition: node%{public}d did layout", host->GetId());
     }
 
     for (const auto& child : children_) {
-        child->DidLayout();
+        child->DidLayout(root);
+    }
+
+    if (root == this && !finishCallbacks_.empty()) {
+        for (const auto& callback : finishCallbacks_) {
+            if (callback) {
+                callback();
+            }
+        }
+        finishCallbacks_.clear();
     }
 }
 
@@ -322,6 +334,13 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
     for (const auto& child : children_) {
         if (child) {
+            auto node = child->GetHostNode();
+            if (node && node->GetLayoutProperty()) {
+                const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
+                if (geometryTransition != nullptr && geometryTransition->IsNodeInAndActive(node)) {
+                    continue;
+                }
+            }
             child->SwapDirtyLayoutWrapperOnMainThread();
         }
     }
@@ -343,4 +362,14 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
     CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
     layoutWrapperBuilder_->AdjustGridOffset();
 }
+
+void LayoutWrapper::BuildLazyItem()
+{
+    if (!lazyBuildFunction_) {
+        return;
+    }
+    lazyBuildFunction_(Claim(this));
+    lazyBuildFunction_ = nullptr;
+}
+
 } // namespace OHOS::Ace::NG

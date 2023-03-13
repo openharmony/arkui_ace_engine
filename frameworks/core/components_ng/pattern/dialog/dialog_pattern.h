@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/dialog//dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_accessibility_property.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -57,6 +58,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<DialogEventHub>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<DialogAccessibilityProperty>();
     }
 
     FocusPattern GetFocusPattern() const override
@@ -98,8 +104,12 @@ public:
 
 private:
     void OnModifyDone() override;
+
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleClick(const GestureEvent& info);
+    void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
+
     void PopDialog(int32_t buttonIdx);
 
     // set render context properties of content frame

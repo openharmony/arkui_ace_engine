@@ -84,15 +84,42 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return task;
 }
 
+void ImagePattern::PrepareAnimation()
+{
+    if (image_->IsStatic()) {
+        return;
+    }
+    SetRedrawCallback();
+    RegisterVisibleAreaChange();
+}
+
 void ImagePattern::SetRedrawCallback()
 {
-    // set animation flush function for svg / gif
     CHECK_NULL_VOID_NOLOG(image_);
+    // set animation flush function for svg / gif
     image_->SetRedrawCallback([weak = WeakClaim(RawPtr(GetHost()))] {
         auto imageNode = weak.Upgrade();
         CHECK_NULL_VOID(imageNode);
         imageNode->MarkNeedRenderOnly();
     });
+}
+
+void ImagePattern::RegisterVisibleAreaChange()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    // register to onVisibleAreaChange
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        LOGD("current image visible ratio = %f", ratio);
+        self->OnVisibleChange(visible);
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // reset visibleAreaChangeNode
+    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
 }
 
 void ImagePattern::OnImageLoadSuccess()
@@ -113,8 +140,7 @@ void ImagePattern::OnImageLoadSuccess()
     dstRect_ = loadingCtx_->GetDstRect();
 
     SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
-    SetRedrawCallback();
-
+    PrepareAnimation();
     if (draggable_) {
         EnableDrag();
     }
@@ -251,6 +277,7 @@ void ImagePattern::LoadImageDataIfNeed()
 
 void ImagePattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     LoadImageDataIfNeed();
 }
 
@@ -399,17 +426,16 @@ void ImagePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(false);
+}
 
-    // register to onVisibleAreaChange
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto callback = [weak = WeakClaim(this)] (bool visible, double ratio) {
-        auto self = weak.Upgrade();
-        CHECK_NULL_VOID(self);
-        LOGD("current image visible ratio = %f", ratio);
-        self->OnVisibleChange(visible);
-    };
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto id = frameNode->GetId();
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
+    CHECK_NULL_VOID_NOLOG(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(id);
+    pipeline->RemoveNodesToNotifyMemoryLevel(id);
+    pipeline->RemoveVisibleAreaChangeNode(id);
 }
 
 void ImagePattern::EnableDrag()
@@ -449,6 +475,37 @@ void ImagePattern::EnableDrag()
     auto eventHub = GetHost()->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDragStart(std::move(dragStart));
+}
+
+void ImagePattern::BeforeCreatePaintWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->MarkContentChanged(true);
+}
+
+void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("draggable", draggable_ ? "true" : "false");
+}
+
+void ImagePattern::UpdateFillColorIfForegroundColor()
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+        auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+        auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value();
+        if (imageSourceInfo.IsSvg()) {
+            imageSourceInfo.SetFillColor(Color::FOREGROUND);
+            imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+        }
+        auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageRenderProperty->UpdateSvgFillColor(Color::FOREGROUND);
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -279,11 +279,18 @@ public:
 
     void HandleConfirm(const JSCallbackInfo& args)
     {
-        if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
+        std::string privateKeyFile;
+        std::string certChainFile;
+        if (args.Length() == 1 && args[0]->IsString()) {
+            privateKeyFile = args[0]->ToString();
+        } else if (args.Length() == 2 && args[0]->IsString() && args[1]->IsString()) {
+            privateKeyFile = args[0]->ToString();
+            certChainFile = args[1]->ToString();
+        } else {
+            LOGE("HandleConfirm error, args is invalid");
             return;
         }
-        std::string privateKeyFile = args[0]->ToString();
-        std::string certChainFile = args[1]->ToString();
+
         if (result_) {
             result_->HandleConfirm(privateKeyFile, certChainFile);
         }
@@ -560,6 +567,17 @@ public:
         auto controller = iter->second;
         controller_map_.erase(iter);
         return controller;
+    }
+
+    static bool ExistController(JSRef<JSObject>& controller)
+    {
+        for (auto iter = controller_map_.begin(); iter != controller_map_.end(); iter++) {
+            if (iter->second->Unwrap<void>() == controller->Unwrap<void>()) {
+                LOGI("exist popup controller");
+                return true;
+            }
+        }
+        return false;
     }
 
     void SetWebController(const JSCallbackInfo& args)
@@ -1464,6 +1482,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("forceDarkAccess", &JSWeb::ForceDarkAccess);
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
+    JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -1732,7 +1751,8 @@ void JSWeb::CreateInNewPipeline(
                 func->Call(webviewController, 1, argv);
             };
         }
-        NG::WebView::Create(dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback));
+        NG::WebView::Create(dstSrc.value(), std::move(setIdCallback), std::move(setHapPathCallback),
+            JSWebWindowNewHandler::ExistController(controller));
 
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         std::string cmdLine = JSRef<JSFunc>::Cast(getCmdLineFunction)->Call(controller, 0, {})->ToString();
@@ -1761,6 +1781,7 @@ void JSWeb::CreateInOldPipeline(
     webComponent = AceType::MakeRefPtr<WebComponent>(dstSrc.value());
     webComponent->SetSrc(dstSrc.value());
     if (setWebIdFunction->IsFunction()) {
+        webComponent->SetPopup(JSWebWindowNewHandler::ExistController(controller));
         CreateWithWebviewController(controller, setWebIdFunction, webComponent);
     } else {
         CreateWithWebController(controller, webComponent);
@@ -4090,6 +4111,37 @@ void JSWeb::VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::WebView::SetVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
+    }
+}
+
+JSRef<JSVal> AudioStateChangedEventToJSValue(const AudioStateChangedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("playing", eventInfo.IsPlaying());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
+{
+    LOGI("JSWeb OnAudioStateChanged");
+
+    if (!args[0]->IsFunction()) {
+        LOGE("OnAudioStateChanged Param is invalid, it is not a function");
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<AudioStateChangedEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), AudioStateChangedEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<AudioStateChangedEvent>(info.get());
+            func->Execute(*eventInfo);
+        };
+        NG::WebView::SetAudioStateChangedId(std::move(uiCallback));
     }
 }
 } // namespace OHOS::Ace::Framework

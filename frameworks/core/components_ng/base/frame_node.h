@@ -27,6 +27,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -48,8 +49,6 @@ class PipelineContext;
 class Pattern;
 class StateModifyTask;
 class UITask;
-
-constexpr int32_t DEFAULT_FRAME_SLOT = -1;
 
 // FrameNode will display rendering region in the screen.
 class ACE_EXPORT FrameNode : public UINode {
@@ -101,6 +100,9 @@ public:
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
     RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
+
+    RefPtr<LayoutWrapper> UpdateLayoutWrapper(
+        RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
 
     std::optional<UITask> CreateLayoutTask(bool forceUseMainThread = false);
 
@@ -264,7 +266,7 @@ public:
     OffsetF GetTransformRelativeOffset() const;
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
-    
+
     void AdjustGridOffset();
 
     void SetActive(bool active) override;
@@ -303,13 +305,21 @@ public:
 
     void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
     void RemoveLastHotZoneRect() const;
-    
+
     bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint);
 
     bool IsLayoutDirtyMarked() const
     {
         return isLayoutDirtyMarked_;
     }
+
+    bool HasPositionProp() const
+    {
+        CHECK_NULL_RETURN_NOLOG(renderContext_, false);
+        return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
+    }
+
+    bool OnRemoveFromParent() override;
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -326,6 +336,8 @@ private:
     RefPtr<PaintWrapper> CreatePaintWrapper();
 
     void OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList) override;
+    void OnGenerateOneDepthVisibleFrameWithTransition(
+        std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
 
     bool IsMeasureBoundary();
@@ -335,6 +347,8 @@ private:
     void DumpInfo() override;
 
     void FocusToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void MouseToJsonValue(std::unique_ptr<JsonValue>& json) const;
+    void TouchToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     HitTestMode GetHitTestMode() const override;
     bool GetTouchable() const;
@@ -342,8 +356,7 @@ private:
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
     void ProcessAllVisibleCallback(std::list<VisibleCallbackInfo>& callbackInfoList, double currentVisibleRatio);
-    void OnVisibleAreaChangeCallback(
-        VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
+    void OnVisibleAreaChangeCallback(VisibleCallbackInfo& callbackInfo, bool visibleType, double currentVisibleRatio);
     double CalculateCurrentVisibleRatio(const RectF& visibleRect, const RectF& renderRect);
 
     struct ZIndexComparator {

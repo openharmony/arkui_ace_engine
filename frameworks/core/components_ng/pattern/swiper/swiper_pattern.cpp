@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
-#include "core/components_ng/pattern/swiper_indicator/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -77,9 +77,9 @@ void SwiperPattern::OnIndexChange() const
         return;
     }
 
-    auto currentIndex = (currentIndex_ + totalCount) % totalCount;
+    auto oldIndex = (oldIndex_ + totalCount) % totalCount;
     auto targetIndex = (CurrentIndex() + totalCount) % totalCount;
-    if (currentIndex != targetIndex) {
+    if (oldIndex != targetIndex) {
         auto swiperEventHub = GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         swiperEventHub->FireChangeEvent(targetIndex);
@@ -88,6 +88,7 @@ void SwiperPattern::OnIndexChange() const
 
 void SwiperPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -97,12 +98,13 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    OnIndexChange();
+    oldIndex_ = currentIndex_;
+    InitIndicator();
 
-    InitSwiperIndicator();
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
+        layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     } else {
         LOGE("index is not valid: %{public}d, items size: %{public}d", CurrentIndex(), childrenSize);
     }
@@ -233,6 +235,12 @@ WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (isInit_) {
+        isInit_ = false;
+    } else {
+        OnIndexChange();
+    }
+
     auto curChild = dirty->GetOrCreateChildByIndex(currentIndex_);
     CHECK_NULL_RETURN(curChild, false);
     auto curChildFrame = curChild->GetHostNode();
@@ -249,6 +257,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     maxChildSize_ = swiperLayoutAlgorithm->GetMaxChildSize();
     return GetEdgeEffect() == EdgeEffect::FADE;
 }
@@ -318,6 +329,9 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     currentIndex_ = index;
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     FireChangeEvent();
     CalculateCacheRange();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -350,6 +364,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::ShowNext()
 {
+    indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
@@ -370,6 +385,7 @@ void SwiperPattern::ShowNext()
 
 void SwiperPattern::ShowPrevious()
 {
+    indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
@@ -452,7 +468,7 @@ void SwiperPattern::InitSwiperController()
     });
 }
 
-void SwiperPattern::InitSwiperIndicator()
+void SwiperPattern::InitIndicator()
 {
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
@@ -476,35 +492,12 @@ void SwiperPattern::InitSwiperIndicator()
         }
     }
     CHECK_NULL_VOID(indicatorNode);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    CHECK_NULL_VOID(indicatorPattern);
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto paintProperty = indicatorNode->GetPaintProperty<SwiperIndicatorPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (swiperParameters_.dimLeft.has_value()) {
-        layoutProperty->UpdateLeft(swiperParameters_.dimLeft.value());
-    }
-    if (swiperParameters_.dimTop.has_value()) {
-        layoutProperty->UpdateTop(swiperParameters_.dimTop.value());
-    }
-    if (swiperParameters_.dimRight.has_value()) {
-        layoutProperty->UpdateRight(swiperParameters_.dimRight.value());
-    }
-    if (swiperParameters_.dimBottom.has_value()) {
-        layoutProperty->UpdateBottom(swiperParameters_.dimBottom.value());
-    }
-    if (swiperParameters_.dimSize.has_value()) {
-        paintProperty->UpdateSize(swiperParameters_.dimSize.value());
-    }
-    if (swiperParameters_.maskValue.has_value()) {
-        paintProperty->UpdateIndicatorMask(swiperParameters_.maskValue.value());
-    }
-    if (swiperParameters_.colorVal.has_value()) {
-        paintProperty->UpdateColor(swiperParameters_.colorVal.value());
-    }
-    if (swiperParameters_.selectedColorVal.has_value()) {
-        paintProperty->UpdateSelectedColor(swiperParameters_.selectedColorVal.value());
+    if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty(indicatorNode);
+    } else {
+        SaveDigitIndicatorProperty(indicatorNode);
     }
 
     auto renderContext = indicatorNode->GetRenderContext();
@@ -726,9 +719,14 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
+    turnPageRate_ = currentOffset_ / MainSize();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG && !indicatorDoingAnimation_) {
+        auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
+        indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -745,6 +743,7 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
+    indicatorDoingAnimation_ = false;
     // Stop translate animation when touch down.
     if (controller_ && controller_->IsRunning()) {
         controller_->Pause();
@@ -795,6 +794,13 @@ void SwiperPattern::HandleDragStart()
 void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 {
     auto mainDelta = static_cast<float>(info.GetMainDelta());
+
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+    if (IsOutOfHotRegion(dragPoint)) {
+        return;
+    }
+
     auto isOutOfBoundary = IsOutOfBoundary(mainDelta + currentOffset_);
     if (!IsLoop() && isOutOfBoundary) {
         auto edgeEffect = GetEdgeEffect();
@@ -892,8 +898,6 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
 
 void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay)
 {
-    LOGD("Play translate animation startPos: %{public}lf, endPos: %{public}lf, nextIndex: %{public}d", startPos, endPos,
-        nextIndex);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto curve = GetCurve();
@@ -937,6 +941,9 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         swiper->targetIndex_.reset();
         if (swiper->currentIndex_ != nextIndex) {
             swiper->currentIndex_ = nextIndex;
+            auto layoutProperty = swiper->GetLayoutProperty<SwiperLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
             swiper->FireChangeEvent();
             swiper->CalculateCacheRange();
         }
@@ -946,7 +953,11 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
         swiper->FireAnimationEndEvent();
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto indicatorNode = host->GetLastChild();
+        CHECK_NULL_VOID(indicatorNode);
+        if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+            indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        }
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
@@ -1164,6 +1175,13 @@ bool SwiperPattern::IsShowIndicator() const
     return swiperLayoutProperty->GetShowIndicatorValue(true);
 }
 
+SwiperIndicatorType SwiperPattern::GetIndicatorType() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, SwiperIndicatorType::DOT);
+    return swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT);
+}
+
 int32_t SwiperPattern::TotalCount() const
 {
     auto host = GetHost();
@@ -1182,4 +1200,78 @@ float SwiperPattern::GetTranslateLength() const
     return translateLength + itemSpace;
 }
 
+bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, true);
+
+    auto hotRegion = geometryNode->GetFrameRect();
+    return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
+}
+
+void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    layoutProperty->UpdateLeft(swiperParameters_->dimLeft.value_or(0.0_vp));
+    layoutProperty->UpdateTop(swiperParameters_->dimTop.value_or(0.0_vp));
+    layoutProperty->UpdateRight(swiperParameters_->dimRight.value_or(0.0_vp));
+    layoutProperty->UpdateBottom(swiperParameters_->dimBottom.value_or(0.0_vp));
+    paintProperty->UpdateItemWidth(swiperParameters_->itemWidth.value_or(swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateItemHeight(swiperParameters_->itemHeight.value_or(swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateSelectedItemWidth(swiperParameters_->selectedItemWidth.value_or(
+        swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateSelectedItemHeight(swiperParameters_->selectedItemHeight.value_or(
+        swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateIndicatorMask(swiperParameters_->maskValue.value_or(false));
+    paintProperty->UpdateColor(swiperParameters_->colorVal.value_or(swiperIndicatorTheme->GetColor()));
+    paintProperty->UpdateSelectedColor(swiperParameters_->selectedColorVal.value_or(
+        swiperIndicatorTheme->GetSelectedColor()));
+}
+
+void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    layoutProperty->UpdateLeft(swiperDigitalParameters_->dimLeft.value_or(0.0_vp));
+    layoutProperty->UpdateTop(swiperDigitalParameters_->dimTop.value_or(0.0_vp));
+    layoutProperty->UpdateRight(swiperDigitalParameters_->dimRight.value_or(0.0_vp));
+    layoutProperty->UpdateBottom(swiperDigitalParameters_->dimBottom.value_or(0.0_vp));
+    layoutProperty->UpdateFontColor(swiperDigitalParameters_->fontColor.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()));
+    layoutProperty->UpdateSelectedFontColor(swiperDigitalParameters_->selectedFontColor.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()));
+    layoutProperty->UpdateFontSize(swiperDigitalParameters_->fontSize.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
+    layoutProperty->UpdateSelectedFontSize(swiperDigitalParameters_->selectedFontSize.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
+    layoutProperty->UpdateFontWeight(swiperDigitalParameters_->fontWeight.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters_->selectedFontWeight.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateLeft(swiperDigitalParameters_->dimLeft.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateTop(swiperDigitalParameters_->dimTop.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateRight(swiperDigitalParameters_->dimRight.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateBottom(swiperDigitalParameters_->dimBottom.value_or(0.0_vp));
+}
 } // namespace OHOS::Ace::NG

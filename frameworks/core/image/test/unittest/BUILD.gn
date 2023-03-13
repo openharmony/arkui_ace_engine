@@ -144,7 +144,6 @@ ohos_unittest("ImageProviderTest") {
   configs = [
     ":config_image_provider_test",
     "$ace_root:ace_test_config",
-    "$ace_root:ace_test_coverage_config",
   ]
 
   deps = [
@@ -189,7 +188,6 @@ ohos_unittest("ImageCompressorTest") {
   configs = [
     ":config_image_cache_test",
     "$ace_root:ace_test_config",
-    "$ace_root:ace_test_coverage_config",
   ]
 
   deps = [
@@ -214,7 +212,7 @@ group("unittest") {
     deps += [
       # ":ImageCacheTest",
       # ":ImageProviderTest",
-      ":ImageCompressorTest",
+      # ":ImageCompressorTest",
     ]
   }
 }

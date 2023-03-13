@@ -34,7 +34,7 @@ public:
     static void Create(const std::string& webData);
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
     static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
-        SetHapPathCallback&& setHapPathCallback);
+        SetHapPathCallback&& setHapPathCallback, bool popup = false);
     static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);
     static void SetOnPageStart(OnWebAsyncFunc&& onPageStart);
     static void SetOnPageFinish(OnWebAsyncFunc&& onPageEnd);
@@ -111,6 +111,7 @@ public:
     static void SetForceDarkAccess(bool access);
     static void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled);
     static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
+    static void SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

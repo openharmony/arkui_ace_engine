@@ -17,7 +17,6 @@
 
 #include <cmath>
 
-#include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/third_party/txt/src/txt/paragraph_builder.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
 #include "third_party/bounds_checking_function/include/securec.h"
@@ -134,18 +133,7 @@ RenderLayer FlutterRenderCustomPaint::GetRenderLayer()
     return AceType::RawPtr(layer_);
 }
 
-FlutterRenderCustomPaint::FlutterRenderCustomPaint()
-{
-    auto currentDartState = flutter::UIDartState::Current();
-    if (!currentDartState) {
-        return;
-    }
-
-    renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(
-        currentDartState->GetSkiaUnrefQueue(),
-        currentDartState->GetIOManager(),
-        currentDartState->GetTaskRunners().GetIOTaskRunner());
-}
+FlutterRenderCustomPaint::FlutterRenderCustomPaint() {}
 
 void FlutterRenderCustomPaint::Paint(RenderContext& context, const Offset& offset)
 {
@@ -291,16 +279,16 @@ void FlutterRenderCustomPaint::SetAntiAlias(bool isEnabled)
 
 void FlutterRenderCustomPaint::TransferFromImageBitmap(const RefPtr<OffscreenCanvas>& offscreenCanvas)
 {
-    std::unique_ptr<ImageData> imageData = offscreenCanvas->GetImageData(0, 0,
-        offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
+    std::unique_ptr<ImageData> imageData =
+        offscreenCanvas->GetImageData(0, 0, offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
     if (imageData != nullptr) {
         ImageData* imageDataPtr = imageData.get();
         PutImageData(Offset(0, 0), *imageDataPtr);
     }
 }
 
-void FlutterRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
-    const float* vertices, const int* colors, const SkPaint* paint)
+void FlutterRenderCustomPaint::Mesh(
+    SkBitmap& bitmap, int column, int row, const float* vertices, const int* colors, const SkPaint* paint)
 {
     const int vertCounts = (column + 1) * (row + 1);
     int32_t size = 6;
@@ -338,7 +326,7 @@ void FlutterRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
     SkScalar y = 0;
     for (int i = 0; i <= row; i++) {
         if (i == row) {
-            y = height;  // to ensure numerically we hit h exactly
+            y = height; // to ensure numerically we hit h exactly
         }
         SkScalar x = 0;
         for (int j = 0; j < column; j++) {
@@ -387,19 +375,17 @@ void FlutterRenderCustomPaint::Mesh(SkBitmap& bitmap, int column, int row,
     skCanvas_->drawVertices(builder.detach(), SkBlendMode::kModulate, tempPaint);
 }
 
-
-void FlutterRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& offscreenCanvas,
-    const std::vector<double>& mesh, int32_t column, int32_t row)
+void FlutterRenderCustomPaint::DrawBitmapMesh(
+    const RefPtr<OffscreenCanvas>& offscreenCanvas, const std::vector<double>& mesh, int32_t column, int32_t row)
 {
-    std::unique_ptr<ImageData> imageData = offscreenCanvas->GetImageData(0, 0,
-        offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
+    std::unique_ptr<ImageData> imageData =
+        offscreenCanvas->GetImageData(0, 0, offscreenCanvas->GetWidth(), offscreenCanvas->GetHeight());
     if (imageData != nullptr) {
-
         if (imageData->data.empty()) {
             LOGE("PutImageData failed, image data is empty.");
             return;
         }
-        uint32_t* data = new (std::nothrow)uint32_t[imageData->data.size()];
+        uint32_t* data = new (std::nothrow) uint32_t[imageData->data.size()];
         if (data == nullptr) {
             LOGE("PutImageData failed, new data is null.");
             return;
@@ -424,7 +410,6 @@ void FlutterRenderCustomPaint::DrawBitmapMesh(const RefPtr<OffscreenCanvas>& off
 
         delete[] data;
     }
-
 }
 
 void FlutterRenderCustomPaint::FillRect(const Offset& offset, const Rect& rect)
@@ -984,17 +969,17 @@ void FlutterRenderCustomPaint::Path2DArc(const Offset& offset, const PathArgs& a
     double x = args.para1;
     double y = args.para2;
     double r = args.para3;
-    auto rect = SkRect::MakeLTRB(x - r + offset.GetX(), y - r + offset.GetY(),
-                                 x + r + offset.GetX(), y + r + offset.GetY());
+    auto rect =
+        SkRect::MakeLTRB(x - r + offset.GetX(), y - r + offset.GetY(), x + r + offset.GetX(), y + r + offset.GetY());
     double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
     double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
     double sweepAngle = endAngle - startAngle;
     if (!NearZero(args.para6)) {
-        sweepAngle = endAngle > startAngle ?
-            (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
+        sweepAngle =
+            endAngle > startAngle ? (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE) : sweepAngle;
     } else {
-        sweepAngle = endAngle > startAngle ?
-            sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
+        sweepAngle =
+            endAngle > startAngle ? sweepAngle : (std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE);
     }
     if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
         skPath2d_.arcTo(rect, startAngle, HALF_CIRCLE_ANGLE, false);
@@ -1064,8 +1049,8 @@ void FlutterRenderCustomPaint::Path2DEllipse(const Offset& offset, const PathArg
             sweepAngle += FULL_CIRCLE_ANGLE;
         }
     }
-    auto rect = SkRect::MakeLTRB(x - rx + offset.GetX(), y - ry + offset.GetY(),
-                                 x + rx + offset.GetX(), y + ry + offset.GetY());
+    auto rect = SkRect::MakeLTRB(
+        x - rx + offset.GetX(), y - ry + offset.GetY(), x + rx + offset.GetX(), y + ry + offset.GetY());
 
     if (!NearZero(rotation)) {
         SkMatrix matrix;
@@ -1340,8 +1325,8 @@ void FlutterRenderCustomPaint::UpdatePaintShader(const Offset& offset, SkPaint& 
             skShader = SkGradientShader::MakeRadial(
                 endPoint, gradient.GetOuterRadius(), colors, pos, gradientColors.size(), mode);
         } else {
-            skShader = SkGradientShader::MakeTwoPointConical(beginPoint, gradient.GetInnerRadius(),
-                endPoint, gradient.GetOuterRadius(), colors, pos, gradientColors.size(), mode);
+            skShader = SkGradientShader::MakeTwoPointConical(beginPoint, gradient.GetInnerRadius(), endPoint,
+                gradient.GetOuterRadius(), colors, pos, gradientColors.size(), mode);
         }
     }
     paint.setShader(skShader);
@@ -1399,17 +1384,13 @@ void FlutterRenderCustomPaint::UpdateLineDash(SkPaint& paint)
 void FlutterRenderCustomPaint::DrawImage(
     const Offset& offset, const CanvasImage& canvasImage, double width, double height)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
     }
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                        ? ImageProvider::GetSkImage(canvasImage.src, context, Size(width, height))
-                        : ImageProvider::GetSkImage(canvasImage.src, context);
+                     ? ImageProvider::GetSkImage(canvasImage.src, context, Size(width, height))
+                     : ImageProvider::GetSkImage(canvasImage.src, context);
 
     if (!image) {
         LOGE("image is null");
@@ -1429,10 +1410,8 @@ void FlutterRenderCustomPaint::DrawImage(
             break;
         }
         case 2: {
-            SkRect dstRect =
-                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            SkRect srcRect =
-                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
             break;
         }
@@ -1447,10 +1426,6 @@ void FlutterRenderCustomPaint::DrawImage(
 
 void FlutterRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const CanvasImage& canvasImage)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
@@ -1461,17 +1436,8 @@ void FlutterRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Can
     SkPixmap imagePixmap(imageInfo, reinterpret_cast<const void*>(pixelMap->GetPixels()), pixelMap->GetRowBytes());
 
     // Step2: Create SkImage and draw it, using gpu or cpu
-    sk_sp<SkImage> image;
-    if (!renderTaskHolder_->ioManager) {
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-    } else {
-#ifndef GPU_DISABLED
-        image = SkImage::MakeCrossContextFromPixmap(renderTaskHolder_->ioManager->GetResourceContext().get(),
-            imagePixmap, true, imagePixmap.colorSpace(), true);
-#else
-        image = SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
-#endif
-    }
+    sk_sp<SkImage> image =
+        SkImage::MakeFromRaster(imagePixmap, &PixelMap::ReleaseProc, PixelMap::GetReleaseContext(pixelMap));
     if (!image) {
         LOGE("image is null");
         return;
@@ -1491,10 +1457,8 @@ void FlutterRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Can
             break;
         }
         case 2: {
-            SkRect dstRect =
-                SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
-            SkRect srcRect =
-                SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
+            SkRect dstRect = SkRect::MakeXYWH(canvasImage.dx, canvasImage.dy, canvasImage.dWidth, canvasImage.dHeight);
+            SkRect srcRect = SkRect::MakeXYWH(canvasImage.sx, canvasImage.sy, canvasImage.sWidth, canvasImage.sHeight);
             skCanvas->drawImageRect(image, srcRect, dstRect, &imagePaint_);
             break;
         }
@@ -1509,10 +1473,6 @@ void FlutterRenderCustomPaint::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Can
 
 void FlutterRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint& paint)
 {
-    if (!flutter::UIDartState::Current()) {
-        return;
-    }
-
     auto context = GetContext().Upgrade();
     if (!context) {
         return;
@@ -1521,8 +1481,8 @@ void FlutterRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint
     auto width = pattern.GetImageWidth();
     auto height = pattern.GetImageHeight();
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                        ? ImageProvider::GetSkImage(pattern.GetImgSrc(), context, Size(width, height))
-                        : ImageProvider::GetSkImage(pattern.GetImgSrc(), context);
+                     ? ImageProvider::GetSkImage(pattern.GetImgSrc(), context, Size(width, height))
+                     : ImageProvider::GetSkImage(pattern.GetImgSrc(), context);
     if (!image) {
         LOGE("image is null");
         return;
@@ -1561,8 +1521,7 @@ void FlutterRenderCustomPaint::UpdatePaintShader(const Pattern& pattern, SkPaint
 #endif
             } },
     };
-    auto operatorIter =
-        BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
+    auto operatorIter = BinarySearchFindIndex(staticPattern, ArraySize(staticPattern), pattern.GetRepetition().c_str());
     if (operatorIter != -1) {
         staticPattern[operatorIter].value(image, paint);
     }
@@ -1574,7 +1533,7 @@ void FlutterRenderCustomPaint::PutImageData(const Offset& offset, const ImageDat
         LOGE("PutImageData failed, image data is empty.");
         return;
     }
-    uint32_t* data = new (std::nothrow)uint32_t[imageData.data.size()];
+    uint32_t* data = new (std::nothrow) uint32_t[imageData.data.size()];
     if (data == nullptr) {
         LOGE("PutImageData failed, new data is null.");
         return;
@@ -1654,8 +1613,8 @@ void FlutterRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
             webglBitmap_.eraseColor(SK_ColorTRANSPARENT);
 #endif
         }
-        webGLContext_->SetBitMapPtr(reinterpret_cast<char*>(webglBitmap_.getPixels()),
-            webglBitmap_.width(), webglBitmap_.height());
+        webGLContext_->SetBitMapPtr(
+            reinterpret_cast<char*>(webglBitmap_.getPixels()), webglBitmap_.width(), webglBitmap_.height());
     }
 }
 

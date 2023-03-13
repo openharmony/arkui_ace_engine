@@ -1699,21 +1699,26 @@ class DistributedStorage {
 *   obsObj = Observed(ClassA)(params to ClassA constructor)
 *
 * Note this works only for classes, not for ClassA[]
-* Also does not work for classes with genetics it seems
 * In that case use factory function
 *   obsObj = ObservedObject.createNew<ClassA[]>([])
 */
-function Observed(target) {
-    var original = target;
-    // the new constructor behaviour
-    var f = function (...args) {
+const Observed = function () {
+    return function Observed(target) {
+        const IS_PROXIED = Symbol('___is_proxied___');
         
-        return ObservedObject.createNew(new original(...args), undefined);
+        const Observed = class extends target {
+            constructor(...args) {
+                super(...args);
+                let isProxied = this.IS_PROXIED;
+                Object.defineProperty(this, IS_PROXIED, { value: true });
+                return isProxied
+                    ? this
+                    : ObservedObject.createNew(this, null);
+            }
+        };
+        return Observed;
     };
-    Object.setPrototypeOf(f, Object.getPrototypeOf(original));
-    // return new constructor (will override original)
-    return f;
-}
+}();
 class SubscribableHandler {
     constructor(owningProperty) {
         this.owningProperties_ = new Set();
@@ -1763,32 +1768,32 @@ class SubscribableHandler {
             }
         });
     }
-    notifyObjectPropertyHasBeenRead(propName) {
+    notifyObjectPropertyHasBeenRead(propName, obj) {
         
         this.owningProperties_.forEach((subscribedId) => {
             var owningProperty = SubscriberManager.Find(subscribedId);
             if (owningProperty) {
                 // PU code path
                 if ('propertyHasBeenReadPU' in owningProperty) {
-                    owningProperty.objectHasBeenReadPU(this, propName);
+                    owningProperty.objectHasBeenReadPU(obj, propName);
                 }
             }
         });
     }
     get(target, property) {
-        return (property === SubscribableHandler.IS_OBSERVED_OBJECT) ? true :
-            (property === SubscribableHandler.RAW_OBJECT) ? target : target[property];
-        /*
-        TODO
-        Requested by Lihong, found not working, still need to investigate
-        return (property === SubscribableHandler.IS_OBSERVED_OBJECT)
-            ? true
-            : (property === SubscribableHandler.RAW_OBJECT)
-                ? target
-                : (typeof target[property] == 'node comfunction')
-                    ? target[property].bind(target)
-                    : target[property];
-                    */
+        if (property === SubscribableHandler.IS_OBSERVED_OBJECT) {
+            return true;
+        }
+        else if (property === SubscribableHandler.RAW_OBJECT) {
+            return target;
+        }
+        else {
+            let ret = target[property];
+            if (typeof ret == "object") {
+                this.notifyObjectPropertyHasBeenRead(property.toString(), ret);
+            }
+            return ret;
+        }
     }
     set(target, property, newValue) {
         switch (property) {
@@ -1909,45 +1914,36 @@ class ObservedObject extends ExtendableProxy {
      * @returns deep copied object, optionally wrapped inside an ObservedObject
      */
     static GetDeepCopyOfObject(obj) {
-        function getProperties(o) {
-            var seenobj = new Set();
-            var seenprop = new Set();
-            function _proto(obj) {
-                return obj instanceof Object ?
-                    Object.getPrototypeOf(obj) :
-                    obj.constructor.prototype;
+        
+        if (obj === null || typeof obj !== 'object') {
+            return obj;
+        }
+        let copy = Array.isArray(obj) ? [] : !obj.constructor ? {} : new obj.constructor();
+        Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+        if (obj instanceof Set) {
+            for (let setKey of obj.keys()) {
+                copy.add(ObservedObject.GetDeepCopyOfObject(setKey));
             }
-            function _properties(obj) {
-                var ret = [];
-                if (obj === null || seenobj.has(obj)) {
-                    return ret;
-                }
-                seenobj.add(obj);
-                if (obj instanceof Object) {
-                    var ps = Object.getOwnPropertyNames(obj);
-                    for (var i = 0; i < ps.length; ++i) {
-                        if (!seenprop.has(ps[i])) {
-                            ret.push(ps[i]);
-                            seenprop.add(ps[i]);
-                        }
-                    }
-                }
-                return ret.concat(_properties(_proto(obj)));
+        }
+        else if (obj instanceof Map) {
+            for (let mapKey of obj.keys()) {
+                copy.set(mapKey, ObservedObject.GetDeepCopyOfObject(obj.get(mapKey)));
             }
-            return _properties(o);
         }
-        if (obj instanceof Array) {
-            let copy = [];
-            obj.forEach((item, index) => copy[index] = ObservedObject.GetDeepCopyOfObject(item));
-            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+        else if (obj instanceof Object) {
+            for (let objKey of Object.keys(obj)) {
+                copy[objKey] = ObservedObject.GetDeepCopyOfObject(obj[objKey]);
+            }
         }
-        else if (typeof obj === "object") {
-            let copy = {};
-            const properties = getProperties(obj);
-            properties.forEach(k => copy[k] = ObservedObject.GetDeepCopyOfObject(obj[k]));
-            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
+        else if (obj instanceof Date) {
+            copy.setTime(obj.getTime());
         }
-        return obj;
+        for (let key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                copy[key] = ObservedObject.GetDeepCopyOfObject(obj[key]);
+            }
+        }
+        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     }
     /**
      * Create a new ObservableObject and subscribe its owner to propertyHasChanged
@@ -2029,7 +2025,6 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         this.subscribers_.delete(subscriberId);
     }
     notifyHasChanged(newValue) {
-        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2052,7 +2047,6 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         });
     }
     notifyPropertyRead() {
-        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2243,7 +2237,6 @@ class ObservedPropertyObject extends ObservedPropertyObjectAbstract {
         return true;
     }
     get() {
-        
         this.notifyPropertyRead();
         return this.wrappedValue_;
     }
@@ -2917,11 +2910,10 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.dependentElementIds_ = new Set();
     }
     notifyPropertyRead() {
-        stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
+        stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
         notifyPropertyRead, DO NOT USE with PU. Use notifyPropertryHasBeenReadPU`);
     }
     notifyPropertryHasBeenReadPU() {
-        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -2933,7 +2925,6 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         this.recordDependentUpdate();
     }
     notifyPropertryHasChangedPU() {
-        
         this.subscribers_.forEach((subscribedId) => {
             var subscriber = SubscriberManager.Find(subscribedId);
             if (subscriber) {
@@ -3144,7 +3135,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
     */
     setValueInternal(newValue) {
         if (typeof newValue !== 'object') {
-            stateMgmtConsole.error(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+            stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
             return false;
         }
         if (newValue == this.wrappedValue_) {
@@ -3174,8 +3165,7 @@ class ObservedPropertyObjectPU extends ObservedPropertyObjectAbstractPU {
         return this.wrappedValue_;
     }
     getUnmonitored() {
-        
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
         return this.wrappedValue_;
     }
     set(newValue) {
@@ -3253,7 +3243,7 @@ class ObservedPropertySimplePU extends ObservedPropertySimpleAbstractPU {
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
         return this.wrappedValue_;
     }
     get() {
@@ -3546,13 +3536,11 @@ class SynchedPropertyObjectTwoWayPU extends ObservedPropertyObjectAbstractPU {
         this.notifyPropertryHasChangedPU();
     }
     getUnmonitored() {
-        
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
         return (this.source_ ? this.source_.getUnmonitored() : undefined);
     }
     // get 'read through` from the ObservedProperty
     get() {
-        
         this.notifyPropertryHasBeenReadPU();
         return this.getUnmonitored();
     }
@@ -3650,7 +3638,7 @@ class SynchedPropertySimpleOneWayPU extends ObservedPropertySimpleAbstractPU {
     }
     getUnmonitored() {
         
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
         return this.wrappedValue_;
     }
     // get 'read through` from the ObservedProperty
@@ -3818,8 +3806,7 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
         this.notifyPropertryHasChangedPU();
     }
     getUnmonitored() {
-        // 
-        // unmonitored get access , no call to otifyPropertyRead !
+        // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
         return this.obsObject_;
     }
     // get 'read through` from the ObservedProperty
@@ -4172,22 +4159,22 @@ class ViewPU extends NativeViewPartialUpdate {
      *
      */
     updateDirtyElements() {
-        if (this.dirtDescendantElementIds_.size == 0) {
+        do {
             
-            return;
-        }
-        
-        // request list of all (gloabbly) deleteelmtIds;
-        let deletedElmtIds = [];
-        this.getDeletedElemtIds(deletedElmtIds);
-        // see which elmtIds are managed by this View
-        // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
-        // process all elmtIds marked as needing update in ascending order.
-        // ascending order ensures parent nodes will be updated before their children
-        // prior cleanup ensure no already deleted Elements have their update func executed
-        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-        this.dirtDescendantElementIds_.clear();
+            // request list of all (gloabbly) deleteelmtIds;
+            let deletedElmtIds = [];
+            this.getDeletedElemtIds(deletedElmtIds);
+            // see which elmtIds are managed by this View
+            // and clean up all book keeping for them
+            this.purgeDeletedElmtIds(deletedElmtIds);
+            // process all elmtIds marked as needing update in ascending order.
+            // ascending order ensures parent nodes will be updated before their children
+            // prior cleanup ensure no already deleted Elements have their update func executed
+            Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+                this.UpdateElement(elmtId);
+                this.dirtDescendantElementIds_.delete(elmtId);
+            });
+        } while (this.dirtDescendantElementIds_.size);
     }
     //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
     purgeDeletedElmtIds(rmElmtIds) {

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
@@ -23,36 +24,43 @@ namespace OHOS::Ace::NG {
 void MenuItemGroupPattern::OnMountToParentDone()
 {
     ModifyFontSize();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+            auto itemNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(itemNode);
+            auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+            CHECK_NULL_VOID(itemPattern);
+            itemPattern->UpdateTextNodes();
+        }
+    }
 }
 
 void MenuItemGroupPattern::ModifyFontSize()
 {
     auto menu = GetMenu();
     CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto menuFontSize = menuPattern->FontSize();
+    auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuProperty);
+    auto menuFontSize = menuProperty->GetFontSize();
+    if (!menuFontSize.has_value()) {
+        return;
+    }
 
     if (headerContent_) {
         auto headerProperty = headerContent_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(headerProperty);
-        headerProperty->UpdateFontSize(menuFontSize);
+        headerProperty->UpdateFontSize(menuFontSize.value());
         headerContent_->MarkModifyDone();
     }
 
     if (footerContent_) {
         auto footerProperty = footerContent_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(footerProperty);
-        footerProperty->UpdateFontSize(menuFontSize);
+        footerProperty->UpdateFontSize(menuFontSize.value());
         footerContent_->MarkModifyDone();
-    }
-
-    auto host = GetHost();
-    for (const auto& child : host->GetChildren()) {
-        auto menuItemPattern = DynamicCast<FrameNode>(child)->GetPattern<MenuItemPattern>();
-        if (menuItemPattern) {
-            menuItemPattern->ModifyFontSize(menuFontSize);
-        }
     }
 }
 

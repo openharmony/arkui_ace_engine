@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "core/components/slider/slider_element.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 
 namespace OHOS::Ace {
 
@@ -59,6 +60,13 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("maxLabel", &JSSlider::SetMaxLabel);
     JSClass<JSSlider>::StaticMethod("showSteps", &JSSlider::SetShowSteps);
     JSClass<JSSlider>::StaticMethod("showTips", &JSSlider::SetShowTips);
+    JSClass<JSSlider>::StaticMethod("blockBorderColor", &JSSlider::SetBlockBorderColor);
+    JSClass<JSSlider>::StaticMethod("blockBorderWidth", &JSSlider::SetBlockBorderWidth);
+    JSClass<JSSlider>::StaticMethod("stepColor", &JSSlider::SetStepColor);
+    JSClass<JSSlider>::StaticMethod("trackBorderRadius", &JSSlider::SetTrackBorderRadius);
+    JSClass<JSSlider>::StaticMethod("blockSize", &JSSlider::SetBlockSize);
+    JSClass<JSSlider>::StaticMethod("blockStyle", &JSSlider::SetBlockStyle);
+    JSClass<JSSlider>::StaticMethod("stepSize", &JSSlider::SetStepSize);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSlider>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
@@ -138,7 +146,9 @@ void JSSlider::Create(const JSCallbackInfo& info)
 
     step = GetStep(step, max, min);
 
-    value = GetValue(value, max, min);
+    if (!Container::IsCurrentUseNewPipeline()) {
+        value = GetValue(value, max, min);
+    }
 
     auto sliderStyle = SliderStyle::OUTSET;
     auto sliderMode = SliderModel::SliderMode::OUTSET;
@@ -277,6 +287,149 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
         return;
     }
     SliderModel::GetInstance()->SetShowTips(info[0]->ToBoolean());
+}
+
+void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        return;
+    }
+    SliderModel::GetInstance()->SetBlockBorderColor(colorVal);
+}
+
+void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    Dimension blockBorderWidth;
+    if (!ParseJsDimensionVp(info[0], blockBorderWidth)) {
+        return;
+    }
+    SliderModel::GetInstance()->SetBlockBorderWidth(blockBorderWidth);
+}
+
+void JSSlider::SetStepColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        return;
+    }
+    SliderModel::GetInstance()->SetStepColor(colorVal);
+}
+
+void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    Dimension trackBorderRadius;
+    if (!ParseJsDimensionVp(info[0], trackBorderRadius)) {
+        return;
+    }
+    SliderModel::GetInstance()->SetTrackBorderRadius(trackBorderRadius);
+}
+
+void JSSlider::SetBlockSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        LOGW("arg is not object.");
+        return;
+    }
+    JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+
+    Dimension width;
+    JSRef<JSVal> jsWidth = sizeObj->GetProperty("width");
+    if (!ParseJsDimensionVp(jsWidth, width)) {
+        return;
+    }
+    if (LessNotEqual(width.Value(), 0.0)) {
+        width.SetValue(0.0);
+    }
+
+    Dimension height;
+    JSRef<JSVal> jsHeight = sizeObj->GetProperty("height");
+    if (!ParseJsDimensionVp(jsHeight, height)) {
+        return;
+    }
+    if (LessNotEqual(height.Value(), 0.0)) {
+        height.SetValue(0.0);
+    }
+
+    SliderModel::GetInstance()->SetBlockSize(Size(width.ConvertToPx(), height.ConvertToPx()));
+}
+
+void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        LOGW("arg is not object.");
+        return;
+    }
+    auto jsObj = JSRef<JSObject>::Cast(info[0]);
+    auto getType = jsObj->GetProperty("type");
+    if (getType->IsNull() || !getType->IsNumber()) {
+        LOGW("block type is not number.");
+        return;
+    }
+    auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
+    if (type == SliderModel::BlockStyleType::IMAGE) {
+        std::string src;
+        if (!ParseJsMedia(jsObj->GetProperty("image"), src)) {
+            return;
+        }
+        SliderModel::GetInstance()->SetBlockImage(src);
+    } else if (type == SliderModel::BlockStyleType::SHAPE) {
+        auto shape = jsObj->GetProperty("shape");
+        if (!shape->IsObject()) {
+            LOGW("shape param is not an object.");
+            return;
+        }
+        JSShapeAbstract* shapeAbstract = JSRef<JSObject>::Cast(shape)->Unwrap<JSShapeAbstract>();
+        if (shapeAbstract == nullptr) {
+            LOGW("clipShape is null");
+            return;
+        }
+        SliderModel::GetInstance()->SetBlockShape(shapeAbstract->GetBasicShape());
+    }
+    SliderModel::GetInstance()->SetBlockType(type);
+}
+
+void JSSlider::SetStepSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The arg is wrong, it is supposed to have at least 1 arguments");
+        return;
+    }
+
+    Dimension stepSize;
+    if (!ParseJsDimensionVp(info[0], stepSize)) {
+        return;
+    }
+    SliderModel::GetInstance()->SetStepSize(stepSize);
 }
 
 void JSSlider::OnChange(const JSCallbackInfo& info)

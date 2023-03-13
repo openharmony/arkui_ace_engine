@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <optional>
 #include <utility>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -94,7 +95,7 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->ClearUserDefinedIdealSize(isWidth);
+    layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
 void ViewAbstract::SetMinWidth(const CalcLength& width)
@@ -221,6 +222,45 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
+void ViewAbstract::SetSphericalEffect(float radio)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->OnSphericalEffectUpdate(radio);
+}
+
+void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->OnPixelStretchEffectUpdate(option);
+}
+
+void ViewAbstract::SetLightUpEffect(float radio)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->OnLightUpEffectUpdate(radio);
+}
+
 void ViewAbstract::SetLayoutWeight(int32_t value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -282,6 +322,7 @@ void ViewAbstract::SetFlexBasis(const Dimension& value)
         return;
     }
     if (LessNotEqual(value.Value(), 0.0f)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension());
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, value);
@@ -383,7 +424,12 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
         return;
     }
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(value);
+    if (Negative(value.Value())) {
+        borderWidth.SetBorderWidth(Dimension(0));
+        LOGW("border width is negative, reset to 0");
+    } else {
+        borderWidth.SetBorderWidth(value);
+    }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
 }
 
@@ -777,7 +823,7 @@ void ViewAbstract::BindPopup(
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
     if (popupInfo.isCurrentOnShow == isShow) {
-        LOGI("No need to change popup show flag.");
+        LOGI("No need to change popup show flag, current show %{public}d", isShow);
         return;
     }
     popupInfo.markNeedUpdate = true;
@@ -814,6 +860,7 @@ void ViewAbstract::BindPopup(
     popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
     if (showInSubWindow) {
+        LOGI("Popup now show in subwindow.");
         SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
         return;
     }
@@ -822,12 +869,13 @@ void ViewAbstract::BindPopup(
         CHECK_NULL_VOID(overlay);
         overlay->ErasePopup(targetId);
     };
+    LOGI("begin to update popup node.");
     targetNode->PushDestroyCallback(destroyCallback);
     overlayManager->UpdatePopupNode(targetId, popupInfo);
 }
 
-void ViewAbstract::BindMenuWithItems(
-    std::vector<OptionParam>&& params, const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset)
+void ViewAbstract::BindMenuWithItems(std::vector<OptionParam>&& params,
+    const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -835,19 +883,22 @@ void ViewAbstract::BindMenuWithItems(
         LOGD("menu params is empty");
         return;
     }
-    auto menuNode = MenuView::Create(std::move(params), targetNode->GetId());
+    auto menuNode = MenuView::Create(std::move(params), targetNode->GetId(), MenuType::MENU, menuParam);
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
 void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
-    bool isContextMenu, const NG::OffsetF& offset)
+    bool isContextMenu, const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
-
+#ifdef PREVIEW
+    // unable to use the subWindow in the Previewer.
+    isContextMenu = false;
+#endif
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
-    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type);
+    auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type, menuParam);
     if (isContextMenu) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset);
         return;
@@ -944,6 +995,16 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     }
 }
 
+void ViewAbstract::SetDebugLine(const std::string& line)
+{
+#ifdef PREVIEW
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetDebugLine(line);
+    }
+#endif
+}
+
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -966,6 +1027,15 @@ void ViewAbstract::SetTransition(const TransitionOptions& options)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(Transition, options);
+}
+
+void ViewAbstract::SetChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ChainedTransition, effect);
 }
 
 void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
@@ -993,6 +1063,15 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(ClipMask, basicShape);
+}
+
+void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ProgressMask, progress);
 }
 
 void ViewAbstract::SetBrightness(const Dimension& brightness)
@@ -1159,6 +1238,57 @@ void ViewAbstract::SetSharedTransition(
         target->SetSharedTransitionOptions(option);
         target->SetShareId(shareId);
     }
+}
+
+void ViewAbstract::SetForegroundColor(const Color& color)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+}
+
+void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& strategy)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        LOGD("current state is not processed, return");
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
+}
+
+void ViewAbstract::SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (value.size() > 1) {
+        LOGE("KeyboardShortcut value arg is wrong, return");
+        return;
+    }
+    if (value.empty() || keys.size() == 0) {
+        LOGI("KeyboardShortcut value and keys is invalid, return");
+        eventHub->SetKeyboardShortcut('\0', 0);
+        eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+        return;
+    }
+    auto key = eventManager->GetKeyboardShortcutKeys(keys);
+    if (key == 0) {
+        LOGI("KeyboardShortcut's keys are the same, return");
+        return;
+    }
+    if (eventManager->IsSameKeyboardShortcutNode(value[0], key)) {
+        LOGI("KeyboardShortcut is the same, return");
+        return;
+    }
+    eventHub->SetKeyboardShortcut(value[0], key);
+    eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
 }
 
 } // namespace OHOS::Ace::NG

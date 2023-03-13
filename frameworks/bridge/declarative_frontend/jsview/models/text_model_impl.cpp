@@ -66,6 +66,8 @@ void TextModelImpl::SetTextColor(const Color& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetTextShadow(const Shadow& value) {}
+
 void TextModelImpl::SetItalicFontStyle(Ace::FontStyle value)
 {
     auto component = GetComponent();
@@ -203,6 +205,8 @@ void TextModelImpl::SetAdaptMaxFontSize(const Dimension& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextModelImpl::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) {}
+
 void TextModelImpl::OnSetWidth()
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -277,6 +281,8 @@ void TextModelImpl::SetCopyOption(CopyOptions copyOption)
     component->SetCopyOption(copyOption);
 }
 
+void TextModelImpl::SetDraggable(bool draggable) {}
+
 void TextModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
 {
     auto component = GetComponent();
@@ -311,5 +317,7 @@ void TextModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     CHECK_NULL_VOID(component);
     component->SetOnDropId(onDrop);
 }
+
+void TextModelImpl::SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) {}
 
 } // namespace OHOS::Ace::Framework

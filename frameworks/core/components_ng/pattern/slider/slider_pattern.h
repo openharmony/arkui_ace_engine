@@ -35,13 +35,16 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        SliderPaintMethod::Parameters paintParameters { trackThickness_, blockDiameter_, sliderLength_, borderBlank_,
-            stepRatio_, valueRatio_, hotBlockShadowWidth_, hotFlag_, mouseHoverFlag_, mousePressedFlag_ };
+        auto paintParameters = UpdateContentParameters();
+        if (!sliderContentModifier_) {
+            sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(paintParameters);
+        }
         SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
         if (!sliderTipModifier_ && bubbleFlag_) {
             sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>();
         }
-        return MakeRefPtr<SliderPaintMethod>(sliderTipModifier_, paintParameters, paragraph_, tipParameters);
+        return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
+            sliderTipModifier_, paragraph_, tipParameters);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -71,8 +74,14 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
+    const OffsetF& GetBlockCenter() const
+    {
+        return circleCenter_;
+    }
+
 private:
     void OnModifyDone() override;
+    void CancelExceptionValue(float& min, float& max);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     void CreateParagraphFunc();
@@ -90,6 +99,8 @@ private:
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);
+    void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void HandleClickEvent();
     void InitMouseEvent(const RefPtr<InputEventHub>& inputEventHub);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleHoverEvent(bool isHover);
@@ -108,6 +119,12 @@ private:
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
 
+    SliderContentModifier::Parameters UpdateContentParameters();
+    void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void UpdateBlock();
+
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;
@@ -125,13 +142,16 @@ private:
     OffsetF circleCenter_ = { 0, 0 };
 
     float trackThickness_ = 0.0f;
-    float blockDiameter_ = 0.0f;
     float blockHotSize_ = 0.0f;
+    SizeF blockSize_;
 
     RefPtr<TouchEventImpl> touchEvent_;
+    RefPtr<ClickEvent> clickListener_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> hoverEvent_;
+
+    RefPtr<SliderContentModifier> sliderContentModifier_;
 
     // tip Parameters
     bool bubbleFlag_ = false;
@@ -140,6 +160,9 @@ private:
     OffsetF bubbleOffset_;
     OffsetF textOffset_;
     RefPtr<SliderTipModifier> sliderTipModifier_;
+
+    RefPtr<FrameNode> imageFrameNode_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG

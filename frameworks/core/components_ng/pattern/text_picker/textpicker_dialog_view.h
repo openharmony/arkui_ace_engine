@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,17 +26,18 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT TextPickerDialogView {
 public:
-    static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, uint32_t selected, const Dimension& height,
-        const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,
+    static RefPtr<FrameNode> Show(const DialogProperties& dialogProperties, const TextPickerSettingData& settingData,
+        std::map<std::string, NG::DialogTextEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetSelected(const RefPtr<TextPickerPattern>& textPickerPattern, uint32_t value = 0);
-    static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern, const std::vector<std::string>& value);
+    static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern,
+        const std::vector<NG::RangeContent>& value);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
     static void SetDefaultPickerItemHeight(const Dimension& value);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
-    std::map<std::string, NG::DialogTextEvent> dialogEvent,
-    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
+        std::map<std::string, NG::DialogTextEvent> dialogEvent,
+        std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static RefPtr<FrameNode> CreateDividerNode(const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateConfirmNode(const RefPtr<FrameNode>& dateNode, DialogEvent& acceptEvent);
     static RefPtr<FrameNode> CreateCancelNode(NG::DialogGestureEvent& cancelEvent);
@@ -44,6 +45,9 @@ public:
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();
+    static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
+    static void SetTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const PickerTextProperties& properties);
 };
 } // namespace OHOS::Ace::NG
 

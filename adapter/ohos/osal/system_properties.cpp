@@ -247,6 +247,11 @@ int32_t GetAstcPsnrProp()
     return system::GetIntParameter<int>("persist.astc.psnr", 0);
 }
 
+bool IsUseMemoryMonitor()
+{
+    return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
+}
+
 bool IsExtSurfaceEnabled()
 {
 #ifdef EXT_SURFACE_ENABLE
@@ -263,9 +268,9 @@ bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
 int32_t SystemProperties::deviceWidth_ = 0;
 int32_t SystemProperties::deviceHeight_ = 0;
-double SystemProperties::resolution_ = 1.0;
-DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
-DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
+ACE_WEAK_SYM double SystemProperties::resolution_ = 1.0;
+ACE_WEAK_SYM DeviceType SystemProperties::deviceType_ { DeviceType::UNKNOWN };
+ACE_WEAK_SYM DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT };
 std::string SystemProperties::brand_ = INVALID_PARAM;
 std::string SystemProperties::manufacturer_ = INVALID_PARAM;
 std::string SystemProperties::model_ = INVALID_PARAM;
@@ -279,19 +284,19 @@ ColorMode SystemProperties::colorMode_ { ColorMode::LIGHT };
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
-bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
-bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
+ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
+ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
-bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
+ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 bool SystemProperties::debugEnabled_ = IsDebugEnabled();
 bool SystemProperties::gpuUploadEnabled_ = IsGpuUploadEnabled();
 bool SystemProperties::astcEnabled_ = GetAstcEnabled();
 int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
-bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
-uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
+ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
+ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 
-DeviceType SystemProperties::GetDeviceType()
+ACE_WEAK_SYM DeviceType SystemProperties::GetDeviceType()
 {
     InitDeviceTypeBySystemProperty();
     return deviceType_;
@@ -367,7 +372,7 @@ void SystemProperties::SetDeviceOrientation(int32_t orientation)
     }
 }
 
-float SystemProperties::GetFontWeightScale()
+ACE_WEAK_SYM float SystemProperties::GetFontWeightScale()
 {
     // Default value of font weight scale is 1.0.
     std::string prop =
@@ -381,7 +386,7 @@ void SystemProperties::InitMccMnc(int32_t mcc, int32_t mnc)
     mnc_ = mnc;
 }
 
-bool SystemProperties::GetDebugEnabled()
+ACE_WEAK_SYM bool SystemProperties::GetDebugEnabled()
 {
     return debugEnabled_;
 }
@@ -401,7 +406,7 @@ std::string SystemProperties::GetNewPipePkg()
     return system::GetParameter("persist.ace.newpipe.pkgname", "");
 }
 
-float SystemProperties::GetAnimationScale()
+ACE_WEAK_SYM float SystemProperties::GetAnimationScale()
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);
     return animationScale_;
@@ -420,6 +425,12 @@ int32_t SystemProperties::GetSvgMode()
 bool SystemProperties::GetAllowWindowOpenMethodEnabled()
 {
     return system::GetBoolParameter("persist.web.allowWindowOpenMethod.enabled", false);
+}
+
+bool SystemProperties::GetIsUseMemoryMonitor()
+{
+    static bool isUseMemoryMonitor = IsUseMemoryMonitor();
+    return isUseMemoryMonitor;
 }
 
 } // namespace OHOS::Ace

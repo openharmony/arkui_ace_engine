@@ -28,6 +28,7 @@ public:
     void Create(const std::string& content) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void SetTextShadow(const Shadow& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -42,6 +43,7 @@ public:
     void SetLetterSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
+    void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
     void OnSetHeight() override;
     void OnSetWidth() override;
     void OnSetAlign() override;
@@ -54,6 +56,8 @@ public:
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
+    void SetDraggable(bool draggable) override;
+    void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) override;
 
 private:
     static RefPtr<TextComponentV2> GetComponent();

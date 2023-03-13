@@ -110,10 +110,10 @@ public:
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
 
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
+    PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext(std::unique_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
+    PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor>& taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend);
 
     ~PipelineContext() override;
@@ -159,7 +159,9 @@ public:
 
     void SetSinglePageId(int32_t pageId);
 
-    bool PopPageStackOverlay();
+    bool PopPageStackOverlay() override;
+
+    void HideOverlays() override;
 
     void NotifyAppStorage(const std::string& key, const std::string& value);
 
@@ -254,11 +256,13 @@ public:
     }
 
     void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) override;
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
 
-    void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type);
+    void WindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr);
 
     void OnSurfaceDensityChanged(double density) override;
 
@@ -338,7 +342,7 @@ public:
 
     void BlurWindowWithDrag(bool isBlur);
 
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
     RefPtr<StageElement> GetStageElement() const;
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -260,6 +260,25 @@ if (is_standard_system) {
       "$icu_path/thirdparty/icu/libhmicui18n${dylib_suffix}",
       "$icu_path/thirdparty/icu/libhmicuuc${dylib_suffix}",
       "$uv_path/thirdparty/libuv/libuv${dylib_suffix}",
+    ]
+
+    rosen_path = get_label_info(
+            "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+            "root_out_dir")
+    deps += [
+      "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context",
+      "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
+      "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+      "//third_party/flutter/build/skia:skia_shared",
+      "//third_party/flutter/glfw:glfw",
+    ]
+
+    sources += [
+      "${rosen_path}/graphic/graphic_standard/libglfw${dylib_suffix}",
+      "${rosen_path}/graphic/graphic_standard/libglfw_render_context${dylib_suffix}",
+      "${rosen_path}/graphic/graphic_standard/librender_service_base${dylib_suffix}",
+      "${rosen_path}/graphic/graphic_standard/librender_service_client${dylib_suffix}",
+      "${rosen_path}/thirdparty/flutter/libskia_shared${dylib_suffix}",
     ]
 
     # Add ark engine-related dynamic libraries

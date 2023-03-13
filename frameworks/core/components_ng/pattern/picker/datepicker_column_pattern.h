@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,12 +19,15 @@
 #include <utility>
 
 #include "base/i18n/localization.h"
+#include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_paint_method.h"
+#include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/picker/toss_animation_controller.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -33,6 +36,15 @@ namespace OHOS::Ace::NG {
 using ColumnChangeCallback = std::function<void(const RefPtr<FrameNode>&, bool, uint32_t, bool)>;
 using ColumnFinishCallback = std::function<void(bool)>;
 using EventCallback = std::function<void(bool)>;
+
+struct DateTextProperties {
+    Dimension upFontSize;
+    Dimension fontSize;
+    Dimension downFontSize;
+    Color upColor;
+    Color currentColor;
+    Color downColor;
+};
 
 class DatePickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(DatePickerColumnPattern, LinearLayoutPattern);
@@ -54,7 +66,8 @@ public:
         return MakeRefPtr<DataPickerLayoutProperty>();
     }
 
-    void FlushCurrentOptions();
+    void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
+        bool isUpdateAnimationProperties = false);
 
     bool NotLoopOptions() const;
 
@@ -62,7 +75,7 @@ public:
 
     bool CanMove(bool isDown) const;
 
-    bool InnerHandleScroll(bool isDown);
+    bool InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly = false, bool isUpdateAnimationProperties = false);
 
     uint32_t GetCurrentIndex() const
     {
@@ -174,6 +187,7 @@ private:
     void HandleMouseEvent(bool isHover);
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
+    void PlayHoverAnimation(const Color& color);
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& event);
@@ -182,8 +196,25 @@ private:
     void CreateAnimation();
     RefPtr<CurveAnimation<double>> CreateAnimation(double from, double to);
     void HandleCurveStopped();
-    void ScrollOption(double delta);
-
+    void ScrollOption(double delta, bool isJump = false);
+    void UpdatePickerTextProperties(uint32_t index, uint32_t showOptionCount,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty);
+    void UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<DataPickerRowLayoutProperty>& timePickerLayoutProperty);
+    void UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<DataPickerRowLayoutProperty>& timePickerLayoutProperty);
+    void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<DataPickerRowLayoutProperty>& timePickerLayoutProperty);
+    void AddAnimationTextProperties(uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void UpdateTextPropertiesLinear(bool isDown, double scale);
+    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        uint32_t index, uint32_t showCount, bool isDown, double scale);
+    void FlushAnimationTextProperties(bool isDown);
+    Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> mouseEvent_;
@@ -206,6 +237,7 @@ private:
     double deltaSize_ = 0.0;
     RefPtr<PanEvent> panEvent_;
     bool pressed_ = false;
+    bool hoverd_ = false;
     double scrollDelta_ = 0.0;
     bool animationCreated_ = false;
     RefPtr<Animator> toController_;
@@ -213,6 +245,8 @@ private:
     RefPtr<CurveAnimation<double>> fromBottomCurve_;
     RefPtr<CurveAnimation<double>> fromTopCurve_;
     RefPtr<TossAnimationController> tossAnimationController_ = AceType::MakeRefPtr<TossAnimationController>();
+    std::vector<DateTextProperties> animationProperties_;
+    bool isJump_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
 };

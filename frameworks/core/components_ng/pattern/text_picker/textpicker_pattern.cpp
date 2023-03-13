@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -166,6 +166,7 @@ void TextPickerPattern::OnColumnsBuilding()
     selectedIndex_ = range_.empty() ? 0 : GetSelected() % range_.size();
     textPickerColumnPattern->SetCurrentIndex(selectedIndex_);
     textPickerColumnPattern->SetOptions(options_);
+    textPickerColumnPattern->SetColumnKind(columnsKind_);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -193,10 +194,11 @@ double TextPickerPattern::CalculateHeight()
     if (textPickerLayoutProperty->HasDefaultPickerItemHeight()) {
         auto defaultPickerItemHeightValue = textPickerLayoutProperty->GetDefaultPickerItemHeightValue();
         if (context->NormalizeToPx(defaultPickerItemHeightValue) <= 0) {
+            height = pickerTheme->GetDividerSpacing().ConvertToPx();
             return height;
         }
         if (defaultPickerItemHeightValue.Unit() == DimensionUnit::PERCENT) {
-            height = pickerTheme->GetGradientHeight().ConvertToPx() * defaultPickerItemHeightValue.ConvertToPx();
+            height = pickerTheme->GetGradientHeight().ConvertToPx() * defaultPickerItemHeightValue.Value();
         } else {
             height = context->NormalizeToPx(defaultPickerItemHeightValue);
         }
@@ -350,4 +352,29 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
     }
 }
 
+void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("range", GetRangeStr().c_str());
+}
+
+std::string TextPickerPattern::GetRangeStr() const
+{
+    if (!range_.empty()) {
+        std::string result = "[";
+        for (const auto& item : range_) {
+            result += "\"";
+            result += "icon:";
+            result += item.icon_;
+            result += ",";
+            result += "text:";
+            result += item.text_;
+            result += "\"";
+            result += ",";
+        }
+        result = result.substr(0, result.size() - 1);
+        result += "]";
+        return result;
+    }
+    return "";
+}
 } // namespace OHOS::Ace::NG

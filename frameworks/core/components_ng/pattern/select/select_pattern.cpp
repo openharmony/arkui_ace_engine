@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,16 @@
 #include "core/components_ng/pattern/select/select_pattern.h"
 
 #include <cstdint>
+#include <optional>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/json/json_util.h"
 #include "base/utils/utils.h"
+#include "core/animation/curves.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/select/select_theme.h"
-#include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_view.h"
@@ -32,6 +33,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -54,6 +56,7 @@ constexpr uint32_t SELECT_ITSELF_TEXT_LINES = 1;
 
 void SelectPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnPress();
     RegisterOnHover();
@@ -103,10 +106,42 @@ void SelectPattern::RegisterOnClick()
     GestureEventFunc callback = [weak = WeakClaim(this)](GestureEvent& /* info */) mutable {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
+
+        auto selected = pattern->GetSelected();
+        if (selected > -1 && selected < pattern->GetOptions().size()) {
+            pattern->UpdateSelectedProps(selected);
+        }
         pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
     gestureHub->BindMenu(std::move(callback));
+}
+
+void SelectPattern::PlayBgColorAnimation(bool isHoverChange)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+
+    AnimationOption option = AnimationOption();
+    if (isHoverChange) {
+        option.SetDuration(selectTheme->GetHoverAnimationDuration());
+        option.SetCurve(Curves::FRICTION);
+    } else {
+        option.SetDuration(selectTheme->GetPressAnimationDuration());
+        option.SetCurve(Curves::SHARP);
+    }
+
+    AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID_NOLOG(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID_NOLOG(renderContext);
+        renderContext->BlendBgColor(pattern->GetBgBlendColor());
+    });
 }
 
 // change background color when hovered
@@ -119,28 +154,21 @@ void SelectPattern::RegisterOnHover()
     auto mouseCallback = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto pipeline = host->GetContext();
+        pattern->SetIsHover(isHover);
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
         // update hover status, repaint background color
         if (isHover) {
-            auto hoverColor = theme->GetHoverColor();
-            renderContext->UpdateBackgroundColor(hoverColor);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            pattern->SetBgBlendColor(theme->GetHoverColor());
         } else {
-            auto bgColor = theme->GetBackgroundColor();
-            renderContext->UpdateBackgroundColor(bgColor);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            pattern->SetBgBlendColor(Color::TRANSPARENT);
         }
+        pattern->PlayBgColorAnimation();
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnHoverEvent(mouseEvent);
-    inputHub->SetHoverAnimation(HoverEffectType::BOARD);
 }
 
 // change background color when pressed
@@ -153,17 +181,21 @@ void SelectPattern::RegisterOnPress()
         auto theme = host->GetContext()->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
+        const auto& renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         // update press status, repaint background color
         if (touchType == TouchType::DOWN) {
             LOGD("triggers option press");
-            auto renderContext = host->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateBackgroundColor(theme->GetClickedColor());
+            pattern->SetBgBlendColor(theme->GetClickedColor());
+            pattern->PlayBgColorAnimation(false);
         }
         if (touchType == TouchType::UP) {
-            auto renderContext = host->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+            if (pattern->IsHover()) {
+                pattern->SetBgBlendColor(theme->GetHoverColor());
+            } else {
+                pattern->SetBgBlendColor(Color::TRANSPARENT);
+            }
+            pattern->PlayBgColorAnimation(false);
         }
     };
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
@@ -244,7 +276,7 @@ void SelectPattern::SetDisabledStyle()
     auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::SPINNER_DISABLE);
     imageSourceInfo.SetSrc(iconPath);
     if (imageSourceInfo.IsSvg()) {
-        imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());    
+        imageSourceInfo.SetFillColor(theme->GetDisabledSpinnerColor());
     }
     spinnerLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     auto spinnerRenderProperty = spinner_->GetPaintProperty<ImageRenderProperty>();
@@ -263,7 +295,7 @@ void SelectPattern::SetSelected(int32_t index)
         LOGW("newly selected index invalid");
         return;
     }
-    UpdateSelectedProps(index);
+    UpdateLastSelectedProps(index);
     selected_ = index;
 }
 
@@ -281,38 +313,54 @@ void SelectPattern::BuildChild()
     auto theme = pipeline->GetTheme<SelectTheme>();
 
     auto select = GetHost();
-    if (!select->GetChildren().empty()) {
-        select->RemoveChildAtIndex(0);
-    }
 
-    auto row = FrameNode::CreateFrameNode(
-        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
+    bool hasRowNode = HasRowNode();
+    bool hasTextNode = HasTextNode();
+    bool hasSpinnerNode = HasSpinnerNode();
+    auto rowId = GetRowId();
+    auto textId = GetTextId();
+    auto spinnerId = GetSpinnerId();
+
+    auto row = FrameNode::GetOrCreateFrameNode(
+        V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     CHECK_NULL_VOID(row);
+    row->SetInternal();
     auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
     CHECK_NULL_VOID(rowProps);
     rowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     rowProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    rowProps->UpdateFlexDirection(FlexDirection::ROW);
     rowProps->UpdateSpace(theme->GetContentSpinnerPadding());
-    text_ = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<TextPattern>());
+    text_ =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textId, []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(text_);
+    text_->SetInternal();
     auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProps);
     InitTextProps(textProps, theme);
 
-    spinner_ = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ImagePattern>());
+    spinner_ = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(spinner_);
+    spinner_->SetInternal();
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
     InitSpinner(spinner_, iconTheme, theme);
 
     // mount triangle and text
-    text_->MountToParent(row);
-    spinner_->MountToParent(row);
+    text_->MarkModifyDone();
+    if (!hasTextNode) {
+        text_->MountToParent(row);
+    }
+    if (!hasSpinnerNode) {
+        spinner_->MountToParent(row);
+    }
     spinner_->MarkModifyDone();
-    row->MountToParent(select);
+    if (!hasRowNode) {
+        row->MountToParent(select);
+    }
     row->MarkModifyDone();
+    row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
     // set bgColor and border
     auto renderContext = select->GetRenderContext();
@@ -322,11 +370,6 @@ void SelectPattern::BuildChild()
     BorderRadiusProperty border;
     border.SetRadius(theme->GetSelectBorderRadius());
     renderContext->UpdateBorderRadius(border);
-
-    auto props = select->GetLayoutProperty();
-    CHECK_NULL_VOID(props);
-    props->UpdateAlignment(Alignment::CENTER);
-    props->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), CalcLength(theme->GetSelectMinHeight())));
 }
 
 void SelectPattern::SetValue(const std::string& value)
@@ -372,6 +415,7 @@ void SelectPattern::SetFontColor(const Color& color)
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     props->UpdateTextColor(color);
+    text_->GetRenderContext()->UpdateForegroundColor(color);
 }
 
 void SelectPattern::SetOptionBgColor(const Color& color)
@@ -388,9 +432,6 @@ void SelectPattern::SetOptionBgColor(const Color& color)
 
 void SelectPattern::SetOptionFontSize(const Dimension& value)
 {
-    if (value.IsNegative()) {
-        return;
-    }
     for (size_t i = 0; i < options_.size(); ++i) {
         if (i == selected_ && selectedFont_.FontSize.has_value()) {
             continue;
@@ -462,9 +503,6 @@ void SelectPattern::SetSelectedOptionBgColor(const Color& color)
 
 void SelectPattern::SetSelectedOptionFontSize(const Dimension& value)
 {
-    if (value.IsNegative()) {
-        return;
-    }
     selectedFont_.FontSize = value;
     if (selected_ != -1) {
         auto pattern = options_[selected_]->GetPattern<OptionPattern>();
@@ -518,8 +556,7 @@ const std::vector<RefPtr<FrameNode>>& SelectPattern::GetOptions()
     return options_;
 }
 
-// update selected option props
-void SelectPattern::UpdateSelectedProps(int32_t index)
+void SelectPattern::UpdateLastSelectedProps(int32_t index)
 {
     CHECK_NULL_VOID(options_[index]);
     auto newSelected = options_[index]->GetPattern<OptionPattern>();
@@ -547,6 +584,14 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
         }
         options_[selected_]->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     }
+}
+
+// update selected option props
+void SelectPattern::UpdateSelectedProps(int32_t index)
+{
+    CHECK_NULL_VOID(options_[index]);
+    auto newSelected = options_[index]->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(newSelected);
 
     // set newSelected props
     auto host = GetHost();
@@ -649,6 +694,22 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("options", InspectorGetOptions().c_str());
     json->Put("selected", std::to_string(selected_).c_str());
 
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetChildren().empty()) {
+        auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        CHECK_NULL_VOID(row);
+        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+        CHECK_NULL_VOID(rowProps);
+        json->Put("space", rowProps->GetSpace()->ToString().c_str());
+
+        if (rowProps->GetFlexDirection().value() == FlexDirection::ROW) {
+            json->Put("arrowPosition", "ArrowPosition.END");
+        } else {
+            json->Put("arrowPosition", "ArrowPosition.START");
+        }
+    }
+
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     json->Put("value", props->GetContent().value_or("").c_str());
@@ -718,4 +779,42 @@ bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     return true;
 }
 
+void SelectPattern::SetSpace(const Dimension& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetChildren().empty()) {
+        auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+        rowProps->UpdateSpace(value);
+        row->MarkModifyDone();
+        row->MarkDirtyNode();
+    }
+}
+
+void SelectPattern::SetArrowPosition(const ArrowPosition value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->GetChildren().empty()) {
+        auto row = FrameNode::GetFrameNode(host->GetFirstChild()->GetTag(), host->GetFirstChild()->GetId());
+        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+
+        if (value == ArrowPosition::END) {
+            rowProps->UpdateFlexDirection(FlexDirection::ROW);
+        } else {
+            rowProps->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
+        }
+        row->MarkModifyDone();
+        row->MarkDirtyNode();
+    }
+}
+
+std::string SelectPattern::GetValue()
+{
+    CHECK_NULL_RETURN(text_, "");
+    auto textProps = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textProps, "");
+    return textProps->GetContentValue("");
+}
 } // namespace OHOS::Ace::NG

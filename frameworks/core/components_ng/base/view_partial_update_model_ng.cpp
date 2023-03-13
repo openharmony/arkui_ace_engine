@@ -61,6 +61,7 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     customNode->SetPageTransitionFunction(std::move(info.pageTransitionFunc));
     customNode->SetForceUpdateNodeFunc(std::move(info.nodeUpdateFunc));
     customNode->SetReloadFunction(std::move(info.reloadFunc));
+    customNode->SetJSViewName(std::move(info.jsViewName));
     return customNode;
 }
 

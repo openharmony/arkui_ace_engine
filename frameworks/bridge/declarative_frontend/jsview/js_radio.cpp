@@ -25,6 +25,9 @@
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO = 2;
+} // namespace
 
 std::unique_ptr<RadioModel> RadioModel::instance_ = nullptr;
 
@@ -80,6 +83,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("height", &JSRadio::JsHeight);
     JSClass<JSRadio>::StaticMethod("size", &JSRadio::JsSize);
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
+    JSClass<JSRadio>::StaticMethod("radioStyle", &JSRadio::JsRadioStyle);
     JSClass<JSRadio>::StaticMethod("onChange", &JSRadio::OnChange);
     JSClass<JSRadio>::StaticMethod("onClick", &JSRadio::JsOnClick);
     JSClass<JSRadio>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -240,6 +244,32 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
     RadioModel::GetInstance()->SetPadding(padding);
 }
 
+void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
+{
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> checkedBackgroundColor = obj->GetProperty("checkedBackgroundColor");
+        JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
+        JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
+        Color checkedBackgroundColorVal;
+        auto theme = GetTheme<RadioTheme>();
+        if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal)) {
+            checkedBackgroundColorVal = theme->GetActiveColor();
+        }
+        RadioModel::GetInstance()->SetCheckedBackgroundColor(checkedBackgroundColorVal);
+        Color uncheckedBorderColorVal;
+        if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal)) {
+            uncheckedBorderColorVal = theme->GetInactiveColor();
+        }
+        RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
+        Color indicatorColorVal;
+        if (!ParseJsColor(indicatorColor, indicatorColorVal)) {
+            indicatorColorVal = theme->GetPointColor();
+        }
+        RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
+    }
+}
+
 void JSRadio::SetPadding(const Dimension& topDimen, const Dimension& leftDimen)
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -251,8 +281,8 @@ void JSRadio::SetPadding(const Dimension& topDimen, const Dimension& leftDimen)
         auto height = radioComponent->GetHeight();
         radioComponent->SetHeight(height);
         radioComponent->SetWidth(width);
-        box->SetHeight(height + topDimen * 2);
-        box->SetWidth(width + leftDimen * 2);
+        box->SetHeight(height + topDimen * FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO);
+        box->SetWidth(width + leftDimen * FOR_DIMENSION_BOX_CALCULATE_MULTIPLY_TWO);
         radioComponent->SetHotZoneVerticalPadding(topDimen);
         radioComponent->SetHorizontalPadding(leftDimen);
     }

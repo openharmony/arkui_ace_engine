@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,9 @@
 #include "base/geometry/point.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
-#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -77,6 +77,13 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
 
+RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
+{
+    isDragged_ = true;
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
+}
+
 void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height)
 {
     LOGI("CreateDragWindow");
@@ -119,6 +126,45 @@ void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY)
 #endif
 }
 
+RefPtr<FrameNode> DragDropManager::FindDragChildNodeByPosition(const RefPtr<UINode> parentNode,
+    float localX, float localY, const std::set<WeakPtr<FrameNode>>& frameNodes)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+
+    for (auto index = parentNode->TotalChildCount() - 1; index >= 0; index--) {
+        auto child = parentNode->GetChildAtIndex(index);
+        if (child == nullptr) {
+            continue;
+        }
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        OffsetF childOffset;
+        if (childFrameNode) {
+            auto childGeometryNode = childFrameNode->GetGeometryNode();
+            CHECK_NULL_RETURN(childGeometryNode, nullptr);
+            childOffset = childGeometryNode->GetFrameOffset();
+        }
+        auto childFindResult = FindDragChildNodeByPosition(
+            child, localX - childOffset.GetX(), localY - childOffset.GetY(), frameNodes);
+        auto weakChildFindResult = AceType::WeakClaim(AceType::RawPtr(childFindResult));
+        if (childFindResult && frameNodes.find(weakChildFindResult) != frameNodes.end()) {
+            return childFindResult;
+        }
+    }
+
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+    CHECK_NULL_RETURN(parentFrameNode, nullptr);
+    auto weakParentFrameNode = AceType::WeakClaim(AceType::RawPtr(parentFrameNode));
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, nullptr);
+    auto parentRect = parentGeometryNode->GetFrameRect();
+    PointF globalPoint = PointF(localX + parentRect.GetX(), localY + parentRect.GetY());
+    if (parentRect.IsInRegion(globalPoint)
+            && frameNodes.find(weakParentFrameNode) != frameNodes.end()) {
+                return parentFrameNode;
+    }
+    return nullptr;
+}
+
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType)
 {
     std::set<WeakPtr<FrameNode>> frameNodes;
@@ -132,6 +178,9 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
         case DragType::LIST:
             frameNodes = listDragFrameNodes_;
             break;
+        case DragType::TEXT:
+            frameNodes = textFieldDragFrameNodes_;
+            break;
         default:
             break;
     }
@@ -140,28 +189,19 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
         return nullptr;
     }
 
-    PointF point(globalX, globalY);
-    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
+    RefPtr<UINode> rootNode = nullptr;
     for (const auto& weakNode : frameNodes) {
         auto frameNode = weakNode.Upgrade();
         if (!frameNode) {
             continue;
         }
-        auto geometryNode = frameNode->GetGeometryNode();
-        if (!geometryNode) {
-            continue;
+        rootNode = frameNode;
+        while (rootNode->GetParent()) {
+            rootNode = rootNode->GetParent();
         }
-        auto globalFrameRect = geometryNode->GetFrameRect();
-        globalFrameRect.SetOffset(frameNode->GetTransformRelativeOffset());
-        if (globalFrameRect.IsInRegion(point)) {
-            hitFrameNodes.insert(std::make_pair(frameNode->GetDepth(), frameNode));
-        }
+        break;
     }
-
-    if (hitFrameNodes.empty()) {
-        return nullptr;
-    }
-    return hitFrameNodes.rbegin()->second;
+    return FindDragChildNodeByPosition(rootNode, globalX, globalY, frameNodes);
 }
 
 bool DragDropManager::CheckDragDropProxy(int64_t id) const
@@ -229,14 +269,28 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
     draggedFrameNode_ = nullptr;
 }
 
+void DragDropManager::OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo)
+{
+    auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, DragType::TEXT);
+    if (dragFrameNode) {
+        auto textFieldPattern = dragFrameNode->GetPattern<TextFieldPattern>();
+        if (textFieldPattern) {
+            textFieldPattern->InsertValue(extraInfo);
+        }
+    }
+    LOGI("OnTextDragEnd");
+    isDragged_ = false;
+    currentId_ = -1;
+}
+
 void DragDropManager::onDragCancel()
 {
     preTargetFrameNode_ = nullptr;
     draggedFrameNode_ = nullptr;
 }
 
-void DragDropManager::FireOnDragEvent(const RefPtr<FrameNode>& frameNode, const Point& point,
-    DragEventType type, const std::string& extraInfo)
+void DragDropManager::FireOnDragEvent(
+    const RefPtr<FrameNode>& frameNode, const Point& point, DragEventType type, const std::string& extraInfo)
 {
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -283,10 +337,16 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     itemDragInfo.SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
+    // use -1 for grid item not in eventGrid
+    auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](RefPtr<FrameNode>& eventGrid) {
+        return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
+    };
+
     auto dragFrameNode = FindDragFrameNodeByPosition(globalX, globalY, dragType);
     if (!dragFrameNode) {
         if (preGridTargetFrameNode_) {
-            FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE, draggedIndex);
+            FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
+                getDraggedIndex(preGridTargetFrameNode_));
             preGridTargetFrameNode_ = nullptr;
         }
         return;
@@ -294,15 +354,17 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
 
     if (dragFrameNode == preGridTargetFrameNode_) {
         int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
-        FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, draggedIndex, insertIndex);
+        FireOnItemDragEvent(
+            dragFrameNode, dragType, itemDragInfo, DragEventType::MOVE, getDraggedIndex(dragFrameNode), insertIndex);
         return;
     }
 
     if (preGridTargetFrameNode_) {
-        FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE, draggedIndex);
+        FireOnItemDragEvent(preGridTargetFrameNode_, dragType, itemDragInfo, DragEventType::LEAVE,
+            getDraggedIndex(preGridTargetFrameNode_));
     }
 
-    FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::ENTER, draggedIndex);
+    FireOnItemDragEvent(dragFrameNode, dragType, itemDragInfo, DragEventType::ENTER, getDraggedIndex(dragFrameNode));
     preGridTargetFrameNode_ = dragFrameNode;
 }
 
@@ -405,9 +467,14 @@ int32_t DragDropManager::GetItemIndex(
     if (dragType == DragType::GRID) {
         auto eventHub = frameNode->GetEventHub<GridEventHub>();
         CHECK_NULL_RETURN(eventHub, -1);
+        if (frameNode != draggedGridFrameNode_) {
+            return eventHub->GetInsertPosition(globalX, globalY);
+        }
         auto itemFrameNode = eventHub->FindGridItemByPosition(globalX, globalY);
-        if (!itemFrameNode && eventHub->CheckPostionInGrid(globalX, globalY)) {
-            return eventHub->GetFrameNodeChildSize();
+        if (!itemFrameNode) {
+            if (eventHub->CheckPostionInGrid(globalX, globalY)) {
+                return eventHub->GetFrameNodeChildSize();
+            }
         } else {
             return eventHub->GetGridItemIndex(itemFrameNode);
         }
@@ -423,16 +490,19 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-
-    auto newData = JsonUtil::Create(true);
-    newData->Put("customDragInfo", extraInfo.c_str());
-
+    if (!newData_) {
+        newData_ = JsonUtil::Create(true);
+        newData_->Put("customDragInfo", extraInfo.c_str());
+    } else {
+        newData_->Replace("customDragInfo", extraInfo.c_str());
+    }
     if (!clipboard_) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     }
     if (!addDataCallback_) {
-        auto callback = [weakManager = WeakClaim(this), addData = newData->ToString()](const std::string& data) {
+        auto callback = [weakManager = WeakClaim(this)](const std::string& data) {
             auto dragDropManager = weakManager.Upgrade();
+            auto addData = dragDropManager->newData_->ToString();
             CHECK_NULL_VOID_NOLOG(dragDropManager);
             auto clipboardAllData = JsonUtil::Create(true);
             clipboardAllData->Put("preData", data.c_str());

@@ -52,6 +52,7 @@ public:
     ~SubwindowOhos() = default;
 
     void InitContainer() override;
+    void ResizeWindow() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
     void HideMenuNG(int32_t targetId) override;
@@ -64,6 +65,9 @@ public:
     void CloseMenu() override;
     void ClearMenu() override;
     void ClearMenuNG() override;
+    RefPtr<NG::FrameNode> ShowDialogNG(
+        const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode) override;
+    void HideSubWindowNG() override;
 
     void SetHotAreas(const std::vector<Rect>& rects) override;
 
@@ -90,6 +94,8 @@ public:
     {
         isToastWindow_ = isToastWindow;
     }
+
+    void UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId);
 
 private:
     RefPtr<StackElement> GetStack();

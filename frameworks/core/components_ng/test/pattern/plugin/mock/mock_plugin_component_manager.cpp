@@ -13,7 +13,31 @@
  * limitations under the License.
  */
 
+#include <memory>
+
+#include "refbase.h"
+
 #include "core/components/plugin/plugin_component_manager.h"
+#include "core/components_ng/test/pattern/plugin/mock/mock_bundle_mgr_interface.h"
+
+namespace OHOS::AppExecFwk {
+sptr<AppExecFwk::IBundleMgr> bms = nullptr;
+
+void MOCKIBundleMgr::ReleaseInstance()
+{
+    bms = nullptr;
+}
+
+void MOCKIBundleMgr::CreateInstance()
+{
+    bms = sptr<AppExecFwk::IBundleMgr>(new (std::nothrow) AppExecFwk::MOCKIBundleMgr());
+}
+
+sptr<IBundleMgr> MOCKIBundleMgr::GetInstance()
+{
+    return bms;
+}
+} // namespace OHOS::AppExecFwk
 
 namespace OHOS::Ace {
 std::shared_ptr<PluginComponentManager> PluginComponentManager::instance_ = nullptr;
@@ -38,7 +62,7 @@ void PluginComponentManager::UnregisterCallBack(const AAFwk::Want& want) {}
 
 sptr<AppExecFwk::IBundleMgr> PluginComponentManager::GetBundleManager()
 {
-    return nullptr;
+    return AppExecFwk::MOCKIBundleMgr::GetInstance();
 }
 
 void PluginComponentManager::UIServiceListener::ResgisterListener(

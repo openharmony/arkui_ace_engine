@@ -81,9 +81,6 @@ public:
     static void CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx);
 
 private:
-    // create RenderTaskHolder for skiaGPUObject
-    static RefPtr<RenderTaskHolder> CreateRenderTaskHolder();
-
     /** Check if task is already running and register task in the task map,
      * making sure the same task runs only once (CreateImageObject with same
      * [src], MakeCanvasImage with the same [imageObj] and [size]).
@@ -116,12 +113,12 @@ private:
      *    @param imageObjWp           weakPtr of imageObj, contains image data
      *    @param renderTaskHolder     passed in to create SkiaGPUObject
      */
-    static void MakeCanvasImageHelper(const WeakPtr<ImageObject>& imageObjWp, const SizeF& targetSize,
-        const RefPtr<RenderTaskHolder>& renderTaskHolder, bool forceResize, bool sync = false);
+    static void MakeCanvasImageHelper(
+        const WeakPtr<ImageObject>& imageObjWp, const SizeF& targetSize, bool forceResize, bool sync = false);
 
     static void UploadImageToGPUForRender(const RefPtr<CanvasImage>& canvasImage,
-        std::function<void(RefPtr<CanvasImage>)>&& callback, const RefPtr<RenderTaskHolder>& renderTaskHolder,
-        const std::string& key, const SizeF& resizeTarget, const RefPtr<ImageData>& data, bool syncLoad);
+        std::function<void(RefPtr<CanvasImage>)>&& callback, const std::string& key, const SizeF& resizeTarget,
+        const RefPtr<ImageData>& data, bool syncLoad);
 
     // helper functions to end task and callback to LoadingContexts
     static void SuccessCallback(const RefPtr<CanvasImage>& canvasImage, const std::string& key, bool sync = false);

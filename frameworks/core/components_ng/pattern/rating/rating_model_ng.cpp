@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,19 +53,28 @@ void RatingModelNG::SetStepSize(double value)
     ACE_UPDATE_PAINT_PROPERTY(RatingRenderProperty, StepSize, value);
 }
 
-void RatingModelNG::SetForegroundSrc(const std::string& value)
+void RatingModelNG::SetForegroundSrc(const std::string& value, bool flag)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, ImageSourceInfo(value));
+    if (flag) {
+        ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo);
+    }
 }
 
-void RatingModelNG::SetSecondarySrc(const std::string& value)
+void RatingModelNG::SetSecondarySrc(const std::string& value, bool flag)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value));
+    if (flag) {
+        ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo);
+    }
 }
 
-void RatingModelNG::SetBackgroundSrc(const std::string& value)
+void RatingModelNG::SetBackgroundSrc(const std::string& value, bool flag)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value));
+    if (flag) {
+        ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo);
+    }
 }
 
 void RatingModelNG::SetOnChange(ChangeEvent&& onChange)
@@ -76,5 +85,4 @@ void RatingModelNG::SetOnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
-
 } // namespace OHOS::Ace::NG

@@ -58,11 +58,18 @@ public:
      * @param msg The msg.
      */
     virtual int32_t OnError(const std::string& code, const std::string& msg) = 0;
+    /**
+     * @brief OnSurfaceChange.
+     * @param width
+     * @param height
+     */
+    virtual int32_t OnSurfaceChange(float width, float height) = 0;
 
     enum Message : uint32_t {
         ON_SURFACE_CREATE = 1,
         ON_ACTION_CREATE,
         ON_ERROR,
+        ON_SURFACE_CHANGE,
     };
 };
 }  // namespace Ace

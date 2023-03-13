@@ -26,14 +26,9 @@ class CanvasPaintMethod : public CustomPaintPaintMethod {
     DECLARE_ACE_TYPE(CanvasPaintMethod, CustomPaintPaintMethod)
 public:
     CanvasPaintMethod() = default;
-    explicit CanvasPaintMethod(const RefPtr<PipelineBase> context)
+    explicit CanvasPaintMethod(const WeakPtr<PipelineBase> context)
     {
         context_ = context;
-        auto* currentDartState = flutter::UIDartState::Current();
-        CHECK_NULL_VOID(currentDartState);
-        renderTaskHolder_ = MakeRefPtr<FlutterRenderTaskHolder>(currentDartState->GetSkiaUnrefQueue(),
-            currentDartState->GetIOManager(), currentDartState->GetTaskRunners().GetIOTaskRunner());
-
         InitImageCallbacks();
     }
 

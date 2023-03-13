@@ -109,6 +109,16 @@ public:
     // called by pipeline in js thread of update.
     void Update();
 
+    void SetJSViewName(std::string&& name)
+    {
+        jsViewName = name;
+    }
+
+    const std::string& GetJSViewName()
+    {
+        return jsViewName;
+    }
+
 private:
     std::function<void()> updateFunc_;
     std::function<void()> appearFunc_;
@@ -117,6 +127,8 @@ private:
     std::function<void(bool)> reloadFunc_;
     std::function<void(int32_t)> forceNodeUpdateFunc_;
     bool needRebuild_ = false;
+
+    std::string jsViewName;
 };
 } // namespace OHOS::Ace::NG
 

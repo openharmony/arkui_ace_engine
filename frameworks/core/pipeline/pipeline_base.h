@@ -48,6 +48,10 @@
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 
+namespace OHOS::Rosen {
+class RSTransaction;
+}
+
 namespace OHOS::Ace {
 
 class Frontend;
@@ -56,18 +60,16 @@ class Window;
 class FontManager;
 class ManagerInterface;
 enum class FrontendType;
-using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
-    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-    const std::string& abilityName)>;
+using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
 public:
     PipelineBase() = default;
-    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+    PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineBase(std::unique_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
+    PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor, RefPtr<AssetManager> assetManager,
         const RefPtr<Frontend>& frontend, int32_t instanceId, RefPtr<PlatformResRegister> platformResRegister);
     ~PipelineBase() override;
 
@@ -153,7 +155,8 @@ public:
     virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
 
     virtual void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED) = 0;
+        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+        const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) = 0;
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
@@ -166,6 +169,13 @@ public:
     virtual void NotifyOnPreDraw() = 0;
 
     virtual bool CallRouterBackToPopPage() = 0;
+
+    virtual bool PopPageStackOverlay()
+    {
+        return false;
+    }
+
+    virtual void HideOverlays() {}
 
     virtual void OnPageShow() {}
 
@@ -216,6 +226,8 @@ public:
     virtual void SetAppTitle(const std::string& title) = 0;
 
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
+
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
 
     virtual void RefreshRootBgColor() const {}
 
@@ -419,12 +431,10 @@ public:
         sharePanelCallback_ = std::move(callback);
     }
 
-    void FireSharePanelCallback(const std::string& faBundleName, const std::string& faAbilityName,
-        const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-        const std::string& abilityName)
+    void FireSharePanelCallback(const std::string& bundleName, const std::string& abilityName)
     {
         if (sharePanelCallback_) {
-            sharePanelCallback_(faBundleName, faAbilityName, faModuleName, faHostPkgName, bundleName, abilityName);
+            sharePanelCallback_(bundleName, abilityName);
         }
     }
 
@@ -764,6 +774,11 @@ public:
         etsCardTouchEventCallback_ = std::move(callback);
     }
 
+    void AddUIExtensionCallback(std::function<void(const TouchEvent&)>&& callback)
+    {
+        uiExtensionCallback_ = std::move(callback);
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -817,7 +832,7 @@ protected:
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
-    std::unique_ptr<Window> window_;
+    std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
     WeakPtr<Frontend> weakFrontend_;
@@ -844,6 +859,7 @@ protected:
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
     std::function<void(const TouchEvent&)> etsCardTouchEventCallback_;
+    std::function<void(const TouchEvent&)> uiExtensionCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;

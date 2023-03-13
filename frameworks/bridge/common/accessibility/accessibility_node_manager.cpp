@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
+
 #include <cstddef>
 
 #include "base/geometry/dimension_offset.h"
@@ -211,6 +212,11 @@ void AccessibilityNodeManager::InitializeCallback() {}
 void AccessibilityNodeManager::SetPipelineContext(const RefPtr<PipelineBase>& context)
 {
     context_ = context;
+}
+
+void AccessibilityNodeManager::AddSubPipelineContext(const RefPtr<PipelineBase>& context)
+{
+    subContexts_.emplace_back(WeakPtr<PipelineBase>(context));
 }
 
 void AccessibilityNodeManager::SetRunningPage(const RefPtr<JsAcePage>& page)

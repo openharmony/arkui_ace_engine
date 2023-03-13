@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,10 @@ public:
 
     void LunarColumnsBuilding(const LunarDate& current);
 
+    void SolarMonthDaysColumnsBuilding(const PickerDate& current);
+
+    void LunarMonthDaysColumnBuilding(const LunarDate& current);
+
     void HandleYearChange(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
 
     void HandleMonthChange(bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
@@ -103,6 +107,16 @@ public:
 
     void HandleSolarDayChange(bool isAdd, uint32_t index);
 
+    void HandleSolarMonthDaysChange(bool isAdd, uint32_t index);
+
+    void HandleLunarMonthDaysChange(bool isAdd, uint32_t index);
+
+    void HandleAddLunarMonthDaysChange(uint32_t index);
+
+    void HandleReduceLunarMonthDaysChange(uint32_t index);
+
+    LunarDate GetCurrentLunarDateByMonthDaysColumn(uint32_t lunarYear) const;
+
     PickerDate GetCurrentDate() const;
 
     void SetEventCallback(EventCallback&& value);
@@ -110,6 +124,8 @@ public:
     void FireChangeEvent(bool refresh) const;
 
     void FlushColumn();
+
+    void FlushMonthDaysColumn();
 
     void AdjustLunarDate(LunarDate& date) const;
 
@@ -129,6 +145,11 @@ public:
         datePickerColumns_.emplace_back(value);
     }
 
+    void ClearColumn()
+    {
+        datePickerColumns_.clear();
+    }
+
     void SetShowLunar(bool value)
     {
         lunar_ = value;
@@ -137,6 +158,16 @@ public:
     bool IsShowLunar() const
     {
         return lunar_;
+    }
+
+    void SetShowMonthDaysFlag(bool value)
+    {
+        showMonthDays_ = value;
+    }
+
+    bool ShowMonthDays() const
+    {
+        return showMonthDays_;
     }
 
     const EventMarker& GetDialogAcceptEvent() const
@@ -232,6 +263,9 @@ public:
     void UpdateCurrentOffset(float offset);
 
     void OnDataLinking(
+        const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
+
+    void HandleMonthDaysChange(
         const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, std::vector<RefPtr<FrameNode>>& resultTags);
 
     std::string GetSelectedObject(bool isColumnChange, int status = -1) const
@@ -367,9 +401,31 @@ public:
         return dayId_.value();
     }
 
+    bool HasMonthDaysNode() const
+    {
+        return monthDaysId_.has_value();
+    }
+
+    int32_t GetMonthDaysId()
+    {
+        if (!monthDaysId_.has_value()) {
+            monthDaysId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return monthDaysId_.value();
+    }
+
     bool HasTitleNode() const
     {
         return titleId_.has_value();
+    }
+
+    bool SetTitleId(const int32_t id)
+    {
+        if (HasTitleNode()) {
+            return false;
+        }
+        titleId_ = id;
+        return true;
     }
 
     int32_t GetTitleId()
@@ -432,7 +488,7 @@ public:
     }
 
     void ShowTitle(int32_t titleId);
-
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -446,6 +502,13 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
 
+    PickerDate GetCurrentDateByMonthDaysColumn() const;
+    PickerDate GetCurrentDateByYearMonthDayColumn() const;
+    void FillSolarYearOptions(const PickerDate& current, RefPtr<FrameNode>& yearColumn);
+    void FillLunarMonthDaysOptions(const LunarDate& current, RefPtr<FrameNode>& monthDaysColumn);
+    void AdjustSolarStartEndDate();
+    void AdjustLunarStartEndDate();
+
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -453,9 +516,11 @@ private:
     uint32_t showCount_ = 0;
     std::vector<RefPtr<FrameNode>> datePickerColumns_;
     bool lunar_ = false;
+    bool showMonthDays_ = false;
     std::optional<int32_t> yearId_;
     std::optional<int32_t> monthId_;
     std::optional<int32_t> dayId_;
+    std::optional<int32_t> monthDaysId_;
     std::optional<int32_t> dateNodeId_;
     std::optional<int32_t> titleId_;
     std::optional<int32_t> ButtonTitleId_;

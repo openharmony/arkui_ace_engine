@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/frontend.h"
+#include "core/common/page_url_checker.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
@@ -120,7 +121,7 @@ public:
         return nullptr;
     }
 
-    // Get MutilModal ptr.
+    // Get MultiModal ptr.
     virtual uintptr_t GetMutilModalPtr() const
     {
         return 0;
@@ -132,12 +133,12 @@ public:
 
     virtual std::string GetHapPath() const
     {
-        return "";
+        return {};
     }
 
     virtual std::string GetWebHapPath() const
     {
-        return "";
+        return {};
     }
 
     void SetCreateTime(std::chrono::time_point<std::chrono::high_resolution_clock> time)
@@ -278,6 +279,21 @@ public:
         isFRSCardContainer_ = isFRSCardContainer;
     }
 
+    void SetPageUrlChecker(const RefPtr<PageUrlChecker>& pageUrlChecker)
+    {
+        pageUrlChecker_ = pageUrlChecker;
+    }
+
+    const RefPtr<PageUrlChecker>& GetPageUrlChecker()
+    {
+        return pageUrlChecker_;
+    }
+
+    virtual bool IsDialogContainer() const
+    {
+        return false;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -293,6 +309,7 @@ private:
     std::string filesDataPath_;
     bool usePartialUpdate_ = false;
     Settings settings_;
+    RefPtr<PageUrlChecker> pageUrlChecker_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

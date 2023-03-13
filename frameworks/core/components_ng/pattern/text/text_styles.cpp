@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text/text_styles.h"
 
+#include "core/components_ng/base/frame_node.h"
+
 namespace OHOS::Ace::NG {
 #define UPDATE_TEXT_STYLE(group, name, func)             \
     do {                                                 \
@@ -30,6 +32,7 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     if (fontStyle) {
         UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
         UPDATE_TEXT_STYLE(fontStyle, TextColor, SetTextColor);
+        UPDATE_TEXT_STYLE(fontStyle, TextShadow, SetShadow);
         UPDATE_TEXT_STYLE(fontStyle, ItalicFontStyle, SetFontStyle);
         UPDATE_TEXT_STYLE(fontStyle, FontWeight, SetFontWeight);
         UPDATE_TEXT_STYLE(fontStyle, FontFamily, SetFontFamilies);
@@ -47,6 +50,18 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);
         UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
         UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
+    }
+    return textStyle;
+}
+
+TextStyle CreateTextStyleUsingThemeWithText(const RefPtr<FrameNode> frameNode,
+    const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
+    const RefPtr<TextTheme>& textTheme)
+{
+    TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, textLineStyle, textTheme);
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+        textStyle.SetTextColor(Color::FOREGROUND);
     }
     return textStyle;
 }

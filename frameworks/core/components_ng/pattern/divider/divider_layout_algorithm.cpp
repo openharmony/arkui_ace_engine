@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/divider/divider_layout_algorithm.h"
 
 #include "base/utils/utils.h"
+#include "core/components/divider/divider_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 
@@ -30,18 +31,26 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     auto dividerLayoutProperty = DynamicCast<DividerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(dividerLayoutProperty, std::nullopt);
 
-    Dimension strokeWidth = dividerLayoutProperty->GetStrokeWidth().value_or(Dimension(1));
-    constrainStrokeWidth_ = Positive(strokeWidth.ConvertToPx()) ? static_cast<float>(strokeWidth.ConvertToPx()) : 0.0f;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, std::nullopt);
+    auto theme = pipeline->GetTheme<DividerTheme>();
+    CHECK_NULL_RETURN(theme, std::nullopt);
+    Dimension strokeWidth = dividerLayoutProperty->GetStrokeWidth().value_or(theme->GetStokeWidth());
+    constrainStrokeWidth_ = NonNegative(strokeWidth.ConvertToPx())
+                                ? static_cast<float>(strokeWidth.ConvertToPx())
+                                : static_cast<float>(theme->GetStokeWidth().ConvertToPx());
     vertical_ = dividerLayoutProperty->GetVertical().value_or(false);
     SizeF constrainSize;
     if (!vertical_) {
         dividerLength_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
                                                                    : contentConstraint.maxSize.Width();
+        constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
         constrainSize = SizeF(dividerLength_, constrainStrokeWidth_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     } else {
         dividerLength_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
                                                                     : contentConstraint.maxSize.Height();
+        constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
         constrainSize = SizeF(constrainStrokeWidth_, dividerLength_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     }

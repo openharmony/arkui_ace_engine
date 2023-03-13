@@ -65,6 +65,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateGridCount(param.gridCount);
     dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
+    dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);

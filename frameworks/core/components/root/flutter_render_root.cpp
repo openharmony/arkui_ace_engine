@@ -15,8 +15,6 @@
 
 #include "core/components/root/flutter_render_root.h"
 
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/text/paragraph_builder.h"
 #include "flutter/runtime/window_manager.h"
 
 #include "core/pipeline/base/flutter_render_context.h"

@@ -21,9 +21,12 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/slider/slider_accessibility_property.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
+#include "core/components_ng/pattern/slider/slider_style.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -35,10 +38,12 @@ namespace {
 constexpr float HALF = 0.5;
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
+constexpr float MAX_STEPS = 100.0f;
 } // namespace
 
 void SliderPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -57,14 +62,31 @@ void SliderPattern::OnModifyDone()
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    CancelExceptionValue(min, max);
     valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
+    UpdateBlock();
     InitTouchEvent(gestureHub);
+    InitClickEvent(gestureHub);
     InitPanEvent(gestureHub);
     InitMouseEvent(inputEventHub);
     auto focusHub = hub->GetFocusHub();
     CHECK_NULL_VOID_NOLOG(focusHub);
     InitOnKeyEvent(focusHub);
+}
+
+void SliderPattern::CancelExceptionValue(float& min, float& max)
+{
+    auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    if (NearEqual(min, max)) {
+        max = min + MAX_STEPS;
+        sliderPaintProperty->UpdateMax(max);
+    }
+    if (value_ < min || value_ > max) {
+        value_ = std::clamp(value_, min, max);
+        FireChangeEvent(SliderChangeMode::End);
+    }
 }
 
 bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/)
@@ -78,7 +100,7 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto sliderLayoutAlgorithm = DynamicCast<SliderLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(sliderLayoutAlgorithm, false);
     trackThickness_ = sliderLayoutAlgorithm->GetTrackThickness();
-    blockDiameter_ = sliderLayoutAlgorithm->GetBlockDiameter();
+    blockSize_ = sliderLayoutAlgorithm->GetBlockSize();
     blockHotSize_ = sliderLayoutAlgorithm->GetBlockHotSize();
 
     auto host = GetHost();
@@ -100,10 +122,25 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
                                         ? theme->GetOutsetHotBlockShadowWidth()
                                         : theme->GetInsetHotBlockShadowWidth();
 
+    auto direction = sliderLayoutProperty->GetDirectionValue(Axis::HORIZONTAL);
+    auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
+
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
-    borderBlank_ = std::max(trackThickness_, blockDiameter_ + hotBlockShadowWidth_ / HALF);
+    borderBlank_ = std::max(trackThickness_, blockLength + hotBlockShadowWidth_ / HALF);
     sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
     borderBlank_ = (length - sliderLength_) * HALF;
+
+    auto children = dirty->GetAllChildrenWithBuild();
+    if (children.size() != 0) {
+        CHECK_NULL_RETURN(imageFrameNode_, true);
+        auto child = children.front();
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        OffsetF childOffset(
+            circleCenter_.GetX() - childSize.Width() * HALF, circleCenter_.GetY() - childSize.Height() * HALF);
+        child->GetGeometryNode()->SetMarginFrameOffset(childOffset);
+        imageFrameNode_->MarkModifyDone();
+        imageFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 
     return true;
 }
@@ -133,14 +170,34 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             bubbleFlag_ = true;
             InitializeBubble();
         }
-        FireChangeEvent(SliderChangeMode::Click);
+        mousePressedFlag_ = true;
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
         if (bubbleFlag_) {
             bubbleFlag_ = false;
         }
+        mousePressedFlag_ = false;
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (clickListener_) {
+        return;
+    }
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleClickEvent();
+    };
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gestureHub->AddClickEvent(clickListener_);
+}
+
+void SliderPattern::HandleClickEvent()
+{
+    FireChangeEvent(SliderChangeMode::Click);
 }
 
 void SliderPattern::InitializeBubble()
@@ -202,6 +259,7 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     float oldValue = value_;
     value_ = valueRatio_ * (max - min) + min;
     valueChangeFlag_ = !NearEqual(oldValue, value_);
+    UpdateCircleCenterOffset();
 }
 
 void SliderPattern::UpdateTipsValue()
@@ -233,6 +291,8 @@ void SliderPattern::UpdateCircleCenterOffset()
         circleCenter_.SetX(contentSize->Width() * HALF);
         circleCenter_.SetY(touchOffset);
     }
+
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SliderPattern::UpdateBubbleSizeAndLayout()
@@ -323,7 +383,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
 
     PanDirection panDirection;
-    panDirection.type = direction_ == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
+    panDirection.type = PanDirection::ALL;
     float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
 }
@@ -367,10 +427,37 @@ void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusSideDistance = theme->GetFocusSideDistance();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
-    auto focusRadius = blockDiameter_ * HALF + static_cast<float>(focusDistance.ConvertToPx());
-    paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
-        circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
-    paintRect.SetCornerRadius(focusRadius);
+    auto halfWidth = blockSize_.Width() * HALF + static_cast<float>(focusDistance.ConvertToPx());
+    auto halfHeight = blockSize_.Height() * HALF + static_cast<float>(focusDistance.ConvertToPx());
+    paintRect.SetRect(RectF(circleCenter_.GetX() - halfWidth + contentOffset.GetX(),
+        circleCenter_.GetY() - halfHeight + contentOffset.GetY(), halfWidth / HALF, halfHeight / HALF));
+    paintRect.SetCornerRadius(focusDistance.ConvertToPx());
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto blockType = paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT);
+    if (blockType == SliderModelNG::BlockStyleType::DEFAULT) {
+        auto focusRadius =
+            std::min(blockSize_.Width(), blockSize_.Height()) * HALF + static_cast<float>(focusDistance.ConvertToPx());
+        paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
+            circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
+        paintRect.SetCornerRadius(focusRadius);
+    } else if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
+        auto shape = paintProperty->GetBlockShape();
+        if (shape.has_value() && shape.value()->GetBasicShapeType() == BasicShapeType::CIRCLE) {
+            auto circle = DynamicCast<Circle>(shape.value());
+            CHECK_NULL_VOID(circle);
+            float focusRadius;
+            if (circle->GetRadius().IsValid()) {
+                focusRadius = circle->GetRadius().ConvertToPx() + focusDistance.ConvertToPx();
+            } else {
+                focusRadius = std::min(circle->GetWidth().ConvertToPx(), circle->GetHeight().ConvertToPx()) * HALF +
+                              focusDistance.ConvertToPx();
+            }
+            paintRect.SetRect(RectF(circleCenter_.GetX() - focusRadius + contentOffset.GetX(),
+                circleCenter_.GetY() - focusRadius + contentOffset.GetY(), focusRadius / HALF, focusRadius / HALF));
+            paintRect.SetCornerRadius(focusRadius);
+        }
+    }
 }
 
 void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
@@ -453,13 +540,12 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     }
     nextValue = std::clamp(nextValue, min, max);
     nextValue = std::round(nextValue / step) * step;
-    if (nextValue == value_) {
+    if (NearEqual(nextValue, value_)) {
         return false;
     }
     value_ = nextValue;
     valueRatio_ = (value_ - min) / (max - min);
     LOGD("Move %{public}d steps, Value change to %{public}f", stepCount, value_);
-    FireChangeEvent(SliderChangeMode::Click);
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
 }
@@ -502,17 +588,17 @@ void SliderPattern::HandleMouseEvent(const MouseInfo& info)
     auto mouseToCenterDistanceY = static_cast<float>(std::abs(info.GetLocalLocation().GetY() - circleCenter_.GetY()));
     float mouseToCenterDistance = std::max(mouseToCenterDistanceX, mouseToCenterDistanceY);
     mouseHoverFlag_ = LessOrEqual(mouseToCenterDistance, blockHotSize_ * HALF);
-    mousePressedFlag_ = info.GetButton() == MouseButton::LEFT_BUTTON;
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SliderPattern::FireChangeEvent(int32_t mode)
 {
-    if (mode != SliderChangeMode::End) {
-        CHECK_NULL_VOID(valueChangeFlag_);
-    }
     auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
+    if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
+        NearEqual(value_, sliderEventHub->GetValue())) {
+        return;
+    }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
     valueChangeFlag_ = false;
 }
@@ -535,7 +621,7 @@ RefPtr<AccessibilityProperty> SliderPattern::CreateAccessibilityProperty()
 {
     return MakeRefPtr<SliderAccessibilityProperty>();
 }
- 
+
 void SliderPattern::CreateParagraphFunc()
 {
     auto paintProperty = GetPaintProperty<SliderPaintProperty>();
@@ -548,8 +634,8 @@ void SliderPattern::CreateParagraphFunc()
     fontStyle->UpdateTextColor(paintProperty->GetTextColor().value_or(sliderTheme->GetTipTextColor()));
     TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipeline->GetTheme<TextTheme>());
     auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
-    auto contentSize = layoutProperty->GetContentLayoutConstraint();
-    CreateParagraphAndLayout(textStyle, paintProperty->GetContent().value_or(""), contentSize.value());
+    auto contentSize = layoutProperty->CreateContentConstraint();
+    CreateParagraphAndLayout(textStyle, paintProperty->GetContent().value_or(""), contentSize);
 }
 
 void SliderPattern::CreateParagraphAndLayout(
@@ -580,5 +666,121 @@ bool SliderPattern::CreateParagraph(const TextStyle& textStyle, std::string cont
     paragraph_->AddText(StringUtils::Str8ToStr16(content));
     paragraph_->Build();
     return true;
+}
+
+SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
+{
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, SliderContentModifier::Parameters());
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, SliderContentModifier::Parameters());
+    auto theme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_RETURN(theme, SliderContentModifier::Parameters());
+    SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio_, hotBlockShadowWidth_,
+        mouseHoverFlag_, mousePressedFlag_ };
+    auto contentSize = GetHostContentSize();
+    auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
+    // Distance between slide track and Content boundary
+    auto centerWidth = direction_ == Axis::HORIZONTAL ? contentSize->Height() : contentSize->Width();
+    centerWidth *= HALF;
+    parameters.selectColor = paintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor());
+    parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(theme->GetTrackBgColor());
+    parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());
+
+    GetSelectPosition(parameters, centerWidth, contentOffset);
+    GetBackgroundPosition(parameters, centerWidth, contentOffset);
+    GetCirclePosition(parameters, centerWidth, contentOffset);
+    return parameters;
+}
+
+void SliderPattern::GetSelectPosition(
+    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset)
+{
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    float sliderSelectLength = std::clamp(sliderLength_ * valueRatio_, 0.0f, sliderLength_);
+    PointF start;
+    PointF end;
+    if (!paintProperty->GetReverseValue(false)) {
+        start = direction_ == Axis::HORIZONTAL ? PointF(offset.GetX() + borderBlank_, offset.GetY() + centerWidth)
+                                               : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_);
+        end = direction_ == Axis::HORIZONTAL
+                  ? PointF(offset.GetX() + borderBlank_ + sliderSelectLength, offset.GetY() + centerWidth)
+                  : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderSelectLength);
+    } else {
+        start = direction_ == Axis::HORIZONTAL
+                    ? PointF(offset.GetX() + borderBlank_ + sliderLength_, offset.GetY() + centerWidth)
+                    : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderLength_);
+        end =
+            direction_ == Axis::HORIZONTAL ?
+                PointF(offset.GetX() + borderBlank_ + sliderLength_ - sliderSelectLength, offset.GetY() + centerWidth) :
+                PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderLength_ - sliderSelectLength);
+    }
+    parameters.selectStart = start;
+    parameters.selectEnd = end;
+}
+
+void SliderPattern::GetBackgroundPosition(
+    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset)
+{
+    auto startPointX = offset.GetX();
+    auto startPointY = offset.GetY();
+    auto start = direction_ == Axis::HORIZONTAL ? PointF(startPointX + borderBlank_, startPointY + centerWidth)
+                                                : PointF(startPointX + centerWidth, startPointY + borderBlank_);
+    auto end = direction_ == Axis::HORIZONTAL
+                   ? PointF(startPointX + borderBlank_ + sliderLength_, startPointY + centerWidth)
+                   : PointF(startPointX + centerWidth, startPointY + borderBlank_ + sliderLength_);
+    parameters.backStart = start;
+    parameters.backEnd = end;
+}
+
+void SliderPattern::GetCirclePosition(
+    SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset)
+{
+    float sliderSelectLength = std::clamp(sliderLength_ * valueRatio_, 0.0f, sliderLength_);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    PointF center;
+    if (!paintProperty->GetReverseValue(false)) {
+        center = direction_ == Axis::HORIZONTAL
+                     ? PointF(offset.GetX() + borderBlank_ + sliderSelectLength, offset.GetY() + centerWidth)
+                     : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderSelectLength);
+    } else {
+        center =
+            direction_ == Axis::HORIZONTAL ?
+                PointF(offset.GetX() + borderBlank_ + sliderLength_ - sliderSelectLength, offset.GetY() + centerWidth) :
+                PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderLength_ - sliderSelectLength);
+    }
+    parameters.circleCenter = center;
+}
+
+void SliderPattern::UpdateBlock()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+
+    if (sliderPaintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT) ==
+        SliderModelNG::BlockStyleType::IMAGE) {
+        if (imageFrameNode_ == nullptr) {
+            auto imageId = ElementRegister::GetInstance()->MakeUniqueId();
+            imageFrameNode_ =
+                FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageId, AceType::MakeRefPtr<ImagePattern>());
+            imageFrameNode_->MountToParent(host);
+        }
+        if (imageFrameNode_ != nullptr) {
+            auto imageLayoutProperty = DynamicCast<ImageLayoutProperty>(imageFrameNode_->GetLayoutProperty());
+            imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(sliderPaintProperty->GetBlockImage().value()));
+            imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+            imageLayoutProperty->UpdateAutoResize(true);
+            imageFrameNode_->MarkModifyDone();
+        }
+    } else {
+        if (imageFrameNode_ != nullptr) {
+            host->RemoveChild(imageFrameNode_);
+            imageFrameNode_ = nullptr;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

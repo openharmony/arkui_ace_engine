@@ -26,6 +26,7 @@
 #include "core/components/box/drag_drop_event.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
@@ -37,6 +38,7 @@ public:
     virtual void Create(const std::string& content) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void SetTextShadow(const Shadow& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
@@ -51,6 +53,7 @@ public:
     virtual void SetLetterSpacing(const Dimension& value) = 0;
     virtual void SetAdaptMinFontSize(const Dimension& value) = 0;
     virtual void SetAdaptMaxFontSize(const Dimension& value) = 0;
+    virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) = 0;
     virtual void OnSetWidth() {};
     virtual void OnSetHeight() {};
     virtual void OnSetAlign() {};
@@ -63,6 +66,8 @@ public:
     virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
     virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
     virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
+    virtual void SetDraggable(bool draggable) = 0;
+    virtual void SetMenuOptionItems(std::vector<NG::MenuOptionsParam>&& menuOptionsItems) = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;

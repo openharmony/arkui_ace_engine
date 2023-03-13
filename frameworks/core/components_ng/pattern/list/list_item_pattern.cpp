@@ -164,6 +164,7 @@ void ListItemPattern::SetSwiperItemForList()
 
 void ListItemPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     if (HasStartNode() || HasEndNode()) {
         axis_ = GetAxis();
         InitSwiperAction();
@@ -397,5 +398,10 @@ void ListItemPattern::MarkIsSelected(bool isSelected)
             onSelect(isSelected);
         }
     }
+}
+
+void ListItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("selectable", selectable_);
 }
 } // namespace OHOS::Ace::NG

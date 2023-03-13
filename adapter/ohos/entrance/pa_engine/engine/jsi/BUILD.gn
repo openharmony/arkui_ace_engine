@@ -46,11 +46,7 @@ template("js_pa_engine_ark") {
     part_name = ace_engine_part
     defines += invoker.defines
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ark_runtime_path/libpandabase:arkbase_public_config",
-      "//arkcompiler/ets_runtime:ark_jsruntime_public_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     include_dirs = [
       "$ability_runtime_inner_api_path/ability_manager/include",
@@ -62,10 +58,10 @@ template("js_pa_engine_ark") {
       "//foundation/arkui/ace_engine/adapter/ohos/entrance/pa_engine/engine/common",
     ]
     deps = [
+      "$ability_runtime_napi_path/inner/napi_ability_common:napi_ability_common",
       "$ability_runtime_napi_path/inner/napi_common:napi_common",
       "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
       "$ability_runtime_path/frameworks/native/appkit:appkit_native",
-      "//arkcompiler/ets_runtime:libark_jsruntime",
       "//foundation/arkui/napi:ace_napi",
       "//foundation/arkui/napi:ace_napi_ark",
       "//foundation/systemabilitymgr/safwk/interfaces/innerkits/safwk:system_ability_fwk",
@@ -77,6 +73,7 @@ template("js_pa_engine_ark") {
       "bundle_framework:appexecfwk_base",
       "bundle_framework:appexecfwk_core",
       "c_utils:utils",
+      "ets_runtime:libark_jsruntime",
       "eventhandler:libeventhandler",
       "form_fwk:form_manager",
       "hiviewdfx_hilog_native:libhilog",
@@ -101,7 +98,10 @@ template("js_pa_engine_ark") {
 
     defines += [ "PA_SUPPORT" ]
 
-    deps += [ ":gen_obj_src_abc_proxyclass" ]
+    deps += [
+      ":gen_obj_src_abc_proxyclass",
+      "$ace_root/frameworks/base:ace_memory_monitor_ohos",
+    ]
 
     if (target_cpu == "arm64") {
       defines += [ "APP_USE_ARM64" ]

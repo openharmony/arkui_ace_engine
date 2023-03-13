@@ -32,7 +32,7 @@ const char FORM_MANAGER_RESULT_FAIL[] = "fail";
 
 void FormManagerResource::Release(const std::function<void(bool)>& onRelease)
 {
-    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
+    auto context = context_.Upgrade();
     if (!context) {
         LOGE("fail to release resource due to context is null");
         return;
@@ -73,7 +73,7 @@ void FormManagerResource::CallResRegisterMethod(
         return;
     }
 
-    auto context = DynamicCast<PipelineContext>(context_.Upgrade());
+    auto context = context_.Upgrade();
     if (!context) {
         LOGE("fail to get context to call res register method");
         return;

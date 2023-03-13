@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,18 @@
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
+constexpr uint8_t KEYS_MAX_VALUE = 3;
+const char SHORT_CUT_VALUE_X = 'x';
+const char SHORT_CUT_VALUE_Y = 'y';
+const char SHORT_CUT_VALUE_Z = 'z';
+const char SHORT_CUT_VALUE_A = 'a';
+const char SHORT_CUT_VALUE_C = 'c';
+const char SHORT_CUT_VALUE_V = 'v';
+enum class CtrlKeysBit {
+    CTRL = 1,
+    SHIFT = 2,
+    ALT = 4,
+};
 
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
     const TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
@@ -68,6 +80,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     // collect
     TouchTestResult hitTestResult;
     const NG::PointF point { touchPoint.x, touchPoint.y };
+    if (refereeNG_->QueryAllDone(touchPoint.id)) {
+        refereeNG_->CleanGestureScope(touchPoint.id);
+    }
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, touchRestrict, hitTestResult, touchPoint.id);
     if (needAppend) {
@@ -280,7 +295,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event)
             break;
         }
     }
-    if (event.action == AxisAction::END || event.action == AxisAction::NONE) {
+    if (event.action == AxisAction::END || event.action == AxisAction::NONE || event.action == AxisAction::CANCEL) {
         if (Container::IsCurrentUseNewPipeline()) {
             if (refereeNG_) {
                 refereeNG_->CleanGestureScope(event.id);
@@ -659,10 +674,206 @@ bool EventManager::DispatchRotationEvent(
     }
 }
 
+void EventManager::AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node)
+{
+    auto frameNode = node.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto iter = keyboardShortcutNode_.begin();
+    while (iter != keyboardShortcutNode_.end()) {
+        auto keyboardShortcutNode = (*iter).Upgrade();
+        if (!keyboardShortcutNode) {
+            keyboardShortcutNode_.erase(iter++);
+            continue;
+        }
+        if (keyboardShortcutNode->GetId() == frameNode->GetId()) {
+            return;
+        }
+        ++iter;
+    }
+    keyboardShortcutNode_.emplace_back(node);
+}
+
+uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<CtrlKey>& keys)
+{
+    uint8_t keyValue = 0;
+    uint8_t ctrlTimes = 0;
+    uint8_t shiftTimes = 0;
+    uint8_t altTimes = 0;
+    if (keys.size() > KEYS_MAX_VALUE) {
+        return 0;
+    }
+    for (const auto& key : keys) {
+        switch (static_cast<uint8_t>(key)) {
+            case static_cast<uint8_t>(CtrlKey::CTRL): {
+                keyValue |= static_cast<uint8_t>(CtrlKeysBit::CTRL);
+                ++ctrlTimes;
+                break;
+            }
+            case static_cast<uint8_t>(CtrlKey::SHIFT): {
+                keyValue |= static_cast<uint8_t>(CtrlKeysBit::SHIFT);
+                ++shiftTimes;
+                break;
+            }
+            case static_cast<uint8_t>(CtrlKey::ALT): {
+                keyValue |= static_cast<uint8_t>(CtrlKeysBit::ALT);
+                ++altTimes;
+                break;
+            }
+            default:
+                keyValue |= 0;
+        }
+    }
+    if (ctrlTimes > 1 || shiftTimes > 1 || altTimes > 1) {
+        return 0;
+    }
+    return keyValue;
+}
+
+bool EventManager::IsSystemKeyboardShortcut(char value, uint8_t keys)
+{
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_C) {
+        return true;
+    }
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_A) {
+        return true;
+    }
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_V) {
+        return true;
+    }
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_X) {
+        return true;
+    }
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_Y) {
+        return true;
+    }
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_Z) {
+        return true;
+    }
+    if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT))) &&
+        std::tolower(value) == SHORT_CUT_VALUE_Z) {
+        return true;
+    }
+    return false;
+}
+
+bool EventManager::IsSameKeyboardShortcutNode(char value, uint8_t keys)
+{
+    if (IsSystemKeyboardShortcut(value, keys)) {
+        return true;
+    }
+    for (auto& weakNode : keyboardShortcutNode_) {
+        auto frameNode = weakNode.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+        auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+        if (!eventHub) {
+            continue;
+        }
+        if (eventHub->GetKeyboardShortcutValue() == std::tolower(value) &&
+            eventHub->GetKeyboardShortcutKeys() == keys) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void EventManager::AddKeyboardShortcutKeys(uint8_t keys, std::vector<KeyCode>& leftKeyCode,
+    std::vector<KeyCode>& rightKeyCode, std::vector<uint8_t>& permutation)
+{
+    uint8_t index = 0;
+    if (keys & static_cast<uint8_t>(CtrlKeysBit::CTRL)) {
+        leftKeyCode.emplace_back(KeyCode::KEY_CTRL_LEFT);
+        rightKeyCode.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+        permutation.emplace_back(++index);
+    }
+    if (keys & static_cast<uint8_t>(CtrlKeysBit::SHIFT)) {
+        leftKeyCode.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+        rightKeyCode.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+        permutation.emplace_back(++index);
+    }
+    if (keys & static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+        leftKeyCode.emplace_back(KeyCode::KEY_ALT_LEFT);
+        rightKeyCode.emplace_back(KeyCode::KEY_ALT_RIGHT);
+        permutation.emplace_back(++index);
+    }
+}
+
+void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
+{
+    LOGI("EventManager::DispatchKeyboardShortcut The key code is %{public}d, the key action is %{public}d, the repeat "
+         "time is "
+         "%{public}d.",
+        event.code, event.action, event.repeatTime);
+    if (event.action != KeyAction::DOWN) {
+        return;
+    }
+    for (auto& node : keyboardShortcutNode_) {
+        auto frameNode = node.Upgrade();
+        if (!frameNode || !(frameNode->IsActive())) {
+            continue;
+        }
+        auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+        if (!eventHub || !(eventHub->IsEnabled())) {
+            continue;
+        }
+
+        auto value = eventHub->GetKeyboardShortcutValue();
+        auto keys = eventHub->GetKeyboardShortcutKeys();
+        if (value == '\0' || keys == 0) {
+            continue;
+        }
+        std::vector<KeyCode> leftKeyCode;
+        std::vector<KeyCode> rightKeyCode;
+        std::vector<uint8_t> permutation;
+        AddKeyboardShortcutKeys(keys, leftKeyCode, rightKeyCode, permutation);
+        if (event.ConvertInputCodeToString() != std::string(1, value)) {
+            continue;
+        }
+        // Handle the keys order problem.
+        do {
+            leftKeyCode.emplace_back(event.code);
+            rightKeyCode.emplace_back(event.code);
+            if (event.IsKey(leftKeyCode) || event.IsKey(rightKeyCode)) {
+                auto gestureEventHub = eventHub->GetGestureEventHub();
+                if (gestureEventHub && gestureEventHub->IsClickable()) {
+                    gestureEventHub->KeyBoardShortCutClick(event, node);
+                    LOGI("EventManager::DispatchKeyboardShortcut click done.");
+                }
+            }
+            leftKeyCode.pop_back();
+            rightKeyCode.pop_back();
+            std::next_permutation(leftKeyCode.begin(), leftKeyCode.end());
+            std::next_permutation(rightKeyCode.begin(), rightKeyCode.end());
+        } while (std::next_permutation(permutation.begin(), permutation.end()));
+        leftKeyCode.clear();
+        rightKeyCode.clear();
+        permutation.clear();
+    }
+}
+
+void EventManager::DelKeyboardShortcutNode(int32_t nodeId)
+{
+    auto iter = keyboardShortcutNode_.begin();
+    while (iter != keyboardShortcutNode_.end()) {
+        auto frameNode = (*iter).Upgrade();
+        if (!frameNode) {
+            keyboardShortcutNode_.erase(iter++);
+            continue;
+        }
+        if (frameNode->GetId() == nodeId) {
+            keyboardShortcutNode_.erase(iter);
+            break;
+        }
+        ++iter;
+    }
+}
+
 void EventManager::ClearResults()
 {
     touchTestResults_.clear();
     mouseTestResults_.clear();
+    keyboardShortcutNode_.clear();
 }
 
 EventManager::EventManager()

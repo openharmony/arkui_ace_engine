@@ -16,7 +16,11 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_STACK_PROCESSOR_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_STACK_PROCESSOR_H
 
+#include <map>
+
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/components/common/properties/state_attributes.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -48,11 +52,33 @@ public:
     /**
      * Returns a globally unique id from ElementRegister
      * JS signatire: MakeUniqueId() : number
-    */
+     */
     static void JSMakeUniqueId(const JSCallbackInfo& info);
+
+    static void SetViewMap(const std::string& viewId, const JSRef<JSObject>& jsView)
+    {
+        if (viewMap_.find(viewId) != viewMap_.end()) {
+            LOGW("jsView already exists for viewId: %{public}s", viewId.c_str());
+            return;
+        }
+
+        viewMap_.emplace(viewId, jsView);
+    }
+
+    static JSRef<JSObject> GetViewById(const std::string viewId)
+    {
+        auto it = viewMap_.find(viewId);
+        if (it == viewMap_.end()) {
+            LOGW("get view failed with viewId:%{public}s", viewId.c_str());
+            return JSRef<JSObject>::New();
+        }
+        LOGI("get view success with viewId:%{public}s", viewId.c_str());
+        return it->second;
+    }
 
 private:
     static void JSVisualState(const JSCallbackInfo& info);
+    static std::map<std::string, JSRef<JSObject>> viewMap_;
 };
 
 } // namespace OHOS::Ace::Framework

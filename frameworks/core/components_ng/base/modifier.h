@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,12 +23,13 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/animation/gradient_arithmetic.h"
+#include "core/components_ng/base/linear_vector.h"
 #include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-
 class Modifier : public virtual AceType {
     DECLARE_ACE_TYPE(Modifier, AceType);
 
@@ -53,15 +54,15 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(Modifier);
 };
 
-class AnimatablePropertyBase : public virtual AceType {
-    DECLARE_ACE_TYPE(AnimatablePropertyBase, AceType);
+class PropertyBase : public virtual AceType {
+    DECLARE_ACE_TYPE(PropertyBase, AceType);
 
 public:
-    AnimatablePropertyBase() = default;
-    ~AnimatablePropertyBase() override = default;
+    PropertyBase() = default;
+    ~PropertyBase() override = default;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(AnimatablePropertyBase);
+    ACE_DISALLOW_COPY_AND_MOVE(PropertyBase);
 };
 
 struct DrawingContext {
@@ -71,12 +72,12 @@ struct DrawingContext {
 };
 
 template<typename T>
-class AnimatableProperty : public AnimatablePropertyBase {
-    DECLARE_ACE_TYPE(AnimatableProperty, AnimatablePropertyBase);
+class NormalProperty : public PropertyBase {
+    DECLARE_ACE_TYPE(NormalProperty, PropertyBase);
 
 public:
-    AnimatableProperty(const T& value) : value_(value) {}
-    ~AnimatableProperty() override = default;
+    explicit NormalProperty(const T& value) : value_(value) {}
+    ~NormalProperty() override = default;
 
     void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc)
     {
@@ -106,6 +107,17 @@ private:
     T value_;
     std::function<T()> getFunc_;
     std::function<void(const T&)> setFunc_;
+    ACE_DISALLOW_COPY_AND_MOVE(NormalProperty);
+};
+
+template<typename T>
+class AnimatableProperty : public NormalProperty<T> {
+    DECLARE_ACE_TYPE(AnimatableProperty, NormalProperty<T>);
+
+public:
+    explicit AnimatableProperty(const T& value) : NormalProperty<T>(value) {}
+    ~AnimatableProperty() override = default;
+private:
     ACE_DISALLOW_COPY_AND_MOVE(AnimatableProperty);
 };
 
@@ -117,18 +129,18 @@ public:
     ~ContentModifier() override = default;
     virtual void onDraw(DrawingContext& Context) = 0;
 
-    void AttachProperty(const RefPtr<AnimatablePropertyBase>& prop)
+    void AttachProperty(const RefPtr<PropertyBase>& prop)
     {
         attachedProperties_.push_back(prop);
     }
 
-    const std::vector<RefPtr<AnimatablePropertyBase>>& GetAttachedProperties()
+    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties()
     {
         return attachedProperties_;
     }
 
 private:
-    std::vector<RefPtr<AnimatablePropertyBase>> attachedProperties_;
+    std::vector<RefPtr<PropertyBase>> attachedProperties_;
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifier);
 };
 
@@ -140,12 +152,12 @@ public:
     ~OverlayModifier() override = default;
     virtual void onDraw(DrawingContext& Context) = 0;
 
-    void AttachProperty(const RefPtr<AnimatablePropertyBase>& prop)
+    void AttachProperty(const RefPtr<PropertyBase>& prop)
     {
         attachedProperties_.push_back(prop);
     }
 
-    const std::vector<RefPtr<AnimatablePropertyBase>>& GetAttachedProperties()
+    const std::vector<RefPtr<PropertyBase>>& GetAttachedProperties()
     {
         return attachedProperties_;
     }
@@ -161,26 +173,33 @@ public:
     }
 
 private:
-    std::vector<RefPtr<AnimatablePropertyBase>> attachedProperties_;
+    std::vector<RefPtr<PropertyBase>> attachedProperties_;
     RectF rect_;
     ACE_DISALLOW_COPY_AND_MOVE(OverlayModifier);
 };
 
-#define DECLARE_PROP_TYPED_CLASS(classname, template_class, type) \
-    class classname : public template_class<type> {               \
-        DECLARE_ACE_TYPE(classname, template_class);              \
-                                                                  \
-    public:                                                       \
-        explicit classname(type value) : template_class(value) {} \
-        ~classname() override = default;                          \
-        ACE_DISALLOW_COPY_AND_MOVE(classname);                    \
+#define DECLARE_PROP_TYPED_CLASS(classname, template_class, type)        \
+    class classname : public template_class<type> {                      \
+        DECLARE_ACE_TYPE(classname, template_class);                     \
+                                                                         \
+    public:                                                              \
+        explicit classname(const type& value) : template_class(value) {} \
+        ~classname() override = default;                                 \
+        ACE_DISALLOW_COPY_AND_MOVE(classname);                           \
     };
 
-DECLARE_PROP_TYPED_CLASS(AnimatablePropertyBool, AnimatableProperty, bool);
+DECLARE_PROP_TYPED_CLASS(PropertyBool, NormalProperty, bool);
+DECLARE_PROP_TYPED_CLASS(PropertySizeF, NormalProperty, SizeF);
+DECLARE_PROP_TYPED_CLASS(PropertyOffsetF, NormalProperty, OffsetF);
+DECLARE_PROP_TYPED_CLASS(PropertyInt, NormalProperty, int32_t);
+DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
+DECLARE_PROP_TYPED_CLASS(PropertyString, NormalProperty, std::string);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
-DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorFloat, AnimatableProperty, LinearVector<float>);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, GradientArithmetic);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
 
 } // namespace OHOS::Ace::NG
 

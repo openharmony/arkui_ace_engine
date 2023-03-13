@@ -55,10 +55,13 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(idealSize);
+    MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     // Calculate child layout constraint.
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize = OptionalSizeF(idealSize);
+    auto childIdeaSize = idealSize;
+    childIdeaSize.SetHeight(static_cast<float>(idealSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()));
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(childIdeaSize);
     childLayoutConstraint.parentIdealSize = OptionalSizeF(idealSize);
 
     // Measure child( is a Column).
@@ -75,6 +78,7 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SlidingPanelLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
 
@@ -96,25 +100,25 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         switch (currentPanelMode) {
             case PanelMode::FULL:
                 childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(fullHeight_.ConvertToPx()));
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
+                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
                 break;
             case PanelMode::HALF:
                 childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight_.ConvertToPx()));
                 if (currentPanelType == PanelType::MINI_BAR) {
                     childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight_.ConvertToPx()));
                 }
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
+                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
                 break;
             case PanelMode::MINI:
                 childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(miniHeight_.ConvertToPx()));
                 if (currentPanelType == PanelType::TEMP_DISPLAY) {
                     childOffset = OffsetF(0.0, frameSize.Height() - static_cast<float>(halfHeight_.ConvertToPx()));
                 }
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
+                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
                 break;
             case PanelMode::AUTO:
                 childOffset = OffsetF(0.0, static_cast<float>(halfHeight_.ConvertToPx()));
-                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset);
+                childWrapper->GetGeometryNode()->SetMarginFrameOffset(childOffset + padding.Offset());
                 break;
             default:
                 LOGE("Unsupported mode:%{public}d", currentPanelMode);
@@ -123,7 +127,7 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         isFirstLayout_ = false;
     } else {
         auto childOffset = OffsetF(0.0f, currentOffset_);
-        childGeometryNode->SetMarginFrameOffset(childOffset);
+        childGeometryNode->SetMarginFrameOffset(childOffset + padding.Offset());
     }
     childWrapper->Layout();
 }

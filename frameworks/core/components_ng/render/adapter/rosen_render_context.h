@@ -32,14 +32,17 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/render/adapter/graphics_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
+#include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
 class BorderImageModifier;
 class DebugBoundaryModifier;
 class MouseSelectModifier;
+class MoonProgressModifier;
 class FocusStateModifier;
 class PageTransitionEffect;
 class OverlayTextModifier;
@@ -84,9 +87,6 @@ public:
 
     void ClearFocusState() override;
 
-    RefPtr<Canvas> GetCanvas() override;
-    void Restore() override;
-
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
@@ -94,14 +94,6 @@ public:
     void StartRecording() override;
 
     void StopRecordingIfNeeded() override;
-
-    bool IsRecording()
-    {
-        return !!recordingCanvas_;
-    }
-
-    void StartPictureRecording(float x, float y, float width, float height);
-    sk_sp<SkPicture> FinishRecordingAsPicture();
 
     void SetDrawContentAtLast(bool useDrawContentLastOrder) override
     {
@@ -137,12 +129,16 @@ public:
     void AnimateHoverEffectBoard(bool isHovered) override;
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(const BlurStyleOption& bgBlurStyle) override;
+    void OnSphericalEffectUpdate(float radio) override;
+    void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
+    void OnLightUpEffectUpdate(float radio) override;
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
 
     void UpdateTransition(const TransitionOptions& options) override;
+    void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) override;
     bool HasAppearingTransition() const
     {
         return propTransitionAppearing_ != nullptr;
@@ -178,12 +174,9 @@ public:
 
     RectF GetPaintRectWithoutTransform() override;
 
-    virtual void GetPointWithTransform(PointF& point) override;
+    void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
-
-    void NotifyTransition(
-        const AnimationOption& option, const TransitionOptions& transOptions, bool isTransitionIn) override;
 
     void OpacityAnimation(const AnimationOption& option, double begin, double end) override;
     void ScaleAnimation(const AnimationOption& option, double begin, double end) override;
@@ -207,12 +200,21 @@ public:
         return needDebugBoundary_;
     }
 
-private:
     void OnBackgroundColorUpdate(const Color& value) override;
+
+    void MarkContentChanged(bool isChanged) override;
+    void MarkDrivenRender(bool flag) override;
+    void MarkDrivenRenderItemIndex(int32_t index) override;
+    void MarkDrivenRenderFramePaintState(bool flag) override;
+
+private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
+
+    void OnForegroundColorUpdate(const Color& value) override;
+    void OnForegroundColorStrategyUpdate(const ForegroundColorStrategy& value) override;
 
     void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) override;
     void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) override;
@@ -238,6 +240,8 @@ private:
     void OnClipEdgeUpdate(bool isClip) override;
     void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
+    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) override;
+
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
     void OnRadialGradientUpdate(const NG::Gradient& value) override;
@@ -260,6 +264,12 @@ private:
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
+    void NotifyTransition(bool isTransitionIn);
+    bool HasTransitionOutAnimation() const override
+    {
+        return disappearingTransitionCount_ > 0;
+    }
+    void OnTransitionOutFinish();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);
 
@@ -268,6 +278,7 @@ private:
 
     void PaintBackground();
     void PaintClip(const SizeF& frameSize);
+    void PaintProgressMask();
     void PaintGradient(const SizeF& frameSize);
     void PaintGraphics();
     void PaintOverlayText();
@@ -289,6 +300,9 @@ private:
     template<typename T, typename D>
     void SetModifier(std::shared_ptr<T>& modifier, D data);
 
+    void AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier);
+    void RemoveModifier(const std::shared_ptr<Rosen::RSModifier>& modifier);
+
     // helper function to update one of the graphic effects
     template<typename T, typename D>
     void UpdateGraphic(std::shared_ptr<T>& modifier, D data);
@@ -308,21 +322,22 @@ private:
     RefPtr<CanvasImage> bdImage_;
 
     std::shared_ptr<Rosen::RSNode> rsNode_;
-    SkPictureRecorder* recorder_ = nullptr;
-    RefPtr<Canvas> recordingCanvas_;
-    RefPtr<Canvas> rosenCanvas_;
     bool isHoveredScale_ = false;
     bool isHoveredBoard_ = false;
     bool isPositionChanged_ = false;
+    bool isSynced_ = false;
     bool firstTransitionIn_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
+    int disappearingTransitionCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
 
+    RefPtr<RosenTransitionEffect> transitionEffect_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;
     std::shared_ptr<MouseSelectModifier> mouseSelectModifier_;
+    std::shared_ptr<MoonProgressModifier> moonProgressModifier_;
     std::shared_ptr<FocusStateModifier> focusStateModifier_;
     std::optional<TransformMatrixModifier> transformMatrixModifier_;
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
@@ -338,6 +353,9 @@ private:
     std::shared_ptr<InvertModifier> invertModifier_;
     std::shared_ptr<HueRotateModifier> hueRotateModifier_;
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
+
+    template<typename Modifier, typename PropertyType>
+    friend class PropertyTransitionEffectImpl;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

@@ -30,7 +30,7 @@ constexpr int32_t FORM_REPEAT_COUNT = 1;
 } // namespace
 
 AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, const std::string& url)
-    : SkiaCanvasImage(nullptr), codec_(std::move(codec)), cacheKey_(url + size.ToString()), size_(size)
+    : codec_(std::move(codec)), cacheKey_(url + size.ToString()), size_(size)
 {
     // set up animator
     int32_t totalDuration = 0;
@@ -69,7 +69,7 @@ AnimatedImage::AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, 
     animator_->Play();
 }
 
-sk_sp<SkImage> AnimatedImage::GetCanvasImage() const
+sk_sp<SkImage> AnimatedImage::GetImage() const
 {
     return currentFrame_;
 }
@@ -164,7 +164,7 @@ bool AnimatedImage::GetCachedFrame(uint32_t idx)
     auto cache = ctx->GetImageCache();
     CHECK_NULL_RETURN(cache, false);
     auto image = cache->GetCacheImageNG(cacheKey_ + std::to_string(idx));
-    CHECK_NULL_RETURN(image && image->imagePtr, false);
+    CHECK_NULL_RETURN_NOLOG(image && image->imagePtr, false);
     currentFrame_ = image->imagePtr;
     LOGD("frame cache found src = %{public}s, frame = %{public}d", cacheKey_.c_str(), idx);
     return true;

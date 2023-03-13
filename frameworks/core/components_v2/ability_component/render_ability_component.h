@@ -36,17 +36,23 @@ public:
     void Paint(RenderContext &context, const Offset &offset) override;
     void OnAppShow() override
     {
-        adapter_->Show();
+        if (adapter_) {
+            adapter_->Show();
+        }
     }
 
     void OnAppHide() override
     {
-        adapter_->Hide();
+        if (adapter_) {
+            adapter_->Hide();
+        }
     }
 
     void FireConnect()
     {
-        adapter_->UpdateRect(currentRect_);
+        if (adapter_) {
+            adapter_->UpdateRect(currentRect_);
+        }
         hasConnectionToAbility_ = true;
         if (component_) {
             component_->FireOnConnected();

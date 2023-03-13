@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,9 @@ public:
     void SetEnterKeyType(TextInputAction value) override;
     void SetTextAlign(TextAlign value) override;
     void SetCaretColor(const Color& value) override;
+    void SetCaretStyle(const CaretStyle& value) override;
+    void SetCaretPosition(const int32_t& value) override;
+    void SetSelectedBackgroundColor(const Color& value) override;
     void SetMaxLength(uint32_t value) override;
     void SetMaxLines(uint32_t value) override;
     void SetFontSize(const Dimension& value) override;
@@ -56,7 +59,13 @@ public:
     void SetOnCut(std::function<void(const std::string&)>&& func) override;
     void SetOnPaste(std::function<void(const std::string&)>&& func) override;
     void SetCopyOption(CopyOptions copyOption) override;
+    void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void ProcessDefaultPadding(PaddingProperty& paddings);
+    void ResetMaxLength() override;
+    void SetForegroundColor(const Color& value) override;
+
+private:
+    void AddDragFrameNodeToManager() const;
 };
 
 } // namespace OHOS::Ace::NG

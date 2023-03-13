@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_set>
 
 #include "base/memory/ace_type.h"
 #include "core/accessibility/accessibility_utils.h"
@@ -86,17 +87,17 @@ public:
 
     virtual int32_t GetCurrentIndex() const
     {
-        return 0;
+        return -1;
     }
 
     virtual int32_t GetBeginIndex() const
     {
-        return 0;
+        return -1;
     }
 
     virtual int32_t GetEndIndex() const
     {
-        return 0;
+        return -1;
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -119,9 +120,83 @@ public:
         host_ = host;
     }
 
+    virtual std::string GetHintText() const
+    {
+        return "";
+    }
+
+    virtual int32_t GetTextLengthLimit() const
+    {
+        return -1;
+    }
+
+    virtual AceCollectionInfo GetCollectionInfo() const
+    {
+        return AceCollectionInfo();
+    }
+
+    virtual AceCollectionItemInfo GetCollectionItemInfo() const
+    {
+        return AceCollectionItemInfo();
+    }
+
+    virtual std::string GetErrorText() const
+    {
+        return "";
+    }
+
+    virtual int32_t GetTextSelectionStart() const
+    {
+        return 0;
+    }
+
+    virtual int32_t GetTextSelectionEnd() const
+    {
+        return 0;
+    }
+
+    virtual AceTextCategory GetTextInputType() const
+    {
+        return AceTextCategory::INPUT_TYPE_DEFAULT;
+    }
+
+    virtual int32_t GetCollectionItemCounts() const
+    {
+        return 0;
+    }
+
+    virtual int32_t GetLiveRegion() const
+    {
+        return 0;
+    }
+
+    virtual bool GetContentInvalid() const
+    {
+        return true;
+    }
+
+    void AddSupportAction(AceAction action)
+    {
+        supportActions_ |= (1UL << static_cast<uint32_t>(action));
+    }
+
+    std::unordered_set<AceAction> GetSupportAction() const;
+
+    void ResetSupportAction()
+    {
+        supportActions_ = 0;
+        SetCommonSupportAction();
+        SetSpecificSupportAction();
+    };
+
 protected:
+    virtual void SetSpecificSupportAction() {}
     WeakPtr<FrameNode> host_;
+    uint64_t supportActions_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
+
+private:
+    void SetCommonSupportAction();
 };
 } // namespace OHOS::Ace::NG
 

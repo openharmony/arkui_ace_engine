@@ -22,6 +22,7 @@
 
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "core/common/ace_page.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
@@ -279,6 +280,20 @@ void SubwindowManager::SetHotAreas(const std::vector<Rect>& rects)
     }
 }
 
+RefPtr<NG::FrameNode> SubwindowManager::ShowDialogNG(
+    const DialogProperties& dialogProps, const RefPtr<NG::UINode>& customNode)
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        LOGI("Subwindow is null, add a new one.");
+        subwindow = Subwindow::CreateSubwindow(containerId);
+        subwindow->InitContainer();
+        AddSubwindow(containerId, subwindow);
+    }
+    return subwindow->ShowDialogNG(dialogProps, customNode);
+}
+
 void SubwindowManager::AddDialogSubwindow(int32_t instanceId, const RefPtr<Subwindow>& subwindow)
 {
     if (!subwindow) {
@@ -369,6 +384,21 @@ void SubwindowManager::CloseDialog(int32_t instanceId)
         if (containerMap.second == instanceId) {
             subwindow->CloseDialog(containerMap.first);
         }
+    }
+}
+
+void SubwindowManager::HideSubWindowNG()
+{
+    RefPtr<Subwindow> subwindow;
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsDialogContainer()) {
+        subwindow = GetCurrentDialogWindow();
+    } else {
+        subwindow = GetCurrentWindow();
+    }
+    if (subwindow) {
+        subwindow->HideSubWindowNG();
     }
 }
 } // namespace OHOS::Ace

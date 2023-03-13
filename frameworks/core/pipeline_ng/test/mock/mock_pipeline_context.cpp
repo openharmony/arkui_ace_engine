@@ -36,7 +36,7 @@ class ManagerInterface : public AceType {
 };
 
 class OffscreenCanvas : public AceType {
-    DECLARE_ACE_TYPE(Frontend, AceType);
+    DECLARE_ACE_TYPE(OffscreenCanvas, AceType);
 };
 } // namespace OHOS::Ace
 namespace OHOS::Ace::NG {
@@ -44,6 +44,7 @@ namespace {
 constexpr int32_t NODE_ID = 143;
 } // namespace
 
+static RefPtr<PipelineContext> pipelineContext = nullptr;
 // static method
 float PipelineContext::GetCurrentRootWidth()
 {
@@ -57,7 +58,10 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    return AceType::MakeRefPtr<PipelineContext>();
+    if (!pipelineContext) {
+        pipelineContext = AceType::MakeRefPtr<PipelineContext>();
+    }
+    return pipelineContext;
 }
 
 // non-static method
@@ -125,7 +129,8 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
 
-void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction) {}
 
 void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
@@ -214,6 +219,9 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
+    if (!overlayManager_) {
+        overlayManager_ = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    }
     return overlayManager_;
 }
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
@@ -230,4 +238,10 @@ void PipelineContext::DumpPipelineInfo() const {}
 void PipelineContext::AddVisibleAreaChangeNode(
     const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
 {}
+void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
+
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG

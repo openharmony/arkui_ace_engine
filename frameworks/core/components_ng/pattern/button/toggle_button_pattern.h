@@ -41,7 +41,7 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
-        return MakeRefPtr<ButtonEventHub>();
+        return MakeRefPtr<ToggleButtonEventHub>();
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
@@ -49,13 +49,14 @@ public:
         return MakeRefPtr<ToggleButtonPaintProperty>();
     }
 
+    void OnClick();
+
 private:
     void OnAttachToFrameNode() override;
     void InitParameters();
     void OnModifyDone() override;
     void HandleEnabled();
     void InitClickEvent();
-    void OnClick();
     void InitButtonAndText();
 
     RefPtr<ClickEvent> clickListener_;

@@ -145,6 +145,16 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             instance->dialogProperties_.closeAnimation = closeAnimation;
         }
 
+        auto showInSubWindowValue = constructorArg->GetProperty("showInSubWindow");
+        if (showInSubWindowValue->IsBoolean()) {
+#if defined(PREVIEW)
+            LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
+                 "emulator or a real device instead.");
+#else
+            instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+#endif
+        }
+
         info.SetReturnValue(instance);
     } else {
         LOGE("JSView creation with invalid arguments.");
@@ -354,6 +364,13 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
         LOGE("Builder of CustomDialog is null.");
         return;
     }
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
+
     // NG
     if (Container::IsCurrentUseNewPipeline()) {
         auto container = Container::Current();
@@ -382,15 +399,12 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
                 this->isShown_ = isShown;
             }
         };
-        dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
-        return;
-    }
 
-    CHECK_NULL_VOID(jsBuilderFunction_);
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-    if (!scopedDelegate) {
-        // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
+        if (dialogProperties_.isShowInSubWindow) {
+            dialog_ = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties_, customNode);
+        } else {
+            dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+        }
         return;
     }
 
@@ -416,6 +430,12 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
 {
     LOGI("JSCustomDialogController(JsCloseDialog)");
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        LOGE("scopedDelegate is null, please check");
+        return;
+    }
 
     if (Container::IsCurrentUseNewPipeline()) {
         auto dialog = dialog_.Upgrade();
@@ -426,7 +446,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         auto container = Container::Current();
         auto currentId = Container::CurrentId();
         CHECK_NULL_VOID(container);
-        if (container->IsSubContainer()) {
+        if (container->IsSubContainer() && !dialogProperties_.isShowInSubWindow) {
             currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
             container = AceEngine::Get().GetContainer(currentId);
         }
@@ -438,13 +458,6 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseDialog(dialog);
-        return;
-    }
-
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
-    if (!scopedDelegate) {
-        // this case usually means there is no foreground container, need to figure out the reason.
-        LOGE("scopedDelegate is null, please check");
         return;
     }
     CloseDialog();
@@ -492,8 +505,7 @@ bool JSCustomDialogController::ParseAnimation(
     std::function<void()> onFinishEvent;
     if (onFinish->IsFunction()) {
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
-        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc), id = Container::CurrentId()]() {
-            ContainerScope scope(id);
+        onFinishEvent = [execCtx = execContext, func = std::move(jsFunc)]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("CustomDialog.onFinish");
             func->Execute();

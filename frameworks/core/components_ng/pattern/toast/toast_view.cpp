@@ -96,7 +96,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::TOAST);
     auto parent = gridColumnInfo->GetParent();
     if (parent) {
-        parent->BuildColumnWidth();
+        parent->BuildColumnWidth(context->GetRootWidth());
     }
     maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
 

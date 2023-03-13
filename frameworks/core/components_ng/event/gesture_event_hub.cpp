@@ -28,6 +28,13 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr const char* HIT_TEST_MODE[] = {
+    "HitTestMode.Default",
+    "HitTestMode.Block",
+    "HitTestMode.Transparent",
+    "HitTestMode.None",
+};
+
 GestureEventHub::GestureEventHub(const WeakPtr<EventHub>& eventHub) : eventHub_(eventHub) {}
 
 RefPtr<FrameNode> GestureEventHub::GetFrameNode() const
@@ -468,6 +475,41 @@ bool GestureEventHub::ActLongClick()
     auto click = longPressEventActuator_->GetGestureEventFunc();
     CHECK_NULL_RETURN_NOLOG(click, true);
     GestureEvent info;
+    click(info);
+    return true;
+}
+
+std::string GestureEventHub::GetHitTestModeStr() const
+{
+    auto mode = static_cast<int32_t>(hitTestMode_);
+    if (mode < 0 || mode >= static_cast<int32_t>(std::size(HIT_TEST_MODE))) {
+        return HIT_TEST_MODE[0];
+    }
+    return HIT_TEST_MODE[mode];
+}
+
+bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node)
+{
+    auto host = node.Upgrade();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(clickEventActuator_, false);
+    auto click = clickEventActuator_->GetClickEvent();
+    CHECK_NULL_RETURN(click, false);
+    GestureEvent info;
+    info.SetSourceDevice(event.sourceType);
+    info.SetTimeStamp(event.timeStamp);
+    EventTarget target;
+    target.id = host->GetId();
+    target.type = host->GetTag();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    target.area.SetOffset(DimensionOffset(offset));
+    target.area.SetHeight(Dimension(size.Height()));
+    target.area.SetWidth(Dimension(size.Width()));
+    target.origin = DimensionOffset(geometryNode->GetParentGlobalOffset());
+    info.SetTarget(target);
     click(info);
     return true;
 }

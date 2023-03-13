@@ -15,196 +15,52 @@
 
 #include "core/components_ng/pattern/slider/slider_paint_method.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstddef>
-#include <optional>
-
-#include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5f;
-constexpr Dimension CIRCLE_SHADOW_WIDTH = 1.0_vp;
-} // namespace
+}
 
-CanvasDrawFunction SliderPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
+    CHECK_NULL_VOID(sliderContentModifier_);
+    auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<SliderTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    auto sliderPaintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
-    auto offset = paintWrapper->GetContentOffset();
-    centerWidth_ = sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                       ? paintWrapper->GetContentSize().Height()
-                       : paintWrapper->GetContentSize().Width();
-    centerWidth_ *= HALF;
-    LinePenAndSize backgroundPenAndSize = GetBackgroundPen(sliderPaintProperty, offset, theme);
-    std::optional<MarkerPenAndPath> markerPenAndPath = std::nullopt;
-    if (sliderPaintProperty->GetShowSteps().value_or(false)) {
-        markerPenAndPath = GetMarkerPen(sliderPaintProperty, offset, theme);
+    CHECK_NULL_VOID(pipeline);
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(sliderTheme);
+    sliderContentModifier_->UpdateData(parameters_);
+    sliderContentModifier_->JudgeNeedAimate(paintProperty);
+    sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
+    sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
+    sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);
+    sliderContentModifier_->SetSelectColor(parameters_.selectColor);
+    sliderContentModifier_->SetTrackBackgroundColor(parameters_.trackBackgroundColor);
+    sliderContentModifier_->SetBlockColor(parameters_.blockColor);
+    sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
+    sliderContentModifier_->SetStepRatio(parameters_.stepRatio);
+    sliderContentModifier_->SetBoardColor();
+    sliderContentModifier_->SetSliderMode(paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET));
+    auto trackBorderRadius = paintProperty->GetTrackBorderRadiusValue(Dimension(parameters_.trackThickness * HALF));
+    if (GreatOrEqual(trackBorderRadius.ConvertToPx(), parameters_.trackThickness * HALF)) {
+        trackBorderRadius = Dimension(parameters_.trackThickness * HALF);
     }
-    LinePenAndSize selectPenAndSize = GetSelectPen(sliderPaintProperty, offset, theme);
-    CirclePenAndSize circlePenAndSize = GetCirclePen(sliderPaintProperty, offset, theme);
-    return [background = backgroundPenAndSize, marker = markerPenAndPath, select = selectPenAndSize,
-               circle = circlePenAndSize](RSCanvas& canvas) {
-        canvas.AttachPen(background.pen);
-        canvas.DrawLine(ToRSPoint(background.start), ToRSPoint(background.end));
-        canvas.DetachPen();
-        if (marker.has_value()) {
-            canvas.AttachPen(marker.value().pen);
-            canvas.DrawPath(marker.value().path);
-            canvas.DetachPen();
-        }
-        if (select.start != select.end) {
-            canvas.AttachPen(select.pen);
-            canvas.DrawLine(ToRSPoint(select.start), ToRSPoint(select.end));
-            canvas.DetachPen();
-        }
-        canvas.AttachPen(circle.pen);
-        canvas.DrawCircle(ToRSPoint(circle.center), circle.radius);
-        canvas.DetachPen();
-        canvas.AttachPen(circle.shadowPen);
-        canvas.DrawCircle(ToRSPoint(circle.center), circle.shadowRadius);
-        canvas.DetachPen();
-    };
-}
-
-SliderPaintMethod::LinePenAndSize SliderPaintMethod::GetBackgroundPen(
-    const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
-    const RefPtr<SliderTheme>& theme) const
-{
-    LinePenAndSize backgroundPenAndSize;
-    auto startPointX = offset.GetX();
-    auto startPointY = offset.GetY();
-    backgroundPenAndSize.pen.SetAntiAlias(true);
-    backgroundPenAndSize.pen.SetWidth(parameters_.trackThickness);
-    backgroundPenAndSize.pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    backgroundPenAndSize.pen.SetColor(
-        ToRSColor(sliderPaintProperty->GetTrackBackgroundColor().value_or(theme->GetTrackBgColor())));
-    backgroundPenAndSize.start = sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-        ? PointF(startPointX + parameters_.borderBlank, startPointY + centerWidth_)
-        : PointF(startPointX + centerWidth_, startPointY + parameters_.borderBlank);
-    backgroundPenAndSize.end = sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-        ? PointF(startPointX + parameters_.borderBlank + parameters_.sliderLength, startPointY + centerWidth_)
-        : PointF(startPointX + centerWidth_, startPointY + parameters_.borderBlank + parameters_.sliderLength);
-    return backgroundPenAndSize;
-}
-
-SliderPaintMethod::MarkerPenAndPath SliderPaintMethod::GetMarkerPen(
-    const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
-    const RefPtr<SliderTheme>& theme) const
-{
-    MarkerPenAndPath markerPenAndPath;
-    markerPenAndPath.pen.SetAntiAlias(true);
-    markerPenAndPath.pen.SetColor(ToRSColor(theme->GetMarkerColor()));
-    markerPenAndPath.pen.SetWidth(static_cast<float>(theme->GetMarkerSize().ConvertToPx()));
-    markerPenAndPath.pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-
-    auto stepsLength = parameters_.sliderLength * parameters_.stepRatio;
-    if (sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
-        float dyOffset = offset.GetY() + centerWidth_;
-        float start = offset.GetX() + parameters_.borderBlank;
-        float end = start + parameters_.sliderLength;
-        float current = start;
-        while (LessOrEqual(current, end)) {
-            float dxOffset = std::clamp(current, start, end);
-            markerPenAndPath.path.MoveTo(dxOffset, dyOffset);
-            markerPenAndPath.path.LineTo(dxOffset, dyOffset);
-            current += stepsLength;
-        }
-    } else {
-        float dxOffset = offset.GetX() + centerWidth_;
-        float start = offset.GetY() + parameters_.borderBlank;
-        float end = start + parameters_.sliderLength;
-        float current = start;
-        while (LessOrEqual(current, end)) {
-            float dyOffset = std::clamp(current, start, end);
-            markerPenAndPath.path.MoveTo(dxOffset, dyOffset);
-            markerPenAndPath.path.LineTo(dxOffset, dyOffset);
-            current += stepsLength;
-        }
+    sliderContentModifier_->SetTrackBorderRadius(trackBorderRadius.ConvertToPx());
+    auto stepSize = paintProperty->GetStepSizeValue(sliderTheme->GetMarkerSize());
+    sliderContentModifier_->SetStepSize(stepSize.ConvertToPx());
+    auto stepColor = paintProperty->GetStepColorValue(sliderTheme->GetMarkerColor());
+    sliderContentModifier_->SetStepColor(stepColor);
+    sliderContentModifier_->SetShowSteps(paintProperty->GetShowStepsValue(false));
+    auto blockSize = paintProperty->GetBlockSizeValue(parameters_.blockSize);
+    if (paintProperty->GetSliderModeValue(SliderModelNG::SliderMode::OUTSET) != SliderModelNG::SliderMode::OUTSET) {
+        blockSize = SizeF(std::min(blockSize.Width(), parameters_.trackThickness),
+            std::min(blockSize.Height(), parameters_.trackThickness));
     }
-    return markerPenAndPath;
-}
-
-SliderPaintMethod::LinePenAndSize SliderPaintMethod::GetSelectPen(
-    const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
-    const RefPtr<SliderTheme>& theme) const
-{
-    LinePenAndSize selectPenAndSize;
-
-    float sliderSelectLength =
-        std::clamp(parameters_.sliderLength * parameters_.valueRatio, 0.0f, parameters_.sliderLength);
-    CHECK_NULL_RETURN_NOLOG(!NearZero(sliderSelectLength), selectPenAndSize);
-    selectPenAndSize.pen.SetAntiAlias(true);
-    selectPenAndSize.pen.SetWidth(parameters_.trackThickness);
-    selectPenAndSize.pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    selectPenAndSize.pen.SetColor(
-        ToRSColor(sliderPaintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor())));
-
-    if (!sliderPaintProperty->GetReverse().value_or(false)) {
-        selectPenAndSize.start = sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-            ? PointF(offset.GetX() + parameters_.borderBlank, offset.GetY() + centerWidth_)
-            : PointF(offset.GetX() + centerWidth_, offset.GetY() + parameters_.borderBlank);
-        selectPenAndSize.end = sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-            ? PointF(offset.GetX() + parameters_.borderBlank + sliderSelectLength, offset.GetY() + centerWidth_)
-            : PointF(offset.GetX() + centerWidth_, offset.GetY() + parameters_.borderBlank + sliderSelectLength);
-    } else {
-        selectPenAndSize.start = sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-            ? PointF(offset.GetX() + parameters_.borderBlank + parameters_.sliderLength, offset.GetY() + centerWidth_)
-            : PointF(offset.GetX() + centerWidth_, offset.GetY() + parameters_.borderBlank + parameters_.sliderLength);
-        selectPenAndSize.end =
-            sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                ? PointF(offset.GetX() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength,
-                        offset.GetY() + centerWidth_)
-                : PointF(offset.GetX() + centerWidth_,
-                        offset.GetY() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength);
-    }
-    return selectPenAndSize;
-}
-
-SliderPaintMethod::CirclePenAndSize SliderPaintMethod::GetCirclePen(
-    const RefPtr<SliderPaintProperty>& sliderPaintProperty, const OffsetF& offset,
-    const RefPtr<SliderTheme>& theme) const
-{
-    float sliderSelectLength =
-        std::clamp(parameters_.sliderLength * parameters_.valueRatio, 0.0f, parameters_.sliderLength);
-    CirclePenAndSize circlePenAndSize;
-    circlePenAndSize.pen.SetAntiAlias(true);
-    circlePenAndSize.pen.SetColor(ToRSColor(sliderPaintProperty->GetBlockColor().value_or(theme->GetBlockColor())));
-    circlePenAndSize.pen.SetWidth(parameters_.blockDiameter * HALF);
-    if (!sliderPaintProperty->GetReverse().value_or(false)) {
-        circlePenAndSize.center =
-            sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                ? PointF(offset.GetX() + parameters_.borderBlank + sliderSelectLength, offset.GetY() + centerWidth_)
-                : PointF(offset.GetX() + centerWidth_, offset.GetY() + parameters_.borderBlank + sliderSelectLength);
-    } else {
-        circlePenAndSize.center =
-            sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                ? PointF(offset.GetX() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength,
-                        offset.GetY() + centerWidth_)
-                : PointF(offset.GetX() + centerWidth_,
-                        offset.GetY() + parameters_.borderBlank + parameters_.sliderLength - sliderSelectLength);
-    }
-    circlePenAndSize.radius = parameters_.blockDiameter * HALF * HALF;
-
-    circlePenAndSize.shadowPen.SetAntiAlias(true);
-    // The shadowColor is used to paint slider'block edge when hovered or pressed.
-    // Outer slider's block needs to be painted with 1vp width edge when not hovered or not pressed,
-    // which color is from theme's BlockOuterEdgeColor.
-    Color shadowColor = theme->GetBlockOuterEdgeColor();
-    shadowColor = parameters_.mouseHoverFlag_ ? theme->GetBlockHoverColor() : shadowColor;
-    shadowColor = parameters_.mousePressedFlag_ ? theme->GetBlockPressedColor() : shadowColor;
-    circlePenAndSize.shadowPen.SetColor(ToRSColor(shadowColor));
-    auto shadowWidth = parameters_.hotFlag || parameters_.mouseHoverFlag_
-                           ? parameters_.hotCircleShadowWidth
-                           : static_cast<float>(CIRCLE_SHADOW_WIDTH.ConvertToPx());
-    circlePenAndSize.shadowPen.SetWidth(shadowWidth);
-    circlePenAndSize.shadowRadius = (parameters_.blockDiameter + shadowWidth) * HALF;
-    return circlePenAndSize;
+    sliderContentModifier_->SetBlockSize(blockSize);
+    sliderContentModifier_->SetBlockBorderColor(paintProperty->GetBlockBorderColorValue(Color::TRANSPARENT));
+    sliderContentModifier_->SetBlockBorderWidth(paintProperty->GetBlockBorderWidthValue(Dimension()).ConvertToPx());
+    sliderContentModifier_->SetBlockType(paintProperty->GetBlockTypeValue(SliderModelNG::BlockStyleType::DEFAULT));
+    sliderContentModifier_->SetBlockShape(paintProperty->GetBlockShapeValue(MakeRefPtr<BasicShape>()));
+    sliderContentModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
 }
 } // namespace OHOS::Ace::NG

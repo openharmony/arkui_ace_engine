@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,9 +46,16 @@ public:
     static void SetControlButtonHiddenIconStr(const std::string& hiddenIconStr);
     static void SetControlButtonSwitchingIconStr(const std::string& switchingIconStr);
     static void SetOnChange(ChangeEvent&& onChange);
+    static void SetDividerStrokeWidth(const Dimension& strokeWidth);
+    static void SetDividerColor(const Color& color);
+    static void SetDividerStartMargin(const Dimension& startMargin);
+    static void SetDividerEndMargin(const Dimension& endMargin);
 
 private:
     static void CreateAndMountControlButton(const RefPtr<FrameNode>& parentNode);
+    static void CreateAndMountDivider(const RefPtr<FrameNode>& parentNode);
+    static void InitSideBarContentEvent(const RefPtr<FrameNode>& parentNode,
+        const RefPtr<FrameNode>& sideBarContentFrameNode);
     static void MarkNeedInitRealSideBarWidth();
 };
 

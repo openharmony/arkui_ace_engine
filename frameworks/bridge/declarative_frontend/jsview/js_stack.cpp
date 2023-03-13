@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "core/common/container.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -106,6 +107,45 @@ void JSStack::SetAlignment(int value)
     StackModel::GetInstance()->SetAlignment(alignment);
 }
 
+void JSStack::SetAlignmentContent(int32_t value)
+{
+    Alignment alignment = Alignment::TOP_LEFT;
+
+    switch (value) {
+        case 0:
+            alignment = Alignment::TOP_LEFT;
+            break;
+        case 1:
+            alignment = Alignment::TOP_CENTER;
+            break;
+        case 2:
+            alignment = Alignment::TOP_RIGHT;
+            break;
+        case 3:
+            alignment = Alignment::CENTER_LEFT;
+            break;
+        case 4:
+            alignment = Alignment::CENTER;
+            break;
+        case 5:
+            alignment = Alignment::CENTER_RIGHT;
+            break;
+        case 6:
+            alignment = Alignment::BOTTOM_LEFT;
+            break;
+        case 7:
+            alignment = Alignment::BOTTOM_CENTER;
+            break;
+        case 8:
+            alignment = Alignment::BOTTOM_RIGHT;
+            break;
+        default:
+            LOGE("Invalid value for alignment");
+            return;
+    }
+    StackModel::GetInstance()->SetAlignmentContent(alignment);
+}
+
 void JSStack::SetWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -164,9 +204,19 @@ void JSStack::Create(const JSCallbackInfo& info)
         JSRef<JSVal> stackAlign = obj->GetProperty("alignContent");
         if (stackAlign->IsNumber()) {
             int32_t value = stackAlign->ToNumber<int32_t>();
-            alignment = (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size())) ? ALIGNMENT_ARR[value]
-                                                                                       : Alignment::CENTER;
+            if (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size())) {
+                alignment = ALIGNMENT_ARR[value];
+            } else {
+                StackModel::GetInstance()->Create();
+                return;
+            }
+        } else {
+            StackModel::GetInstance()->Create();
+            return;
         }
+    } else {
+        StackModel::GetInstance()->Create();
+        return;
     }
 
     StackModel::GetInstance()->Create(alignment);
@@ -180,7 +230,8 @@ void JSStack::JSBind(BindingTarget globalObj)
     JSClass<JSStack>::StaticMethod("create", &JSStack::Create, opt);
     JSClass<JSStack>::StaticMethod("stackFit", &JSStack::SetStackFit, opt);
     JSClass<JSStack>::StaticMethod("overflow", &JSStack::SetOverflow, opt);
-    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignment, opt);
+    JSClass<JSStack>::StaticMethod("align", &JSStack::SetAlignment, opt);
+    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignmentContent, opt);
     JSClass<JSStack>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSStack>::StaticMethod("width", SetWidth);
     JSClass<JSStack>::StaticMethod("height", SetHeight);

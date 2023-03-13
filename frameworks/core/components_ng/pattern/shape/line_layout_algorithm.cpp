@@ -19,6 +19,9 @@
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const Dimension DEFAULT_STROKE_WIDTH(1, DimensionUnit::PX);
+} // namespace
 std::optional<SizeF> LineLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -32,15 +35,26 @@ std::optional<SizeF> LineLayoutAlgorithm::MeasureContent(
     auto paintProperty = host->GetPaintProperty<LinePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, std::nullopt);
 
+    auto strokewidth = static_cast<float>(paintProperty->GetStrokeWidthValue(DEFAULT_STROKE_WIDTH).ConvertToPx());
+    if (paintProperty->HasStrokeWidth()) {
+        strokewidth = paintProperty->GetStrokeWidthValue().ConvertToPx();
+    }
+
     PointF startPoint = PointF(paintProperty->GetStartPointValue().first.ConvertToPx(),
         paintProperty->GetStartPointValue().second.ConvertToPx());
     PointF endPoint = PointF(
         paintProperty->GetEndPointValue().first.ConvertToPx(), paintProperty->GetEndPointValue().second.ConvertToPx());
 
-    auto width = startPoint.GetX() > endPoint.GetX() ? (startPoint.GetX() - endPoint.GetX())
-                                                     : (endPoint.GetX() - startPoint.GetX());
-    auto height = startPoint.GetY() > endPoint.GetY() ? (startPoint.GetY() - endPoint.GetY())
-                                                      : (endPoint.GetY() - startPoint.GetY());
+    auto width = startPoint.GetX() > endPoint.GetX() ? startPoint.GetX()
+                                                     : endPoint.GetX();
+    auto height = startPoint.GetY() > endPoint.GetY() ? startPoint.GetY()
+                                                      : endPoint.GetY();
+    if (NearZero(width)) {
+        width = strokewidth;
+    }
+    if (NearZero(height)) {
+        height = strokewidth;
+    }
 
     return SizeF(width, height);
 }

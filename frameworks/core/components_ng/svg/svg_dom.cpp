@@ -19,6 +19,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/svg/svg_context.h"
+#include "frameworks/core/components_ng/render/drawing.h"
 #include "frameworks/core/components_ng/svg/parse/svg_animation.h"
 #include "frameworks/core/components_ng/svg/parse/svg_circle.h"
 #include "frameworks/core/components_ng/svg/parse/svg_clip_path.h"
@@ -260,6 +261,11 @@ void SvgDom::ControlAnimation(bool play)
     svgContext_->ControlAnimators(play);
 }
 
+bool SvgDom::IsStatic()
+{
+    return svgContext_->GetAnimatorCount() == 0;
+}
+
 void SvgDom::DrawImage(
     RSCanvas& canvas, const ImageFit& imageFit, const Size& layout, const std::optional<Color>& color)
 {
@@ -291,10 +297,15 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
     }
     if (viewBox_.IsValid()) {
         if (svgSize_.IsValid() && !svgSize_.IsInfinite()) {
+            // center align viewBox to svg
             scaleViewBox = std::min(svgSize_.Width() / viewBox_.Width(), svgSize_.Height() / viewBox_.Height());
             tx = svgSize_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = svgSize_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
+            // center align svg to layout container
+            tx += layout_.Width() * half - svgSize_.Width() * half * scaleX;
+            ty += layout_.Height() * half - svgSize_.Height() * half * scaleY;
         } else if (!layout_.IsEmpty()) {
+            // no svg size, center align viewBox to layout container
             scaleViewBox = std::min(layout_.Width() / viewBox_.Width(), layout_.Height() / viewBox_.Height());
             tx = layout_.Width() * half - (viewBox_.Width() * half + viewBox_.Left()) * scaleViewBox;
             ty = layout_.Height() * half - (viewBox_.Height() * half + viewBox_.Top()) * scaleViewBox;
@@ -304,6 +315,13 @@ void SvgDom::FitImage(RSCanvas& canvas, const ImageFit& imageFit, const Size& la
     }
     canvas.Translate(static_cast<float>(tx), static_cast<float>(ty));
     canvas.Scale(static_cast<float>(scaleX * scaleViewBox), static_cast<float>(scaleY * scaleViewBox));
+
+    if (NearZero(scaleX) || NearZero(scaleViewBox) || NearZero(scaleY)) {
+        return;
+    }
+    RSRect clipRect(0.0f, 0.0f, static_cast<float>(layout_.Width() / scaleX / scaleViewBox),
+        static_cast<float>(layout_.Height() / scaleY / scaleViewBox));
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
 }
 
 void SvgDom::FitViewPort(const Size& layout)

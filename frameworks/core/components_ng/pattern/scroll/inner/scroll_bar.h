@@ -91,7 +91,7 @@ public:
     ~ScrollBar() override = default;
 
     bool InBarTouchRegion(const Point& point) const;
-    bool InBarRegion(const Point& point) const;
+    bool InBarActiveRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
@@ -264,6 +264,7 @@ public:
 
     void SetOutBoundary(double outBoundary)
     {
+        inSpring =  !NearEqual(outBoundary_, outBoundary, 0.000001f);
         outBoundary_ = outBoundary;
     }
 
@@ -344,6 +345,7 @@ public:
     void SetGestureEvent();
     void SetMouseEvent();
     void FlushBarWidth();
+    void PlayAdaptAnimation(double activeSize, double activeMainOffset);
     void PlayGrowAnimation();
     void PlayShrinkAnimation();
     void PlayBarEndAnimation();
@@ -355,6 +357,8 @@ private:
     void SetBarRegion(const Offset& offset, const Size& size);
     void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
     void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+    void UpdateActiveRectSize(double activeSize);
+    void UpdateActiveRectOffset(double activeMainOffset);
     double NormalizeToPx(const Dimension& dimension) const;
 
     DisplayMode displayMode_ = DisplayMode::AUTO;
@@ -389,6 +393,7 @@ private:
     bool isPressed_ = false;
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
+    bool inSpring = false; // whether bar in the spring state
 
     Offset paintOffset_;
     Size viewPortSize_;
@@ -399,6 +404,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Animator> touchAnimator_;
     RefPtr<Animator> scrollEndAnimator_;
+    RefPtr<Animator> adaptAnimator_;
     std::function<void()> markNeedRenderFunc_;
 };
 

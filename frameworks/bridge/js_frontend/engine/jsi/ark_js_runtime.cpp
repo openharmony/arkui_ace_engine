@@ -109,10 +109,11 @@ bool ArkJSRuntime::StartDebugger()
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
 #elif defined(ANDROID_PLATFORM)
         ret = JSNApi::StartDebugger(libPath_.c_str(), vm_, isDebugMode_, instanceId_, debuggerPostTask_);
-#elif defined(IOS_PLATFORM)
-        ret = JSNApi::StartDebugger(vm_, isDebugMode_, instanceId_, debuggerPostTask_);
 #endif
     }
+#if defined(IOS_PLATFORM)
+    ret = JSNApi::StartDebugger(nullptr, vm_, isDebugMode_, instanceId_, debuggerPostTask_);
+#endif
 #endif
     return ret;
 }
@@ -134,8 +135,8 @@ bool ArkJSRuntime::ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t siz
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
     bool ret = JSNApi::ExecuteModuleBuffer(vm_, buffer, size, filePath);
-    LOGE(
-        "ArkJSRuntime::EvaluateJsCode after JSNApi::Execute %{public}p, filePath = %{public}s", this, filePath.c_str());
+    LOGI("ArkJSRuntime::EvaluateJsCode after JSNApi::Execute %{public}p, filePath = %{public}s",
+        this, filePath.c_str());
     HandleUncaughtException();
     return ret;
 }
@@ -169,6 +170,13 @@ void ArkJSRuntime::RunGC()
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
     JSNApi::TriggerGC(vm_);
+}
+
+void ArkJSRuntime::RunFullGC()
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    JSNApi::TriggerGC(vm_, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewInt32(int32_t value)
@@ -263,8 +271,14 @@ bool ArkJSRuntime::HasPendingException()
 
 void ArkJSRuntime::HandleUncaughtException()
 {
+    if (uncaughtErrorHandler_ == nullptr) {
+        LOGE("uncaughtErrorHandler is null.");
+        return;
+    }
+
     Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
-    if (!exception.IsEmpty() && !exception->IsHole() && uncaughtErrorHandler_ != nullptr) {
+    if (!exception.IsEmpty() && !exception->IsHole()) {
+        LOGI("HandleUncaughtException catch exception.");
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
         uncaughtErrorHandler_(errorPtr, shared_from_this());

@@ -23,6 +23,7 @@
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/event/key_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -63,8 +64,9 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
-constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5f;
-constexpr double DEFAULT_AXIS_RATIO = -0.06f;
+constexpr double DEFAULT_DBCLICK_INTERVAL = 0.5;
+constexpr double DEFAULT_DBCLICK_OFFSET = 2.0;
+constexpr double DEFAULT_AXIS_RATIO = -0.06;
 
 WebPattern::WebPattern() = default;
 
@@ -260,7 +262,10 @@ bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
         return false;
     }
     std::chrono::duration<float> timeout_ = clickInfo.start - doubleClickQueue_.back().start;
-    if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL) {
+    double offsetX = clickInfo.x - doubleClickQueue_.back().x;
+    double offsetY = clickInfo.y - doubleClickQueue_.back().y;
+    double offset = sqrt(offsetX * offsetX + offsetY * offsetY);
+    if (timeout_.count() < DEFAULT_DBCLICK_INTERVAL && offset < DEFAULT_DBCLICK_OFFSET) {
         SendDoubleClickEvent(clickInfo);
         std::queue<MouseClickInfo> empty;
         swap(empty, doubleClickQueue_);
@@ -467,12 +472,12 @@ void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     };
     focusHub->SetOnFocusInternal(focusTask);
 
-    auto blurTask = [weak = WeakClaim(this)]() {
+    auto blurTask = [weak = WeakClaim(this)](const BlurReason& blurReason) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
-        pattern->HandleBlurEvent();
+        pattern->HandleBlurEvent(blurReason);
     };
-    focusHub->SetOnBlurInternal(blurTask);
+    focusHub->SetOnBlurReasonInternal(blurTask);
 
     auto keyTask = [weak = WeakClaim(this)](const KeyEvent& keyEvent) -> bool {
         auto pattern = weak.Upgrade();
@@ -493,11 +498,12 @@ void WebPattern::HandleFocusEvent()
     }
 }
 
-void WebPattern::HandleBlurEvent()
+void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
 {
     CHECK_NULL_VOID(delegate_);
     isFocus_ = false;
     if (!selectPopupMenuShowing_) {
+        delegate_->SetBlurReason(static_cast<OHOS::NWeb::BlurReason>(blurReason));
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
@@ -885,6 +891,7 @@ void WebPattern::InitEnhanceSurfaceFlag()
 
 void WebPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     // called in each update function.
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -897,6 +904,7 @@ void WebPattern::OnModifyDone()
         InitEnhanceSurfaceFlag();
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
+        delegate_->SetPopup(isPopup_);
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);

@@ -30,6 +30,9 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_DURATION = 200;
+} // namespace
 void SwitchPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -56,11 +59,13 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     width_ = width;
     height_ = height;
     auto geometryNode = dirty->GetGeometryNode();
-    auto offset = geometryNode->GetContentOffset();
-    auto size = geometryNode->GetContentSize();
-    if (offset != offset_ || size != size_) {
-        offset_ = offset;
-        size_ = size;
+    offset_ = geometryNode->GetContentOffset();
+    size_ = geometryNode->GetContentSize();
+    if (isFirstAddhotZoneRect_) {
+        AddHotZoneRect();
+        isFirstAddhotZoneRect_ = false;
+    } else {
+        RemoveLastHotZoneRect();
         AddHotZoneRect();
     }
     return true;
@@ -68,6 +73,7 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void SwitchPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -105,6 +111,7 @@ void SwitchPattern::OnModifyDone()
         isOn_ = switchPaintProperty->GetIsOnValue();
     }
     auto isOn = switchPaintProperty->GetIsOnValue();
+    isOnBeforeAnimate_ = isOn;
     if (isOn != isOn_.value()) {
         OnChange();
     }
@@ -132,7 +139,7 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
     CHECK_NULL_VOID(host);
     auto curve = GetCurve();
     if (!curve) {
-        curve = Curves::LINEAR;
+        curve = Curves::FAST_OUT_SLOW_IN;
     }
 
     // If animation is still running, stop it before play new animation.
@@ -173,6 +180,8 @@ void SwitchPattern::PlayTranslateAnimation(float startPos, float endPos)
                 switchPattern->UpdateChangeEvent();
             }
         }
+        switchPattern->isOnBeforeAnimate_ = switchPattern->isOn_;
+        switchPattern->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
@@ -188,7 +197,6 @@ RefPtr<Curve> SwitchPattern::GetCurve() const
 
 int32_t SwitchPattern::GetDuration() const
 {
-    const int32_t DEFAULT_DURATION = 250;
     auto switchPaintProperty = GetPaintProperty<SwitchPaintProperty>();
     CHECK_NULL_RETURN(switchPaintProperty, DEFAULT_DURATION);
     return switchPaintProperty->GetDuration().value_or(DEFAULT_DURATION);
@@ -210,10 +218,11 @@ void SwitchPattern::OnChange()
     auto translateOffset = GetSwitchWidth();
     StopTranslateAnimation();
     changeFlag_ = true;
+    isOnBeforeAnimate_ = !isOn_.value();
     if (!isOn_.value()) {
-        PlayTranslateAnimation(0, translateOffset);
+        PlayTranslateAnimation(0.0f, translateOffset);
     } else {
-        PlayTranslateAnimation(translateOffset, 0);
+        PlayTranslateAnimation(translateOffset, 0.0f);
     }
 }
 
@@ -427,10 +436,10 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 void SwitchPattern::HandleMouseEvent(bool isHover)
 {
-    isHover_ = isHover;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     isTouch_ = false;
+    isHover_ = isHover;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -477,8 +486,8 @@ bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 // Set the default hot zone for the component.
 void SwitchPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
     hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
@@ -489,4 +498,10 @@ void SwitchPattern::AddHotZoneRect()
     host->AddHotZoneRect(hotZoneRegion);
 }
 
+void SwitchPattern::RemoveLastHotZoneRect() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveLastHotZoneRect();
+}
 } // namespace OHOS::Ace::NG

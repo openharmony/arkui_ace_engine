@@ -24,11 +24,11 @@
 
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
-#include "core/components_ng/render/adapter/skia_canvas_image.h"
+#include "core/components_ng/render/adapter/skia_image.h"
 
 namespace OHOS::Ace::NG {
-class AnimatedImage : public SkiaCanvasImage {
-    DECLARE_ACE_TYPE(AnimatedImage, SkiaCanvasImage)
+class AnimatedImage : public SkiaImage {
+    DECLARE_ACE_TYPE(AnimatedImage, SkiaImage)
 public:
     explicit AnimatedImage(std::unique_ptr<SkCodec> codec, const SizeF& size, const std::string& url);
 
@@ -36,13 +36,17 @@ public:
 
     static RefPtr<CanvasImage> Create(const RefPtr<ImageData>& data, const SizeF& size, const std::string& url);
 
-    sk_sp<SkImage> GetCanvasImage() const override;
+    sk_sp<SkImage> GetImage() const override;
 
     RefPtr<CanvasImage> Clone() override
     {
         return Claim(this);
     }
 
+    bool IsStatic() override
+    {
+        return false;
+    }
     void SetRedrawCallback(std::function<void()>&& callback) override
     {
         redraw_ = std::move(callback);

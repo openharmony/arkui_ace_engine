@@ -17,8 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_FLUTTER_RENDER_CHART_H
 
 #include "flutter/lib/ui/painting/path.h"
-#include "flutter/lib/ui/text/font_collection.h"
-#include "flutter/lib/ui/text/paragraph_builder.h"
 
 #include "base/geometry/offset.h"
 #include "base/geometry/rect.h"

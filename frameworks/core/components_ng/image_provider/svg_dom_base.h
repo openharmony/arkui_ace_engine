@@ -36,6 +36,10 @@ public:
     virtual const std::optional<Color>& GetSvgFillColor() = 0;
     virtual void SetSvgFillColor(const std::optional<Color>& color) {}
 
+    virtual bool IsStatic()
+    {
+        return true;
+    }
     virtual void SetAnimationCallback(std::function<void()>&& funcAnimateFlush, const WeakPtr<CanvasImage>& imagePtr) {}
     virtual void ControlAnimation(bool play) {}
 

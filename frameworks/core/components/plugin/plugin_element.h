@@ -43,8 +43,12 @@ public:
         return pluginSubContainer_;
     }
 
+    void SetLoadFailState(bool loadFialState)
+    {
+        loadFailState_ = loadFialState;
+    }
     void HandleOnCompleteEvent() const;
-    void HandleOnErrorEvent(const std::string code, const std::string msg) const;
+    void HandleOnErrorEvent(const std::string& code, const std::string& msg);
     void OnActionEvent(const std::string& action) const;
 
 private:
@@ -67,6 +71,7 @@ private:
     EventCallback onErrorEvent_;
     RequestPluginInfo pluginInfo_;
     int64_t pluginSubContainerId_ = 0;
+    bool loadFailState_ = false;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_PLUGIN_ELEMENT_H

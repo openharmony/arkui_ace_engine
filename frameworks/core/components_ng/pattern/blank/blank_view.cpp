@@ -46,8 +46,11 @@ void BlankView::SetBlankMin(const Dimension& blankMin)
     CHECK_NULL_VOID(blankNode);
     auto layoutProperty = blankNode->GetLayoutProperty<BlankLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    // TODO: Use flex basis
-    layoutProperty->UpdateMinSize(blankMin);
+    if (blankMin.IsNegative()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, Dimension());
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, FlexBasis, blankMin);
 }
 
 void BlankView::SetHeight(const Dimension& height)

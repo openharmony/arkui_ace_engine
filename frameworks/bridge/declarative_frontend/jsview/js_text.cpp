@@ -27,10 +27,12 @@
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "bridge/declarative_frontend/jsview/js_text.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -62,11 +64,13 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::vector<TextCase> TEXT_CASES = { TextCase::NORMAL, TextCase::LOWERCASE, TextCase::UPPERCASE };
-const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::LEFT,
-    TextAlign::RIGHT, TextAlign::JUSTIFY };
-
+const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY,
+    TextAlign::LEFT, TextAlign::RIGHT };
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
 }; // namespace
 
 void JSText::SetWidth(const JSCallbackInfo& info)
@@ -84,11 +88,19 @@ void JSText::SetHeight(const JSCallbackInfo& info)
 void JSText::SetFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        TextModel::GetInstance()->SetFontSize(theme->GetTextStyle().GetFontSize());
         return;
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
@@ -102,7 +114,7 @@ void JSText::SetFontWeight(const std::string& value)
 void JSText::SetTextColor(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color textColor;
@@ -112,22 +124,67 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetTextColor(textColor);
 }
 
+void JSText::SetTextShadow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    if (!info[0]->IsNumber() && !info[0]->IsObject()) {
+        LOGW("info[0] not is Object or Number");
+        return;
+    }
+    int32_t shadowStyle = 0;
+    if (ParseJsInteger<int32_t>(info[0], shadowStyle)) {
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        Shadow shadow = Shadow::CreateShadow(style);
+        TextModel::GetInstance()->SetTextShadow(shadow);
+        return;
+    }
+    auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
+    if (!argsPtrItem || argsPtrItem->IsNull()) {
+        LOGW("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
+        info.ReturnSelf();
+        return;
+    }
+    double radius = 0.0;
+    ParseJsonDouble(argsPtrItem->GetValue("radius"), radius);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    Shadow shadow;
+    shadow.SetBlurRadius(radius);
+    Dimension offsetX;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetX"), offsetX)) {
+        shadow.SetOffsetX(offsetX.Value());
+    }
+    Dimension offsetY;
+    if (ParseJsonDimensionVp(argsPtrItem->GetValue("offsetY"), offsetY)) {
+        shadow.SetOffsetY(offsetY.Value());
+    }
+    Color color;
+    if (ParseJsonColor(argsPtrItem->GetValue("color"), color)) {
+        shadow.SetColor(color);
+    }
+    TextModel::GetInstance()->SetTextShadow(shadow);
+}
+
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
 {
     do {
         if (!info[0]->IsObject()) {
-            LOGE("info[0] not is Object");
+            LOGI("info[0] not is Object");
             break;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
         if (!overflowValue->IsNumber()) {
-            LOGE("overflow value is not a number");
+            LOGI("overflow value is not a number");
             break;
         }
         auto overflow = overflowValue->ToNumber<int32_t>();
         if (overflow < 0 || overflow >= static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
-            LOGE("Text: textOverflow(%{public}d) illegal value", overflow);
+            LOGI("Text: textOverflow(%{public}d) illegal value", overflow);
             break;
         }
         TextModel::GetInstance()->SetTextOverflow(TEXT_OVERFLOWS[overflow]);
@@ -152,7 +209,7 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 void JSText::SetFontStyle(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-        LOGE("Text fontStyle(%{public}d) illegal value", value);
+        LOGI("Text fontStyle(%{public}d) illegal value", value);
         return;
     }
     TextModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[value]);
@@ -161,7 +218,7 @@ void JSText::SetFontStyle(int32_t value)
 void JSText::SetTextAlign(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_ALIGNS.size())) {
-        LOGE("Text: TextAlign(%d) expected positive number", value);
+        LOGI("Text: TextAlign(%d) expected positive number", value);
         return;
     }
     TextModel::GetInstance()->SetTextAlign(TEXT_ALIGNS[value]);
@@ -179,7 +236,7 @@ void JSText::SetAlign(const JSCallbackInfo& info)
 void JSText::SetLineHeight(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension value;
@@ -192,12 +249,12 @@ void JSText::SetLineHeight(const JSCallbackInfo& info)
 void JSText::SetFontFamily(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     std::vector<std::string> fontFamilies;
     if (!ParseJsFontFamilies(info[0], fontFamilies)) {
-        LOGE("Parse FontFamilies failed");
+        LOGI("Parse FontFamilies failed");
         return;
     }
     TextModel::GetInstance()->SetFontFamily(fontFamilies);
@@ -206,7 +263,7 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension fontSize;
@@ -219,7 +276,7 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension fontSize;
@@ -232,7 +289,7 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension value;
@@ -245,7 +302,7 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 void JSText::SetTextCase(int32_t value)
 {
     if (value < 0 || value >= static_cast<int32_t>(TEXT_CASES.size())) {
-        LOGE("Text textCase(%{public}d) illegal value", value);
+        LOGI("Text textCase(%{public}d) illegal value", value);
         return;
     }
     TextModel::GetInstance()->SetTextCase(TEXT_CASES[value]);
@@ -254,7 +311,7 @@ void JSText::SetTextCase(int32_t value)
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
-        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        LOGI("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Dimension value;
@@ -268,7 +325,7 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
 {
     do {
         if (!info[0]->IsObject()) {
-            LOGE("info[0] not is Object");
+            LOGI("info[0] not is Object");
             break;
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -293,6 +350,15 @@ void JSText::SetDecoration(const JSCallbackInfo& info)
         }
     } while (false);
     info.SetReturnValue(info.This());
+}
+
+void JSText::SetHeightAdaptivePolicy(int32_t value)
+{
+    if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+        LOGW("Text: HeightAdaptivePolicy(%d) expected positive number", value);
+        return;
+    }
+    TextModel::GetInstance()->SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
 
 void JSText::JsOnClick(const JSCallbackInfo& info)
@@ -364,7 +430,7 @@ void JSText::JsOnDragStart(const JSCallbackInfo& info)
 
         auto ret = func->Execute(info, extraParams);
         if (!ret->IsObject()) {
-            LOGE("builder param is not an object.");
+            LOGI("builder param is not an object.");
             return itemInfo;
         }
         auto node = ParseDragNode(ret);
@@ -444,11 +510,33 @@ void JSText::JsOnDrop(const JSCallbackInfo& info)
 void JSText::JsFocusable(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
-        LOGE("The info is wrong, it is supposed to be an boolean");
+        LOGI("The info is wrong, it is supposed to be an boolean");
         return;
     }
     JSInteractableView::SetFocusable(info[0]->IsBoolean());
     JSInteractableView::SetFocusNode(false);
+}
+
+void JSText::JsDraggable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        LOGI("The info is wrong, it is supposed to be an boolean");
+        return;
+    }
+    TextModel::GetInstance()->SetDraggable(info[0]->IsBoolean());
+}
+
+void JSText::JsMenuOptionsExtension(const JSCallbackInfo& info)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (info[0]->IsArray()) {
+            std::vector<NG::MenuOptionsParam> menuOptionsItems;
+            JSViewAbstract::ParseMenuOptions(info, JSRef<JSArray>::Cast(info[0]), menuOptionsItems);
+            TextModel::GetInstance()->SetMenuOptionItems(std::move(menuOptionsItems));
+        }
+    } else {
+        LOGI("only newPipeline supply");
+    }
 }
 
 void JSText::JSBind(BindingTarget globalObj)
@@ -459,6 +547,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("width", &JSText::SetWidth);
     JSClass<JSText>::StaticMethod("height", &JSText::SetHeight);
     JSClass<JSText>::StaticMethod("fontColor", &JSText::SetTextColor, opt);
+    JSClass<JSText>::StaticMethod("textShadow", &JSText::SetTextShadow, opt);
     JSClass<JSText>::StaticMethod("fontSize", &JSText::SetFontSize, opt);
     JSClass<JSText>::StaticMethod("fontWeight", &JSText::SetFontWeight, opt);
     JSClass<JSText>::StaticMethod("maxLines", &JSText::SetMaxLines, opt);
@@ -474,6 +563,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("textCase", &JSText::SetTextCase, opt);
     JSClass<JSText>::StaticMethod("baselineOffset", &JSText::SetBaselineOffset, opt);
     JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
+    JSClass<JSText>::StaticMethod("heightAdaptivePolicy", &JSText::SetHeightAdaptivePolicy);
     JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSText>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -489,6 +579,8 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onDragLeave", &JSText::JsOnDragLeave);
     JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
+    JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
+    JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
     JSClass<JSText>::Inherit<JSContainerBase>();
     JSClass<JSText>::Inherit<JSViewAbstract>();
     JSClass<JSText>::Bind<>(globalObj);

@@ -20,6 +20,7 @@
 #include "draw/canvas.h"
 #include "draw/shadow.h"
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
+#include "drawing/engine_adapter/skia_adapter/skia_path.h"
 #include "image/image.h"
 #include "rosen_text/properties/text_style.h"
 #include "rosen_text/ui/font_collection.h"
@@ -28,9 +29,6 @@
 #include "utils/camera3d.h"
 #include "utils/point3.h"
 #include "utils/scalar.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "pipeline/rs_recording_canvas.h"
-#endif
 
 namespace OHOS::Ace {
 using RSCanvas = Rosen::Drawing::Canvas;
@@ -63,10 +61,8 @@ using RSMatrix = Rosen::Drawing::Matrix;
 using RSCamera3D = Rosen::Drawing::Camera3D;
 using RSMaskFilter = Rosen::Drawing::MaskFilter;
 using RSBlurType = Rosen::Drawing::BlurType;
-#ifdef ENABLE_ROSEN_BACKEND
-using RSImageInfo = Rosen::RsImageInfo;
-using RSRecordingCanvas = Rosen::RSRecordingCanvas;
-#endif
+using RSPathFillType = Rosen::Drawing::PathFillType;
+using RSSkPath = Rosen::Drawing::SkiaPath;
 
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;

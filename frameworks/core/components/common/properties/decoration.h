@@ -116,6 +116,17 @@ struct BlurStyleOption {
     }
 };
 
+struct PixStretchEffectOption {
+    Dimension top;
+    Dimension bottom;
+    Dimension left;
+    Dimension right;
+    bool operator==(const PixStretchEffectOption& other) const
+    {
+        return top == other.top && bottom == other.bottom && left == other.left && right == other.right;
+    }
+};
+
 struct LinearGradientInfo {
     double x1 = 0.0;
     double x2 = 0.0;

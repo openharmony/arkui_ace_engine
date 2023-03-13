@@ -27,13 +27,78 @@
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+    const std::optional<Dimension>& fontSize, const Dimension& defaultFontSize)
+{
+    if (fontSize.has_value()) {
+        textProperty->UpdateFontSize(fontSize.value());
+    } else if (menuProperty && menuProperty->GetFontSize().has_value()) {
+        textProperty->UpdateFontSize(menuProperty->GetFontSize().value());
+    } else {
+        textProperty->UpdateFontSize(defaultFontSize);
+    }
+}
+
+void UpdateFontWeight(RefPtr<TextLayoutProperty>& textProperty,
+    RefPtr<MenuLayoutProperty>& menuProperty, const std::optional<FontWeight>& fontWeight)
+{
+    if (fontWeight.has_value()) {
+        textProperty->UpdateFontWeight(fontWeight.value());
+    } else if (menuProperty && menuProperty->GetFontWeight().has_value()) {
+        textProperty->UpdateFontWeight(menuProperty->GetFontWeight().value());
+    } else {
+        textProperty->UpdateFontWeight(FontWeight::REGULAR);
+    }
+}
+
+void UpdateFontColor(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+    const std::optional<Color>& fontColor, const Color& defaultFontColor)
+{
+    if (fontColor.has_value()) {
+        textProperty->UpdateTextColor(fontColor.value());
+    } else if (menuProperty && menuProperty->GetFontColor().has_value()) {
+        textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
+    } else {
+        textProperty->UpdateTextColor(defaultFontColor);
+    }
+}
+
+void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimension& size, const Color& color)
+{
+    ImageSourceInfo imageSourceInfo;
+    imageSourceInfo.SetSrc(src);
+    imageSourceInfo.SetFillColor(color);
+
+    auto props = node->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateImageSourceInfo(imageSourceInfo);
+    props->UpdateAlignment(Alignment::CENTER);
+    CalcSize idealSize = { CalcLength(size), CalcLength(size) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    props->UpdateCalcLayoutProperty(layoutConstraint);
+
+    auto iconRenderProperty = node->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(iconRenderProperty);
+    iconRenderProperty->UpdateSvgFillColor(color);
+}
+}
+
+void MenuItemPattern::OnMountToParentDone()
+{
+    UpdateTextNodes();
+}
+
 void MenuItemPattern::OnModifyDone()
 {
+    Pattern::OnModifyDone();
     RegisterOnClick();
     RegisterOnTouch();
     RegisterOnHover();
@@ -56,14 +121,21 @@ void MenuItemPattern::OnModifyDone()
         CHECK_NULL_VOID(contentProperty);
         contentProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
     }
-    if (IsSelectIconShow()) {
-        AddSelectIcon();
-    }
-}
 
-void MenuItemPattern::OnMountToParentDone()
-{
-    ModifyFontSize();
+    RefPtr<FrameNode> leftRow = host->GetChildAtIndex(0)
+        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    CHECK_NULL_VOID(leftRow);
+    AddSelectIcon(leftRow);
+    UpdateIcon(leftRow, true);
+    auto menuNode = GetMenu();
+    auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
+    UpdateText(leftRow, menuProperty, false);
+
+    RefPtr<FrameNode> rightRow = host->GetChildAtIndex(1)
+        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+    CHECK_NULL_VOID(rightRow);
+    UpdateText(rightRow, menuProperty, true);
+    UpdateIcon(rightRow, false);
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
@@ -350,74 +422,124 @@ void MenuItemPattern::UpdateBackgroundColor(const Color& color)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void MenuItemPattern::AddSelectIcon()
+void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    if (!itemProperty->GetSelectIcon().value_or(false)) {
+        if (selectIcon_) {
+            row->RemoveChildAtIndex(0);
+            selectIcon_ = nullptr;
+            row->MarkModifyDone();
+            row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+        return;
+    }
+    if (!selectIcon_) {
+        selectIcon_ = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(selectIcon_);
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto iconTheme = pipeline->GetTheme<IconTheme>();
+    CHECK_NULL_VOID(iconTheme);
+    auto userIcon = itemProperty->GetSelectIconSrc().value_or("");
+    auto iconPath = userIcon.empty()
+        ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), Color::BLACK);
+
+    auto renderContext = selectIcon_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetVisible(isSelected_);
+
+    selectIcon_->MountToParent(row, 0);
+    selectIcon_->MarkModifyDone();
+    selectIcon_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateIcon(RefPtr<FrameNode>& row, bool isStart)
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto iconSrc = isStart ? itemProperty->GetStartIcon().value_or("") : itemProperty->GetEndIcon().value_or("");
+    auto& iconNode = isStart ? startIcon_ : endIcon_;
+    if (iconSrc.empty()) {
+        row->RemoveChild(iconNode); // it's safe even if iconNode is nullptr
+        iconNode = nullptr;
+        row->MarkModifyDone();
+        row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    if (!iconNode) {
+        iconNode = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        CHECK_NULL_VOID(iconNode);
+    }
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    UpdateIconSrc(iconNode, iconSrc, selectTheme->GetIconSideLength(), selectTheme->GetMenuIconColor());
+
+    iconNode->MountToParent(row, ((isStart && selectIcon_) || (!isStart && label_)) ? 1 : 0);
+    iconNode->MarkModifyDone();
+    iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel)
+{
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+    auto content = isLabel ? itemProperty->GetLabel().value_or("") : itemProperty->GetContent().value_or("");
+    auto& node = isLabel ? label_ : content_;
+    if (content.empty()) {
+        (void)row->RemoveChild(node); // it's safe even if node is nullptr
+        node = nullptr;
+        row->MarkModifyDone();
+        row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    if (!node) {
+        node = FrameNode::CreateFrameNode(
+            V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    }
+    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(textProperty);
+    auto context = PipelineBase::GetCurrentContext();
+    auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
+    CHECK_NULL_VOID(theme);
+    auto fontSize = isLabel ? itemProperty->GetLabelFontSize() : itemProperty->GetFontSize();
+    UpdateFontSize(textProperty, menuProperty, fontSize, theme->GetMenuFontSize());
+    auto fontWeight = isLabel ? itemProperty->GetLabelFontWeight() : itemProperty->GetFontWeight();
+    UpdateFontWeight(textProperty, menuProperty, fontWeight);
+    auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
+    UpdateFontColor(textProperty, menuProperty, fontColor,
+        isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+    textProperty->UpdateContent(content);
+    node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
+    node->MarkModifyDone();
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemPattern::UpdateTextNodes()
 {
     auto host = GetHost();
-    auto row = host->GetChildAtIndex(0);
-    CHECK_NULL_VOID(row);
-    if (IsSelected() && !selectIcon_) {
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto iconTheme = pipeline->GetTheme<IconTheme>();
-        CHECK_NULL_VOID(iconTheme);
-        auto iconPath = iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG);
-        ImageSourceInfo imageSourceInfo;
-        imageSourceInfo.SetSrc(iconPath);
-        auto selectTheme = pipeline->GetTheme<SelectTheme>();
-        CHECK_NULL_VOID(selectTheme);
-        imageSourceInfo.SetFillColor(Color::BLACK);
-
-        auto selectIcon = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_VOID(selectIcon);
-        auto props = selectIcon->GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(props);
-        props->UpdateImageSourceInfo(imageSourceInfo);
-        props->UpdateAlignment(Alignment::CENTER);
-        CalcSize idealSize = { CalcLength(selectTheme->GetIconSideLength()),
-            CalcLength(selectTheme->GetIconSideLength()) };
-        MeasureProperty layoutConstraint;
-        layoutConstraint.selfIdealSize = idealSize;
-        props->UpdateCalcLayoutProperty(layoutConstraint);
-
-        auto iconRenderProperty = selectIcon->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_VOID(iconRenderProperty);
-        iconRenderProperty->UpdateSvgFillColor(Color::BLACK);
-
-        selectIcon->MountToParent(row, 0);
-        selectIcon->MarkModifyDone();
-
-        selectIcon_ = selectIcon;
-    }
-    if (!IsSelected() && selectIcon_) {
-        row->RemoveChildAtIndex(0);
-        selectIcon_ = nullptr;
-    }
-}
-
-void MenuItemPattern::ModifyFontSize()
-{
-    auto menu = GetMenu();
-    CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto menuFontSize = menuPattern->FontSize();
-
-    ModifyFontSize(menuFontSize);
-}
-
-void MenuItemPattern::ModifyFontSize(const Dimension& fontSize)
-{
-    CHECK_NULL_VOID(content_);
-    auto contentProperty = content_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(contentProperty);
-    contentProperty->UpdateFontSize(fontSize);
-    content_->MarkModifyDone();
-
-    CHECK_NULL_VOID(label_);
-    auto labelProperty = label_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(labelProperty);
-    labelProperty->UpdateFontSize(fontSize);
-    label_->MarkModifyDone();
+    CHECK_NULL_VOID(host);
+    auto menuNode = GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    RefPtr<FrameNode> leftRow = host->GetChildAtIndex(0)
+        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    CHECK_NULL_VOID(leftRow);
+    UpdateText(leftRow, menuProperty, false);
+    RefPtr<FrameNode> rightRow = host->GetChildAtIndex(1)
+        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+    CHECK_NULL_VOID(rightRow);
+    UpdateText(rightRow, menuProperty, true);
 }
 } // namespace OHOS::Ace::NG

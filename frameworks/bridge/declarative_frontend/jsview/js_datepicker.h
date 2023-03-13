@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 
 namespace OHOS::Ace::Framework {
@@ -31,6 +32,11 @@ public:
     static void SetLunar(bool isLunar);
     static void OnChange(const JSCallbackInfo& info);
     static void PickerBackgroundColor(const JSCallbackInfo& info);
+    static void SetDisappearTextStyle(const JSCallbackInfo& info);
+    static void SetTextStyle(const JSCallbackInfo& info);
+    static void SetSelectedTextStyle(const JSCallbackInfo& info);
+    static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
+    static void ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result);
     // keep compatible, need remove after
     static void UseMilitaryTime(bool isUseMilitaryTime);
 
@@ -39,6 +45,7 @@ private:
     // keep compatible, need remove after
     static void CreateTimePicker(const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    static void SetDefaultAttributes();
     // keep compatible, need remove after
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
@@ -68,8 +75,12 @@ public:
     static void OnChange(const JSCallbackInfo& info);
     static void UseMilitaryTime(bool isUseMilitaryTime);
 
+    static void SetDisappearTextStyle(const JSCallbackInfo& info);
+    static void SetTextStyle(const JSCallbackInfo& info);
+    static void SetSelectedTextStyle(const JSCallbackInfo& info);
 private:
     static void CreateTimePicker(const JSRef<JSObject>& paramObj);
+    static void SetDefaultAttributes();
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
 

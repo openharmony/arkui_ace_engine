@@ -121,6 +121,8 @@ private:
     OffsetF arrowPosition_;
     SizeF selfSize_;
     RectF touchRegion_;
+    SizeF buttonRowSize_;
+    OffsetF buttonRowOffset_;
 
     Edge padding_;
     Edge margin_;
@@ -133,7 +135,7 @@ private:
     bool showBottomArrow_ = false;
     bool showTopArrow_ = false;
     bool showCustomArrow_ = false;
-    float scaledBubbleSpacing_;
+    float scaledBubbleSpacing_ = 0.0f;
     float arrowHeight_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);

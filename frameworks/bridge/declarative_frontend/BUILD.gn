@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 import("../../../build/uicast.gni")
 
@@ -186,6 +187,7 @@ template("declarative_js_engine") {
       "jsview/js_interactable_view.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
+      "jsview/js_linear_gradient.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -280,6 +282,7 @@ template("declarative_js_engine") {
       "jsview/models/grid_item_model_impl.cpp",
       "jsview/models/grid_model_impl.cpp",
       "jsview/models/grid_row_model_impl.cpp",
+      "jsview/models/hyperlink_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
@@ -342,11 +345,20 @@ template("declarative_js_engine") {
         "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
-        "jsview/js_video.cpp",
-        "jsview/js_video_controller.cpp",
         "jsview/models/rating_model_impl.cpp",
-        "jsview/models/video_model_impl.cpp",
       ]
+      if (defined(config.video_components_support) &&
+          config.video_components_support) {
+        sources += [
+          "jsview/js_video.cpp",
+          "jsview/js_video_controller.cpp",
+          "jsview/models/video_model_impl.cpp",
+        ]
+      }
+    }
+
+    if (defined(vendor_configs.ace_engine_advanced)) {
+      sources += vendor_configs.ace_engine_advanced_jsview
     }
 
     if (defined(config.xcomponent_components_support) &&
@@ -431,22 +443,46 @@ template("declarative_js_engine") {
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
     include_dirs += uicast_configs.uicast_root_include
 
+    external_deps = []
+
+    # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
+    if (is_cross_platform_build) {
+      configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      } else {
+        deps += [ "$ark_ets_path:libark_jsruntime" ]
+      }
+    } else {
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        # static library for ios platform
+        external_deps += [ "ets_runtime:libark_jsruntime_static" ]
+      } else {
+        external_deps += [ "ets_runtime:libark_jsruntime" ]
+      }
+    }
+
     if (platform == "windows" || platform == "mac" || platform == "linux") {
       deps += [ ":gen_obj_src_js_mock_system_plugin" ]
     } else {
       if (defined(config.plugin_components_support) &&
           config.plugin_components_support) {
         if (!use_mingw_win && !use_mac && !use_linux) {
-          external_deps = [
+          external_deps += [
             "multimedia_image_framework:image",
             "multimedia_image_framework:image_native",
           ]
         }
       } else {
-        external_deps = [
+        external_deps += [
           "multimedia_image_framework:image",
           "multimedia_image_framework:image_native",
         ]
+      }
+
+      if (defined(config.window_scene_support) && config.window_scene_support) {
+        sources += [ "jsview/js_ui_extension.cpp" ]
+        deps += [ "$window_manager_path/window_scene/session:scene_session" ]
       }
     }
   }
@@ -529,7 +565,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_tabs_controller.cpp",
       "jsview/js_text.cpp",
       "jsview/js_toggle.cpp",
-      "jsview/js_video.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
     ]
@@ -537,6 +572,11 @@ template("declarative_js_engine_ng") {
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+
+    if (defined(config.video_components_support) &&
+        config.video_components_support) {
+      sources += [ "jsview/js_video.cpp" ]
+    }
 
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {

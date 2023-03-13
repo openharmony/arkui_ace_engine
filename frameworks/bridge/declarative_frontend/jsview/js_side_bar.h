@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,7 @@ public:
     static void JsMinSideBarWidth(const JSCallbackInfo& info);
     static void JsShowSideBar(bool isShow);
     static void JsControlButton(const JSCallbackInfo& info);
+    static void JsDivider(const JSCallbackInfo& info);
     static void JsAutoHide(bool autoHide);
     static void JsSideBarPosition(const JSCallbackInfo& info);
     static void CreateForNG(const JSCallbackInfo& info);

@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.h"
 
+#include "securec.h"
 #include "third_party/skia/include/effects/SkColorFilterImageFilter.h"
 
 #include "base/utils/utils.h"
@@ -58,8 +59,8 @@ void SvgFeColorMatrix::OnInitStyle()
     }
 }
 
-void SvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter,
-    const ColorInterpolationType& srcColor, ColorInterpolationType& currentColor) const
+void SvgFeColorMatrix::OnAsImageFilter(sk_sp<SkImageFilter>& imageFilter, const ColorInterpolationType& srcColor,
+    ColorInterpolationType& currentColor) const
 {
     auto declaration = AceType::DynamicCast<SvgFeColorMatrixDeclaration>(declaration_);
     CHECK_NULL_VOID_NOLOG(declaration);

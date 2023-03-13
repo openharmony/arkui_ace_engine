@@ -140,18 +140,12 @@ void PagePattern::ProcessShowState()
 
 void PagePattern::OnShow()
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetChildren().empty()) {
-        LOGI("PagePattern has no children, do not execute onShow.");
-        return;
-    }
+    // Do not invoke onPageShow unless the initialRender function has been executed.
+    CHECK_NULL_VOID_NOLOG(isRenderDone_);
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
     isOnShow_ = true;
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     if (onPageShow_) {
-        context->PostAsyncEvent([onPageShow = onPageShow_]() { onPageShow(); });
+        onPageShow_();
     }
 }
 
@@ -159,10 +153,8 @@ void PagePattern::OnHide()
 {
     CHECK_NULL_VOID_NOLOG(isOnShow_);
     isOnShow_ = false;
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     if (onPageHide_) {
-        context->PostAsyncEvent([onPageHide = onPageHide_]() { onPageHide(); });
+        onPageHide_();
     }
 }
 

@@ -18,26 +18,15 @@
 
 #include <utility>
 
-#include "flutter/fml/memory/ref_counted.h"
-#ifdef FLUTTER_2_5
 #include "core/components_ng/render/canvas_image.h"
-#else
-#include "flutter/lib/ui/painting/image.h"
-#endif
-
 #include "core/image/image_cache.h"
 #include "core/image/image_object.h"
 
 namespace OHOS::Ace {
 
 struct CachedImage {
-#ifdef FLUTTER_2_5
-    explicit CachedImage(const RefPtr<NG::CanvasImage>& image) : imagePtr(image) {}
-    RefPtr<NG::CanvasImage> imagePtr;
-#else
-    explicit CachedImage(fml::RefPtr<flutter::CanvasImage> image) : imagePtr(std::move(image)) {}
-    fml::RefPtr<flutter::CanvasImage> imagePtr;
-#endif
+    explicit CachedImage(const sk_sp<SkImage>& image) : imagePtr(image) {}
+    sk_sp<SkImage> imagePtr;
     uint32_t uniqueId = 0;
 };
 

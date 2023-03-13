@@ -16,17 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_LAYOUT_ALGORITHM_H
 
+#include <optional>
 #include <string>
 #include <utility>
 
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class PipelineContext;
+class TextContentModifier;
 
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT TextLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -51,8 +53,10 @@ public:
     const RefPtr<Paragraph>& GetParagraph();
 
     std::list<RefPtr<SpanItem>>&& GetSpanItemChildren();
-    
+
     float GetBaselineOffset() const;
+
+    std::optional<TextStyle> GetTextStyle() const;
 
 private:
     bool CreateParagraph(const TextStyle& textStyle, std::string content);
@@ -64,10 +68,22 @@ private:
     static TextDirection GetTextDirection(const std::string& content);
     float GetTextWidth() const;
     SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;
+    bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline);
+    bool BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline);
+    bool BuildParagraphAdaptUseLayoutConstraint(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline);
+    std::optional<SizeF> BuildTextRaceParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
+        const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline);
+    void SetPropertyToModifier(const RefPtr<TextLayoutProperty>& layoutProperty, RefPtr<TextContentModifier> modifier);
+    bool AdaptMaxTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
+        const RefPtr<PipelineContext>& pipeline);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     RefPtr<Paragraph> paragraph_;
     float baselineOffset_ = 0.0f;
+    std::optional<TextStyle> textStyle_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };

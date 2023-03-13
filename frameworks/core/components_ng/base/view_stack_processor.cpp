@@ -235,6 +235,11 @@ const AnimationOption& ViewStackProcessor::GetImplicitAnimationOption() const
     return implicitAnimationOption_;
 }
 
+RefPtr<UINode> ViewStackProcessor::GetNewUINode()
+{
+    return Finish();
+}
+
 ScopedViewStackProcessor::ScopedViewStackProcessor()
 {
     std::swap(instance_, ViewStackProcessor::instance);

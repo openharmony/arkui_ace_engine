@@ -380,7 +380,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest005, TestSize.Level1)
     EXPECT_FALSE(slidingPanelLayoutAlgorithm == nullptr);
     panelPattern->mode_ = panelLayoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     panelPattern->type_ = panelLayoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
-    panelPattern->previousMode_ = panelPattern->mode_;
+    panelPattern->previousMode_ = panelPattern->mode_.value_or(PanelMode::HALF);
     panelPattern->isFirstLayout_ = true;
     panelPattern->currentOffset_ = 0.0f;
     panelPattern->isFirstLayout_ = false;
@@ -419,8 +419,9 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest006, TestSize.Level1)
     slidingPanelPattern->dragStartCurrentOffset_ = ZERO;
     slidingPanelPattern->mode_ = panelLayoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     slidingPanelPattern->type_ = panelLayoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
-    slidingPanelPattern->previousMode_ = slidingPanelPattern->mode_;
-    slidingPanelPattern->defaultBlankHeights_[slidingPanelPattern->mode_] = DEFAULT_BLANK_HEIGHT_MODE_HALF;
+    slidingPanelPattern->previousMode_ = slidingPanelPattern->mode_.value_or(PanelMode::HALF);
+    slidingPanelPattern->defaultBlankHeights_[slidingPanelPattern->mode_.value_or(PanelMode::HALF)] =
+        DEFAULT_BLANK_HEIGHT_MODE_HALF;
 
     GestureEvent startInfo;
     startInfo.SetLocalLocation(START_POINT);
@@ -463,8 +464,9 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest007, TestSize.Level1)
     slidingPanelPattern->dragStartCurrentOffset_ = ZERO;
     slidingPanelPattern->mode_ = panelLayoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     slidingPanelPattern->type_ = panelLayoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
-    slidingPanelPattern->previousMode_ = slidingPanelPattern->mode_;
-    slidingPanelPattern->defaultBlankHeights_[slidingPanelPattern->mode_] = DEFAULT_BLANK_HEIGHT_MODE_HALF;
+    slidingPanelPattern->previousMode_ = slidingPanelPattern->mode_.value_or(PanelMode::HALF);
+    slidingPanelPattern->defaultBlankHeights_[slidingPanelPattern->mode_.value_or(PanelMode::HALF)] =
+        DEFAULT_BLANK_HEIGHT_MODE_HALF;
     slidingPanelPattern->fullHalfBoundary_ = FULL_HALF_BOUNDARY;
     slidingPanelPattern->halfMiniBoundary_ = HALF_MINI_BOUNDARY;
 
@@ -507,7 +509,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest008, TestSize.Level1)
     slidingPanelPattern->isAnimating_ = false;
     slidingPanelPattern->mode_ = panelLayoutProperty->GetPanelMode().value_or(PanelMode::HALF);
     slidingPanelPattern->type_ = panelLayoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
-    slidingPanelPattern->previousMode_ = slidingPanelPattern->mode_;
+    slidingPanelPattern->previousMode_ = slidingPanelPattern->mode_.value_or(PanelMode::HALF);
 
     GestureEvent endInfo;
     endInfo.SetMainVelocity(MAIN_VELOCITY);

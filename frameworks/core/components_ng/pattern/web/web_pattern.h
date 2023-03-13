@@ -110,6 +110,11 @@ public:
         return webSrc_;
     }
 
+    void SetPopup(bool popup)
+    {
+        isPopup_ = popup;
+    }
+
     void SetWebData(const std::string& webData)
     {
         if (webData_ != webData) {
@@ -323,7 +328,7 @@ private:
     void SendDoubleClickEvent(const MouseClickInfo& info);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent();
-    void HandleBlurEvent();
+    void HandleBlurEvent(const BlurReason& blurReason);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool WebOnKeyEvent(const KeyEvent& keyEvent);
     void WebRequestFocus();
@@ -399,6 +404,7 @@ private:
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
+    bool isPopup_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

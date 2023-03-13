@@ -50,7 +50,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
    * @param eventSource 
    */
   syncPeerHasChanged(eventSource : ObservedPropertyAbstractPU<T>) {
-    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
+    stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: syncPeerHasChanged peer '${eventSource.info()}'.`);
     this.notifyPropertryHasChangedPU();
   }
 
@@ -60,7 +60,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
    * @param changedPropertyName 
    */
   public objectPropertyHasChangedPU(souceObject: ObservedObject<T>, changedPropertyName : string) {
-    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: \
+    stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}']: \
         objectPropertyHasChangedPU: contained ObservedObject property '${changedPropertyName}' has changed.`)
     this.notifyPropertryHasChangedPU();
   }
@@ -82,27 +82,27 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
   */
   private setValueInternal(newValue: T): boolean {
     if (typeof newValue !== 'object') {
-      stateMgmtConsole.error(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
+      stateMgmtConsole.error(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is NOT an object. Application error. Ignoring set.`);
       return false;
     }
 
     if (newValue == this.wrappedValue_){
-      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] newValue unchanged`);
       return false;
     }
 
     this.unsubscribeWrappedObject();
 
     if (ObservedObject.IsObservedObject(newValue)) {
-      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an ObservedObject already`);
       ObservedObject.addOwningProperty(newValue, this);
       this.wrappedValue_ = newValue;
     } else if (newValue instanceof SubscribableAbstract) {
-      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an SubscribaleAbstract, subscribiung to it.`);
       this.wrappedValue_ = newValue;
       (this.wrappedValue_ as unknown as SubscribableAbstract).addOwningProperty(this);
     } else {
-      stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
+      stateMgmtConsole.debug(`ObservedPropertyObjectPU[${this.id__()}, '${this.info() || "unknown"}'] new value is an Object, needs to be wrapped in an ObservedObject.`);
       this.wrappedValue_ = ObservedObject.createNew(newValue, this);
     }
     return true;
@@ -115,8 +115,7 @@ class ObservedPropertyObjectPU<T extends Object> extends ObservedPropertyObjectA
   }
 
   public getUnmonitored(): T {
-    stateMgmtConsole.debug(`ObservedPropertyObject[${this.id__()}, '${this.info() || "unknown"}']: getUnmonitored returns '${JSON.stringify(this.wrappedValue_)}' .`);
-    // unmonitored get access , no call to otifyPropertyRead !
+    // unmonitored get access , no call to notifyPropertryHasBeenReadPU !
     return this.wrappedValue_;
   }
 

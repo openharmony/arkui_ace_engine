@@ -72,6 +72,13 @@ void JSCanvasGradient::addColorStop(const JSCallbackInfo& info)
         Color colorFromString = Color::WHITE;
         if (!Color::ParseColorString(jsColor, colorFromString)) {
             LOGE("color is invalid!");
+            gradient_ ->ClearColors();
+            color.SetColor(Color::TRANSPARENT);
+            color.SetDimension(0.0);
+            gradient_->AddColor(color);
+            gradient_->AddColor(color);
+            isColorStopValid_ = false;
+            return;
         }
         color.SetColor(colorFromString);
         color.SetDimension(offset);

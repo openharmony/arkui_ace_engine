@@ -18,54 +18,85 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
-void TextPaintMethod::PaintSelection(RSCanvas& canvas, PaintWrapper* paintWrapper)
+TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, RefPtr<Paragraph> paragraph, float baselineOffset,
+    RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier)
+    : pattern_(pattern), paragraph_(std::move(paragraph)), baselineOffset_(baselineOffset),
+      textContentModifier_(textContentModifier), textOverlayModifier_(textOverlayModifier)
+{}
+
+RefPtr<Modifier> TextPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
+{
+    return textContentModifier_;
+}
+
+void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textPattern);
     CHECK_NULL_VOID(paragraph_);
-    const auto& selection = textPattern->GetTextSelector();
-    auto textValue = textPattern->GetTextForDisplay();
-    if (textValue.empty() || selection.GetStart() == selection.GetEnd()) {
-        return;
-    }
-    std::vector<Rect> selectedRects;
-    paragraph_->GetRectsForRange(selection.GetStart(), selection.GetEnd(), selectedRects);
-    if (selectedRects.empty()) {
-        return;
+    CHECK_NULL_VOID(textContentModifier_);
+
+    textContentModifier_->SetParagraph(paragraph_);
+
+    auto offset = paintWrapper->GetContentOffset();
+    auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    textContentModifier_->SetPrintOffset(paintOffset);
+
+    auto textPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(textPattern);
+    auto frameNode = textPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto textOverflow = layoutProperty->GetTextOverflow();
+    if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE) {
+        if (paragraph_->GetTextWidth() > paintWrapper->GetContentSize().Width()) {
+            textContentModifier_->StartTextRace();
+        } else {
+            textContentModifier_->StopTextRace();
+        }
+    } else {
+        textContentModifier_->StopTextRace();
     }
 
+    textContentModifier_->ContentChange();
+
+    PropertyChangeFlag flag = 0;
+    if (textContentModifier_->NeedMeasureUpdate(flag)) {
+        frameNode->MarkDirtyNode(flag);
+    }
+}
+
+RefPtr<Modifier> TextPaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)
+{
+    return textOverlayModifier_;
+}
+
+void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(paragraph_);
+    CHECK_NULL_VOID(textOverlayModifier_);
+
+    auto offset = paintWrapper->GetContentOffset();
+    auto paintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    textOverlayModifier_->SetPrintOffset(paintOffset);
+
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    const auto& selection = textPattern->GetTextSelector();
+    auto textValue = textPattern->GetTextForDisplay();
+    std::vector<Rect> selectedRects;
+    if (!textValue.empty() && selection.GetTextStart() != selection.GetTextEnd()) {
+        paragraph_->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
+    }
+    textOverlayModifier_->SetSelectedRects(selectedRects);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto theme = themeManager->GetTheme<TextTheme>();
     auto selectedColor = theme->GetSelectedColor().GetValue();
-
-    canvas.Save();
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(selectedColor);
-    canvas.AttachBrush(brush);
-
-    auto offset = paintWrapper->GetContentOffset();
-    auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-
-    for (const auto& selectedRect : selectedRects) {
-        canvas.DrawRect(
-            RSRect(textPaintOffset.GetX() + selectedRect.Left(), textPaintOffset.GetY() + selectedRect.Top(),
-                textPaintOffset.GetX() + selectedRect.Right(), textPaintOffset.GetY() + selectedRect.Bottom()));
-    }
-    canvas.DetachBrush();
-    canvas.Restore();
-}
-
-CanvasDrawFunction TextPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
-{
-    return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
-        auto textPaint = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(textPaint);
-        textPaint->PaintSelection(canvas, paintWrapper);
-    };
+    textOverlayModifier_->SetSelectedColor(selectedColor);
 }
 } // namespace OHOS::Ace::NG

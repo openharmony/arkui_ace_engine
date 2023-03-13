@@ -15,7 +15,6 @@
 
 #include "core/components/slider/flutter_render_circle_block.h"
 
-#include "flutter/lib/ui/ui_dart_state.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 
 #include "base/utils/system_properties.h"

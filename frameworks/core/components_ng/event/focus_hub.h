@@ -45,10 +45,15 @@ enum class ScopeType : int32_t {
     FLEX = 1,
 };
 enum class FocusStep : int32_t {
-    LEFT = 0,
-    UP = 1,
-    RIGHT = 2,
-    DOWN = 3,
+    NONE = 0x0,
+    LEFT = 0x1,
+    UP = 0x2,
+    RIGHT = 0x11,
+    DOWN = 0x12,
+    LEFT_END = 0x3,
+    UP_END = 0x4,
+    RIGHT_END = 0X13,
+    DOWN_END = 0x14,
 };
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 

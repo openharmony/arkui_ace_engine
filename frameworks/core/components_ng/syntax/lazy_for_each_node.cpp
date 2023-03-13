@@ -62,7 +62,7 @@ void LazyForEachNode::UpdateLazyForEachItems(int32_t newStartIndex, int32_t newE
     // delete all.
     if (newIds.empty()) {
         // clean current children.
-        Clean();
+        Clean(true);
         builder_->Clean();
         startIndex_ = -1;
         endIndex_ = -1;

@@ -55,5 +55,12 @@ bool ListPattern::IsAtTop() const
     return false;
 }
 
+bool ListPattern::OutBoundaryCallback()
+{
+    return false;
+}
+
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
+
+void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
 } // namespace OHOS::Ace::NG

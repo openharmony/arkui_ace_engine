@@ -32,6 +32,7 @@ group("pattern_unittest") {
     "dragBar:dragBar_pattern_test_ng",
     "flex:flex_pattern_unit_test",
     "focusHub:focusHub_pattern_test_ng",
+    "form:form_pattern_test_ng",
     "gauge:gauge_pattern_test_ng",
     "gesture:gesture_pattern_test_ng",
     "grid:grid_pattern_test_ng",
@@ -54,9 +55,7 @@ group("pattern_unittest") {
     "overlay:overlay_manager_test_ng",
     "panel:panel_pattern_test_ng",
     "patternlock:patternlock_pattern_test_ng",
-
-    # "picker:picker_pattern_test_ng",
-    # "form:form_pattern_test_ng",
+    "picker:picker_pattern_test_ng",
     "plugin:plugin_pattern_test_ng",
     "progress:progress_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
@@ -66,6 +65,8 @@ group("pattern_unittest") {
     "relative_container:relative_container_pattern_test_ng",
     "scroll:scroll_unit_test",
     "scroll_bar:scroll_bar_unit_test",
+
+    # "search:search_pattern_test_ng",
     "select:select_pattern_test_ng",
     "shape:shape_pattern_unit_test",
     "side_bar:side_bar_pattern_test_ng",

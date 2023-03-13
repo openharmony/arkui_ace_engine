@@ -45,8 +45,8 @@ struct TextSelector {
 
     void Update(int32_t base, int32_t destination)
     {
-        baseOffset = std::min(base, destination);
-        destinationOffset = std::max(base, destination);
+        baseOffset = base;
+        destinationOffset = destination;
     }
 
     // Usually called when none is selected.
@@ -66,14 +66,24 @@ struct TextSelector {
         return !operator==(other);
     }
 
-    inline int32_t GetStart() const
+    inline int32_t GetTextStart() const
     {
         return std::min(baseOffset, destinationOffset);
     }
 
-    inline int32_t GetEnd() const
+    inline int32_t GetTextEnd() const
     {
         return std::max(baseOffset, destinationOffset);
+    }
+
+    inline int32_t GetStart() const
+    {
+        return baseOffset;
+    }
+
+    inline int32_t GetEnd() const
+    {
+        return destinationOffset;
     }
 
     inline bool IsValid() const
@@ -93,17 +103,23 @@ struct TextSelector {
         return destinationOffset == baseOffset;
     }
 
+    double GetSelectHeight() const
+    {
+        return std::max(firstHandle.Height(), secondHandle.Height());
+    }
+
+    bool StartEqualToDest() const
+    {
+        return baseOffset == destinationOffset;
+    }
+
     std::string ToString()
     {
         std::string result;
         result.append("base offset: ");
         result.append(std::to_string(baseOffset));
-        result.append(", base position: ");
-        result.append(selectionBaseOffset.ToString());
         result.append(", destination offset: ");
         result.append(std::to_string(destinationOffset));
-        result.append(", destination position: ");
-        result.append(selectionDestinationOffset.ToString());
         return result;
     }
 
