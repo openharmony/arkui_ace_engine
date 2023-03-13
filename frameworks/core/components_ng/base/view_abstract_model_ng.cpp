@@ -29,8 +29,8 @@ void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNo
 }
 } // namespace
 
-void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-    const MenuParam& menuParam)
+void ViewAbstractModelNG::BindMenu(
+    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     GestureEventFunc showMenu;
@@ -126,6 +126,18 @@ void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const
         center.SetZ(z);
     }
     ViewAbstract::SetPivot(center);
+}
+
+void ViewAbstractModelNG::SetScale(float x, float y, float z)
+{
+    VectorF scale(x, y);
+    if (x < 0) {
+        x = 1;
+    }
+    if (y < 0) {
+        y = 1;
+    }
+    ViewAbstract::SetScale(scale);
 }
 
 void ViewAbstractModelNG::BindContentCover(
