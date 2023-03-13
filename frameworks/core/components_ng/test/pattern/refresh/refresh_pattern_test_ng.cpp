@@ -480,18 +480,15 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest009, TestSize.Level1)
     /**
      * @tc.steps: step4. test refresh status for default
      */
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, -1);
     /**
      * @tc.steps: step5. test refresh status for DRAG
      */
     pattern->HandleDragStart();
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, 1);
     pattern->HandleDragStart();
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx() - 1)));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
 }
 
@@ -533,23 +530,18 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest010, TestSize.Level1)
     pattern->HandleDragStart();
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx())));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     /**
      * @tc.steps: step4. test refresh status for OVER_DRAG
      */
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx() - 1)));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     layoutProperty->UpdateScrollableOffset(
         OffsetF(0.0f, static_cast<float>(layoutProperty->GetTriggerRefreshDistanceValue().ConvertToPx())));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
     layoutProperty->UpdateScrollableOffset(OffsetF(0.0f, 0.0f));
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, true, true);
     EXPECT_EQ(stateChangeValue, static_cast<int>(RefreshStatus::DRAG));
 }
 
@@ -576,24 +568,20 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest011, TestSize.Level1)
     /**
      * @tc.steps: step2. Judge whether there is progressChild and textChild.
      */
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     EXPECT_FALSE(textChild == nullptr);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     auto loadingProgressChild =
         FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
     EXPECT_FALSE(loadingProgressChild == nullptr);
     pattern->progressChild_ = loadingProgressChild;
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
     /**
      * @tc.steps: step3. when there is both progressChild and textChild, and their valid property.
      */
     auto progressChildLayoutProperty = pattern->progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     progressChildLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
@@ -624,15 +612,12 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest012, TestSize.Level1)
      * @tc.steps: step2. when renderProperty has invalid IsRefreshing.
      */
     refreshRenderProperty->UpdateIsRefreshing(true);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     /**
      * @tc.steps: step3. when renderProperty has valid IsRefreshing property, but has no IsShowLastTimeValue.
      */
     refreshRenderProperty->UpdateIsRefreshing(false);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     /**
      * @tc.steps: step4. when renderProperty has valid IsRefreshing property and IsShowLastTimeValue.
@@ -642,7 +627,6 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest012, TestSize.Level1)
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     EXPECT_FALSE(refreshLayoutProperty == nullptr);
     refreshLayoutProperty->UpdateIsShowLastTime(true);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
     EXPECT_TRUE(refreshRenderProperty->GetTimeText() == std::nullopt);
 }

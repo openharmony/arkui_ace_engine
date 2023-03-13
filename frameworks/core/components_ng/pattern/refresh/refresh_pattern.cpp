@@ -731,9 +731,9 @@ float RefreshPattern::GetCustomBuilderOpacityRatio()
     auto adjustOffset = verticalOffset - customBuilderSize.Height();
     float opacityRatio = 0.0f;
     if (GreatOrEqual(
-            static_cast<double>(customBuilderSize.Height() + std::clamp(static_cast<double>(triggerLoadingDistance_),
-            0.0, TRIGGER_REFRESH_DISTANCE.ConvertToPx())),
-            TRIGGER_REFRESH_DISTANCE.ConvertToPx() + CUSTOM_BUILDER_HIGHT_LIGHT_SIZE.ConvertToPx())) {
+        static_cast<double>(customBuilderSize.Height() + std::clamp(static_cast<double>(triggerLoadingDistance_),
+        0.0, TRIGGER_REFRESH_DISTANCE.ConvertToPx())),
+        TRIGGER_REFRESH_DISTANCE.ConvertToPx() + CUSTOM_BUILDER_HIGHT_LIGHT_SIZE.ConvertToPx())) {
         opacityRatio = 1.0f;
     } else {
         opacityRatio = (adjustOffset - std::clamp(triggerLoadingDistance_, 0.0f,
