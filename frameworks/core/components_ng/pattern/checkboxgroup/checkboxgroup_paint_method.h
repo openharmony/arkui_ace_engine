@@ -48,9 +48,9 @@ public:
         CHECK_NULL_VOID(checkboxGroupModifier_);
         CHECK_NULL_VOID(paintWrapper);
         auto paintProperty = DynamicCast<CheckBoxGroupPaintProperty>(paintWrapper->GetPaintProperty());
-        auto contentSize = paintWrapper->GetContentSize();
+        auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
-        float strokePaintSize = contentSize.Width();
+        float strokePaintSize = size.Width();
         if (paintProperty->GetCheckBoxGroupSelectedColor().has_value()) {
             checkboxGroupModifier_->SetActiveColor(paintProperty->GetCheckBoxGroupSelectedColor().value());
         }
@@ -80,6 +80,7 @@ public:
         checkboxGroupModifier_->SetUiStatus(uiStatus_);
         checkboxGroupModifier_->SetSelectStatus(selectStatus);
         checkboxGroupModifier_->SetOffset(offset);
+        checkboxGroupModifier_->SetSize(size);
     }
 
     void SetHotZoneOffset(OffsetF& hotZoneOffset)

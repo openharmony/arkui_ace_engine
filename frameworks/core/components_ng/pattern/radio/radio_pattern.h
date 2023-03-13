@@ -163,6 +163,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     bool isFirstAddhotZoneRect_ = true;
+    bool isGroupChanged_ = false;
     TouchHoverAnimationType touchHoverType_;
 
     RefPtr<RadioModifier> radioModifier_;
