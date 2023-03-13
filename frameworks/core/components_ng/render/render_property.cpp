@@ -85,7 +85,6 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("hueRotate", propFrontHueRotate.has_value() ? propFrontHueRotate.value() : 0.0);
     json->Put("colorBlend", propFrontColorBlend.has_value() ? propFrontColorBlend->ColorToString().c_str() : "");
 
-    json->Put("backdropBlur", propBlurRadius.value_or(0.0_vp).Value());
     auto jsonShadow = JsonUtil::Create(true);
     auto shadow = propBackShadow.value_or(Shadow());
     if (shadow.GetStyle() == ShadowStyle::OuterDefaultXS) {
@@ -129,9 +128,7 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("y", 0.0);
         json->Put("backgroundImagePosition", jsonValue);
     }
-    if (propBlurRadius.has_value()) {
-        json->Put("backdropBlur", propBlurRadius->ToString().c_str());
-    }
+    json->Put("backdropBlur", (propBlurRadius.value_or(Dimension(0))).ConvertToPx());
 }
 
 void ClipProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const

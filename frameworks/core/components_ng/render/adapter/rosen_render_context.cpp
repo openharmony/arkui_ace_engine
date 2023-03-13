@@ -488,7 +488,8 @@ void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
         float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
         SetPivot(xPivot, yPivot);
 
-        if (auto z = center.GetZ(); z.has_value()) {
+        auto z = center.GetZ();
+        if (z.has_value()) {
             float zPivot = ConvertDimensionToScaleBySize(z.value(), rect.Width());
             rsNode_->SetCameraDistance(zPivot);
         }
