@@ -63,4 +63,6 @@ bool ListPattern::OutBoundaryCallback()
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+void ListPattern::SetSwiperItem(WeakPtr<ListItemPattern> swiperItem) {}
 } // namespace OHOS::Ace::NG

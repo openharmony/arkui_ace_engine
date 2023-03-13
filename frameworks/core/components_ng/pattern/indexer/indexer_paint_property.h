@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_PAINT_PROPERTY_H
 
 #include "core/components/common/properties/color.h"
+#include "core/components/indexer/indexer_theme.h"
+#include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT IndexerPaintProperty : public PaintProperty {
@@ -35,6 +38,11 @@ public:
         value->PaintProperty::UpdatePaintProperty(DynamicCast<PaintProperty>(this));
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
         value->propPopupBackground_ = ClonePopupBackground();
+        value->propPopupSelectedColor_ = ClonePopupSelectedColor();
+        value->propPopupUnselectedColor_ = ClonePopupUnselectedColor();
+        value->propPopupItemBackground_ = ClonePopupItemBackground();
+        value->propPopupHorizontalSpace_ = ClonePopupHorizontalSpace();
+
         return value;
     }
 
@@ -43,6 +51,10 @@ public:
         PaintProperty::Reset();
         ResetSelectedBackgroundColor();
         ResetPopupBackground();
+        ResetPopupSelectedColor();
+        ResetPopupUnselectedColor();
+        ResetPopupItemBackground();
+        ResetPopupHorizontalSpace();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -51,10 +63,26 @@ public:
         json->Put(
             "SelectedBackgroundColor", propSelectedBackgroundColor_.value_or(Color::WHITE).ColorToString().c_str());
         json->Put("PopupBackground", propPopupBackground_.value_or(Color::WHITE).ColorToString().c_str());
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+        CHECK_NULL_VOID(indexerTheme);
+        json->Put("popupSelectedColor",
+            propPopupSelectedColor_.value_or(indexerTheme->GetPopupDefaultColor()).ColorToString().c_str());
+        json->Put("popupUnselectedColor",
+            propPopupUnselectedColor_.value_or(indexerTheme->GetPopupDefaultColor()).ColorToString().c_str());
+        json->Put("popupItemBackground",
+            propPopupItemBackground_.value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str());
+        json->Put("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
+            Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str());
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupSelectedColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupUnselectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupBackground, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupItemBackground, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupHorizontalSpace, Dimension, PROPERTY_UPDATE_RENDER);
 };
 } // namespace OHOS::Ace::NG
 

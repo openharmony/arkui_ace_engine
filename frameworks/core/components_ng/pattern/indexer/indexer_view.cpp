@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/indexer/indexer_view.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -154,5 +155,58 @@ void IndexerView::SetOnPopupSelected(OnPopupSelectedEvent&& onPopupSelectedEvent
     auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnPopupSelected(std::move(onPopupSelectedEvent));
+}
+
+void IndexerView::SetPopupSelectedColor(const std::optional<Color>& popupSelectedColor)
+{
+    if (popupSelectedColor.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupSelectedColor, popupSelectedColor.value());
+    } else {
+        LOGW("PopupSelectedColor value is not valid");
+        ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, PopupSelectedColor);
+    }
+}
+
+void IndexerView::SetPopupUnselectedColor(const std::optional<Color>& popupUnselectedColor)
+{
+    if (popupUnselectedColor.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupUnselectedColor, popupUnselectedColor.value());
+    } else {
+        LOGW("PopupUnselectedColor value is not valid");
+        ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, PopupUnselectedColor);
+    }
+}
+
+void IndexerView::SetFontSize(const Dimension& fontSize)
+{
+    if (fontSize.IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontSize, fontSize);
+    } else {
+        LOGW("FontSize value is not valid");
+        ACE_RESET_LAYOUT_PROPERTY(IndexerLayoutProperty, FontSize);
+    }
+}
+
+void IndexerView::SetFontWeight(FontWeight weight)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, FontWeight, weight);
+}
+
+void IndexerView::SetPopupItemBackground(const std::optional<Color>& popupItemBackground)
+{
+    if (popupItemBackground.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupItemBackground, popupItemBackground.value());
+    } else {
+        LOGW("PopupItemBackgroundColor value is not valid");
+        ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, PopupItemBackground);
+    }
+}
+
+void IndexerView::SetPopupHorizontalSpace(const Dimension& popupHorizontalSpace)
+{
+    auto spaceValue = popupHorizontalSpace.Value();
+    if (spaceValue >= 0) {
+        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace, popupHorizontalSpace);
+    }
 }
 } // namespace OHOS::Ace::NG

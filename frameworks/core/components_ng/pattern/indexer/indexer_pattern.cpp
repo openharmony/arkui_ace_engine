@@ -514,6 +514,8 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
     auto indexerItemSize = Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP);
     auto itemSize = layoutProperty->GetItemSize().value_or(indexerItemSize);
     auto padding = layoutProperty->CreatePaddingAndBorder();
@@ -531,13 +533,19 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
     auto zeroPositionX = host->GetOffsetRelativeToWindow().GetX() + indexerWidth / 2;
     auto zeroPosiitonY = host->GetOffsetRelativeToWindow().GetY();
     auto renderContext = customNode->GetRenderContext();
+    auto userDefineSpace = paintProperty->GetPopupHorizontalSpace();
+    if (userDefineSpace) {
+        userDefinePositionX = userDefineSpace.value().ConvertToPx();
+    }
     if (alignMent == NG::AlignStyle::LEFT) {
-        renderContext->UpdatePosition(OffsetT<Dimension>(
-            Dimension(zeroPositionX + userDefinePositionX), Dimension(zeroPosiitonY + userDefinePositionY)));
+        auto xPos = userDefineSpace ? (zeroPositionX + indexerWidth / 2) : zeroPositionX;
+        renderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(xPos + userDefinePositionX), Dimension(zeroPosiitonY + userDefinePositionY)));
     } else {
         auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(zeroPositionX - bubbleSize - userDefinePositionX),
-            Dimension(zeroPosiitonY + userDefinePositionY)));
+        auto xPos = (userDefineSpace ? (zeroPositionX - indexerWidth / 2) : zeroPositionX) - bubbleSize;
+        renderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(xPos - userDefinePositionX), Dimension(zeroPosiitonY + userDefinePositionY)));
     }
 }
 
@@ -669,6 +677,18 @@ void IndexerPattern::InitBubbleList(
 {
     CHECK_NULL_VOID(listNode);
     CHECK_NULL_VOID(indexerTheme);
+    auto layoutProperty = GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto popupUnselectedTextColor =
+        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
+    auto popupItemTextFontSize =
+        layoutProperty->GetFontSize().value_or(indexerTheme->GetPopupTextStyle().GetFontSize());
+    auto popupItemTextFontWeight =
+        layoutProperty->GetFontWeight().value_or(indexerTheme->GetPopupTextStyle().GetFontWeight());
+    auto popupItemBackground =
+        paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     for (uint32_t i = 0; i < currentListData.size(); i++) {
         auto listItemNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG,
@@ -677,9 +697,9 @@ void IndexerPattern::InitBubbleList(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         textLayoutProperty->UpdateContent(currentListData.at(i));
-        textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupDefaultColor());
-        textLayoutProperty->UpdateFontSize(indexerTheme->GetPopupTextSize());
-        textLayoutProperty->UpdateFontWeight(indexerTheme->GetPopupTextStyle().GetFontWeight());
+        textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
+        textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
+        textLayoutProperty->UpdateTextColor(popupUnselectedTextColor);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         listItemNode->AddChild(textNode);
@@ -687,6 +707,9 @@ void IndexerPattern::InitBubbleList(
         auto listItemProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
         listItemProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
         listItemProperty->UpdateAlignment(Alignment::CENTER);
+        auto listItemContext = listItemNode->GetRenderContext();
+        CHECK_NULL_VOID(listItemContext);
+        listItemContext->UpdateBackgroundColor(popupItemBackground);
         AddListItemClickListener(listItemNode, i);
         listNode->AddChild(listItemNode);
         listItemNode->MarkModifyDone();
@@ -703,6 +726,16 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto popupSelectedTextColor =
+        paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+    auto popupUnselectedTextColor =
+        paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetPopupDefaultColor());
+    auto popupItemBackground =
+        paintProperty->GetPopupItemBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto listNode = popupNode_->GetLastChild();
     auto currentIndex = 0;
     for (auto child : listNode->GetChildren()) {
@@ -717,13 +750,14 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         if (currentIndex == clickIndex) {
-            textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupTextColor());
+            textLayoutProperty->UpdateTextColor(popupSelectedTextColor);
             listItemContext->UpdateBackgroundColor(Color(POPUP_LISTITEM_CLICKED_BG));
         } else {
-            textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupDefaultColor());
-            listItemContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            textLayoutProperty->UpdateTextColor(popupUnselectedTextColor);
+            listItemContext->UpdateBackgroundColor(popupItemBackground);
         }
-
+        textNode->MarkModifyDone();
+        textNode->MarkDirtyNode();
         listItemNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         currentIndex++;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -411,7 +411,7 @@ void JSIndexer::GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle)
     if (ParseJsDimensionVp(size, fontSize)) {
         textStyle.SetFontSize(fontSize);
     }
-    
+
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString()) {
         textStyle.SetFontWeight(ConvertStrToFontWeight(weight->ToString()));
@@ -454,16 +454,27 @@ void JSIndexer::SetItemSize(const JSCallbackInfo& args)
     }
 }
 
-void JSIndexer::SetAlignStyle(int32_t value)
+void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1 || !args[0]->IsNumber()) {
+        return;
+    }
+    int32_t value = args[0]->ToNumber<int32_t>();
     if (Container::IsCurrentUseNewPipeline()) {
         if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
             NG::IndexerView::SetAlignStyle(NG_ALIGN_STYLE[value]);
         }
+        if (args.Length() > 1) {
+            Dimension dimensionValue;
+            if (ParseJsDimensionVp(args[1], dimensionValue)) {
+                NG::IndexerView::SetPopupHorizontalSpace(dimensionValue);
+            }
+        }
+        return;
     }
     if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
         auto indexerComponent =
-                AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+            AceType::DynamicCast<V2::IndexerComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (indexerComponent) {
             indexerComponent->SetAlignStyle(ALIGN_STYLE[value]);
         }
@@ -499,6 +510,87 @@ void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
     }
 }
 
+void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    std::optional<Color> selectedColor = std::nullopt;
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+    } else {
+        Color color;
+        if (ParseJsColor(args[0], color)) {
+            selectedColor = color;
+        }
+    }
+    NG::IndexerView::SetPopupSelectedColor(selectedColor);
+}
+
+void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    std::optional<Color> unselectedColor = std::nullopt;
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+    } else {
+        Color color;
+        if (ParseJsColor(args[0], color)) {
+            unselectedColor = color;
+        }
+    }
+    NG::IndexerView::SetPopupUnselectedColor(unselectedColor);
+}
+
+void JSIndexer::SetPopupItemFont(const JSCallbackInfo& args)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    Dimension fontSize;
+    std::string weight;
+    if (args.Length() < 1 || !args[0]->IsObject()) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 object argument");
+    } else {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        JSRef<JSVal> size = obj->GetProperty("size");
+        if (!size->IsNull()) {
+            ParseJsDimensionVp(size, fontSize);
+        }
+
+        auto jsWeight = obj->GetProperty("weight");
+        if (!jsWeight->IsNull()) {
+            if (jsWeight->IsNumber()) {
+                weight = std::to_string(jsWeight->ToNumber<int32_t>());
+            } else {
+                ParseJsString(jsWeight, weight);
+            }
+        }
+    }
+    NG::IndexerView::SetFontSize(fontSize);
+    NG::IndexerView::SetFontWeight(ConvertStrToFontWeight(weight, FontWeight::MEDIUM));
+}
+
+void JSIndexer::SetPopupItemBackgroundColor(const JSCallbackInfo& args)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+    std::optional<Color> backgroundColor = std::nullopt;
+    if (args.Length() < 1) {
+        LOGW("The argv is wrong, it is supposed to have at least 1 argument");
+    } else {
+        Color color;
+        if (ParseJsColor(args[0], color)) {
+            backgroundColor = color;
+        }
+    }
+    NG::IndexerView::SetPopupItemBackground(backgroundColor);
+}
+
 void JSIndexer::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -521,6 +613,10 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
     JSClass<JSIndexer>::StaticMethod("selected", &JSIndexer::SetSelected, opt);
     JSClass<JSIndexer>::StaticMethod("popupPosition", &JSIndexer::SetPopupPosition, opt);
+    JSClass<JSIndexer>::StaticMethod("popupSelectedColor", &JSIndexer::SetPopupSelectedColor, opt);
+    JSClass<JSIndexer>::StaticMethod("popupUnselectedColor", &JSIndexer::SetPopupUnselectedColor, opt);
+    JSClass<JSIndexer>::StaticMethod("popupItemFont", &JSIndexer::SetPopupItemFont);
+    JSClass<JSIndexer>::StaticMethod("popupItemBackgroundColor", &JSIndexer::SetPopupItemBackgroundColor, opt);
     // keep compatible, need remove after
     JSClass<JSIndexer>::StaticMethod("onPopupSelected", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
