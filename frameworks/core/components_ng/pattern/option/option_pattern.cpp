@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,8 +19,10 @@
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
+#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
@@ -399,4 +401,45 @@ const std::string& OptionPattern::GetText()
     return textProps->GetContentValue();
 }
 
+void OptionPattern::UpdateText(const std::string& content)
+{
+    CHECK_NULL_VOID(text_);
+    auto props = text_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateContent(content);
+    text_->MarkModifyDone();
+    text_->MarkDirtyNode();
+}
+
+void OptionPattern::UpdateIcon(const std::string& src)
+{
+    iconSrc_ = src;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<FrameNode> row = host->GetChildAtIndex(0)
+        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    CHECK_NULL_VOID(row);
+    if (src.empty()) {
+        row->RemoveChild(icon_); // it's safe even if icon_ is nullptr
+        row->MarkModifyDone();
+        row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        icon_ = nullptr;
+        return;
+    }
+    if (!icon_) {
+        icon_ = OptionView::CreateIcon(src, row);
+        row->MarkModifyDone();
+        row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return;
+    }
+
+    auto props = icon_->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    auto imageSrcInfo = props->GetImageSourceInfo();
+    CHECK_NULL_VOID(imageSrcInfo);
+    imageSrcInfo->SetSrc(src);
+    props->UpdateImageSourceInfo(imageSrcInfo.value());
+    icon_->MarkModifyDone();
+    icon_->MarkDirtyNode();
+}
 } // namespace OHOS::Ace::NG

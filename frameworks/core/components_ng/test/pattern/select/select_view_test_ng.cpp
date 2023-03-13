@@ -75,22 +75,22 @@ HWTEST_F(SelectViewTestNg, SelectSetSpaceTest001, TestSize.Level1)
     auto select = FrameNode::GetOrCreateFrameNode(
         V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SelectPattern>(); });
-    EXPECT_NE(select, nullptr);
+    ASSERT_NE(select, nullptr);
 
     auto row = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    CHECK_NULL_VOID(row);
+    ASSERT_NE(row, nullptr);
 
     auto text = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    EXPECT_NE(text, nullptr);
+    ASSERT_NE(text, nullptr);
 
     auto spinner = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    EXPECT_NE(spinner, nullptr);
+    ASSERT_NE(spinner, nullptr);
 
     text->MountToParent(row);
     spinner->MountToParent(row);
@@ -98,12 +98,12 @@ HWTEST_F(SelectViewTestNg, SelectSetSpaceTest001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(select);
 
     SelectView::SetSpace(Dimension(20.00, DimensionUnit::VP));
-    if (!select->GetChildren().empty()) {
-        auto row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
-        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
-        
-        EXPECT_TRUE(rowProps->GetSpace()->Value() == 20);
-    }
+    ASSERT_FALSE(select->GetChildren().empty());
+    row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
+    ASSERT_NE(row, nullptr);
+    auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+    ASSERT_NE(rowProps, nullptr);
+    ASSERT_TRUE(rowProps->GetSpace()->Value() == 20);
 }
 
 /**
@@ -113,29 +113,28 @@ HWTEST_F(SelectViewTestNg, SelectSetSpaceTest001, TestSize.Level1)
  */
 HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
 {
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto select = FrameNode::GetOrCreateFrameNode(
         V2::SELECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SelectPattern>(); });
-    EXPECT_NE(select, nullptr);
+    ASSERT_NE(select, nullptr);
 
     auto row = FrameNode::GetOrCreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    CHECK_NULL_VOID(row);
+    ASSERT_NE(row, nullptr);
 
     auto text = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    EXPECT_NE(text, nullptr);
+    ASSERT_NE(text, nullptr);
 
     auto spinner = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    EXPECT_NE(spinner, nullptr);
+    ASSERT_NE(spinner, nullptr);
 
     text->MountToParent(row);
     spinner->MountToParent(row);
@@ -143,22 +142,20 @@ HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Push(select);
 
     SelectView::SetArrowPosition(ArrowPosition::END);
-    if (!select->GetChildren().empty()) {
-        auto row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
-        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
-        
-        EXPECT_STREQ(V2::ConvertFlexDirectionToStirng(rowProps->GetFlexDirection().value()).c_str(),
-                     "FlexDirection.Row");
-    }
+    ASSERT_FALSE(select->GetChildren().empty());
+    row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
+    ASSERT_NE(row, nullptr);
+    auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+    ASSERT_STREQ(V2::ConvertFlexDirectionToStirng(rowProps->GetFlexDirection().value()).c_str(),
+                    "FlexDirection.Row");
 
     SelectView::SetArrowPosition(ArrowPosition::START);
-    if (!select->GetChildren().empty()) {
-        auto row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
-        auto rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
-        
-        EXPECT_STREQ(V2::ConvertFlexDirectionToStirng(rowProps->GetFlexDirection().value()).c_str(),
-                     "FlexDirection.RowReverse");
-    }
+    ASSERT_FALSE(select->GetChildren().empty());
+    row = FrameNode::GetFrameNode(select->GetFirstChild()->GetTag(), select->GetFirstChild()->GetId());
+    ASSERT_NE(row, nullptr);
+    rowProps = row->GetLayoutProperty<FlexLayoutProperty>();
+    ASSERT_STREQ(V2::ConvertFlexDirectionToStirng(rowProps->GetFlexDirection().value()).c_str(),
+                    "FlexDirection.RowReverse");
 }
 
 /**
@@ -168,7 +165,6 @@ HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest001, TestSize.Level1)
  */
 HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
 {
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
@@ -178,5 +174,36 @@ HWTEST_F(SelectViewTestNg, SelectSetArrowPositionTest002, TestSize.Level1)
     SelectView::Create(params);
     SelectView::SetArrowPosition(ArrowPosition::END);
     SelectView::SetSpace(Dimension(20.00, DimensionUnit::VP));
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_TRUE(select->GetChildren().empty());
+}
+
+/**
+ * @tc.name: CreateMenu001
+ * @tc.desc: Test create menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectViewTestNg, CreateMenu001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    std::vector<SelectParam> params = {{ OPTION_TEXT, FILE_SOURCE }};
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    SelectView::Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetMenuNode(), nullptr);
+
+    // Create again
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+    SelectView::Create(params);
+    select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetMenuNode(), nullptr);
 }
 } // namespace OHOS::Ace::NG
