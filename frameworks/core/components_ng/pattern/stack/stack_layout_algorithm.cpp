@@ -15,7 +15,6 @@
 
 #include "frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.h"
 
-#include "foundation/ability/ability_runtime/services/common/include/hilog_wrapper.h"
 
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
