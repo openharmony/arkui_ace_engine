@@ -207,6 +207,9 @@ void IndexerView::SetPopupHorizontalSpace(const Dimension& popupHorizontalSpace)
     auto spaceValue = popupHorizontalSpace.Value();
     if (spaceValue >= 0) {
         ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace, popupHorizontalSpace);
+    } else {
+        LOGW("PopupHorizontalSpace value is not valid");
+        ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace);
     }
 }
 } // namespace OHOS::Ace::NG
