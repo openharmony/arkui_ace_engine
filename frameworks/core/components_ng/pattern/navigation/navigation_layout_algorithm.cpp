@@ -17,6 +17,7 @@
 
 #include <cmath>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
@@ -218,8 +219,14 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             return;
         }
 
-        navBarWidth = std::floor(static_cast<float>(
-            navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ConvertToPx()));
+        auto navBarWidthValue = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH);
+        bool isPercentSize = (navBarWidthValue.Unit() == DimensionUnit::PERCENT);
+        if (isPercentSize) {
+            navBarWidth = std::floor(static_cast<float>(navBarWidthValue.Value() * size.Width()));
+        } else {
+            navBarWidth = std::floor(static_cast<float>(
+                navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ConvertToPx()));
+        }
         contentWidth = std::floor(size.Width() - static_cast<float>(DIVIDER_WIDTH.ConvertToPx()) - navBarWidth);
         dividerWidth = size.Width() - navBarWidth - contentWidth;
         navBarSize.SetWidth(navBarWidth);
