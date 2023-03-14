@@ -25,28 +25,38 @@
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT FormWindow : public Window {
 public:
     explicit FormWindow(const WeakPtr<PipelineBase>& context) : Window(nullptr), outSidePipelineContext_(context) {}
-    ~FormWindow() = default;
+    ~FormWindow()
+    {
+        auto context = outSidePipelineContext_.Upgrade();
+        if (!context) {
+            LOGE("form remove vsync callback fail due to null context");
+            return;
+        }
+        context->RemoveFormVsyncCallback(formWindowId_);
+    };
 
     void RequestFrame() override;
 
-    void Destroy() override
-    {}
+    void Destroy() override {}
 
-    void SetRootRenderNode(const RefPtr<RenderNode>& root) override
-    {}
+    void SetRootRenderNode(const RefPtr<RenderNode>& root) override {}
 
     void SetVsyncCallback(AceVsyncCallback&& callback) override;
 
+    void SetFormWindowId(int64_t formWindowId)
+    {
+        formWindowId_ = formWindowId;
+    };
+
 private:
     WeakPtr<PipelineBase> outSidePipelineContext_;
+    int64_t formWindowId_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(FormWindow);
 };
 
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENT_FORM_FORM_WINDOW_H

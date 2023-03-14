@@ -61,7 +61,7 @@ class FontManager;
 class ManagerInterface;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
-
+using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
@@ -154,8 +154,8 @@ public:
 
     virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
 
-    virtual void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+    virtual void OnSurfaceChanged(int32_t width, int32_t height,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) = 0;
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
@@ -780,6 +780,10 @@ public:
         uiExtensionCallback_ = std::move(callback);
     }
 
+    void SetFormVsyncCallback(AceVsyncCallback&& callback, int32_t formWindowId);
+
+    void RemoveFormVsyncCallback(int32_t formWindowId);
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -814,6 +818,8 @@ protected:
     bool isSubPipeline_ = false;
 
     bool isJsPlugin_ = false;
+
+    std::unordered_map<int32_t, AceVsyncCallback> formVsyncCallbacks_;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     int32_t appLabelId_ = 0;

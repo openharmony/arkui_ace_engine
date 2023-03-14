@@ -31,7 +31,6 @@ namespace Ace {
 class SubContainer;
 class FormManagerDelegate;
 
-
 namespace NG {
 
 class FormPattern : public Pattern {
@@ -74,6 +73,7 @@ private:
 
     void InitFormManagerDelegate();
     void CreateCardContainer();
+    void RemoveSubContainer();
 
     void FireOnAcquiredEvent(int64_t id) const;
     void FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) const;
@@ -90,10 +90,11 @@ private:
     RefPtr<FormManagerDelegate> formManagerBridge_;
 
     RequestFormInfo cardInfo_;
+    bool isLoaded_ = false;
 };
 
 } // namespace NG
 } // namespace Ace
-} // OHOS
+} // namespace OHOS
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_PATTERN_H

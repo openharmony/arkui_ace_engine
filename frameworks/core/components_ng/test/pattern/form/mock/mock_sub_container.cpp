@@ -32,6 +32,7 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
     const FrontendType& cardType, const FrontendType& uiSyntax)
 {}
+void SubContainer::RunSameCard() {}
 
 void SubContainer::UpdateCard(
     const std::string& content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap)

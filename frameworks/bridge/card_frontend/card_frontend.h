@@ -29,11 +29,12 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate_impl.h"
 
 namespace OHOS::Ace {
-
 class ACE_EXPORT CardFrontend : public Frontend {
     DECLARE_ACE_TYPE(CardFrontend, Frontend);
 
 public:
+    using OnFormVisibleCallback = std::function<void()>;
+
     CardFrontend() = default;
     ~CardFrontend() override;
 
@@ -79,9 +80,9 @@ public:
         return false;
     }
 
-    void OnSaveAbilityState (std::string& data) override {}
+    void OnSaveAbilityState(std::string& data) override {}
 
-    void OnRestoreAbilityState (const std::string& data) override {}
+    void OnRestoreAbilityState(const std::string& data) override {}
 
     void OnShow() override
     {
@@ -184,6 +185,20 @@ public:
         cardId_ = cardId;
     }
 
+    void AddFormVisiableCallback(const OnFormVisibleCallback& callback)
+    {
+        if (callback) {
+            onFormVisibleCallback_ = callback;
+        }
+    }
+
+    void FireFormVisiableCallback() const
+    {
+        if (onFormVisibleCallback_) {
+            onFormVisibleCallback_();
+        }
+    }
+
 protected:
     void ParseManifest() const;
 
@@ -197,6 +212,7 @@ protected:
     Framework::PipelineContextHolder holder_;
     RefPtr<AssetManager> assetManager_;
     RefPtr<Framework::ManifestParser> manifestParser_;
+    OnFormVisibleCallback onFormVisibleCallback_;
 
     mutable std::once_flag onceFlag_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -285,5 +301,4 @@ private:
     RefPtr<Framework::CardFrontendDelegate> delegate_;
 };
 } // namespace OHOS::Ace
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CARD_FRONTEND_CARD_FRONTEND_H
