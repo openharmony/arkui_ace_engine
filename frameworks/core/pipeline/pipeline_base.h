@@ -624,12 +624,13 @@ public:
     }
     bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
     {
+        bool isConsume = false;
         for (const auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
             if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
-                return true;
+                isConsume = true;
             }
         }
-        return false;
+        return isConsume;
     }
 
     using configChangedCallback = std::function<void()>;
