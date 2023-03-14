@@ -59,6 +59,17 @@ AceEngine::AceEngine()
     }
 }
 
+AceEngine::~AceEngine()
+{
+    LOGI("~AceEngine");
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    LOGI("~AceEngine: containerMap_ size: %{public}zu", containerMap_.size());
+    for (const auto& [first, second] : containerMap_) {
+        LOGI("~AceEngine: container (%{public}s) instance id: %{public}d(%{public}d)",
+            second->TypeName(), first, second->GetInstanceId());
+    }
+}
+
 AceEngine& AceEngine::Get()
 {
     static AceEngine engine;
