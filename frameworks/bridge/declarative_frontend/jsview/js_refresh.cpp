@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/refresh_model_impl.h"
 #include "core/components/refresh/refresh_theme.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace {
@@ -127,6 +128,23 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         if (friction->ToNumber<int32_t>() <= 0) {
             RefreshModel::GetInstance()->IsRefresh(true);
         }
+    }
+    ParseCustomBuilder(info);
+}
+
+void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
+{
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto builder = paramObject->GetProperty("builder");
+    if (builder->IsFunction()) {
+        RefPtr<NG::UINode> customNode;
+        {
+            NG::ScopedViewStackProcessor builderViewStackProcessor;
+            JsFunction Jsfunc(info.This(), JSRef<JSObject>::Cast(builder));
+            Jsfunc.Execute();
+            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        }
+        RefreshModel::GetInstance()->SetCustomBuilder(customNode);
     }
 }
 
