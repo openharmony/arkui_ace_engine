@@ -109,7 +109,7 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
 double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
     const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType)
 {
-    if (gridCount_ > 0) {
+    if (gridCount_ >= 0) {
         return info->GetWidth(std::min(gridCount_, GridSystemManager::GetInstance().GetCurrentGridInfo().maxColumns));
     }
 
