@@ -319,11 +319,7 @@ public:
         ViewAbstract::MarkAnchor({ x, y });
     }
 
-    void SetScale(float x, float y, float z) override
-    {
-        VectorF scale(x, y);
-        ViewAbstract::SetScale(scale);
-    }
+    void SetScale(float x, float y, float z) override;
 
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
 
