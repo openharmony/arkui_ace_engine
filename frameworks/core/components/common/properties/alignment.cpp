@@ -40,8 +40,12 @@ const Alignment Alignment::BOTTOM_RIGHT = Alignment(1.0, 1.0);
 Offset Alignment::GetAlignPosition(const Size& parentSize, const Size& childSize, const Alignment& alignment)
 {
     Offset offset;
-    offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / 2.0);
-    offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
+    if (GreatOrEqual(parentSize.Width(), childSize.Width())) {
+        offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / 2.0);
+    }
+    if (GreatOrEqual(parentSize.Height(), childSize.Height())) {
+        offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
+    }
     return offset;
 }
 
@@ -49,8 +53,12 @@ NG::OffsetF Alignment::GetAlignPosition(
     const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment)
 {
     NG::OffsetF offset;
-    offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / 2.0);
-    offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
+    if (GreatOrEqual(parentSize.Width(), childSize.Width())) {
+        offset.SetX((1.0 + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / 2.0);
+    }
+    if (GreatOrEqual(parentSize.Height(), childSize.Height())) {
+        offset.SetY((1.0 + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / 2.0);
+    }
     return offset;
 }
 
