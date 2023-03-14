@@ -173,7 +173,6 @@ void RenderSceneViewer::RenderWithContext(RenderContext& context, const Offset& 
             delegate->sceneViewerAdapter_.SetEngine(std::move(engine));
             LOGD("ACE-3D init Engine this %d %d", delegate->GetKey(), __LINE__);
         });
-        LOGD("ACE-3D RenderSceneViewer::RenderWithContext get eglcontext %pX", eglContext);
     }
 
     if (needsSceneSetup_) {
