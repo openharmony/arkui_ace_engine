@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 class ImagePainterUtils {
 public:
     static constexpr uint8_t RADIUS_POINTS_SIZE = 4;
-    static SkVector* ToSkRadius(const BorderRadiusArray& radiusXY);
+    static std::unique_ptr<SkVector[]> ToSkRadius(const BorderRadiusArray& radiusXY);
     static void AddFilter(SkPaint& paint, const ImagePaintConfig& config);
 };
 } // namespace OHOS::Ace::NG

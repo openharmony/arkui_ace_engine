@@ -187,8 +187,8 @@ bool SkiaImage::DrawWithRecordingCanvas(
     auto config = GetPaintConfig();
     ImagePainterUtils::AddFilter(paint, config);
 
-    SkVector* radii = ImagePainterUtils::ToSkRadius(radiusXY);
-    recordingCanvas->ClipAdaptiveRRect(radii);
+    auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
+    recordingCanvas->ClipAdaptiveRRect(radii.get());
     if (config.imageFit_ == ImageFit::TOP_LEFT) {
         SkAutoCanvasRestore acr(recordingCanvas, true);
         auto skSrcRect = SkRect::MakeXYWH(srcRect.GetLeft(), srcRect.GetTop(), srcRect.GetWidth(), srcRect.GetHeight());
@@ -197,7 +197,7 @@ bool SkiaImage::DrawWithRecordingCanvas(
     }
     recordingCanvas->scale(config.scaleX_, config.scaleY_);
 
-    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii, 1.0, GetUniqueID(),
+    Rosen::RsImageInfo rsImageInfo((int)(config.imageFit_), (int)(config.imageRepeat_), radii.get(), 1.0, GetUniqueID(),
         GetCompressWidth(), GetCompressHeight());
     auto data = GetCompressData();
     recordingCanvas->DrawImageWithParm(GetImage(), std::move(data), rsImageInfo, paint);

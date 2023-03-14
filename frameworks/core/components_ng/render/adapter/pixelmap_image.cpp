@@ -81,10 +81,10 @@ void PixelMapImage::DrawToRSCanvas(
     }
     SkPaint paint;
     ImagePainterUtils::AddFilter(paint, GetPaintConfig());
-    SkVector* radii = ImagePainterUtils::ToSkRadius(radiusXY);
-    recordingCanvas->ClipAdaptiveRRect(radii);
+    auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
+    recordingCanvas->ClipAdaptiveRRect(radii.get());
     Rosen::RsImageInfo rsImageInfo(
-        (int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii, 1.0, 0, 0, 0);
+        (int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii.get(), 1.0, 0, 0, 0);
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #endif
 }
