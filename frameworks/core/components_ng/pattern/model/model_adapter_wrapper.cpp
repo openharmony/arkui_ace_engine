@@ -326,7 +326,6 @@ EGLContext ModelAdapterWrapper::GetRenderContext()
 {
     auto ret = EGL_NO_CONTEXT;
     ret = Rosen::RSUIShareContext::GetInstance().GetRsRenderContext();
-    LOGD("MODEL_NG: RenderContext %p", ret);
     return ret;
 }
 
