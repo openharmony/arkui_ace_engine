@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
 #include "core/components/badge/badge_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -87,6 +88,7 @@ void BadgePattern::OnModifyDone()
     textLayoutProperty->UpdateFontSize(badgeFontSize.value());
 
     textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
