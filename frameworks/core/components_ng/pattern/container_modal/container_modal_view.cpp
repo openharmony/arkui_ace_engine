@@ -62,7 +62,7 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
 
     CHECK_NULL_RETURN(stack->GetLayoutProperty(), nullptr);
-    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CHECK_NULL_RETURN(column->GetLayoutProperty(), nullptr);
     column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
 
