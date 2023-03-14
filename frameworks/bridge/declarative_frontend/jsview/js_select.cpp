@@ -754,6 +754,10 @@ void JSSelect::Height(const JSRef<JSVal>& jsValue)
 
 void JSSelect::JsSize(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsSize(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
