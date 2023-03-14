@@ -427,9 +427,13 @@ void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
 void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
 {
     CHECK_NULL_VOID(rsNode_);
-    // rsNode sets rotation on camera, need to switch degrees to negative values
-    float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2)) * -1;
-    rsNode_->SetRotation(rotate.w * rotate.x / norm, rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
+    float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2));
+    if (NearZero(norm)) {
+        LOGW("rotate vector is near zero, please check");
+        norm = 1.0f;
+    }
+    // for rosen backend, the rotation angles in the x and y directions should be set to opposite angles
+    rsNode_->SetRotation(-rotate.w * rotate.x / norm, -rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
     RequestNextFrame();
 }
 
