@@ -2702,8 +2702,10 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
 void FrontendDelegateDeclarative::GetSnapshot(
     const std::string& componentId, NG::ComponentSnapshot::JsCallback&& callback)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     NG::ComponentSnapshot snapshot(componentId);
     snapshot.Get(std::move(callback));
+#endif
 }
 
 } // namespace OHOS::Ace::Framework
