@@ -34,6 +34,19 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     auto contentSize = paintWrapper->GetContentSize();
     config.scaleX_ = contentSize.Width() / frameSize.Width();
     config.scaleY_ = contentSize.Height() / frameSize.Height();
+
+    // update border radius
+    if (renderProps->GetNeedBorderRadiusValue(false)) {
+        auto renderCtx = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderCtx);
+        auto borderRadius = renderCtx->GetBorderRadius();
+        BorderRadiusArray radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
+                                              borderRadius->radiusTopLeft->ConvertToPx()),
+            PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
+            PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
+            PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
+        config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(std::move(radiusXY));
+    }
 }
 
 CanvasDrawFunction ImagePaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
