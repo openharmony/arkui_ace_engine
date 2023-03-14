@@ -256,6 +256,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+    oldIndex_ = currentIndex_;
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
@@ -332,6 +333,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     FireChangeEvent();
+    oldIndex_ = currentIndex_;
     CalculateCacheRange();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -969,6 +971,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
             swiper->FireChangeEvent();
+            swiper->oldIndex_ = nextIndex;
             swiper->CalculateCacheRange();
         }
         if (restartAutoPlay) {
