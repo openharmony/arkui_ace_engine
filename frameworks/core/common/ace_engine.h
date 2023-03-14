@@ -34,7 +34,7 @@ class AcePage;
 
 class ACE_EXPORT AceEngine {
 public:
-    ~AceEngine() = default;
+    ~AceEngine();
 
     void AddContainer(int32_t instanceId, const RefPtr<Container>& container);
     void RemoveContainer(int32_t instanceId);
