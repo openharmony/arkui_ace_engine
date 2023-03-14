@@ -82,6 +82,16 @@ public:
         needInitRealSideBarWidth_ = value;
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return { false, true, ScopeType::OTHERS };
+    }
+
     void InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitSideBarContentEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub);
