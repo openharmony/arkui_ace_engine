@@ -90,6 +90,8 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (!textValue.empty() && selection.GetTextStart() != selection.GetTextEnd()) {
         paragraph_->GetRectsForRange(selection.GetTextStart(), selection.GetTextEnd(), selectedRects);
     }
+    auto contentRect = textPattern->GetTextContentRect();
+    textOverlayModifier_->SetContentRect(contentRect);
     textOverlayModifier_->SetSelectedRects(selectedRects);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
