@@ -17,6 +17,8 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -408,6 +410,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
             offset = offset + OffsetF(pos.second.first, 0) + OffsetF(laneCrossOffset, 0) +
                 OffsetF(0, crossSize / lanes_ * laneIndex);
         }
+        SetListItemIndex(layoutWrapper, wrapper, pos.first);
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
         wrapper->Layout();
     }
@@ -513,5 +516,21 @@ void ListItemGroupLayoutAlgorithm::CalculateLanes(const RefPtr<ListLayoutPropert
         lanes_ = lanes;
         lanesChanged_ = true;
     }
+}
+
+void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
+    const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup)
+{
+    auto host = itemLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto listItem = host->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID_NOLOG(listItem);
+    listItem->SetIndexInListItemGroup(indexInGroup);
+
+    host = groupLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID_NOLOG(listItemGroup);
+    listItem->SetIndexInList(listItemGroup->GetIndexInList());
 }
 } // namespace OHOS::Ace::NG

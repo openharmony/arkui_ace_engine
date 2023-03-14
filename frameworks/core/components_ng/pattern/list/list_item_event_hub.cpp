@@ -16,23 +16,16 @@
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/list/list_event_hub.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 int32_t ListItemEventHub::GetIndex(const Point& point) const
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, -1);
-    auto parent = host->GetParent();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-    while (parent && !frameNode) {
-        parent = parent->GetParent();
-        frameNode = AceType::DynamicCast<FrameNode>(parent);
-    }
-    CHECK_NULL_RETURN(frameNode, -1);
-    auto hub = frameNode->GetEventHub<ListEventHub>();
-    CHECK_NULL_RETURN(hub, -1);
-    return hub->GetListItemIndexByPosition(point.GetX(), point.GetY());
+    auto pattern = host->GetPattern<ListItemPattern>();
+    CHECK_NULL_RETURN(pattern, -1);
+    return pattern->GetIndexInList();
 }
 
 std::string ListItemEventHub::GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType drag)
