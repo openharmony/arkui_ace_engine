@@ -65,8 +65,7 @@ group("pattern_unittest") {
     "relative_container:relative_container_pattern_test_ng",
     "scroll:scroll_unit_test",
     "scroll_bar:scroll_bar_unit_test",
-
-    # "search:search_pattern_test_ng",
+    "search:search_pattern_test_ng",
     "select:select_pattern_test_ng",
     "shape:shape_pattern_unit_test",
     "side_bar:side_bar_pattern_test_ng",
