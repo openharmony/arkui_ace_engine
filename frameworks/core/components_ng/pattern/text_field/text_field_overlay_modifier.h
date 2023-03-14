@@ -24,16 +24,13 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 
 namespace OHOS::Ace::NG {
 class TextFieldOverlayModifier : public OverlayModifier {
     DECLARE_ACE_TYPE(TextFieldOverlayModifier, OverlayModifier);
 
 public:
-    TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollBar>&& scrollBar,
-                            WeakPtr<ScrollEdgeEffect>&& edgeEffect);
+    TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern);
     ~TextFieldOverlayModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -47,19 +44,13 @@ public:
     void SetCursorOffset(OffsetF& value);
     void SetCursorOffsetX(float value);
     void SetInputStyle(InputStyle& value);
-    void SetFrameSize(const SizeF& value);
-    void SetCurrentOffset(float value);
 
 private:
     void PaintSelection(DrawingContext& context) const;
     void PaintCursor(DrawingContext& context) const;
-    void PaintScrollBar(RSCanvas& canvas);
-    void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
 
 private:
     WeakPtr<Pattern> pattern_;
-    WeakPtr<ScrollBar> scrollBar_;
-    WeakPtr<ScrollEdgeEffect> edgeEffect_;
     RefPtr<AnimatablePropertyColor> cursorColor_;
     RefPtr<AnimatablePropertyFloat> cursorWidth_;
     RefPtr<AnimatablePropertyColor> selectedColor_;
@@ -67,9 +58,8 @@ private:
     RefPtr<PropertyBool> cursorVisible_;
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyOffsetF> contentOffset_;
-    RefPtr<PropertyFloat> currentOffset_;
     InputStyle inputStyle_ = InputStyle::DEFAULT;
-    RefPtr<PropertySizeF> frameSize_;
+
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

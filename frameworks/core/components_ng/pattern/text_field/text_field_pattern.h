@@ -37,9 +37,6 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -102,8 +99,8 @@ struct CaretMetricsF {
     }
 };
 
-class TextFieldPattern : public ScrollablePattern, public ValueChangeObserver {
-    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, ValueChangeObserver);
+class TextFieldPattern : public Pattern, public ValueChangeObserver {
+    DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
 
 public:
     TextFieldPattern();
@@ -112,8 +109,7 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!textFieldOverlayModifier_) {
-            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this),
-                AceType::WeakClaim(AceType::RawPtr(GetScrollBar())), GetScrollEdgeEffect());
+            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this));
         }
         if (!textFieldContentModifier_) {
             textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
@@ -514,32 +510,7 @@ public:
     }
 
     void UpdateEditingValueToRecord();
-    void InitScrollableEvent();
-    void UpdateScrollBarOffset() override;
-    bool UpdateCurrentOffset(float offset, int32_t source) override
-    {
-        return true;
-    }
-    bool IsAtTop() const override
-    {
-        return true;
-    }
-    bool IsAtBottom() const override
-    {
-        return true;
-    }
-    bool IsScrollable() const override
-    {
-        return scrollable_;
-    }
-    bool IsAtomicNode() const override
-    {
-        return true;
-    }
-    float GetCurrentOffset() const
-    {
-        return currentOffset_;
-    }
+
     RefPtr<TextFieldContentModifier> GetContentModifier()
     {
         return textFieldContentModifier_;
@@ -589,10 +560,7 @@ private:
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
 
     void AddScrollEvent();
-    void OnTextAreaScroll(float offset);
-    bool OnScrollCallback(float offset, int32_t source) override;
-    void FireOnScrollStart();
-    void CheckScrollable();
+    void OnTextAreaScroll(float dy);
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
@@ -732,8 +700,6 @@ private:
     bool setSelectAllFlag_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;
-    bool scrollable_ = true;
-    float currentOffset_ = 0.0f;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 

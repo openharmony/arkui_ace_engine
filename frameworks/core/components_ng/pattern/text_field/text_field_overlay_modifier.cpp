@@ -21,13 +21,10 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 
 namespace OHOS::Ace::NG {
-TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
-                                                   WeakPtr<ScrollBar>&& scrollBar,
-                                                   WeakPtr<ScrollEdgeEffect>&& edgeEffect)
-    : pattern_(pattern), scrollBar_(scrollBar), edgeEffect_(edgeEffect)
+TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
+    : pattern_(pattern)
 {
     cursorColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color()));
     cursorWidth_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(CURSOR_WIDTH.ConvertToPx()));
@@ -38,8 +35,6 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     cursorOffsetX_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(textFieldPattern->GetCaretOffsetX());
-    frameSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
-    currentOffset_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
 
     AttachProperty(cursorColor_);
     AttachProperty(cursorWidth_);
@@ -48,16 +43,12 @@ TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::
     AttachProperty(contentSize_);
     AttachProperty(contentOffset_);
     AttachProperty(cursorOffsetX_);
-    AttachProperty(frameSize_);
-    AttachProperty(currentOffset_);
 }
 
 void TextFieldOverlayModifier::onDraw(DrawingContext& context)
 {
     PaintCursor(context);
     PaintSelection(context);
-    PaintScrollBar(context.canvas);
-    PaintEdgeEffect(frameSize_->Get(), context.canvas);
 }
 
 void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
@@ -130,22 +121,6 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
         cursorOffsetX_->Get() + static_cast<float>(cursorWidth_->Get()), caretRect.GetY() + caretRect.Height()));
 }
 
-void TextFieldOverlayModifier::PaintScrollBar(RSCanvas& canvas)
-{
-    auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBar);
-    if (scrollBar->NeedPaint()) {
-        ScrollBarPainter::PaintRectBar(canvas, scrollBar);
-    }
-}
-
-void TextFieldOverlayModifier::PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas)
-{
-    auto edgeEffect = edgeEffect_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(edgeEffect);
-    edgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
-}
-
 void TextFieldOverlayModifier::SetCursorColor(Color& value)
 {
     cursorColor_->Set(LinearColor(value));
@@ -184,15 +159,5 @@ void TextFieldOverlayModifier::SetCursorOffsetX(float value)
 void TextFieldOverlayModifier::SetInputStyle(InputStyle& value)
 {
     inputStyle_ = value;
-}
-
-void TextFieldOverlayModifier::SetFrameSize(const SizeF& value)
-{
-    frameSize_->Set(value);
-}
-
-void TextFieldOverlayModifier::SetCurrentOffset(float value)
-{
-    currentOffset_->Set(value);
 }
 } // namespace OHOS::Ace::NG

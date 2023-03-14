@@ -103,7 +103,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     bool showPlaceHolder = false;
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
-    
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
@@ -136,17 +135,6 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     if (pattern->IsTextArea()) {
         auto useHeight = static_cast<float>(paragraph_->GetHeight());
-        if (textFieldLayoutProperty->GetCalcLayoutConstraint() &&
-            textFieldLayoutProperty->GetCalcLayoutConstraint()->maxSize.has_value() &&
-            textFieldLayoutProperty->GetCalcLayoutConstraint()->maxSize.value().Height().has_value()) {
-            auto maxHeightSize = textFieldLayoutProperty->GetCalcLayoutConstraint()->maxSize.value()
-                .Height().value().GetDimension();
-            if (maxHeightSize.Unit() == DimensionUnit::PERCENT) {
-                idealHeight = maxHeightSize.ConvertToPxWithSize(contentConstraint.percentReference.Height());
-            } else {
-                idealHeight = maxHeightSize.ConvertToPx();
-            }
-        }
         textRect_.SetSize(SizeF(idealWidth, useHeight));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }

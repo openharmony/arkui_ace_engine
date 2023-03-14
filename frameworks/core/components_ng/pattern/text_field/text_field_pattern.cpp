@@ -58,8 +58,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_v2/inspector/utils.h"
 #include "core/image/image_source_info.h"
-#include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
-#include "core/components_ng/pattern/scroll/scroll_spring_effect.h"
 #if defined(ENABLE_STANDARD_INPUT)
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
@@ -224,8 +222,6 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     AdjustTextAreaOffsetY();
     UpdateSelectionOffset();
     SetHandlerOnMoveDone();
-    CheckScrollable();
-    UpdateScrollBarOffset();
     return true;
 }
 
@@ -664,30 +660,37 @@ void TextFieldPattern::AddScrollEvent()
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (scrollableEvent_) {
-        gestureHub->RemoveScrollableEvent(scrollableEvent_);
-    }
-    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
-    auto scrollCallback = [weak = WeakClaim(this)](float offset, int32_t source) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_RETURN(pattern, false);
-        return pattern->OnScrollCallback(offset, source);
+    CHECK_NULL_VOID_NOLOG(!scrollableEvent_);
+    scrollableEvent_ = MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    auto scrollCallback = [weak = WeakClaim(this)](Dimension x, Dimension y) {
+        auto textFieldPattern = weak.Upgrade();
+        CHECK_NULL_VOID(textFieldPattern);
+        textFieldPattern->OnTextAreaScroll(static_cast<float>(y.ConvertToPx()));
     };
-    scrollableEvent_->SetScrollPositionCallback(std::move(scrollCallback));
+    scrollableEvent_->SetOnScrollCallback(std::move(scrollCallback));
     gestureHub->AddScrollableEvent(scrollableEvent_);
 }
 
-void TextFieldPattern::OnTextAreaScroll(float offset)
+void TextFieldPattern::OnTextAreaScroll(float dy)
 {
-    if (!IsTextArea() || textRect_.Height() < contentRect_.Height() ||
-        (textRect_.GetY() + offset) > contentRect_.GetY() ||
-        std::abs(((textRect_.GetY() + offset) - contentRect_.Height())) > textRect_.Height()) {
+    if (!IsTextArea() || textRect_.Height() < contentRect_.Height()) {
         return;
     }
-    caretRect_.SetTop(caretRect_.GetY() + offset);
-    currentOffset_ = textRect_.GetY() + offset;
-    textRect_.SetOffset(OffsetF(textRect_.GetX(), currentOffset_));
-    UpdateScrollBarOffset();
+    auto textRectOffsetTop = textRect_.GetY();
+    auto textRectOffsetBottom = textRect_.GetY() + textRect_.Height();
+    // scroll down
+    if (dy > 0) {
+        // text rect min positionY is content offsetY
+        textRect_.SetOffset(OffsetF(textRect_.GetX(), std::min(textRectOffsetTop - dy, 0.0f)));
+    } else {
+        // scroll up
+        // text rect bottom max positionY is content offsetY + content height
+        textRectOffsetBottom = std::max(textRectOffsetBottom + dy, contentRect_.GetY() + contentRect_.Height());
+        textRectOffsetTop = textRectOffsetBottom == contentRect_.GetY() + contentRect_.Height()
+                                ? contentRect_.GetY() + contentRect_.Height() - textRect_.Height()
+                                : textRectOffsetTop + dy;
+        textRect_.SetOffset(OffsetF(textRect_.GetX(), textRectOffsetTop));
+    }
 }
 
 void TextFieldPattern::GetTextRectsInRange(
@@ -1566,14 +1569,6 @@ void TextFieldPattern::OnModifyDone()
     }
     FireOnChangeIfNeeded();
     caretUpdateType_ = CaretUpdateType::INPUT;
-    if (IsTextArea()) {
-        SetAxis(Axis::VERTICAL);
-        if (!GetScrollableEvent()) {
-            InitScrollableEvent();
-        }
-        SetEdgeEffect(EdgeEffect::SPRING);
-        SetScrollBar(DisplayMode::ON);
-    }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -3180,80 +3175,6 @@ std::string TextFieldPattern::GetCopyOptionString() const
             break;
     }
     return copyOptionString;
-}
-
-void TextFieldPattern::InitScrollableEvent()
-{
-    AddScrollEvent();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textFieldEventHub = host->GetEventHub<TextFieldEventHub>();
-    auto onScrollBegin = textFieldEventHub->GetOnScrollBegin();
-    auto onScrollFrameBegin = textFieldEventHub->GetOnScrollFrameBegin();
-    auto scrollableEvent = GetScrollableEvent();
-    CHECK_NULL_VOID(scrollableEvent);
-    if (onScrollBegin) {
-        scrollableEvent->SetScrollBeginCallback(std::move(onScrollBegin));
-    }
-    if (onScrollFrameBegin) {
-        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
-    }
-}
-
-void TextFieldPattern::UpdateScrollBarOffset()
-{
-    if (textEditingValue_.text.empty()) {
-        return;
-    }
-    if (!GetScrollBar() && !GetScrollBarProxy()) {
-        return;
-    }
-    Size size(contentRect_.Width(), contentRect_.Height());
-    UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_, textRect_.Height(), size);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::FireOnScrollStart()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID_NOLOG(hub);
-    auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID_NOLOG(onScrollStart);
-    onScrollStart();
-}
-
-bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
-{
-    auto scrollBar = GetScrollBar();
-    if (scrollBar && scrollBar->IsDriving()) {
-        offset = scrollBar->CalcPatternOffset(offset);
-        source = SCROLL_FROM_BAR;
-    }
-    OnTextAreaScroll(offset);
-    return true;
-}
-
-void TextFieldPattern::CheckScrollable()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
-    if (textEditingValue_.text.empty()) {
-        scrollable_ = false;
-    } else {
-        if (GreatNotEqual(textRect_.Height(), contentRect_.Height())) {
-            scrollable_ = true;
-        } else {
-            scrollable_ = false;
-        }
-    }
-    SetScrollEnable(scrollable_);
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
