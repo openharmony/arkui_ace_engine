@@ -216,12 +216,12 @@ public:
 
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
-        swiperParameters_ = std::make_unique<SwiperParameters>(swiperParameters);
+        swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
     }
 
     void SetSwiperDigitalParameters(const SwiperDigitalParameters& swiperDigitalParameters)
     {
-        swiperDigitalParameters_ = std::make_unique<SwiperDigitalParameters>(swiperDigitalParameters);
+        swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
     }
 
     void ShowNext();
@@ -230,6 +230,8 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
     SwiperIndicatorType GetIndicatorType() const;
+    std::shared_ptr<SwiperParameters> GetSwiperParameters();
+    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -341,8 +343,8 @@ private:
 
     ChangeEventPtr changeEvent_;
 
-    std::unique_ptr<SwiperParameters> swiperParameters_;
-    std::unique_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
+    std::shared_ptr<SwiperParameters> swiperParameters_;
+    std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
     SizeF maxChildSize_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
