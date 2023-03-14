@@ -20,6 +20,7 @@
 
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rating/rating_accessibility_property.h"
 #include "core/components_ng/pattern/rating/rating_event_hub.h"
 #include "core/components_ng/pattern/rating/rating_layout_algorithm.h"
 #include "core/components_ng/pattern/rating/rating_layout_property.h"
@@ -69,6 +70,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<RatingEventHub>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<RatingAccessibilityProperty>();
     }
 
     // Called on main thread to check if need rerender of the content.
