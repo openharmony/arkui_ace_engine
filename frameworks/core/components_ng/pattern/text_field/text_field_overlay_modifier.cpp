@@ -132,9 +132,12 @@ void TextFieldOverlayModifier::PaintCursor(DrawingContext& context) const
 
 void TextFieldOverlayModifier::PaintScrollBar(RSCanvas& canvas)
 {
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID_NOLOG(scrollBar);
-    if (scrollBar->NeedPaint()) {
+    CHECK_NULL_VOID(scrollBar);
+    textFieldPattern->CheckScrollable();
+    if (scrollBar->NeedPaint() && textFieldPattern->IsScrollable()) {
         ScrollBarPainter::PaintRectBar(canvas, scrollBar);
     }
 }
