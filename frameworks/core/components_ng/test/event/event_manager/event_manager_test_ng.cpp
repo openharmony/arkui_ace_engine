@@ -137,7 +137,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest002, TestSize.Level1)
     event.pressedCodes.emplace_back(KeyCode::KEY_ALT_LEFT);
     event.pressedCodes.emplace_back(KeyCode::KEY_C);
     eventManager->DispatchKeyboardShortcut(event);
-    EXPECT_TRUE(event.action == KeyAction::DOWN);
+    EXPECT_EQ(event.action, KeyAction::DOWN);
     eventHubShift->SetKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE));
     event.code = KeyCode::KEY_A;
     event.action = KeyAction::DOWN;
@@ -145,14 +145,14 @@ HWTEST_F(EventManagerTestNg, EventManagerTest002, TestSize.Level1)
     event.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     event.pressedCodes.emplace_back(KeyCode::KEY_A);
     eventManager->DispatchKeyboardShortcut(event);
-    EXPECT_TRUE(event.action == KeyAction::DOWN);
+    EXPECT_EQ(event.action, KeyAction::DOWN);
     eventHubAlt->SetKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_ALT_VALUE));
     event.code = KeyCode::KEY_V;
     event.action = KeyAction::DOWN;
     event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
     event.pressedCodes.emplace_back(KeyCode::KEY_V);
     eventManager->DispatchKeyboardShortcut(event);
-    EXPECT_TRUE(event.action == KeyAction::DOWN);
+    EXPECT_EQ(event.action, KeyAction::DOWN);
 }
 
 /**
@@ -212,17 +212,17 @@ HWTEST_F(EventManagerTestNg, EventManagerTest003, TestSize.Level1)
 HWTEST_F(EventManagerTestNg, EventManagerTest004, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
-    EXPECT_NE(eventManager, nullptr);
+    ASSERT_NE(eventManager, nullptr);
 
     auto frameNodeone = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
 
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeone));
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeone));
-    EXPECT_FALSE(frameNodeone == nullptr);
+    ASSERT_NE(frameNodeone, nullptr);
 
     auto frameNodetwo = FrameNode::GetOrCreateFrameNode(SHIFT, NODEID, nullptr);
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodetwo));
-    EXPECT_FALSE(frameNodetwo == nullptr);
+    ASSERT_NE(frameNodetwo, nullptr);
 }
 
 /**
@@ -233,16 +233,16 @@ HWTEST_F(EventManagerTestNg, EventManagerTest004, TestSize.Level1)
 HWTEST_F(EventManagerTestNg, EventManagerTest005, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
-    EXPECT_NE(eventManager, nullptr);
+    ASSERT_NE(eventManager, nullptr);
 
     auto frameNodeone = FrameNode::GetOrCreateFrameNode(CTRL, NODEID, nullptr);
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeone));
 
     eventManager->DelKeyboardShortcutNode(frameNodeone->GetId());
-    EXPECT_FALSE(frameNodeone == nullptr);
+    ASSERT_NE(frameNodeone, nullptr);
 
     auto frameNodetwo = FrameNode::GetOrCreateFrameNode(SHIFT, NODEID, nullptr);
     eventManager->DelKeyboardShortcutNode(frameNodetwo->GetId());
-    EXPECT_FALSE(frameNodetwo == nullptr);
+    ASSERT_NE(frameNodetwo, nullptr);
 }
 } // namespace OHOS::Ace::NG

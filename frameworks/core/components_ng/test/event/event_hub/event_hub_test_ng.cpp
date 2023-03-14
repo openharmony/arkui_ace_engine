@@ -293,7 +293,7 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
 HWTEST_F(EventHubTestNg, EventHubDragEventsTest005, TestSize.Level1)
 {
     auto eventHub = AceType::MakeRefPtr<EventHub>();
-    EXPECT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub, nullptr);
 
     eventHub->SetKeyboardShortcut(CHARACTER_A, NUM_CTRL_VALUE);
     EXPECT_EQ(CHARACTER_A, eventHub->GetKeyboardShortcutValue());

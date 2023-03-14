@@ -13,16 +13,9 @@
 
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("$ace_root/frameworks/core/components_ng/components.gni")
 
 ohos_unittest("event_manager_test_ng") {
   module_out_path = "$test_output_path/text"
-
-  include_dirs = [
-    "$ace_root/frameworks",
-    "$ace_root/frameworks/core",
-    "$ace_root/frameworks/core/components_ng/layout",
-  ]
 
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
@@ -55,10 +48,5 @@ ohos_unittest("event_manager_test_ng") {
     "//third_party/googletest:gmock_main",
   ]
 
-  configs = [
-    "$ace_root:ace_config",
-    "$ace_root:ace_test_config",
-    "$ace_flutter_engine_root:flutter_config",
-    "$ace_flutter_engine_root/skia:skia_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
