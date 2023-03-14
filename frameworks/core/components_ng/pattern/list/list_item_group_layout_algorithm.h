@@ -145,6 +145,8 @@ private:
         LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
     void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
     bool NeedMeasureItem() const;
+    static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
+        const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
 
     int32_t headerIndex_;
     int32_t footerIndex_;
