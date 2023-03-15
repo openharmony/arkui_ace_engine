@@ -27,6 +27,7 @@
 
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
+#include "core/common/flutter/flutter_thread_model.h"
 
 namespace OHOS::Ace {
 
@@ -42,6 +43,7 @@ public:
     void InitPlatformThread(bool useCurrentEventRunner = false);
     void InitJsThread(bool newThread = true);
     void InitOtherThreads(const flutter::TaskRunners& taskRunners);
+    void InitOtherThreads(FlutterThreadModel* threadModel);
 
     void AddTaskObserver(Task&& callback) override;
     void RemoveTaskObserver() override;
