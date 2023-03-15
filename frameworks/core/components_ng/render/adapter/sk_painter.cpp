@@ -38,14 +38,26 @@ void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const Sh
     if (!ret) {
         return;
     }
-    SetPen(skPen, shapePaintProperty);
+    // do brush first then do pen
     SetBrush(skBrush, shapePaintProperty);
     skCanvas->drawPath(skPath, skBrush);
-    skCanvas->drawPath(skPath, skPen);
+    if (SetPen(skPen, shapePaintProperty)) {
+        skCanvas->drawPath(skPath, skPen);
+    }
 }
 
-void SkPainter::SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty)
+bool SkPainter::SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty)
 {
+    if (shapePaintProperty.HasStrokeWidth()) {
+        // Return false will not call 'drawPath'.
+        // The path will be stroked once 'drawPath' has been called even if the strokeWidth is zero.
+        if (NearZero(shapePaintProperty.GetStrokeWidth()->Value())) {
+            return false;
+        }
+        skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.GetStrokeWidthValue().ConvertToPx()));
+    } else {
+        skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
+    }
     skPaint.setStyle(SkPaint::Style::kStroke_Style);
     if (shapePaintProperty.HasAntiAlias()) {
         skPaint.setAntiAlias(shapePaintProperty.GetAntiAliasValue());
@@ -79,12 +91,6 @@ void SkPainter::SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintPro
         skPaint.setStrokeJoin(SkPaint::Join::kMiter_Join);
     }
 
-    if (shapePaintProperty.HasStrokeWidth()) {
-        skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.GetStrokeWidthValue().ConvertToPx()));
-    } else {
-        skPaint.setStrokeWidth(static_cast<SkScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
-    }
-
     Color strokeColor = Color::BLACK;
     if (shapePaintProperty.HasStroke()) {
         strokeColor = shapePaintProperty.GetStrokeValue();
@@ -111,6 +117,7 @@ void SkPainter::SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintPro
     if (shapePaintProperty.HasStrokeMiterLimit()) {
         skPaint.setStrokeMiter(static_cast<SkScalar>(shapePaintProperty.GetStrokeMiterLimitValue()));
     }
+    return true;
 }
 
 void SkPainter::SetBrush(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty)

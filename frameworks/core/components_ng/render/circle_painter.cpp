@@ -25,9 +25,10 @@ void CirclePainter::DrawCircle(RSCanvas& canvas, float radius, const ShapePaintP
 {
     RSPen pen;
     RSBrush brush;
-    ShapePainter::SetPan(pen, shapePaintProperty);
+    if (ShapePainter::SetPen(pen, shapePaintProperty)) {
+        canvas.AttachPen(pen);
+    }
     ShapePainter::SetBrush(brush, shapePaintProperty);
-    canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
     PointF centerPoint = PointF(radius, radius);
     canvas.DrawCircle(ToRSPoint(centerPoint), radius);

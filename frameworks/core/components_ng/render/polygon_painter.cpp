@@ -29,9 +29,10 @@ void PolygonPainter::DrawPolygon(RSCanvas& canvas, const PolygonPaintProperty& p
     }
     RSPen pen;
     RSBrush brush;
-    ShapePainter::SetPan(pen, polygonPaintProperty);
+    if (ShapePainter::SetPen(pen, polygonPaintProperty)) {
+        canvas.AttachPen(pen);
+    }
     ShapePainter::SetBrush(brush, polygonPaintProperty);
-    canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
     RSPath path;
     std::vector<RSPoint> points;
