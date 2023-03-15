@@ -1439,6 +1439,7 @@ class Environment {
         prop = AppStorage.SetAndProp(key, tmp);
         this.props_.set(key, prop);
         
+        return true;
     }
     envProps(properties) {
         properties.forEach(property => {
