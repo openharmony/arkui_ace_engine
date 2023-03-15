@@ -100,7 +100,7 @@ private:
     void OnChildHover(int32_t index, bool isHover);
     void ResetStatus();
     void OnKeyEventDisapear();
-    void InitBubbleList(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
+    void UpdateBubbleListItem(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
         RefPtr<IndexerTheme>& indexerTheme);
     void AddPopupTouchListener(RefPtr<FrameNode> popupNode);
     void OnPopupTouchDown(const TouchEventInfo& info);
@@ -111,6 +111,7 @@ private:
     void UpdateBubbleView();
     void UpdateBubbleSize();
     void UpdateBubbleLetterView(bool showDivider);
+    void CreateBubbleListView(std::vector<std::string>& currentListData);
     void UpdateBubbleListView(std::vector<std::string>& currentListData);
     void UpdatePopupOpacity(float ratio);
     void UpdatePopupVisibility(VisibleType visible);
@@ -147,7 +148,10 @@ private:
     int32_t childFocusIndex_ = -1;
     int32_t childPressIndex_ = -1;
     int32_t animationId_ = 0;
+    int32_t lastPopupIndex_ = -1;
+    int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
+    int32_t lastSelectProp_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
