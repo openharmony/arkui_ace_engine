@@ -26,7 +26,7 @@ class ShapePainter {
 public:
     ShapePainter() = default;
     ~ShapePainter() = default;
-    static void SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProperty);
+    static bool SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProperty);
     static void SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty);
 };
 } // namespace OHOS::Ace::NG

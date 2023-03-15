@@ -27,7 +27,9 @@ void RectPainter::DrawRect(RSCanvas& canvas, const RectF& rect, RectPaintPropert
 {
     RSPen pen;
     RSBrush brush;
-    ShapePainter::SetPan(pen, rectPaintProperty);
+    if (ShapePainter::SetPen(pen, rectPaintProperty)) {
+        canvas.AttachPen(pen);
+    }
     ShapePainter::SetBrush(brush, rectPaintProperty);
     std::vector<RSRPoint> radiusXY(4);
     if (rectPaintProperty.GetTopLeftRadius()) {
@@ -46,7 +48,6 @@ void RectPainter::DrawRect(RSCanvas& canvas, const RectF& rect, RectPaintPropert
         radiusXY[3].SetX(static_cast<float>(rectPaintProperty.GetBottomLeftRadiusValue().GetX().ConvertToPx()));
         radiusXY[3].SetY(static_cast<float>(rectPaintProperty.GetBottomLeftRadiusValue().GetY().ConvertToPx()));
     }
-    canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
     RSRoundRect rSRoundRect(
         RSRRect(rect.GetX(), rect.GetY(), rect.Width() + rect.GetX(), rect.Height() + rect.GetY()), radiusXY);

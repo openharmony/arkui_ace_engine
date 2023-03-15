@@ -25,9 +25,10 @@ void EllipsePainter::DrawEllipse(RSCanvas& canvas, const RectF& rect, const Shap
 {
     RSPen pen;
     RSBrush brush;
-    ShapePainter::SetPan(pen, shapePaintProperty);
+    if (ShapePainter::SetPen(pen, shapePaintProperty)) {
+        canvas.AttachPen(pen);
+    }
     ShapePainter::SetBrush(brush, shapePaintProperty);
-    canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
     canvas.DrawOval(RSRRect(rect.GetX(), rect.GetY(), rect.GetX() + rect.Width(), rect.GetY() + rect.Height()));
 }
