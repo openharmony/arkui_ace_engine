@@ -367,6 +367,7 @@ private:
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
+    void UpdateBackgroundColorRightNow(int32_t color);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
