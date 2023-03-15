@@ -372,8 +372,13 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(const std::vector<ButtonInfo>& but
     }
     if (container) {
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
-        layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
-        layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        if (buttons.size() <= 2) {
+            layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_AROUND);
+            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+        } else {
+            layoutProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
+            layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
+        }
     }
 
     CHECK_NULL_RETURN(container, nullptr);
