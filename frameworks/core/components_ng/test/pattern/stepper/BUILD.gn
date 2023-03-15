@@ -78,6 +78,12 @@ ohos_unittest("stepper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/image/image_source_info.cpp",
 
+    # loadingProgress
+    "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.cpp",
+
     # text
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
