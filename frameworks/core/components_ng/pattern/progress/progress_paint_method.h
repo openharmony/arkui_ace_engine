@@ -44,7 +44,6 @@ public:
           progressModifier_(progressModifier)
     {
         progressModifier_->SetProgressType(progressType_);
-        progressModifier_->SetStrokeWidth(strokeWidth_);
     }
     ~ProgressPaintMethod() override = default;
 
@@ -60,7 +59,6 @@ public:
         GetThemeDate();
         auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
-        auto offset = paintWrapper->GetContentOffset();
         color_ = paintProperty->GetColor().value_or(color_);
         bgColor_ = paintProperty->GetBackgroundColor().value_or(bgColor_);
         borderColor_ = paintProperty->GetBorderColor().value_or(borderColor_);
@@ -68,9 +66,11 @@ public:
         value_ = paintProperty->GetValue().value_or(value_);
         scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
 
-        progressModifier_->SetBorderWidth(capsuleBorderWidth_);
-        progressModifier_->SetOffset(offset);
+        progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+        progressModifier_->SetContentSize(paintWrapper->GetContentSize());
+        CalculateStrokeWidth(paintWrapper->GetContentSize());
         progressModifier_->SetStrokeWidth(strokeWidth_);
+        progressModifier_->SetBorderWidth(capsuleBorderWidth_);
         progressModifier_->SetColor(LinearColor(color_));
         progressModifier_->SetBackgroundColor(LinearColor(bgColor_));
         progressModifier_->SetBorderColor(LinearColor(borderColor_));
@@ -82,7 +82,7 @@ public:
     }
 
     void GetThemeDate();
-
+    void CalculateStrokeWidth(const SizeF& contentSize);
 private:
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;
