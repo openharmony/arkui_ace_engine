@@ -28,9 +28,9 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
 } // namespace
 
 namespace OHOS::Ace::NG {
-SkVector* ImagePainterUtils::ToSkRadius(const BorderRadiusArray& radiusXY)
+std::unique_ptr<SkVector[]> ImagePainterUtils::ToSkRadius(const BorderRadiusArray& radiusXY)
 {
-    SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
+    auto radii = std::make_unique<SkVector[]>(RADIUS_POINTS_SIZE);
     if (radiusXY.size() == RADIUS_POINTS_SIZE) {
         radii[SkRRect::kUpperLeft_Corner].set(
             SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
