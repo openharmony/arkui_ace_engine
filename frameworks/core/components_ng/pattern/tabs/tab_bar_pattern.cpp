@@ -490,7 +490,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     auto totalCount = host->TotalChildCount();
 
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
-    if (index < 0 || index >= totalCount || !swiperController_) {
+    if (index < 0 || index >= totalCount || !swiperController_ ||
+        indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
     if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
@@ -711,6 +712,9 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    if (indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
     if (tabBarPattern->IsContainsBuilder() || layoutProperty->GetAxis() == Axis::VERTICAL ||
         tabBarStyles_[indicator] == TabBarStyle::BOTTOMTABBATSTYLE) {
         paintProperty->UpdateIndicator({});
@@ -797,6 +801,10 @@ void TabBarPattern::UpdateTextColor(int32_t indicator)
 
 void TabBarPattern::UpdateSubTabBoard()
 {
+    if (indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
+        indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
+        return;
+    }
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
@@ -821,7 +829,11 @@ void TabBarPattern::UpdateSubTabBoard()
 
 SelectedMode TabBarPattern::GetSelectedMode() const
 {
-    return selectedModes_[indicator_];
+    if (indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
+        return SelectedMode::INDICATOR;
+    } else {
+        return selectedModes_[indicator_];
+    }
 }
 
 bool TabBarPattern::IsContainsBuilder()
@@ -965,6 +977,10 @@ void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
 
 RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
 {
+    if (indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
+        indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
+        return nullptr;
+    }
     Color backgroundColor = Color::WHITE;
     auto tabBarNode = GetHost();
     if (tabBarNode) {
