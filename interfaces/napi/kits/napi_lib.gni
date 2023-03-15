@@ -16,7 +16,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 common_napi_libs = [
   # napi .so needs to be all lower case
-  "componentsnapshot",
+  "arkui/component_snapshot",
   "configuration",
   "device",
   "font",
@@ -32,16 +32,23 @@ common_napi_libs = [
 template("ace_napi_lib") {
   forward_variables_from(invoker, "*")
 
-  ohos_shared_library(target_name) {
-    relative_install_dir = "module"
+  target_names = string_split(target_name, "/")
+  prefix_dir = target_names[0]
+
+  module_path = prefix_dir
+  install_dir = ""
+  if (prefix_dir != target_name) {
+    module_path = target_names[1]
+    install_dir = "/" + prefix_dir
+  }
+
+  module_name = string_replace(module_path, "_", "")
+
+  ohos_shared_library(module_name) {
+    deps = [ "$ace_root/interfaces/napi/kits/${module_path}:${module_name}_static_${platform}" ]
+
+    relative_install_dir = "module" + install_dir
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem
-    path_name = target_name
-
-    if (target_name == "componentsnapshot") {
-      path_name = "component_snapshot"
-      relative_install_dir = "module/arkui"
-    }
-    deps = [ "$ace_root/interfaces/napi/kits/${path_name}:${target_name}_static_${platform}" ]
   }
 }
