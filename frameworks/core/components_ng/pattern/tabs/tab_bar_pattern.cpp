@@ -37,7 +37,7 @@ constexpr int8_t LEFT_GRADIENT = 0;
 constexpr int8_t RIGHT_GRADIENT = 1;
 constexpr int8_t TOP_GRADIENT = 2;
 constexpr int8_t BOTTOM_GRADIENT = 3;
-}
+} // namespace
 
 void TabBarPattern::OnAttachToFrameNode()
 {
@@ -542,11 +542,7 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     } else {
         PlayTranslateAnimation(originalPaintRect.GetX(), targetPaintRect.GetX(), targetOffset);
     }
-    if (std::abs(indicator - index) > 1) {
-        swiperController_->SwipeToWithoutAnimation(index);
-    } else {
-        swiperController_->SwipeTo(index);
-    }
+    swiperController_->SwipeTo(index);
     indicator_ = index;
     layoutProperty->UpdateIndicator(index);
 }
@@ -765,7 +761,6 @@ void TabBarPattern::UpdateGradientRegions()
     }
     tarBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
-
 
 void TabBarPattern::UpdateTextColor(int32_t indicator)
 {
@@ -1083,7 +1078,7 @@ bool TabBarPattern::IsAtBottom() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    return LessOrEqual(currentOffset_, host->GetGeometryNode()->GetFrameSize().Width());
+    return LessOrEqual(tabItemOffsets_.back().GetX(), host->GetGeometryNode()->GetFrameSize().Width());
 }
 
 bool TabBarPattern::IsOutOfBoundary()
