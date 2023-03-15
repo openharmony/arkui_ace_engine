@@ -871,7 +871,6 @@ void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& dialogNode)
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
-    pageFocusHub->SetParentFocusable(false);
     pageFocusHub->LostFocus();
 }
 
@@ -886,7 +885,6 @@ void OverlayManager::BlurOverlayNode()
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
-    pageFocusHub->SetParentFocusable(true);
     pageFocusHub->RequestFocus();
 }
 
