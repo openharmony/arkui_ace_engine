@@ -101,6 +101,7 @@ private:
     static void UpdateFrameNodeTree(
         const RefPtr<NG::FrameNode>& node, const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode)
     {
+        CHECK_NULL_VOID(rsSurfaceNode);
         rsSurfaceNode->CreateNodeInRenderThread();
         auto context = node->GetRenderContext();
         CHECK_NULL_VOID(context);
