@@ -127,9 +127,24 @@ bool GetNapiString(napi_env env, napi_value value, std::string& retStr)
         int32_t id = 0;
         int32_t type = 0;
         std::vector<std::string> params;
-        if (ParseResourceParam(env, value, id, type, params)) {
-            ParseString(id, type, params, retStr);
+        if (!ParseResourceParam(env, value, id, type, params)) {
+            LOGE("can not parse resource info from inout params.");
+            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            return false;
         }
+        if (!ParseString(id, type, params, retStr)) {
+            LOGE("can not get message from resource manager.");
+            NapiThrow(env, "Can not get message from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            return false;
+        }
+    } else if (valueType == napi_undefined) {
+        LOGE("The parameter type is undefined.");
+        NapiThrow(env, "Required input parameters are missing.", Framework::ERROR_CODE_PARAM_INVALID);
+        return false;
+    } else {
+        LOGE("The parameter type is incorrect.");
+        NapiThrow(env, "The type of message is incorrect.", Framework::ERROR_CODE_PARAM_INVALID);
+        return false;
     }
     return !retStr.empty();
 }
