@@ -134,7 +134,7 @@ struct DialogProperties {
     std::function<void(const bool)> onChange;               // onChange success callback
     DialogAlignment alignment = DialogAlignment::DEFAULT;   // Alignment of dialog.
     DimensionOffset offset;                                 // Offset which base on alignment of Dialog.
-    int32_t gridCount = 0;
+    int32_t gridCount = -1;
     std::optional<Color> maskColor;
     std::optional<AnimationOption> openAnimation;
     std::optional<AnimationOption> closeAnimation;
