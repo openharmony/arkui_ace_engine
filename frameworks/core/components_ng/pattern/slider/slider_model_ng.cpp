@@ -126,8 +126,5 @@ void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
-    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    eventHub->SetValue(paintProperty->GetValueValue(.0f));
 }
 } // namespace OHOS::Ace::NG
