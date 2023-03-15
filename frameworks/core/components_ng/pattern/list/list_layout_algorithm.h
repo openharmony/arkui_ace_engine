@@ -211,6 +211,7 @@ protected:
 
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
         const RefPtr<ListLayoutProperty>& layoutProperty) const;
+    static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
     void AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index);

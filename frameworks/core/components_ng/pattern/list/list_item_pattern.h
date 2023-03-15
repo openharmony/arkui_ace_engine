@@ -131,6 +131,26 @@ public:
         selectable_ = selectable;
     }
 
+    int32_t GetIndexInList() const
+    {
+        return indexInList_;
+    }
+
+    void SetIndexInList(int32_t index)
+    {
+        indexInList_ = index;
+    }
+
+    int32_t GetIndexInListItemGroup() const
+    {
+        return indexInListItemGroup_;
+    }
+
+    void SetIndexInListItemGroup(int32_t index)
+    {
+        indexInListItemGroup_ = index;
+    }
+
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<ListItemAccessibilityProperty>();
@@ -145,6 +165,9 @@ private:
     void StartSpringMotion(float start, float end, float velocity);
 
     RefPtr<ShallowBuilder> shallowBuilder_;
+
+    int32_t indexInList_ = 0;
+    int32_t indexInListItemGroup_ = -1;
 
     // swiperAction
     int32_t startNodeIndex_ = -1;
