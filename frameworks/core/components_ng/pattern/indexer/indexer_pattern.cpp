@@ -488,6 +488,7 @@ void IndexerPattern::ShowBubble()
         UpdatePopupOpacity(0.0f);
         overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
     }
+    UpdateBubbleView();
     StartBubbleAppearAnimation();
 }
 
@@ -574,7 +575,7 @@ void IndexerPattern::UpdateBubbleView()
     columnRenderContext->SetClipToBounds(true);
     SetPositionOfPopupNode(popupNode_);
     popupNode_->MarkModifyDone();
-    popupNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    popupNode_->MarkDirtyNode();
 }
 
 void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
@@ -623,6 +624,7 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
         letterLayoutProperty->UpdateBorderWidth({ borderWidthZero, borderWidthZero, borderWidthZero, borderWidthZero });
     }
     letterNode->MarkModifyDone();
+    letterNode->MarkDirtyNode();
 }
 
 void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListData)
@@ -654,6 +656,7 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     CHECK_NULL_VOID(listRenderContext);
     listRenderContext->SetClipToBounds(true);
     listNode->MarkModifyDone();
+    listNode->MarkDirtyNode();
 }
 
 void IndexerPattern::InitBubbleList(
@@ -1007,7 +1010,6 @@ void IndexerPattern::StartBubbleAppearAnimation()
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->UpdateBubbleView();
             pattern->UpdatePopupOpacity(1.0f);
         });
     AnimationUtils::AddKeyFrame(1.0f, Curves::SHARP, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {

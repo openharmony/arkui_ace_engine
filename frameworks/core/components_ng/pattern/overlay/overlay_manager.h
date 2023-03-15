@@ -56,7 +56,7 @@ public:
     }
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void EraseIndexerPopup(int32_t targetId);
-    void RemoveIndexerPopup(RefPtr<FrameNode>& overlaynode);
+    void RemoveIndexerPopup();
     RefPtr<FrameNode> GetIndexerPopup(int32_t targetId);
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);

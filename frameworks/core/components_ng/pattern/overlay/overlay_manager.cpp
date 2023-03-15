@@ -437,7 +437,7 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     CHECK_NULL_VOID(customNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    if (!customPopupMap_[targetId] || customPopupMap_[targetId] == customNode) {
+    if (!customPopupMap_[targetId] || customPopupMap_[targetId] != customNode) {
         customPopupMap_[targetId] = customNode;
         customNode->MountToParent(rootNode);
         customNode->MarkModifyDone();
@@ -457,7 +457,7 @@ void OverlayManager::EraseIndexerPopup(int32_t targetId)
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::RemoveIndexerPopup(RefPtr<FrameNode>& overlayNode)
+void OverlayManager::RemoveIndexerPopup()
 {
     if (customPopupMap_.empty()) {
         return;
@@ -467,12 +467,10 @@ void OverlayManager::RemoveIndexerPopup(RefPtr<FrameNode>& overlayNode)
     for (const auto& popup : customPopupMap_) {
         auto targetId = popup.first;
         auto popupNode = popup.second;
-        if (overlayNode == popupNode) {
-            customPopupMap_.erase(targetId);
-            rootNode->RemoveChild(overlayNode);
-            rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-        }
+        customPopupMap_.erase(targetId);
+        rootNode->RemoveChild(popupNode);
     }
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 RefPtr<FrameNode> OverlayManager::GetIndexerPopup(int32_t targetId)
@@ -756,10 +754,10 @@ bool OverlayManager::RemoveOverlay()
     CHECK_NULL_RETURN(rootNode, true);
     auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
+        RemoveIndexerPopup();
         // stage node is at index 0, remove overlay at index 1
         auto overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(overlay, false);
-        RemoveIndexerPopup(overlay);
         // close dialog with animation
         auto pattern = overlay->GetPattern();
         if (AceType::DynamicCast<DialogPattern>(pattern)) {
