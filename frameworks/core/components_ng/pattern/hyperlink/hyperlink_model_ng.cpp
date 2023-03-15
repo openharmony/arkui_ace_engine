@@ -19,40 +19,38 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
 namespace OHOS::Ace::NG {
-void HyperlinkModelNG::Create(const std::string& address, const std::string& summary)
+void HyperlinkModelNG::Create(const std::string& address, const std::string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto hyperlinkNode =
-        FrameNode::CreateFrameNode(V2::HYPERLINK_ETS_TAG, nodeId, AceType::MakeRefPtr<HyperlinkPattern>());
-    SetTextStyle(hyperlinkNode, summary);
+    auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(
+        V2::HYPERLINK_ETS_TAG, nodeId, [address]() { return AceType::MakeRefPtr<HyperlinkPattern>(address); });
 
     stack->Push(hyperlinkNode);
+    SetTextStyle(hyperlinkNode, content);
 }
 
 void HyperlinkModelNG::SetColor(const Color& value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto textChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    CHECK_NULL_VOID(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(value);
-    textChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    LOGI("Hyperlink setColor.");
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ForegroundColor, value);
+    ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
 }
 
-void HyperlinkModelNG::SetTextStyle(const RefPtr<FrameNode>& hyperlinkNode, const std::string& label)
+void HyperlinkModelNG::SetTextStyle(const RefPtr<FrameNode>& hyperlinkNode, const std::string& content)
 {
     CHECK_NULL_VOID(hyperlinkNode);
-    auto  textLayoutProperty = hyperlinkNode->GetLayoutProperty<TextLayoutProperty>();
+    auto textLayoutProperty = hyperlinkNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
-    textLayoutProperty->UpdateContent(label);
+    textLayoutProperty->UpdateContent(content);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     textLayoutProperty->UpdateTextDecoration(TextDecoration::UNDERLINE);
+    hyperlinkNode->MarkModifyDone();
+    hyperlinkNode->MarkDirtyNode();
 }
 } // namespace OHOS::Ace::NG
