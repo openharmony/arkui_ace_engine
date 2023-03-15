@@ -56,6 +56,13 @@ const float NEW_WIDTH = 500.0f;
 const float NEW_HEIGHT = 500.0f;
 const RectF NEW_RECT = RectF(NEW_X_VALUE, NEW_Y_VALUE, NEW_WIDTH, NEW_HEIGHT);
 const OffsetF NEW_ORIGIN = OffsetF(NEW_WIDTH, NEW_HEIGHT);
+
+const char CHARACTER_A = 'a';
+const char CHARACTER_Q = 'q';
+const char CHARACTER_E = 'e';
+constexpr int32_t NUM_CTRL_VALUE = 1;
+constexpr int32_t NUM_SHIFT_VALUE = 2;
+constexpr int32_t NUM_ALT_VALUE = 4;
 } // namespace
 
 class EventHubTestNg : public testing::Test {
@@ -276,5 +283,27 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
     eventHub->FireOnDragMove(dragEvent, DRAG_DROP_EVENT_TYPE);
     EXPECT_TRUE(eventHub->HasOnDrop());
     EXPECT_EQ(dragEventType, DRAG_DROP_EVENT_TYPE);
+}
+
+/**
+ * @tc.name: EventHubCreateTest005
+ * @tc.desc: Create EventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubDragEventsTest005, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->SetKeyboardShortcut(CHARACTER_A, NUM_CTRL_VALUE);
+    EXPECT_EQ(CHARACTER_A, eventHub->GetKeyboardShortcutValue());
+    EXPECT_EQ(NUM_CTRL_VALUE, eventHub->GetKeyboardShortcutKeys());
+    eventHub->SetKeyboardShortcut(CHARACTER_Q, NUM_SHIFT_VALUE);
+
+    EXPECT_EQ(CHARACTER_Q, eventHub->GetKeyboardShortcutValue());
+    EXPECT_EQ(NUM_SHIFT_VALUE, eventHub->GetKeyboardShortcutKeys());
+    eventHub->SetKeyboardShortcut(CHARACTER_E, NUM_ALT_VALUE);
+    EXPECT_EQ(CHARACTER_E, eventHub->GetKeyboardShortcutValue());
+    EXPECT_EQ(NUM_ALT_VALUE, eventHub->GetKeyboardShortcutKeys());
 }
 } // namespace OHOS::Ace::NG
