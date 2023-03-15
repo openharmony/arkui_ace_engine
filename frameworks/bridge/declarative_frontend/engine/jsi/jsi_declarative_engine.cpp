@@ -1078,8 +1078,8 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
             std::lock_guard<std::mutex> lock(loadFormMutex_);
-            if (!runtime->ExecuteModuleBufferForForm(content.data(), content.size(), abcPath)) {
-                LOGE("ExecuteCardAbc ExecuteModuleBufferForForm \"%{public}s\" failed.", fileName.c_str());
+            if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath)) {
+                LOGE("ExecuteCardAbc ExecuteModuleBuffer \"%{public}s\" failed.", fileName.c_str());
                 return false;
             }
         }

@@ -22,7 +22,6 @@
 #include "ability_info.h"
 #include "configuration.h"
 #include "dm/display_manager.h"
-#include "extension_ability_info.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -748,7 +747,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
             CHECK_NULL_VOID(frontend);
             frontend->SetBundleName(bundleName_);
             frontend->SetModuleName(moduleName_);
-            frontend->SetIsBundle(isBundle_);
+            // arkTSCard only support "esModule" compile mode
+            frontend->SetIsBundle(false);
         } else {
             Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         }
@@ -762,7 +762,7 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
 
     if (isFormRender_ && !isFormRenderInit_) {
         container->UpdateFormSharedImage(formImageDataMap_);
-        container->UpdateFormDate(formData_);
+        container->UpdateFormData(formData_);
         isFormRenderInit_ = true;
     }
 
@@ -1554,12 +1554,12 @@ void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pix
     pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
 }
 
-void UIContentImpl::UpdateFormDate(const std::string& data)
+void UIContentImpl::UpdateFormData(const std::string& data)
 {
     if (isFormRenderInit_) {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
-        container->UpdateFormDate(data);
+        container->UpdateFormData(data);
     } else {
         formData_ = data;
     }

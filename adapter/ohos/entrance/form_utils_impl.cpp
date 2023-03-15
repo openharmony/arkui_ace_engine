@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace {
 int32_t FormUtilsImpl::RouterEvent(
-    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defualtbundleName)
+    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
 {
     ContainerScope scope(containerId);
     auto container = Container::Current();
@@ -44,7 +44,7 @@ int32_t FormUtilsImpl::RouterEvent(
         return -1;
     }
     if (bundle.empty()) {
-        bundle = defualtbundleName;
+        bundle = defaultBundleName;
     }
     want.SetElementName(bundle, ability);
     if (params->IsValid()) {
@@ -67,7 +67,7 @@ int32_t FormUtilsImpl::RouterEvent(
 }
 
 int32_t FormUtilsImpl::BackgroundEvent(
-    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defualtbundleName)
+    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
 {
     ContainerScope scope(containerId);
     auto container = Container::Current();
@@ -86,7 +86,7 @@ int32_t FormUtilsImpl::BackgroundEvent(
         return -1;
     }
     if (bundle.empty()) {
-        bundle = defualtbundleName;
+        bundle = defaultBundleName;
     }
     want.SetElementName(bundle, ability);
     if (params->IsValid()) {
