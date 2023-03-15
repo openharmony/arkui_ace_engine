@@ -109,6 +109,7 @@ private:
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
     RefPtr<FrameNode> CreatePopupNode();
     void UpdateBubbleView();
+    void UpdateBubbleSize();
     void UpdateBubbleLetterView(bool showDivider);
     void UpdateBubbleListView(std::vector<std::string>& currentListData);
     void UpdatePopupOpacity(float ratio);

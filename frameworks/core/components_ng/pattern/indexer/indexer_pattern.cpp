@@ -559,12 +559,8 @@ void IndexerPattern::UpdateBubbleView()
     CHECK_NULL_VOID(columnLayoutProperty);
     auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
     auto popListData = indexerEventHub->GetOnRequestPopupData();
-    auto currentListData = popListData ? popListData(selected_) : std::vector<std::string>();
-    auto popupSize = currentListData.size();
-    auto listActualSize = popupSize < INDEXER_BUBBLE_MAXSIZE ? popupSize : INDEXER_BUBBLE_MAXSIZE;
-    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * (listActualSize + 1)));
-    columnLayoutProperty->UpdateUserDefinedIdealSize(columnCalcSize);
+    auto currentListData =
+        popListData ? popListData(childPressIndex_ >= 0 ? childPressIndex_ : selected_) : std::vector<std::string>();
     UpdateBubbleLetterView(!currentListData.empty());
     UpdateBubbleListView(currentListData);
     auto columnRenderContext = popupNode_->GetRenderContext();
@@ -575,6 +571,25 @@ void IndexerPattern::UpdateBubbleView()
     columnRenderContext->SetClipToBounds(true);
     SetPositionOfPopupNode(popupNode_);
     popupNode_->MarkModifyDone();
+    popupNode_->MarkDirtyNode();
+}
+
+void IndexerPattern::UpdateBubbleSize()
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto columnLayoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(columnLayoutProperty);
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto popListData = indexerEventHub->GetOnRequestPopupData();
+    auto currentListData =
+        popListData ? popListData(childPressIndex_ >= 0 ? childPressIndex_ : selected_) : std::vector<std::string>();
+    auto popupSize = currentListData.size();
+    auto listActualSize = popupSize < INDEXER_BUBBLE_MAXSIZE ? popupSize : INDEXER_BUBBLE_MAXSIZE;
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * (listActualSize + 1)));
+    columnLayoutProperty->UpdateUserDefinedIdealSize(columnCalcSize);
     popupNode_->MarkDirtyNode();
 }
 
@@ -596,7 +611,7 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
     CHECK_NULL_VOID(letterNode);
     auto letterLayoutProperty = letterNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(letterLayoutProperty);
-    letterLayoutProperty->UpdateContent(arrayValue_[selected_]);
+    letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_]);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
     auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
@@ -1004,6 +1019,7 @@ void IndexerPattern::StartBubbleAppearAnimation()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->UpdatePopupOpacity(1.0f);
+            pattern->UpdateBubbleSize();
         });
     AnimationUtils::AddKeyFrame(
         middleTimeRatio, Curves::LINEAR, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
