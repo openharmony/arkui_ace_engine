@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,6 @@ public:
     virtual void SetSoPath(const std::string& soPath) = 0;
     virtual void SetOnLoad(LoadEvent&& onLoad) = 0;
     virtual void SetOnDestroy(DestroyEvent&& onDestroy) = 0;
-    virtual void SetOnSurfaceDestroyEvent(DestroyEvent&& onSurfaceDestroyEvent) = 0;
 
 private:
     static std::unique_ptr<XComponentModel> instance_;
