@@ -60,6 +60,7 @@ use_linux = "${current_os}_${current_cpu}" == "linux_x64"
 ace_root = "//foundation/arkui/ace_engine"
 ace_napi = "//foundation/arkui/napi"
 ace_graphic = "//foundation/graphic/graphic_2d"
+ace_hitrace = "//base/hiviewdfx/hitrace"
 
 if (!defined(aosp_libs_dir)) {
   aosp_libs_dir = "//prebuilts/aosp_prebuilt_libs/asdk_libs"

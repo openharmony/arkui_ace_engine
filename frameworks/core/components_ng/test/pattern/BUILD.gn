@@ -25,6 +25,7 @@ group("pattern_unittest") {
     "common_view:common_view_test_ng",
     "container_modal:container_modal_test_ng",
     "counter:counter_pattern_test_ng",
+    "custom_dialog:custom_dialog_test_ng",
     "custom_paint:custom_paint_pattern_test_ng",
     "data_panel:data_panel_pattern_test_ng",
     "dialog:dialog_pattern_test_ng",
