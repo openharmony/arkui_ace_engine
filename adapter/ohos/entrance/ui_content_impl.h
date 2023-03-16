@@ -88,7 +88,7 @@ public:
 
     // ArkTS Form
     std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() override;
-    void UpdateFormDate(const std::string& data) override;
+    void UpdateFormData(const std::string& data) override;
     void UpdateFormSharedImage(
         const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
     void ReloadForm() override;
