@@ -43,6 +43,7 @@
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/ressched/ressched_report.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -206,6 +207,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     HandleOnAreaChangeEvent();
     HandleVisibleAreaChangeEvent();
+    // Keep the call sent at the end of the function
+    ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
