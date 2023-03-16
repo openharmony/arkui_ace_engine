@@ -101,10 +101,6 @@ public:
                     pattern->GetAttr<Dimension>("inset_hot_block_shadow_width", INSET_HOT_BLOCK_SHADOW_WIDTH);
                 theme->focusSideDistance_ =
                     pattern->GetAttr<Dimension>("focus_side_distance", FOCUS_SIDE_DISTANCE);
-                theme->layoutMaxLength_ = pattern->GetAttr<Dimension>("slider_max_length", .0_vp);
-                theme->hoverAnimationDuration_ = pattern->GetAttr<double>("hover_animation_duration", 0.0);
-                theme->pressAnimationDuration_ = pattern->GetAttr<double>("press_animation_duration", 0.0);
-                theme->moveAnimationDuration_ = pattern->GetAttr<double>("move_animation_duration", 0.0);
             } else {
                 LOGW("find pattern of slider fail");
             }
@@ -228,26 +224,6 @@ public:
         return focusSideDistance_;
     }
 
-    Dimension GetLayoutMaxLength() const
-    {
-        return layoutMaxLength_;
-    }
-
-    double GetHoverAnimationDuration() const
-    {
-        return hoverAnimationDuration_;
-    }
-
-    double GetPressAnimationDuration() const
-    {
-        return pressAnimationDuration_;
-    }
-
-    double GetMoveAnimationDuration() const
-    {
-        return moveAnimationDuration_;
-    }
-
 protected:
     SliderTheme() = default;
 
@@ -282,10 +258,6 @@ private:
 
     // others
     Dimension focusSideDistance_;
-    Dimension layoutMaxLength_;
-    double hoverAnimationDuration_ = 0.0;
-    double pressAnimationDuration_ = 0.0;
-    double moveAnimationDuration_ = 0.0;
 };
 
 } // namespace OHOS::Ace
