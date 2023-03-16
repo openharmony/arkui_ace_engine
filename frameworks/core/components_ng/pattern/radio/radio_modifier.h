@@ -76,7 +76,7 @@ public:
                     animateTouchHoverColor_->Set(LinearColor(hoverColor_));
                     break;
                 case TouchHoverAnimationType::NONE:
-                    animateTouchHoverColor_->Set(LinearColor(Color::TRANSPARENT));
+                    animateTouchHoverColor_->Set(LinearColor(hoverColor_.BlendOpacity(0)));
                     break;
                 default:
                     break;

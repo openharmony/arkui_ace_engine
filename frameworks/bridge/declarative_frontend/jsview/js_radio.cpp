@@ -183,18 +183,17 @@ void JSRadio::JsSize(const JSCallbackInfo& info)
 
 void JSRadio::JsPadding(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
+        return;
+    }
     if (!info[0]->IsString() && !info[0]->IsNumber() && !info[0]->IsObject()) {
         LOGE("arg is not a string, number or object.");
         return;
     }
 
-    Dimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetPadding(NG::CalcLength(value));
+        JSViewAbstract::JsPadding(info);
         return;
     }
 

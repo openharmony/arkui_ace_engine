@@ -244,6 +244,7 @@ void RadioPattern::UpdateState()
 
             pageEventHub->RemoveRadioFromGroup(preGroup.value(), host->GetId());
             pageEventHub->AddRadioToGroup(group, host->GetId());
+            isGroupChanged_ = true;
         }
     }
     pattern->SetPreGroup(group);
@@ -273,10 +274,11 @@ void RadioPattern::UpdateState()
         // If the radio check is not set, set isFirstCreated_ to false.
         isFirstCreated_ = false;
     }
-    if (preCheck_ != check) {
+    if (preCheck_ != check || isGroupChanged_) {
         UpdateGroupCheckStatus(host, check);
     }
     preCheck_ = check;
+    isGroupChanged_ = false;
 }
 
 void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
@@ -316,7 +318,9 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
         auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(radioPaintProperty);
         radioPaintProperty->UpdateRadioCheck(check);
-        PlayAnimation(false);
+        if (!isGroupChanged_) {
+            PlayAnimation(false);
+        }
     }
 
     if (!isFirstCreated_) {
