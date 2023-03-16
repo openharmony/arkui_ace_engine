@@ -172,6 +172,8 @@ void WindowPattern::LoadContent(
     CHECK_NULL_VOID(uiContent_);
     uiContent_->Initialize(shared_from_this(), contentUrl, storage);
 
+    uiContent_->Foreground();
+
     auto inputListener = std::make_shared<InputEventListener>(instanceId_);
     RegisterInputEventListener(inputListener);
 }
@@ -313,22 +315,27 @@ void WindowPattern::Connect()
 
 void WindowPattern::Foreground()
 {
-    CHECK_NULL_VOID(uiContent_);
-    uiContent_->Foreground();
+    if (uiContent_) {
+        uiContent_->Foreground();
+    }
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Foreground();
 }
 
 void WindowPattern::Background()
 {
-    CHECK_NULL_VOID(uiContent_);
-    uiContent_->Background();
+    if (uiContent_) {
+        uiContent_->Background();
+    }
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Background();
 }
 
 void WindowPattern::Disconnect()
 {
+    if (uiContent_) {
+        uiContent_->Destroy();
+    }
     CHECK_NULL_VOID(sessionStage_);
     sessionStage_->Disconnect();
 }

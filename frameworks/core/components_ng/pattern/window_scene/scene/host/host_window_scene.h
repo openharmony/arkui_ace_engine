@@ -30,7 +30,7 @@ public:
 protected:
     bool HasStartingPage() override
     {
-        return true;
+        return false;
     }
 
     void OnForeground() override;

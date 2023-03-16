@@ -61,6 +61,8 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     CHECK_NULL_VOID(uiContent_);
     uiContent_->Initialize(shared_from_this(), contentUrl, storage);
 
+    uiContent_->Foreground();
+
     ViewportConfig config;
     config.SetPosition(0, 0);
     config.SetSize(720, 1280);
