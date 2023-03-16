@@ -18,7 +18,7 @@
 namespace OHOS::Ace {
 namespace {
 int32_t g_id = 0;
-}
+} // namespace
 
 int32_t Container::CurrentId()
 {
