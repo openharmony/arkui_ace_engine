@@ -77,6 +77,7 @@ public:
             auto iter = generatedItem.find(*id);
             if (iter != generatedItem.end()) {
                 generatedItem_.try_emplace(iter->first, iter->second);
+                generatedItem.erase(iter);
             }
         }
         // store cached items.
