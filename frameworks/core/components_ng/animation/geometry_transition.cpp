@@ -86,6 +86,10 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
 
     auto inNode = inNode_.Upgrade();
     auto outNode = outNode_.Upgrade();
+    if (outNode) {
+        outNodeParentPos_ = outNode->GetPaintRectOffset(true);
+        outNodePos_ = outNode->GetPaintRectOffset();
+    }
     if (!inNode || !outNode || !inNode->GetLayoutProperty() || !outNode->GetLayoutProperty()) {
         hasInAnim_ = false;
         hasOutAnim_ = false;
