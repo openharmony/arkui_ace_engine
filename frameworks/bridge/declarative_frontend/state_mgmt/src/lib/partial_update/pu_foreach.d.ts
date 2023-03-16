@@ -17,7 +17,7 @@
  * ForEach for partial update
  *
  * all definitions in this file are framework internal
- * 
+ *
  * Note: the API for ForEach with partial update and with full update
  * are different. Only this declaration file or the one for full update
  * can be used. Using both would lead to syntax error.
@@ -25,6 +25,14 @@
  */
 
 declare class ForEach {
+
+  // forEach improved
+  static startUpdate(): void;
+  static setContext(): void;
+  static getContext(): void;
+  static useItem(): void;
+  static completeUpdate(): void;
+
   static create(): void;
   static pop(): void;
   static setIdArray(elmtId: number, newIdArray: string[], diffIndexArray: number[], duplicateIds: number[]): void;

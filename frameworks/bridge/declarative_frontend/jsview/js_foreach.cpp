@@ -48,6 +48,51 @@ ForEachModel* ForEachModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
+// NG Only. Start improved ForEach update operation.
+void JSForEach::StartUpdate(const JSCallbackInfo& info)
+{
+
+    ACE_SCOPED_TRACE("JSForEach::StartUpdate");
+    LOGD("JSForEach::StartUpdate");
+
+    if (Container::IsCurrentUseNewPipeline()) {
+        LOGD("JSForEach::StartUpdate-> Calling Create");
+        // TODO enable later. ForEachModel::GetInstance()->Create();
+        return;
+    }
+    LOGE("JSForEach::StartUpdate called for Legacy components");
+    return;
+}
+
+// NG Only. SetContext forEach improved operation.
+void JSForEach::SetContext(const JSCallbackInfo& info)
+{
+    ACE_SCOPED_TRACE("JSForEach::SetContext");
+    LOGD("JSForEach::SetContext");
+}
+
+// NG Only. GetContext forEach improved operation.
+void JSForEach::GetContext(const JSCallbackInfo& info)
+{
+    ACE_SCOPED_TRACE("JSForEach::GetContext");
+    LOGD("JSForEach::GetContext");
+}
+
+// NG Only. GetContext forEach improved operation.
+void JSForEach::UseItem(const JSCallbackInfo& info)
+{
+    ACE_SCOPED_TRACE("JSForEach::UseItem");
+    LOGD("JSForEach::UseItem");
+}
+
+// NG Only. GetContext forEach improved operation.
+void JSForEach::CompleteUpdate(const JSCallbackInfo& info)
+{
+    ACE_SCOPED_TRACE("JSForEach::CompleteUpdate");
+    LOGD("JSForEach::CompleteUpdate");
+    // TODO enable later...ForEachModel::GetInstance()->GetCurrentIdList()->clear();
+}
+
 // Create(...)
 // NG:       no params
 // Classic:  cmpilerGenId, array, itemGenFunc, idGenFunction
@@ -210,6 +255,13 @@ void JSForEach::CreateNewChildFinish(const JSCallbackInfo& info)
 void JSForEach::JSBind(BindingTarget globalObj)
 {
     JSClass<JSForEach>::Declare("ForEach");
+    // forEach improved
+    JSClass<JSForEach>::StaticMethod("startUpdate", &JSForEach::StartUpdate);
+    JSClass<JSForEach>::StaticMethod("setContext", &JSForEach::SetContext);
+    JSClass<JSForEach>::StaticMethod("getContext", &JSForEach::GetContext);
+    JSClass<JSForEach>::StaticMethod("useItem", &JSForEach::UseItem);
+    JSClass<JSForEach>::StaticMethod("completeUpdate", &JSForEach::CompleteUpdate);
+
     JSClass<JSForEach>::StaticMethod("create", &JSForEach::Create);
     JSClass<JSForEach>::StaticMethod("pop", &JSForEach::Pop);
     JSClass<JSForEach>::StaticMethod("getIdArray", &JSForEach::GetIdArray);

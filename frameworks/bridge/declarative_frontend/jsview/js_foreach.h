@@ -23,6 +23,13 @@ namespace OHOS::Ace::Framework {
 
 class JSForEach {
 public:
+    // ForEach improved
+    static void StartUpdate(const JSCallbackInfo& info);
+    static void SetContext(const JSCallbackInfo& info);
+    static void GetContext(const JSCallbackInfo& info);
+    static void UseItem(const JSCallbackInfo& info);
+    static void CompleteUpdate(const JSCallbackInfo& info);
+
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
     static void CreateForPartialUpdate();
