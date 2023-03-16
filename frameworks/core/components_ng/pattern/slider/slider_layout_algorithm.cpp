@@ -40,13 +40,6 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     float width = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     float height = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
 
-    Axis direction = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
-    if (direction == Axis::HORIZONTAL && GreaterOrEqualToInfinity(width)) {
-        width = static_cast<float>(theme->GetLayoutMaxLength().ConvertToPx());
-    }
-    if (direction == Axis::VERTICAL && GreaterOrEqualToInfinity(height)) {
-        height = static_cast<float>(theme->GetLayoutMaxLength().ConvertToPx());
-    }
     Dimension themeTrackThickness = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
                                             SliderModel::SliderMode::OUTSET
                                         ? theme->GetOutsetTrackThickness()
@@ -72,6 +65,7 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     sliderWidth = std::max(sliderWidth, trackThickness_);
     sliderWidth = std::max(sliderWidth, blockHotSize_);
     sliderWidth = std::max(sliderWidth, blockDiameter_ + static_cast<float>(hotBlockShadowWidth.ConvertToPx()) / HALF);
+    Axis direction = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     sliderWidth = std::clamp(sliderWidth, 0.0f, direction == Axis::HORIZONTAL ? height : width);
     float sliderLength = direction == Axis::HORIZONTAL ? width : height;
     return direction == Axis::HORIZONTAL ? SizeF(sliderLength, sliderWidth) : SizeF(sliderWidth, sliderLength);
