@@ -46,6 +46,9 @@ public:
         if (paintProperty->HasSelectedColor()) {
             switchModifier_->SetUserActiveColor(paintProperty->GetSelectedColor().value());
         }
+        if (paintProperty->HasSwitchPointColor()) {
+            switchModifier_->SetUserPointColor(paintProperty->GetSwitchPointColor().value());
+        }
         auto size = paintWrapper->GetContentSize();
         auto offset = paintWrapper->GetContentOffset();
         switchModifier_->SetSize(size);
