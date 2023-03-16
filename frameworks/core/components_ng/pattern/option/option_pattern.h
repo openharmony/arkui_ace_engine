@@ -21,6 +21,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/option/option_accessibility_property.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_paint_method.h"
@@ -50,6 +51,11 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<OptionEventHub>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<OptionAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override

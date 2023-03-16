@@ -68,6 +68,14 @@ public:
         return popupMap_[targetId];
     }
 
+    bool HasPopupInfo(int32_t targetId) const
+    {
+        if (popupMap_.find(targetId) != popupMap_.end()) {
+            return true;
+        }
+        return false;
+    }
+
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
     void HideMenu(int32_t targetId);
     void DeleteMenu(int32_t targetId);
