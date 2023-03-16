@@ -166,16 +166,12 @@ HWTEST_F(CustomDialogTestNg, CustomDialogTestNg005, TestSize.Level1)
         V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
     auto Dialog = DialogView::CreateDialogNode(param, child);
     EXPECT_TRUE(Dialog);
-    if (!Dialog) {
-        return;
-    }
+    ASSERT_NE(Dialog, nullptr);
     child->GetGeometryNode()->SetMarginFrameOffset(translate);
     EXPECT_EQ(Dialog->TotalChildCount(), 1);
     auto dialogPattern = Dialog->GetPattern<DialogPattern>();
     EXPECT_TRUE(dialogPattern);
-    if (!dialogPattern) {
-        return;
-    }
+    ASSERT_NE(dialogPattern, nullptr);
     info.SetGlobalLocation(globalLocation);
     dialogPattern->HandleClick(info);
 }
@@ -199,16 +195,12 @@ HWTEST_F(CustomDialogTestNg, CustomDialogTestNg006, TestSize.Level1)
         V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
     auto Dialog = DialogView::CreateDialogNode(param, child);
     EXPECT_TRUE(Dialog);
-    if (!Dialog) {
-        return;
-    }
+    ASSERT_NE(Dialog, nullptr);
     child->GetGeometryNode()->SetMarginFrameOffset(translate);
     EXPECT_EQ(Dialog->TotalChildCount(), 1);
     auto dialogPattern = Dialog->GetPattern<DialogPattern>();
     EXPECT_TRUE(dialogPattern);
-    if (!dialogPattern) {
-        return;
-    }
+    ASSERT_NE(dialogPattern, nullptr);
     info.SetGlobalLocation(globalLocation);
     dialogPattern->HandleClick(info);
 }
