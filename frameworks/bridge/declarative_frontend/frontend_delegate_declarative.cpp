@@ -1358,7 +1358,10 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
-
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
         auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             LOGI("Begin to show dialog ");
@@ -1444,6 +1447,10 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
         auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
         auto overlayManager = context ? context->GetOverlayManager() : nullptr;
         taskExecutor_->PostTask(
