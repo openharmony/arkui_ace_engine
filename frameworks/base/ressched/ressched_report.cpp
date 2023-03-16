@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,8 @@
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+
 namespace OHOS::Ace {
 namespace {
 constexpr uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
@@ -24,6 +26,7 @@ constexpr uint32_t RES_TYPE_PUSH_PAGE       = 10;
 constexpr uint32_t RES_TYPE_SLIDE           = 11;
 constexpr uint32_t RES_TYPE_POP_PAGE        = 28;
 constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
+constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr int32_t TOUCH_EVENT               = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
@@ -43,6 +46,7 @@ constexpr char SLIDE_ON[] = "slide_on";
 constexpr char SLIDE_OFF[] = "slide_off";
 constexpr char TOUCH[] = "touch";
 constexpr char WEB_GESTURE[] = "web_gesture";
+constexpr char LOAD_PAGE[] = "load_page";
 
 void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload)
 {
@@ -126,13 +130,24 @@ void ResSchedReport::OnTouchEvent(const TouchType& touchType)
     if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
         std::unordered_map<std::string, std::string> payload;
         payload[NAME] = TOUCH;
-        if (reportDataFunc_ == nullptr) {
-            reportDataFunc_ = LoadReportDataFunc();
-        }
-        if (reportDataFunc_ != nullptr) {
-            reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT, payload);
-        }
+        ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT, payload);
     }
+}
+
+void ResSchedReport::LoadPageEvent(int32_t value)
+{
+    if (LIKELY(value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)) {
+        return;
+    } else if (value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == true) {
+        loadPageOn_ = false;
+    } else if (value == ResDefine::LOAD_PAGE_START_EVENT) {
+        loadPageOn_ = true;
+    }
+
+    std::unordered_map<std::string, std::string> payload;
+    payload[NAME] = LOAD_PAGE;
+    LoadAceApplicationContext(payload);
+    ResSchedDataReport(RES_TYPE_LOAD_PAGE, value, payload);
 }
 
 ResSchedReportScope::ResSchedReportScope(const std::string& name,
@@ -143,6 +158,7 @@ ResSchedReportScope::ResSchedReportScope(const std::string& name,
     LoadAceApplicationContext(payload_);
     if (name_ == PUSH_PAGE) {
         ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_PUSH_PAGE, PUSH_PAGE_START_EVENT, payload_);
+        ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_START_EVENT);
     }
 }
 
