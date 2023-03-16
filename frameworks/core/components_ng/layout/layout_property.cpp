@@ -86,13 +86,13 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (padding_) {
         json->Put("padding", padding_->ToJsonString().c_str());
     } else {
-        json->Put("padding", "0.0");
+        json->Put("padding", "0.00vp");
     }
 
     if (margin_) {
         json->Put("margin", margin_->ToJsonString().c_str());
     } else {
-        json->Put("margin", "0.0");
+        json->Put("margin", "0.00vp");
     }
 
     json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
