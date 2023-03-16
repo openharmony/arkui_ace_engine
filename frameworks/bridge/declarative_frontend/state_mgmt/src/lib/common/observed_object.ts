@@ -213,6 +213,38 @@ class SubscribableArrayHandler extends SubscribableHandler {
 }
 
 
+class SubscribableDateHandler extends SubscribableHandler {
+
+    constructor(owningProperty: IPropertySubscriber) {
+      super(owningProperty);
+    }
+  
+    /**
+     * Get trap for Date type proxy
+     * Functions that modify Date in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * @param target Original Date object
+     * @param property 
+     * @returns 
+     */
+    public get(target: Object, property: PropertyKey): any {
+      let ret = super.get(target, property);
+      if (typeof ret === "function" && property.toString() && 
+          property.toString().startsWith('set')) {
+        const self = this;
+        return function() {
+            // execute original function with given arguments
+            ret.apply(this, arguments);
+            self.notifyObjectPropertyHasChanged(property.toString(), this);
+        }.bind(target) // bind "this" to target inside the function
+      } else if (typeof ret === "function") {
+        ret = ret.bind(target);
+      }
+      return ret;
+    }
+}
+
+
 class ExtendableProxy {
   constructor(obj: Object, handler: SubscribableHandler) {
     return new Proxy(obj, handler);
@@ -381,7 +413,8 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
       throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
     }
     let handler = Array.isArray(obj) ? new SubscribableArrayHandler(objectOwningProperty)
-                                     : new SubscribableHandler(objectOwningProperty);
+                                     : (obj instanceof Date) ? new SubscribableDateHandler(objectOwningProperty)
+                                                             : new SubscribableHandler(objectOwningProperty);
     super(obj, handler);
 
     if (ObservedObject.IsObservedObject(obj)) {
