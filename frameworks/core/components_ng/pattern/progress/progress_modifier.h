@@ -77,7 +77,7 @@ private:
     RefPtr<PropertyFloat> value_;
     RefPtr<PropertyFloat> scaleWidth_;
     RefPtr<PropertyInt> scaleCount_;
-    ProgressType progressType_ = ProgressType::LINEAR;
+    RefPtr<PropertyInt> progressType_;
 
     Dimension capsuleBorderWidth_ = Dimension(DEFAULT_CAPSULE_BORDER_WIDTH,  DimensionUnit::VP);
     OffsetF offset_ = OffsetF(0.0, 0.0);

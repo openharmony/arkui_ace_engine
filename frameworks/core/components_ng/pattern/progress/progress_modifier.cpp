@@ -32,7 +32,8 @@ ProgressModifier::ProgressModifier()
       maxValue_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_MAX_VALUE)),
       value_(AceType::MakeRefPtr<PropertyFloat>(0.0f)),
       scaleWidth_(AceType::MakeRefPtr<PropertyFloat>(DEFAULT_SCALE_WIDTH)),
-      scaleCount_(AceType::MakeRefPtr<PropertyInt>(DEFAULT_SCALE_COUNT))
+      scaleCount_(AceType::MakeRefPtr<PropertyInt>(DEFAULT_SCALE_COUNT)),
+      progressType_(AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(ProgressType::LINEAR)))
 {
     AttachProperty(strokeWidth_);
     AttachProperty(color_);
@@ -80,7 +81,9 @@ void ProgressModifier::SetBorderColor(LinearColor color)
 
 void ProgressModifier::SetProgressType(ProgressType type)
 {
-    progressType_ = type;
+    if (progressType_) {
+        progressType_->Set(static_cast<int32_t>(type));
+    }
 }
 
 void ProgressModifier::SetMaxValue(float value)
@@ -125,15 +128,15 @@ void ProgressModifier::ContentDrawWithFunction(DrawingContext& context)
 {
     SizeF frameSize(context.width, context.height);
     auto& canvas = context.canvas;
-    if (progressType_ == ProgressType::LINEAR) {
+    if (progressType_->Get() == static_cast<int32_t>(ProgressType::LINEAR)) {
         PaintLinear(canvas, offset_, frameSize);
-    } else if (progressType_ == ProgressType::RING) {
+    } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::RING)) {
         PaintRing(canvas, offset_, frameSize);
-    } else if (progressType_ == ProgressType::SCALE) {
+    } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::SCALE)) {
         PaintScaleRing(canvas, offset_, frameSize);
-    } else if (progressType_ == ProgressType::MOON) {
+    } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::MOON)) {
         PaintMoon(canvas, offset_, frameSize);
-    } else if (progressType_ == ProgressType::CAPSULE) {
+    } else if (progressType_->Get() == static_cast<int32_t>(ProgressType::CAPSULE)) {
         if (frameSize.Width() >= frameSize.Height()) {
             PaintCapsule(canvas, offset_, frameSize);
         } else {
