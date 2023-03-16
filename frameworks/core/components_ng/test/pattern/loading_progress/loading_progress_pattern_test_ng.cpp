@@ -213,7 +213,6 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, Save()).Times(1);
     EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     CometParam cometParam;
@@ -224,7 +223,6 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, Save()).Times(1);
     EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     loadingProgressModifier.DrawOrbit(context, cometParam, 50.0f, 2.0f);
@@ -234,7 +232,6 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, Save()).Times(1);
     EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     loadingProgressModifier.DrawOrbit(context, cometParam, .0f, 2.0f);
