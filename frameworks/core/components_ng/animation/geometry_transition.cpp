@@ -70,12 +70,15 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
 {
     state_ = State::IDLE;
     buildDuringLayout_ = GeometryTransition::layoutStarted_;
-    CHECK_NULL_VOID(frameNode.Upgrade());
-    LOGD("GeometryTransition build node%{public}d %{public}s", frameNode.Upgrade()->GetId(), isNodeIn ? "in" : "out");
+    auto node = frameNode.Upgrade();
+    CHECK_NULL_VOID(node);
+    LOGD("GeometryTransition build node%{public}d %{public}s", node->GetId(), isNodeIn ? "in" : "out");
 
     if (!isNodeIn && (frameNode == inNode_ || frameNode == outNode_)) {
         SwapInAndOut(frameNode == inNode_);
         hasOutAnim_ = true;
+        outNodeParentPos_ = node->GetPaintRectOffset(true);
+        outNodePos_ = node->GetPaintRectOffset();
     }
     if (isNodeIn && (frameNode != inNode_)) {
         hasOutAnim_ = !inNode_.Upgrade() && outNode_.Upgrade() ? true : hasOutAnim_;
@@ -86,10 +89,6 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
 
     auto inNode = inNode_.Upgrade();
     auto outNode = outNode_.Upgrade();
-    if (outNode) {
-        outNodeParentPos_ = outNode->GetPaintRectOffset(true);
-        outNodePos_ = outNode->GetPaintRectOffset();
-    }
     if (!inNode || !outNode || !inNode->GetLayoutProperty() || !outNode->GetLayoutProperty()) {
         hasInAnim_ = false;
         hasOutAnim_ = false;
