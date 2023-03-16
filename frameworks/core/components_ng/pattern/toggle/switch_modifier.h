@@ -69,6 +69,11 @@ public:
         userActiveColor_ = color;
     }
 
+    void SetUserPointColor(const Color& color)
+    {
+        userPointColor_ = color;
+    }
+
     void SetEnabled(bool enabled)
     {
         if (enabled_) {
