@@ -67,6 +67,7 @@ const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
+const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
 } // namespace
 
@@ -635,7 +636,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
-                    want.SetParam("address", address);
+                    want.SetUri(address);
+                    want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
             false, false, useNewPipe);
@@ -1074,7 +1076,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
-                    want.SetParam("address", address);
+                    want.SetUri(address);
+                    want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
             false, false, useNewPipe);
