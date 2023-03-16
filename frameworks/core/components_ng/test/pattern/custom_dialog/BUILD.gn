@@ -33,6 +33,7 @@ ohos_unittest("custom_dialog_test_ng") {
     # inner
     "$ace_root/adapter/ohos/osal/ace_trace.cpp",
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/adapter/preview/osal/system_properties.cpp",
     "$ace_root/frameworks/base/geometry/dimension.cpp",
     "$ace_root/frameworks/base/json/json_util.cpp",
     "$ace_root/frameworks/base/log/ace_trace.cpp",
@@ -108,7 +109,6 @@ ohos_unittest("custom_dialog_test_ng") {
 
     # mock
     "$ace_root/frameworks/base/test/mock/mock_animatable_dimension.cpp",
-    "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_ace_application_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/event/mock/mock_touch_event.cpp",
