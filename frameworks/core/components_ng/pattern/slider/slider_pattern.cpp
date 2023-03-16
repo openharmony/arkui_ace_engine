@@ -171,6 +171,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             InitializeBubble();
         }
         mousePressedFlag_ = true;
+        FireChangeEvent(SliderChangeMode::Begin);
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
         if (bubbleFlag_) {
@@ -198,6 +199,7 @@ void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 void SliderPattern::HandleClickEvent()
 {
     FireChangeEvent(SliderChangeMode::Click);
+    FireChangeEvent(SliderChangeMode::End);
 }
 
 void SliderPattern::InitializeBubble()
@@ -356,7 +358,6 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
-        pattern->FireChangeEvent(SliderChangeMode::Begin);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();

@@ -35,9 +35,12 @@ public:
 
     void FireChangeEvent(float value, int32_t mode)
     {
+        constexpr int32_t BEGIN_MODE = 0;
         CHECK_NULL_VOID(changeEvent_);
         changeEvent_(value, mode);
-        SetValue(value);
+        if (mode > BEGIN_MODE) {
+            SetValue(value);
+        }
     }
 
     void SetValue(float value)

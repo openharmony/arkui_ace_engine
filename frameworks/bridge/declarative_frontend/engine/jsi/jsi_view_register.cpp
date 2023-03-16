@@ -1165,7 +1165,8 @@ void JsRegisterViews(BindingTarget globalObj)
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
     sliderChangeMode.Constant("Moving", 1);
-    sliderChangeMode.Constant("End", 2); // 2 means index of constant
+    sliderChangeMode.Constant("End", 2);   // 2 means index of constant
+    sliderChangeMode.Constant("Click", 3); // 3 means index of constant
 
     JSObjectTemplate pickerStyle;
     pickerStyle.Constant("Inline", 0);
