@@ -19,7 +19,11 @@
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
-
+namespace {
+constexpr uint8_t UINT32_LEFT_SHIFT_24 = 24;
+constexpr uint8_t UINT32_LEFT_SHIFT_16 = 16;
+constexpr uint8_t UINT32_LEFT_SHIFT_8 = 8;
+} // namespace
 RSColor ToRSColor(const Color& color)
 {
     return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
@@ -27,7 +31,11 @@ RSColor ToRSColor(const Color& color)
 
 RSColor ToRSColor(const LinearColor& color)
 {
-    return RSColor(color.GetRed(), color.GetGreen(), color.GetBlue(), color.GetAlpha());
+    return RSColor(
+        (static_cast<uint32_t>(std::clamp<int16_t>(color.GetAlpha(), 0, UINT8_MAX)) << UINT32_LEFT_SHIFT_24) |
+        (static_cast<uint32_t>(std::clamp<int16_t>(color.GetRed(), 0, UINT8_MAX)) << UINT32_LEFT_SHIFT_16) |
+        (static_cast<uint32_t>(std::clamp<int16_t>(color.GetGreen(), 0, UINT8_MAX)) << UINT32_LEFT_SHIFT_8) |
+        (static_cast<uint32_t>(std::clamp<int16_t>(color.GetBlue(), 0, UINT8_MAX))));
 }
 
 RSRect ToRSRect(const NG::RectF& rect)

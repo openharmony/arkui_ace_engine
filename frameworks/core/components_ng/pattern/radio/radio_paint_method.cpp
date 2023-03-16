@@ -168,7 +168,7 @@ void RadioModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& conten
     float centerY = outCircleRadius + offset.GetY();
     outCircleRadius += hotZoneHorizontalPadding_.ConvertToPx();
     RSBrush brush;
-    brush.SetColor(ToRSColor(Color(animateTouchHoverColor_->Get())));
+    brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
     canvas.DrawCircle(RSPoint(centerX, centerY), outCircleRadius);

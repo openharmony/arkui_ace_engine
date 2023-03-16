@@ -57,7 +57,7 @@ void RatingModifier::PaintBoard(DrawingContext& context)
     auto ratingTheme = pipeline->GetTheme<RatingTheme>();
     CHECK_NULL_VOID(ratingTheme);
     // animate color
-    Color bgColor = boardColor_->Get();
+    LinearColor bgColor = boardColor_->Get();
     auto pressBorderRadius = ratingTheme->GetFocusBorderRadius();
     auto& canvas = context.canvas;
 

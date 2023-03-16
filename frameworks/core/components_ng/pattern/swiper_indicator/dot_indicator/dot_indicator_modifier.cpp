@@ -47,7 +47,7 @@ constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
-    contentProperty.backgroundColor = backgroundColor_->Get();
+    contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
