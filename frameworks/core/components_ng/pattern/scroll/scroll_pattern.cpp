@@ -123,6 +123,11 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     viewPort_ = layoutAlgorithm->GetViewPortSize();
     viewPortExtent_ = layoutAlgorithm->GetViewPortExtent();
     UpdateScrollBarOffset();
+    if (config.frameSizeChange) {
+        if (GetScrollBar() != nullptr) {
+            GetScrollBar()->OnScrollEnd();
+        }
+    }
     return false;
 }
 
