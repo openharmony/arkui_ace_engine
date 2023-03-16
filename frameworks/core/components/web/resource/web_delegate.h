@@ -264,8 +264,8 @@ class WebWindowNewHandlerOhos : public WebWindowNewHandler {
     DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler)
 
 public:
-    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
-        : handler_(handler) {}
+    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler, int32_t parentNWebId)
+        : handler_(handler), parentNWebId_(parentNWebId) {}
 
     void SetWebController(int32_t id) override;
 
@@ -273,8 +273,11 @@ public:
 
     int32_t GetId() const override;
 
+    int32_t GetParentNWebId() const override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
+    int32_t parentNWebId_ = -1;
 };
 
 class DataResubmittedOhos : public DataResubmitted {
@@ -529,6 +532,10 @@ public:
     {
         isPopup_ = popup;
     }
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
+    }
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -596,6 +603,7 @@ private:
     std::string GetCustomScheme();
     void InitWebViewWithSurface();
     Size GetEnhanceSurfaceSize(const Size& drawSize);
+    void NotifyPopupWindowResult(bool result);
 #endif
 
     WeakPtr<WebComponent> webComponent_;
@@ -663,6 +671,7 @@ private:
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
 #endif
 };
 

@@ -513,6 +513,11 @@ int32_t WebWindowNewHandlerOhos::GetId() const
     return -1;
 }
 
+int32_t WebWindowNewHandlerOhos::GetParentNWebId() const
+{
+    return parentNWebId_;
+}
+
 void DataResubmittedOhos::Resend()
 {
     if (handler_) {
@@ -1773,6 +1778,17 @@ void WebDelegate::RegisterOHOSWebEventAndMethord()
     }
 }
 
+void WebDelegate::NotifyPopupWindowResult(bool result)
+{
+    if (parentNWebId_ != -1) {
+        std::weak_ptr<OHOS::NWeb::NWeb> parentNWebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(parentNWebId_);
+        auto parentNWebSptr = parentNWebWeak.lock();
+        if (parentNWebSptr) {
+            parentNWebSptr->NotifyPopupWindowResult(result);
+        }
+    }
+}
+
 void WebDelegate::RunSetWebIdCallback()
 {
     CHECK_NULL_VOID(nweb_);
@@ -1784,6 +1800,7 @@ void WebDelegate::RunSetWebIdCallback()
         auto setWebIdCallback = pattern->GetSetWebIdCallback();
         CHECK_NULL_VOID(setWebIdCallback);
         setWebIdCallback(webId);
+        NotifyPopupWindowResult(true);
         return;
     }
     auto webCom = webComponent_.Upgrade();
@@ -1791,6 +1808,7 @@ void WebDelegate::RunSetWebIdCallback()
     auto setWebIdCallback = webCom->GetSetWebIdCallback();
     CHECK_NULL_VOID(setWebIdCallback);
     setWebIdCallback(webId);
+    NotifyPopupWindowResult(true);
 }
 
 void WebDelegate::RunJsProxyCallback()
@@ -4078,8 +4096,9 @@ void WebDelegate::OnWindowNew(const std::string& targetUrl, bool isAlert, bool i
         [weak = WeakClaim(this), targetUrl, isAlert, isUserTrigger, handler]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
+            int32_t parentNWebId = (delegate->nweb_ ? delegate->nweb_->GetWebId() : -1);
             auto param = std::make_shared<WebWindowNewEvent>(targetUrl, isAlert, isUserTrigger,
-                AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler));
+                AceType::MakeRefPtr<WebWindowNewHandlerOhos>(handler, parentNWebId));
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
                 CHECK_NULL_VOID(webPattern);

@@ -898,6 +898,7 @@ void WebPattern::OnModifyDone()
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
+        delegate_->SetParentNWebId(parentNWebId_);
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
