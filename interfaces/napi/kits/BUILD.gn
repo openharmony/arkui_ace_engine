@@ -34,7 +34,18 @@ foreach(module, common_napi_libs) {
       platform = "ohos"
     }
   }
-  common_targets += [ ":$module" ]
+
+  module_path_names = []
+  module_path_names = string_split(module, "/")
+  prefix_dir = module_path_names[0]
+
+  module_path = prefix_dir
+  if (prefix_dir != module) {
+    module_path = module_path_names[1]
+  }
+
+  module_name = string_replace(module_path, "_", "")
+  common_targets += [ ":$module_name" ]
 }
 
 group("napi_group") {

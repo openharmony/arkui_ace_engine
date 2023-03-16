@@ -24,7 +24,9 @@
 
 #include "common/task_runners.h"
 #include "flutter/fml/message_loop.h"
+#ifdef OHOS_PLATFORM
 #include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
+#endif
 #include "shell/common/thread_host.h"
 
 #include "base/log/log.h"
