@@ -74,7 +74,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         contentSize.Width() + contentOffset.GetX(), contentOffset.GetY() + contentSize.Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
-        paragraph->Paint(&canvas, textFieldPattern->GetTextRect().GetX(),
+        paragraph->Paint(&canvas, textRectX_->Get(),
             textFieldPattern->IsTextArea() ? textRectY_->Get() : contentOffset.GetY());
     }
     canvas.Restore();
@@ -131,19 +131,20 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     theme = pipelineContext->GetTheme<TextFieldTheme>();
-    auto themePaddingTop = theme->GetPadding().Top().ConvertToPx();
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
 
     textObscured_ = AceType::MakeRefPtr<PropertyBool>(textFieldPattern->GetTextObscured());
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
-    textRectY_ = AceType::MakeRefPtr<PropertyFloat>(themePaddingTop);
+    textRectY_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Top().ConvertToPx());
+    textRectX_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Left().ConvertToPx());
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
     AttachProperty(textRectY_);
     AttachProperty(textObscured_);
+    AttachProperty(textRectX_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -249,6 +250,13 @@ void TextFieldContentModifier::SetTextObscured(bool value)
 {
     if (textObscured_) {
         textObscured_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetTextRectX(const float value)
+{
+    if (textRectX_->Get() != value) {
+        textRectX_->Set(value);
     }
 }
 

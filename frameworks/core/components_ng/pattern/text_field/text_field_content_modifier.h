@@ -45,6 +45,7 @@ public:
     void SetTextValue(std::string& value);
     void SetTextRectY(const float value);
     void SetTextObscured(bool value);
+    void SetTextRectX(const float value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
 
 private:
@@ -65,6 +66,7 @@ private:
     std::optional<Color> textColor_;
     RefPtr<AnimatablePropertyColor> animatableTextColor_;
 
+    RefPtr<PropertyFloat> textRectX_;
     RefPtr<PropertyFloat> textRectY_;
     RefPtr<PropertyOffsetF> contentOffset_;
     RefPtr<PropertySizeF> contentSize_;
