@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG {
 RefPtr<RenderSurface> RenderSurface::Create()
 {
     if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(OHOS_PLATFORM) && defined(ENABLE_ROSEN_BACKEND)
         return MakeRefPtr<RosenRenderSurface>();
 #endif
     }

@@ -2113,7 +2113,7 @@ bool RenderNode::ProcessExternalRSNode(const RefPtr<Component>& component)
             return false;
         }
     }
-#if !defined(WINDOWS_PLATFORM) && !defined(MAC_PLATFORM) && !defined(LINUX_PLATFORM)
+#ifdef OHOS_PLATFORM
     // extract RSNode from tail component.
     auto rsNode = RosenRenderRemoteWindow::ExtractRSNode(tailComponent);
     SyncRSNode(rsNode);

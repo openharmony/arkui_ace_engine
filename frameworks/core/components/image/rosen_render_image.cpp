@@ -310,6 +310,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
 {
     return [sourceInfo = sourceInfo_, pipelineContext = GetContext(), weak = AceType::WeakClaim(this),
                id = Container::CurrentId()]() {
+#ifdef OHOS_PLATFORM
         ContainerScope scope(id);
         auto context = pipelineContext.Upgrade();
         if (!context) {
@@ -358,6 +359,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
                 renderImage->UpdatePixmap(pixmapOhos);
             },
             TaskExecutor::TaskType::UI);
+#endif
     };
 }
 
