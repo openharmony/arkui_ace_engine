@@ -132,13 +132,13 @@ public:
         jsonValue->Put("fontSize", swiperDigitalParameters_->fontSize.value_or(
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()).ToString().c_str());
         jsonValue->Put("fontColor", swiperDigitalParameters_->fontColor.value_or(
-            Color::FromString("#99182431")).ColorToString().c_str());
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()).ColorToString().c_str());
         jsonValue->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(
             swiperDigitalParameters_->fontWeight.value_or(FontWeight::NORMAL)).c_str());
         jsonValue->Put("selectedFontSize", swiperDigitalParameters_->selectedFontSize.value_or(
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()).ToString().c_str());
         jsonValue->Put("selectedFontColor", swiperDigitalParameters_->selectedFontColor.value_or(
-            Color::FromString("#99182431")).ColorToString().c_str());
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()).ColorToString().c_str());
         jsonValue->Put("selectedFontWeight", V2::ConvertWrapFontWeightToStirng(
             swiperDigitalParameters_->selectedFontWeight.value_or(FontWeight::NORMAL)).c_str());
         return jsonValue->ToString();
