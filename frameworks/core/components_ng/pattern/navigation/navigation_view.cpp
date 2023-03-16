@@ -337,7 +337,7 @@ void NavigationView::Create()
 
         auto context = contentNode->GetRenderContext();
         CHECK_NULL_VOID(context);
-        context->UpdateBackgroundColor(CONTENT_COLOR);
+        context->UpdateBackgroundColor(Color::WHITE);
     }
 
     // divider node
