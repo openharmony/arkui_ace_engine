@@ -42,8 +42,13 @@ bool SystemProperties::GetDebugEnabled()
     return false;
 }
 
-float SystemProperties::GetAnimationScale()
+ACE_WEAK_SYM float SystemProperties::GetAnimationScale()
 {
     return defaultAnimationScale;
+}
+
+bool SystemProperties::GetIsUseMemoryMonitor()
+{
+    return false;
 }
 } // namespace OHOS::Ace
