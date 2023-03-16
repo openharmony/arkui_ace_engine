@@ -116,7 +116,7 @@ HWTEST_F(CustomDialogTestNg, CustomDialogTestNg003, TestSize.Level1)
 
 /**
  * @tc.name: CustomDialogTestNg004
- * @tc.desc: Verify function OpenAnimation and GetOpenAnimation
+ * @tc.desc: Verify function GetCloseAnimation and GetOpenAnimation
  * @tc.type: FUNC
  */
 HWTEST_F(CustomDialogTestNg, CustomDialogTestNg004, TestSize.Level1)
@@ -141,32 +141,7 @@ HWTEST_F(CustomDialogTestNg, CustomDialogTestNg004, TestSize.Level1)
     if (dialogPattern->GetOpenAnimation().has_value()) {
         EXPECT_EQ(dialogPattern->GetOpenAnimation().value().GetDelay(), animationOption.GetDelay());
     }
-}
 
-/**
- * @tc.name: CustomDialogTestNg005
- * @tc.desc: Verify function SetCloseAnimation and GetCloseAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(CustomDialogTestNg, CustomDialogTestNg005, TestSize.Level1)
-{
-    DialogProperties param;
-    AnimationOption animationOption;
-    animationOption.SetDelay(10);
-    param.openAnimation = animationOption;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
-    auto result = DialogView::CreateDialogNode(param, nullptr);
-    EXPECT_TRUE(result);
-    if (!result) {
-        return;
-    }
-    auto dialogPattern = result->GetPattern<DialogPattern>();
-    EXPECT_TRUE(dialogPattern);
-    if (!dialogPattern) {
-        return;
-    }
     if (dialogPattern->GetCloseAnimation().has_value()) {
         EXPECT_EQ(dialogPattern->GetCloseAnimation().value().GetDelay(), animationOption.GetDelay());
     }
