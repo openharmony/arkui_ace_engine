@@ -4239,7 +4239,27 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         if (idGenFunc === undefined) {
             
-            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
+            //idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
+            idGenFunc = (item, index) => {
+                console.error(`OLEG idGenFunc, index:  ${index} item: ${item}`);
+                //return `${index}__${JSON.stringify(item)}`;
+                if ((item === null) || !(typeof item === 'object') ||
+                    ((typeof item === 'object') && Array.isArray(item))) {
+                    console.error(`OLEG idGenFunc not object/array index:  ${index},  ${JSON.stringify(item)}`);
+                    return `${index}__${JSON.stringify(item)}`;
+                }
+                else {
+                    // We need dynamic prop name if case "item" is used
+                    // in several ForEach components
+                    var propName = `__ace_id_${elmtId}__`;
+                    if (!item.hasOwnProperty(propName)) {
+                        item[propName] = "autoid_" + ForEach.getNextId(elmtId);
+                        console.error(`OLEG idGenFunc, Object **NO** ${propName}, setting`);
+                    }
+                    console.error(`OLEG idGenFunc, ${propName}: ${item[propName]}`);
+                    return item[propName];
+                }
+            }; // idGenFunc
             idGenFuncUsesIndex = true;
         }
         let diffIndexArray = []; // New indexes compared to old one.

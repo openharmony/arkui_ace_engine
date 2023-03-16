@@ -42,6 +42,7 @@ public:
 
     void CreateNewChildStart(const std::string& id) override;
     void CreateNewChildFinish(const std::string& id) override;
+    int32_t GetNextId(int32_t nodeId) override;
 };
 } // namespace OHOS::Ace::NG
 

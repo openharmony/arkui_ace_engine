@@ -50,6 +50,7 @@ public:
 
     virtual void CreateNewChildStart(const std::string& id) = 0;
     virtual void CreateNewChildFinish(const std::string& id) = 0;
+    virtual int32_t GetNextId(int32_t nodeId) = 0;
     
 private:
      static std::unique_ptr<ForEachModel> instance;

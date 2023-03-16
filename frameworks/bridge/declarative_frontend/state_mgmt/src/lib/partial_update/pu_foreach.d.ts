@@ -30,5 +30,6 @@ declare class ForEach {
   static setIdArray(elmtId: number, newIdArray: string[], diffIndexArray: number[], duplicateIds: number[]): void;
   static createNewChildStart(id: string, parentView: NativeViewPartialUpdate): void;
   static createNewChildFinish(id: string, parentView: NativeViewPartialUpdate): void;
+  static getNextId(elmtId: number): number;
 }
 

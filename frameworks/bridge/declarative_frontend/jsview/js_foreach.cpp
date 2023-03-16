@@ -88,6 +88,19 @@ void JSForEach::Pop()
     ForEachModel::GetInstance()->Pop();
 }
 
+void JSForEach::GetNextId(const JSCallbackInfo& info)
+{
+    if ((info.Length() != 1) || info[0]->IsString()) {
+        LOGE("Invalid arguments for ForEach.GetIdArray");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+
+    const auto elmtId = info[0]->ToNumber<int32_t>();
+    int32_t nextId =  NG::ForEachModelNG::GetInstance()->GetNextId(elmtId);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(nextId)));
+}
+
 // partial update / NG only
 // signature
 // nodeId/elmtId : number
@@ -216,6 +229,7 @@ void JSForEach::JSBind(BindingTarget globalObj)
     JSClass<JSForEach>::StaticMethod("setIdArray", &JSForEach::SetIdArray);
     JSClass<JSForEach>::StaticMethod("createNewChildStart", &JSForEach::CreateNewChildStart);
     JSClass<JSForEach>::StaticMethod("createNewChildFinish", &JSForEach::CreateNewChildFinish);
+    JSClass<JSForEach>::StaticMethod("getNextId", &JSForEach::GetNextId);
     JSClass<JSForEach>::Bind<>(globalObj);
 }
 
