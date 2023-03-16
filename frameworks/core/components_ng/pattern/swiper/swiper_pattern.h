@@ -25,6 +25,7 @@
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_accessibility_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
@@ -59,6 +60,11 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<SwiperPaintProperty>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<SwiperAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -229,6 +235,17 @@ public:
     void SwipeTo(int32_t index);
 
     void OnVisibleChange(bool isVisible) override;
+
+    int32_t GetStartIndex() const
+    {
+        return startIndex_;
+    }
+
+    int32_t GetEndIndex() const
+    {
+        return endIndex_;
+    }
+
     SwiperIndicatorType GetIndicatorType() const;
     std::shared_ptr<SwiperParameters> GetSwiperParameters();
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();

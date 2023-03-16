@@ -111,6 +111,7 @@ ohos_unittest("tabs_model_test_ng") {
 
     # mock
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_property.cpp",
