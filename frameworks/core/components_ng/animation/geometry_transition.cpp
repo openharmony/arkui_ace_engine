@@ -227,9 +227,9 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto geometryNode = self->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     // get own parent's global position
-    auto parentPos = self->GetPaintRectOffset(true);
+    auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectOffset(true);
     // get target's global position
-    auto targetPos = target->GetPaintRectOffset();
+    auto targetPos = target->IsRemoving() ? outNodePos_ : target->GetPaintRectOffset();
     // adjust self's position to match with target's position, here we only need to adjust node self,
     // its children's positions are still determined by layout process.
     auto activeFrameRect = isNodeIn ? RectF(targetPos - parentPos, size_) :
