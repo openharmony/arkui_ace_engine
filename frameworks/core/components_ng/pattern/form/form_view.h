@@ -38,6 +38,7 @@ public:
     static void SetOnError(FormCallback&& onError);
     static void SetOnUninstall(FormCallback&& onUninstall);
     static void SetOnRouter(FormCallback&& onRouter);
+    static void SetOnLoad(FormCallback&& onLoad);
 };
 
 } // namespace OHOS::Ace::NG

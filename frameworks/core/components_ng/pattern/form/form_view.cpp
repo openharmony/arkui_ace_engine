@@ -120,4 +120,13 @@ void FormView::SetOnRouter(FormCallback&& onRouter)
     eventHub->SetOnRouter(std::move(onRouter));
 }
 
+void FormView::SetOnLoad(FormCallback&& onLoad)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnLoad(std::move(onLoad));
+}
+
 } // namespace OHOS::Ace::NG
