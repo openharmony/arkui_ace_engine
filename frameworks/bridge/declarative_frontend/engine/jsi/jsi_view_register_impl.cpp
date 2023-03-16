@@ -372,10 +372,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
-    { "ListItemGroup", JSListItemGroup::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
-    { "ImageAnimator", JSImageAnimator::JSBind },
     { "Counter", JSCounter::JSBind },
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
@@ -385,8 +383,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
-    { "Swiper", JSSwiper::JSBind },
     { "If", JSIfElse::JSBind },
+    { "Scroll", JSScroll::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
     { "Toggle", JSToggle::JSBind },
@@ -406,24 +404,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
-#ifdef WINDOW_SCENE_SUPPORTED
-    { "UIExtensionComponent", JSUIExtension::JSBind },
-#endif
-#ifdef ABILITY_COMPONENT_SUPPORTED
-    { "AbilityComponent", JSAbilityComponent::JSBind },
-#endif
     { "QRCode", JSQRCode::JSBind },
-#ifdef UICAST_COMPONENT_SUPPORTED
-    { "UICast", JSUICast::JSBind },
-#endif
-#ifdef FORM_SUPPORTED
-    { "FormComponent", JSForm::JSBind },
-#endif
-#ifdef WEB_SUPPORTED
-    { "WebController", JSWebController::JSBind },
-#endif
 #ifndef WEARABLE_PRODUCT
-    { "Camera", JSCamera::JSBind },
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
 #endif
@@ -455,30 +437,15 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ImageData", JSCanvasImageData::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
-#ifdef VIDEO_SUPPORTED
-    { "VideoController", JSVideoController::JSBind },
-#endif
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
     { "Checkbox", JSCheckbox::JSBind },
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
-    { "FlowItem", JSWaterFlowItem::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
-#ifdef PREVIEW
-    { "FormComponent", JSForm::JSBind },
-    { "XComponent", JSXComponent::JSBind },
-    { "XComponentController", JSXComponentController::JSBind },
-    { "RichText", JSRichText::JSBind },
-    { "Web", JSWeb::JSBind },
-    { "WebController", JSWebController::JSBind },
-    { "Video", JSVideo::JSBind },
-    { "VideoController", JSVideoController::JSBind },
-    { "PluginComponent", JSPlugin::JSBind },
-#endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     { "Model", JSSceneView::JSBind },
 #endif
@@ -520,7 +487,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Navigation", JSNavigation::JSBind },
     { "Navigator", JSNavigator::JSBind },
     { "NavRouter", JSNavRouter::JSBind },
-    { "ColumnSplit", JSColumnSplit::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
     { "ScrollBar", JSScrollBar::JSBind },
