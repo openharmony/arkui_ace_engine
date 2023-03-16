@@ -73,12 +73,15 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return std::nullopt;
     }
 
-    TextStyle textStyle = CreateTextStyleUsingThemeWithText(frameNode,
+    TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
     if (contentModifier) {
         SetPropertyToModifier(textLayoutProperty, contentModifier);
         contentModifier->ModifyTextStyle(textStyle);
     }
+
+    // Determines whether a foreground color is set or inherited.
+    UpdateTextColorIfForeground(frameNode, textStyle);
 
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) {
         return BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, pipeline);
@@ -485,5 +488,13 @@ bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::stri
 std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
 {
     return textStyle_;
+}
+
+void TextLayoutAlgorithm::UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
+{
+    auto renderContext = frameNode->GetRenderContext();
+    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+        textStyle.SetTextColor(Color::FOREGROUND);
+    }
 }
 } // namespace OHOS::Ace::NG
