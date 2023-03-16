@@ -19,8 +19,8 @@
 #include <mutex>
 #include <unordered_map>
 
-#include "adapter/ohos/entrance/pa_engine/backend_delegate.h"
 #include "base/thread/cancelable_callback.h"
+#include "base/thread/task_executor.h"
 #include "native_engine/native_engine.h"
 
 namespace OHOS::Ace {
@@ -36,7 +36,7 @@ public:
     ~JsBackendTimerModule() = default;
 
     static JsBackendTimerModule* GetInstance();
-    void InitTimerModule(NativeEngine* engine, const RefPtr<BackendDelegate>& delegate);
+    void InitTimerModule(NativeEngine* engine, const RefPtr<TaskExecutor>& taskExecutor);
 
     uint32_t AddCallBack(const std::shared_ptr<NativeReference>& func,
         const std::vector<std::shared_ptr<NativeReference>>& params, NativeEngine* engine);
@@ -47,14 +47,14 @@ public:
     void RemoveTimerCallback(uint32_t callbackId);
 
 private:
-    void AddDelegate(NativeEngine* engine, const RefPtr<BackendDelegate>& delegate);
-    RefPtr<BackendDelegate> GetDelegateWithoutLock(NativeEngine* engine);
+    void AddTaskExecutor(NativeEngine* engine, const RefPtr<TaskExecutor>& taskExecutor);
+    RefPtr<TaskExecutor> GetTaskExecutorWithoutLock(NativeEngine* engine);
 
     std::mutex mutex_;
     uint32_t callbackId_ = 0;
     std::unordered_map<uint32_t, TimerCallbackNode> callbackNodeMap_;
     std::unordered_map<uint32_t, CancelableCallback<void()>> timeoutTaskMap_;
-    std::unordered_map<NativeEngine*, RefPtr<BackendDelegate>> delegateMap_;
+    std::unordered_map<NativeEngine*, RefPtr<TaskExecutor>> taskExecutorMap_;
 };
 } // namespace OHOS::Ace
 

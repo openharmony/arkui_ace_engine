@@ -137,8 +137,6 @@ public:
         return "";
     }
 
-    void DumpHeapSnapshot(bool isPrivate) override;
-
     static bool Register();
     static void CreateContainer(int32_t instanceId, BackendType type, void* paAbility,
         std::unique_ptr<PlatformEventCallback> callback);

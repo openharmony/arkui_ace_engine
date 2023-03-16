@@ -154,9 +154,10 @@ void JsBackendTimerModule::PostTimerCallback(uint32_t callbackId, int64_t delayT
         result.first->second = cancelableTimer;
     }
 
-    RefPtr<BackendDelegate> delegate = GetDelegateWithoutLock(engine);
-    if (delegate) {
-        delegate->PostDelayedJsTask(cancelableTimer, delayTime);
+    RefPtr<TaskExecutor> taskExecutor = GetTaskExecutorWithoutLock(engine);
+
+    if (taskExecutor) {
+        taskExecutor->PostDelayedTask(cancelableTimer, TaskExecutor::TaskType::JS, delayTime);
     }
 }
 
@@ -207,31 +208,31 @@ JsBackendTimerModule* JsBackendTimerModule::GetInstance()
     return &instance;
 }
 
-RefPtr<BackendDelegate> JsBackendTimerModule::GetDelegateWithoutLock(NativeEngine* engine)
+RefPtr<TaskExecutor> JsBackendTimerModule::GetTaskExecutorWithoutLock(NativeEngine* engine)
 {
-    auto delegateNode = delegateMap_.find(engine);
-    if (delegateNode == delegateMap_.end()) {
-        LOGE("Get delegate failed.");
+    auto taskExecutorNode = taskExecutorMap_.find(engine);
+    if (taskExecutorNode == taskExecutorMap_.end()) {
+        LOGE("Get taskExecutorNode failed.");
         return nullptr;
     }
 
-    return delegateNode->second;
+    return taskExecutorNode->second;
 }
 
-void JsBackendTimerModule::AddDelegate(NativeEngine* engine, const RefPtr<BackendDelegate>& delegate)
+void JsBackendTimerModule::AddTaskExecutor(NativeEngine* engine, const RefPtr<TaskExecutor>& taskExecutor)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    delegateMap_[engine] = delegate;
+    taskExecutorMap_[engine] = taskExecutor;
 }
 
-void JsBackendTimerModule::InitTimerModule(NativeEngine* engine, const RefPtr<BackendDelegate>& delegate)
+void JsBackendTimerModule::InitTimerModule(NativeEngine* engine, const RefPtr<TaskExecutor>& taskExecutor)
 {
-    if (engine == nullptr || delegate == nullptr) {
-        LOGE("InitTimerModule failed with engine or delegate is nullptr.");
+    if (engine == nullptr || taskExecutor == nullptr) {
+        LOGE("InitTimerModule failed with engine or taskExecutor is nullptr.");
         return;
     }
 
-    AddDelegate(engine, delegate);
+    AddTaskExecutor(engine, taskExecutor);
 
     NativeObject* globalObject = ConvertNativeValueTo<NativeObject>(engine->GetGlobal());
     if (!globalObject) {

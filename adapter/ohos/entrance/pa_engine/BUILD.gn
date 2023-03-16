@@ -57,10 +57,7 @@ template("pa_backend") {
       "samgr:samgr_proxy",
     ]
 
-    sources = [
-      "backend_delegate_impl.cpp",
-      "pa_backend.cpp",
-    ]
+    sources = [ "pa_backend.cpp" ]
 
     sources += [ "engine/common/js_backend_engine_loader.cpp" ]
   }
