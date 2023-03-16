@@ -80,6 +80,9 @@ public:
     bool SetAccessorProperty(shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue> &name,
                              const shared_ptr<JsValue> &getter, const shared_ptr<JsValue> &setter) override;
 
+    bool HasProperty(shared_ptr<JsRuntime> runtime, const std::string &name) override;
+    bool HasProperty(shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue> &name) override;
+
     int32_t GetArrayLength(shared_ptr<JsRuntime> runtime) override;
     shared_ptr<JsValue> GetElement(shared_ptr<JsRuntime> runtime, int32_t idx) override;
     std::string GetJsonString(const shared_ptr<JsRuntime>& runtime) override;
