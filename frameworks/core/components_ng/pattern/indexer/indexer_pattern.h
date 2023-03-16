@@ -152,6 +152,7 @@ private:
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
     int32_t lastSelectProp_ = -1;
+    int32_t popupClickedIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
