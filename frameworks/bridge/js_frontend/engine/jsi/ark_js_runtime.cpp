@@ -50,8 +50,8 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
     option.SetEnableAsmInterpreter(SystemProperties::GetAsmInterpreterEnabled());
     option.SetAsmOpcodeDisableRange(SystemProperties::GetAsmOpcodeDisableRange());
-    LOGI("Initialize ark properties = %{public}d, bundlename = %{public}s",
-        SystemProperties::GetArkProperties(), SystemProperties::GetArkBundleName().c_str());
+    LOGI("Initialize ark properties = %{public}d, bundlename = %{public}s", SystemProperties::GetArkProperties(),
+        SystemProperties::GetArkBundleName().c_str());
 #endif
     const int64_t poolSize = 0x10000000; // 256M
     option.SetGcPoolSize(poolSize);
@@ -118,27 +118,22 @@ bool ArkJSRuntime::StartDebugger()
     return ret;
 }
 
-#if defined(PREVIEW)
-bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename)
+bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const std::string& filename)
 {
+#if defined(PREVIEW)
     return JSNApi::ExecuteModuleBuffer(vm_, data, size, filename);
-}
+#else
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    bool ret = JSNApi::ExecuteModuleBuffer(vm_, data, size, filename);
+    HandleUncaughtException();
+    return ret;
 #endif
+}
 
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
     return NewUndefined();
-}
-
-bool ArkJSRuntime::ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath)
-{
-    JSExecutionScope executionScope(vm_);
-    LocalScope scope(vm_);
-    bool ret = JSNApi::ExecuteModuleBuffer(vm_, buffer, size, filePath);
-    LOGI("ArkJSRuntime::EvaluateJsCode after JSNApi::Execute %{public}p, filePath = %{public}s",
-        this, filePath.c_str());
-    HandleUncaughtException();
-    return ret;
 }
 
 bool ArkJSRuntime::EvaluateJsCode(const uint8_t* buffer, int32_t size, const std::string& filePath, bool needUpdate)

@@ -65,8 +65,7 @@ group("pattern_unittest") {
     "relative_container:relative_container_pattern_test_ng",
     "scroll:scroll_unit_test",
     "scroll_bar:scroll_bar_unit_test",
-
-    # "search:search_pattern_test_ng",
+    "search:search_pattern_test_ng",
     "select:select_pattern_test_ng",
     "shape:shape_pattern_unit_test",
     "side_bar:side_bar_pattern_test_ng",
@@ -76,7 +75,7 @@ group("pattern_unittest") {
     "stage:stage_pattern_test_ng",
     "stepper:stepper_pattern_test_ng",
     "swiper:swiper_pattern_test_ng",
-    "tabs:tab_bar_pattern_test_ng",
+    "tabs:tabs_model_test_ng",
     "tabs:tabs_pattern_test_ng",
     "text:text_pattern_test_ng",
     "text_clock:text_clock_pattern_unit_test",

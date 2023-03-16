@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const int DEFAULT_MAXLINES = 1;
+constexpr int DEFAULT_MAXLINES = 1;
 } // namespace
 
 void TabContentNode::OnAttachToMainTree()

@@ -45,8 +45,6 @@ struct TabsItemDivider final {
         if (!tabTheme) {
             return;
         }
-        startMargin = tabTheme->GetDividerMargin();
-        endMargin = tabTheme->GetDividerMargin();
         color = tabTheme->GetDividerColor();
     }
     bool operator==(const TabsItemDivider& itemDivider) const

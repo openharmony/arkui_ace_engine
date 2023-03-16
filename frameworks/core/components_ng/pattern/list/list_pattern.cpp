@@ -64,11 +64,11 @@ void ListPattern::OnModifyDone()
     if (!GetScrollableEvent()) {
         InitScrollableEvent();
     }
-
-    SetEdgeEffect(listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING));
+    auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    SetEdgeEffect(edgeEffect);
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
     SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF));
-    SetChainAnimation(listLayoutProperty->GetChainAnimation().value_or(false));
+    SetChainAnimation(edgeEffect == EdgeEffect::SPRING && listLayoutProperty->GetChainAnimation().value_or(false));
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
@@ -534,36 +534,39 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
         ScrollPage(true);
         return true;
     }
-    if (event.IsDirectionalKey()) {
-        return HandleDirectionKey(event.code);
-    }
-    return false;
+    return HandleDirectionKey(event);
 }
 
-bool ListPattern::HandleDirectionKey(KeyCode code)
+bool ListPattern::HandleDirectionKey(const KeyEvent& event)
 {
-    if ((GetAxis() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_UP) ||
-        (GetAxis() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_LEFT)) {
+    if ((GetAxis() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP) ||
+        (GetAxis() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
+        (event.IsShiftWith(KeyCode::KEY_TAB))) {
         auto nextIndex = std::clamp(scrollIndex_ - 1, 0, maxListItemIndex_);
         if (nextIndex == scrollIndex_) {
             return false;
         }
+        if (scrollIndex_ == startIndex_) {
+            LOGD("Scroll to previous index: %{public}d", nextIndex);
+            // Need to update: current selection
+            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_TOP);
+        }
         scrollIndex_ = nextIndex;
-        LOGD("Scroll to next index: %{public}d", scrollIndex_);
-        // Need to update: current selection
-        ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_TOP);
         return false;
     }
-    if ((GetAxis() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_DOWN) ||
-        (GetAxis() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_RIGHT)) {
+    if ((GetAxis() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN) ||
+        (GetAxis() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
+        (event.code == KeyCode::KEY_TAB)) {
         auto nextIndex = std::clamp(scrollIndex_ + 1, 0, maxListItemIndex_);
         if (nextIndex == scrollIndex_) {
             return false;
         }
+        if (scrollIndex_ == endIndex_) {
+            LOGD("Scroll to next index: %{public}d", scrollIndex_);
+            // Need to update: current selection
+            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_BUTTON);
+        }
         scrollIndex_ = nextIndex;
-        LOGD("Scroll to previous index: %{public}d", scrollIndex_);
-        // Need to update: current selection
-        ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
         return false;
     }
     return false;
@@ -717,7 +720,7 @@ void ListPattern::ProcessDragStart(float startPosition)
     CHECK_NULL_VOID(chainAnimation_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto globalOffset = host->GetOffsetRelativeToWindow();
+    auto globalOffset = host->GetTransformRelativeOffset();
     int32_t index = -1;
     auto offset = startPosition - GetMainAxisOffset(globalOffset, GetAxis());
     for (auto & pos : itemPosition_) {

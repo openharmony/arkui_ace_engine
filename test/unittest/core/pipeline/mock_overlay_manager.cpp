@@ -80,4 +80,20 @@ bool OverlayManager::RemoveOverlay()
 {
     return removeOverlayFlag;
 }
+
+void OverlayManager::EraseIndexerPopup(int32_t targetId) {}
+
+void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode)
+{
+    customPopupMap_[targetId] = customNode;
+}
+
+RefPtr<FrameNode> OverlayManager::GetIndexerPopup(int32_t targetId)
+{
+    auto it = customPopupMap_.find(targetId);
+    if (it != customPopupMap_.end()) {
+        return customPopupMap_[targetId];
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

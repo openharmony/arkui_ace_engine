@@ -223,6 +223,9 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSDatePicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSDatePicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
+    JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
+    JSClass<JSDatePicker>::StaticMethod("selectedTextStyle", &JSDatePicker::SetSelectedTextStyle);
     JSClass<JSDatePicker>::Inherit<JSViewAbstract>();
     JSClass<JSDatePicker>::Bind(globalObj);
 }
@@ -272,59 +275,17 @@ void JSDatePicker::ParseTextProperties(const JSRef<JSObject>& paramObj, NG::Pick
 
     if (!disappearProperty->IsNull() && disappearProperty->IsObject()) {
         JSRef<JSObject> disappearObj = JSRef<JSObject>::Cast(disappearProperty);
-        NG::PickerTextStyle disappearTextStyle;
-        JSDatePicker::ParseTextStyle(disappearObj, disappearTextStyle);
-
-        if (disappearTextStyle.fontSize.has_value() && disappearTextStyle.fontSize->IsValid()) {
-            result.disappearFontSize_ = disappearTextStyle.fontSize.value();
-            result.hasValueFlag |= NG::FLAG_DISAPPEAR_FONTSIZE;
-        }
-        if (disappearTextStyle.textColor) {
-            result.disappearColor_ = disappearTextStyle.textColor.value();
-            result.hasValueFlag |= NG::FLAG_DISAPPEAR_COLOR;
-        }
-        if (disappearTextStyle.fontWeight) {
-            result.disappearWeight_ = disappearTextStyle.fontWeight.value();
-            result.hasValueFlag |= NG::FLAG_DISAPPEAR_WEIGHT;
-        }
+        JSDatePicker::ParseTextStyle(disappearObj, result.disappearTextStyle_);
     }
 
     if (!normalProperty->IsNull() && normalProperty->IsObject()) {
         JSRef<JSObject> noramlObj = JSRef<JSObject>::Cast(normalProperty);
-        NG::PickerTextStyle textStyle;
-        JSDatePicker::ParseTextStyle(noramlObj, textStyle);
-
-        if (textStyle.fontSize.has_value() && textStyle.fontSize->IsValid()) {
-            result.fontSize_ = textStyle.fontSize.value();
-            result.hasValueFlag |= NG::FLAG_FONTSIZE;
-        }
-        if (textStyle.textColor) {
-            result.color_ = textStyle.textColor.value();
-            result.hasValueFlag |= NG::FLAG_COLOR;
-        }
-        if (textStyle.fontWeight) {
-            result.weight_ = textStyle.fontWeight.value();
-            result.hasValueFlag |= NG::FLAG_WEIGHT;
-        }
+        JSDatePicker::ParseTextStyle(noramlObj, result.normalTextStyle_);
     }
 
     if (!selectedProperty->IsNull() && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
-        NG::PickerTextStyle selectedTextStyle;
-        JSDatePicker::ParseTextStyle(selectedObj, selectedTextStyle);
-
-        if (selectedTextStyle.fontSize.has_value() && selectedTextStyle.fontSize->IsValid()) {
-            result.selectedFontSize_ = selectedTextStyle.fontSize.value();
-            result.hasValueFlag |= NG::FLAG_SELECTED_FONTSIZE;
-        }
-        if (selectedTextStyle.textColor) {
-            result.selectedColor_ = selectedTextStyle.textColor.value();
-            result.hasValueFlag |= NG::FLAG_SELECTED_COLOR;
-        }
-        if (selectedTextStyle.fontWeight) {
-            result.selectedWeight_ = selectedTextStyle.fontWeight.value();
-            result.hasValueFlag |= NG::FLAG_SELECTED_WEIGHT;
-        }
+        JSDatePicker::ParseTextStyle(selectedObj, result.selectedTextStyle_);
     }
 }
 
@@ -366,6 +327,55 @@ void JSDatePicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTex
         textStyle.fontWeight = ConvertStrToFontWeight(weight);
     }
 }
+
+void JSDatePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
+{
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("datePicker Theme is null");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSDatePicker::ParseTextStyle(info[0], textStyle);
+    }
+    DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+}
+
+void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
+{
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("datePicker Theme is null");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSDatePicker::ParseTextStyle(info[0], textStyle);
+    }
+    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+}
+
+void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
+{
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("datePicker Theme is null");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSDatePicker::ParseTextStyle(info[0], textStyle);
+    }
+    DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+}
+
 void JSDatePicker::OnChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsFunction()) {
@@ -493,6 +503,34 @@ void JSDatePicker::CreateDatePicker(const JSRef<JSObject>& paramObj)
     if (selectedDate->IsObject()) {
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
+    SetDefaultAttributes();
+}
+
+void JSDatePicker::SetDefaultAttributes()
+{
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("datePicker Theme is null");
+        return;
+    }
+    NG::PickerTextStyle textStyle;
+    auto selectedStyle = theme->GetOptionStyle(true, false);
+    textStyle.textColor = selectedStyle.GetTextColor();
+    textStyle.fontSize = selectedStyle.GetFontSize();
+    textStyle.fontWeight = selectedStyle.GetFontWeight();
+    DatePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+
+    auto disappearStyle = theme->GetDisappearOptionStyle();
+    textStyle.textColor = disappearStyle.GetTextColor();
+    textStyle.fontSize = disappearStyle.GetFontSize();
+    textStyle.fontWeight = disappearStyle.GetFontWeight();
+    DatePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+
+    auto normalStyle = theme->GetOptionStyle(false, false);
+    textStyle.textColor = normalStyle.GetTextColor();
+    textStyle.fontSize = normalStyle.GetFontSize();
+    textStyle.fontWeight = normalStyle.GetFontWeight();
+    DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
 void JSDatePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
@@ -785,38 +823,50 @@ void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
 
 void JSTimePicker::SetDisappearTextStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("timePicker Theme is null");
         return;
     }
     NG::PickerTextStyle textStyle;
-    JSDatePicker::ParseTextStyle(info[0], textStyle);
-
-    TimePickerModel::GetInstance()->SetDisappearTextStyle(textStyle);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSDatePicker::ParseTextStyle(info[0], textStyle);
+    }
+    TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 }
 
 void JSTimePicker::SetTextStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("timePicker Theme is null");
         return;
     }
     NG::PickerTextStyle textStyle;
-    JSDatePicker::ParseTextStyle(info[0], textStyle);
-
-    TimePickerModel::GetInstance()->SetNormalTextStyle(textStyle);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSDatePicker::ParseTextStyle(info[0], textStyle);
+    }
+    TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
 void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    auto theme = GetTheme<PickerTheme>();
+    if (!theme) {
+        LOGE("timePicker Theme is null");
         return;
     }
     NG::PickerTextStyle textStyle;
-    JSDatePicker::ParseTextStyle(info[0], textStyle);
-
-    TimePickerModel::GetInstance()->SetSelectedTextStyle(textStyle);
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("The arg is wrong, it is supposed to have at least 1 argument");
+    } else {
+        JSDatePicker::ParseTextStyle(info[0], textStyle);
+    }
+    TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
 void JSTimePicker::CreateTimePicker(const JSRef<JSObject>& paramObj)
@@ -838,7 +888,7 @@ void JSTimePicker::SetDefaultAttributes()
 {
     auto theme = GetTheme<PickerTheme>();
     if (!theme) {
-        LOGE("datePicker Theme is null");
+        LOGE("timePicker Theme is null");
         return;
     }
     NG::PickerTextStyle textStyle;
@@ -846,19 +896,19 @@ void JSTimePicker::SetDefaultAttributes()
     textStyle.textColor = selectedStyle.GetTextColor();
     textStyle.fontSize = selectedStyle.GetFontSize();
     textStyle.fontWeight = selectedStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetSelectedTextStyle(textStyle);
+    TimePickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 
     auto disappearStyle = theme->GetDisappearOptionStyle();
     textStyle.textColor = disappearStyle.GetTextColor();
     textStyle.fontSize = disappearStyle.GetFontSize();
     textStyle.fontWeight = disappearStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetDisappearTextStyle(textStyle);
+    TimePickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
 
     auto normalStyle = theme->GetOptionStyle(false, false);
     textStyle.textColor = normalStyle.GetTextColor();
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
-    TimePickerModel::GetInstance()->SetNormalTextStyle(textStyle);
+    TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
 PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal)

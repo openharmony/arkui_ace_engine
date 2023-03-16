@@ -21,7 +21,6 @@
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/radio/radio_modifier.h"
 #include "core/components_ng/pattern/radio/radio_paint_property.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 

@@ -78,10 +78,10 @@ public:
         paintConfig_ = std::make_unique<ImagePaintConfig>(config);
     }
 
-    ImagePaintConfig& GetPaintConfig()
+    inline ImagePaintConfig& GetPaintConfig()
     {
         if (!paintConfig_) {
-            LOGI("image paint config is null");
+            LOGW("image paint config is null");
         }
         return *paintConfig_;
     }

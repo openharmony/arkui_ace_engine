@@ -97,9 +97,9 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    auto tabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(1);
-    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(2);
+    auto tabBarWrapper = layoutWrapper->GetOrCreateChildByIndex(TAB_BAR_INDEX);
+    auto dividerWrapper = layoutWrapper->GetOrCreateChildByIndex(DIVIDER_INDEX);
+    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(SWIPER_INDEX);
     if (!tabBarWrapper || !dividerWrapper || !swiperWrapper) {
         return;
     }
@@ -116,7 +116,7 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 }
 
 std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(LayoutWrapper* layoutWrapper,
-    const RefPtr<LayoutWrapper>& tabBarWrapper, SizeF frameSize) const
+    const RefPtr<LayoutWrapper>& tabBarWrapper, const SizeF& frameSize) const
 {
     std::vector<OffsetF> offsetList;
     OffsetF tabBarOffset;
@@ -194,7 +194,7 @@ TabsItemDivider TabsLayoutAlgorithm::GetDivider(LayoutWrapper* layoutWrapper) co
 }
 
 float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layoutProperty,
-    const RefPtr<LayoutWrapper>& dividerWrapper, SizeF idealSize)
+    const RefPtr<LayoutWrapper>& dividerWrapper, const SizeF& idealSize)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
     

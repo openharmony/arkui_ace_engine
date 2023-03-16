@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,15 +33,26 @@ public:
         changeEvent_ = std::move(changeEvent);
     }
 
-    void FireChangeEvent(float value, int32_t mode) const
+    void FireChangeEvent(float value, int32_t mode)
     {
-        if (changeEvent_) {
-            changeEvent_(value, mode);
-        }
+        CHECK_NULL_VOID(changeEvent_);
+        changeEvent_(value, mode);
+        SetValue(value);
+    }
+
+    void SetValue(float value)
+    {
+        value_ = value;
+    }
+
+    float GetValue() const
+    {
+        return value_;
     }
 
 private:
     SliderOnChangeEvent changeEvent_;
+    float value_ = .0f;
     ACE_DISALLOW_COPY_AND_MOVE(SliderEventHub);
 };
 

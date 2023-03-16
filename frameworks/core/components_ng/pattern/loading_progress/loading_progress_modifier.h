@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class LoadingProgressModifier : public ContentModifier {

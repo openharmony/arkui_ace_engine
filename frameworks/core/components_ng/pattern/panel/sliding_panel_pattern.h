@@ -109,7 +109,7 @@ private:
     bool isAnimating_ = false;
     bool isFirstLayout_ = true;
 
-    PanelMode mode_ = PanelMode::FULL;
+    std::optional<PanelMode> mode_;
     PanelMode previousMode_ = PanelMode::HALF;
     PanelType type_ = PanelType::FOLDABLE_BAR;
     float fullHalfBoundary_ = 0.0f;

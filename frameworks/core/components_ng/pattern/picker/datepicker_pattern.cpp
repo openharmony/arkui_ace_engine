@@ -141,7 +141,7 @@ void DatePickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
         if (iter != datePickerColumns_.end()) {
             auto datePickerColumnPattern = (*iter)->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
-            datePickerColumnPattern->FlushCurrentOptions();
+            datePickerColumnPattern->FlushCurrentOptions(isAdd, true, false);
         }
     }
 }

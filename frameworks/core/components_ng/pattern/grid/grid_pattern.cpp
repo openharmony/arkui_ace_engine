@@ -327,12 +327,41 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(eventhub, false);
     if (gridLayoutInfo_.startMainLineIndex_ != gridLayoutInfo.startMainLineIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+        FlushFocusOnScroll(gridLayoutInfo);
     }
     gridLayoutInfo_ = gridLayoutInfo;
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
 
     UpdateScrollBarOffset();
     return false;
+}
+
+void GridPattern::FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo)
+{
+    auto gridFrame = GetHost();
+    CHECK_NULL_VOID(gridFrame);
+    auto gridFocus = gridFrame->GetFocusHub();
+    CHECK_NULL_VOID(gridFocus);
+    if (!gridFocus->IsCurrentFocus()) {
+        return;
+    }
+    auto childFocusList = gridFocus->GetChildren();
+    for (const auto& childFocus : childFocusList) {
+        if (childFocus->IsCurrentFocus()) {
+            return;
+        }
+    }
+    int32_t curMainIndex = gridLayoutInfo.startMainLineIndex_;
+    if (gridLayoutInfo.gridMatrix_.find(curMainIndex) == gridLayoutInfo.gridMatrix_.end()) {
+        LOGE("Can not find main index: %{public}d", curMainIndex);
+        return;
+    }
+    auto curCrossNum = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.at(curMainIndex).size());
+    auto weakChild = SearchFocusableChildInCross(curMainIndex, 0, curCrossNum);
+    auto child = weakChild.Upgrade();
+    if (child) {
+        child->RequestFocusImmediately();
+    }
 }
 
 std::pair<FocusStep, FocusStep> GridPattern::GetFocusSteps(

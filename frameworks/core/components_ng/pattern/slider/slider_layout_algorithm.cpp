@@ -101,6 +101,8 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<SliderPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
     auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -120,12 +122,13 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto borderBlank = std::max(trackThickness_, blockSize + BlockShadowWidth / HALF);
     auto sliderLength = length >= borderBlank ? length - borderBlank : 1;
     borderBlank = (length - sliderLength) * HALF;
+    auto selectOffset = borderBlank + pattern->GetValueRatio() * sliderLength;
 
-    CalculateBlockOffset(layoutWrapper, selfSize, borderBlank, axis, reverse);
+    CalculateBlockOffset(layoutWrapper, selfSize, selectOffset, axis, reverse);
 }
 
 void SliderLayoutAlgorithm::CalculateBlockOffset(
-    LayoutWrapper* layoutWrapper, const SizeF& selfSize, float borderBlank, Axis axis, bool reverse)
+    LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
@@ -146,19 +149,19 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
     if (pattern->GetBlockCenter() == OffsetF()) {
         if (!reverse) {
             if (axis == Axis::HORIZONTAL) {
-                circleCenter.SetX(borderBlank);
+                circleCenter.SetX(selectOffset);
                 circleCenter.SetY(selfSize.Height() * HALF);
             } else {
                 circleCenter.SetX(selfSize.Width() * HALF);
-                circleCenter.SetY(borderBlank);
+                circleCenter.SetY(selectOffset);
             }
         } else {
             if (axis == Axis::HORIZONTAL) {
-                circleCenter.SetX(selfSize.Width() - borderBlank);
+                circleCenter.SetX(selfSize.Width() - selectOffset);
                 circleCenter.SetY(selfSize.Height() * HALF);
             } else {
                 circleCenter.SetX(selfSize.Width() * HALF);
-                circleCenter.SetY(selfSize.Height() - borderBlank);
+                circleCenter.SetY(selfSize.Height() - selectOffset);
             }
         }
     } else {

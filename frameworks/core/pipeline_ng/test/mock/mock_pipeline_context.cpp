@@ -44,7 +44,7 @@ namespace {
 constexpr int32_t NODE_ID = 143;
 } // namespace
 
-static RefPtr<PipelineContext> pipelineContext_ = nullptr;
+static RefPtr<PipelineContext> pipelineContext = nullptr;
 // static method
 float PipelineContext::GetCurrentRootWidth()
 {
@@ -58,10 +58,10 @@ float PipelineContext::GetCurrentRootHeight()
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
 {
-    if (!pipelineContext_) {
-        pipelineContext_ = AceType::MakeRefPtr<PipelineContext>();
+    if (!pipelineContext) {
+        pipelineContext = AceType::MakeRefPtr<PipelineContext>();
     }
-    return pipelineContext_;
+    return pipelineContext;
 }
 
 // non-static method
@@ -79,7 +79,10 @@ void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action) 
 
 void PipelineContext::OnIdle(int64_t deadline) {}
 
-void PipelineContext::Destroy() {}
+void PipelineContext::Destroy()
+{
+    pipelineContext = nullptr;
+}
 
 void PipelineContext::OnShow() {}
 
@@ -219,8 +222,12 @@ const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
 
 const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
 {
+    if (!overlayManager_) {
+        overlayManager_ = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    }
     return overlayManager_;
 }
+
 void PipelineContext::AddPredictTask(PredictTask&& task) {}
 
 void PipelineContext::FlushPipelineImmediately() {}

@@ -75,6 +75,10 @@ SizeF ShapeContainerLayoutAlgorithm::GetChildrenSize(LayoutWrapper* layoutWrappe
     float maxWidth = 0.0f;
     float maxHeight = 0.0f;
 
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(layoutConstraint);
+    }
     // reference: BoxLayoutAlgorithm::PerformMeasureSelfWithChildList()
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();

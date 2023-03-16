@@ -104,8 +104,10 @@ void JSList::Create(const JSCallbackInfo& args)
     ListModel::GetInstance()->Create();
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        Dimension space;
-        if (ConvertFromJSValue(obj->GetProperty("space"), space) && space.IsValid()) {
+        JSRef<JSVal> spaceValue = obj->GetProperty("space");
+        if (!spaceValue->IsNull()) {
+            Dimension space;
+            ConvertFromJSValue(spaceValue, space);
             ListModel::GetInstance()->SetSpace(space);
         }
         int32_t initialIndex = 0;

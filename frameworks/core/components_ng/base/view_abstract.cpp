@@ -30,7 +30,6 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"

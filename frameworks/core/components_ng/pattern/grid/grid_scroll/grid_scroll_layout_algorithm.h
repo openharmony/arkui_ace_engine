@@ -93,6 +93,8 @@ private:
     Axis axis_ = Axis::VERTICAL;
 
     float mainGap_ = 0;
+    float crossGap_ = 0;
+    float crossPaddingOffset_ = 0;
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;

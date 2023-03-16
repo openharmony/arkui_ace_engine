@@ -33,6 +33,7 @@ class ACE_EXPORT SubContainer : public virtual AceType {
 
 public:
     using OnFormAcquiredCallback = std::function<void(const size_t)>;
+    using OnFormLoadCallback = std::function<void()>;
 
     explicit SubContainer(const WeakPtr<PipelineBase>& context) : outSidePipelineContext_(context) {}
     SubContainer(const WeakPtr<PipelineBase>& context, int32_t instanceId)
@@ -135,6 +136,11 @@ public:
         nodeId_ = static_cast<int64_t>(nodeId);
     }
 
+    void SetFormLoadCallback(const OnFormLoadCallback&& callback)
+    {
+        onFormLoadCallback_ = std::move(callback);
+    }
+
 private:
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -152,6 +158,7 @@ private:
     RefPtr<Component> formComponent_;
     WeakPtr<Element> formElement_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
+    OnFormLoadCallback onFormLoadCallback_;
     WindowConfig cardWindowConfig_;
 
     double surfaceWidth_ = 1.0f;

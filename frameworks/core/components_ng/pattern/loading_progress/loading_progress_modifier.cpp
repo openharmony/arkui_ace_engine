@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_modifier.h"
 #include <algorithm>
 
+#include "base/geometry/arc.h"
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -27,7 +28,6 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/paint.h"
 
 namespace OHOS::Ace::NG {
 namespace {

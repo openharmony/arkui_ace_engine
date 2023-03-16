@@ -100,7 +100,6 @@ public:
                 theme->tabBarDefaultWidth_ = pattern->GetAttr<Dimension>("tab_bar_default_width", 0.0_vp);
                 theme->subTabBarMinWidth_ = pattern->GetAttr<Dimension>("sub_tab_bar_min_width", 0.0_vp);
                 theme->dividerColor_ = pattern->GetAttr<Color>("divider_color", Color::BLACK);
-                theme->dividerMargin_ = pattern->GetAttr<Dimension>("divider_margin", 0.0_vp);
                 theme->tabBarShadowMargin_ = pattern->GetAttr<Dimension>("tab_bar_shadow_margin", 0.0_vp);
                 theme->tabBarGradientWidth_ = pattern->GetAttr<Dimension>("tab_bar_gradient_width", 0.0_vp);
             } else {
@@ -307,11 +306,6 @@ public:
         return dividerColor_;
     }
 
-    const Dimension& GetDividerMargin() const
-    {
-        return dividerMargin_;
-    }
-
     const Dimension& GetTabBarShadowMargin() const
     {
         return tabBarShadowMargin_;
@@ -364,7 +358,6 @@ private:
     Dimension tabBarDefaultWidth_;
     Dimension subTabBarMinWidth_;
     Color dividerColor_;
-    Dimension dividerMargin_;
     Dimension tabBarShadowMargin_;
     Dimension tabBarGradientWidth_;
 };

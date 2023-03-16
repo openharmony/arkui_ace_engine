@@ -30,6 +30,9 @@ public:
 
 
     static RefPtr<FrameNode> CreateSelectOption(const std::string& value, const std::string& icon, int32_t index);
+
+    static RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& parent);
+    static RefPtr<FrameNode> CreateIcon(const std::string& icon, const RefPtr<FrameNode>& parent);
 };
 
 } // namespace OHOS::Ace::NG

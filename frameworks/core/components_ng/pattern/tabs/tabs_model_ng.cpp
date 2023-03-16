@@ -280,12 +280,12 @@ void TabsModelNG::Pop()
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildren().front());
     CHECK_NULL_VOID(tabBarNode);
 
-    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     tabBarNode->MarkModifyDone();
+    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 
-    auto begin = tabsNode->GetChildren().begin();
-    auto dividerNode = AceType::DynamicCast<FrameNode>(*(++begin));
+    auto childNode = tabsNode->GetChildAtIndex(1);
+    CHECK_NULL_VOID(childNode);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(childNode);
     auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -125,5 +126,8 @@ void SliderModelNG::SetOnChange(SliderOnChangeEvent&& eventOnChange)
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(eventOnChange));
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    eventHub->SetValue(paintProperty->GetValueValue(.0f));
 }
 } // namespace OHOS::Ace::NG

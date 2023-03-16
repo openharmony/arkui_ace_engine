@@ -641,6 +641,11 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldManager && textfieldManager->OnBackPressed()) {
+        return true;
+    }
+
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
@@ -983,7 +988,9 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
     eventManager_->SetPressedKeyCodes(event.pressedCodes);
     CHECK_NULL_RETURN(eventManager_, false);
-    eventManager_->DispatchKeyboardShortcut(event);
+    if (event.action == KeyAction::DOWN) {
+        eventManager_->DispatchKeyboardShortcut(event);
+    }
     // Need update while key tab pressed
     if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
         (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {

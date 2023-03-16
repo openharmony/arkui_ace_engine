@@ -484,7 +484,15 @@ void JSSelect::SelectedOptionFontColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        return;
+        if (info[0]->IsNull() || info[0]->IsUndefined()) {
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID_NOLOG(pipeline);
+            auto theme = pipeline->GetTheme<SelectTheme>();
+            CHECK_NULL_VOID_NOLOG(theme);
+            textColor = theme->GetSelectedColorText();
+        } else {
+            return;
+        }
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -754,6 +762,10 @@ void JSSelect::Height(const JSRef<JSVal>& jsValue)
 
 void JSSelect::JsSize(const JSCallbackInfo& info)
 {
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::JsSize(info);
+        return;
+    }
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;

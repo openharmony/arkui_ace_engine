@@ -469,8 +469,6 @@ void SliderContentModifier::DrawBlockShape(DrawingContext& context)
 void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr<Circle>& circle)
 {
     auto blockSize = blockSize_->Get();
-    shapeWidth_->Set(circle->GetWidth().ConvertToPxWithSize(blockSize.Width()));
-    shapeHeight_->Set(circle->GetHeight().ConvertToPxWithSize(blockSize.Height()));
     auto shapeWidth = shapeWidth_->Get();
     auto shapeHeight = shapeHeight_->Get();
 
@@ -489,7 +487,6 @@ void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr
     float height = std::min(shapeHeight, blockSize.Height());
     float radius = std::min(width, height) * HALF;
     if (circle->GetRadius().IsValid()) {
-        circleRadius_->Set(circle->GetRadius().ConvertToPxWithSize(radius));
         radius = circleRadius_->Get();
     }
 
@@ -502,8 +499,6 @@ void SliderContentModifier::DrawBlockShapeCircle(DrawingContext& context, RefPtr
 void SliderContentModifier::DrawBlockShapeEllipse(DrawingContext& context, RefPtr<Ellipse>& ellipse)
 {
     auto blockSize = blockSize_->Get();
-    shapeWidth_->Set(ellipse->GetWidth().ConvertToPxWithSize(blockSize.Width()));
-    shapeHeight_->Set(ellipse->GetHeight().ConvertToPxWithSize(blockSize.Height()));
     auto shapeWidth = shapeWidth_->Get();
     auto shapeHeight = shapeHeight_->Get();
 
@@ -524,8 +519,6 @@ void SliderContentModifier::DrawBlockShapeEllipse(DrawingContext& context, RefPt
     float x = blockCenter.GetX() - width * HALF;
     float y = blockCenter.GetY() - height * HALF;
     if (ellipse->GetRadiusX().IsValid() && ellipse->GetRadiusY().IsValid()) {
-        ellipseRadiusX_->Set(ellipse->GetRadiusX().ConvertToPxWithSize(width * HALF));
-        ellipseRadiusY_->Set(ellipse->GetRadiusY().ConvertToPxWithSize(height * HALF));
         float radiusX = ellipseRadiusX_->Get();
         float radiusY = ellipseRadiusY_->Get();
         x = blockCenter.GetX() - radiusX;
@@ -562,8 +555,6 @@ void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<P
 void SliderContentModifier::DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect)
 {
     auto blockSize = blockSize_->Get();
-    shapeWidth_->Set(rect->GetWidth().ConvertToPxWithSize(blockSize.Width()));
-    shapeHeight_->Set(rect->GetHeight().ConvertToPxWithSize(blockSize.Height()));
     auto shapeWidth = shapeWidth_->Get();
     auto shapeHeight = shapeHeight_->Get();
 
@@ -590,26 +581,18 @@ void SliderContentModifier::DrawBlockShapeRect(DrawingContext& context, RefPtr<S
     rsRect.SetBottom(blockCenter.GetY() + height * HALF);
     roundRect.SetRect(rsRect);
 
-    rectTopLeftRadiusX_->Set(rect->GetTopLeftRadius().GetX().ConvertToPxWithSize(width * HALF));
-    rectTopLeftRadiusY_->Set(rect->GetTopLeftRadius().GetY().ConvertToPxWithSize(height * HALF));
     float radiusX = rectTopLeftRadiusX_->Get();
     float radiusY = rectTopLeftRadiusY_->Get();
     roundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, radiusX, radiusY);
 
-    rectTopRightRadiusX_->Set(rect->GetTopRightRadius().GetX().ConvertToPxWithSize(width * HALF));
-    rectTopRightRadiusY_->Set(rect->GetTopRightRadius().GetY().ConvertToPxWithSize(height * HALF));
     radiusX = rectTopRightRadiusX_->Get();
     radiusY = rectTopRightRadiusY_->Get();
     roundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, radiusX, radiusY);
 
-    rectBottomLeftRadiusX_->Set(rect->GetBottomLeftRadius().GetX().ConvertToPxWithSize(width * HALF));
-    rectBottomLeftRadiusY_->Set(rect->GetBottomLeftRadius().GetY().ConvertToPxWithSize(height * HALF));
     radiusX = rectBottomLeftRadiusX_->Get();
     radiusY = rectBottomLeftRadiusY_->Get();
     roundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, radiusX, radiusY);
 
-    rectBottomRightRadiusX_->Set(rect->GetBottomRightRadius().GetX().ConvertToPxWithSize(width * HALF));
-    rectBottomRightRadiusY_->Set(rect->GetBottomRightRadius().GetY().ConvertToPxWithSize(height * HALF));
     radiusX = rectBottomRightRadiusX_->Get();
     radiusY = rectBottomRightRadiusY_->Get();
     roundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, radiusX, radiusY);
@@ -617,5 +600,43 @@ void SliderContentModifier::DrawBlockShapeRect(DrawingContext& context, RefPtr<S
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
     canvas.DetachPen();
+}
+
+void SliderContentModifier::SetBlockShape(const RefPtr<BasicShape>& shape)
+{
+    shape_ = shape;
+    CHECK_NULL_VOID(shape_);
+    shapeWidth_->Set(shape_->GetWidth().ConvertToPx());
+    shapeHeight_->Set(shape_->GetHeight().ConvertToPx());
+    if (shape->GetBasicShapeType() == BasicShapeType::CIRCLE) {
+        auto circle = DynamicCast<Circle>(shape_);
+        CHECK_NULL_VOID(circle);
+        if (circle->GetRadius().IsValid()) {
+            circleRadius_->Set(circle->GetRadius().ConvertToPx());
+        } else {
+            circleRadius_->Set(std::min(shape_->GetWidth().ConvertToPx(), shape_->GetHeight().ConvertToPx()) * HALF);
+        }
+    } else if (shape->GetBasicShapeType() == BasicShapeType::ELLIPSE) {
+        auto ellipse = DynamicCast<Ellipse>(shape_);
+        CHECK_NULL_VOID(ellipse);
+        if (ellipse->GetRadiusX().IsValid() && ellipse->GetRadiusY().IsValid()) {
+            ellipseRadiusX_->Set(ellipse->GetRadiusX().ConvertToPx());
+            ellipseRadiusY_->Set(ellipse->GetRadiusY().ConvertToPx());
+        } else {
+            ellipseRadiusX_->Set(shape_->GetWidth().ConvertToPx() * HALF);
+            ellipseRadiusY_->Set(shape_->GetHeight().ConvertToPx() * HALF);
+        }
+    } else if (shape->GetBasicShapeType() == BasicShapeType::RECT) {
+        auto rect = DynamicCast<ShapeRect>(shape_);
+        CHECK_NULL_VOID(rect);
+        rectTopLeftRadiusX_->Set(rect->GetTopLeftRadius().GetX().ConvertToPx());
+        rectTopLeftRadiusY_->Set(rect->GetTopLeftRadius().GetY().ConvertToPx());
+        rectTopRightRadiusX_->Set(rect->GetTopRightRadius().GetX().ConvertToPx());
+        rectTopRightRadiusY_->Set(rect->GetTopRightRadius().GetY().ConvertToPx());
+        rectBottomLeftRadiusX_->Set(rect->GetBottomLeftRadius().GetX().ConvertToPx());
+        rectBottomLeftRadiusY_->Set(rect->GetBottomLeftRadius().GetY().ConvertToPx());
+        rectBottomRightRadiusX_->Set(rect->GetBottomRightRadius().GetX().ConvertToPx());
+        rectBottomRightRadiusY_->Set(rect->GetBottomRightRadius().GetY().ConvertToPx());
+    }
 }
 } // namespace OHOS::Ace::NG

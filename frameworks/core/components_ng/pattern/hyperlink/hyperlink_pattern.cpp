@@ -20,6 +20,7 @@ void HyperlinkPattern::OnAttachToFrameNode() {}
 
 void HyperlinkPattern::OnModifyDone()
 {
+    TextPattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
@@ -34,9 +35,26 @@ void HyperlinkPattern::OnModifyDone()
     InitInputEvent(inputHub);
 }
 
+void HyperlinkPattern::LinkToAddress()
+{
+#if defined(PREVIEW)
+    LOGW("Unable to jump in preview.");
+    return;
+#else
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->HyperlinkStartAbility(address_);
+#endif
+}
+
 void HyperlinkPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    // Add click events here.
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& /* info */) {
+        auto hyperlinkPattern = weak.Upgrade();
+        CHECK_NULL_VOID(hyperlinkPattern);
+        hyperlinkPattern->LinkToAddress();
+    };
+    gestureHub->SetUserOnClick(std::move(clickCallback));
 }
 
 void HyperlinkPattern::InitInputEvent(const RefPtr<InputEventHub>& inputHub)
@@ -69,5 +87,10 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
+}
+
+void HyperlinkPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("address", address_.c_str());
 }
 } // namespace OHOS::Ace::NG

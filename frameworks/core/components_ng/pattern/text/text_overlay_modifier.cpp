@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 
+#include "core/components_ng/render/drawing.h"
+
 namespace OHOS::Ace::NG {
 TextOverlayModifier::TextOverlayModifier()
 {

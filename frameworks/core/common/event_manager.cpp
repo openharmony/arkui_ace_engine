@@ -682,10 +682,10 @@ void EventManager::AddKeyboardShortcutNode(const WeakPtr<NG::FrameNode>& node)
     while (iter != keyboardShortcutNode_.end()) {
         auto keyboardShortcutNode = (*iter).Upgrade();
         if (!keyboardShortcutNode) {
+            keyboardShortcutNode_.erase(iter++);
             continue;
         }
         if (keyboardShortcutNode->GetId() == frameNode->GetId()) {
-            keyboardShortcutNode_.erase(iter);
             return;
         }
         ++iter;
@@ -837,7 +837,7 @@ void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
             if (event.IsKey(leftKeyCode) || event.IsKey(rightKeyCode)) {
                 auto gestureEventHub = eventHub->GetGestureEventHub();
                 if (gestureEventHub && gestureEventHub->IsClickable()) {
-                    gestureEventHub->ActClick();
+                    gestureEventHub->KeyBoardShortCutClick(event, node);
                     LOGI("EventManager::DispatchKeyboardShortcut click done.");
                 }
             }
@@ -858,6 +858,7 @@ void EventManager::DelKeyboardShortcutNode(int32_t nodeId)
     while (iter != keyboardShortcutNode_.end()) {
         auto frameNode = (*iter).Upgrade();
         if (!frameNode) {
+            keyboardShortcutNode_.erase(iter++);
             continue;
         }
         if (frameNode->GetId() == nodeId) {

@@ -218,7 +218,7 @@ public:
     void SetSelectedMode(SelectedMode selectedMode, uint32_t position)
     {
         if (selectedModes_.size() == position) {
-            selectedModes_.push_back(selectedMode);
+            selectedModes_.emplace_back(selectedMode);
         } else {
             selectedModes_[position] = selectedMode;
         }
@@ -227,11 +227,21 @@ public:
     void SetIndicatorStyle(const IndicatorStyle& indicatorStyle, uint32_t position)
     {
         if (indicatorStyles_.size() == position) {
-            indicatorStyles_.push_back(indicatorStyle);
+            indicatorStyles_.emplace_back(indicatorStyle);
         } else {
             indicatorStyles_[position] = indicatorStyle;
         }
     }
+
+    void SetTabBarStyle(TabBarStyle tabBarStyle, uint32_t position)
+    {
+        if (tabBarStyles_.size() == position) {
+            tabBarStyles_.emplace_back(tabBarStyle);
+        } else {
+            tabBarStyles_[position] = tabBarStyle;
+        }
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -304,6 +314,7 @@ private:
     float currentIndicatorOffset_ = 0.0f;
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
+    std::vector<TabBarStyle> tabBarStyles_;
 
     RefPtr<TabBarModifier> tabBarModifier_;
     std::vector<bool> gradientRegions_ = {false, false, false, false};

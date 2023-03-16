@@ -99,8 +99,8 @@ void TabsPattern::OnUpdateShowDivider()
         return;
     }
 
-    auto begin = children.begin();
-    auto dividerNode = *(++begin);
+    auto dividerNode = host->GetChildAtIndex(1);
+    CHECK_NULL_VOID(dividerNode);
     if (dividerNode->GetTag() != V2::DIVIDER_ETS_TAG || !AceType::InstanceOf<FrameNode>(dividerNode)) {
         LOGE("OnUpdateShowDivider: Get divider failed.");
         return;

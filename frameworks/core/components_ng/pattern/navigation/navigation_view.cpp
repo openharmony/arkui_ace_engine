@@ -525,7 +525,7 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
     for (const auto& menuItem : menuItems) {
         ++count;
         if (needMoreButton && (count > mostMenuItemCount - 1)) {
-            params.push_back({ menuItem.text.value(), "", menuItem.action });
+            params.push_back({ menuItem.text.value(), menuItem.icon.value(), menuItem.action });
         } else {
             auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());

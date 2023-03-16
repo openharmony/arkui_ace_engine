@@ -34,9 +34,9 @@ public:
 
     ~TabBarModifier() override = default;
     
-    void SetIndicator(RectF indicator);
+    void SetIndicator(const RectF& indicator);
 
-    void SetIndicatorColor(LinearColor indicatorColor);
+    void SetIndicatorColor(const LinearColor& indicatorColor);
 
     void SetIndicatorWidth(float indicatorWidth);
 

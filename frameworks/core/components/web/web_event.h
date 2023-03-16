@@ -650,6 +650,23 @@ private:
     std::string data_;
 };
 
+class ACE_EXPORT LoadInterceptEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadInterceptEvent, BaseEventInfo);
+
+public:
+    explicit LoadInterceptEvent(const RefPtr<WebRequest>& request) :
+        BaseEventInfo("LoadInterceptEvent"), request_(request) {}
+    ~LoadInterceptEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
+};
+
 class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebGeolocationHideEvent, BaseEventInfo);
 

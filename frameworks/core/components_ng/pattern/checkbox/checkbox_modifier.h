@@ -26,8 +26,9 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
+
 namespace OHOS::Ace::NG {
 class CheckBoxModifier : public ContentModifier {
     DECLARE_ACE_TYPE(CheckBoxModifier, ContentModifier);
@@ -39,7 +40,7 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
-        RSCanvas canvas = context.canvas;
+        RSCanvas& canvas = context.canvas;
         PaintCheckBox(canvas, offset_->Get(), size_->Get());
     }
 
@@ -183,8 +184,8 @@ private:
     RefPtr<AnimatablePropertyFloat> strokeSize_;
     RefPtr<PropertyBool> isSelect_;
     RefPtr<PropertyBool> isHover_;
-    RefPtr<PropertyOffsetF> offset_;
-    RefPtr<PropertySizeF> size_;
+    RefPtr<AnimatablePropertyOffsetF> offset_;
+    RefPtr<AnimatablePropertySizeF> size_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CheckBoxModifier);
 };

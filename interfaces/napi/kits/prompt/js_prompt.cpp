@@ -45,26 +45,6 @@ napi_value GetReturnObject(napi_env env, std::string callbackString)
     return returnObj;
 }
 
-void GetNapiString(napi_env env, napi_value value, std::string& retStr)
-{
-    size_t ret = 0;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, value, &valueType);
-    if (valueType == napi_string) {
-        size_t valueLen = GetParamLen(value) + 1;
-        std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(valueLen);
-        napi_get_value_string_utf8(env, value, titleChar.get(), valueLen, &ret);
-        retStr = titleChar.get();
-    } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (ParseResourceParam(env, value, id, type, params)) {
-            ParseString(id, type, params, retStr);
-        }
-    }
-}
-
 static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -261,8 +241,16 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
-            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
-            GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString);
+            if (!GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString)) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                return nullptr;
+            }
+            if (!GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString)) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                return nullptr;
+            }
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -286,8 +274,16 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_get_named_property(env, buttonArray, "color", &colorNApi);
                     std::string textString;
                     std::string colorString;
-                    GetNapiString(env, textNApi, textString);
-                    GetNapiString(env, colorNApi, colorString);
+                    if (!GetNapiString(env, textNApi, textString)) {
+                        delete asyncContext;
+                        asyncContext = nullptr;
+                        return nullptr;
+                    }
+                    if (!GetNapiString(env, colorNApi, colorString)) {
+                        delete asyncContext;
+                        asyncContext = nullptr;
+                        return nullptr;
+                    }
                     ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
                     asyncContext->buttons.emplace_back(buttonInfo);
                 }
@@ -319,10 +315,6 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         if (asyncContext == nullptr) {
             return;
         }
-        if (!asyncContext->valid) {
-            LOGE("%{public}s, module exported object is invalid.", __func__);
-            return;
-        }
 
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
@@ -338,6 +330,27 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
                 PromptAsyncContext* asyncContext = (PromptAsyncContext*)work->data;
                 if (asyncContext == nullptr) {
+                    LOGE("%{public}s, asyncContext is nullptr.", __func__);
+                    delete work;
+                    work = nullptr;
+                    return;
+                }
+
+                if (!asyncContext->valid) {
+                    LOGE("%{public}s, module exported object is invalid.", __func__);
+                    delete asyncContext;
+                    delete work;
+                    work = nullptr;
+                    return;
+                }
+
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncContext->env, &scope);
+                if (scope == nullptr) {
+                    LOGE("%{public}s, open handle scope failed.", __func__);
+                    delete asyncContext;
+                    delete work;
+                    work = nullptr;
                     return;
                 }
 
@@ -377,6 +390,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
                 napi_delete_async_work(asyncContext->env, asyncContext->work);
+                napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
                 delete work;
                 work = nullptr;
@@ -392,8 +406,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     napi_wrap(env, thisVar, (void*)asyncContext, [](napi_env env, void* data, void* hint) {
         PromptAsyncContext* cbInfo = (PromptAsyncContext*)data;
         if (cbInfo != nullptr) {
+            LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
             cbInfo->valid = false;
-            delete cbInfo;
         }
     }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
@@ -519,7 +533,11 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
-            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
+            if (!GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString)) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                return nullptr;
+            }
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -624,10 +642,6 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         if (asyncContext == nullptr) {
             return;
         }
-        if (!asyncContext->valid) {
-            LOGE("%{public}s, module exported object is invalid.", __func__);
-            return;
-        }
 
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
@@ -643,8 +657,30 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
                 ShowActionMenuAsyncContext* asyncContext = (ShowActionMenuAsyncContext*)work->data;
                 if (asyncContext == nullptr) {
+                    LOGE("%{public}s, asyncContext is nullptr.", __func__);
+                    delete work;
+                    work = nullptr;
                     return;
                 }
+
+                if (!asyncContext->valid) {
+                    LOGE("%{public}s, module exported object is invalid.", __func__);
+                    delete asyncContext;
+                    delete work;
+                    work = nullptr;
+                    return;
+                }
+
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncContext->env, &scope);
+                if (scope == nullptr) {
+                    LOGE("%{public}s, open handle scope failed.", __func__);
+                    delete asyncContext;
+                    delete work;
+                    work = nullptr;
+                    return;
+                }
+
                 napi_value ret;
                 napi_value successIndex = nullptr;
                 napi_create_int32(asyncContext->env, asyncContext->successType, &successIndex);
@@ -681,6 +717,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
                 napi_delete_async_work(asyncContext->env, asyncContext->work);
+                napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
                 delete work;
                 work = nullptr;
@@ -696,8 +733,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     napi_wrap(env, thisVar, (void*)asyncContext, [](napi_env env, void* data, void* hint) {
         ShowActionMenuAsyncContext* cbInfo = (ShowActionMenuAsyncContext*)data;
         if (cbInfo != nullptr) {
+            LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
             cbInfo->valid = false;
-            delete cbInfo;
         }
     }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM

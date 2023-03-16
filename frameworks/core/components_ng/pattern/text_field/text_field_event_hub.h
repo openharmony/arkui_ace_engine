@@ -26,6 +26,12 @@
 namespace OHOS::Ace::NG {
 
 using ChangeEvent = std::function<void(const std::string, const std::string)>;
+using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
+using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
+using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
+using OnScrollStartEvent = std::function<void()>;
+using OnScrollStopEvent = std::function<void()>;
+using OnScrollIndexEvent = std::function<void(int32_t, int32_t)>;
 
 class TextFieldEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextFieldEventHub, EventHub)
@@ -125,7 +131,74 @@ public:
         }
     }
 
+    void SetOnScroll(OnScrollEvent&& onScroll)
+    {
+        onScrollEvent_ = std::move(onScroll);
+    }
+
+    const OnScrollEvent& GetOnScroll() const
+    {
+        return onScrollEvent_;
+    }
+
+    void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin)
+    {
+        onScrollBeginEvent_ = std::move(onScrollBegin);
+    }
+
+    const OnScrollBeginEvent& GetOnScrollBegin() const
+    {
+        return onScrollBeginEvent_;
+    }
+
+    void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin)
+    {
+        onScrollFrameBeginEvent_ = std::move(onScrollFrameBegin);
+    }
+
+    const OnScrollFrameBeginEvent& GetOnScrollFrameBegin() const
+    {
+        return onScrollFrameBeginEvent_;
+    }
+
+    void SetOnScrollStart(OnScrollStartEvent&& onScrollStart)
+    {
+        onScrollStartEvent_ = std::move(onScrollStart);
+    }
+
+    const OnScrollStartEvent& GetOnScrollStart() const
+    {
+        return onScrollStartEvent_;
+    }
+
+    void SetOnScrollStop(OnScrollStopEvent&& onScrollStop)
+    {
+        onScrollStopEvent_ = std::move(onScrollStop);
+    }
+
+    const OnScrollStopEvent& GetOnScrollStop() const
+    {
+        return onScrollStopEvent_;
+    }
+
+    void SetOnScrollIndex(OnScrollIndexEvent&& onScrollIndex)
+    {
+        onScrollIndexEvent_ = std::move(onScrollIndex);
+    }
+
+    const OnScrollIndexEvent& GetOnScrollIndex() const
+    {
+        return onScrollIndexEvent_;
+    }
+
 private:
+    OnScrollEvent onScrollEvent_;
+    OnScrollBeginEvent onScrollBeginEvent_;
+    OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
+    OnScrollStartEvent onScrollStartEvent_;
+    OnScrollStopEvent onScrollStopEvent_;
+    OnScrollIndexEvent onScrollIndexEvent_;
+
     std::function<void(const std::string&)> onInputFilterError_;
     std::function<void(bool)> onEditChanged_;
     std::function<void(int32_t)> onSubmit_;

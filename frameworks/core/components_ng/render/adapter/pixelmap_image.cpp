@@ -15,6 +15,8 @@
 
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
+#include "image_painter_utils.h"
+
 #include "base/image/pixel_map.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -27,11 +29,6 @@
 #endif
 
 namespace OHOS::Ace::NG {
-namespace {
-#ifdef ENABLE_ROSEN_BACKEND
-constexpr uint8_t RADIUS_POINTS_SIZE = 4;
-#endif
-} // namespace
 RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
 {
 #ifndef NG_BUILD
@@ -83,24 +80,11 @@ void PixelMapImage::DrawToRSCanvas(
         return;
     }
     SkPaint paint;
-    SkVector radii[RADIUS_POINTS_SIZE] = { { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 }, { 0.0, 0.0 } };
-    if (radiusXY.size() == RADIUS_POINTS_SIZE) {
-        radii[SkRRect::kUpperLeft_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperLeft_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kUpperRight_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kUpperRight_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kLowerLeft_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerRight_Corner].GetY(), 0.0f)));
-        radii[SkRRect::kLowerRight_Corner].set(
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetX(), 0.0f)),
-            SkFloatToScalar(std::max(radiusXY[SkRRect::kLowerLeft_Corner].GetY(), 0.0f)));
-    }
-    recordingCanvas->ClipAdaptiveRRect(radii);
+    ImagePainterUtils::AddFilter(paint, GetPaintConfig());
+    auto radii = ImagePainterUtils::ToSkRadius(radiusXY);
+    recordingCanvas->ClipAdaptiveRRect(radii.get());
     Rosen::RsImageInfo rsImageInfo(
-        (int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii, 1.0, 0, 0, 0);
+        (int)(GetPaintConfig().imageFit_), (int)(GetPaintConfig().imageRepeat_), radii.get(), 1.0, 0, 0, 0);
     recordingCanvas->DrawPixelMapWithParm(pixelMap_->GetPixelMapSharedPtr(), rsImageInfo, paint);
 #endif
 }

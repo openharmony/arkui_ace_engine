@@ -56,12 +56,13 @@ private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);
     static void CreateForNG(const JSCallbackInfo& info);
     static void SetTabBarForNG(const JSCallbackInfo& info);
-    static void SetIndicator(JSRef<JSVal>& info);
-    static void SetBoard(JSRef<JSVal>& info);
-    static void SetSelectedMode(JSRef<JSVal>& info);
-    static void SetSubTabBarStyle(JSRef<JSObject>& paramObject);
-    static void SetLabelStyle(JSRef<JSVal>& info);
-    static void GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyle);
+    static void SetIndicator(const JSRef<JSVal>& info);
+    static void SetBoard(const JSRef<JSVal>& info);
+    static void SetSelectedMode(const JSRef<JSVal>& info);
+    static void SetSubTabBarStyle(const JSRef<JSObject>& paramObject);
+    static void SetLabelStyle(const JSRef<JSVal>& info);
+    static void GetFontContent(JSRef<JSVal> font, LabelStyle& labelStyle);
+    static void CompleteParameters(LabelStyle& buttonParameters);
 };
 
 } // namespace OHOS::Ace::Framework

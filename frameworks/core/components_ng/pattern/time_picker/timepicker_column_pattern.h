@@ -198,10 +198,12 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
-    void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
-    void ChangeAmPmTextStyle(uint32_t index, uint32_t showOptionCount, RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
+    void ChangeTextStyle(uint32_t index, uint32_t showOptionCount,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
+    void ChangeAmPmTextStyle(uint32_t index, uint32_t showOptionCount,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
@@ -223,15 +225,18 @@ private:
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
     void PlayHoverAnimation(const Color& color);
-    void UpdateDisappearTextProperties(RefPtr<PickerTheme>& pickerTheme, RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
-    void UpdateCandidateTextProperties(RefPtr<PickerTheme>& pickerTheme,
-        RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
-    void UpdateSelectedTextProperties(RefPtr<PickerTheme>& pickerTheme,
-        RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
-    void AddAnimationTextProperties(uint32_t currentIndex, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
+    void UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
+    void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
+    void AddAnimationTextProperties(uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty);
     void UpdateTextPropertiesLinear(bool isDown, double scale);
-    void TextPropertiesLinearAnimation(RefPtr<TextLayoutProperty>& textLayoutProperty,
+    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
         uint32_t index, uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);

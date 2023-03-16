@@ -23,7 +23,6 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
-#include "core/components_ng/render/paint.h"
 
 namespace OHOS::Ace::NG {
 void SkPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty)

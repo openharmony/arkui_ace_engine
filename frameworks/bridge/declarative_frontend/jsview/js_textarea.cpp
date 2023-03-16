@@ -80,6 +80,7 @@ void JSTextAreaController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextAreaController>::Declare("TextAreaController");
     JSClass<JSTextAreaController>::Method("caretPosition", &JSTextAreaController::CaretPosition);
+    JSClass<JSTextAreaController>::Method("setTextSelection", &JSTextAreaController::SetTextSelection);
     JSClass<JSTextAreaController>::Bind(globalObj, JSTextAreaController::Constructor, JSTextAreaController::Destructor);
 }
 
@@ -102,6 +103,14 @@ void JSTextAreaController::CaretPosition(int32_t caretPosition)
     auto controller = controllerWeak_.Upgrade();
     if (controller) {
         controller->CaretPosition(caretPosition);
+    }
+}
+
+void JSTextAreaController::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        controller->SetTextSelection(selectionStart, selectionEnd);
     }
 }
 

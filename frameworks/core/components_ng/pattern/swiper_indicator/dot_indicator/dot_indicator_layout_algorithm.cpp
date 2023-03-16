@@ -32,8 +32,6 @@ constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
-constexpr float HALF = 0.5f;
-constexpr float DOUBLE = 2.0f;
 } // namespace
 void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -41,9 +39,6 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
-    const auto& minSize = layoutConstraint->minSize;
-    const auto& maxSize = layoutConstraint->maxSize;
-
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto swiperNode = DynamicCast<FrameNode>(frameNode->GetParent());
@@ -59,25 +54,33 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(theme);
-    // Diameter of a single indicator circle.
-    auto userSize = paintProperty->GetSizeValue(theme->GetSize()).ConvertToPx();
-    if (LessNotEqual(userSize, 0.0)) {
-        userSize = theme->GetSize().ConvertToPx();
-    }
 
+    // Diameter of a single indicator circle, item or selected-item width and height
+    auto userItemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
+    auto userItemHeight = paintProperty->GetItemHeightValue(theme->GetSize()).ConvertToPx();
+    auto userSelectedItemWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
+    auto userSelectedItemHeight = paintProperty->GetSelectedItemHeightValue(theme->GetSize()).ConvertToPx();
+    if (LessNotEqual(userItemWidth, 0.0) ||LessNotEqual(userItemHeight, 0.0) ||
+        LessNotEqual(userSelectedItemWidth, 0.0) || LessNotEqual(userSelectedItemHeight, 0.0)) {
+        userItemWidth = theme->GetSize().ConvertToPx();
+        userItemHeight = theme->GetSize().ConvertToPx();
+        userSelectedItemWidth = theme->GetSize().ConvertToPx();
+        userSelectedItemHeight = theme->GetSize().ConvertToPx();
+    }
     auto indicatorPadding = INDICATOR_PADDING_DEFAULT;
+
     // To the size of the hover after the layout, in order to prevent the components after the hover draw boundaries
-    userSize *= INDICATOR_ZOOM_IN_SCALE;
+    userItemWidth *= INDICATOR_ZOOM_IN_SCALE;
+    userItemHeight *= INDICATOR_ZOOM_IN_SCALE;
+    userSelectedItemWidth *= INDICATOR_ZOOM_IN_SCALE;
+    userSelectedItemHeight *= INDICATOR_ZOOM_IN_SCALE;
     indicatorPadding = INDICATOR_PADDING_HOVER;
 
-    // Length of a selected indicator round rect.
-    auto selectedSize = userSize * DOUBLE;
-
     // The width and height of the entire indicator.
-    auto indicatorHeight = static_cast<float>(userSize + indicatorPadding.ConvertToPx() * DOUBLE);
-    auto indicatorWidth = static_cast<float>(
-        (indicatorPadding.ConvertToPx() * DOUBLE + (userSize + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) +
-        selectedSize);
+    auto indicatorHeight = static_cast<float>(((userItemHeight > userSelectedItemHeight) ?
+        userItemHeight : userSelectedItemHeight) + indicatorPadding.ConvertToPx() * 2);
+    auto indicatorWidth = static_cast<float>(indicatorPadding.ConvertToPx() * 2 +
+        ((userItemWidth + INDICATOR_ITEM_SPACE.ConvertToPx()) * (itemCount - 1)) + userSelectedItemWidth);
 
     if (direction == Axis::HORIZONTAL) {
         indicatorWidth_ = indicatorWidth;
@@ -93,7 +96,7 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (frameSize.IsNonNegative()) {
             break;
         }
-        frameSize.Constrain(minSize, maxSize);
+        frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } while (false);
 
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
@@ -126,30 +129,31 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
 
     Offset position;
-    if (left.has_value()) {
+    Dimension indicatorPositionDefault = 0.0_vp;
+    if (left.has_value() && !NearEqual(left->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(left->Value()));
         position.SetX(leftValue);
-    } else if (right.has_value()) {
+    } else if (right.has_value() && !NearEqual(right->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(right->Value()));
         position.SetX(swiperWidth - indicatorWidth_ - rightValue);
     } else {
         position.SetX(
-            direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) * HALF : swiperWidth - indicatorWidth_);
+            direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) * 0.5f : swiperWidth - indicatorWidth_);
     }
-    if (top.has_value()) {
+    if (top.has_value() && !NearEqual(top->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(top->Value()));
         position.SetY(topValue);
-    } else if (bottom.has_value()) {
+    } else if (bottom.has_value() && !NearEqual(bottom->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(bottom->Value()));
         position.SetY(swiperHeight - indicatorHeight_ - bottomValue);
     } else {
         if (direction == Axis::HORIZONTAL) {
             position.SetY(swiperHeight - indicatorHeight_);
         } else {
-            position.SetY((swiperHeight - indicatorHeight_) * HALF);
+            position.SetY((swiperHeight - indicatorHeight_) * 0.5f);
         }
     }
-    auto currentOffset = OffsetF { static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
+    auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};
     layoutWrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 }
 

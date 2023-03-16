@@ -22,15 +22,9 @@
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/paint.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr int32_t NUMBER_TWO = 2;
-constexpr double NEARLY_ZERO = 0.001;
-} // namespace
-
 TabBarModifier::TabBarModifier()
     :indicatorColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::BLACK)),
     indicatorLeft_(AceType::MakeRefPtr<AnimatablePropertyFloat>(-1)),
@@ -58,7 +52,7 @@ void TabBarModifier::onDraw(DrawingContext& context)
     }
 }
 
-void TabBarModifier::SetIndicator(RectF indicator)
+void TabBarModifier::SetIndicator(const RectF& indicator)
 {
     indicator_ = indicator;
     if (indicatorLeft_) {
@@ -69,7 +63,7 @@ void TabBarModifier::SetIndicator(RectF indicator)
     }
 }
 
-void TabBarModifier::SetIndicatorColor(LinearColor indicatorColor)
+void TabBarModifier::SetIndicatorColor(const LinearColor& indicatorColor)
 {
     if (indicatorColor_) {
         indicatorColor_->Set(indicatorColor);
@@ -119,19 +113,21 @@ void TabBarModifier::PaintIndicator(DrawingContext& context, RectF indicator)
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
     
-    if (indicatorHeight_->Get() > NEARLY_ZERO) {
+    if (GreatNotEqual(indicatorHeight_->Get(), 0.0f)) {
         indicator.SetHeight(indicatorHeight_->Get());
     } else {
         indicator.SetHeight(tabTheme->GetSubTabIndicatorHeight().ConvertToPx());
     }
-    if (indicatorWidth_->Get() > NEARLY_ZERO) {
-        indicator.SetLeft(indicatorLeft_->Get() + (indicator.Width() - indicatorWidth_->Get()) / NUMBER_TWO);
+    if (GreatNotEqual(indicatorWidth_->Get(), 0.0f)) {
+        indicator.SetLeft(indicatorLeft_->Get() + (indicator.Width() - indicatorWidth_->Get()) / 2);
         indicator.SetWidth(indicatorWidth_->Get());
     } else {
         indicator.SetLeft(indicatorLeft_->Get());
     }
-    if (indicatorMarginTop_->Get() > NEARLY_ZERO) {
+    if (GreatNotEqual(indicatorMarginTop_->Get(), 0.0f)) {
         indicator.SetTop(indicatorTop_->Get() + indicatorMarginTop_->Get());
+    } else {
+        indicator.SetTop(indicatorTop_->Get());
     }
     
     RSBrush brush;

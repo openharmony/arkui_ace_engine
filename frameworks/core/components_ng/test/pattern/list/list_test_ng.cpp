@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#define private public
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
@@ -1237,7 +1238,7 @@ HWTEST_F(ListTestNg, ListItemGroupLayoutTest002, TestSize.Level1)
 
 /**
  * @tc.name: ListEventTest001
- * @tc.desc: Verify callback function
+ * @tc.desc: Verify onScroll, onScrollIndex, onReachStart, onReachEnd callback
  * @tc.type: FUNC
  */
 HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
@@ -1275,31 +1276,177 @@ HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ListPattern>();
     ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step4. RunMeasureAndLayout and check onReachStart called.
-     * @tc.expected: The onReachStart callback is called.
-     */
     RunMeasureAndLayout(frameNode);
-    EXPECT_TRUE(isReachStartEventCalled);
 
     /**
-     * @tc.steps: step5. Scroll 100px, RunMeasureAndLayout and check onScroll, onScrollIndex called.
+     * @tc.steps: step4. Scroll 100px, RunMeasureAndLayout and check onScroll, onScrollIndex called.
      * @tc.expected: The onScroll, onScrollIndex callback is called.
      */
-    constexpr float SCROLL_OFFSET1 = -100.f;
-    pattern->UpdateCurrentOffset(SCROLL_OFFSET1, SCROLL_FROM_UPDATE);
+    const float scrollOffset1 = -100.f;
+    pattern->UpdateCurrentOffset(scrollOffset1, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
     EXPECT_TRUE(isScrollEventCalled);
     EXPECT_TRUE(isScrollIndexEventCalled);
 
     /**
-     * @tc.steps: step6. Scroll 100px, RunMeasureAndLayout and check onReachEnd called.
-     * @tc.expected: The onReachEnd callback is called.
+     * @tc.steps: step4. Scroll back 100px, change ScrollState and RunMeasureAndLayout.
+     * @tc.expected: The onScroll, onReachStart callback is called.
      */
-    constexpr float SCROLL_OFFSET2 = -100.f;
-    pattern->UpdateCurrentOffset(SCROLL_OFFSET2, SCROLL_FROM_UPDATE);
+    isScrollEventCalled = false;
+    const float scrollOffset2 = 100.f;
+    pattern->UpdateCurrentOffset(scrollOffset2, SCROLL_FROM_ANIMATION);
     RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(isScrollEventCalled);
+    EXPECT_TRUE(isReachStartEventCalled);
+
+
+    /**
+     * @tc.steps: step5. Scroll 100px, change ScrollState and RunMeasureAndLayout.
+     * @tc.expected: The onReachStart, onScroll callback is called.
+     */
+    isScrollEventCalled = false;
+    const float scrollOffset3 = -100.f;
+    pattern->UpdateCurrentOffset(scrollOffset3, SCROLL_FROM_ANIMATION_SPRING);
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(isScrollEventCalled);
+
+    /**
+     * @tc.steps: step6. Scroll 100px, change ScrollState and RunMeasureAndLayout.
+     * @tc.expected: The onScroll, onReachEnd callback is called.
+     */
+    isScrollEventCalled = false;
+    const float scrollOffset4 = -100.f;
+    pattern->UpdateCurrentOffset(scrollOffset4, SCROLL_FROM_NONE);
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(isScrollEventCalled);
     EXPECT_TRUE(isReachEndEventCalled);
+}
+
+/**
+ * @tc.name: ListEventTest002
+ * @tc.desc: Verify onScrollStart, onScrollStop callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListEventTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+
+    /**
+     * @tc.steps: step2. Set callback founction to list.
+     */
+    bool isScrollStartEventCalled = false;
+    bool isScrollStopEventCalled = false;
+    auto scrollStartEvent = [&isScrollStartEventCalled]() { isScrollStartEventCalled = true; };
+    auto scrollStopEvent = [&isScrollStopEventCalled]() { isScrollStopEventCalled = true; };
+    listModelNG.SetOnScrollStart(scrollStartEvent);
+    listModelNG.SetOnScrollStop(scrollStopEvent);
+
+    /**
+     * @tc.steps: step3. Create listItem and get frameNode, pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. Check onScrollStart called.
+     * @tc.expected: The onScrollStart callback is called.
+     */
+    pattern->OnScrollCallback(100.f, SCROLL_FROM_START);
+    EXPECT_TRUE(isScrollStartEventCalled);
+
+    /**
+     * @tc.steps: step5. Check onScrollEnd called.
+     * @tc.expected: The onScrollEnd callback is called.
+     */
+    pattern->OnScrollEndCallback();
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(isScrollStopEventCalled);
+}
+
+/**
+ * @tc.name: ListEventTest003
+ * @tc.desc: Verify onItemDragStart, onItemDragEnter, onItemDragMove, onItemDragLeave, onItemDrop callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListEventTest003, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 10;
+
+    /**
+     * @tc.steps: step1. Create List and listItem.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Set callback founction to list.
+     */
+    bool isItemDragStartEventCalled = false;
+    auto itemDragStartEvent = [&isItemDragStartEventCalled](const ItemDragInfo&, int32_t) {
+        isItemDragStartEventCalled = true;
+        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
+        return dragItem;
+    };
+    listModelNG.SetOnItemDragStart(itemDragStartEvent);
+    listModelNG.SetOnItemDragEnter([](const ItemDragInfo&) {});
+    listModelNG.SetOnItemDragLeave([](const ItemDragInfo&, int32_t) {});
+    listModelNG.SetOnItemDragMove([](const ItemDragInfo&, int32_t, int32_t) {});
+    listModelNG.SetOnItemDrop([](const ItemDragInfo&, int32_t, int32_t, bool) {});
+
+    /**
+     * @tc.steps: step3. Get frameNode, eventHub.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step4. Trigger HandleOnItemDragStart.
+     * @tc.expected: Callback is called and dragValue is correct.
+     */
+    RunMeasureAndLayout(frameNode);
+    GestureEvent info;
+    Point globalPoint = Point(200.f, 150.f); // point at the first item.
+    info.SetGlobalPoint(globalPoint);
+    eventHub->HandleOnItemDragStart(info);
+    EXPECT_TRUE(isItemDragStartEventCalled);
+    EXPECT_EQ(eventHub->draggedIndex_, 1);
+    EXPECT_NE(eventHub->dragDropProxy_, nullptr);
+
+    /**
+     * @tc.steps: step5. Trigger HandleOnItemDragUpdate and HandleOnItemDragEnd.
+     * @tc.expected: DragValue is correct.
+     */
+    eventHub->HandleOnItemDragUpdate(info);
+    eventHub->HandleOnItemDragEnd(info);
+    EXPECT_EQ(eventHub->draggedIndex_, 0);
+    EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
+
+    /**
+     * @tc.steps: step6. Trigger HandleOnItemDragStart.
+     * @tc.expected: DragValue is correct.
+     */
+    eventHub->HandleOnItemDragStart(info);
+    EXPECT_EQ(eventHub->draggedIndex_, 1);
+    EXPECT_NE(eventHub->dragDropProxy_, nullptr);
+
+    /**
+     * @tc.steps: step7. Trigger HandleOnItemDragUpdate and HandleOnItemDragCancel.
+     * @tc.expected: DragValue is correct.
+     */
+    eventHub->HandleOnItemDragUpdate(info);
+    eventHub->HandleOnItemDragCancel();
+    EXPECT_EQ(eventHub->draggedIndex_, 0);
+    EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
 }
 } // namespace OHOS::Ace::NG

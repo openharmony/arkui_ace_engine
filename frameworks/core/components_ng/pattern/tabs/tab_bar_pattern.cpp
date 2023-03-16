@@ -33,7 +33,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float NEARLY_ZERO = 0.001f;
+constexpr int8_t LEFT_GRADIENT = 0;
+constexpr int8_t RIGHT_GRADIENT = 1;
+constexpr int8_t TOP_GRADIENT = 2;
+constexpr int8_t BOTTOM_GRADIENT = 3;
 } // namespace
 
 void TabBarPattern::OnAttachToFrameNode()
@@ -487,10 +490,12 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     auto totalCount = host->TotalChildCount();
 
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
-    if (index < 0 || index >= totalCount || !swiperController_) {
+    if (index < 0 || index >= totalCount || !swiperController_ ||
+        indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
-    if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
+    if (tabBarStyles_[indicator_] == TabBarStyle::SUBTABBATSTYLE &&
+        tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE && layoutProperty->GetAxis() == Axis::HORIZONTAL) {
         HandleSubTabBarClick(layoutProperty, index);
         return;
     }
@@ -538,11 +543,8 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     } else {
         PlayTranslateAnimation(originalPaintRect.GetX(), targetPaintRect.GetX(), targetOffset);
     }
-    if (std::abs(indicator - index) > 1) {
-        swiperController_->SwipeToWithoutAnimation(index);
-    } else {
-        swiperController_->SwipeTo(index);
-    }
+    swiperController_->SwipeTo(index);
+    indicator_ = index;
     layoutProperty->UpdateIndicator(index);
 }
 
@@ -710,9 +712,13 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    if (indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
     if (tabBarPattern->IsContainsBuilder() || layoutProperty->GetAxis() == Axis::VERTICAL ||
-        tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
+        tabBarStyles_[indicator] == TabBarStyle::BOTTOMTABBATSTYLE) {
         paintProperty->UpdateIndicator({});
+        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return;
     }
 
@@ -720,7 +726,9 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     paintProperty->UpdateIndicator(rect);
     currentIndicatorOffset_ = rect.GetX();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    UpdateSubTabBoard();
+    if (tabBarStyles_[indicator] == TabBarStyle::SUBTABBATSTYLE) {
+        UpdateSubTabBoard();
+    }
 }
 
 void TabBarPattern::UpdateGradientRegions()
@@ -740,14 +748,14 @@ void TabBarPattern::UpdateGradientRegions()
     }
     if (barMode == TabBarMode::SCROLLABLE) {
         if (axis == Axis::HORIZONTAL) {
-            if (tabItemOffsets_.front().GetX() < -NEARLY_ZERO) {
+            if (LessNotEqual(tabItemOffsets_.front().GetX(), 0.0f)) {
                 gradientRegions_[LEFT_GRADIENT] = true;
             }
             if (tabItemOffsets_.front().GetX() + childrenMainSize_ > frameRect.Width()) {
                 gradientRegions_[RIGHT_GRADIENT] = true;
             }
         } else if (axis == Axis::VERTICAL) {
-            if (tabItemOffsets_.front().GetY() < -NEARLY_ZERO) {
+            if (LessNotEqual(tabItemOffsets_.front().GetY(), 0.0f)) {
                 gradientRegions_[TOP_GRADIENT] = true;
             }
             if (tabItemOffsets_.front().GetY() + childrenMainSize_ > frameRect.Height()) {
@@ -757,7 +765,6 @@ void TabBarPattern::UpdateGradientRegions()
     }
     tarBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
-
 
 void TabBarPattern::UpdateTextColor(int32_t indicator)
 {
@@ -794,6 +801,10 @@ void TabBarPattern::UpdateTextColor(int32_t indicator)
 
 void TabBarPattern::UpdateSubTabBoard()
 {
+    if (indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
+        indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
+        return;
+    }
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
     auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
@@ -818,7 +829,11 @@ void TabBarPattern::UpdateSubTabBoard()
 
 SelectedMode TabBarPattern::GetSelectedMode() const
 {
-    return selectedModes_[indicator_];
+    if (indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
+        return SelectedMode::INDICATOR;
+    } else {
+        return selectedModes_[indicator_];
+    }
 }
 
 bool TabBarPattern::IsContainsBuilder()
@@ -962,6 +977,10 @@ void TabBarPattern::UpdateIndicatorCurrentOffset(float offset)
 
 RefPtr<NodePaintMethod> TabBarPattern::CreateNodePaintMethod()
 {
+    if (indicator_ >= static_cast<int32_t>(indicatorStyles_.size()) ||
+        indicator_ >= static_cast<int32_t>(selectedModes_.size())) {
+        return nullptr;
+    }
     Color backgroundColor = Color::WHITE;
     auto tabBarNode = GetHost();
     if (tabBarNode) {
@@ -1075,7 +1094,7 @@ bool TabBarPattern::IsAtBottom() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    return LessOrEqual(currentOffset_, host->GetGeometryNode()->GetFrameSize().Width());
+    return LessOrEqual(tabItemOffsets_.back().GetX(), host->GetGeometryNode()->GetFrameSize().Width());
 }
 
 bool TabBarPattern::IsOutOfBoundary()

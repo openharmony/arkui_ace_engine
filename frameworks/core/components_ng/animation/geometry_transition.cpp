@@ -63,10 +63,13 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> GeometryTransition::GetMatchedPa
     return { self.Upgrade(), target.Upgrade() };
 }
 
+bool GeometryTransition::layoutStarted_ = false;
+
 // Build should be called during node tree build phase dealing with node add/remove or appearing/disappearing
 void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn)
 {
     state_ = State::IDLE;
+    buildDuringLayout_ = GeometryTransition::layoutStarted_;
     CHECK_NULL_VOID(frameNode.Upgrade());
     LOGD("GeometryTransition build node%{public}d %{public}s", frameNode.Upgrade()->GetId(), isNodeIn ? "in" : "out");
 
@@ -131,6 +134,9 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
 // impact self and children's measure and layout.
 void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
+    if (buildDuringLayout_ && GeometryTransition::layoutStarted_) {
+        return;
+    }
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
     if (IsNodeInAndActive(hostNode)) {
@@ -143,6 +149,10 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
 // Called after layout, perform final adjustments of geometry position
 void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& root, const WeakPtr<FrameNode>& frameNode)
 {
+    if (buildDuringLayout_ && GeometryTransition::layoutStarted_) {
+        buildDuringLayout_ = false;
+        return;
+    }
     auto node = frameNode.Upgrade();
     CHECK_NULL_VOID(node);
     if (IsNodeInAndActive(frameNode)) {

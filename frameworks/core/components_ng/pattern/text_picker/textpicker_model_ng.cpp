@@ -67,27 +67,23 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
     stack->Push(textPickerNode);
 }
 
-void TextPickerModelNG::SetDefaultAttributes(RefPtr<PickerTheme> pickerTheme)
+void TextPickerModelNG::SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(pickerTheme);
-    NG::PickerTextStyle textStyle;
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
-    textStyle.textColor = selectedStyle.GetTextColor();
-    textStyle.fontSize = selectedStyle.GetFontSize();
-    textStyle.fontWeight = selectedStyle.GetFontWeight();
-    SetSelectedTextStyle(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, selectedStyle.GetTextColor());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight, selectedStyle.GetFontWeight());
 
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
-    textStyle.textColor = disappearStyle.GetTextColor();
-    textStyle.fontSize = disappearStyle.GetFontSize();
-    textStyle.fontWeight = disappearStyle.GetFontWeight();
-    SetDisappearTextStyle(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor, disappearStyle.GetTextColor());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight, disappearStyle.GetFontWeight());
 
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
-    textStyle.textColor = normalStyle.GetTextColor();
-    textStyle.fontSize = normalStyle.GetFontSize();
-    textStyle.fontWeight = normalStyle.GetFontWeight();
-    SetNormalTextStyle(textStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, normalStyle.GetFontSize());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, normalStyle.GetTextColor());
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight, normalStyle.GetFontWeight());
 }
 
 RefPtr<FrameNode> TextPickerModelNG::CreateColumnNode(uint32_t columnKind, uint32_t showCount)
@@ -181,43 +177,49 @@ void TextPickerModelNG::SetDefaultPickerItemHeight(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultPickerItemHeight, value);
 }
 
-void TextPickerModelNG::SetDisappearTextStyle(const NG::PickerTextStyle& value)
+void TextPickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
+    CHECK_NULL_VOID(pickerTheme);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize, value.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize());
     }
-    if (value.textColor) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor, value.textColor.value());
-    }
-    if (value.fontWeight) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight, value.fontWeight.value());
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearColor, value.textColor.value_or(disappearStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, DisappearWeight, value.fontWeight.value_or(disappearStyle.GetFontWeight()));
 }
 
-void TextPickerModelNG::SetNormalTextStyle(const NG::PickerTextStyle& value)
+void TextPickerModelNG::SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
+    CHECK_NULL_VOID(pickerTheme);
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, value.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, normalStyle.GetFontSize());
     }
-    if (value.textColor) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, value.textColor.value());
-    }
-    if (value.fontWeight) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight, value.fontWeight.value());
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, Color, value.textColor.value_or(normalStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, Weight, value.fontWeight.value_or(normalStyle.GetFontWeight()));
 }
 
-void TextPickerModelNG::SetSelectedTextStyle(const NG::PickerTextStyle& value)
+void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value)
 {
+    CHECK_NULL_VOID(pickerTheme);
+    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize, value.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize());
     }
-    if (value.textColor) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, value.textColor.value());
-    }
-    if (value.fontWeight) {
-        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight, value.fontWeight.value());
-    }
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedColor, value.textColor.value_or(selectedStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(
+        TextPickerLayoutProperty, SelectedWeight, value.fontWeight.value_or(selectedStyle.GetFontWeight()));
 }
 
 void TextPickerModelNG::SetOnChange(TextChangeEvent&& onChange)

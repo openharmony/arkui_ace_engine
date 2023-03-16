@@ -70,6 +70,8 @@ public:
         return height_;
     }
 
+    bool OnBackPressed();
+
 private:
     bool hasMove_ = false;
     Offset position_;

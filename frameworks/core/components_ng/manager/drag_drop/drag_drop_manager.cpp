@@ -207,7 +207,12 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
     }
 
     if (preTargetFrameNode_) {
-        FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
+        auto preGeometryNode = preTargetFrameNode_->GetGeometryNode();
+        CHECK_NULL_VOID(preGeometryNode);
+        auto preRect = preGeometryNode->GetFrameRect();
+        if (!preRect.IsInRegion(PointF(globalX, globalY))) {
+            FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
+        }
     }
 
     FireOnDragEvent(dragFrameNode, point, DragEventType::ENTER, extraInfo);

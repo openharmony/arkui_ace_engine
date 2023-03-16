@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/models/tab_content_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components/button/button_theme.h"
 
 namespace OHOS::Ace {
 
@@ -84,6 +85,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
 
     std::string infoStr;
     if (ParseJsString(info[0], infoStr)) {
+        TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(infoStr, std::nullopt, nullptr, true);
         return;
     }
@@ -173,7 +175,7 @@ void JSTabContent::Pop()
     TabContentModel::GetInstance()->Pop();
 }
 
-void JSTabContent::SetIndicator(JSRef<JSVal>& info)
+void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
     IndicatorStyle indicator;
@@ -183,23 +185,23 @@ void JSTabContent::SetIndicator(JSRef<JSVal>& info)
             indicator.color = tabTheme->GetActiveIndicatorColor();
         }
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("height"), indicator.height)
-        || indicator.height.Value() < 0.0f) {
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("height"), indicator.height) ||
+        indicator.height.Value() < 0.0f) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.height = tabTheme->GetActiveIndicatorWidth();
         }
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("width"), indicator.width)
-        || indicator.width.Value() < 0.0f) {
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("width"), indicator.width) ||
+        indicator.width.Value() < 0.0f) {
         indicator.width = 0.0_vp;
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), indicator.borderRadius)
-        || indicator.borderRadius.Value() < 0.0f) {
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), indicator.borderRadius) ||
+        indicator.borderRadius.Value() < 0.0f) {
         indicator.borderRadius = 0.0_vp;
     }
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("marginTop"), indicator.marginTop)
-        || indicator.marginTop.Value() < 0.0f) {
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("marginTop"), indicator.marginTop) ||
+        indicator.marginTop.Value() < 0.0f) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             indicator.marginTop = tabTheme->GetSubTabIndicatorGap();
@@ -208,12 +210,12 @@ void JSTabContent::SetIndicator(JSRef<JSVal>& info)
     TabContentModel::GetInstance()->SetIndicator(indicator);
 }
 
-void JSTabContent::SetBoard(JSRef<JSVal>& info)
+void JSTabContent::SetBoard(const JSRef<JSVal>& info)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info);
     BoardStyle board;
-    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), board.borderRadius)
-        || board.borderRadius.Value() < 0.0f) {
+    if (!info->IsObject() || !ConvertFromJSValue(obj->GetProperty("borderRadius"), board.borderRadius) ||
+        board.borderRadius.Value() < 0.0f) {
         RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
         if (tabTheme) {
             board.borderRadius = tabTheme->GetFocusIndicatorRadius();
@@ -222,13 +224,13 @@ void JSTabContent::SetBoard(JSRef<JSVal>& info)
     TabContentModel::GetInstance()->SetBoard(board);
 }
 
-void JSTabContent::SetSelectedMode(JSRef<JSVal>& info)
+void JSTabContent::SetSelectedMode(const JSRef<JSVal>& info)
 {
-    std::string selectedMode;
+    int32_t selectedMode;
     if (!ConvertFromJSValue(info, selectedMode)) {
         TabContentModel::GetInstance()->SetSelectedMode(SelectedMode::INDICATOR);
     } else {
-        TabContentModel::GetInstance()->SetSelectedMode(ConvertStrToSelectedMode(selectedMode));
+        TabContentModel::GetInstance()->SetSelectedMode(static_cast<SelectedMode>(selectedMode));
     }
 }
 
@@ -261,7 +263,7 @@ void JSTabContent::GetFontContent(const JSRef<JSVal> font, LabelStyle& labelStyl
     }
 }
 
-void JSTabContent::SetLabelStyle(JSRef<JSVal>& info)
+void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info)
 {
     if (!info->IsObject()) {
         LOGE("info not is Object");
@@ -309,22 +311,51 @@ void JSTabContent::SetLabelStyle(JSRef<JSVal>& info)
         TextStyle textStyle;
         GetFontContent(font, labelStyle);
     }
+    CompleteParameters(labelStyle);
+    TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
+}
 
-    if (Container::IsCurrentUseNewPipeline()) {
-        TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
+void JSTabContent::CompleteParameters(LabelStyle& labelStyle)
+{
+    auto buttonTheme = GetTheme<ButtonTheme>();
+    if (!buttonTheme) {
         return;
+    }
+    auto textStyle = buttonTheme->GetTextStyle();
+    if (!labelStyle.maxLines.has_value()) {
+        labelStyle.maxLines = buttonTheme->GetTextMaxLines();
+    }
+    if (!labelStyle.minFontSize.has_value()) {
+        labelStyle.minFontSize = buttonTheme->GetMinFontSize();
+    }
+    if (!labelStyle.maxFontSize.has_value()) {
+        labelStyle.maxFontSize = buttonTheme->GetMaxFontSize();
+    }
+    if (!labelStyle.fontSize.has_value()) {
+        labelStyle.fontSize = textStyle.GetFontSize();
+    }
+    if (!labelStyle.fontWeight.has_value()) {
+        labelStyle.fontWeight = textStyle.GetFontWeight();
+    }
+    if (!labelStyle.fontStyle.has_value()) {
+        labelStyle.fontStyle = textStyle.GetFontStyle();
+    }
+    if (!labelStyle.heightAdaptivePolicy.has_value()) {
+        labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (!labelStyle.textOverflow.has_value()) {
+        labelStyle.textOverflow = TextOverflow::ELLIPSIS;
     }
 }
 
-void JSTabContent::SetSubTabBarStyle(JSRef<JSObject>& paramObject)
+void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
 {
     JSRef<JSVal> contentParam = paramObject->GetProperty("content");
     auto isContentEmpty = contentParam->IsEmpty() || contentParam->IsUndefined() || contentParam->IsNull();
     if (isContentEmpty) {
-        LOGE("The content param is empty");
-        return;
+        LOGW("The content param is empty");
     }
-    std::optional<std::string> contentOpt = std::nullopt;
+    std::optional<std::string> contentOpt;
     std::string content;
     if (ParseJsString(contentParam, content)) {
         contentOpt = content;

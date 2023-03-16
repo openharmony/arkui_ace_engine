@@ -58,6 +58,7 @@ public:
     static void SetOnInterceptRequest(
         std::function<RefPtr<WebResponse>(const std::shared_ptr<BaseEventInfo>& info)>&& onInterceptRequestImpl);
     static void SetOnUrlLoadIntercept(OnWebSyncFunc&& onUrlLoadInterceptImpl);
+    static void SetOnLoadIntercept(OnWebSyncFunc&& onLoadInterceptImpl);
     static void SetOnFileSelectorShow(OnWebSyncFunc&& onFileSelectorShowImpl);
     static void SetOnContextMenuShow(OnWebSyncFunc&& onContextMenuImpl);
     static void SetFileAccessEnabled(bool isFileAccessEnabled);

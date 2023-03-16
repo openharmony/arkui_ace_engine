@@ -87,6 +87,15 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/form_render:ace_form_render"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor/",
+                        "header_files": [
+                            "drawable_descriptor.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable_descriptor:drawable_descriptor"
                 }
             ],
             "test": [

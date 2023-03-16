@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/radio/radio_paint_method.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
 class CheckBoxGroupModifier : public ContentModifier {
@@ -54,13 +54,13 @@ public:
     ~CheckBoxGroupModifier() override = default;
     void onDraw(DrawingContext& context) override
     {
-        PaintCheckBox(context, offset_);
+        PaintCheckBox(context, offset_->Get(), size_->Get());
     }
 
-    void PaintCheckBox(DrawingContext& context, const OffsetF& paintOffset) const;
+    void PaintCheckBox(DrawingContext& context, const OffsetF& paintOffset, const SizeF& contentSize) const;
     void PaintCheckBoxGroupPartStatus(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush,
         RSPen pen, const SizeF& paintSize) const;
-    void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, SizeF& paintSize) const;
+    void DrawUnselected(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
     void DrawActiveBorder(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, const SizeF& paintSize) const;
     void DrawUnselectedBorder(RSCanvas& canvas, const OffsetF& paintOffset,
         RSBrush& brush, const SizeF& paintSize) const;
@@ -187,7 +187,16 @@ public:
 
     void SetOffset(OffsetF& offset)
     {
-        offset_ = offset;
+        if (offset_) {
+            offset_->Set(offset);
+        }
+    }
+
+    void SetSize(SizeF& size)
+    {
+        if (size_) {
+            size_->Set(size);
+        }
     }
 
 private:
@@ -196,15 +205,16 @@ private:
     RefPtr<AnimatablePropertyColor> inactiveColor_;
     RefPtr<AnimatablePropertyFloat> checkMarkPaintSize_;
     RefPtr<AnimatablePropertyFloat> checkStroke_;
-    RefPtr<AnimatablePropertyFloat> shapeScale_;
+    RefPtr<PropertyFloat> shapeScale_;
     RefPtr<PropertyBool> isTouch_;
     RefPtr<PropertyBool> isHover_;
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyInt> uiStatus_;
     RefPtr<PropertyInt> status_;
+    RefPtr<PropertyOffsetF> offset_;
+    RefPtr<PropertySizeF> size_;
     float borderWidth_;
     float borderRadius_;
-    OffsetF offset_;
     Color shadowColor_;
     Color clickEffectColor_;
     Color hoverColor_;

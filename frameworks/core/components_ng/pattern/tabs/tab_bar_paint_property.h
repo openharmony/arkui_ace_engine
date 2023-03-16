@@ -23,14 +23,6 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-constexpr int8_t LEFT_GRADIENT = 0;
-constexpr int8_t RIGHT_GRADIENT = 1;
-constexpr int8_t TOP_GRADIENT = 2;
-constexpr int8_t BOTTOM_GRADIENT = 3;
-constexpr int8_t POS_NUM = 4;
-}
-
 class TabBarPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(TabBarPaintProperty, PaintProperty)
 

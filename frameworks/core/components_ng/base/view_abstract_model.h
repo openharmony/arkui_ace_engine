@@ -117,7 +117,7 @@ public:
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;
-    virtual void SetPivot(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetRotate(float x, float y, float z, float angle) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
@@ -212,6 +212,8 @@ public:
     virtual void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) = 0;
+    virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, int32_t type) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;

@@ -26,10 +26,10 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/paint_wrapper.h"
+
 namespace OHOS::Ace::NG {
 enum class UIStatus {
     SELECTED = 0,
@@ -61,7 +61,7 @@ public:
 
     void onDraw(DrawingContext& context) override
     {
-        RSCanvas canvas = context.canvas;
+        RSCanvas& canvas = context.canvas;
         PaintRadio(canvas, isCheck_->Get(), size_->Get(), offset_->Get());
     }
 
@@ -85,8 +85,8 @@ public:
     }
 
     void InitializeParam();
-    void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& offset) const;
-    void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
+    void PaintRadio(RSCanvas& canvas, bool checked, const SizeF& contentSize, const OffsetF& contentOffset) const;
+    void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& contentOffset) const;
 
     void SetPointColor(const Color& pointColor)
     {
@@ -192,8 +192,8 @@ private:
     RefPtr<PropertyBool> isCheck_;
     RefPtr<PropertyInt> uiStatus_;
 
-    RefPtr<PropertyOffsetF> offset_;
-    RefPtr<PropertySizeF> size_;
+    RefPtr<AnimatablePropertyOffsetF> offset_;
+    RefPtr<AnimatablePropertySizeF> size_;
     RefPtr<RadioModifier> radioModifier_;
     RefPtr<PropertyFloat> totalScale_;
     RefPtr<PropertyFloat> pointScale_;
