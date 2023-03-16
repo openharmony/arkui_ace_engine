@@ -265,8 +265,8 @@ class WebWindowNewHandlerOhos : public WebWindowNewHandler {
     DECLARE_ACE_TYPE(WebWindowNewHandlerOhos, WebWindowNewHandler)
 
 public:
-    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler)
-        : handler_(handler) {}
+    WebWindowNewHandlerOhos(const std::shared_ptr<OHOS::NWeb::NWebControllerHandler>& handler, int32_t parentNWebId)
+        : handler_(handler), parentNWebId_(parentNWebId) {}
 
     void SetWebController(int32_t id) override;
 
@@ -274,8 +274,11 @@ public:
 
     int32_t GetId() const override;
 
+    int32_t GetParentNWebId() const override;
+
 private:
     std::shared_ptr<OHOS::NWeb::NWebControllerHandler> handler_;
+    int32_t parentNWebId_ = -1;
 };
 
 class DataResubmittedOhos : public DataResubmitted {
@@ -534,6 +537,10 @@ public:
     {
         isPopup_ = popup;
     }
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
+    }
 #endif
 private:
     void InitWebEvent();
@@ -606,6 +613,8 @@ private:
     void RegisterSurfacePositionChangedCallback();
     void UnregisterSurfacePositionChangedCallback();
 
+    void NotifyPopupWindowResult(bool result);
+
     EventCallbackV2 GetAudioStateChangedCallback(bool useNewPipe, const RefPtr<NG::WebEventHub>& eventHub);
 #endif
 
@@ -677,6 +686,7 @@ private:
     sptr<AppExecFwk::IConfigurationObserver> configChangeObserver_ = nullptr;
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
 #endif
 };
 
