@@ -146,4 +146,70 @@ HWTEST_F(CustomDialogTestNg, CustomDialogTestNg004, TestSize.Level1)
         EXPECT_EQ(dialogPattern->GetCloseAnimation().value().GetDelay(), animationOption.GetDelay());
     }
 }
+
+/**
+ * @tc.name: CustomDialogTestNg005
+ * @tc.desc: Verify function HandleClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomDialogTestNg, CustomDialogTestNg005, TestSize.Level1)
+{
+    GestureEvent info;
+    Offset globalLocation(10, 6);
+    OffsetF translate(10, 5);
+    DialogProperties param;
+    param.autoCancel = false;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto child = FrameNode::GetOrCreateFrameNode(
+        V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
+    auto Dialog = DialogView::CreateDialogNode(param, child);
+    EXPECT_TRUE(Dialog);
+    if (!Dialog) {
+        return;
+    }
+    child->GetGeometryNode()->SetMarginFrameOffset(translate);
+    EXPECT_EQ(Dialog->TotalChildCount(), 1);
+    auto dialogPattern = Dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    if (!dialogPattern) {
+        return;
+    }
+    info.SetGlobalLocation(globalLocation);
+    dialogPattern->HandleClick(info);
+}
+
+/**
+ * @tc.name: CustomDialogTestNg006
+ * @tc.desc: Verify function HandleClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomDialogTestNg, CustomDialogTestNg006, TestSize.Level1)
+{
+    GestureEvent info;
+    Offset globalLocation(10, 6);
+    OffsetF translate(10, 5);
+    DialogProperties param;
+    param.autoCancel = true;
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<DialogTheme>()));
+    auto child = FrameNode::GetOrCreateFrameNode(
+        V2::CUSTOM_DIALOG_COMPONENT_TAG, 0, []() { return AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr); });
+    auto Dialog = DialogView::CreateDialogNode(param, child);
+    EXPECT_TRUE(Dialog);
+    if (!Dialog) {
+        return;
+    }
+    child->GetGeometryNode()->SetMarginFrameOffset(translate);
+    EXPECT_EQ(Dialog->TotalChildCount(), 1);
+    auto dialogPattern = Dialog->GetPattern<DialogPattern>();
+    EXPECT_TRUE(dialogPattern);
+    if (!dialogPattern) {
+        return;
+    }
+    info.SetGlobalLocation(globalLocation);
+    dialogPattern->HandleClick(info);
+}
 } // namespace OHOS::Ace::NG
