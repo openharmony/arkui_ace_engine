@@ -61,6 +61,7 @@ public:
     void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) override;
     void HidePopupNG(int32_t targetId) override;
     void HidePopupNG() override;
+    void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) override;
     bool CancelPopup(const std::string& id) override;
     void CloseMenu() override;
     void ClearMenu() override;

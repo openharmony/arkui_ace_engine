@@ -43,6 +43,7 @@ public:
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) = 0;
     virtual void HidePopupNG(int32_t targetId) = 0;
     virtual void HidePopupNG() = 0;
+    virtual void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) = 0;
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
