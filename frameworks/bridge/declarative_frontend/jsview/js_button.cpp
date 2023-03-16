@@ -637,15 +637,22 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBackgroundColor(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            auto buttonTheme = GetTheme<ButtonTheme>();
+            if (buttonTheme) {
+                backgroundColor = buttonTheme->GetBgColor();
+            }
+        }
+        ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
+        return;
+    }
+
     if (!ParseJsColor(info[0], backgroundColor)) {
         return;
     }
