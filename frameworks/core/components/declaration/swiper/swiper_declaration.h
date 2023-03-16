@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,11 @@ inline constexpr int32_t DEFAULT_SWIPER_DISPLAY_COUNT = 1;
 enum class SwiperDisplayMode {
     STRETCH = 0,
     AUTO_LINEAR,
+};
+
+enum class SwiperIndicatorType {
+    DOT = 0,
+    DIGIT,
 };
 
 struct SwiperAttribute : Attribute {

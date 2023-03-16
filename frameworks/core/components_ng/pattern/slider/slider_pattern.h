@@ -79,6 +79,11 @@ public:
         return circleCenter_;
     }
 
+    float GetValueRatio() const
+    {
+        return valueRatio_;
+    }
+
 private:
     void OnModifyDone() override;
     void CancelExceptionValue(float& min, float& max);

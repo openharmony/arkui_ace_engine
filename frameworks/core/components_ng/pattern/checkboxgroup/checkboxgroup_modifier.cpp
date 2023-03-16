@@ -287,8 +287,8 @@ void CheckBoxGroupModifier::DrawAnimationOffToOn(
     }
 }
 
-void CheckBoxGroupModifier::DrawAnimationOnToOff(
-    RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
+void CheckBoxGroupModifier::DrawAnimationOnToOff(RSCanvas& canvas, const OffsetF& origin, RSPen& pen,
+    const SizeF& paintSize) const
 {
     if (shapeScale_->Get() == DEFAULT_MIN_CHECKBOX_SHAPE_SCALE ||
         checkMarkPaintSize_->Get() == CHECKBOX_GROUP_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {

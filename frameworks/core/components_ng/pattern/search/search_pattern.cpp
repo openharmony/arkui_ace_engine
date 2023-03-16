@@ -51,15 +51,12 @@ void SearchPattern::UpdateChangeEvent(const std::string& value)
     CHECK_NULL_VOID(buttonHost);
     auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     CHECK_NULL_VOID(imageHost);
-
-    auto cancelButtonrenderContext = buttonHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelButtonrenderContext);
-    auto cancelImagerenderContext = imageHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelImagerenderContext);
-
+    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelButtonRenderContext);
+    auto cancelImageRenderContext = imageHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelImageRenderContext);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
     auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
@@ -68,13 +65,13 @@ void SearchPattern::UpdateChangeEvent(const std::string& value)
     auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
     if ((style == CancelButtonStyle::CONSTANT)
         || ((style == CancelButtonStyle::INPUT) && !value.empty())) {
-        cancelButtonrenderContext->UpdateOpacity(1.0);
-        cancelImagerenderContext->UpdateOpacity(1.0);
+        cancelButtonRenderContext->UpdateOpacity(1.0);
+        cancelImageRenderContext->UpdateOpacity(1.0);
         cancelButtonEvent->SetEnabled(true);
         imageEvent->SetEnabled(true);
     } else {
-        cancelButtonrenderContext->UpdateOpacity(0.0);
-        cancelImagerenderContext->UpdateOpacity(0.0);
+        cancelButtonRenderContext->UpdateOpacity(0.0);
+        cancelImageRenderContext->UpdateOpacity(0.0);
         cancelButtonEvent->SetEnabled(false);
         imageEvent->SetEnabled(false);
     }
@@ -167,6 +164,7 @@ void SearchPattern::OnModifyDone()
     InitCancelButtonClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    InitTextFieldMouseEvent();
     InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
     InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
     InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
@@ -516,6 +514,27 @@ void SearchPattern::InitMouseEvent()
     inputHub->AddOnMouseEvent(mouseEvent_);
 }
 
+void SearchPattern::InitTextFieldMouseEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputHub);
+
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleTextFieldHoverEvent(isHover);
+        }
+    };
+    textFieldHoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
+    inputHub->AddOnHoverEvent(textFieldHoverEvent_);
+}
+
 void SearchPattern::InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId)
 {
     if (inputEvent) {
@@ -594,13 +613,14 @@ void SearchPattern::OnButtonTouchUp(int32_t childId)
     }
 }
 
-void SearchPattern::SetMouseStyle(MouseFormat& format)
+void SearchPattern::SetMouseStyle(MouseFormat format)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(windowId, format);
+    CHECK_NULL_VOID(mouseStyle);
+
     int32_t currentPointerStyle = 0;
     mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
     if (currentPointerStyle != static_cast<int32_t>(format)) {
@@ -643,6 +663,13 @@ void SearchPattern::HandleMouseEvent(const MouseInfo& info)
         renderContext->AnimateHoverEffectBoard(true);
     } else {
         renderContext->AnimateHoverEffectBoard(false);
+    }
+}
+
+void SearchPattern::HandleTextFieldHoverEvent(bool isHoverOverTextField)
+{
+    if (!isHoverOverTextField && isHover_) {
+        SetMouseStyle(MouseFormat::TEXT_CURSOR);
     }
 }
 
@@ -731,14 +758,12 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     auto searchIconJson = JsonUtil::Create(false);
 
     // icon size
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto defaultIconSize = searchTheme->GetIconHeight();
+    auto searchIconGeometryNode = imageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(searchIconGeometryNode);
+    auto searchIconFrameSize = searchIconGeometryNode->GetFrameSize().Width();
     auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(searchLayoutProperty);
-    auto searchIconSize = searchLayoutProperty->GetSearchIconUDSize().value_or(defaultIconSize).ConvertToPx();
+    auto searchIconSize = searchLayoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameSize)).ConvertToPx();
     searchIconJson->Put("size", Dimension(searchIconSize, DimensionUnit::PX).ToString().c_str());
 
     // icon color
@@ -777,14 +802,13 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     auto cancelIconJson = JsonUtil::Create(false);
 
     // icon size
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-    auto defaultIconSize = searchTheme->GetIconHeight();
-    auto searchLayoutproperty = host->GetLayoutProperty<SearchLayoutProperty>();
-    CHECK_NULL_VOID(searchLayoutproperty);
-    auto cancelIconSize = searchLayoutproperty->GetCancelButtonUDSize().value_or(defaultIconSize).ConvertToPx();
+    auto cancelIconGeometryNode = cancelImageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(cancelIconGeometryNode);
+    auto cancelIconFrameSize = cancelIconGeometryNode->GetFrameSize().Width();
+    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutProperty);
+    auto cancelIconSize =
+        searchLayoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize)).ConvertToPx();
     cancelIconJson->Put("size", Dimension(cancelIconSize, DimensionUnit::PX).ToString().c_str());
 
     // icon color
@@ -833,9 +857,9 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
     // color
     auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(Color());
     cursorJson->Put("color", caretColor.ColorToString().c_str());
-    auto caretwidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
-    cursorJson->Put("width", caretwidth.ToString().c_str());
-    json->Put("cursorStyle", cursorJson);
+    auto caretWidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
+    cursorJson->Put("width", caretWidth.ToString().c_str());
+    json->Put("caretStyle", cursorJson);
 }
 
 void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

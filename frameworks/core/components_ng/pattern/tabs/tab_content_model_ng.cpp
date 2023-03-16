@@ -148,6 +148,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     renderContext->UpdateBorderRadius(borderRadiusProperty);
 	
     auto myIndex = tabContentNode->GetParent()->GetChildFlatIndex(tabContentId).second;
+    tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle != TabBarStyle::SUBTABBATSTYLE) {
         indicatorStyle.marginTop = 0.0_vp;
@@ -261,7 +262,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkModifyDone();
     imageNode->MarkModifyDone();
     tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    tabBarFrameNode->MarkModifyDone();
     tabBarPattern->AddTabBarItemType(tabContentId, false);
 }
 

@@ -84,7 +84,6 @@ EGLContext RosenRenderSceneViewer::GetRenderContext()
     }
 
     ret = Rosen::RSUIShareContext::GetInstance().GetRsRenderContext();
-    LOGD("RenderContext %p", ret);
     return ret;
 }
 } // namespace OHOS::Ace

@@ -20,6 +20,13 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int8_t LEFT_GRADIENT = 0;
+constexpr int8_t RIGHT_GRADIENT = 1;
+constexpr int8_t TOP_GRADIENT = 2;
+constexpr int8_t BOTTOM_GRADIENT = 3;
+constexpr int8_t POS_NUM = 4;
+}
 
 CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
@@ -39,8 +46,8 @@ CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
     return paintFunc;
 }
 
-void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, RectF barRect,
-    Color backgroundColor, std::vector<bool> gradientRegions)
+void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& barRect,
+    const Color& backgroundColor, std::vector<bool> gradientRegions)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -71,32 +78,24 @@ void TabBarPaintMethod::PaintGradient(RSCanvas& canvas, RectF barRect,
     }
 }
 
-void TabBarPaintMethod::PaintLeftGradient(RSCanvas& canvas, RectF barRect, Color backgroundColor, float shadowMargin,
-    float gradientWidth)
+void TabBarPaintMethod::PaintLeftGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    float shadowMargin, float gradientWidth)
 {
-    RSBrush leftBrush;
-    RSRect rect(0.0f, 0.0f, shadowMargin + gradientWidth, barRect.Height());
+    RSRect gradientRect(0.0f, 0.0f, shadowMargin + gradientWidth, barRect.Height());
     RSPoint leftStartPoint;
     leftStartPoint.SetX(shadowMargin + gradientWidth);
     leftStartPoint.SetY(0.0f);
     RSPoint leftEndPoint;
     leftEndPoint.SetX(0.0f);
     leftEndPoint.SetY(0.0f);
-    Color endColor = backgroundColor;
-    Color startColor = endColor.ChangeAlpha(0);
-    std::vector<float> leftPos { 0.0f, gradientWidth / (shadowMargin + gradientWidth), 1.0f };
-    std::vector<RSColorQuad> leftColors { startColor.GetValue(), endColor.GetValue(), endColor.GetValue() };
-    leftBrush.SetShaderEffect(
-        RSShaderEffect::CreateLinearGradient(leftStartPoint, leftEndPoint, leftColors, leftPos, RSTileMode::CLAMP));
-    canvas.DetachPen().AttachBrush(leftBrush);
-    canvas.DrawRect(rect);
+    PaintGradientRect(canvas, gradientRect, backgroundColor, leftStartPoint, leftEndPoint, shadowMargin,
+        gradientWidth);
 }
 
-void TabBarPaintMethod::PaintRightGradient(RSCanvas& canvas, RectF barRect, Color backgroundColor, float shadowMargin,
-    float gradientWidth)
+void TabBarPaintMethod::PaintRightGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    float shadowMargin, float gradientWidth)
 {
-    RSBrush rightBrush;
-    RSRect rect(barRect.Width() - shadowMargin - gradientWidth,
+    RSRect gradientRect(barRect.Width() - shadowMargin - gradientWidth,
                     0.0f, barRect.Width(), barRect.Height());
     RSPoint rightStartPoint;
     rightStartPoint.SetX(barRect.Width() - shadowMargin - gradientWidth);
@@ -104,42 +103,28 @@ void TabBarPaintMethod::PaintRightGradient(RSCanvas& canvas, RectF barRect, Colo
     RSPoint rightEndPoint;
     rightEndPoint.SetX(barRect.Width());
     rightEndPoint.SetY(0.0f);
-    Color endColor = backgroundColor;
-    Color startColor = endColor.ChangeAlpha(0);
-    std::vector<float> rightPos { 0.0f, gradientWidth / (shadowMargin + gradientWidth), 1.0f };
-    std::vector<RSColorQuad> rightColors { startColor.GetValue(), endColor.GetValue(), endColor.GetValue() };
-    rightBrush.SetShaderEffect(
-        RSShaderEffect::CreateLinearGradient(rightStartPoint, rightEndPoint, rightColors, rightPos, RSTileMode::CLAMP));
-    canvas.DetachPen().AttachBrush(rightBrush);
-    canvas.DrawRect(rect);
+    PaintGradientRect(canvas, gradientRect, backgroundColor, rightStartPoint, rightEndPoint, shadowMargin,
+        gradientWidth);
 }
 
-void TabBarPaintMethod::PaintTopGradient(RSCanvas& canvas, RectF barRect, Color backgroundColor, float shadowMargin,
-    float gradientWidth)
+void TabBarPaintMethod::PaintTopGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    float shadowMargin, float gradientWidth)
 {
-    RSBrush topBrush;
-    RSRect rect(0.0f, 0.0f, barRect.Width(), shadowMargin + gradientWidth);
+    RSRect gradientRect(0.0f, 0.0f, barRect.Width(), shadowMargin + gradientWidth);
     RSPoint topStartPoint;
     topStartPoint.SetX(0.0f);
     topStartPoint.SetY(shadowMargin + gradientWidth);
     RSPoint topEndPoint;
     topEndPoint.SetX(0.0f);
     topEndPoint.SetY(0.0f);
-    Color endColor = backgroundColor;
-    Color startColor = endColor.ChangeAlpha(0);
-    std::vector<float> topPos { 0.0f, gradientWidth / (shadowMargin + gradientWidth), 1.0f };
-    std::vector<RSColorQuad> topColors { startColor.GetValue(), endColor.GetValue(), endColor.GetValue() };
-    topBrush.SetShaderEffect(
-        RSShaderEffect::CreateLinearGradient(topStartPoint, topEndPoint, topColors, topPos, RSTileMode::CLAMP));
-    canvas.DetachPen().AttachBrush(topBrush);
-    canvas.DrawRect(rect);
+    PaintGradientRect(canvas, gradientRect, backgroundColor, topStartPoint, topEndPoint, shadowMargin,
+        gradientWidth);
 }
 
-void TabBarPaintMethod::PaintBottomGradient(RSCanvas& canvas, RectF barRect, Color backgroundColor, float shadowMargin,
-    float gradientWidth)
+void TabBarPaintMethod::PaintBottomGradient(RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor,
+    float shadowMargin, float gradientWidth)
 {
-    RSBrush bottomBrush;
-    RSRect rect(0.0f, barRect.Height() - shadowMargin - gradientWidth,
+    RSRect gradientRect(0.0f, barRect.Height() - shadowMargin - gradientWidth,
         barRect.Width(), barRect.Height());
     RSPoint bottomStartPoint;
     bottomStartPoint.SetX(0.0f);
@@ -147,15 +132,23 @@ void TabBarPaintMethod::PaintBottomGradient(RSCanvas& canvas, RectF barRect, Col
     RSPoint bottomEndPoint;
     bottomEndPoint.SetX(0.0f);
     bottomEndPoint.SetY(barRect.Height());
+    PaintGradientRect(canvas, gradientRect, backgroundColor, bottomStartPoint, bottomEndPoint, shadowMargin,
+        gradientWidth);
+}
+
+void TabBarPaintMethod::PaintGradientRect(RSCanvas& canvas, const RSRect& gradientRect, const Color& backgroundColor,
+    const RSPoint& startPoint, const RSPoint& endPoint, float shadowMargin, float gradientWidth)
+{
+    RSBrush brush;
     Color endColor = backgroundColor;
     Color startColor = endColor.ChangeAlpha(0);
-    std::vector<float> bottomPos { 0.0f, gradientWidth / (shadowMargin + gradientWidth), 1.0f };
-    std::vector<RSColorQuad> bottomColors { startColor.GetValue(), endColor.GetValue(), endColor.GetValue() };
-    bottomBrush.SetShaderEffect(
+    std::vector<float> gradientPos { 0.0f, gradientWidth / (shadowMargin + gradientWidth), 1.0f };
+    std::vector<RSColorQuad> gradientColors { startColor.GetValue(), endColor.GetValue(), endColor.GetValue() };
+    brush.SetShaderEffect(
         RSShaderEffect::CreateLinearGradient(
-            bottomStartPoint, bottomEndPoint, bottomColors, bottomPos, RSTileMode::CLAMP));
-    canvas.DetachPen().AttachBrush(bottomBrush);
-    canvas.DrawRect(rect);
+            startPoint, endPoint, gradientColors, gradientPos, RSTileMode::CLAMP));
+    canvas.DetachPen().AttachBrush(brush);
+    canvas.DrawRect(gradientRect);
 }
 
 RefPtr<Modifier> TabBarPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)

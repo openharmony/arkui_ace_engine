@@ -99,7 +99,7 @@ void SwiperPattern::OnModifyDone()
     CHECK_NULL_VOID(layoutProperty);
 
     oldIndex_ = currentIndex_;
-    InitSwiperIndicator();
+    InitIndicator();
 
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
@@ -257,6 +257,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+    oldIndex_ = currentIndex_;
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
@@ -333,6 +334,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     FireChangeEvent();
+    oldIndex_ = currentIndex_;
     CalculateCacheRange();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -468,7 +470,7 @@ void SwiperPattern::InitSwiperController()
     });
 }
 
-void SwiperPattern::InitSwiperIndicator()
+void SwiperPattern::InitIndicator()
 {
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
@@ -492,35 +494,12 @@ void SwiperPattern::InitSwiperIndicator()
         }
     }
     CHECK_NULL_VOID(indicatorNode);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    CHECK_NULL_VOID(indicatorPattern);
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (swiperParameters_.dimLeft.has_value()) {
-        layoutProperty->UpdateLeft(swiperParameters_.dimLeft.value());
-    }
-    if (swiperParameters_.dimTop.has_value()) {
-        layoutProperty->UpdateTop(swiperParameters_.dimTop.value());
-    }
-    if (swiperParameters_.dimRight.has_value()) {
-        layoutProperty->UpdateRight(swiperParameters_.dimRight.value());
-    }
-    if (swiperParameters_.dimBottom.has_value()) {
-        layoutProperty->UpdateBottom(swiperParameters_.dimBottom.value());
-    }
-    if (swiperParameters_.dimSize.has_value()) {
-        paintProperty->UpdateSize(swiperParameters_.dimSize.value());
-    }
-    if (swiperParameters_.maskValue.has_value()) {
-        paintProperty->UpdateIndicatorMask(swiperParameters_.maskValue.value());
-    }
-    if (swiperParameters_.colorVal.has_value()) {
-        paintProperty->UpdateColor(swiperParameters_.colorVal.value());
-    }
-    if (swiperParameters_.selectedColorVal.has_value()) {
-        paintProperty->UpdateSelectedColor(swiperParameters_.selectedColorVal.value());
+    if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty(indicatorNode);
+    } else {
+        SaveDigitIndicatorProperty(indicatorNode);
     }
 
     auto renderContext = indicatorNode->GetRenderContext();
@@ -968,6 +947,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
             swiper->FireChangeEvent();
+            swiper->oldIndex_ = nextIndex;
             swiper->CalculateCacheRange();
         }
         if (restartAutoPlay) {
@@ -1198,6 +1178,58 @@ bool SwiperPattern::IsShowIndicator() const
     return swiperLayoutProperty->GetShowIndicatorValue(true);
 }
 
+SwiperIndicatorType SwiperPattern::GetIndicatorType() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, SwiperIndicatorType::DOT);
+    return swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT);
+}
+
+std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters()
+{
+    if (swiperParameters_ == nullptr) {
+        swiperParameters_ = std::make_shared<SwiperParameters>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        swiperParameters_->dimLeft = 0.0_vp;
+        swiperParameters_->dimTop = 0.0_vp;
+        swiperParameters_->dimRight = 0.0_vp;
+        swiperParameters_->dimBottom = 0.0_vp;
+        swiperParameters_->itemWidth = swiperIndicatorTheme->GetSize();
+        swiperParameters_->itemHeight = swiperIndicatorTheme->GetSize();
+        swiperParameters_->selectedItemWidth = swiperIndicatorTheme->GetSize();
+        swiperParameters_->selectedItemHeight = swiperIndicatorTheme->GetSize();
+        swiperParameters_->maskValue = true;
+        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+    }
+    return swiperParameters_;
+}
+
+std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters()
+{
+    if (swiperDigitalParameters_ == nullptr) {
+        swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperDigitalParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        swiperDigitalParameters_->dimLeft = 0.0_vp;
+        swiperDigitalParameters_->dimTop = 0.0_vp;
+        swiperDigitalParameters_->dimRight = 0.0_vp;
+        swiperDigitalParameters_->dimBottom = 0.0_vp;
+        swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        swiperDigitalParameters_->selectedFontColor =
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        swiperDigitalParameters_->fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+        swiperDigitalParameters_->selectedFontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+        swiperDigitalParameters_->fontWeight = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
+        swiperDigitalParameters_->selectedFontWeight =
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
+    }
+    return swiperDigitalParameters_;
+}
+
 int32_t SwiperPattern::TotalCount() const
 {
     auto host = GetHost();
@@ -1227,4 +1259,70 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
+void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto swiperParameters = GetSwiperParameters();
+    CHECK_NULL_VOID(swiperParameters);
+    layoutProperty->UpdateLeft(swiperParameters->dimLeft.value_or(0.0_vp));
+    layoutProperty->UpdateTop(swiperParameters->dimTop.value_or(0.0_vp));
+    layoutProperty->UpdateRight(swiperParameters->dimRight.value_or(0.0_vp));
+    layoutProperty->UpdateBottom(swiperParameters->dimBottom.value_or(0.0_vp));
+    paintProperty->UpdateItemWidth(swiperParameters->itemWidth.value_or(swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateItemHeight(swiperParameters->itemHeight.value_or(swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateSelectedItemWidth(swiperParameters->selectedItemWidth.value_or(
+        swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateSelectedItemHeight(swiperParameters->selectedItemHeight.value_or(
+        swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateIndicatorMask(swiperParameters->maskValue.value_or(false));
+    paintProperty->UpdateColor(swiperParameters->colorVal.value_or(swiperIndicatorTheme->GetColor()));
+    paintProperty->UpdateSelectedColor(swiperParameters->selectedColorVal.value_or(
+        swiperIndicatorTheme->GetSelectedColor()));
+}
+
+void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperDigitalParameters = GetSwiperDigitalParameters();
+    CHECK_NULL_VOID(swiperDigitalParameters);
+    layoutProperty->UpdateLeft(swiperDigitalParameters->dimLeft.value_or(0.0_vp));
+    layoutProperty->UpdateTop(swiperDigitalParameters->dimTop.value_or(0.0_vp));
+    layoutProperty->UpdateRight(swiperDigitalParameters->dimRight.value_or(0.0_vp));
+    layoutProperty->UpdateBottom(swiperDigitalParameters->dimBottom.value_or(0.0_vp));
+    layoutProperty->UpdateFontColor(swiperDigitalParameters->fontColor.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()));
+    layoutProperty->UpdateSelectedFontColor(swiperDigitalParameters->selectedFontColor.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()));
+    layoutProperty->UpdateFontSize(swiperDigitalParameters->fontSize.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
+    layoutProperty->UpdateSelectedFontSize(swiperDigitalParameters->selectedFontSize.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
+    layoutProperty->UpdateFontWeight(swiperDigitalParameters->fontWeight.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters->selectedFontWeight.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateLeft(swiperDigitalParameters->dimLeft.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateTop(swiperDigitalParameters->dimTop.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateRight(swiperDigitalParameters->dimRight.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateBottom(swiperDigitalParameters->dimBottom.value_or(0.0_vp));
+}
 } // namespace OHOS::Ace::NG

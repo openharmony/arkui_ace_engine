@@ -18,8 +18,6 @@
 
 #include <memory>
 
-#include "flutter/common/task_runners.h"
-#include "flutter/shell/common/thread_host.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "key_event.h"
 #include "wm/window.h"
@@ -27,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
+#include "core/common/flutter/flutter_thread_model.h"
 #include "core/common/platform_res_register.h"
 #include "core/event/key_event_recognizer.h"
 
@@ -36,7 +35,7 @@ using ReleaseCallback = std::function<void()>;
 
 class ACE_FORCE_EXPORT AceViewOhos : public AceView, public Referenced {
 public:
-    explicit AceViewOhos(int32_t id, flutter::ThreadHost threadHost, flutter::TaskRunners taskRunners);
+    explicit AceViewOhos(int32_t id, std::unique_ptr<FlutterThreadModel> threadModel);
     ~AceViewOhos() override = default;
     static AceViewOhos* CreateView(
         int32_t instanceId, bool useCurrentEventRunner = false, bool usePlatformThread = false);
@@ -136,9 +135,9 @@ public:
     bool Dump(const std::vector<std::string>& params) override;
     const void* GetNativeWindowById(uint64_t textureId) override;
 
-    const flutter::TaskRunners& GetTaskRunners() const
+    FlutterThreadModel* GetThreadModel() const
     {
-        return taskRunners_;
+        return threadModel_.get();
     }
 
 private:
@@ -214,8 +213,7 @@ private:
     std::unordered_map<int32_t, TouchPointInfo> touchPointInfoMap_;
 
     // TODO: still using flutter threads
-    const flutter::ThreadHost threadHost_;
-    const flutter::TaskRunners taskRunners_;
+    std::unique_ptr<FlutterThreadModel> threadModel_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceViewOhos);
 };

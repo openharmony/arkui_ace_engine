@@ -38,9 +38,14 @@ void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
 
     auto paintOffset = paintOffset_->Get();
     for (const auto& selectedRect : selectedRects_) {
-        drawingContext.canvas.DrawRect(
-            RSRect(paintOffset.GetX() + selectedRect.Left(), paintOffset.GetY() + selectedRect.Top(),
-                paintOffset.GetX() + selectedRect.Right(), paintOffset.GetY() + selectedRect.Bottom()));
+        auto rect = selectedRect;
+        if (contentRect_.has_value()) {
+            if (rect.Right() > contentRect_.value().Right()) {
+                rect.SetWidth(std::max(contentRect_.value().Right() - rect.Left(), 0.0));
+            }
+        }
+        drawingContext.canvas.DrawRect(RSRect(paintOffset.GetX() + rect.Left(), paintOffset.GetY() + rect.Top(),
+            paintOffset.GetX() + rect.Right(), paintOffset.GetY() + rect.Bottom()));
     }
     drawingContext.canvas.DetachBrush();
     drawingContext.canvas.Restore();

@@ -82,7 +82,7 @@ public:
     void MarkAnchor(const Dimension& x, const Dimension& y) override;
 
     void SetScale(float x, float y, float z) override;
-    void SetPivot(const Dimension& x, const Dimension& y) override;
+    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetRotate(float x, float y, float z, float angle) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
@@ -169,6 +169,8 @@ public:
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) override;
     void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
+    void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, int32_t type) override {}
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;

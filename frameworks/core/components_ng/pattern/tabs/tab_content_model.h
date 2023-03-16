@@ -33,13 +33,6 @@ enum class SelectedMode {
     BOARD,
 };
 
-inline SelectedMode ConvertStrToSelectedMode(const std::string& value)
-{
-    std::string temp = value;
-    transform(temp.begin(), temp.end(), temp.begin(), tolower);
-    return temp == "board" ? SelectedMode::BOARD : SelectedMode::INDICATOR;
-}
-
 struct IndicatorStyle final {
     Color color = Color::WHITE;
     Dimension height = 0.0_vp;

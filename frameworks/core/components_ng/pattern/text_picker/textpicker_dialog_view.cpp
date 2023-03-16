@@ -335,38 +335,38 @@ void TextPickerDialogView::SetTextProperties(const RefPtr<PickerTheme>& pickerTh
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
 
-    Color disappearColor = properties.hasValueFlag & FLAG_DISAPPEAR_COLOR ?
-        properties.disappearColor_ : disappearStyle.GetTextColor();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor, disappearColor);
-    Color normalColor = properties.hasValueFlag & FLAG_COLOR ?
-        properties.color_ : normalStyle.GetTextColor();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color, normalColor);
-    Color selectedColor = properties.hasValueFlag & FLAG_SELECTED_COLOR ?
-        properties.selectedColor_ : selectedStyle.GetTextColor();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor, selectedColor);
+    if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, DisappearFontSize, properties.disappearTextStyle_.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearColor,
+        properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight,
+        properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
 
-    Dimension disappearFontSize = (properties.hasValueFlag & FLAG_DISAPPEAR_FONTSIZE) &&
-        properties.disappearFontSize_.IsValid() ?
-        properties.disappearFontSize_ : disappearStyle.GetFontSize();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontSize, disappearFontSize);
-    Dimension normalFontSize = (properties.hasValueFlag & FLAG_FONTSIZE) &&
-        properties.fontSize_.IsValid() ?
-        properties.fontSize_ : normalStyle.GetFontSize();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, normalFontSize);
-    Dimension selectedFontSize = (properties.hasValueFlag & FLAG_SELECTED_FONTSIZE) &&
-        properties.selectedFontSize_.IsValid() ?
-        properties.selectedFontSize_ : selectedStyle.GetFontSize();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize, selectedFontSize);
+    if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, FontSize, properties.normalTextStyle_.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, FontSize, normalStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Color,
+        properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight,
+        properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
 
-    FontWeight disappearWeight = properties.hasValueFlag & FLAG_DISAPPEAR_WEIGHT ?
-        properties.disappearWeight_ : disappearStyle.GetFontWeight();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearWeight, disappearWeight);
-    FontWeight normalWeight = properties.hasValueFlag & FLAG_WEIGHT ?
-        properties.weight_ : normalStyle.GetFontWeight();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Weight, normalWeight);
-    FontWeight selectedWeight = properties.hasValueFlag & FLAG_SELECTED_WEIGHT ?
-        properties.selectedWeight_ : selectedStyle.GetFontWeight();
-    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight, selectedWeight);
+    if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            TextPickerLayoutProperty, SelectedFontSize, properties.selectedTextStyle_.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedColor,
+        properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedWeight,
+        properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
 }
 
 void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange)

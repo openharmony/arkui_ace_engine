@@ -211,6 +211,9 @@ bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double key
                 isVirtualKeyBoardShow_ = VkState::VK_SHOW;
                 return true;
             }
+            if (height - GetCoordinatePoint().GetY() < keyboard) {
+                return true;
+            }
             drawSize_.SetHeight(height - keyboard - GetCoordinatePoint().GetY());
             delegate_->SetBoundsOrResize(drawSize_, GetGlobalOffset());
             SyncGeometryProperties();

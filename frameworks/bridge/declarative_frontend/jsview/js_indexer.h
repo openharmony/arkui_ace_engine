@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,11 +36,15 @@ public:
     static void SetPopupFont(const JSCallbackInfo& args);
     static void GetFontContent(const JSCallbackInfo& args, TextStyle& textStyle);
     static void SetItemSize(const JSCallbackInfo& args);
-    static void SetAlignStyle(int32_t value);
+    static void SetAlignStyle(const JSCallbackInfo& args);
     static void SetSelected(const JSCallbackInfo& args);
     static void SetPopupPosition(const JSCallbackInfo& args);
     static void JsOnRequestPopupData(const JSCallbackInfo& args);
     static void JsOnPopupSelected(const JSCallbackInfo& args);
+    static void SetPopupSelectedColor(const JSCallbackInfo& args);
+    static void SetPopupUnselectedColor(const JSCallbackInfo& args);
+    static void SetPopupItemFont(const JSCallbackInfo& args);
+    static void SetPopupItemBackgroundColor(const JSCallbackInfo& args);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_INDEXER_H

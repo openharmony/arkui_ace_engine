@@ -914,9 +914,8 @@ void WebPattern::OnModifyDone()
             renderSurface_->InitSurface();
             delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
-
-        delegate_->UpdateBackgroundColor(
-            static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue()));
+        delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
+            static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
         delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(true));
@@ -989,6 +988,9 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         drawSizeCache_.SetSize(drawSize_);
         if (drawSize_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
             isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+            return true;
+        }
+        if (height - GetCoordinatePoint()->GetY() < keyboard) {
             return true;
         }
         drawSize_.SetHeight(height - keyboard - GetCoordinatePoint()->GetY());

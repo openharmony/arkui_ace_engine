@@ -19,13 +19,14 @@
 #include <iomanip>
 #include <ios>
 #include <optional>
-#include <string>
 #include <sstream>
+#include <string>
 
 #include "base/geometry/dimension.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/property/property.h"
+
 
 namespace OHOS::Ace::NG {
 
@@ -56,14 +57,13 @@ struct ScaleOptions {
     ScaleOptions() = default;
     bool operator==(const ScaleOptions& other) const
     {
-        return NearEqual(xScale, other.xScale) && NearEqual(yScale, other.yScale) &&
-               NearEqual(zScale, other.zScale) && NearEqual(centerX, other.centerX) &&
-               NearEqual(centerY, other.centerY);
+        return NearEqual(xScale, other.xScale) && NearEqual(yScale, other.yScale) && NearEqual(zScale, other.zScale) &&
+               NearEqual(centerX, other.centerX) && NearEqual(centerY, other.centerY);
     }
     std::string ToString() const
     {
-        return "scale:[" + std::to_string(xScale) + "," + std::to_string(yScale) + "," + std::to_string(zScale) +
-               "," + centerX.ToString() + "," + centerY.ToString() + "]";
+        return "scale:[" + std::to_string(xScale) + "," + std::to_string(yScale) + "," + std::to_string(zScale) + "," +
+               centerX.ToString() + "," + centerY.ToString() + "]";
     }
 };
 struct RotateOptions {
@@ -74,6 +74,7 @@ struct RotateOptions {
     float angle = 0.0f;
     Dimension centerX;
     Dimension centerY;
+    Dimension centerZ;
     RotateOptions(float xDirection, float yDirection, float zDirection, float angle, const Dimension& centerX,
         const Dimension& centerY)
         : xDirection(xDirection), yDirection(yDirection), zDirection(zDirection), angle(angle), centerX(centerX),
@@ -84,13 +85,14 @@ struct RotateOptions {
     {
         return NearEqual(angle, other.angle) && NearEqual(xDirection, other.xDirection) &&
                NearEqual(yDirection, other.yDirection) && NearEqual(zDirection, other.zDirection) &&
-               NearEqual(centerX, other.centerX) && NearEqual(centerY, other.centerY);
+               NearEqual(centerX, other.centerX) && NearEqual(centerY, other.centerY) &&
+               NearEqual(centerZ, other.centerZ);
     }
     std::string ToString() const
     {
         return "rotate:[" + std::to_string(xDirection) + "," + std::to_string(yDirection) + "," +
                std::to_string(zDirection) + "," + centerX.ToString() + "," + centerY.ToString() +
-               ", angle:" + std::to_string(angle) + "]";
+               ", cameraDistance: " + centerZ.ToString() + ", angle:" + std::to_string(angle) + "]";
     }
 };
 struct TransitionOptions {

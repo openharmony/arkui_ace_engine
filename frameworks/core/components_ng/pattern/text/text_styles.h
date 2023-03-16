@@ -35,6 +35,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMinFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(AdaptMaxFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LetterSpacing, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ForegroundColor, Color);
 };
 
 struct TextLineStyle {

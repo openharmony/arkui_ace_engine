@@ -30,10 +30,10 @@ public:
     void SetValue(const std::string& value) override;
     void SetOnChange(TextChangeEvent&& onChange) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
-    void SetDefaultAttributes(RefPtr<PickerTheme> pickerTheme) override;
-    void SetDisappearTextStyle(const NG::PickerTextStyle& value) override;
-    void SetNormalTextStyle(const NG::PickerTextStyle& value) override;
-    void SetSelectedTextStyle(const NG::PickerTextStyle& value) override;
+    void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override;
+    void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
+    void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
+    void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override;
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateButtonNode();

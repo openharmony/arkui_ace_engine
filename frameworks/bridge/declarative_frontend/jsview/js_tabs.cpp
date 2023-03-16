@@ -221,43 +221,30 @@ void JSTabs::SetDivider(const JSCallbackInfo& info)
     TabsItemDivider divider;
     if (info.Length() < 1) {
         LOGW("Invalid params");
-        return;
-    }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)
-        || divider.strokeWidth.Value() < 0.0f) {
-        LOGW("Invalid strokeWidth of divider");
-        divider.strokeWidth.Reset();
-    }
-    if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-        // Failed to get color from param, using default color defined in theme
-        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-        if (tabTheme) {
-            divider.color = tabTheme->GetDividerColor();
+    } else {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth) ||
+            divider.strokeWidth.Value() < 0.0f) {
+            divider.strokeWidth.Reset();
         }
-    }
+        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+            if (tabTheme) {
+                divider.color = tabTheme->GetDividerColor();
+            }
+        }
 
-    if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)
-        || divider.startMargin.Value() < 0.0f) {
-        // Failed to get color from param, using default color defined in theme
-        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-        if (tabTheme) {
-            divider.startMargin = tabTheme->GetDividerMargin();
+        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin) ||
+            divider.startMargin.Value() < 0.0f) {
+            divider.startMargin.Reset();
+        }
+        
+        if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin) ||
+            divider.endMargin.Value() < 0.0f) {
+            divider.endMargin.Reset();
         }
     }
-    
-    if (!info[0]->IsObject() || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)
-        || divider.endMargin.Value() < 0.0f) {
-        // Failed to get color from param, using default color defined in theme
-        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
-        if (tabTheme) {
-            divider.endMargin = tabTheme->GetDividerMargin();
-        }
-    }
-
     TabsModel::GetInstance()->SetDivider(divider);
-
-    info.ReturnSelf();
 }
 
 void JSTabs::JSBind(BindingTarget globalObj)

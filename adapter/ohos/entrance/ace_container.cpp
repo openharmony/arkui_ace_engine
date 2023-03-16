@@ -689,6 +689,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const 
 
 void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
+    SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     HdcRegister::Get().StopHdcRegister(instanceId);
@@ -1068,7 +1069,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
     if (!isSubContainer_) {
         auto* aceView = static_cast<AceViewOhos*>(aceView_);
         ACE_DCHECK(aceView != nullptr);
-        flutterTaskExecutor->InitOtherThreads(aceView->GetTaskRunners());
+        flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
     }
     ContainerScope scope(instanceId);
     if (type_ == FrontendType::DECLARATIVE_JS) {
@@ -1478,7 +1479,7 @@ std::shared_ptr<Rosen::RSSurfaceNode> AceContainer::GetFormSurfaceNode(int32_t i
     return window->GetRSSurfaceNode();
 }
 
-void AceContainer::UpdateFormDate(const std::string& data)
+void AceContainer::UpdateFormData(const std::string& data)
 {
     auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(frontend_);
     CHECK_NULL_VOID(frontend);
@@ -1599,7 +1600,12 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_HotReloadPage()
 {
     AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
         auto ace = AceType::DynamicCast<AceContainer>(container);
-        if (ace) {
+        CHECK_NULL_VOID(ace);
+        if (ace->IsUseNewPipeline()) {
+            auto frontend = ace->GetFrontend();
+            CHECK_NULL_VOID(frontend);
+            frontend->RebuildAllPages();
+        } else {
             ace->NotifyConfigurationChange(true);
         }
         LOGI("frontend rebuild finished");

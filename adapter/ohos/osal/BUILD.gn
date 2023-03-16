@@ -123,7 +123,10 @@ template("ace_osal_ohos_source_set") {
       "hisysevent_native:libhisysevent",
       "hitrace_native:libhitracechain",
     ]
-    deps += [ "//foundation/graphic/graphic_2d/rosen/modules/frame_analyzer:libframe_analyzer" ]
+    deps += [
+      "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
+      "//foundation/graphic/graphic_2d/rosen/modules/frame_analyzer:libframe_analyzer",
+    ]
   }
 }
 

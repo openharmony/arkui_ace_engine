@@ -88,6 +88,7 @@ public:
     static void JsLightUpEffect(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
+    static void JsBindContentCover(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);

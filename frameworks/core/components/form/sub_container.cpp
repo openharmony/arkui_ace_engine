@@ -316,6 +316,9 @@ void SubContainer::RunCard(int64_t formId, const std::string& path, const std::s
             CHECK_NULL_VOID(pattern);
             pipelineContext_->SetDrawDelegate(pattern->GetDrawDelegate());
             frontend_->RunPage(0, "", data);
+            if (onFormLoadCallback_) {
+                onFormLoadCallback_();
+            }
             return;
         }
 

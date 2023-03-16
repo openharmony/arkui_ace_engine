@@ -570,8 +570,8 @@ var BarMode;
 
 var SelectedMode;
 (function (SelectedMode) {
-  SelectedMode["INDICATOR"] = "INDICATOR";
-  SelectedMode["BOARD"] = "BOARD";
+  SelectedMode[SelectedMode["INDICATOR"] = 0] = "INDICATOR";
+  SelectedMode[SelectedMode["BOARD"] = 1] = "BOARD";
 })(SelectedMode || (SelectedMode = {}));
 
 var SizeType;
@@ -1029,6 +1029,13 @@ var TransitionEdge;
     TransitionEdge['END']  = 3;
 })(TransitionEdge || (TransitionEdge = {}));
 
+var ModalTransition;
+(function (ModalTransition) {
+  ModalTransition[ModalTransition["Default"] = 0] = "Default";
+  ModalTransition[ModalTransition["None"] = 1] = "None";
+  ModalTransition[ModalTransition["Alpha"] = 2] = "Alpha";
+})(ModalTransition || (ModalTransition = {}));
+
 var CtrlKey;
 (function (CtrlKey) {
   CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
@@ -1062,6 +1069,7 @@ class SubTabBarStyle {
   }
 }
 
+
 class ProgressMask {
   constructor(value, total, color) {
     this.type = 'ProgressMask';
@@ -1089,6 +1097,89 @@ class BottomTabBarStyle {
   }
   static of(icon, text) {
     return new BottomTabBarStyle(icon, text);
+  }
+}
+
+class Indicator {
+  top(value) {
+    this.top = value;
+    return this;
+  }
+  left(value) {
+    this.left = value;
+    return this;
+  }
+  right(value) {
+    this.right = value;
+    return this;
+  }
+  bottom(value) {
+    this.bottom = value;
+    return this;
+  }
+  static dot() {
+    return new DotIndicator();
+  }
+  static digit() {
+    return new DigitIndicator();
+  }
+}
+
+class DotIndicator extends Indicator {
+  constructor() {
+    super();
+    this.type = 'DotIndicator';
+  }
+  itemWidth(value) {
+    this.itemWidth = value;
+    return this;
+  }
+  itemHeight(value) {
+    this.itemHeight = value;
+    return this;
+  }
+  selectedItemWidth(value) {
+    this.selectedItemWidth = value;
+    return this;
+  }
+  selectedItemHeight(value) {
+    this.selectedItemHeight = value;
+    return this;
+  }
+  mask(value) {
+    this.mask = value;
+    return this;
+  }
+  color(value) {
+    this.color = value;
+    return this;
+  }
+  selectedColor(value) {
+    this.selectedColor = value;
+    return this;
+  }
+}
+
+class DigitIndicator extends Indicator{
+  constructor() {
+    super();
+    this.type = 'DigitIndicator';
+  }
+  fontColor(value) {
+    this.fontColor = value;
+    return this;
+  }
+  selectedFontColor(value) {
+    this.selectedFontColor = value;
+    return this;
+  }
+  digitFont(value) {
+    this.digitFont = value;
+    return this;
+  }
+  selectedDigitFont(value) {
+    this.selectedDigitFont = value;
+    return this;
   }
 }
 

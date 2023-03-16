@@ -100,8 +100,6 @@ public:
 protected:
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;
-    void DumpProperty(const RefPtr<AccessibilityNode> node);
-    void DumpPropertyNG(const std::vector<std::string>& params);
     void DumpTree(int32_t depth, NodeId nodeID) override;
 
 private:
@@ -209,8 +207,10 @@ private:
     void SetExecuteActionResult(
         Accessibility::AccessibilityElementOperatorCallback& callback, const bool succeeded, const int32_t requestId);
 
+    void DumpProperty(const RefPtr<AccessibilityNode>& node);
+    void DumpPropertyNG(const std::vector<std::string>& params);
     RefPtr<NG::PipelineContext> FindPipelineByElementId(const int32_t elementId, RefPtr<NG::FrameNode>& node);
-    RefPtr<NG::FrameNode> FindNodeFromPipeline(const WeakPtr<PipelineBase> context, const int32_t elementId);
+    RefPtr<NG::FrameNode> FindNodeFromPipeline(const WeakPtr<PipelineBase>& context, const int32_t elementId);
     RefPtr<PipelineBase> GetPipelineByWindowId(const int32_t windowId);
 
     std::string callbackKey_;

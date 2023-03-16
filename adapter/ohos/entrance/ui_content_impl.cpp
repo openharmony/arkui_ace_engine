@@ -22,7 +22,6 @@
 #include "ability_info.h"
 #include "configuration.h"
 #include "dm/display_manager.h"
-#include "extension_ability_info.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -68,6 +67,7 @@ const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
+const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
 } // namespace
 
@@ -636,7 +636,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
-                    want.SetParam("address", address);
+                    want.SetUri(address);
+                    want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
             false, false, useNewPipe);
@@ -748,7 +749,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
             CHECK_NULL_VOID(frontend);
             frontend->SetBundleName(bundleName_);
             frontend->SetModuleName(moduleName_);
-            frontend->SetIsBundle(isBundle_);
+            // arkTSCard only support "esModule" compile mode
+            frontend->SetIsBundle(false);
         } else {
             Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         }
@@ -762,7 +764,7 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
 
     if (isFormRender_ && !isFormRenderInit_) {
         container->UpdateFormSharedImage(formImageDataMap_);
-        container->UpdateFormDate(formData_);
+        container->UpdateFormData(formData_);
         isFormRenderInit_ = true;
     }
 
@@ -1074,7 +1076,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
-                    want.SetParam("address", address);
+                    want.SetUri(address);
+                    want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
             false, false, useNewPipe);
@@ -1257,8 +1260,6 @@ void UIContentImpl::ReloadForm()
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
     Platform::AceContainer::ClearEngineCache(instanceId_);
-    Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
-        startUrl_, "");
 }
 
 void UIContentImpl::Focus()
@@ -1556,12 +1557,12 @@ void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pix
     pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
 }
 
-void UIContentImpl::UpdateFormDate(const std::string& data)
+void UIContentImpl::UpdateFormData(const std::string& data)
 {
     if (isFormRenderInit_) {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
-        container->UpdateFormDate(data);
+        container->UpdateFormData(data);
     } else {
         formData_ = data;
     }

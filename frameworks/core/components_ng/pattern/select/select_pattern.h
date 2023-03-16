@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/option/option_paint_method.h"
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
 #include "core/components_ng/pattern/select/select_view.h"
@@ -47,6 +48,11 @@ public:
         return false;
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<SelectAccessibilityProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<SelectLayoutAlgorithm>();
@@ -62,6 +68,11 @@ public:
     void SetMenuNode(const RefPtr<FrameNode>& menu)
     {
         menu_ = menu;
+    }
+
+    const RefPtr<FrameNode> GetMenuNode()
+    {
+        return menu_;
     }
 
     void SetSelectSize(const SizeF& selectSize)
@@ -152,6 +163,8 @@ public:
     void PlayBgColorAnimation(bool isHoverChange = true);
     void SetSpace(const Dimension& value);
     void SetArrowPosition(const ArrowPosition value);
+
+    std::string GetValue();
 
 private:
     void OnModifyDone() override;

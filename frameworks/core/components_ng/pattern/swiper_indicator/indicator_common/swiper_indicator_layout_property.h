@@ -27,6 +27,14 @@ struct IndicatorLayoutStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Right, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Bottom, Dimension);
 };
+struct DigitIndicatorLayoutStyle {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedFontColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedFontSize, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedFontWeight, FontWeight);
+};
 
 class ACE_EXPORT SwiperIndicatorLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(SwiperIndicatorLayoutProperty, LayoutProperty);
@@ -41,6 +49,7 @@ public:
         auto value = MakeRefPtr<SwiperIndicatorLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propIndicatorLayoutStyle_ = CloneIndicatorLayoutStyle();
+        value->propDigitIndicatorLayoutStyle_ = CloneDigitIndicatorLayoutStyle();
         return value;
     }
 
@@ -48,6 +57,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetIndicatorLayoutStyle();
+        ResetDigitIndicatorLayoutStyle();
     }
 
     ACE_DEFINE_PROPERTY_GROUP(IndicatorLayoutStyle, IndicatorLayoutStyle);
@@ -55,6 +65,19 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(IndicatorLayoutStyle, Top, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(IndicatorLayoutStyle, Right, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(IndicatorLayoutStyle, Bottom, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_GROUP(DigitIndicatorLayoutStyle, DigitIndicatorLayoutStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DigitIndicatorLayoutStyle, FontColor, Color,
+        PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DigitIndicatorLayoutStyle, SelectedFontColor, Color,
+        PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DigitIndicatorLayoutStyle, FontSize, Dimension,
+        PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DigitIndicatorLayoutStyle, SelectedFontSize, Dimension,
+        PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DigitIndicatorLayoutStyle, FontWeight, FontWeight,
+        PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(DigitIndicatorLayoutStyle, SelectedFontWeight, FontWeight,
+        PROPERTY_UPDATE_MEASURE_SELF);
 };
 } // namespace OHOS::Ace::NG
 

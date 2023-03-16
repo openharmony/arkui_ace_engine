@@ -166,8 +166,10 @@ void ListItemPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     if (HasStartNode() || HasEndNode()) {
-        axis_ = GetAxis();
-        InitSwiperAction();
+        auto axis = GetAxis();
+        bool axisChanged = axis_ != axis;
+        axis_ = axis;
+        InitSwiperAction(axisChanged);
         return;
     }
     panEvent_.Reset();
@@ -192,8 +194,9 @@ void ListItemPattern::MarkDirtyNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void ListItemPattern::InitSwiperAction()
+void ListItemPattern::InitSwiperAction(bool axisChanged)
 {
+    bool isPanInit = false;
     if (!panEvent_) {
         auto weak = AceType::WeakClaim(this);
         auto actionStartTask = [weak](const GestureEvent& info) {
@@ -214,9 +217,11 @@ void ListItemPattern::InitSwiperAction()
             pattern->HandleDragEnd(info);
         };
         GestureEventNoParameter actionCancelTask;
-        float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
         panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
             std::move(actionEndTask), std::move(actionCancelTask));
+        isPanInit = true;
+    }
+    if (isPanInit || axisChanged) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto hub = host->GetEventHub<EventHub>();
@@ -226,7 +231,12 @@ void ListItemPattern::InitSwiperAction()
         PanDirection panDirection = {
             .type = axis_ == Axis::HORIZONTAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL,
         };
+        float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
         gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
+
+        startNodeSize_ = 0.0f;
+        endNodeSize_ = 0.0f;
+        curOffset_ = 0.0f;
     }
     if (!springController_) {
         springController_ = AceType::MakeRefPtr<Animator>(PipelineBase::GetCurrentContext());

@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -140,5 +139,4 @@ bool TabsNode::GetFadingEdge() const
     CHECK_NULL_RETURN(tabBarProperty, true);
     return tabBarProperty->GetFadingEdge().value_or(true);
 }
-
 } // namespace OHOS::Ace::NG

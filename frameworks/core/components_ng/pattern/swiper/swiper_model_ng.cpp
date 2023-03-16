@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -73,6 +74,12 @@ void SwiperModelNG::SetDisplayCount(int32_t displayCount)
 void SwiperModelNG::SetShowIndicator(bool showIndicator)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, ShowIndicator, showIndicator);
+}
+
+void SwiperModelNG::SetIndicatorType(SwiperIndicatorType indicatorType)
+{
+    SwiperIndicatorUtils::SetSwiperIndicatorType(indicatorType);
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, IndicatorType, indicatorType);
 }
 
 void SwiperModelNG::SetItemSpace(const Dimension& itemSpace)
@@ -178,6 +185,24 @@ void SwiperModelNG::SetIndicatorStyle(const SwiperParameters& swiperParameters)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
+};
+
+void SwiperModelNG::SetDotIndicatorStyle(const SwiperParameters& swiperParameters)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperParameters(swiperParameters);
+};
+
+void SwiperModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperDigitalParameters(swiperDigitalParameters);
 };
 
 void SwiperModelNG::SetOnClick(

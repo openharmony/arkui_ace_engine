@@ -43,6 +43,8 @@ public:
 
     void OnActionEvent(const std::string& action) const;
 
+    void OnLoadEvent();
+
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<FormLayoutProperty>();
@@ -75,6 +77,7 @@ private:
 
     void FireOnAcquiredEvent(int64_t id) const;
     void FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) const;
+    void FireOnLoadEvent() const;
     void FireOnErrorEvent(const std::string& code, const std::string& msg) const;
     void FireOnUninstallEvent(int64_t id) const;
 

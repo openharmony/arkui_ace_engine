@@ -44,16 +44,21 @@ int32_t FormRendererDelegateProxy::OnSurfaceCreate(
     }
 
     if (!data.WriteParcelable(&want)) {
-        HILOG_ERROR("register callback fail, want error");
+        HILOG_ERROR("%{public}s fail, write want error", __func__);
         return ERR_INVALID_VALUE;
     }
 
     MessageParcel reply;
     MessageOption option;
-    int32_t error = Remote()->SendRequest(
+    auto remoteProxy = Remote();
+    if (!remoteProxy) {
+        HILOG_ERROR("Send surfaceNode failed, ipc remoteobj is null");
+        return IPC_PROXY_ERR;
+    }
+    int32_t error = remoteProxy->SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE), data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("register callback fail, error: %d", error);
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
         return error;
     }
 
@@ -69,7 +74,7 @@ int32_t FormRendererDelegateProxy::OnActionEvent(const std::string& action)
     }
 
     if (!data.WriteString(action)) {
-        HILOG_ERROR("register callback fail, action error");
+        HILOG_ERROR("%{public}s, write action error", __func__);
         return ERR_INVALID_VALUE;
     }
 
@@ -78,7 +83,7 @@ int32_t FormRendererDelegateProxy::OnActionEvent(const std::string& action)
     int32_t error = Remote()->SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ACTION_CREATE), data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("register callback fail, error: %d", error);
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
         return error;
     }
 
@@ -94,12 +99,12 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::s
     }
 
     if (!data.WriteString(code)) {
-        HILOG_ERROR("register callback fail, code error");
+        HILOG_ERROR("%{public}s, write code error", __func__);
         return ERR_INVALID_VALUE;
     }
 
     if (!data.WriteString(msg)) {
-        HILOG_ERROR("register callback fail, msg error");
+        HILOG_ERROR("%{public}s, write msg error", __func__);
         return ERR_INVALID_VALUE;
     }
 
@@ -108,7 +113,7 @@ int32_t FormRendererDelegateProxy::OnError(const std::string& code, const std::s
     int32_t error = Remote()->SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR), data, reply, option);
     if (error != NO_ERROR) {
-        HILOG_ERROR("register callback fail, error: %d", error);
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
         return error;
     }
 

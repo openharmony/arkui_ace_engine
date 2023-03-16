@@ -247,6 +247,7 @@ public:
     void SetPositionMode(PositionMode positionMode)
     {
         positionMode_ = positionMode;
+        positionModeUpdate_ = true;
     }
 
     void SetShapeMode(ShapeMode shapeMode)
@@ -394,6 +395,7 @@ private:
     bool isDriving_ = false; // false: scroll driving; true: bar driving
     bool isHover_ = false;
     bool inSpring = false; // whether bar in the spring state
+    bool positionModeUpdate_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;

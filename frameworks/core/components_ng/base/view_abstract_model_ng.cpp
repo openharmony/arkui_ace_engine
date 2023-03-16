@@ -29,8 +29,8 @@ void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNo
 }
 } // namespace
 
-void ViewAbstractModelNG::BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-    const MenuParam& menuParam)
+void ViewAbstractModelNG::BindMenu(
+    std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     GestureEventFunc showMenu;
@@ -117,5 +117,45 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         LOGE("The arg responseType is invalid.");
         return;
     }
+}
+
+void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const Dimension& z)
+{
+    DimensionOffset center(x, y);
+    if (!NearZero(z.Value())) {
+        center.SetZ(z);
+    }
+    ViewAbstract::SetPivot(center);
+}
+
+void ViewAbstractModelNG::SetScale(float x, float y, float z)
+{
+    VectorF scale(x, y);
+    if (x < 0) {
+        x = 1;
+    }
+    if (y < 0) {
+        y = 1;
+    }
+    ViewAbstract::SetScale(scale);
+}
+
+void ViewAbstractModelNG::BindContentCover(
+    bool isShow, std::function<void(const std::string&)>&& callback, std::function<void()>&& buildFunc, int32_t type)
+{
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(targetNode);
+    auto buildNodeFunc = [buildFunc]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildNodeFunc), type, targetNode->GetId());
 }
 } // namespace OHOS::Ace::NG

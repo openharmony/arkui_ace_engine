@@ -32,7 +32,6 @@ namespace OHOS::Ace::NG {
 
 namespace {
 
-constexpr int32_t CHILD_COUNT = 2;
 constexpr double DEFAULT_INDICATOR_OFFSET = 16.0;
 constexpr int32_t DEFAULT_FRICTION_RATIO = 42;
 constexpr char REFRESH_LAST_UPDATED[] = "refresh.last_updated"; // I18n for last updated
@@ -58,21 +57,18 @@ void RefreshModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TriggerRefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, false);
 }
 
 void RefreshModelNG::Pop()
 {
     auto refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(refreshNode);
-    if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
-        LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
-        return;
-    }
     auto layoutProperty = refreshNode->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto refreshRenderProperty = refreshNode->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
-
+    if (!layoutProperty->GetIsCustomBuilderExistValue()) {
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_VOID(textChild);
     refreshNode->AddChild(textChild);
@@ -103,6 +99,7 @@ void RefreshModelNG::Pop()
     refreshNode->AddChild(loadingProgressChild);
     auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
+    }
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 void RefreshModelNG::SetRefreshing(bool isRefreshing)
@@ -205,6 +202,16 @@ void RefreshModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
+void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
+{
+    CHECK_NULL_VOID(customBuilder);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddCustomBuilderNode(customBuilder);
 }
 
 } // namespace OHOS::Ace::NG

@@ -256,6 +256,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     FocusToJsonValue(json);
     MouseToJsonValue(json);
     TouchToJsonValue(json);
+    json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
 void FrameNode::OnAttachToMainTree()
@@ -1048,7 +1049,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (childHitResult == HitTestResult::STOP_BUBBLING) {
             preventBubbling = true;
             consumed = true;
-            if ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
+            if ((child->GetHitTestMode() == HitTestMode::HTMBLOCK) ||
+                (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF)) {
                 break;
             }
@@ -1067,6 +1069,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     if (consumed) {
         testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
         consumed = false;
+    } else if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+        testResult = HitTestResult::STOP_BUBBLING;
     }
 
     if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&

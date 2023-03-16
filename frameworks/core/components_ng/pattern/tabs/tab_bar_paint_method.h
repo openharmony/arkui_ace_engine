@@ -27,7 +27,7 @@ class TabBarPaintMethod : public NodePaintMethod {
 
 public:
     TabBarPaintMethod(const RefPtr<TabBarModifier>& tabBarModifier,
-        const std::vector<bool>& gradientRegions, Color backgroundColor,
+        const std::vector<bool>& gradientRegions, const Color& backgroundColor,
         const IndicatorStyle& indicatorStyle, float currentIndicatorOffset, SelectedMode selectedMode)
         : tabBarModifier_(tabBarModifier), gradientRegions_(gradientRegions),
         backgroundColor_(backgroundColor), indicatorStyle_(indicatorStyle),
@@ -40,21 +40,23 @@ public:
 
 private:
     static void PaintGradient(
-        RSCanvas& canvas, RectF barRect, Color backgroundColor, std::vector<bool> gradientRegions);
-    static void PaintLeftGradient(RSCanvas& context, RectF barRect, Color backgroundColor, float shadowMargin,
-        float gradientWidth);
-    static void PaintRightGradient(RSCanvas& context, RectF barRect, Color backgroundColor, float shadowMargin,
-        float gradientWidth);
-    static void PaintTopGradient(RSCanvas& context, RectF barRect, Color backgroundColor, float shadowMargin,
-        float gradientWidth);
-    static void PaintBottomGradient(RSCanvas& context, RectF barRect, Color backgroundColor, float shadowMargin,
-        float gradientWidth);
+        RSCanvas& canvas, const RectF& barRect, const Color& backgroundColor, std::vector<bool> gradientRegions);
+    static void PaintLeftGradient(RSCanvas& context, const RectF& barRect, const Color& backgroundColor,
+        float shadowMargin, float gradientWidth);
+    static void PaintRightGradient(RSCanvas& context, const RectF& barRect, const Color& backgroundColor,
+        float shadowMargin, float gradientWidth);
+    static void PaintTopGradient(RSCanvas& context, const RectF& barRect, const Color& backgroundColor,
+        float shadowMargin, float gradientWidth);
+    static void PaintBottomGradient(RSCanvas& context, const RectF& barRect, const Color& backgroundColor,
+        float shadowMargin, float gradientWidth);
+    static void PaintGradientRect(RSCanvas& context, const RSRect& gradientRect, const Color& backgroundColor,
+        const RSPoint& startPoint, const RSPoint& endPoint, float shadowMargin, float gradientWidth);
 
     RefPtr<TabBarModifier> tabBarModifier_;
     std::vector<bool> gradientRegions_;
     Color backgroundColor_;
     IndicatorStyle indicatorStyle_;
-    float currentIndicatorOffset_;
+    float currentIndicatorOffset_ = 0.0f;
     SelectedMode selectedMode_ = SelectedMode::INDICATOR;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPaintMethod);
 };

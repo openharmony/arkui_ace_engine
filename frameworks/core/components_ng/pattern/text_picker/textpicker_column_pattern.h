@@ -229,26 +229,26 @@ private:
     void HandleMouseEvent(bool isHover);
     void SetButtonBackgroundColor(const Color& pressColor);
     void PlayPressAnimation(const Color& pressColor);
-    void FlushCurrentTextOptions(RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+    void FlushCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         bool isUpateTextContentOnly);
     void FlushCurrentImageOptions();
-    void FlushCurrentMixtureOptions(RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+    void FlushCurrentMixtureOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         bool isUpateTextContentOnly);
-    void UpdatePickerTextProperties(RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
+    void UpdatePickerTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         uint32_t currentIndex, uint32_t middleIndex, uint32_t showCount);
-    void UpdateSelectedTextProperties(RefPtr<PickerTheme>& pickerTheme,
-        RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
-    void UpdateCandidateTextProperties(RefPtr<PickerTheme>& pickerTheme,
-        RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
-    void UpdateDisappearTextProperties(RefPtr<PickerTheme>& pickerTheme,
-        RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
-    void AddAnimationTextProperties(uint32_t currentIndex, RefPtr<TextLayoutProperty>& textLayoutProperty);
+    void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
+    void UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
+    void UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
+    void AddAnimationTextProperties(uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty);
     void UpdateTextPropertiesLinear(bool isDown, double scale);
-    void TextPropertiesLinearAnimation(RefPtr<TextLayoutProperty>& textLayoutProperty,
+    void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty,
         uint32_t index, uint32_t showCount, bool isDown, double scale);
     void FlushAnimationTextProperties(bool isDown);
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);

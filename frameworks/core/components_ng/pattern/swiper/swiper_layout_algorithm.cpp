@@ -33,6 +33,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr Dimension INDICATOR_PADDING = 8.0_vp;
+} // namespace
+
 void SwiperLayoutAlgorithm::AddToItemRange(int32_t index)
 {
     if (index != currentIndex_) {
@@ -302,6 +306,9 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (swiperLayoutProperty->GetShowIndicatorValue(true)) {
         auto indicatorWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_);
         if (indicatorWrapper) {
+            if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DIGIT) {
+                PlaceDigitChild(indicatorWrapper, swiperLayoutProperty);
+            }
             indicatorWrapper->Layout();
         }
     }
@@ -355,6 +362,74 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
         }
     }
+}
+
+void SwiperLayoutAlgorithm::PlaceDigitChild(
+    const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty)
+{
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutProperty);
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    auto indicatorGeometryNode = indicatorWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(indicatorGeometryNode);
+    auto indicatorWidth = INDICATOR_PADDING.ConvertToPx() * 2.0;
+    auto indicatorHeight = 0.0f;
+    for (auto&& child : indicatorWrapper->GetAllChildrenWithBuild()) {
+        auto textGeometryNode = child->GetGeometryNode();
+        CHECK_NULL_VOID(textGeometryNode);
+        auto textFrameSize = textGeometryNode->GetFrameSize();
+        indicatorWidth += textFrameSize.Width();
+        if (indicatorHeight < textFrameSize.Height()) {
+            indicatorHeight = textFrameSize.Height();
+        }
+    }
+    auto layoutPropertyConstraint = indicatorWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutPropertyConstraint);
+    const auto& layoutConstraint = layoutPropertyConstraint->GetLayoutConstraint();
+    auto swiperWidth = layoutConstraint->parentIdealSize.Width().value();
+    auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
+    auto left = swiperLayoutProperty->GetLeft();
+    auto right = swiperLayoutProperty->GetRight();
+    auto top = swiperLayoutProperty->GetTop();
+    auto bottom = swiperLayoutProperty->GetBottom();
+    auto axis = swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
+    Offset position;
+    Dimension indicatorPositionDefault = 0.0_vp;
+    if (left.has_value() && !NearEqual(left->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
+        auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth, Dimension(left->Value()));
+        position.SetX(leftValue);
+    } else if (right.has_value() && !NearEqual(right->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
+        auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth, Dimension(right->Value()));
+        position.SetX(swiperWidth - indicatorWidth - rightValue);
+    } else {
+        position.SetX(axis == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth) * 0.5 : swiperWidth - indicatorWidth);
+    }
+    if (top.has_value() && !NearEqual(top->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
+        auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight, Dimension(top->Value()));
+        position.SetY(topValue);
+    } else if (bottom.has_value() && !NearEqual(bottom->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
+        auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight, Dimension(bottom->Value()));
+        position.SetY(swiperHeight - indicatorHeight - bottomValue);
+    } else {
+        if (axis == Axis::HORIZONTAL) {
+            position.SetY(swiperHeight - indicatorHeight);
+        } else {
+            position.SetY((swiperHeight - indicatorHeight) * 0.5);
+        }
+    }
+    auto currentOffset = OffsetF{ static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
+    indicatorGeometryNode->SetMarginFrameOffset(currentOffset);
+}
+
+double SwiperLayoutAlgorithm::GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge)
+{
+    double edgeLength = edge.Unit() == DimensionUnit::PERCENT ? swiperLength * edge.Value() : edge.ConvertToPx();
+    if (!NearZero(edgeLength) && edgeLength > swiperLength - indicatorLength) {
+        edgeLength = swiperLength - indicatorLength;
+    }
+    if (edgeLength < 0.0) {
+        edgeLength = 0.0;
+    }
+    return edgeLength;
 }
 
 } // namespace OHOS::Ace::NG

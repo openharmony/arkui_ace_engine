@@ -115,15 +115,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle001, Tes
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
-    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    EXPECT_FALSE(pickerProperty->HasDisappearFontSize());
-    EXPECT_FALSE(pickerProperty->HasDisappearColor());
-    EXPECT_FALSE(pickerProperty->HasDisappearWeight());
+    EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
+    EXPECT_TRUE(pickerProperty->HasDisappearColor());
+    EXPECT_TRUE(pickerProperty->HasDisappearWeight());
 }
 
 /**
@@ -140,7 +140,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle002, Tes
     data.fontSize = Dimension(10);
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
-    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -163,13 +163,13 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, Tes
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(0);
-    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    ASSERT_FALSE(pickerProperty->HasDisappearFontSize());
+    EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
 }
 
 /**
@@ -183,15 +183,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle001, TestSi
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
-    TimePickerModelNG::GetInstance()->SetNormalTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    EXPECT_FALSE(pickerProperty->HasFontSize());
-    EXPECT_FALSE(pickerProperty->HasColor());
-    EXPECT_FALSE(pickerProperty->HasWeight());
+    EXPECT_TRUE(pickerProperty->HasFontSize());
+    EXPECT_TRUE(pickerProperty->HasColor());
+    EXPECT_TRUE(pickerProperty->HasWeight());
 }
 
 /**
@@ -208,7 +208,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle002, TestSi
     data.fontSize = Dimension(10);
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
-    TimePickerModelNG::GetInstance()->SetNormalTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -231,13 +231,13 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle003, TestSi
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(0);
-    TimePickerModelNG::GetInstance()->SetNormalTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    EXPECT_FALSE(pickerProperty->HasFontSize());
+    EXPECT_TRUE(pickerProperty->HasFontSize());
 }
 
 /**
@@ -251,15 +251,15 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle001, Test
 
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
-    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    EXPECT_FALSE(pickerProperty->HasSelectedFontSize());
-    EXPECT_FALSE(pickerProperty->HasSelectedColor());
-    EXPECT_FALSE(pickerProperty->HasSelectedWeight());
+    EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
+    EXPECT_TRUE(pickerProperty->HasSelectedColor());
+    EXPECT_TRUE(pickerProperty->HasSelectedWeight());
 }
 
 /**
@@ -276,7 +276,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle002, Test
     data.fontSize = Dimension(10);
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
-    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
@@ -299,13 +299,13 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetSelectedTextStyle003, Test
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(0);
-    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
-    EXPECT_FALSE(pickerProperty->HasSelectedFontSize());
+    EXPECT_TRUE(pickerProperty->HasSelectedFontSize());
 }
 
 /**
@@ -347,7 +347,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern002, TestSize.Level1)
     data.fontSize = Dimension(10);
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
-    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -376,7 +376,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern003, TestSize.Level1)
     data.fontSize = Dimension(10);
     data.textColor = Color::RED;
     data.fontWeight = Ace::FontWeight::BOLD;
-    TimePickerModelNG::GetInstance()->SetNormalTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -426,7 +426,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern005, TestSize.Level1)
 
     PickerTextStyle data;
     data.fontSize = Dimension(10);
-    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(data);
+    TimePickerModelNG::GetInstance()->SetSelectedTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
@@ -449,16 +449,17 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern005, TestSize.Level1)
 HWTEST_F(TimePickerPatternTestNg, TimePickerDialogViewShow001, TestSize.Level1)
 {
     TimePickerSettingData settingData;
-    settingData.properties.hasValueFlag = 0xffff;
-    settingData.properties.disappearColor_ = Color::RED;
-    settingData.properties.color_ = Color::RED;
-    settingData.properties.selectedColor_ = Color::RED;
-    settingData.properties.disappearFontSize_ = Dimension(0);
-    settingData.properties.fontSize_ = Dimension(0);
-    settingData.properties.selectedFontSize_ = Dimension(0);
-    settingData.properties.disappearWeight_ = Ace::FontWeight::BOLD;
-    settingData.properties.weight_ = Ace::FontWeight::BOLD;
-    settingData.properties.selectedWeight_ = Ace::FontWeight::BOLD;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.normalTextStyle_.textColor = Color::RED;
+    settingData.properties.normalTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+
+    settingData.properties.selectedTextStyle_.textColor = Color::RED;
+    settingData.properties.selectedTextStyle_.fontSize = Dimension(0);
+    settingData.properties.normalTextStyle_.fontWeight = Ace::FontWeight::BOLD;
     settingData.isUseMilitaryTime = false;
 
     std::map<std::string, PickerTime> timePickerProperty;

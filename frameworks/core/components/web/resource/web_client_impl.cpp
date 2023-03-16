@@ -304,14 +304,19 @@ void WebClientImpl::OnRouterPush(const std::string& param)
     delegate->OnRouterPush(param);
 }
 
-bool WebClientImpl::OnHandleInterceptUrlLoading(const std::string& url)
+bool WebClientImpl::OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
     if (!delegate) {
         return false;
     }
-    return delegate->OnHandleInterceptUrlLoading(url);
+
+    bool result = delegate->OnHandleInterceptUrlLoading(request->Url());
+    if (!result) {
+        result = delegate->OnHandleInterceptLoading(request);
+    }
+    return result;
 }
 
 std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> WebClientImpl::OnHandleInterceptRequest(

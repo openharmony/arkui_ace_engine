@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,7 @@ public:
     void SetDisplayMode(SwiperDisplayMode displayMode) override;
     void SetDisplayCount(int32_t displayCount) override;
     void SetShowIndicator(bool showIndicator) override;
+    void SetIndicatorType(SwiperIndicatorType indicatorType) override;
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
@@ -56,6 +57,8 @@ public:
     void SetMainSwiperSizeWidth() override;
     void SetMainSwiperSizeHeight() override;
     void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
+    void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) override;
+    void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) override;
 };
 
 } // namespace OHOS::Ace::NG

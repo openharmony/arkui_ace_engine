@@ -43,6 +43,7 @@ RefPtr<FrameNode> RenderContext::GetHost() const
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propBdImage_, BorderImageProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propOverlay_, OverlayProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propPositionProperty_, RenderPositionProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propBackground_, BackgroundProperty);
@@ -80,5 +81,11 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     pixelJsonValue->Put("top", pixStretchEffectOption.top.ConvertToPx());
     pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ConvertToPx());
     json->Put("pixelStretchEffect", pixelJsonValue);
+    static const char* STYLE[] = {"", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
+        "BlurStyle.BackgroundThin", "BlurStyle.BackgroundRegular",
+        "BlurStyle.BackgroundThick", "BlurStyle.BackgroundUltraThick"};
+    json->Put("backgroundBlurStyle", STYLE[static_cast<int>(
+        GetBackBlurStyle().value_or(BlurStyleOption()).blurStyle)]);
+    json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
 }
 } // namespace OHOS::Ace::NG

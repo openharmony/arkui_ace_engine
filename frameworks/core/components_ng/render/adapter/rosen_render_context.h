@@ -269,6 +269,10 @@ private:
     {
         return disappearingTransitionCount_ > 0;
     }
+    bool HasTransition() const override
+    {
+        return transitionEffect_ != nullptr;
+    }
     void OnTransitionOutFinish();
     void SetTransitionPivot(const SizeF& frameSize, bool transitionIn);
     void SetPivot(float xPivot, float yPivot);

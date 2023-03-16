@@ -69,6 +69,15 @@
         cast##target->Reset##name();                                            \
     } while (false)
 
+#define ACE_RESET_PAINT_PROPERTY(target, name)                                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        CHECK_NULL_VOID(cast##target);                                          \
+        cast##target->Reset##name();                                            \
+    } while (false)
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ViewStackProcessor final {
 public:

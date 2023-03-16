@@ -382,37 +382,37 @@ void TimePickerDialogView::SetTextProperties(const RefPtr<PickerTheme>& pickerTh
     auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
 
-    Color disappearColor = properties.hasValueFlag & FLAG_DISAPPEAR_COLOR ?
-        properties.disappearColor_ : disappearStyle.GetTextColor();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearColor, disappearColor);
-    Color normalColor = properties.hasValueFlag & FLAG_COLOR ?
-        properties.color_ : normalStyle.GetTextColor();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color, normalColor);
-    Color selectedColor = properties.hasValueFlag & FLAG_SELECTED_COLOR ?
-        properties.selectedColor_ : selectedStyle.GetTextColor();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor, selectedColor);
+    if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            TimePickerLayoutProperty, DisappearFontSize, properties.disappearTextStyle_.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize, disappearStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearColor,
+        properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearWeight,
+        properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
 
-    Dimension disappearFontSize = (properties.hasValueFlag & FLAG_DISAPPEAR_FONTSIZE) &&
-        properties.disappearFontSize_.IsValid() ?
-        properties.disappearFontSize_ : disappearStyle.GetFontSize();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearFontSize, disappearFontSize);
-    Dimension normalFontSize = (properties.hasValueFlag & FLAG_FONTSIZE) &&
-        properties.fontSize_.IsValid() ?
-        properties.fontSize_ : normalStyle.GetFontSize();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, normalFontSize);
-    Dimension selectedFontSize = (properties.hasValueFlag & FLAG_SELECTED_FONTSIZE) &&
-        properties.selectedFontSize_.IsValid() ?
-        properties.selectedFontSize_ : selectedStyle.GetFontSize();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize, selectedFontSize);
+    if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            TimePickerLayoutProperty, FontSize, properties.normalTextStyle_.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, FontSize, normalStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Color,
+        properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Weight,
+        properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
 
-    FontWeight disappearWeight = properties.hasValueFlag & FLAG_DISAPPEAR_WEIGHT ?
-        properties.disappearWeight_ : disappearStyle.GetFontWeight();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DisappearWeight, disappearWeight);
-    FontWeight normalWeight = properties.hasValueFlag & FLAG_WEIGHT ?
-        properties.weight_ : normalStyle.GetFontWeight();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, Weight, normalWeight);
-    FontWeight selectedWeight = properties.hasValueFlag & FLAG_SELECTED_WEIGHT ?
-        properties.selectedWeight_ : selectedStyle.GetFontWeight();
-    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight, selectedWeight);
+    if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            TimePickerLayoutProperty, SelectedFontSize, properties.selectedTextStyle_.fontSize.value());
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedFontSize, selectedStyle.GetFontSize());
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedColor,
+        properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, SelectedWeight,
+        properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
 }
 } // namespace OHOS::Ace::NG

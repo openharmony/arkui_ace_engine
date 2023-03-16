@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -284,6 +285,16 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
 }
 } // namespace
 
+RefPtr<FrameNode> Inspector::GetFrameNodeByKey(const std::string& key)
+{
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+
+    return AceType::DynamicCast<FrameNode>(GetInspectorByKey(rootNode, key));
+}
+
 std::string Inspector::GetInspectorNodeByKey(const std::string& key)
 {
     auto context = NG::PipelineContext::GetCurrentContext();
@@ -299,10 +310,8 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
     auto frameNode = AceType::DynamicCast<FrameNode>(inspectorElement);
     if (frameNode) {
-        RectF rect;
+        auto rect = frameNode->GetRenderContext()->GetPaintRectWithTransform();
         rect.SetOffset(frameNode->GetTransformRelativeOffset());
-        rect.SetWidth(frameNode->GetGeometryNode()->GetFrameRect().Width());
-        rect.SetHeight(frameNode->GetGeometryNode()->GetFrameRect().Height());
         jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     }
     auto jsonAttrs = JsonUtil::Create(true);
@@ -352,88 +361,6 @@ std::string Inspector::GetInspector(bool isLayoutInspector)
         return jsonTree->ToString();
     }
 
-    return jsonRoot->ToString();
-}
-
-std::string Inspector::GetInspectorTree(bool isLayoutInspector)
-{
-    auto jsonRoot = JsonUtil::Create(true);
-    jsonRoot->Put(INSPECTOR_TYPE, INSPECTOR_ROOT);
-
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN_NOLOG(context, jsonRoot->ToString());
-    auto scale = context->GetViewScale();
-    auto rootHeight = context->GetRootHeight();
-    auto rootWidth = context->GetRootWidth();
-    jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
-    jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
-    jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
-
-    auto root = context->GetRootElement();
-    CHECK_NULL_RETURN_NOLOG(root, jsonRoot->ToString());
-
-    std::map<int32_t, std::list<RefPtr<UINode>>> depthElementMap;
-    depthElementMap[0].emplace_back(root);
-    DumpElementTree(1, root, depthElementMap);
-
-    int32_t height = 0;
-    std::unordered_map<int32_t, std::vector<std::pair<RefPtr<UINode>, std::string>>> elementJSONInfoMap;
-    for (int depth = static_cast<int32_t>(depthElementMap.size()); depth > 0; depth--) {
-        const auto& depthElements = depthElementMap[depth];
-        for (const auto& element : depthElements) {
-            auto inspectorElement = AceType::DynamicCast<FrameNode>(element);
-            if (inspectorElement == nullptr) {
-                continue;
-            }
-
-            auto jsonNode = JsonUtil::Create(true);
-            jsonNode->Put(INSPECTOR_TYPE, inspectorElement->GetTag().c_str());
-            jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
-            RectF rect;
-            rect.SetOffset(inspectorElement->GetTransformRelativeOffset());
-            rect.SetWidth(inspectorElement->GetGeometryNode()->GetFrameRect().Width());
-            rect.SetHeight(inspectorElement->GetGeometryNode()->GetFrameRect().Height());
-            jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
-            auto jsonObject = JsonUtil::Create(true);
-            inspectorElement->ToJsonValue(jsonObject);
-            jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
-            if (!element->GetChildren().empty()) {
-                if (height > 0) {
-                    auto jsonNodeArray = JsonUtil::CreateArray(true);
-                    auto childNodeJSONVec = elementJSONInfoMap[height - 1];
-                    for (auto& iter : childNodeJSONVec) {
-                        auto parent = iter.first->GetParent();
-                        if (parent->GetId() == element->GetId()) {
-                            auto childJSONValue = JsonUtil::ParseJsonString(iter.second);
-                            jsonNodeArray->Put(childJSONValue);
-                        }
-                    }
-                    if (jsonNodeArray->GetArraySize()) {
-                        jsonNode->Put(INSPECTOR_CHILDREN, jsonNodeArray);
-                    }
-                }
-            }
-            elementJSONInfoMap[height].emplace_back(element, jsonNode->ToString());
-        }
-        if (elementJSONInfoMap.find(height) != elementJSONInfoMap.end()) {
-            height++;
-        }
-    }
-
-    auto jsonChildren = JsonUtil::CreateArray(true);
-    auto firstDepthNodeVec = elementJSONInfoMap[elementJSONInfoMap.size() - 1];
-    for (const auto& nodeJSONInfo : firstDepthNodeVec) {
-        auto nodeJSONValue = JsonUtil::ParseJsonString(nodeJSONInfo.second);
-        jsonChildren->Put(nodeJSONValue);
-    }
-    jsonRoot->Put(INSPECTOR_CHILDREN, jsonChildren);
-
-    if (isLayoutInspector) {
-        auto jsonTree = JsonUtil::Create(true);
-        jsonTree->Put("type", "root");
-        jsonTree->Put("content", jsonRoot);
-        return jsonTree->ToString();
-    }
     return jsonRoot->ToString();
 }
 

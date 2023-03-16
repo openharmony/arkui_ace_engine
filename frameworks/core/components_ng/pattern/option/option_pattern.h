@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/option/option_accessibility_property.h"
 #include "core/components_ng/pattern/option/option_event_hub.h"
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 #include "core/components_ng/pattern/option/option_paint_method.h"
@@ -52,6 +53,11 @@ public:
         return MakeRefPtr<OptionEventHub>();
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<OptionAccessibilityProperty>();
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<OptionLayoutAlgorithm>();
@@ -65,6 +71,11 @@ public:
     void SetTextNode(const RefPtr<FrameNode>& text)
     {
         text_ = text;
+    }
+
+    void SetIconNode(const RefPtr<FrameNode>& icon)
+    {
+        icon_ = icon;
     }
 
     void SetBgColor(const Color& color);
@@ -127,6 +138,9 @@ public:
 
     void PlayBgColorAnimation(bool isHoverChange = true);
 
+    void UpdateText(const std::string& content);
+    void UpdateIcon(const std::string& src);
+
 private:
     void OnModifyDone() override;
 
@@ -148,9 +162,10 @@ private:
 
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
-    RefPtr<FrameNode> text_ = nullptr;
-    RefPtr<TextTheme> textTheme_ = nullptr;
-    RefPtr<SelectTheme> selectTheme_ = nullptr;
+    RefPtr<FrameNode> text_;
+    RefPtr<FrameNode> icon_;
+    RefPtr<TextTheme> textTheme_;
+    RefPtr<SelectTheme> selectTheme_;
     // this option node's index in the menu
     int index_ = -1;
 

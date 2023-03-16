@@ -14,18 +14,22 @@
  */
 #include "gtest/gtest.h"
 
+// Add the following two macro definitions to test the private and protected method.
+#define private public
+#define protected public
+#include "base/geometry/ng/size_t.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_method.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
-// Add the following two macro definitions to test the private and protected method.
-#define private public
-#define protected public
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 
@@ -42,6 +46,33 @@ const Dimension HEIGHT = 50.0_vp;
 const NG::PaddingPropertyF PADDING = NG::PaddingPropertyF();
 const bool SELECTED = true;
 const Color SELECTED_COLOR = Color::BLUE;
+const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
+const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
+constexpr float SHAPE_SCALE_SMALL = 0.3f;
+constexpr float SHAPE_SCALE_HALF = 0.5f;
+constexpr float SHAPE_SCALE = 1.0f;
+constexpr float COMPONENT_WIDTH = 200.0;
+constexpr float COMPONENT_HEIGHT = 210.0;
+constexpr float BORDER_RADIUS = 100.0;
+constexpr float CHECK_STROKE = 200.0;
+constexpr float CHECK_MARK_SIZEF = 50.0;
+constexpr float CHECK_MARK_WIDTHF = 5.0;
+constexpr float CHECKMARK_PAINTSIZE = 400.0;
+constexpr double BORDER_WIDTH = 300.0;
+constexpr Dimension CHECK_MARK_SIZE = Dimension(CHECK_MARK_SIZEF);
+constexpr Dimension NEGATIVE_CHECK_MARK_SIZE = Dimension(-CHECK_MARK_SIZEF);
+constexpr Dimension CHECK_MARK_WIDTH = Dimension(CHECK_MARK_WIDTHF);
+const Color POINT_COLOR = Color::BLUE;
+const Color ACTIVE_COLOR = Color::BLACK;
+const Color INACTIVE_COLOR = Color::GREEN;
+const Color SHADOW_COLOR = Color::RED;
+const Color CLICK_EFFECT_COLOR = Color::WHITE;
+const Color HOVER_COLOR = Color::GRAY;
+const Color INACTIVE_POINT_COLOR = Color::TRANSPARENT;
+constexpr Dimension HOVER_RADIUS = Dimension(3.0);
+constexpr Dimension HORIZONTAL_PADDING = Dimension(5.0);
+constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
+constexpr Dimension SHADOW_WIDTH_FORUPDATE = Dimension(6.0);
 } // namespace
 
 class CheckBoxGroupPropertyTestNg : public testing::Test {
@@ -62,6 +93,15 @@ void CheckBoxGroupPropertyTestNg::TearDownTestCase()
 }
 void CheckBoxGroupPropertyTestNg::SetUp() {}
 void CheckBoxGroupPropertyTestNg::TearDown() {}
+CheckBoxGroupModifier::Parameters CheckBoxGroupCreateDefModifierParam()
+{
+    CheckBoxGroupModifier::Parameters parameters = {BORDER_WIDTH, BORDER_RADIUS, CHECK_STROKE, CHECKMARK_PAINTSIZE,
+        POINT_COLOR, ACTIVE_COLOR, INACTIVE_COLOR, SHADOW_COLOR, CLICK_EFFECT_COLOR, HOVER_COLOR, INACTIVE_POINT_COLOR,
+        HOVER_RADIUS, HORIZONTAL_PADDING, VERTICAL_PADDING, SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED,
+        CheckBoxGroupPaintProperty::SelectStatus::NONE};
+    
+    return parameters;
+}
 
 /**
  * @tc.name: CheckBoxGroupPaintPropertyTest001
@@ -601,5 +641,401 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest016, TestSize.Leve
     pattern->UpdateAnimation(false);
     ASSERT_NE(pattern->controller_, nullptr);
     pattern->UpdateAnimation(false);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest001
+ * @tc.desc: Test CheckBoxGroup Modifier DrawTouchBoard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest001, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    /**
+     *  @tc.case: case. When isTouch is true, CheckBoxGroupModifier will call DrawTouchBoard.
+     */
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, true, false, 0.0, UIStatus::FOCUS, checkBoxGroupModifier_);
+    auto modifier_ = checkBoxPaintMethod.GetContentModifier(&paintWrapper);
+    ASSERT_NE(modifier_, nullptr);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    SizeF size;
+    OffsetF offset;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
+    checkBoxGroupModifier_->DrawTouchBoard(canvas, size, offset);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest002
+ * @tc.desc: Test CheckBoxGroup Modifier DrawHoverBoard.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest002, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    /**
+     * @tc.case: case. When isHover is true, CheckBoxGroupModifier's PaintCheckBox will call DrawHoverBoard.
+     */
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, true, 0.0, UIStatus::FOCUS, checkBoxGroupModifier_);
+    auto modifier_ = checkBoxPaintMethod.GetContentModifier(&paintWrapper);
+    ASSERT_NE(modifier_, nullptr);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    SizeF size;
+    OffsetF offset;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
+    checkBoxGroupModifier_->DrawHoverBoard(canvas, size, offset);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest003
+ * @tc.desc: Test CheckBoxGroup Modifier DrawAnimationOffToOn.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest003, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    /**
+     * @tc.case: case. When uiStatus_ == UIStatus::OFF_TO_ON, CheckBoxGroupModifier's  will call
+     * DrawAnimationOffToOn.
+     */
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(true, false, false, 0.0, UIStatus::OFF_TO_ON, checkBoxGroupModifier_);
+    Testing::MockCanvas canvas;
+    OffsetF offset;
+    RSPen pen;
+    SizeF size;
+    /**
+     * @tc.case: case1. shapeScale_ < CHECK_MARK_LEFT_ANIMATION_PERCENT. and shapeScale_ !=
+     * DEFAULT_MAX_CHECKBOX_SHAPE_SCALE.
+     */
+    checkBoxPaintMethod.shapeScale_ = SHAPE_SCALE_SMALL;
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(2);
+    checkBoxGroupModifier_->DrawAnimationOffToOn(canvas, offset, pen, size);
+    /**
+     * @tc.case: case2. shapeScale_ == DEFAULT_MAX_CHECKBOX_SHAPE_SCALE. and shapeScale_ !=
+     * DEFAULT_MAX_CHECKBOX_SHAPE_SCALE.
+     */
+    checkBoxPaintMethod.shapeScale_ = SHAPE_SCALE;
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(4);
+    checkBoxGroupModifier_->DrawAnimationOffToOn(canvas, offset, pen, size);
+    /**
+     * @tc.case: case3. shapeScale_ > CHECK_MARK_LEFT_ANIMATION_PERCENT.
+     */
+    checkBoxPaintMethod.shapeScale_ = SHAPE_SCALE_HALF;
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(4);
+    checkBoxGroupModifier_->DrawAnimationOffToOn(canvas, offset, pen, size);
+}
+
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest004
+ * @tc.desc: Test CheckBoxGroup Modifier paintCheckBox when enabled_ == false..
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest004, TestSize.Level1)
+{
+    /**
+     * @tc.case: case1. When uiStatus_ == UIStatus::OFF_TO_ON and enabled_ == false.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, true, true, 0.0, UIStatus::OFF_TO_ON, checkBoxGroupModifier_);
+    auto modifier_ = checkBoxPaintMethod.GetContentModifier(&paintWrapper);
+    ASSERT_NE(modifier_, nullptr);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context {canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT};
+    checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest005
+ * @tc.desc: Test CheckBoxGroup Modifier will paintCheckBox when UIStatus is ON_TO_OFF.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest005, TestSize.Level1)
+{
+    /**
+     * @tc.case: case1. When uiStatus_ == UIStatus::ON_TO_OFF and enabled_ == true.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(true, false, false, SHAPE_SCALE,
+        UIStatus::ON_TO_OFF, checkBoxGroupModifier_);
+    auto modifier_ = checkBoxPaintMethod.GetContentModifier(&paintWrapper);
+    ASSERT_NE(modifier_, nullptr);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context {canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT};
+    checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest006
+ * @tc.desc: Test CheckBoxGroup  Modifier will paintCheckBox when UIStatus is UNSELECTED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest006, TestSize.Level1)
+{
+    /**
+     * @tc.case: case1. When uiStatus_ == UIStatus::UNSELECTED and enabled_ == true.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(true, false, false, 0.0, UIStatus::UNSELECTED, checkBoxGroupModifier_);
+    auto modifier_ = checkBoxPaintMethod.GetContentModifier(&paintWrapper);
+    ASSERT_NE(modifier_, nullptr);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context {canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT};
+    checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest007
+ * @tc.desc: Test CheckBoxGroup Modifier PaintCheckBox PaintCheckBoxGroupPartStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest007, TestSize.Level1)
+{
+    /**
+     * @tc.case: case1. When status == CheckBoxGroupPaintProperty::SelectStatus::PART and enabled_ == true.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(true, false, false, 0.0, UIStatus::UNSELECTED, checkBoxGroupModifier_);
+    auto modifier_ = checkBoxPaintMethod.GetContentModifier(&paintWrapper);
+    ASSERT_NE(modifier_, nullptr);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context {canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT};
+    checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest008
+ * @tc.desc: Test CheckBoxGroup Modifier  paintCheckBox when UIStatus is PART_TO_OFF.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest008, TestSize.Level1)
+{
+    /**
+     * @tc.case: case1. When uiStatus_ == UIStatus::PART_TO_OFF and enabled_ == false.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0,
+        UIStatus::PART_TO_OFF, checkBoxGroupModifier_);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context {canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT};
+    checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest009
+ * @tc.desc: Test checkBoxPaintMethod  UpdateContentModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest009, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(COMPONENT_WIDTH, COMPONENT_WIDTH));
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, true, 0.0, UIStatus::FOCUS, checkBoxGroupModifier_);
+    checkBoxPaintProperty->UpdateCheckBoxGroupSelectedColor(ACTIVE_COLOR);
+    checkBoxPaintProperty->UpdateCheckBoxGroupUnSelectedColor(INACTIVE_COLOR);
+    checkBoxPaintProperty->UpdateCheckBoxGroupCheckMarkColor(POINT_COLOR);
+    checkBoxPaintProperty->UpdateCheckBoxGroupCheckMarkSize(NEGATIVE_CHECK_MARK_SIZE);
+    checkBoxPaintProperty->UpdateCheckBoxGroupCheckMarkWidth(CHECK_MARK_WIDTH);
+    /**
+      * @tc.expected: step1. Check the CheckBoxGroup property value.
+      */
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(checkBoxGroupModifier_->activeColor_->Get(), LinearColor(ACTIVE_COLOR));
+    EXPECT_EQ(checkBoxGroupModifier_->inactiveColor_->Get(), LinearColor(INACTIVE_COLOR));
+    EXPECT_EQ(checkBoxGroupModifier_->pointColor_->Get(), LinearColor(POINT_COLOR));
+    EXPECT_EQ(checkBoxGroupModifier_->checkMarkPaintSize_->Get(), COMPONENT_WIDTH);
+    EXPECT_EQ(checkBoxGroupModifier_->checkStroke_->Get(), CHECK_MARK_WIDTHF);
+    /**
+      * @tc.expected: step2.Test GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx() >= 0.
+      */
+    checkBoxPaintProperty->UpdateCheckBoxGroupCheckMarkSize(CHECK_MARK_SIZE);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(checkBoxGroupModifier_->checkMarkPaintSize_->Get(), CHECK_MARK_SIZEF);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest010
+ * @tc.desc: Test CheckBoxGroupPattern UpdateModifierParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest010, TestSize.Level1)
+{
+    const std::optional<std::string> groupName;
+    CheckBoxGroupModelNG checkboxGroupModel;
+    checkboxGroupModel.Create(groupName);
+    auto groupFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(groupFrameNode, nullptr);
+    auto checkBoxPaintProperty = groupFrameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->UpdateCheckBoxGroupSelectedColor(ACTIVE_COLOR);
+    checkBoxPaintProperty->UpdateCheckBoxGroupUnSelectedColor(INACTIVE_COLOR);
+    checkBoxPaintProperty->UpdateCheckBoxGroupCheckMarkColor(POINT_COLOR);
+    checkBoxPaintProperty->UpdateCheckBoxGroupCheckMarkSize(CHECK_MARK_SIZE);
+    checkBoxPaintProperty->UpdateCheckBoxGroupCheckMarkWidth(CHECK_MARK_WIDTH);
+    auto pattern = groupFrameNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto paintMethod = pattern->CreateNodePaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    auto modifier_ = pattern->checkBoxGroupModifier_;
+    ASSERT_NE(modifier_, nullptr);
+    EXPECT_EQ(modifier_->activeColor_->Get(), LinearColor(ACTIVE_COLOR));
+    EXPECT_EQ(modifier_->inactiveColor_->Get(), LinearColor(INACTIVE_COLOR));
+    EXPECT_EQ(modifier_->pointColor_->Get(), LinearColor(POINT_COLOR));
+    EXPECT_EQ(modifier_->checkMarkPaintSize_->Get(), CHECK_MARK_SIZEF);
+    EXPECT_EQ(modifier_->checkStroke_->Get(), CHECK_MARK_WIDTHF);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest011
+ * @tc.desc:  Test CheckBoxGroupModifier  paintCheckBox when enabled_ == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest011, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0, UIStatus::ON_TO_OFF, checkBoxGroupModifier_);
+    auto modifier_ = checkBoxPaintMethod.GetContentModifier(&paintWrapper);
+    ASSERT_NE(modifier_, nullptr);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context {canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT};
+    checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupPaintMethodTest012
+ * @tc.desc:  Test CheckBoxGroupModifier PaintCheckBox when enabled_ == false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest012, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    CheckBoxGroupModifier::Parameters parameters = CheckBoxGroupCreateDefModifierParam();
+    auto checkBoxGroupModifier_= AceType::MakeRefPtr<CheckBoxGroupModifier>(parameters);
+    CheckBoxGroupPaintMethod checkBoxPaintMethod(false, false, false, 0.0,
+        UIStatus::UNSELECTED, checkBoxGroupModifier_);
+    auto modifier_ = checkBoxPaintMethod.GetContentModifier(&paintWrapper);
+    ASSERT_NE(modifier_, nullptr);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    DrawingContext context {canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT};
+    checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
 }
 } // namespace OHOS::Ace::NG

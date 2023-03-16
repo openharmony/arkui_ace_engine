@@ -487,4 +487,30 @@ std::string GestureEventHub::GetHitTestModeStr() const
     }
     return HIT_TEST_MODE[mode];
 }
+
+bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node)
+{
+    auto host = node.Upgrade();
+    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_RETURN(clickEventActuator_, false);
+    auto click = clickEventActuator_->GetClickEvent();
+    CHECK_NULL_RETURN(click, false);
+    GestureEvent info;
+    info.SetSourceDevice(event.sourceType);
+    info.SetTimeStamp(event.timeStamp);
+    EventTarget target;
+    target.id = host->GetId();
+    target.type = host->GetTag();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto offset = geometryNode->GetFrameOffset();
+    auto size = geometryNode->GetFrameSize();
+    target.area.SetOffset(DimensionOffset(offset));
+    target.area.SetHeight(Dimension(size.Height()));
+    target.area.SetWidth(Dimension(size.Width()));
+    target.origin = DimensionOffset(geometryNode->GetParentGlobalOffset());
+    info.SetTarget(target);
+    click(info);
+    return true;
+}
 } // namespace OHOS::Ace::NG

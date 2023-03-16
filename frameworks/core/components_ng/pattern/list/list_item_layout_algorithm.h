@@ -64,10 +64,33 @@ public:
         return endNodeSize_;
     }
 
+    void SetIndexInList(int32_t index)
+    {
+        indexInList_ = index;
+    }
+
+    void SetIndexInListItemGroup(int32_t indexInGroup)
+    {
+        indexInListItemGroup_ = indexInGroup;
+    }
+
+    int32_t GetIndexInList() const
+    {
+        return indexInList_;
+    }
+
+    int32_t GetIndexInListItemGroup() const
+    {
+        return indexInListItemGroup_;
+    }
+
 private:
     int32_t startNodeIndex_;
     int32_t endNodeIndex_;
     int32_t childNodeIndex_;
+
+    int32_t indexInList_ = 0;
+    int32_t indexInListItemGroup_ = -1;
 
     float curOffset_ = 0.0f;
     float startNodeSize_ = 0.0f;

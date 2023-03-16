@@ -195,7 +195,7 @@ private:
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
-    bool HandleDirectionKey(KeyCode code);
+    bool HandleDirectionKey(const KeyEvent& event);
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;

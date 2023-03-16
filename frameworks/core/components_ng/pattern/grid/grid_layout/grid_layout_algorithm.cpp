@@ -34,9 +34,9 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
 {
     LayoutConstraintF layoutConstraint = layoutProperty->CreateChildConstraint();
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, idealSize.Width()).value_or(0);
+    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, idealSize.Height()).value_or(0);
     auto columnsGap =
-        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, idealSize.Height()).value_or(0);
+        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, idealSize.Width()).value_or(0);
 
     float rowLen = 0.0;
     for (int32_t i = 0; i < rowSpan; ++i) {
@@ -60,9 +60,9 @@ void GridLayoutAlgorithm::InitGridCeils(LayoutWrapper* layoutWrapper, const Size
     auto layoutProperty = DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, idealSize.Width()).value_or(0);
+    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, idealSize.Height()).value_or(0);
     auto columnsGap =
-        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, idealSize.Height()).value_or(0);
+        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, idealSize.Width()).value_or(0);
     auto rowsLen = GridUtils::ParseArgs(layoutProperty->GetRowsTemplate().value_or(""), idealSize.Height(), rowsGap);
     auto colsLen =
         GridUtils::ParseArgs(layoutProperty->GetColumnsTemplate().value_or(""), idealSize.Width(), columnsGap);
@@ -159,9 +159,9 @@ OffsetF GridLayoutAlgorithm::ComputeItemPosition(
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
     auto frameSize = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
     auto scale = layoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
+    auto rowsGap = ConvertToPx(layoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
     auto columnsGap =
-        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
+        ConvertToPx(layoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
 
     // Calculate the position for current child.
     float positionX = 0.0f;

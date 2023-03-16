@@ -191,6 +191,12 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
         strokeWidthDimension = theme->GetThickness();
     }
 
+    // If the parameter value is string(''), parse result 0.
+    // The value of 0 is allowed, but the value of string('') is not allowed, so use theme value.
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
+        strokeWidthDimension = theme->GetThickness();
+    }
+
     if (strokeWidthDimension.IsNegative() || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
         strokeWidthDimension = theme->GetThickness();
     }

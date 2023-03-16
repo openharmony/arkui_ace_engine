@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_OVERLAY_MANAGER_H
 
 #include <unordered_map>
+#include <utility>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -55,6 +56,7 @@ public:
     }
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void EraseIndexerPopup(int32_t targetId);
+    void RemoveIndexerPopup();
     RefPtr<FrameNode> GetIndexerPopup(int32_t targetId);
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
@@ -64,6 +66,14 @@ public:
     const PopupInfo& GetPopupInfo(int32_t targetId)
     {
         return popupMap_[targetId];
+    }
+
+    bool HasPopupInfo(int32_t targetId) const
+    {
+        if (popupMap_.find(targetId) != popupMap_.end()) {
+            return true;
+        }
+        return false;
     }
 
     void ShowMenu(int32_t targetId, const NG::OffsetF& offset, RefPtr<FrameNode> menu = nullptr);
@@ -80,6 +90,7 @@ public:
     // customNode only used by customDialog, pass in nullptr if not customDialog
     RefPtr<FrameNode> ShowDialog(
         const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft = false);
+    void ShowCustomDialog(const RefPtr<FrameNode>& customNode);
     void ShowDateDialog(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
@@ -117,6 +128,9 @@ public:
         return false;
     }
 
+    void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
+
 private:
     void PopToast(int32_t targetId);
 
@@ -143,6 +157,7 @@ private:
     // K: target frameNode ID, V: menuNode
     std::unordered_map<int32_t, RefPtr<FrameNode>> menuMap_;
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
+    std::stack<WeakPtr<FrameNode>> modalStack_;
     WeakPtr<UINode> rootNodeWeak_;
 
     std::function<void()> onHideMenuCallback_ = nullptr;

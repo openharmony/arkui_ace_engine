@@ -45,6 +45,9 @@ private:
     double CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper);
     void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
 
+    // children frame size
+    SizeF searchIconSizeMeasure_;
+    SizeF cancelIconSizeMeasure_;
     SizeF searchButtonSizeMeasure_;
     SizeF cancelBtnSizeMeasure_;
     SizeF textFieldSizeMeasure_;

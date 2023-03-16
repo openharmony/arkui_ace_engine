@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_OVERLAY_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_OVERLAY_MODIFIER_H
 
+#include <optional>
 #include <vector>
 
 #include "base/memory/ace_type.h"
@@ -38,6 +39,11 @@ public:
 
     void SetSelectedRects(const std::vector<Rect>& selectedRects);
 
+    void SetContentRect(const RectF& contentRect)
+    {
+        contentRect_ = contentRect;
+    }
+
 private:
     bool IsSelectedRectsChanged(const std::vector<Rect>& selectedRects);
 
@@ -45,6 +51,7 @@ private:
     RefPtr<PropertyInt> selectedColor_;
     RefPtr<PropertyBool> changeSelectedRects_;
     std::vector<Rect> selectedRects_;
+    std::optional<RectF> contentRect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextOverlayModifier);
 };

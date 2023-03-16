@@ -102,7 +102,7 @@ void RosenRenderContext::OnNodeAppear()
 {
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
     // to calculate the pivot, so just mark need to perform appearing transition.
-    if (!propTransitionDisappearing_ && !transitionEffect_) {
+    if (!propTransitionAppearing_ && !transitionEffect_) {
         return;
     }
     firstTransitionIn_ = true;
@@ -474,9 +474,13 @@ void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
 void RosenRenderContext::OnTransformRotateUpdate(const Vector4F& rotate)
 {
     CHECK_NULL_VOID(rsNode_);
-    // rsNode sets rotation on camera, need to switch degrees to negative values
-    float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2)) * -1;
-    rsNode_->SetRotation(rotate.w * rotate.x / norm, rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
+    float norm = std::sqrt(std::pow(rotate.x, 2) + std::pow(rotate.y, 2) + std::pow(rotate.z, 2));
+    if (NearZero(norm)) {
+        LOGW("rotate vector is near zero, please check");
+        norm = 1.0f;
+    }
+    // for rosen backend, the rotation angles in the x and y directions should be set to opposite angles
+    rsNode_->SetRotation(-rotate.w * rotate.x / norm, -rotate.w * rotate.y / norm, rotate.w * rotate.z / norm);
     RequestNextFrame();
 }
 
@@ -487,6 +491,12 @@ void RosenRenderContext::OnTransformCenterUpdate(const DimensionOffset& center)
         float xPivot = ConvertDimensionToScaleBySize(center.GetX(), rect.Width());
         float yPivot = ConvertDimensionToScaleBySize(center.GetY(), rect.Height());
         SetPivot(xPivot, yPivot);
+
+        auto z = center.GetZ();
+        if (z.has_value()) {
+            float zPivot = ConvertDimensionToScaleBySize(z.value(), rect.Width());
+            rsNode_->SetCameraDistance(zPivot);
+        }
     }
     RequestNextFrame();
 }
@@ -1629,7 +1639,15 @@ void RosenRenderContext::OnClipShapeUpdate(const RefPtr<BasicShape>& /*basicShap
 void RosenRenderContext::OnClipEdgeUpdate(bool isClip)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetClipToBounds(isClip);
+    if (isClip) {
+        rsNode_->SetClipToBounds(true);
+    } else {
+        // In the internal implementation, some nodes call SetClipToBounds(true), some call SetClipToFrame(true).
+        // If the developer set clip to false, we should disable all internal clips
+        // so that the child component can go beyond the parent component
+        rsNode_->SetClipToBounds(false);
+        rsNode_->SetClipToFrame(false);
+    }
     RequestNextFrame();
 }
 
@@ -1801,7 +1819,7 @@ void RosenRenderContext::OnMotionPathUpdate(const MotionPathOption& motionPath)
     motionOption.SetEndFraction(motionPath.GetEnd());
     motionOption.SetRotationMode(
         motionPath.GetRotate() ? Rosen::RotationMode::ROTATE_AUTO : Rosen::RotationMode::ROTATE_NONE);
-    motionOption.SetPathNeedAddOrigin(true);
+    motionOption.SetPathNeedAddOrigin(HasOffset());
     rsNode_->SetMotionPathOption(std::make_shared<Rosen::RSMotionPathOption>(motionOption));
     RequestNextFrame();
 }
@@ -2016,6 +2034,12 @@ void RosenRenderContext::OnTransitionOutFinish()
             // if success, tell parent to rebuild render tree.
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
+        }
+        if (isModalRootNode_ && parent->GetChildren().empty()) {
+            auto grandParent = parent->GetParent();
+            CHECK_NULL_VOID(grandParent);
+            grandParent->RemoveChild(parent);
+            grandParent->RebuildRenderContextTree();
         }
     }
 }

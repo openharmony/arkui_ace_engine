@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -161,6 +161,9 @@ public:
     // ----------------
     virtual void RequestAnimationFrame(const std::string& callbackId) = 0;
     virtual void CancelAnimationFrame(const std::string& callbackId) = 0;
+
+    virtual void GetSnapshot(
+        const std::string& componentId, std::function<void(std::shared_ptr<Media::PixelMap>, int32_t)>&& callback) = 0;
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;

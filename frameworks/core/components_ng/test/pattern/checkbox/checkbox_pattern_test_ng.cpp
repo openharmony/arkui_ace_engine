@@ -47,8 +47,14 @@ const Color BOARD_COLOR = Color::BLUE;
 const Color CHECK_COLOR = Color::WHITE;
 const Color BORDER_COLOR = Color::GRAY;
 const Color SHADOW_COLOR = Color::BLUE;
+const Color UNSELECTED_COLOR = Color::RED;
+const Color CHECK_MARK_COLOR = Color::GREEN;
 const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
+constexpr Dimension CHECK_MARK_SIZE = Dimension(10.0);
+constexpr Dimension CHECK_MARK_SIZE_INCORRECT_VALUE = Dimension(-1.0);
+constexpr Dimension CHECK_MARK_WIDTH = Dimension(5.0);
+const bool SELECT_STATE = true;
 } // namespace
 
 class CheckBoxPropertyTestNg : public testing::Test {
@@ -62,6 +68,9 @@ public:
 void CheckBoxPropertyTestNg::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 }
 void CheckBoxPropertyTestNg::TearDownTestCase()
 {
@@ -646,6 +655,74 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest019, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBoxPatternTest020
+ * @tc.desc: Set unSelectedColor into CheckBoxPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest020, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    checkBoxModelNG.SetUnSelectedColor(UNSELECTED_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxUnSelectedColor(), UNSELECTED_COLOR);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest021
+ * @tc.desc: Set checkMarkColor into CheckBoxPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest021, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    checkBoxModelNG.SetCheckMarkColor(CHECK_MARK_COLOR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkColor(), CHECK_MARK_COLOR);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest022
+ * @tc.desc: Set checkMarkSize into CheckBoxPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest022, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    checkBoxModelNG.SetCheckMarkSize(CHECK_MARK_SIZE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkSize(), CHECK_MARK_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest023
+ * @tc.desc: Set checkMarkWidth into CheckBoxPaintProperty and get it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest023, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    checkBoxModelNG.SetCheckMarkWidth(CHECK_MARK_WIDTH);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkWidth(), CHECK_MARK_WIDTH);
+}
+
+/**
  * @tc.name: CheckBoxPaintMethodTest001
  * @tc.desc: Test CheckBox PaintMethod PaintCheckBox.
  * @tc.type: FUNC
@@ -672,4 +749,75 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest001, TestSize.Level1)
     checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
 
+/**
+ * @tc.name: CheckBoxPaintMethodTest002
+ * @tc.desc: Test checkbox method UpdateContentModifier will update value into modifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest002, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    if (checkBoxPaintProperty) {
+        checkBoxPaintProperty->UpdateCheckBoxSelect(SELECT_STATE);
+        checkBoxPaintProperty->UpdateCheckBoxSelectedColor(SELECTED_COLOR);
+        checkBoxPaintProperty->UpdateCheckBoxUnSelectedColor(UNSELECTED_COLOR);
+        checkBoxPaintProperty->UpdateCheckBoxCheckMarkColor(CHECK_MARK_COLOR);
+        checkBoxPaintProperty->UpdateCheckBoxCheckMarkSize(CHECK_MARK_SIZE);
+        checkBoxPaintProperty->UpdateCheckBoxCheckMarkWidth(CHECK_MARK_WIDTH);
+    }
+    
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    auto checkboxModifier = AceType::MakeRefPtr<CheckBoxModifier>(false,
+        Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
+    ASSERT_NE(checkboxModifier, nullptr);
+    CheckBoxPaintMethod checkBoxPaintMethod(checkboxModifier);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->isSelect_->Get(), SELECT_STATE);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->userActiveColor_, SELECTED_COLOR);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->inactiveColor_, UNSELECTED_COLOR);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->pointColor_, CHECK_MARK_COLOR);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(),
+        static_cast<float>(CHECK_MARK_SIZE.ConvertToPx()));
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(),
+        static_cast<float>(CHECK_MARK_WIDTH.ConvertToPx()));
+}
+
+/**
+ * @tc.name: CheckBoxPaintMethodTest003
+ * @tc.desc: Test checkbox method UpdateContentModifier will update incorrect value into modifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest003, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    if (checkBoxPaintProperty) {
+        checkBoxPaintProperty->UpdateCheckBoxCheckMarkSize(CHECK_MARK_SIZE_INCORRECT_VALUE);
+    }
+    
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    auto checkboxModifier = AceType::MakeRefPtr<CheckBoxModifier>(false,
+        Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
+    ASSERT_NE(checkboxModifier, nullptr);
+    CheckBoxPaintMethod checkBoxPaintMethod(checkboxModifier);
+    checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CONTENT_SIZE.Width()));
+}
 } // namespace OHOS::Ace::NG
