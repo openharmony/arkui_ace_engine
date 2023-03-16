@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/thread_checker.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
 #include "core/components/xcomponent/resource/native_texture.h"
@@ -67,21 +68,18 @@ public:
         return MakeRefPtr<XComponentLayoutAlgorithm>();
     }
 
-    std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*> GetNativeXComponent()
+    std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, std::weak_ptr<OH_NativeXComponent>> GetNativeXComponent()
     {
         if (!nativeXComponent_ || !nativeXComponentImpl_) {
-            if (nativeXComponent_) {
-                delete nativeXComponent_;
-                nativeXComponent_ = nullptr;
-            }
             nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
-            nativeXComponent_ = new OH_NativeXComponent(AceType::RawPtr(nativeXComponentImpl_));
+            nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
         }
         return std::make_pair(nativeXComponentImpl_, nativeXComponent_);
     }
 
     void NativeXComponentInit()
     {
+        CHECK_RUN_ON(UI);
         CHECK_NULL_VOID(nativeXComponentImpl_);
         CHECK_NULL_VOID(nativeXComponent_);
         auto host = GetHost();
@@ -92,22 +90,13 @@ public:
         CHECK_NULL_VOID(geometryNode);
         auto width = geometryNode->GetContentSize().Width();
         auto height = geometryNode->GetContentSize().Height();
-
-        pipelineContext->GetTaskExecutor()->PostTask(
-            [nXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, width, height] {
-                if (nXComp && nXCompImpl) {
-                    nXCompImpl->SetXComponentWidth(static_cast<int>(width));
-                    nXCompImpl->SetXComponentHeight(static_cast<int>(height));
-                    auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-                    const auto* callback = nXCompImpl->GetCallback();
-                    if (callback && callback->OnSurfaceCreated != nullptr) {
-                        callback->OnSurfaceCreated(nXComp, surface);
-                    }
-                } else {
-                    LOGE("Native XComponent nullptr");
-                }
-            },
-            TaskExecutor::TaskType::JS);
+        nativeXComponentImpl_->SetXComponentWidth(static_cast<int>(width));
+        nativeXComponentImpl_->SetXComponentHeight(static_cast<int>(height));
+        auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+        const auto* callback = nativeXComponentImpl_->GetCallback();
+        if (callback && callback->OnSurfaceCreated != nullptr) {
+            callback->OnSurfaceCreated(nativeXComponent_.get(), surface);
+        }
     }
 
     void OnPaint();
@@ -176,7 +165,7 @@ private:
     RefPtr<RenderSurface> renderSurface_;
     RefPtr<RenderContext> renderContextForSurface_;
 
-    OH_NativeXComponent* nativeXComponent_ = nullptr;
+    std::shared_ptr<OH_NativeXComponent> nativeXComponent_;
     RefPtr<NativeXComponentImpl> nativeXComponentImpl_;
 
     bool hasXComponentInit_ = false;
