@@ -363,6 +363,7 @@ void IndexerPattern::ResetStatus()
     childHoverIndex_ = -1;
     childFocusIndex_ = -1;
     childPressIndex_ = -1;
+    popupClickedIndex_ = -1;
 }
 
 void IndexerPattern::OnSelect(bool changed)
@@ -710,6 +711,7 @@ void IndexerPattern::UpdateBubbleListItem(
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
+    auto popupSelectedTextColor = paintProperty->GetPopupSelectedColor().value_or(indexerTheme->GetPopupDefaultColor());
     auto popupUnselectedTextColor =
         paintProperty->GetPopupUnselectedColor().value_or(indexerTheme->GetDefaultTextColor());
     auto popupItemTextFontSize =
@@ -722,6 +724,13 @@ void IndexerPattern::UpdateBubbleListItem(
     for (uint32_t i = 0; i < currentListData.size(); i++) {
         auto listItemNode = DynamicCast<FrameNode>(listNode->GetChildAtIndex(i));
         CHECK_NULL_VOID(listItemNode);
+        auto listItemProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
+        CHECK_NULL_VOID(listItemProperty);
+        listItemProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
+        listItemProperty->UpdateAlignment(Alignment::CENTER);
+        auto listItemContext = listItemNode->GetRenderContext();
+        CHECK_NULL_VOID(listItemContext);
+        AddListItemClickListener(listItemNode, i);
         auto textNode = DynamicCast<FrameNode>(listItemNode->GetFirstChild());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -729,23 +738,25 @@ void IndexerPattern::UpdateBubbleListItem(
         textLayoutProperty->UpdateContent(currentListData.at(i));
         textLayoutProperty->UpdateFontSize(popupItemTextFontSize);
         textLayoutProperty->UpdateFontWeight(popupItemTextFontWeight);
-        textLayoutProperty->UpdateTextColor(popupUnselectedTextColor);
+        if (i == popupClickedIndex_) {
+            textLayoutProperty->UpdateTextColor(popupSelectedTextColor);
+            listItemContext->UpdateBackgroundColor(Color(POPUP_LISTITEM_CLICKED_BG));
+        } else {
+            textLayoutProperty->UpdateTextColor(popupUnselectedTextColor);
+            listItemContext->UpdateBackgroundColor(popupItemBackground);
+        }
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
         textNode->MarkModifyDone();
-        auto listItemProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
-        listItemProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
-        listItemProperty->UpdateAlignment(Alignment::CENTER);
-        auto listItemContext = listItemNode->GetRenderContext();
-        CHECK_NULL_VOID(listItemContext);
-        listItemContext->UpdateBackgroundColor(popupItemBackground);
-        AddListItemClickListener(listItemNode, i);
+        textNode->MarkDirtyNode();
         listItemNode->MarkModifyDone();
+        listItemNode->MarkDirtyNode();
     }
 }
 
 void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
 {
+    popupClickedIndex_ = clickIndex;
     auto host = GetHost();
     CHECK_NULL_VOID(popupNode_);
     auto context = PipelineContext::GetCurrentContext();

@@ -454,8 +454,8 @@ inline FontWeight StringToFontWeight(const std::string& weight, FontWeight defau
         { "bolder", FontWeight::BOLDER },
         { "lighter", FontWeight::LIGHTER },
         { "medium", FontWeight::MEDIUM },
-        { "regular", FontWeight::REGULAR },
         { "normal", FontWeight::NORMAL },
+        { "regular", FontWeight::REGULAR },
     };
     auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), weight.c_str());
     return weightIter != -1 ? fontWeightTable[weightIter].value : defaultFontWeight;
