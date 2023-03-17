@@ -473,7 +473,8 @@ bool TextLayoutAlgorithm::AdaptMaxTextSize(TextStyle& textStyle, const std::stri
         if (!CreateParagraphAndLayout(textStyle, content, contentConstraint)) {
             return false;
         }
-        if (paragraph_->GetLineCount() > 1 || GreatNotEqual(paragraph_->GetLongestLine(), maxSize.Width())) {
+        if (paragraph_->GetLineCount() > 1 || paragraph_->DidExceedMaxLines() ||
+            GreatNotEqual(paragraph_->GetLongestLine(), maxSize.Width())) {
             if (paragraph != nullptr) {
                 paragraph_ = paragraph;
             }
