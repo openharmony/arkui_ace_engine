@@ -1749,7 +1749,7 @@ void RosenRenderContext::OnMotionPathUpdate(const MotionPathOption& motionPath)
     motionOption.SetEndFraction(motionPath.GetEnd());
     motionOption.SetRotationMode(
         motionPath.GetRotate() ? Rosen::RotationMode::ROTATE_AUTO : Rosen::RotationMode::ROTATE_NONE);
-    motionOption.SetPathNeedAddOrigin(true);
+    motionOption.SetPathNeedAddOrigin(HasOffset());
     rsNode_->SetMotionPathOption(std::make_shared<Rosen::RSMotionPathOption>(motionOption));
     RequestNextFrame();
 }
