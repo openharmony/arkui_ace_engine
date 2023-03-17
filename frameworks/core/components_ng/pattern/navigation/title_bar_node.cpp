@@ -37,4 +37,16 @@ RefPtr<TitleBarNode> TitleBarNode::GetOrCreateTitleBarNode(
     return titleBarNode;
 }
 
+// The function is only used for fast preview.
+void TitleBarNode::FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild)
+{
+    auto oldChild = GetChildAtIndex(slot);
+    if (title_ == oldChild) {
+        title_ = newChild;
+    } else if (menu_ == oldChild) {
+        menu_ = newChild;
+    }
+    UINode::FastPreviewUpdateChild(slot, newChild);
+}
+
 } // namespace OHOS::Ace::NG
