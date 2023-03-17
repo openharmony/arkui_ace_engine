@@ -146,7 +146,7 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
     }
 
     OffsetF circleCenter;
-    if (pattern->GetBlockCenter() == OffsetF()) {
+    if (pattern->GetAnimatableBlockCenter() == OffsetF()) {
         if (!reverse) {
             if (axis == Axis::HORIZONTAL) {
                 circleCenter.SetX(selectOffset);
@@ -165,7 +165,7 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
             }
         }
     } else {
-        circleCenter = pattern->GetBlockCenter();
+        circleCenter = pattern->GetAnimatableBlockCenter();
     }
 
     OffsetF imageNodeOffset(

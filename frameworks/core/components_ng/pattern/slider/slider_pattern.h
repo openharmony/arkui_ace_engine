@@ -19,6 +19,7 @@
 #include <cstddef>
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_layout_algorithm.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
@@ -37,7 +38,8 @@ public:
     {
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
-            sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(paintParameters);
+            sliderContentModifier_ =
+                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [this]() { LayoutImageNode(); });
         }
         SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
         if (!sliderTipModifier_ && bubbleFlag_) {
@@ -77,6 +79,14 @@ public:
     const OffsetF& GetBlockCenter() const
     {
         return circleCenter_;
+    }
+
+    const OffsetF GetAnimatableBlockCenter() const
+    {
+        if (sliderContentModifier_ != nullptr) {
+            return sliderContentModifier_->GetBlockCenter();
+        }
+        return OffsetF();
     }
 
     float GetValueRatio() const
@@ -129,6 +139,7 @@ private:
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void UpdateBlock();
+    void LayoutImageNode();
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
