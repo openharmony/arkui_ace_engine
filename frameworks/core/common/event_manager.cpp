@@ -30,12 +30,12 @@
 
 namespace OHOS::Ace {
 constexpr uint8_t KEYS_MAX_VALUE = 3;
-const char SHORT_CUT_VALUE_X = 'x';
-const char SHORT_CUT_VALUE_Y = 'y';
-const char SHORT_CUT_VALUE_Z = 'z';
-const char SHORT_CUT_VALUE_A = 'a';
-const char SHORT_CUT_VALUE_C = 'c';
-const char SHORT_CUT_VALUE_V = 'v';
+const std::string SHORT_CUT_VALUE_X = "X";
+const std::string SHORT_CUT_VALUE_Y = "Y";
+const std::string SHORT_CUT_VALUE_Z = "Z";
+const std::string SHORT_CUT_VALUE_A = "A";
+const std::string SHORT_CUT_VALUE_C = "C";
+const std::string SHORT_CUT_VALUE_V = "V";
 enum class CtrlKeysBit {
     CTRL = 1,
     SHIFT = 2,
@@ -729,34 +729,34 @@ uint8_t EventManager::GetKeyboardShortcutKeys(const std::vector<CtrlKey>& keys)
     return keyValue;
 }
 
-bool EventManager::IsSystemKeyboardShortcut(char value, uint8_t keys)
+bool EventManager::IsSystemKeyboardShortcut(const std::string& value, uint8_t keys)
 {
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_C) {
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_C) {
         return true;
     }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_A) {
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_A) {
         return true;
     }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_V) {
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_V) {
         return true;
     }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_X) {
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_X) {
         return true;
     }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_Y) {
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_Y) {
         return true;
     }
-    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && std::tolower(value) == SHORT_CUT_VALUE_Z) {
+    if (!(keys ^ static_cast<uint8_t>(CtrlKeysBit::CTRL)) && value == SHORT_CUT_VALUE_Z) {
         return true;
     }
     if (!(keys ^ (static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT))) &&
-        std::tolower(value) == SHORT_CUT_VALUE_Z) {
+        value == SHORT_CUT_VALUE_Z) {
         return true;
     }
     return false;
 }
 
-bool EventManager::IsSameKeyboardShortcutNode(char value, uint8_t keys)
+bool EventManager::IsSameKeyboardShortcutNode(const std::string& value, uint8_t keys)
 {
     if (IsSystemKeyboardShortcut(value, keys)) {
         return true;
@@ -770,41 +770,270 @@ bool EventManager::IsSameKeyboardShortcutNode(char value, uint8_t keys)
         if (!eventHub) {
             continue;
         }
-        if (eventHub->GetKeyboardShortcutValue() == std::tolower(value) &&
-            eventHub->GetKeyboardShortcutKeys() == keys) {
-            return true;
+        auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
+        for (auto& keyboardShortcut : keyboardShortcuts) {
+            LOGI("IsSameKeyboardShortcutNode keys = %{public}d value = %{public}s", keyboardShortcut.keys,
+                keyboardShortcut.value.c_str());
+            if (keyboardShortcut.value.find(value) != std::string::npos && keyboardShortcut.keys == keys) {
+                return true;
+            }
         }
     }
     return false;
 }
 
-void EventManager::AddKeyboardShortcutKeys(uint8_t keys, std::vector<KeyCode>& leftKeyCode,
-    std::vector<KeyCode>& rightKeyCode, std::vector<uint8_t>& permutation)
+void AddKeyboardShortcutSingleKey(
+    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
 {
     uint8_t index = 0;
+    std::vector<KeyCode> keyCode1;
+    std::vector<KeyCode> keyCode2;
     if (keys & static_cast<uint8_t>(CtrlKeysBit::CTRL)) {
-        leftKeyCode.emplace_back(KeyCode::KEY_CTRL_LEFT);
-        rightKeyCode.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+        keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
+        keyCode2.emplace_back(KeyCode::KEY_CTRL_RIGHT);
         permutation.emplace_back(++index);
     }
     if (keys & static_cast<uint8_t>(CtrlKeysBit::SHIFT)) {
-        leftKeyCode.emplace_back(KeyCode::KEY_SHIFT_LEFT);
-        rightKeyCode.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+        keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+        keyCode2.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
         permutation.emplace_back(++index);
     }
     if (keys & static_cast<uint8_t>(CtrlKeysBit::ALT)) {
-        leftKeyCode.emplace_back(KeyCode::KEY_ALT_LEFT);
-        rightKeyCode.emplace_back(KeyCode::KEY_ALT_RIGHT);
+        keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
+        keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
         permutation.emplace_back(++index);
+    }
+    keyCodes.emplace_back(keyCode1);
+    keyCodes.emplace_back(keyCode2);
+}
+
+void AddKeyboardShortcutDoubleKeysWithCtrlShift(
+    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
+{
+    uint8_t index = 0;
+    std::vector<KeyCode> keyCode1;
+    std::vector<KeyCode> keyCode2;
+    std::vector<KeyCode> keyCode3;
+    std::vector<KeyCode> keyCode4;
+
+    keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    keyCode3.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+    keyCode4.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+    keyCode3.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyCode4.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCodes.emplace_back(keyCode1);
+    keyCodes.emplace_back(keyCode2);
+    keyCodes.emplace_back(keyCode3);
+    keyCodes.emplace_back(keyCode4);
+}
+
+void AddKeyboardShortcutDoubleKeysWithCtrlAlt(
+    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
+{
+    uint8_t index = 0;
+    std::vector<KeyCode> keyCode1;
+    std::vector<KeyCode> keyCode2;
+    std::vector<KeyCode> keyCode3;
+    std::vector<KeyCode> keyCode4;
+
+    keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    keyCode3.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+    keyCode4.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
+    keyCode3.emplace_back(KeyCode::KEY_ALT_LEFT);
+    keyCode4.emplace_back(KeyCode::KEY_ALT_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCodes.emplace_back(keyCode1);
+    keyCodes.emplace_back(keyCode2);
+    keyCodes.emplace_back(keyCode3);
+    keyCodes.emplace_back(keyCode4);
+}
+
+void AddKeyboardShortcutDoubleKeysWithShiftAlt(
+    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
+{
+    uint8_t index = 0;
+    std::vector<KeyCode> keyCode1;
+    std::vector<KeyCode> keyCode2;
+    std::vector<KeyCode> keyCode3;
+    std::vector<KeyCode> keyCode4;
+
+    keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyCode3.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+    keyCode4.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
+    keyCode3.emplace_back(KeyCode::KEY_ALT_LEFT);
+    keyCode4.emplace_back(KeyCode::KEY_ALT_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCodes.emplace_back(keyCode1);
+    keyCodes.emplace_back(keyCode2);
+    keyCodes.emplace_back(keyCode3);
+    keyCodes.emplace_back(keyCode4);
+}
+
+void AddKeyboardShortcutDoubleKeys(
+    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
+{
+    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT)) {
+        AddKeyboardShortcutDoubleKeysWithCtrlShift(keys, keyCodes, permutation);
+    }
+    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+        AddKeyboardShortcutDoubleKeysWithCtrlAlt(keys, keyCodes, permutation);
+    }
+    if (keys == static_cast<uint8_t>(CtrlKeysBit::SHIFT) + static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+        AddKeyboardShortcutDoubleKeysWithShiftAlt(keys, keyCodes, permutation);
+    }
+}
+
+void AddKeyboardShortcutTripleKeys(
+    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
+{
+    uint8_t index = 0;
+    std::vector<KeyCode> keyCode1;
+    std::vector<KeyCode> keyCode2;
+    std::vector<KeyCode> keyCode3;
+    std::vector<KeyCode> keyCode4;
+    std::vector<KeyCode> keyCode5;
+    std::vector<KeyCode> keyCode6;
+    std::vector<KeyCode> keyCode7;
+    std::vector<KeyCode> keyCode8;
+
+    keyCode1.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    keyCode3.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    keyCode4.emplace_back(KeyCode::KEY_CTRL_LEFT);
+    keyCode5.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+    keyCode6.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+    keyCode7.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+    keyCode8.emplace_back(KeyCode::KEY_CTRL_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCode1.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyCode3.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+    keyCode4.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+    keyCode5.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyCode6.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyCode7.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+    keyCode8.emplace_back(KeyCode::KEY_SHIFT_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCode1.emplace_back(KeyCode::KEY_ALT_LEFT);
+    keyCode2.emplace_back(KeyCode::KEY_ALT_RIGHT);
+    keyCode3.emplace_back(KeyCode::KEY_ALT_LEFT);
+    keyCode4.emplace_back(KeyCode::KEY_ALT_RIGHT);
+    keyCode5.emplace_back(KeyCode::KEY_ALT_LEFT);
+    keyCode6.emplace_back(KeyCode::KEY_ALT_RIGHT);
+    keyCode7.emplace_back(KeyCode::KEY_ALT_LEFT);
+    keyCode8.emplace_back(KeyCode::KEY_ALT_RIGHT);
+    permutation.emplace_back(++index);
+
+    keyCodes.emplace_back(keyCode1);
+    keyCodes.emplace_back(keyCode2);
+    keyCodes.emplace_back(keyCode3);
+    keyCodes.emplace_back(keyCode4);
+    keyCodes.emplace_back(keyCode5);
+    keyCodes.emplace_back(keyCode6);
+    keyCodes.emplace_back(keyCode7);
+    keyCodes.emplace_back(keyCode8);
+}
+
+void AddKeyboardShortcutKeys(
+    uint8_t keys, std::vector<std::vector<KeyCode>>& keyCodes, std::vector<uint8_t>& permutation)
+{
+    // single FunctionKey
+    if (keys == 0) {
+        keyCodes.emplace_back(std::vector<KeyCode>());
+    }
+    // single key
+    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) || keys == static_cast<uint8_t>(CtrlKeysBit::SHIFT) ||
+        keys == static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+        LOGI("AddKeyboardShortcutKeys single key");
+        AddKeyboardShortcutSingleKey(keys, keyCodes, permutation);
+    }
+    // double keys
+    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT) ||
+        keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::ALT) ||
+        keys == static_cast<uint8_t>(CtrlKeysBit::SHIFT) + static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+        LOGI("AddKeyboardShortcutKeys double keys");
+        AddKeyboardShortcutDoubleKeys(keys, keyCodes, permutation);
+    }
+    // triple keys
+    if (keys == static_cast<uint8_t>(CtrlKeysBit::CTRL) + static_cast<uint8_t>(CtrlKeysBit::SHIFT) +
+                    static_cast<uint8_t>(CtrlKeysBit::ALT)) {
+        LOGI("AddKeyboardShortcutKeys triple keys");
+        AddKeyboardShortcutTripleKeys(keys, keyCodes, permutation);
+    }
+}
+
+void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::KeyboardShortcut>& keyboardShortcuts,
+    const WeakPtr<NG::FrameNode>& node, const RefPtr<NG::EventHub>& eventHub)
+{
+    CHECK_NULL_VOID(eventHub);
+    for (auto& keyboardShortcut : keyboardShortcuts) {
+        if (keyboardShortcut.value.empty()) {
+            continue;
+        }
+
+        std::vector<std::vector<KeyCode>> keyCodes;
+        std::vector<uint8_t> permutation;
+        AddKeyboardShortcutKeys(keyboardShortcut.keys, keyCodes, permutation);
+        if (event.ConvertInputCodeToString().find(keyboardShortcut.value) == std::string::npos) {
+            continue;
+        }
+        // Handle left and right the keys problem.
+        std::vector<uint8_t> perm;
+        for (auto& keyCode : keyCodes) {
+            perm.assign(permutation.begin(), permutation.end());
+            // Handle the keys order problem.
+            do {
+                keyCode.emplace_back(event.code);
+                if (!event.IsKey(keyCode)) {
+                    keyCode.pop_back();
+                    std::next_permutation(keyCode.begin(), keyCode.end());
+                    continue;
+                }
+
+                if (keyboardShortcut.onKeyboardShortcutAction) {
+                    keyboardShortcut.onKeyboardShortcutAction();
+                    LOGI("TriggerKeyboardShortcut action done.");
+                } else {
+                    auto gestureEventHub = eventHub->GetGestureEventHub();
+                    if (gestureEventHub && gestureEventHub->IsClickable()) {
+                        gestureEventHub->KeyBoardShortCutClick(event, node);
+                        LOGI("TriggerKeyboardShortcut click done.");
+                    }
+                }
+                keyCode.pop_back();
+                std::next_permutation(keyCode.begin(), keyCode.end());
+            } while (std::next_permutation(perm.begin(), perm.end()));
+            perm.clear();
+        }
+        keyCodes.clear();
+        permutation.clear();
     }
 }
 
 void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
-    LOGI("EventManager::DispatchKeyboardShortcut The key code is %{public}d, the key action is %{public}d, the repeat "
-         "time is "
-         "%{public}d.",
-        event.code, event.action, event.repeatTime);
+    LOGI("EventManager: The key code is %{public}d, the key action is %{public}d.", event.code, event.action);
     if (event.action != KeyAction::DOWN) {
         return;
     }
@@ -818,37 +1047,8 @@ void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
             continue;
         }
 
-        auto value = eventHub->GetKeyboardShortcutValue();
-        auto keys = eventHub->GetKeyboardShortcutKeys();
-        if (value == '\0' || keys == 0) {
-            continue;
-        }
-        std::vector<KeyCode> leftKeyCode;
-        std::vector<KeyCode> rightKeyCode;
-        std::vector<uint8_t> permutation;
-        AddKeyboardShortcutKeys(keys, leftKeyCode, rightKeyCode, permutation);
-        if (event.ConvertInputCodeToString() != std::string(1, value)) {
-            continue;
-        }
-        // Handle the keys order problem.
-        do {
-            leftKeyCode.emplace_back(event.code);
-            rightKeyCode.emplace_back(event.code);
-            if (event.IsKey(leftKeyCode) || event.IsKey(rightKeyCode)) {
-                auto gestureEventHub = eventHub->GetGestureEventHub();
-                if (gestureEventHub && gestureEventHub->IsClickable()) {
-                    gestureEventHub->KeyBoardShortCutClick(event, node);
-                    LOGI("EventManager::DispatchKeyboardShortcut click done.");
-                }
-            }
-            leftKeyCode.pop_back();
-            rightKeyCode.pop_back();
-            std::next_permutation(leftKeyCode.begin(), leftKeyCode.end());
-            std::next_permutation(rightKeyCode.begin(), rightKeyCode.end());
-        } while (std::next_permutation(permutation.begin(), permutation.end()));
-        leftKeyCode.clear();
-        rightKeyCode.clear();
-        permutation.clear();
+        auto keyboardShortcuts = eventHub->GetKeyboardShortcut();
+        TriggerKeyboardShortcut(event, keyboardShortcuts, node, eventHub);
     }
 }
 

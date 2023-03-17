@@ -679,9 +679,10 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
-    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) override
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction) override
     {
-        ViewAbstract::SetKeyboardShortcut(value, keys);
+        ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
     }
 
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override

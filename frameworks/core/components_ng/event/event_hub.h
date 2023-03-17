@@ -33,13 +33,22 @@ class FrameNode;
 using OnAreaChangedFunc =
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>;
 
+struct KeyboardShortcut {
+    std::string value;
+    uint8_t keys = 0;
+    std::function<void()> onKeyboardShortcutAction = nullptr;
+};
+
 // The event hub is mainly used to handle common collections of events, such as gesture events, mouse events, etc.
 class EventHub : public virtual AceType {
     DECLARE_ACE_TYPE(EventHub, AceType)
 
 public:
     EventHub() = default;
-    ~EventHub() override = default;
+    ~EventHub() override
+    {
+        keyboardShortcut_.clear();
+    };
 
     const RefPtr<GestureEventHub>& GetOrCreateGestureEventHub()
     {
@@ -256,20 +265,27 @@ public:
 
     bool IsCurrentStateOn(UIState state);
 
-    void SetKeyboardShortcut(char value, uint8_t keys)
+    void SetKeyboardShortcut(
+        const std::string& value, uint8_t keys, const std::function<void()>& onKeyboardShortcutAction)
     {
-        value_ = static_cast<char>(std::tolower(value));
-        keys_ = keys;
+        if (value.empty() && keys == 0) {
+            if (keyboardShortcut_.size() == 1) {
+                keyboardShortcut_.clear();
+            }
+            return;
+        }
+        KeyboardShortcut keyboardShortcut;
+        for (auto&& ch : value) {
+            keyboardShortcut.value.push_back(static_cast<char>(std::toupper(ch)));
+        }
+        keyboardShortcut.keys = keys;
+        keyboardShortcut.onKeyboardShortcutAction = onKeyboardShortcutAction;
+        keyboardShortcut_.emplace_back(keyboardShortcut);
     }
 
-    char GetKeyboardShortcutValue() const
+    std::vector<KeyboardShortcut>& GetKeyboardShortcut()
     {
-        return value_;
-    }
-
-    uint8_t GetKeyboardShortcutKeys() const
-    {
-        return keys_;
+        return keyboardShortcut_;
     }
 
 protected:
@@ -293,8 +309,7 @@ private:
     OnDragFunc onDrop_;
 
     bool enabled_ { true };
-    char value_ = '\0';
-    uint8_t keys_ = 0;
+    std::vector<KeyboardShortcut> keyboardShortcut_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

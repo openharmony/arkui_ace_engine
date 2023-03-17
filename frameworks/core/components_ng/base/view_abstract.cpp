@@ -1257,7 +1257,8 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorStrategy, strategy);
 }
 
-void ViewAbstract::SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys)
+void ViewAbstract::SetKeyboardShortcut(
+    const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1267,26 +1268,21 @@ void ViewAbstract::SetKeyboardShortcut(const std::string& value, const std::vect
     CHECK_NULL_VOID(eventHub);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (value.size() > 1) {
-        LOGE("KeyboardShortcut value arg is wrong, return");
-        return;
-    }
-    if (value.empty() || keys.size() == 0) {
+    if (value.empty() || (keys.size() == 0 && value.length() == 1)) {
         LOGI("KeyboardShortcut value and keys is invalid, return");
-        eventHub->SetKeyboardShortcut('\0', 0);
-        eventManager->DelKeyboardShortcutNode(frameNode->GetId());
+        eventHub->SetKeyboardShortcut("", 0, nullptr);
         return;
     }
     auto key = eventManager->GetKeyboardShortcutKeys(keys);
-    if (key == 0) {
+    if ((key == 0 && value.length() == 1) || (key == 0 && keys.size() > 0 && value.length() > 1)) {
         LOGI("KeyboardShortcut's keys are the same, return");
         return;
     }
-    if (eventManager->IsSameKeyboardShortcutNode(value[0], key)) {
+    if (eventManager->IsSameKeyboardShortcutNode(value, key)) {
         LOGI("KeyboardShortcut is the same, return");
         return;
     }
-    eventHub->SetKeyboardShortcut(value[0], key);
+    eventHub->SetKeyboardShortcut(value, key, std::move(onKeyboardShortcutAction));
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNode));
 }
 
