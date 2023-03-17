@@ -142,8 +142,8 @@ void LayoutWrapper::WillLayout()
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     if (geometryTransition != nullptr) {
-        LOGD("GeometryTransition: node%{public}d will layout, priority: %{public}d",
-            host->GetId(), host->GetLayoutPriority());
+        LOGD("GeometryTransition: node%{public}d will layout, priority: %{public}d", host->GetId(),
+            host->GetLayoutPriority());
         geometryTransition->WillLayout(Claim(this));
     }
 
@@ -196,13 +196,30 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     auto preConstraint = layoutProperty_->GetLayoutConstraint();
     auto contentConstraint = layoutProperty_->GetContentLayoutConstraint();
     layoutProperty_->BuildGridProperty(host);
+    const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
+    auto hasAspectRatio = magicItemProperty && magicItemProperty->HasAspectRatio();
     if (parentConstraint) {
-        geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
-        layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
+        if (hasAspectRatio) {
+            auto useConstraint = parentConstraint.value();
+            useConstraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue());
+            geometryNode_->SetParentLayoutConstraint(useConstraint);
+            layoutProperty_->UpdateLayoutConstraint(useConstraint);
+        } else {
+            geometryNode_->SetParentLayoutConstraint(parentConstraint.value());
+            layoutProperty_->UpdateLayoutConstraint(parentConstraint.value());
+        }
     } else {
         LayoutConstraintF layoutConstraint;
         layoutConstraint.percentReference.SetWidth(PipelineContext::GetCurrentRootWidth());
-        layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+        if (hasAspectRatio) {
+            auto aspectRatio = magicItemProperty->GetAspectRatioValue();
+            if (Positive(aspectRatio)) {
+                auto height = PipelineContext::GetCurrentRootHeight() / aspectRatio;
+                layoutConstraint.percentReference.SetHeight(height);
+            }
+        } else {
+            layoutConstraint.percentReference.SetHeight(PipelineContext::GetCurrentRootHeight());
+        }
         layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     }
     layoutProperty_->UpdateContentConstraint();
@@ -234,8 +251,6 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
         layoutAlgorithm_->Measure(this);
 
         // check aspect radio.
-        const auto& magicItemProperty = layoutProperty_->GetMagicItemProperty();
-        auto hasAspectRatio = magicItemProperty ? magicItemProperty->HasAspectRatio() : false;
         if (hasAspectRatio) {
             auto aspectRatio = magicItemProperty->GetAspectRatioValue();
             // Adjust by aspect ratio, firstly pick height based on width. It means that when width, height and
