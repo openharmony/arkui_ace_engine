@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -349,23 +350,16 @@ void StepperPattern::CreateWaitingRightButtonNode()
     CHECK_NULL_VOID(stepperTheme);
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    // Create imageNode
+    // Create loadingProgressNode
     auto buttonId = hostNode->GetRightButtonId();
-    auto imageNode = FrameNode::GetOrCreateFrameNode(
-        V2::IMAGE_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    imageNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+    auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(
+        V2::LOADING_PROGRESS_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
+    loadingProgressNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(stepperTheme->GetProgressDiameter()), CalcLength(stepperTheme->GetProgressDiameter())));
-    imageNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageFit(ImageFit::FILL);
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(InternalResource::ResourceId::PIECE_DELETE_SVG);
-    imageSourceInfo.SetFillColor(stepperTheme->GetProgressColor());
-    imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(imageSourceInfo);
-    SizeF sourceSize(static_cast<float>(stepperTheme->GetProgressDiameter().ConvertToPx()),
-        static_cast<float>(stepperTheme->GetProgressDiameter().ConvertToPx()));
-    imageNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateSourceSize(sourceSize);
-    imageNode->MountToParent(hostNode);
-    imageNode->MarkModifyDone();
+    loadingProgressNode->GetPaintProperty<LoadingProgressPaintProperty>()->UpdateColor(
+        stepperTheme->GetProgressColor());
+    loadingProgressNode->MountToParent(hostNode);
+    loadingProgressNode->MarkModifyDone();
 }
 
 void StepperPattern::UpdateRightButtonNode(int32_t index)
