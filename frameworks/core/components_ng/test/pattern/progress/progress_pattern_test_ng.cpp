@@ -26,6 +26,8 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components/progress/progress_theme.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/progress/progress_layout_algorithm.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
@@ -33,8 +35,6 @@
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/components_ng/property/progress_mask_property.h"
-#include "core/components_ng/render/adapter/moon_progress_modifier.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/components_ng/render/render_context.h"
@@ -68,6 +68,7 @@ constexpr ProgressType PROGRESS_TYPE_RING = ProgressType::RING;
 constexpr ProgressType PROGRESS_TYPE_SCALE = ProgressType::SCALE;
 constexpr ProgressType PROGRESS_TYPE_MOON = ProgressType::MOON;
 constexpr ProgressType PROGRESS_TYPE_CAPSULE = ProgressType::CAPSULE;
+constexpr ProgressType PROGRESS_TYPE_CIRCLE = ProgressType::CIRCLE;
 constexpr Dimension STORKE_WIDTH = 10.0_vp;
 constexpr Dimension LARG_STORKE_WIDTH = 500.0_vp;
 constexpr Dimension SCALE_WIDTH = 10.0_vp;
@@ -84,10 +85,15 @@ constexpr float PROGRESS_COMPONENT_HEIGHT = 200.0f;
 constexpr float LARG_PROGRESS_COMPONENT_HEIGHT = 2000.0f;
 constexpr float NUMBER_OF_TWO = 2.0f;
 constexpr float PROGRESS_STROKE_WIDTH = 10.0f;
+constexpr float PROGRESS_LARGE_STROKE_WIDTH = 200.0f;
 constexpr float PROGRESS_MODIFIER_VALUE = 100.0f;
+constexpr float PROGRESS_MODIFIER_LARGE_VALUE = 200.0f;
+constexpr float PROGRESS_MODIFIER_MAX_VALUE = 10000.0f;
 constexpr float CONTEXT_WIDTH = 100.0f;
 constexpr float CONTEXT_HEIGHT = 100.0f;
 constexpr float CONTEXT_LARGE_HEIGHT = 200.0f;
+constexpr float CONTEXT_HUGE_WIDTH = 20000.0f;
+constexpr float CONTEXT_HUGE_HEIGHT = 20000.0f;
 constexpr Dimension DEFALT_RING_DIAMETER = 72.0_vp;
 constexpr Dimension TEST_PROGRERSS_THICKNESS = 4.0_vp;
 constexpr Dimension TEST_PROGRESS_STROKE_WIDTH = 10.0_vp;
@@ -243,6 +249,8 @@ HWTEST_F(ProgressPatternTestNg, ProgressCreate001, TestSize.Level1)
     CheckValue(frameNode, testProperty);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     EXPECT_NE(pattern, nullptr);
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
     RefPtr<ProgressLayoutAlgorithm> progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, nullptr, nullptr);
     EXPECT_NE(layoutWrapper, nullptr);
@@ -833,39 +841,81 @@ HWTEST_F(ProgressPatternTestNg, ProgressModifier001, TestSize.Level1)
     progressModifier.SetScaleCount(SCALE_COUNT);
     OffsetF offset(0, 0);
     progressModifier.SetOffset(offset);
-
     RSCanvas canvas;
-    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    DrawingContext context {canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT};
 
     // case1.set ProgressType LINEAR(Width >= Height)
     progressModifier.SetProgressType(PROGRESS_TYPE_LINEAR);
     progressModifier.onDraw(context);
-
     // case2.set ProgressType LINEAR(Width < Height)
     progressModifier.SetProgressType(PROGRESS_TYPE_LINEAR);
-    DrawingContext secondContext { canvas, CONTEXT_WIDTH, CONTEXT_LARGE_HEIGHT };
+    DrawingContext secondContext {canvas, CONTEXT_WIDTH, CONTEXT_LARGE_HEIGHT};
     progressModifier.onDraw(secondContext);
-
     // case3.set ProgressType RING
+    progressModifier.SetStrokeWidth(PROGRESS_LARGE_STROKE_WIDTH);
     progressModifier.SetProgressType(PROGRESS_TYPE_RING);
     progressModifier.onDraw(context);
-
     // case4.set ProgressType SCALE
     progressModifier.SetProgressType(PROGRESS_TYPE_SCALE);
+    progressModifier.onDraw(context);
+    // case5.set ProgressType SCALE
     progressModifier.SetScaleWidth(0);
     progressModifier.onDraw(context);
-
-    // case5.set ProgressType MOON
+    // case6.set ProgressType MOON
+    progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
     progressModifier.SetProgressType(PROGRESS_TYPE_MOON);
     progressModifier.onDraw(context);
+    // case7.set ProgressType MOON(angle <=FLOAT_ZERO_FIVE)
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_MAX_VALUE);
+    progressModifier.onDraw(context);
+}
 
-    // case6.set ProgressType CAPSULE(Width >= Height)
+/**
+ * @tc.name: ProgressModifier002
+ * @tc.desc: Test ProgressModifier.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, ProgressModifier002, TestSize.Level1)
+{
+    ProgressModifier progressModifier;
+    progressModifier.SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    LinearColor linearColor;
+    progressModifier.SetColor(linearColor);
+    progressModifier.SetBackgroundColor(linearColor);
+    progressModifier.SetBorderColor(linearColor);
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetScaleWidth(PROGRESS_MODIFIER_VALUE);
+    progressModifier.SetScaleCount(SCALE_COUNT);
+    OffsetF offset(0, 0);
+    progressModifier.SetOffset(offset);
+    RSCanvas canvas;
+    DrawingContext context {canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT};
+    DrawingContext secondContext {canvas, CONTEXT_WIDTH, CONTEXT_LARGE_HEIGHT};
+
+    // case1.set ProgressType CAPSULE(Width >= Height)
     progressModifier.SetProgressType(PROGRESS_TYPE_CAPSULE);
     progressModifier.onDraw(context);
-
-    // case6.set ProgressType CAPSULE(Width < Height)
-    progressModifier.SetProgressType(PROGRESS_TYPE_CAPSULE);
+    // case2.set ProgressType CAPSULE(Width >= Height, progressWidth < radius)
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_MAX_VALUE);
+    progressModifier.onDraw(context);
+    // case3.set ProgressType CAPSULE(Width >= Height, else)
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_LARGE_VALUE);
+    DrawingContext thirdContext {canvas, CONTEXT_HUGE_WIDTH, CONTEXT_HEIGHT};
+    progressModifier.onDraw(thirdContext);
+    // case4.set ProgressType CAPSULE(Width < Height)
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_VALUE);
     progressModifier.onDraw(secondContext);
+    // case5.set ProgressType CAPSULE(Width < Height,progressWidth < radius)
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_MAX_VALUE);
+    progressModifier.onDraw(secondContext);
+    // case6.set ProgressType CAPSULE(Width < Height,else)
+    progressModifier.SetMaxValue(PROGRESS_MODIFIER_LARGE_VALUE);
+    DrawingContext fourthContext {canvas, CONTEXT_WIDTH, CONTEXT_HUGE_HEIGHT};
+    progressModifier.onDraw(fourthContext);
+    // case7.set ProgressType CIRCLE
+    progressModifier.SetProgressType(PROGRESS_TYPE_CIRCLE);
+    progressModifier.onDraw(context);
 }
 
 /**
@@ -884,7 +934,7 @@ HWTEST_F(ProgressPatternTestNg, ProgressPaintMethod001, TestSize.Level1)
     // creat paintWrapper
     WeakPtr<RenderContext> renderContext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     auto progressPaintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     ASSERT_NE(progressPaintProperty, nullptr);
     PaintWrapper *paintWrapper =
@@ -937,11 +987,46 @@ HWTEST_F(ProgressPatternTestNg, ProgressPaintProperty001, TestSize.Level1)
 HWTEST_F(ProgressPatternTestNg, progressMaskPropertyTestNg001, TestSize.Level1)
 {
     ProgressMaskProperty progressMaskProperty;
-    progressMaskProperty.GetValue();
-    progressMaskProperty.GetMaxValue();
-    progressMaskProperty.GetColor();
     progressMaskProperty.SetValue(VALUE_OF_SET_VALUE);
+    auto progressMaskValue = progressMaskProperty.GetValue();
+    EXPECT_EQ(progressMaskValue, VALUE_OF_SET_VALUE);
     progressMaskProperty.SetMaxValue(VALUE_OF_SET_VALUE);
+    auto progressMaskMaxValue = progressMaskProperty.GetMaxValue();
+    EXPECT_EQ(progressMaskMaxValue, VALUE_OF_SET_VALUE);
     progressMaskProperty.SetColor(TEST_COLOR);
+    auto progressMaskColor = progressMaskProperty.GetColor();
+    EXPECT_EQ(progressMaskColor, TEST_COLOR);
+}
+
+/**
+ * @tc.name: RenderContextTest001
+ * @tc.desc: Test ToJsonValue and SetProgressMask
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, RenderContextTest001, TestSize.Level1)
+{
+    auto progress = AceType::MakeRefPtr<ProgressMaskProperty>();
+    ViewAbstractModelNG viewAbstractModelNG;
+    viewAbstractModelNG.SetProgressMask(progress);
+
+    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    auto renderContext = RenderContext::Create();
+    renderContext->UpdateProgressMask(progress);
+
+    renderContext->ToJsonValue(json);
+    ASSERT_NE(json, nullptr);
+    renderContext->OnProgressMaskUpdate(progress);
+}
+
+/**
+ * @tc.name: ProgressThemeTest001
+ * @tc.desc: Test GetMaskColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, ProgressThemeTest001, TestSize.Level1)
+{
+    RefPtr<ProgressTheme> theme = AceType::Claim(new ProgressTheme());
+    theme->maskColor_ = Color::RED;
+    EXPECT_EQ(theme->GetMaskColor(), Color::RED);
 }
 } // namespace OHOS::Ace::NG
