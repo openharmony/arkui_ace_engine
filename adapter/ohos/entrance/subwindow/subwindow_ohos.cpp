@@ -235,6 +235,17 @@ void SubwindowOhos::HidePopupNG()
     HideWindow();
 }
 
+void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    popupInfo = overlayManager->GetPopupInfo(targetId);
+}
+
 void SubwindowOhos::ShowWindow()
 {
     LOGI("Show the subwindow");

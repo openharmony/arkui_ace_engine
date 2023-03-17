@@ -821,6 +821,14 @@ void ViewAbstract::BindPopup(
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
+    // subwindow model needs to use subContainer to get popupInfo
+    if (showInSubWindow) {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
+        if (subwindow) {
+            subwindow->GetPopupInfoNG(targetId, popupInfo);
+        }
+    }
+
     if (popupInfo.isCurrentOnShow == isShow) {
         LOGI("No need to change popup show flag, current show %{public}d", isShow);
         return;
@@ -832,11 +840,9 @@ void ViewAbstract::BindPopup(
     if (popupInfo.popupId == -1 || !popupNode) {
         if (!isUseCustom) {
             popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
-        } else if (isUseCustom) {
+        } else {
             CHECK_NULL_VOID(customNode);
             popupNode = BubbleView::CreateCustomBubbleNode(targetTag, targetId, customNode, param);
-        } else {
-            LOGE("useCustom is invalid");
         }
         if (popupNode) {
             popupId = popupNode->GetId();
@@ -859,8 +865,13 @@ void ViewAbstract::BindPopup(
     popupInfo.targetSize = SizeF(param->GetTargetSize().Width(), param->GetTargetSize().Height());
     popupInfo.targetOffset = OffsetF(param->GetTargetOffset().GetX(), param->GetTargetOffset().GetY());
     if (showInSubWindow) {
-        LOGI("Popup now show in subwindow.");
-        SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
+        if (isShow) {
+            LOGI("Popup now show in subwindow.");
+            SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
+        } else {
+            LOGI("Popup now hide in subwindow.");
+            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+        }
         return;
     }
     auto destroyCallback = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager)), targetId]() {
