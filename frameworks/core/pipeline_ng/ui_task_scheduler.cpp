@@ -58,17 +58,25 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     ACE_FUNCTION_TRACE();
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     std::vector<RefPtr<FrameNode>> orderedNodes;
-    bool needReorder = false;
+    bool hasNormalNode = false;
+    bool hasPriorityNode = false;
     for (auto&& pageNodes : dirtyLayoutNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node || node->IsInDestroying()) {
                 continue;
             }
             orderedNodes.emplace_back(node);
-            needReorder = node->GetLayoutPriority() != 0 ? true : needReorder;
+            if (node->GetLayoutPriority() == 0) {
+                hasNormalNode = true;
+            } else {
+                hasPriorityNode = true;
+            }
         }
     }
-    if (needReorder) {
+    if (!hasNormalNode) {
+        dirtyLayoutNodes_ = std::move(dirtyLayoutNodes);
+        return;
+    } else if (hasPriorityNode) {
         std::sort(orderedNodes.begin(), orderedNodes.end(), Cmp);
     }
 
