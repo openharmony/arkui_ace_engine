@@ -173,6 +173,7 @@ public:
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
     void ScrollTo(float position);
     void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
+    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
@@ -247,6 +248,7 @@ private:
     bool crossMatchChild_ = false;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> jumpIndexInGroup_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
     int32_t scrollIndex_ = 0;
     bool scrollable_ = true;

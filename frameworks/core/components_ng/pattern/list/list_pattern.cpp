@@ -268,6 +268,10 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetIndex(jumpIndex_.value());
         listLayoutAlgorithm->SetIndexAlignment(scrollIndexAlignment_);
     }
+    if (jumpIndexInGroup_) {
+        listLayoutAlgorithm->SetIndexInGroup(jumpIndexInGroup_.value());
+        jumpIndexInGroup_.reset();
+    }
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
@@ -633,6 +637,18 @@ void ListPattern::ScrollToIndex(int32_t index, ScrollIndexAlignment align)
     StopAnimate();
     if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
         jumpIndex_ = index;
+        scrollIndexAlignment_ = align;
+        MarkDirtyNodeSelf();
+    }
+}
+
+void ListPattern::ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align)
+{
+    LOGI("ScrollToIndex:%{public}d, %{public}d", index, indexInGroup);
+    StopAnimate();
+    if (index >= 0 || index == ListLayoutAlgorithm::LAST_ITEM) {
+        jumpIndex_ = index;
+        jumpIndexInGroup_ = indexInGroup;
         scrollIndexAlignment_ = align;
         MarkDirtyNodeSelf();
     }

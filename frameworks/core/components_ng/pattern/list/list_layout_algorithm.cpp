@@ -219,6 +219,7 @@ void ListLayoutAlgorithm::MeasureList(
         }
         CalculateEstimateOffset();
     } else {
+        jumpIndexInGroup_.reset();
         LOGD("StartIndex index: %{public}d, offset is %{public}f, startMainPos: %{public}f, endMainPos: %{public}f",
             startIndex, currentOffset_, startMainPos_, endMainPos_);
         bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
@@ -519,7 +520,7 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
 }
 
 void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos,
-    bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty) const
+    bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty)
 {
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
@@ -527,6 +528,10 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(itemGroup);
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
+    if (jumpIndexInGroup_.has_value()) {
+        itemGroup->SetJumpIndex(jumpIndexInGroup_.value());
+        jumpIndexInGroup_.reset();
+    }
 }
 
 void ListLayoutAlgorithm::SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)

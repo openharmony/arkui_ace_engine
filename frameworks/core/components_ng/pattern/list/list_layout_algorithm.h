@@ -80,6 +80,11 @@ public:
         jumpIndex_ = index;
     }
 
+    void SetIndexInGroup(int32_t index)
+    {
+        jumpIndexInGroup_ = index;
+    }
+
     void SetIndexAlignment(ScrollIndexAlignment align)
     {
         scrollIndexAlignment_ = align;
@@ -210,7 +215,7 @@ protected:
     }
 
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
-        const RefPtr<ListLayoutProperty>& layoutProperty) const;
+        const RefPtr<ListLayoutProperty>& layoutProperty);
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
     void CheckListItemGroupRecycle(
         LayoutWrapper* layoutWrapper, int32_t index, float referencePos, bool forwardLayout) const;
@@ -238,6 +243,7 @@ private:
     void OnSurfaceChanged(LayoutWrapper* layoutWrapper);
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> jumpIndexInGroup_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
 
     PositionMap itemPosition_;

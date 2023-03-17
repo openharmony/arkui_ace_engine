@@ -194,7 +194,20 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     int32_t endIndex = totalItemCount_ - 1;
     float startPos = headerMainSize_;
     float endPos = totalMainSize_ - footerMainSize_;
-    if (!itemPosition_.empty()) {
+    if (jumpIndex_.has_value()) {
+        auto jumpIndex = jumpIndex_.value();
+        if (jumpIndex < 0 || jumpIndex >= totalItemCount_) {
+            jumpIndex = 0;
+        }
+        if (forwardLayout_) {
+            startIndex = jumpIndex;
+        } else {
+            endIndex = jumpIndex;
+        }
+        itemPosition_.clear();
+        layoutWrapper->RemoveAllChildInRenderTree();
+        jumpIndex_.reset();
+    } else if (!itemPosition_.empty()) {
         if (itemPosition_.begin()->first > 0) {
             startPos = itemPosition_.begin()->second.first;
         }

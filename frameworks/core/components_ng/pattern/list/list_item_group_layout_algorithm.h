@@ -84,6 +84,11 @@ public:
         listLayoutProperty_ = std::move(layoutProperty);
     }
 
+    void SetJumpIndex(int32_t index)
+    {
+        jumpIndex_ = index;
+    }
+
     int32_t GetStartIndex() const
     {
         return itemPosition_.empty() ? 0 : itemPosition_.begin()->first;
@@ -161,6 +166,7 @@ private:
     V2::ListItemAlign itemAlign_ = V2::ListItemAlign::START;
     float spaceWidth_ = 0.0f;
 
+    std::optional<int32_t> jumpIndex_;
     int32_t totalItemCount_ = 0;
     float totalMainSize_ = 0.0f;
     float headerMainSize_ = 0.0f;
