@@ -398,12 +398,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
-    { "PageTransitionEnter", JSPageTransition::JSBind },
-    { "PageTransitionExit", JSPageTransition::JSBind },
     { "Radio", JSRadio::JSBind },
-    { "ActionSheet", JSActionSheet::JSBind },
-    { "AlertDialog", JSAlertDialog::JSBind },
-    { "ContextMenu", JSContextMenu::JSBind },
     { "QRCode", JSQRCode::JSBind },
 #ifndef WEARABLE_PRODUCT
     { "Piece", JSPiece::JSBind },
@@ -414,16 +409,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Badge", JSBadge::JSBind },
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
-    { "Gesture", JSGesture::JSBind },
-    { "TapGesture", JSGesture::JSBind },
-    { "LongPressGesture", JSGesture::JSBind },
-    { "PanGesture", JSGesture::JSBind },
-    { "SwipeGesture", JSGesture::JSBind },
-    { "PinchGesture", JSGesture::JSBind },
-    { "RotationGesture", JSGesture::JSBind },
-    { "GestureGroup", JSGesture::JSBind },
-    { "PanGestureOption", JSPanGestureOption::JSBind },
-    { "PanGestureOptions", JSPanGestureOption::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
 
@@ -438,7 +423,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
     { "Sheet", JSSheet::JSBind },
-    { "JSClipboard", JSClipboard::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
     { "Checkbox", JSCheckbox::JSBind },
@@ -487,6 +471,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Navigation", JSNavigation::JSBind },
     { "Navigator", JSNavigator::JSBind },
     { "NavRouter", JSNavRouter::JSBind },
+    { "ColumnSplit", JSColumnSplit::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
     { "ScrollBar", JSScrollBar::JSBind },
@@ -685,17 +670,8 @@ void RegisterAllFormModule(BindingTarget globalObj)
     JSCanvasImageData::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
-#ifdef ABILITY_COMPONENT_SUPPORTED
-    JSAbilityComponentController::JSBind(globalObj);
-#endif
-#ifdef VIDEO_SUPPORTED
-    JSVideoController::JSBind(globalObj);
-#endif
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
-#ifdef WEB_SUPPORTED
-    JSWebController::JSBind(globalObj);
-#endif
     for (auto& iter : formBindFuncs) {
         iter.second(globalObj);
     }

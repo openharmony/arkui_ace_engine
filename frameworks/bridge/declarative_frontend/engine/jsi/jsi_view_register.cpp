@@ -1035,8 +1035,6 @@ void JsRegisterFormViews(BindingTarget globalObj)
         return;
     }
     auto vm = runtime->GetEcmaVm();
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadEtsCard"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadEtsCard));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "postCardAction"),
@@ -1087,11 +1085,6 @@ void JsRegisterFormViews(BindingTarget globalObj)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
-
-    BindingTarget focusControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
-    focusControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "requestFocus"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RequestFocus));
-    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "focusControl"), focusControlObj);
 
     JsBindFormViews(globalObj);
 
