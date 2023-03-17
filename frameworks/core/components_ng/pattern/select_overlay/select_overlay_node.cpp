@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -218,6 +219,17 @@ RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
     });
 
     return button;
+}
+
+OffsetF GetPageOffset()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF());
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, OffsetF());
+    auto page = stageManager->GetLastPage();
+    CHECK_NULL_RETURN(page, OffsetF());
+    return page->GetOffsetRelativeToWindow();
 }
 
 } // namespace
@@ -461,7 +473,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     // set click position to menu
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
-    props->UpdateMenuOffset(info->rightClickOffset);
+    props->UpdateMenuOffset(info->rightClickOffset + GetPageOffset());
 
     if (!info->menuInfo.showCut) {
         auto cutOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
