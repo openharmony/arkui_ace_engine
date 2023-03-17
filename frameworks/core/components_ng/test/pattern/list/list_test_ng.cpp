@@ -1463,6 +1463,7 @@ HWTEST_F(ListTestNg, ListEventTest003, TestSize.Level1)
 HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
 {
     constexpr int32_t ITEM_COUNT = 9;
+
     /**
      * @tc.steps: step1. Create List and SetMultiSelectable.
      */
@@ -1515,7 +1516,7 @@ HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
     fourthItemPattern->MarkIsSelected(false);
 
     /**
-     * @tc.steps: step6. Click the lower boundary of the 4th item .
+     * @tc.steps: step6. Click the lower boundary of the 4th item.
      * @tc.expected: The 4th and 5th items are selected.
      */
     info.SetAction(MouseAction::PRESS);
@@ -1588,7 +1589,7 @@ HWTEST_F(ListTestNg, ListSelectTest002, TestSize.Level1)
     secondItemPattern->MarkIsSelected(false);
 
     /**
-     * @tc.steps: step6. Select (120, 150) - (360, 250) zone, from the LEFT_TOP to the RIGHT_BOTTOM.
+     * @tc.steps: step5. Select (120, 150) - (360, 250) zone, from the LEFT_TOP to the RIGHT_BOTTOM.
      * @tc.expected: The 3rd and 4th are selected.
      */
     info.SetAction(MouseAction::PRESS);
@@ -1626,7 +1627,7 @@ HWTEST_F(ListTestNg, ListSelectTest002, TestSize.Level1)
     fourthItemPattern->MarkIsSelected(false);
 
     /**
-     * @tc.steps: step6. Select (120, 150) - (360, 250) zone, from the LEFT_BOTTOM to the RIGHT_TOP.
+     * @tc.steps: step7. Select (120, 150) - (360, 250) zone, from the LEFT_BOTTOM to the RIGHT_TOP.
      * @tc.expected: The 3rd and 4th are selected.
      */
     info.SetAction(MouseAction::PRESS);
@@ -1645,7 +1646,7 @@ HWTEST_F(ListTestNg, ListSelectTest002, TestSize.Level1)
     fourthItemPattern->MarkIsSelected(false);
 
     /**
-     * @tc.steps: step6. Select (120, 150) - (360, 250) zone, from the RIGHT_BOTTOM to the LEFT_TOP.
+     * @tc.steps: step8. Select (120, 150) - (360, 250) zone, from the RIGHT_BOTTOM to the LEFT_TOP.
      * @tc.expected: The 3rd and 4th are selected.
      */
     info.SetAction(MouseAction::PRESS);

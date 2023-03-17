@@ -56,6 +56,7 @@ const std::string GRID_TEMPLATE_ILLEGAL = "abcd1234 *&^%$";
 const int32_t GRID_CACHED_COUNT = 5;
 const std::string SCROLL_BAR_WIDTH = "10px";
 const std::string SCROLL_BAR_COLOR = "#909090";
+constexpr float DEFAULT_ITEM_MAIN_SIZE = 100.f;
 } // namespace
 
 struct GridTestProperty {
@@ -76,67 +77,113 @@ struct GridTestProperty {
 
 class GridPatternTestNg : public testing::Test {
 public:
+    static void SetWidth(const Dimension& width)
+    {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+    }
+
+    static void SetHeight(const Dimension& height)
+    {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(height)));
+    }
+
+    static void CreateGridItem(int32_t number)
+    {
+        for (int32_t i = 0; i < number; i++) {
+            GridItemModelNG gridItemModel;
+            gridItemModel.Create();
+            SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+    }
+
+    static void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode)
+    {
+        RefPtr<LayoutWrapper> gridLayoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+        gridLayoutWrapper->SetActive();
+        gridLayoutWrapper->SetRootMeasureNode();
+        LayoutConstraintF LayoutConstraint;
+        LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+        LayoutConstraint.percentReference = { DEVICE_WIDTH, DEVICE_HEIGHT };
+        LayoutConstraint.selfIdealSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+        LayoutConstraint.maxSize = { DEVICE_WIDTH, DEVICE_HEIGHT };
+        gridLayoutWrapper->Measure(LayoutConstraint);
+        gridLayoutWrapper->Layout();
+        gridLayoutWrapper->MountToHostOnMainThread();
+    }
+
+    static RefPtr<GridItemPattern> GetItemPattern(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        auto item = frameNode->GetChildAtIndex(index);
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        if (!itemFrameNode) {
+            return nullptr;
+        }
+        return itemFrameNode->GetPattern<GridItemPattern>();
+    }
+
     static RefPtr<FrameNode> CreateGrid(
-        const GridTestProperty& gridTestProperty, const int32_t girdItemCount = 0);
+        const GridTestProperty& gridTestProperty, const int32_t girdItemCount = 0)
+    {
+        GridModelNG grid;
+        RefPtr<ScrollControllerBase> positionController = grid.CreatePositionController();
+        RefPtr<ScrollProxy> scrollBarProxy = grid.CreateScrollBarProxy();
+        grid.Create(positionController, scrollBarProxy);
+
+        if (gridTestProperty.rowsTemplate.has_value()) {
+            grid.SetRowsTemplate(gridTestProperty.rowsTemplate.value());
+        }
+        if (gridTestProperty.columnsTemplate.has_value()) {
+            grid.SetColumnsTemplate(gridTestProperty.columnsTemplate.value());
+        }
+        if (gridTestProperty.rowsGap.has_value()) {
+            grid.SetRowsGap(gridTestProperty.rowsGap.value());
+        }
+        if (gridTestProperty.columnsGap.has_value()) {
+            grid.SetColumnsGap(gridTestProperty.columnsGap.value());
+        }
+        if (gridTestProperty.cachedCount.has_value()) {
+            grid.SetCachedCount(gridTestProperty.cachedCount.value());
+        }
+        if (gridTestProperty.gridDirection.has_value()) {
+            grid.SetLayoutDirection(gridTestProperty.gridDirection.value());
+        }
+        if (gridTestProperty.maxCount.has_value()) {
+            grid.SetMaxCount(gridTestProperty.maxCount.value());
+        }
+        if (gridTestProperty.minCount.has_value()) {
+            grid.SetMinCount(gridTestProperty.minCount.value());
+        }
+        if (gridTestProperty.cellLength.has_value()) {
+            grid.SetCellLength(gridTestProperty.cellLength.value());
+        }
+        if (gridTestProperty.editable.has_value()) {
+            grid.SetEditable(gridTestProperty.editable.value());
+        }
+        if (gridTestProperty.scrollBarMode.has_value()) {
+            grid.SetScrollBarMode(gridTestProperty.scrollBarMode.value());
+        }
+        if (gridTestProperty.scrollBarWidth.has_value()) {
+            grid.SetScrollBarWidth(gridTestProperty.scrollBarWidth.value());
+        }
+        if (gridTestProperty.scrollBarColor.has_value()) {
+            grid.SetScrollBarColor(gridTestProperty.scrollBarColor.value());
+        }
+
+        for (int32_t i = 0; i < girdItemCount; ++i) {
+            GridItemModelNG gridItem;
+            gridItem.Create();
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+        return AceType::DynamicCast<FrameNode>(element);
+    }
 };
-
-RefPtr<FrameNode> GridPatternTestNg::CreateGrid(
-    const GridTestProperty& gridTestProperty, const int32_t girdItemCount)
-{
-    GridModelNG grid;
-    RefPtr<ScrollControllerBase> positionController = grid.CreatePositionController();
-    RefPtr<ScrollProxy> scrollBarProxy = grid.CreateScrollBarProxy();
-    grid.Create(positionController, scrollBarProxy);
-
-    if (gridTestProperty.rowsTemplate.has_value()) {
-        grid.SetRowsTemplate(gridTestProperty.rowsTemplate.value());
-    }
-    if (gridTestProperty.columnsTemplate.has_value()) {
-        grid.SetColumnsTemplate(gridTestProperty.columnsTemplate.value());
-    }
-    if (gridTestProperty.rowsGap.has_value()) {
-        grid.SetRowsGap(gridTestProperty.rowsGap.value());
-    }
-    if (gridTestProperty.columnsGap.has_value()) {
-        grid.SetColumnsGap(gridTestProperty.columnsGap.value());
-    }
-    if (gridTestProperty.cachedCount.has_value()) {
-        grid.SetCachedCount(gridTestProperty.cachedCount.value());
-    }
-    if (gridTestProperty.gridDirection.has_value()) {
-        grid.SetLayoutDirection(gridTestProperty.gridDirection.value());
-    }
-    if (gridTestProperty.maxCount.has_value()) {
-        grid.SetMaxCount(gridTestProperty.maxCount.value());
-    }
-    if (gridTestProperty.minCount.has_value()) {
-        grid.SetMinCount(gridTestProperty.minCount.value());
-    }
-    if (gridTestProperty.cellLength.has_value()) {
-        grid.SetCellLength(gridTestProperty.cellLength.value());
-    }
-    if (gridTestProperty.editable.has_value()) {
-        grid.SetEditable(gridTestProperty.editable.value());
-    }
-    if (gridTestProperty.scrollBarMode.has_value()) {
-        grid.SetScrollBarMode(gridTestProperty.scrollBarMode.value());
-    }
-    if (gridTestProperty.scrollBarWidth.has_value()) {
-        grid.SetScrollBarWidth(gridTestProperty.scrollBarWidth.value());
-    }
-    if (gridTestProperty.scrollBarColor.has_value()) {
-        grid.SetScrollBarColor(gridTestProperty.scrollBarColor.value());
-    }
-
-    GridItemModelNG gridItem;
-    for (int32_t i = 0; i < girdItemCount; ++i) {
-        gridItem.Create();
-        ViewStackProcessor::GetInstance()->Pop();
-    }
-
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    return AceType::DynamicCast<FrameNode>(element);
-}
 
 /**
  * @tc.name: GridTest001
@@ -221,35 +268,8 @@ HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
 
     /**
-     * @tc.steps: step5. Set different MouseInfo to verify the HandleMouseEventWithoutKeyboard function.
-     * @tc.expected: step5. Check whether relevant parameters are correct.
-     */
-    MouseInfo info;
-    info.SetButton(MouseButton::LEFT_BUTTON);
-    info.SetAction(MouseAction::PRESS);
-    const Offset offset1(20.0, 25.0);
-    info.SetLocalLocation(offset1);
-
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_EQ(pattern->mouseStartOffset_, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
-    EXPECT_EQ(pattern->mouseEndOffset_, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
-
-    info.SetAction(MouseAction::MOVE);
-    const Offset offset2(25.0, 20.0);
-    info.SetLocalLocation(offset2);
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_EQ(pattern->mouseEndOffset_, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()));
-
-    info.SetAction(MouseAction::RELEASE);
-    const Offset offset3(20.0, 20.0);
-    info.SetLocalLocation(offset3);
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_EQ(pattern->mouseStartOffset_, OffsetF(0.0f, 0.0f));
-    EXPECT_EQ(pattern->mouseEndOffset_, OffsetF(0.0f, 0.0f));
-
-    /**
-     * @tc.steps: step6. Set different KeyEvent to verify the OnKeyEvent function.
-     * @tc.expected: step6. Check whether the return value is correct.
+     * @tc.steps: step5. Set different KeyEvent to verify the OnKeyEvent function.
+     * @tc.expected: step5. Check whether the return value is correct.
      */
     KeyEvent event;
     auto ret = pattern->OnKeyEvent(event);
@@ -645,75 +665,6 @@ HWTEST_F(GridPatternTestNg, GridTest007, TestSize.Level1)
     EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
 }
 
-/**
- * @tc.name: GridTest008
- * @tc.desc: Set fixed rows only Fill all items in the grid.
- * @tc.type: FUNC
- */
-HWTEST_F(GridPatternTestNg, GridTest008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Set grid properties.
-     */
-    GridTestProperty gridTestProperty;
-    gridTestProperty.rowsTemplate = std::make_optional("1fr 2fr");
-    gridTestProperty.rowsGap = std::make_optional(GRID_ROWS_GAP);
-    gridTestProperty.editable = std::make_optional(true);
-
-    /**
-     * @tc.steps: step2. Create grid and gridItem.
-    */
-    RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<GridPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->SetMultiSelectable(true);
-
-    /**
-     * @tc.steps: step3. Set layoutConstraint.
-     * @tc.expected: step3. related function is called.
-     */
-    auto layoutWrapper = frameNode->CreateLayoutWrapper();
-    LayoutConstraintF constraint;
-    constraint.selfIdealSize.SetSize(CONTAINER_SIZE);
-
-    /**
-     * @tc.steps: step4. Call the measure and layout function of grid to calculate the size and layout.
-     * @tc.expected: step4. Check size after layout.
-     */
-    layoutWrapper->Measure(constraint);
-    layoutWrapper->Layout();
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), CONTAINER_SIZE);
-
-    /**
-     * @tc.steps: step5. When setting different startOffset and endOffset, call the ComputeSelectedZone function.
-     * @tc.expected: step5. Check whether the return value is correct.
-     */
-    OffsetF startOffset1(1.0f, 0.0f);
-    OffsetF endOffset1(1.0f, 0.0f);
-    auto selectedZone1 = pattern->ComputeSelectedZone(startOffset1, endOffset1);
-    EXPECT_EQ(selectedZone1, RectF(startOffset1.GetX(), startOffset1.GetY(), endOffset1.GetX() - startOffset1.GetX(),
-                                 endOffset1.GetY() - startOffset1.GetY()));
-
-    OffsetF startOffset2(1.0f, 1.0f);
-    OffsetF endOffset2(1.0f, 0.0f);
-    auto selectedZone2 = pattern->ComputeSelectedZone(startOffset2, endOffset2);
-    EXPECT_EQ(selectedZone2, RectF(startOffset2.GetX(), endOffset2.GetY(), endOffset2.GetX() - startOffset2.GetX(),
-                                 startOffset2.GetY() - endOffset2.GetY()));
-
-    OffsetF startOffset3(1.0f, 0.0f);
-    OffsetF endOffset3(0.0f, 1.0f);
-    auto selectedZone3 = pattern->ComputeSelectedZone(startOffset3, endOffset3);
-    EXPECT_EQ(selectedZone3, RectF(endOffset3.GetX(), startOffset3.GetY(), startOffset3.GetX() - endOffset3.GetX(),
-                                 endOffset3.GetY() - startOffset3.GetY()));
-
-    OffsetF startOffset4(1.0f, 1.0f);
-    OffsetF endOffset4(0.0f, 0.0f);
-    auto selectedZone4 = pattern->ComputeSelectedZone(startOffset4, endOffset4);
-    EXPECT_EQ(selectedZone4, RectF(endOffset4.GetX(), endOffset4.GetY(), startOffset4.GetX() - endOffset4.GetX(),
-                                 startOffset4.GetY() - endOffset4.GetY()));
-}
-
 RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, int32_t gridItemFrom,
     int32_t gridItemTo, float scrollOffset = 0.0f, int32_t totalItemCount = 9)
 {
@@ -791,7 +742,7 @@ RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, 
  * @tc.desc: grid with fixed column
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest009, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest008, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 900.0f);
     const int32_t itemCount = 9;
@@ -804,7 +755,7 @@ HWTEST_F(GridPatternTestNg, GridTest009, TestSize.Level1)
  * @tc.desc: grid with fixed column, some griditem not show
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest010, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest009, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 600.0f);
     const int32_t itemCount = 6;
@@ -817,7 +768,7 @@ HWTEST_F(GridPatternTestNg, GridTest010, TestSize.Level1)
  * @tc.desc: grid with fixed column, some griditem not fully show
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest011, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest010, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 800.0f);
     const int32_t itemCount = 9;
@@ -830,7 +781,7 @@ HWTEST_F(GridPatternTestNg, GridTest011, TestSize.Level1)
  * @tc.desc: grid with fixed column, scroll to show one more line
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest012, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest011, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 600.0f);
     const int32_t itemCount = 9;
@@ -843,7 +794,7 @@ HWTEST_F(GridPatternTestNg, GridTest012, TestSize.Level1)
  * @tc.desc: grid with fixed column, scroll to end
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest013, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest012, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 600.0f);
     const int32_t itemCount = 9;
@@ -856,7 +807,7 @@ HWTEST_F(GridPatternTestNg, GridTest013, TestSize.Level1)
  * @tc.desc: grid with fixed column, scroll to index not fully showed at last line
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest014, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest013, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 600.0f);
     const int32_t itemCount = 9;
@@ -881,7 +832,7 @@ HWTEST_F(GridPatternTestNg, GridTest014, TestSize.Level1)
  * @tc.desc: grid with fixed column, scroll to index not fully showed at first line
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest015, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest014, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 600.0f);
     const int32_t itemCount = 9;
@@ -906,7 +857,7 @@ HWTEST_F(GridPatternTestNg, GridTest015, TestSize.Level1)
  * @tc.desc: grid with fixed column, scroll to index fully showed
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest016, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest015, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 600.0f);
     const int32_t itemCount = 9;
@@ -931,7 +882,7 @@ HWTEST_F(GridPatternTestNg, GridTest016, TestSize.Level1)
  * @tc.desc: grid with fixed column, scroll to index not fully showed at last line
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest017, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest016, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 600.0f);
     const int32_t itemCount = 9;
@@ -954,7 +905,7 @@ HWTEST_F(GridPatternTestNg, GridTest017, TestSize.Level1)
  * @tc.desc: grid with fixed column, scroll to index out of view
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest018, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest017, TestSize.Level1)
 {
     OptionalSizeF gridSize(900.0f, 600.0f);
     const int32_t itemCount = 9;
@@ -997,7 +948,7 @@ HWTEST_F(GridPatternTestNg, GridTest018, TestSize.Level1)
  * @tc.desc: Test all the properties of grid.
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GridTestProperty and set properties of grid.
@@ -1075,7 +1026,7 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
  * @tc.desc: Test OnDirtyLayoutWrapperSwap function of grid.
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create grid.
@@ -1121,7 +1072,7 @@ HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
  * @tc.desc: Test all the properties of gridItem.
  * @tc.type: FUNC
  */
-HWTEST_F(GridPatternTestNg, GridTest021, TestSize.Level1)
+HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create gridItem and Set properties.
@@ -1155,5 +1106,366 @@ HWTEST_F(GridPatternTestNg, GridTest021, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->onSelect_, nullptr);
+}
+
+/**
+ * @tc.name: GridSelectTest001
+ * @tc.desc: Test mouse click to select, only PRESS and RELEASE the mouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridSelectTest001, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetMultiSelectable(true);
+    CreateGridItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout and set MouseButton::LEFT_BUTTON.
+     */
+    RunMeasureAndLayout(frameNode);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+
+    /**
+     * @tc.steps: step4. Click the (0, 0) point of firstItem.
+     * @tc.expected: The 1st item is selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(0.f, 0.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<GridItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step5. Click on the boundary between the 1st and 2nd items.
+     * @tc.expected: The 1st and 2nd items are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(180.f, 50.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    RefPtr<GridItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step5. Click on the boundary between the 1st and 5th items.
+     * @tc.expected: The 1st and 2nd items are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(90.f, 100.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    // When mouse press, ClearMultiSelect func would deselect all items.
+    EXPECT_FALSE(secondItemPattern->IsSelected());
+    firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    RefPtr<GridItemPattern> fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step7. Click on the halfway point between the 1st, 2nd, 5th, 6th items.
+     * @tc.expected: The 1st, 2nd, 5th, 6th items are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(180.f, 100.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    RefPtr<GridItemPattern> sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
+    pattern->HandleMouseEventWithoutKeyboard(info);
+}
+
+/**
+ * @tc.name: GridSelectTest002
+ * @tc.desc: Test mouse box selection, PRESS, MOVE and RELEASE the mouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridSelectTest002, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+    const Offset LEFT_TOP = Offset(90.f, 50.f);
+    const Offset LEFT_BOTTOM = Offset(90.f, 150.f);
+    const Offset RIGHT_TOP = Offset(270.f, 50.f);
+    const Offset RIGHT_BOTTOM = Offset(270.f, 150.f);
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetMultiSelectable(true);
+    CreateGridItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout and set MouseButton::LEFT_BUTTON.
+     */
+    RunMeasureAndLayout(frameNode);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+
+    /**
+     * @tc.steps: step4. Select (0, 0) - (284, 100) zone.
+     * @tc.expected: The 1st, 2nd, 5th, 6th items are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(0.f, 0.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(180.f, 100.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<GridItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    RefPtr<GridItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    RefPtr<GridItemPattern> fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    RefPtr<GridItemPattern> sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step5. Select (90, 50) - (270, 150) zone, from the LEFT_TOP to the RIGHT_BOTTOM.
+     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(LEFT_TOP);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(RIGHT_BOTTOM);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step6. Select (90, 50) - (270, 150) zone, from the RIGHT_TOP to the LEFT_BOTTOM.
+     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(RIGHT_TOP);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(LEFT_BOTTOM);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step7. Select (90, 50) - (270, 150) zone, from the LEFT_BOTTOM to the RIGHT_TOP.
+     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(LEFT_BOTTOM);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(RIGHT_TOP);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step8. Select (90, 50) - (270, 150) zone, from the RIGHT_BOTTOM to the LEFT_TOP.
+     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(RIGHT_BOTTOM);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(LEFT_TOP);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+}
+
+/**
+ * @tc.name: GridSelectTest003
+ * @tc.desc: Test gridItem selectable property and onSelect callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridSelectTest003, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetMultiSelectable(true);
+
+    /**
+     * @tc.steps: step2. Create gridItem.
+     */
+    bool isSixthItemSelected = false;
+    auto selectCallback = [&isSixthItemSelected](bool) { isSixthItemSelected = true; };
+    for (int32_t i = 0; i < ITEM_COUNT; i++) {
+        GridItemModelNG gridItemModel;
+        gridItemModel.Create();
+        SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+        if (i == 1) {
+            gridItemModel.SetSelectable(false);
+        }
+        if (i == 5) {
+            gridItemModel.SetOnSelect(std::move(selectCallback));
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    /**
+     * @tc.steps: step3. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. RunMeasureAndLayout and set MouseButton::LEFT_BUTTON.
+     */
+    RunMeasureAndLayout(frameNode);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+
+    /**
+     * @tc.steps: step5. Select (225, 50) - (315, 150) zone.
+     * @tc.expected: The 2nd item is not selected but 6th item is selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(225.f, 50.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(315.f, 150.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<GridItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_FALSE(secondItemPattern->IsSelected());
+    RefPtr<GridItemPattern> sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+    EXPECT_TRUE(isSixthItemSelected);
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+}
+
+/**
+ * @tc.name: GridSelectTest004
+ * @tc.desc: Test OnMouseSelectAll func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridSelectTest004, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetMultiSelectable(true);
+    CreateGridItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout and run OnMouseSelectAll func.
+     * @tc.expected: All items are selected.
+     */
+    RunMeasureAndLayout(frameNode);
+    pattern->OnMouseSelectAll();
+    auto children = frameNode->GetChildren();
+    for (const auto& item : children) {
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        if (!itemFrameNode) {
+            continue;
+        }
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        EXPECT_TRUE(itemPattern->IsSelected());
+    }
 }
 } // namespace OHOS::Ace::NG
