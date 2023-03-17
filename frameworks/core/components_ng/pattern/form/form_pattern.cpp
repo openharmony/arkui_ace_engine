@@ -43,7 +43,9 @@ void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
         return;
     }
 }
-}
+
+constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 2000;
+} // namespace
 
 FormPattern::FormPattern() = default;
 FormPattern::~FormPattern() = default;
@@ -115,9 +117,15 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
             cardInfo_.width = info.width;
             cardInfo_.height = info.height;
-            subContainer_->SetFormPattern(WeakClaim(this));
-            subContainer_->UpdateRootElementSize();
-            subContainer_->UpdateSurfaceSizeWithAnimathion();
+            if (subContainer_) {
+                subContainer_->SetFormPattern(WeakClaim(this));
+                subContainer_->UpdateRootElementSize();
+                subContainer_->UpdateSurfaceSizeWithAnimathion();
+            }
+        }
+        if (isLoaded_) {
+            auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+            layoutProperty->UpdateVisibility(visible);
         }
         return false;
     }
@@ -291,22 +299,24 @@ void FormPattern::CreateCardContainer()
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
-    if (subContainer_) {
-        auto id = subContainer_->GetRunningCardId();
-        FormManager::GetInstance().RemoveSubContainer(id);
-        subContainer_->Destroy();
-        subContainer_.Reset();
+    auto hasContainer = false;
+    RemoveSubContainer();
+    if (cardInfo_.id != 0 && Container::IsCurrentUseNewPipeline()) {
+        auto subContainer = FormManager::GetInstance().GetSubContainer(cardInfo_.id);
+        if (subContainer && context->GetInstanceId() == subContainer->GetInstanceId() &&
+            subContainer->GetCardType() == FrontendType::JS_CARD) {
+            subContainer_ = subContainer;
+            FormManager::GetInstance().RemoveSubContainer(cardInfo_.id);
+            hasContainer = true;
+        }
     }
-
-    subContainer_ = AceType::MakeRefPtr<SubContainer>(context, context->GetInstanceId());
+    if (!subContainer_) {
+        subContainer_ = AceType::MakeRefPtr<SubContainer>(context, context->GetInstanceId());
+    }
     CHECK_NULL_VOID(subContainer_);
     subContainer_->Initialize();
     subContainer_->SetFormPattern(WeakClaim(this));
     subContainer_->SetNodeId(host->GetId());
-    auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
-    auto key = info.ToString();
-    FormManager::GetInstance().AddNonmatchedContainer(key, subContainer_);
 
     subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](size_t id) {
         auto pattern = weak.Upgrade();
@@ -328,6 +338,46 @@ void FormPattern::CreateCardContainer()
         CHECK_NULL_VOID(pattern);
         pattern->OnLoadEvent();
     });
+
+    subContainer_->AddFormVisiableCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+        layoutProperty->UpdateVisibility(visible);
+        pattern->isLoaded_ = true;
+    });
+
+    auto eventhHub = host->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventhHub);
+    eventhHub->SetOnDisappear([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto subContainer = pattern->GetSubContainer();
+        CHECK_NULL_VOID(subContainer);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        auto id = subContainer->GetRunningCardId();
+        FormManager::GetInstance().AddSubContainer(id, subContainer);
+        uiTaskExecutor.PostDelayedTask(
+            [id, nodeId = subContainer->GetNodeId()] {
+                auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
+                if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == nodeId) {
+                    FormManager::GetInstance().RemoveSubContainer(id);
+                    cachedubContainer->Destroy();
+                    cachedubContainer.Reset();
+                }
+            },
+            DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
+    });
+    if (hasContainer) {
+        subContainer_->RunSameCard();
+    }
 }
 
 std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
@@ -434,8 +484,7 @@ void FormPattern::OnLoadEvent()
     LOGI("OnLoadEvent");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto uiTaskExecutor =
-        SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -496,5 +545,18 @@ void FormPattern::DispatchPointerEvent(
 
     ShowPointEvent(pointerEvent);
     formManagerBridge_->DispatchPointerEvent(pointerEvent);
+}
+
+void FormPattern::RemoveSubContainer()
+{
+    if (subContainer_) {
+        auto id = subContainer_->GetRunningCardId();
+        auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
+        if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == subContainer_->GetNodeId()) {
+            FormManager::GetInstance().RemoveSubContainer(id);
+        }
+        subContainer_->Destroy();
+        subContainer_.Reset();
+    }
 }
 } // namespace OHOS::Ace::NG

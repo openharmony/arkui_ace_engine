@@ -28,10 +28,12 @@ FormManager::~FormManager() {}
 void FormManager::AddSubContainer(int64_t formId, const RefPtr<SubContainer>& subContainer)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    auto result = subContainerMap_.try_emplace(formId, subContainer);
-    if (!result.second) {
-        LOGW("already have subContainer of this instance");
+    auto preSubContainer = subContainerMap_.find(formId);
+    if (preSubContainer != subContainerMap_.end() && preSubContainer->second != nullptr) {
+        preSubContainer->second->Destroy();
+        subContainerMap_.erase(formId);
     }
+    subContainerMap_.insert_or_assign(formId, subContainer);
 }
 
 void FormManager::RemoveSubContainer(int64_t formId)
@@ -49,48 +51,6 @@ RefPtr<SubContainer> FormManager::GetSubContainer(int64_t formId)
     } else {
         return nullptr;
     }
-}
-
-void FormManager::AddNonmatchedContainer(const std::string& cardKey, const RefPtr<SubContainer>& subContainer)
-{
-    std::lock_guard<std::mutex> lock(nonmatchedContainerMutex_);
-    auto result = nonmatchedContainerMap_.try_emplace(cardKey, subContainer);
-    if (!result.second) {
-        LOGW("already have subContainer of this key: %{public}s", cardKey.c_str());
-    }
-}
-
-RefPtr<SubContainer> FormManager::MatchSubContainerWithFormId(int64_t formId, const std::string& cardKey)
-{
-    std::lock_guard<std::mutex> lock(nonmatchedContainerMutex_);
-    auto iter = nonmatchedContainerMap_.find(cardKey);
-    if (iter == nonmatchedContainerMap_.end()) {
-        LOGW("no subcontainer of key: %{private}s", cardKey.c_str());
-        return nullptr;
-    }
-    auto subContainer = iter->second;
-    AddSubContainer(formId, subContainer);
-    nonmatchedContainerMap_.erase(iter);
-    return subContainer;
-}
-void FormManager::Dump(const std::vector<std::string>& params)
-{
-#ifdef FORM_SUPPORTED
-    std::unordered_map<std::string, RefPtr<SubContainer>> copied;
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        copied = nonmatchedContainerMap_;
-    }
-    for (const auto& container : copied) {
-        auto pipelineContext = container.second->GetPipelineContext();
-        if (!pipelineContext) {
-            LOGW("the pipeline context is nullptr, pa container");
-            continue;
-        }
-        pipelineContext->GetTaskExecutor()->PostSyncTask(
-            [params, container = container.second]() { container->Dump(params); }, TaskExecutor::TaskType::UI);
-    }
-#endif
 }
 
 void FormManager::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils)

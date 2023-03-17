@@ -87,7 +87,6 @@ void CardFrontend::ParseManifest() const
 
 void CardFrontend::RunPage(int32_t pageId, const std::string& url, const std::string& params)
 {
-
     std::string urlPath;
     if (GetFormSrc().empty()) {
         ParseManifest();
@@ -259,6 +258,13 @@ void CardFrontend::OnPageLoaded(const RefPtr<Framework::JsAcePage>& page)
             }
         },
         TaskExecutor::TaskType::UI);
+    taskExecutor_->PostTask(
+        [weak = AceType::WeakClaim(this)] {
+            auto frontend = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(frontend);
+            frontend->FireFormVisiableCallback();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void CardFrontend::UpdateData(const std::string& dataList)
@@ -348,5 +354,4 @@ void CardFrontend::OnMediaFeatureUpdate()
     CHECK_NULL_VOID(parseJsCard_);
     parseJsCard_->UpdateStyle(delegate_->GetPage());
 }
-
 } // namespace OHOS::Ace

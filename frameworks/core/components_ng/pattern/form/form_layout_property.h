@@ -24,7 +24,6 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT FormLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(FormLayoutProperty, LayoutProperty);
 
@@ -37,6 +36,7 @@ public:
         auto value = MakeRefPtr<FormLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<FormLayoutProperty>(this));
         value->propRequestFormInfo_ = CloneRequestFormInfo();
+        value->propVisibleType_ = CloneVisibleType();
         return value;
     }
 
@@ -44,8 +44,10 @@ public:
     {
         LayoutProperty::Reset();
         ResetRequestFormInfo();
+        ResetVisibleType();
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(VisibleType, VisibleType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RequestFormInfo, RequestFormInfo, PROPERTY_UPDATE_MEASURE);
 };
 

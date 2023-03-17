@@ -34,6 +34,7 @@ class ACE_EXPORT SubContainer : public virtual AceType {
 public:
     using OnFormAcquiredCallback = std::function<void(const size_t)>;
     using OnFormLoadCallback = std::function<void()>;
+    using OnFormVisibleCallback = std::function<void()>;
 
     explicit SubContainer(const WeakPtr<PipelineBase>& context) : outSidePipelineContext_(context) {}
     SubContainer(const WeakPtr<PipelineBase>& context, int32_t instanceId)
@@ -45,6 +46,7 @@ public:
     void RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
         const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
         const FrontendType& cardType, const FrontendType& uiSyntax);
+    void RunSameCard();
     void UpdateCard(
         const std::string& content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap);
     void Destroy();
@@ -88,6 +90,11 @@ public:
         if (callback) {
             onFormAcquiredCallback_ = callback;
         }
+    }
+
+    void AddFormVisiableCallback(OnFormVisibleCallback&& callback)
+    {
+        onFormVisibleCallback_ = std::move(callback);
     }
 
     void SetAllowUpdate(bool update)
@@ -141,6 +148,16 @@ public:
         onFormLoadCallback_ = std::move(callback);
     }
 
+    int64_t GetNodeId() const
+    {
+        return nodeId_;
+    }
+
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
 private:
     RefPtr<CardFrontend> frontend_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -150,6 +167,8 @@ private:
     int32_t instanceId_;
 
     int64_t runningCardId_ = 0;
+    int64_t windowId_ = -1;
+
     bool allowUpdate_ = true;
 
     FrontendType cardType_ = FrontendType::JS_CARD;
@@ -158,7 +177,9 @@ private:
     RefPtr<Component> formComponent_;
     WeakPtr<Element> formElement_;
     OnFormAcquiredCallback onFormAcquiredCallback_;
+
     OnFormLoadCallback onFormLoadCallback_;
+    OnFormVisibleCallback onFormVisibleCallback_;
     WindowConfig cardWindowConfig_;
 
     double surfaceWidth_ = 1.0f;

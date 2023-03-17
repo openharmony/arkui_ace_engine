@@ -155,7 +155,7 @@ void JSForm::SetVisibility(const JSCallbackInfo& info)
 
     auto type = info[0]->ToNumber<int32_t>();
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetVisibility(VisibleType(type));
+        NG::FormView::SetVisibility(VisibleType(type));
         return;
     }
 
