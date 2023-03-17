@@ -44,10 +44,12 @@ public:
     uint32_t GetMinAPIVersion() const;
     uint32_t GetTargetAPIVersion() const;
     uint32_t GetVersionCode() const;
+    bool IsInstallationFree() const;
 
 private:
     std::string apiReleaseType_;
     std::string bundleName_;
+    std::string bundleType_;
     std::string icon_;
     std::string label_;
     std::string vendor_;

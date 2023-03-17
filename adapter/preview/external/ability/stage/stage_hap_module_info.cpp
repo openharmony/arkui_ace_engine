@@ -24,7 +24,6 @@ void StageHapModuleInfo::Parse(const std::unique_ptr<JsonValue>& root)
     }
     compileMode_ = root->GetString("compileMode");
     moduleName_ = root->GetString("name");
-    installationFree_ = root->GetBool("installationFree");
     auto metaData = root->GetValue("metadata");
     if (metaData && metaData->IsArray()) {
         for (auto index = 0; index < metaData->GetArraySize(); ++index) {
@@ -32,6 +31,13 @@ void StageHapModuleInfo::Parse(const std::unique_ptr<JsonValue>& root)
             if (item && item->GetString("name") == "ArkTSPartialUpdate") {
                 isPartialUpdate_ = (item->GetString("value", "true") != "false");
             }
+        }
+    }
+    auto abilities = root->GetValue("abilities");
+    if (abilities && abilities->IsArray()) {
+        auto item = abilities->GetArrayItem(0);
+        if (item) {
+            labelId_ = item->GetUInt("labelId", 0);
         }
     }
 }
@@ -51,8 +57,8 @@ bool StageHapModuleInfo::GetPartialUpdateFlag() const
     return isPartialUpdate_;
 }
 
-bool StageHapModuleInfo::IsInstallationFree() const
+uint32_t StageHapModuleInfo::GetLabelId() const
 {
-    return installationFree_;
+    return labelId_;
 }
 } // namespace OHOS::Ace

@@ -106,22 +106,27 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
             if (pipeline) {
                 pipeline->CallRouterBackToPopPage();
             }
-        }, true));
+        },
+        true));
     appBarRow->AddChild(titleLabel);
-    appBarRow->AddChild(BuildIconButton(
-        InternalResource::ResourceId::APP_BAR_FA_SVG,
-        [pipeline, appBarTheme](GestureEvent& info) {
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        appBarRow->AddChild(BuildIconButton(
+            InternalResource::ResourceId::APP_BAR_FA_SVG,
+            [pipeline, appBarTheme](GestureEvent& info) {
 #ifdef PREVIEW
-            LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
-                 "emulator or a real device instead.");
+                LOGW("[Engine Log] Unable to show the SharePanel in the Previewer. Perform this operation on the "
+                     "emulator or a real device instead.");
 #else
-            if (pipeline && appBarTheme) {
-                LOGI("start panel bundleName is %{public}s, abilityName is %{public}s",
-                    appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
-                pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
-            }
+                if (pipeline && appBarTheme) {
+                    LOGI("start panel bundleName is %{public}s, abilityName is %{public}s",
+                        appBarTheme->GetBundleName().c_str(), appBarTheme->GetAbilityName().c_str());
+                    pipeline->FireSharePanelCallback(appBarTheme->GetBundleName(), appBarTheme->GetAbilityName());
+                }
 #endif
-        }, false));
+            },
+            false));
+    }
+
     return appBarRow;
 }
 
