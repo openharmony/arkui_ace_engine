@@ -61,8 +61,6 @@ public:
         if (paintProperty->HasCheckBoxCheckMarkSize()) {
             if (paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx() >= 0) {
                 strokePaintSize = paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx();
-            } else {
-                paintProperty->UpdateCheckBoxCheckMarkSize(Dimension(strokePaintSize));
             }
         }
         checkboxModifier_->SetStrokeSize(strokePaintSize);
