@@ -48,11 +48,14 @@ public:
 
     void OnModifyDone() override;
 
-    void MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode);
-
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    void AddChildShapeNode(WeakPtr<FrameNode> childNode)
+    {
+        ChildNodes_.push_back(std::move(childNode));
     }
 
 private:
@@ -60,6 +63,7 @@ private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
     bool isShapeContainerInit_ = false;
+    std::vector<WeakPtr<FrameNode>> ChildNodes_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ShapeContainerPattern);
 };
