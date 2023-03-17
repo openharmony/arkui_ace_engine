@@ -51,7 +51,9 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+        auto swiperNode = GetSwiperNode();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
         if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DotIndicatorLayoutAlgorithm>();
@@ -68,15 +70,15 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+        auto swiperNode = GetSwiperNode();
+        CHECK_NULL_RETURN(swiperNode, nullptr);
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
         if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             if (!dotIndicatorModifier_) {
                 dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
             }
             auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
-            auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
-            CHECK_NULL_RETURN(swiperPattern, nullptr);
             paintMethod->SetAxis(swiperPattern->GetDirection());
             paintMethod->SetCurrentIndex(swiperPattern->GetCurrentIndex());
             paintMethod->SetItemCount(swiperPattern->TotalCount());

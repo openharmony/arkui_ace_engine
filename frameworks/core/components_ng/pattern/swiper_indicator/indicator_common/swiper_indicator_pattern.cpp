@@ -120,7 +120,9 @@ void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /* info */)
 {
     GetMouseClickIndex();
     CHECK_NULL_VOID_NOLOG(mouseClickIndex_);
-    auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     swiperPattern->SwipeTo(mouseClickIndex_.value());
     auto host = GetHost();
@@ -144,7 +146,9 @@ void SwiperIndicatorPattern::HandleTouchClick(const GestureEvent& info)
         itemWidth = theme->GetSize().ConvertToPx();
         selectedItemWidth = theme->GetSize().ConvertToPx();
     }
-    auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
 
     auto currentIndex = swiperPattern->GetCurrentIndex();
@@ -272,7 +276,9 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     CHECK_NULL_VOID(host);
     auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto swiperPattern = GetSwiperNode()->GetPattern<SwiperPattern>();
+    auto swiperNode = GetSwiperNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     float itemWidthValue = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
     float itemHeightValue = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
