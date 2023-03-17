@@ -3854,11 +3854,10 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
 const UndefinedElmtId = -1;
 // Create ID generator at TS/JS side to avoid hops to native
 class UniqueId {
-    static Make() {
+    static get() {
         return "autoid_" + (++UniqueId.currentId);
     }
 }
-// Static properties shared by all instances
 UniqueId.currentId = Date.now();
 // Nativeview
 // implemented in C++  for release
@@ -4247,13 +4246,8 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         if (idGenFunc === undefined) {
             
-            //idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
             idGenFunc = (item, index) => {
-                // TODO clean up for final version
-                console.log(`OLEG/6 idGenFunc, index:  ${index} item: ${item}`);
                 if (!item || !(typeof item === 'object') || ((typeof item === 'object') && Array.isArray(item))) {
-                    //if (!item || !(typeof item === 'object')) {
-                    console.error(`OLEG idGenFunc not object/array index:  ${index},  ${JSON.stringify(item)}`);
                     return `${index}__${JSON.stringify(item)}`;
                 }
                 else {
@@ -4262,13 +4256,11 @@ class ViewPU extends NativeViewPartialUpdate {
                     var propName = `__ace_id_${elmtId}__`;
                     if (!item.hasOwnProperty(propName)) {
                         Object.defineProperty(item, propName, {
-                            value: UniqueId.Make(),
+                            value: UniqueId.get(),
                             writable: false,
                             enumerable: false
                         });
-                        console.error(`OLEG idGenFunc/6, Object **NO** ${propName.toString()}, setting`);
                     }
-                    console.error(`OLEG idGenFunc/6, ${propName.toString()}: ${item[propName]}`);
                     return item[propName];
                 }
             }; // idGenFunc
