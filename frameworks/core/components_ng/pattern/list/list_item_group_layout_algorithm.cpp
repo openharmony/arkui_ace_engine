@@ -157,22 +157,22 @@ void ListItemGroupLayoutAlgorithm::UpdateReferencePos(RefPtr<LayoutProperty> lay
 bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
 {
     if (forwardLayout_ && headerIndex_ >= 0) {
-        if (GreatOrEqual(headerMainSize_, endPos_ - referencePos_)) {
+        if (GreatNotEqual(headerMainSize_, endPos_ - referencePos_)) {
             return false;
         }
     }
     if (forwardLayout_ && footerIndex_ >= 0) {
-        if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
+        if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
             return false;
         }
     }
     if (!forwardLayout_ && headerIndex_ >= 0) {
-        if (GreatOrEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
+        if (GreatNotEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
             return false;
         }
     }
     if (!forwardLayout_ && footerIndex_ >= 0) {
-        if (LessOrEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
+        if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
             return false;
         }
     }
