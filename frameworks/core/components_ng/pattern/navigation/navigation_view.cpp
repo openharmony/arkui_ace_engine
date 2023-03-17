@@ -47,6 +47,9 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigator/navigator_event_hub.h"
 #include "core/components_ng/pattern/navigator/navigator_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
+#include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/select/select_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -901,6 +904,32 @@ void NavigationView::SetBackButtonIcon(const std::string& src, bool noPixMap, Re
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NoPixMap, noPixMap);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, ImageSource, imageSourceInfo);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, PixelMap, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarContentNode = navBarNode->GetNavBarContentNode();
+    CHECK_NULL_VOID(navBarContentNode);
+    if (navBarContentNode->GetChildren().empty()) {
+        return;
+    }
+    for (const auto& navBarContentChild : navBarContentNode->GetChildren()) {
+        auto navBarContentChildFrameNode = AceType::DynamicCast<FrameNode>(navBarContentChild);
+        CHECK_NULL_VOID(navBarContentChildFrameNode);
+        if (navBarContentChildFrameNode->GetTag() != V2::NAVROUTER_VIEW_ETS_TAG) {
+            return;
+        }
+        auto navRouterNode = AceType::DynamicCast<NavRouterGroupNode>(navBarContentChildFrameNode);
+        CHECK_NULL_VOID(navRouterNode);
+        auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(navRouterNode->GetNavDestinationNode());
+        CHECK_NULL_VOID(navDestinationNode);
+        auto navDestinationLayoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+        navDestinationLayoutProperty->UpdateImageSource(imageSourceInfo);
+        navDestinationLayoutProperty->UpdateNoPixMap(noPixMap);
+        navDestinationLayoutProperty->UpdatePixelMap(pixMap);
+        navDestinationNode->MarkModifyDone();
+    }
 }
 
 } // namespace OHOS::Ace::NG
