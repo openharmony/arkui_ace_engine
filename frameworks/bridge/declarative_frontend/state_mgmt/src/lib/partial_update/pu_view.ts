@@ -37,6 +37,8 @@ const UndefinedElmtId = -1;
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 
+type ForEachUpdateContextType = { idArray: Array<string>, elmtIdMap: Map<string, Array<number>> };
+
 // Nativeview
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -61,8 +63,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // Set of dependent elmtIds that need partial update
   // during next re-render
-  protected dirtDescendantElementIds_: Set<number>
-    = new Set<number>();
+  protected dirtDescendantElementIds_: Set<number> = new Set<number>();
+
+  private forEachChildRenderRecorder: Array<Array<number>> = new Array<Array<number>>([]);
 
   // registry of update functions
   // the key is the elementId of the Component/Element that's the result of this function
@@ -219,6 +222,30 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected abstract rerender(): void;
   protected updateStateVars(params: {}): void {
     stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
+  }
+
+  /**
+   * functions to faciliate elmtId creation during ForEach render or update
+   */
+  private pushForEachChildRenderRecorder(): void {
+    this.forEachChildRenderRecorder.push(new Array<number>());
+  }
+
+  private popForEachChildRenderRecorder(): Array<number> {
+    return this.forEachChildRenderRecorder.pop();
+  }
+
+  private isForEachRenderInProgress(): boolean {
+    return this.forEachChildRenderRecorder.length > 0;
+  }
+
+  private recordCreatedElmtIdForForEach(elmtId: number): boolean {
+    if (this.isForEachRenderInProgress()) {
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]:ForEach recording: added elmtId ${elmtId}`)
+      this.forEachChildRenderRecorder[this.forEachChildRenderRecorder.length - 1].push(elmtId);
+      return true;
+    }
+    return false;
   }
 
   protected initialRenderView(): void {
@@ -459,6 +486,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
     const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: First render for elmtId ${elmtId} start ....`);
+    this.recordCreatedElmtIdForForEach(elmtId);
     compilerAssignedUpdateFunc(elmtId, /* is first rneder */ true);
 
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
@@ -496,6 +524,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
     itemGenFuncUsesIndex: boolean = false,
     idGenFuncUsesIndex: boolean = false): void {
 
+
+
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction `);
 
     if (itemArray === null || itemArray === undefined) {
@@ -514,16 +544,18 @@ abstract class ViewPU extends NativeViewPartialUpdate
       idGenFuncUsesIndex = true;
     }
 
-    const forEachUpdateContext: ForEachContextType = ForEach.GetContext();
+    const forEachUpdateContext: ForEachUpdateContextType = ForEach.GetContext();
     const oldIdArray: Array<string> = forEachUpdateContext.idArray;
     const oldElmtIdMap = forEachUpdateContext.elmtIdMap;
+
+    let newElmtIdMap = new Map<string, Array<number>>();
 
     // Map oldId -> index inside oldArray
     let oldIdMap = new Map<string, number>();
     oldIdArray.forEach((id, index) => oldIdMap.set(id, index));
 
     // compute new id array and for quicker search for existing ids turn it into a set
-    const newIdArray : Array<string> = itemArray.map(idGenFunc);
+    const newIdArray: Array<string> = itemArray.map(idGenFunc);
     const newIdSet = new Set<string>(newIdArray);
 
     // identify to-be-deleted items by their index in the old array
@@ -540,16 +572,36 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       const oldIndex: number | undefined = oldIdMap.get(newId);
       if (oldIndex) {
-        // existing item, move it
+        // case 1: existing array item, move its UINodes into place, no updates needed
         ForEach.UseItem(oldIndex);
+        newElmtIdMap.set(newId, oldElmtIdMap.get(oldIdArray[oldIndex]));
       } else {
+        // case 2: new array item
         const recycleIndex = deletedItemsOldIndex.shift();
-        if (recycleIndex != undefined) {
-          //  UpdateItem(recycleIndex);
+        let recycleElmtIds: Array<number>;
+        if ((recycleIndex != undefined)
+          && ((recycleElmtIds = oldElmtIdMap.get(oldIdArray[recycleIndex])) != undefined)) {
+          // case 2A: new array item
+          // deleted array item exists whose UINodes can be used and updated
+          // there is delete item whosde UINodes can be updated
+          // run the regular partial update for each elmtId
+          recycleElmtIds.forEach(elmtId => {
+            const updateFunc: (elmtId: number, isFirstRender: boolean) => void = this.updateFuncByElmtId.get(elmtId);
+            if (updateFunc) {
+              this.pushForEachChildRenderRecorder();
+              // item and imdex are in scope
+              // FIXME app might use other variable names
+              updateFunc(elmtId, /* isFirstRender */ false);
+            }
+          });
+          const createElmtIds = this.popForEachChildRenderRecorder();
+          newElmtIdMap.set(newId, createElmtIds);
           ForEach.UseItem(recycleIndex)
         } else {
+          // case 2B: new array item
           // no old UINodes left to update
           // render new UINodes for this item
+          this.pushForEachChildRenderRecorder();
           ForEach.createNewChildStart(newId, this);
           if (itemGenFuncUsesIndex) {
             itemGenFunc(item, index);
@@ -557,12 +609,13 @@ abstract class ViewPU extends NativeViewPartialUpdate
             itemGenFunc(item);
           }
           ForEach.createNewChildFinish(newId, this);
+          const createElmtIds = this.popForEachChildRenderRecorder();
+          newElmtIdMap.set(newId, createElmtIds);
         }
       }
     })
 
-    // FIXME oldElmtIdMap
-    ForEach.SetContext({ idArray: newIdArray, elmtIdMap: oldElmtIdMap});
+    ForEach.SetContext({ idArray: newIdArray, elmtIdMap: newElmtIdMap });
     ForEach.CompleteUpdate();
 
     /*
