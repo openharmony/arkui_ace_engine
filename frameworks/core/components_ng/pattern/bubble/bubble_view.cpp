@@ -247,7 +247,6 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     if (param->IsBackgroundColorSetted()) {
         popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
     }
-    popupPaintProp->UpdateAutoCancel(!param->HasAction());
     popupPaintProp->UpdatePlacement(param->GetPlacement());
     popupPaintProp->UpdateUseCustom(param->IsUseCustom());
 }

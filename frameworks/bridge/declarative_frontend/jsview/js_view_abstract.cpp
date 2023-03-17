@@ -737,8 +737,8 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                 auto clickCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
                                          GestureEvent& info) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("primaryButton.action");
-                    LOGI("Call primary click");
+                    ACE_SCORING_EVENT("secondaryButton.action");
+                    LOGI("Call secondary click");
                     func->Execute(info);
                 };
                 properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
