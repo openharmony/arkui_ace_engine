@@ -143,6 +143,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
+    safeArea_ = layoutProperty->safeArea_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)

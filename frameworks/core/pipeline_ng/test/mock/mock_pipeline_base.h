@@ -86,6 +86,8 @@ public:
     MOCK_CONST_METHOD1(OnDumpInfo, bool(const std::vector<std::string>& params));
     MOCK_METHOD2(FlushVsync, void(uint64_t nanoTimestamp, uint32_t frameCount));
     MOCK_METHOD3(SetRootRect, void(double width, double height, double offset));
+    MOCK_METHOD1(SetGetViewSafeAreaImpl, void(std::function<SafeAreaEdgeInserts()>&& callback));
+    MOCK_CONST_METHOD0(GetCurrentViewSafeArea, SafeAreaEdgeInserts());
     MOCK_METHOD0(FlushPipelineWithoutAnimation, void());
     MOCK_METHOD0(FlushPipelineImmediately, void());
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));

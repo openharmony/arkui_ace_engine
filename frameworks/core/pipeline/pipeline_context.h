@@ -302,6 +302,10 @@ public:
     Rect GetStageRect() const;
     Rect GetPageRect() const;
 
+    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) override {};
+
+    SafeAreaEdgeInserts GetCurrentViewSafeArea() const override { return SafeAreaEdgeInserts(); };
+
     bool IsSurfaceReady() const
     {
         return isSurfaceReady_;

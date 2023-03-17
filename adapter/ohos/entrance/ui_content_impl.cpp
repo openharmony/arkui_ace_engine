@@ -29,6 +29,7 @@
 #include "service_extension_context.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -1420,12 +1421,13 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [config, container, reason, rsTransaction]() {
+        [config, container, reason, rsTransaction, rsWindow = window_]() {
             container->SetWindowPos(config.Left(), config.Top());
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
                 pipelineContext->SetDisplayWindowRectInfo(
                     Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+                pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
             }
             auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
             CHECK_NULL_VOID(aceView);
