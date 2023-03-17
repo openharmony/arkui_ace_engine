@@ -69,7 +69,6 @@ public:
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
     bool EvaluateJsCode(
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) override;
-    bool ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath) override;
     bool ExecuteJsBin(const std::string& fileName) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
@@ -92,6 +91,7 @@ public:
     bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
+    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
 
     const EcmaVM* GetEcmaVm() const
     {
@@ -133,6 +133,16 @@ public:
         return errorCallback_;
     }
 
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
+
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
 #if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {
@@ -169,7 +179,6 @@ public:
         return undefined;
     }
 
-    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
     void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
     {
         RootView_ = RootView;

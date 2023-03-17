@@ -238,7 +238,7 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
     // set font size, unit FP
     Dimension fontSize;
     if (!size->IsUndefined() && !size->IsNull() && ParseJsDimensionFp(size, fontSize)) {
-        if (LessNotEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0)) {
+        if (LessOrEqual(fontSize.Value(), 0.0) || LessOrEqual(size->ToNumber<double>(), 0.0)) {
             fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
         }
     } else {

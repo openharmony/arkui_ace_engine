@@ -74,7 +74,7 @@ public:
     MOCK_METHOD1(SetAppWindowTitle, void(const std::string& title));
     MOCK_METHOD1(SetAppWindowIcon, void(const std::shared_ptr<Media::PixelMap>& pixelMap));
     MOCK_METHOD0(GetFormRootNode, std::shared_ptr<Rosen::RSSurfaceNode>());
-    MOCK_METHOD1(UpdateFormDate, void(const std::string& data));
+    MOCK_METHOD1(UpdateFormData, void(const std::string& data));
     MOCK_METHOD1(
         UpdateFormSharedImage, void(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap));
     MOCK_METHOD1(SetFormWidth, void(const float width));

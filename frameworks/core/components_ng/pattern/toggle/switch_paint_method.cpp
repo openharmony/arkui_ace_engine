@@ -145,7 +145,7 @@ void SwitchModifier::PaintSwitch(RSCanvas& canvas, const OffsetF& contentOffset,
 void SwitchModifier::DrawHoverBoard(RSCanvas& canvas, const OffsetF& offset) const
 {
     RSBrush brush;
-    brush.SetColor(ToRSColor(Color(animateHoverColor_->Get())));
+    brush.SetColor(ToRSColor(animateHoverColor_->Get()));
     brush.SetAntiAlias(true);
     auto rightBottomX = offset.GetX() + actualWidth_;
     auto rightBottomY = offset.GetY() + actualHeight_;

@@ -566,6 +566,7 @@ public:
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool OnBackPressed();
+    void CheckScrollable();
 
 private:
     void HandleBlurEvent();
@@ -590,7 +591,6 @@ private:
     void AddScrollEvent();
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
-    void CheckScrollable();
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);

@@ -464,12 +464,11 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
         if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {
             NG::IndexerView::SetAlignStyle(NG_ALIGN_STYLE[value]);
         }
+        Dimension popupHorizontalSpace(-1.0);
         if (args.Length() > 1) {
-            Dimension dimensionValue;
-            if (ParseJsDimensionVp(args[1], dimensionValue)) {
-                NG::IndexerView::SetPopupHorizontalSpace(dimensionValue);
-            }
+            ParseJsDimensionVp(args[1], popupHorizontalSpace);
         }
+        NG::IndexerView::SetPopupHorizontalSpace(popupHorizontalSpace);
         return;
     }
     if (value >= 0 && value < static_cast<int32_t>(ALIGN_STYLE.size())) {

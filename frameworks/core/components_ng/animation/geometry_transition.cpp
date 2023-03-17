@@ -70,12 +70,15 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
 {
     state_ = State::IDLE;
     buildDuringLayout_ = GeometryTransition::layoutStarted_;
-    CHECK_NULL_VOID(frameNode.Upgrade());
-    LOGD("GeometryTransition build node%{public}d %{public}s", frameNode.Upgrade()->GetId(), isNodeIn ? "in" : "out");
+    auto node = frameNode.Upgrade();
+    CHECK_NULL_VOID(node);
+    LOGD("GeometryTransition build node%{public}d %{public}s", node->GetId(), isNodeIn ? "in" : "out");
 
     if (!isNodeIn && (frameNode == inNode_ || frameNode == outNode_)) {
         SwapInAndOut(frameNode == inNode_);
         hasOutAnim_ = true;
+        outNodeParentPos_ = node->GetPaintRectOffset(true);
+        outNodePos_ = node->GetPaintRectOffset();
     }
     if (isNodeIn && (frameNode != inNode_)) {
         hasOutAnim_ = !inNode_.Upgrade() && outNode_.Upgrade() ? true : hasOutAnim_;
@@ -223,9 +226,9 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto geometryNode = self->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     // get own parent's global position
-    auto parentPos = self->GetPaintRectOffset(true);
+    auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectOffset(true);
     // get target's global position
-    auto targetPos = target->GetPaintRectOffset();
+    auto targetPos = target->IsRemoving() ? outNodePos_ : target->GetPaintRectOffset();
     // adjust self's position to match with target's position, here we only need to adjust node self,
     // its children's positions are still determined by layout process.
     auto activeFrameRect = isNodeIn ? RectF(targetPos - parentPos, size_) :

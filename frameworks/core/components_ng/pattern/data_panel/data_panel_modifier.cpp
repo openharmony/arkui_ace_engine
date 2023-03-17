@@ -220,7 +220,7 @@ void DataPanelModifier::PaintCircle(DrawingContext& context, OffsetF offset, flo
     }
     arcData.wholeAngle = WHOLE_CIRCLE;
     arcData.startAngle = 0.0f;
-    PaintTrackBackground(canvas, arcData, trackBackgroundColor_->Get());
+    PaintTrackBackground(canvas, arcData, trackBackgroundColor_->Get().ToColor());
     double proportions = 1.0;
     double maxValue = max_->Get();
     if (LessOrEqual(maxValue, 0.0)) {

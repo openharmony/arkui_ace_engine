@@ -47,7 +47,7 @@ public:
 
     void Initialize() override {}
 
-    void Destroy() override {}
+    void Destroy() override;
 
     int32_t GetInstanceId() const override
     {

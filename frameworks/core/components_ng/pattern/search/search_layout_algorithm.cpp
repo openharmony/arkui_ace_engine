@@ -350,16 +350,16 @@ void SearchLayoutAlgorithm::CalcChildrenHotZone(LayoutWrapper* layoutWrapper)
 
     // calculate search button hot zone
     searchButtonFrameNode->RemoveLastHotZoneRect();
-    DimensionRect searchButtonHoteZone;
+    DimensionRect searchButtonHotZone;
     if (searchButtonHeight > searchHeight) {
-        searchButtonHoteZone.SetSize(DimensionSize(Dimension(searchButtonWidth), Dimension(searchHeight)));
+        searchButtonHotZone.SetSize(DimensionSize(Dimension(searchButtonWidth), Dimension(searchHeight)));
         double hotZoneOffsetY = (searchButtonHeight - searchHeight) / 2;
-        searchButtonHoteZone.SetOffset(DimensionOffset(Dimension(0), Dimension(hotZoneOffsetY)));
+        searchButtonHotZone.SetOffset(DimensionOffset(Dimension(0), Dimension(hotZoneOffsetY)));
     } else {
-        searchButtonHoteZone.SetSize(DimensionSize(Dimension(searchButtonWidth), Dimension(searchButtonHeight)));
-        searchButtonHoteZone.SetOffset(DimensionOffset(Dimension(0), Dimension(0)));
+        searchButtonHotZone.SetSize(DimensionSize(Dimension(searchButtonWidth), Dimension(searchButtonHeight)));
+        searchButtonHotZone.SetOffset(DimensionOffset(Dimension(0), Dimension(0)));
     }
-    searchButtonFrameNode->AddHotZoneRect(searchButtonHoteZone);
+    searchButtonFrameNode->AddHotZoneRect(searchButtonHotZone);
 }
 
 void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

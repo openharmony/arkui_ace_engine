@@ -165,22 +165,22 @@ inline void StringSplitter(const std::string& source, char delimiter, std::vecto
 
 } // namespace StringUtils
 
-class ACE_EXPORT LinearColor : public Color {
+class ACE_EXPORT LinearColor {
 public:
     LinearColor() = default;
-    explicit LinearColor(uint32_t value) : Color(value) {}
-    explicit LinearColor(const Color& color) : Color(color.GetValue()) {}
-    LinearColor(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue)
+    explicit LinearColor(uint32_t argb)
     {
-        ColorParam colorValue {
-#if BIG_ENDIANNESS
-        .argb = { .alpha = alpha, .red = red, .green = green, .blue = blue }
-#else
-        .argb = { .blue = blue, .green = green, .red = red, .alpha = alpha }
-#endif
-        };
-        SetValue(colorValue.value);
+        alpha_ = static_cast<int16_t>((argb & 0xFF000000) >> 24);
+        red_ = static_cast<int16_t>((argb & 0x00FF0000) >> 16);
+        green_ = static_cast<int16_t>((argb & 0x0000FF00) >> 8);
+        blue_ = static_cast<int16_t>(argb & 0xFF);
     }
+    explicit LinearColor(const Color& color)
+        : alpha_(color.GetAlpha()), red_(color.GetRed()), green_(color.GetGreen()), blue_(color.GetBlue())
+    {}
+    LinearColor(int16_t alpha, int16_t red, int16_t green, int16_t blue)
+        : alpha_(alpha), red_(red), green_(green), blue_(blue)
+    {}
     ~LinearColor() = default;
 
     static const LinearColor TRANSPARENT;
@@ -211,8 +211,62 @@ public:
 
     bool operator==(const LinearColor& color) const
     {
-        return GetValue() == color.GetValue();
+        return alpha_ == color.GetAlpha() && red_ == color.GetRed() && green_ == color.GetGreen() &&
+               blue_ == color.GetBlue();
     }
+
+    int16_t GetRed() const
+    {
+        return red_;
+    }
+
+    int16_t GetGreen() const
+    {
+        return green_;
+    }
+
+    int16_t GetBlue() const
+    {
+        return blue_;
+    }
+
+    int16_t GetAlpha() const
+    {
+        return alpha_;
+    }
+
+    uint32_t GetValue() const
+    {
+        return (static_cast<uint32_t>(std::clamp<int16_t>(blue_, 0, UINT8_MAX))) |
+               (static_cast<uint32_t>((std::clamp<int16_t>(green_, 0, UINT8_MAX)) << 8)) |
+               (static_cast<uint32_t>((std::clamp<int16_t>(red_, 0, UINT8_MAX)) << 16)) |
+               (static_cast<uint32_t>((std::clamp<int16_t>(alpha_, 0, UINT8_MAX)) << 24));
+    }
+
+    Color BlendOpacity(double opacityRatio) const
+    {
+        auto alpha = static_cast<int16_t>(GetAlpha() * opacityRatio);
+        return Color::FromARGB(
+            static_cast<uint8_t>(std::clamp<int16_t>(alpha, 0, UINT8_MAX)),
+            static_cast<uint8_t>(std::clamp<int16_t>(red_, 0, UINT8_MAX)),
+            static_cast<uint8_t>(std::clamp<int16_t>(green_, 0, UINT8_MAX)),
+            static_cast<uint8_t>(std::clamp<int16_t>(blue_, 0, UINT8_MAX)));
+    }
+
+    Color ToColor() const
+    {
+        return Color::FromARGB(
+            static_cast<uint8_t>(std::clamp<int16_t>(alpha_, 0, UINT8_MAX)),
+            static_cast<uint8_t>(std::clamp<int16_t>(red_, 0, UINT8_MAX)),
+            static_cast<uint8_t>(std::clamp<int16_t>(green_, 0, UINT8_MAX)),
+            static_cast<uint8_t>(std::clamp<int16_t>(blue_, 0, UINT8_MAX)));
+    }
+
+private:
+    int16_t alpha_;
+    int16_t red_;
+    int16_t green_;
+    int16_t blue_;
 };
 
 } // namespace OHOS::Ace

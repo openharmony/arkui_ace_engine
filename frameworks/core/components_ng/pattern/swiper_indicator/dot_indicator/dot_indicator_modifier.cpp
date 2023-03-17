@@ -47,7 +47,7 @@ constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
 void DotIndicatorModifier::onDraw(DrawingContext& context)
 {
     ContentProperty contentProperty;
-    contentProperty.backgroundColor = backgroundColor_->Get();
+    contentProperty.backgroundColor = backgroundColor_->Get().ToColor();
     contentProperty.vectorBlackPointCenterX = vectorBlackPointCenterX_->Get();
     contentProperty.longPointLeftCenterX = longPointLeftCenterX_->Get();
     contentProperty.longPointRightCenterX = longPointRightCenterX_->Get();
@@ -146,13 +146,20 @@ void DotIndicatorModifier::PaintUnselectedIndicator(
     canvas.AttachBrush(brush);
     if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
         !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
-        float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) - itemHalfSizes[ITEM_HALF_WIDTH];
+        float rectLeft = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) -
+            itemHalfSizes[ITEM_HALF_WIDTH] * 0.5;
         float rectTop = (axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX()) - itemHalfSizes[ITEM_HALF_HEIGHT];
-        float rectRight = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) + itemHalfSizes[ITEM_HALF_WIDTH];
+        float rectRight = (axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY()) +
+            itemHalfSizes[ITEM_HALF_WIDTH] * 0.5;
         float rectBottom = (axis_ == Axis::HORIZONTAL ? center.GetY() :
             center.GetX()) + itemHalfSizes[ITEM_HALF_HEIGHT];
-        canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
-            itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[ITEM_HALF_HEIGHT] });
+        if (itemHalfSizes[ITEM_HALF_HEIGHT] > itemHalfSizes[ITEM_HALF_WIDTH]) {
+            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
+                itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[ITEM_HALF_WIDTH] });
+        } else {
+            canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
+                itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[ITEM_HALF_HEIGHT] });
+        }
     } else {
         float pointX = axis_ == Axis::HORIZONTAL ? center.GetX() : center.GetY();
         float pointY = axis_ == Axis::HORIZONTAL ? center.GetY() : center.GetX();
@@ -175,8 +182,14 @@ void DotIndicatorModifier::PaintSelectedIndicator(
         rightCenter.GetY()) + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5f;
     float rectBottom = (axis_ == Axis::HORIZONTAL ? rightCenter.GetY() :
         rightCenter.GetX()) + itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT];
-    canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
-        itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] });
+
+    if (itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] > itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) {
+        canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
+            itemHalfSizes[SELECTED_ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] });
+    } else {
+        canvas.DrawRoundRect({ { rectLeft, rectTop, rectRight, rectBottom },
+            itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT] });
+    }
 }
 
 void DotIndicatorModifier::PaintMask(DrawingContext& context)

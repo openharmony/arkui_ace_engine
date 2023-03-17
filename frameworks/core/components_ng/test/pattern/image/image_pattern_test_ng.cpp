@@ -36,6 +36,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double RADIUS_DEFAULT = 300.0;
+constexpr double RADIUS_ALTERNATE = 100.0;
 constexpr double IMAGE_WIDTH_DEFAULT = -1.0;
 constexpr double IMAGE_HEIGHT_DEFAULT = -1.0;
 constexpr double IMAGE_COMPONENTWIDTH_DEFAULT = -1.0;
@@ -314,7 +315,7 @@ HWTEST_F(ImagePatternTestNg, SetImagePaintConfig001, TestSize.Level1)
 
 /**
  * @tc.name: SetImagePaintConfig002
- * @tc.desc: Verify that Imagepattern will set correct ImagePaintConfig to CanvaImage.
+ * @tc.desc: Verify that ImagePattern will set correct ImagePaintConfig to CanvasImage.
  * @tc.type: FUNC
  */
 HWTEST_F(ImagePatternTestNg, SetImagePaintConfig002, TestSize.Level1)
@@ -536,12 +537,25 @@ HWTEST_F(ImagePatternTestNg, ImagePaintMethod001, TestSize.Level1)
     auto paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
     EXPECT_TRUE(imagePaintMethod.canvasImage_ != nullptr);
     EXPECT_TRUE(paintMethod != nullptr);
-    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->imageFit_, IMAGE_FIT_DEFAULT);
-    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->renderMode_, IMAGE_RENDERMODE_DEFAULT);
-    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
-    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->imageRepeat_, IMAGE_REPEAT_DEFAULT);
-    EXPECT_EQ(imagePaintMethod.canvasImage_->paintConfig_->needFlipCanvasHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
-    EXPECT_EQ(*imagePaintMethod.canvasImage_->paintConfig_->colorFilter_, COLOR_FILTER_DEFAULT);
+    auto& config = imagePaintMethod.canvasImage_->paintConfig_;
+    EXPECT_EQ(config->imageFit_, IMAGE_FIT_DEFAULT);
+    EXPECT_EQ(config->renderMode_, IMAGE_RENDERMODE_DEFAULT);
+    EXPECT_EQ(config->imageInterpolation_, IMAGE_INTERPOLATION_DEFAULT);
+    EXPECT_EQ(config->imageRepeat_, IMAGE_REPEAT_DEFAULT);
+    EXPECT_EQ(config->needFlipCanvasHorizontally_, MATCHTEXTDIRECTION_DEFAULT);
+    EXPECT_EQ(*config->colorFilter_, COLOR_FILTER_DEFAULT);
+
+    /**
+     * @tc.steps: step4. Update renderProps and test UpdatePaintConfig
+    */
+    auto renderCtx = frameNode->GetRenderContext();
+    
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(Dimension(RADIUS_ALTERNATE));
+    renderCtx->UpdateBorderRadius(borderRadius);
+    PaintWrapper newPaintWrapper(nullptr, geometryNode, imageRenderProperty);
+    paintMethod = imagePaintMethod.GetContentDrawFunction(&paintWrapper);
+    EXPECT_EQ(config->borderRadiusXY_->at(0).GetX(), RADIUS_ALTERNATE);
 }
 
 /**

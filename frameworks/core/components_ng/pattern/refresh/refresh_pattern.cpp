@@ -589,7 +589,6 @@ void RefreshPattern::CustomBuilderExit()
     AnimationOption option;
     option.SetDuration(CUSTOM_BUILDER_EXIT_DURATION);
     auto finishCallback = [weak = AceType::WeakClaim(this)]() {
-        LOGE("-------------> finishCallback called");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnExitAnimationFinish();
@@ -614,6 +613,9 @@ void RefreshPattern::CheckCustomBuilderDragUpdateStage()
     CHECK_NULL_VOID(hostLayoutProperty);
     auto customBuilderSize = customBuilder_->GetGeometryNode()->GetMarginFrameSize();
     auto maxScroll = MAX_SCROLL_DISTANCE.ConvertToPx();
+    if (NearZero(static_cast<double>(customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height()))) {
+        return;
+    }
     if (LessNotEqual(static_cast<double>(maxScroll - customBuilderSize.Height()),
         static_cast<double>(triggerLoadingDistance_))) {
         return;
@@ -669,6 +671,7 @@ void RefreshPattern::CustomBuilderReset()
     CHECK_NULL_VOID(customBuilder_);
     scrollOffset_.SetY(0.0f);
     UpdateCustomBuilderProperty(RefreshState::STATE_LOADING, 0.0f);
+    customBuilder_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void RefreshPattern::UpdateCustomBuilderProperty(RefreshState state, float ratio)
@@ -757,7 +760,10 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
         if (refreshingProp) {
             isRefreshing_ = true;
             auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-            scrollOffset_.SetY(distance + customBuilder_->GetGeometryNode()->GetFrameSize().Height());
+            if (NearZero(static_cast<double>(customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height()))) {
+                return false;
+            }
+            scrollOffset_.SetY(distance + customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height());
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }

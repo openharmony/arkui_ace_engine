@@ -65,6 +65,8 @@ private:
     bool hasOutAnim_ = false;
     bool buildDuringLayout_ = false;
     SizeF size_;
+    OffsetF outNodePos_;
+    OffsetF outNodeParentPos_;
     static bool layoutStarted_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);

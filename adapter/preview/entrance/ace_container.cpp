@@ -971,7 +971,7 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, RSAceView* view, d
 
             struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig = {
                 .SurfaceNodeName = "preview_surface",
-                .onRender = onRender,
+                .additionalData = reinterpret_cast<void*>(onRender),
             };
             static auto snode = Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig);
             director->SetRSSurfaceNode(snode);

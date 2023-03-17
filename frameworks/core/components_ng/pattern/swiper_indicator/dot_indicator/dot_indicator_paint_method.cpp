@@ -268,15 +268,15 @@ void DotIndicatorPaintMethod::CalculatePointCenterX(
         } else {
             if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
                 !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
-                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5;
                 startLongPointLeftCenterX = startCenterX;
-                startLongPointRightCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 2;
+                startLongPointRightCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 startCenterX += space + selectedItemWidth;
             } else {
-                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
                 startLongPointLeftCenterX = startCenterX;
-                startLongPointRightCenterX = startCenterX + selectedItemWidth;
-                startCenterX += space + selectedItemWidth * 2;
+                startLongPointRightCenterX = startCenterX + itemWidth;
+                startCenterX += space + itemWidth * 2;
             }
         }
         if (i != endCurrentIndex) {

@@ -51,15 +51,12 @@ void SearchPattern::UpdateChangeEvent(const std::string& value)
     CHECK_NULL_VOID(buttonHost);
     auto imageHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_IMAGE_INDEX));
     CHECK_NULL_VOID(imageHost);
-
-    auto cancelButtonrenderContext = buttonHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelButtonrenderContext);
-    auto cancelImagerenderContext = imageHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelImagerenderContext);
-
+    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelButtonRenderContext);
+    auto cancelImageRenderContext = imageHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelImageRenderContext);
     auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
     auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
@@ -68,13 +65,13 @@ void SearchPattern::UpdateChangeEvent(const std::string& value)
     auto style = layoutProperty->GetCancelButtonStyle().value_or(CancelButtonStyle::INPUT);
     if ((style == CancelButtonStyle::CONSTANT)
         || ((style == CancelButtonStyle::INPUT) && !value.empty())) {
-        cancelButtonrenderContext->UpdateOpacity(1.0);
-        cancelImagerenderContext->UpdateOpacity(1.0);
+        cancelButtonRenderContext->UpdateOpacity(1.0);
+        cancelImageRenderContext->UpdateOpacity(1.0);
         cancelButtonEvent->SetEnabled(true);
         imageEvent->SetEnabled(true);
     } else {
-        cancelButtonrenderContext->UpdateOpacity(0.0);
-        cancelImagerenderContext->UpdateOpacity(0.0);
+        cancelButtonRenderContext->UpdateOpacity(0.0);
+        cancelImageRenderContext->UpdateOpacity(0.0);
         cancelButtonEvent->SetEnabled(false);
         imageEvent->SetEnabled(false);
     }
@@ -808,10 +805,10 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     auto cancelIconGeometryNode = cancelImageFrameNode->GetGeometryNode();
     CHECK_NULL_VOID(cancelIconGeometryNode);
     auto cancelIconFrameSize = cancelIconGeometryNode->GetFrameSize().Width();
-    auto searchLayoutproperty = host->GetLayoutProperty<SearchLayoutProperty>();
-    CHECK_NULL_VOID(searchLayoutproperty);
+    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutProperty);
     auto cancelIconSize =
-        searchLayoutproperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize)).ConvertToPx();
+        searchLayoutProperty->GetCancelButtonUDSizeValue(Dimension(cancelIconFrameSize)).ConvertToPx();
     cancelIconJson->Put("size", Dimension(cancelIconSize, DimensionUnit::PX).ToString().c_str());
 
     // icon color
@@ -860,8 +857,8 @@ void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
     // color
     auto caretColor = textFieldPaintProperty->GetCursorColor().value_or(Color());
     cursorJson->Put("color", caretColor.ColorToString().c_str());
-    auto caretwidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
-    cursorJson->Put("width", caretwidth.ToString().c_str());
+    auto caretWidth = textFieldPaintProperty->GetCursorWidth().value_or(Dimension(0, DimensionUnit::VP));
+    cursorJson->Put("width", caretWidth.ToString().c_str());
     json->Put("caretStyle", cursorJson);
 }
 

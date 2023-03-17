@@ -45,7 +45,7 @@ public:
     {
         struct Rosen::RSSurfaceNodeConfig rsSurfaceNodeConfig = {
             .SurfaceNodeName = "preview_surface",
-            .onRender = onRender,
+            .additionalData = reinterpret_cast<void*>(onRender),
         };
         surfaceNode_ = Rosen::RSSurfaceNode::Create(rsSurfaceNodeConfig);
     }

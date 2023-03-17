@@ -34,7 +34,12 @@ template("napi_componentsnapshot_static") {
       deps += [ config.libace_target ]
     }
 
-    external_deps = [ "napi:ace_napi" ]
+    if (is_cross_platform_build) {
+      deps += [ "//foundation/arkui/napi/:ace_napi" ]
+    } else {
+      external_deps = [ "napi:ace_napi" ]
+    }
+
     if (defined(config.pixel_map_support)) {
       external_deps += [
         "multimedia_image_framework:image",

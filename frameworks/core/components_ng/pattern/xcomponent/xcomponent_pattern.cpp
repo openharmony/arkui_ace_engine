@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,16 +145,6 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
         auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireDestroyEvent();
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto taskExecutor = pipelineContext->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [eventHub] {
-                CHECK_NULL_VOID(eventHub);
-                eventHub->FireSurfaceDestroyEvent();
-            },
-            TaskExecutor::TaskType::JS);
     }
 }
 
@@ -225,76 +215,55 @@ void XComponentPattern::OnPaint()
 
 void XComponentPattern::NativeXComponentChange(float width, float height)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, width, height] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            nXCompImpl->SetXComponentWidth(static_cast<int>(width));
-            nXCompImpl->SetXComponentHeight(static_cast<int>(height));
-            auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-            const auto* callback = nXCompImpl->GetCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->OnSurfaceChanged);
-            callback->OnSurfaceChanged(nXComp, surface);
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    nativeXComponentImpl_->SetXComponentWidth(static_cast<int>(width));
+    nativeXComponentImpl_->SetXComponentHeight(static_cast<int>(height));
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto* callback = nativeXComponentImpl_->GetCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->OnSurfaceChanged);
+    callback->OnSurfaceChanged(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::NativeXComponentDestroy()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-            const auto* callback = nXCompImpl->GetCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->OnSurfaceDestroyed);
-            callback->OnSurfaceDestroyed(nXComp, surface);
-            delete nXComp;
-            nXComp = nullptr;
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto* callback = nativeXComponentImpl_->GetCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->OnSurfaceDestroyed);
+    callback->OnSurfaceDestroyed(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::NativeXComponentOffset(double x, double y)
 {
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     float scale = pipelineContext->GetViewScale();
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, x, y, scale] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            nXCompImpl->SetXComponentOffsetX(x * scale);
-            nXCompImpl->SetXComponentOffsetY(y * scale);
-        },
-        TaskExecutor::TaskType::JS);
+    nativeXComponentImpl_->SetXComponentOffsetX(x * scale);
+    nativeXComponentImpl_->SetXComponentOffsetY(y * scale);
 }
 
 void XComponentPattern::NativeXComponentDispatchTouchEvent(
     const OH_NativeXComponent_TouchEvent& touchEvent, const std::vector<XComponentTouchPoint>& xComponentTouchPoints)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto taskExecutor = pipelineContext->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, touchEvent, xComponentTouchPoints] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            nXCompImpl->SetTouchEvent(touchEvent);
-            nXCompImpl->SetTouchPoint(xComponentTouchPoints);
-            auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-            const auto* callback = nXCompImpl->GetCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->DispatchTouchEvent);
-            callback->DispatchTouchEvent(nXComp, surface);
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    nativeXComponentImpl_->SetTouchEvent(touchEvent);
+    nativeXComponentImpl_->SetTouchPoint(xComponentTouchPoints);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto* callback = nativeXComponentImpl_->GetCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->DispatchTouchEvent);
+    callback->DispatchTouchEvent(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::XComponentSizeInit(float textureWidth, float textureHeight)
@@ -476,34 +445,26 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
 
 void XComponentPattern::HandleMouseHoverEvent(bool isHover)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, &nXComp = nativeXComponent_, isHover] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            const auto* callback = nXCompImpl->GetMouseEventCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->DispatchHoverEvent);
-            callback->DispatchHoverEvent(nXComp, isHover);
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->DispatchHoverEvent);
+    callback->DispatchHoverEvent(nativeXComponent_.get(), isHover);
 }
 
 void XComponentPattern::NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [nXCompImpl = nativeXComponentImpl_, nXComp = nativeXComponent_, mouseEvent] {
-            CHECK_NULL_VOID(nXComp && nXCompImpl);
-            nXCompImpl->SetMouseEvent(mouseEvent);
-            auto* surface = const_cast<void*>(nXCompImpl->GetSurface());
-            const auto* callback = nXCompImpl->GetMouseEventCallback();
-            CHECK_NULL_VOID_NOLOG(callback && callback->DispatchMouseEvent);
-            callback->DispatchMouseEvent(nXComp, surface);
-        },
-        TaskExecutor::TaskType::JS);
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+    nativeXComponentImpl_->SetMouseEvent(mouseEvent);
+    auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
+    const auto* callback = nativeXComponentImpl_->GetMouseEventCallback();
+    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_VOID_NOLOG(callback->DispatchMouseEvent);
+    callback->DispatchMouseEvent(nativeXComponent_.get(), surface);
 }
 
 void XComponentPattern::SetTouchPoint(

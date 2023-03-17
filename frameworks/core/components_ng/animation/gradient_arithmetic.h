@@ -37,7 +37,7 @@ public:
                 LinearColor srcColor(srcColors[i].GetColor().GetValue());
                 LinearColor destColor(destColors[i].GetColor().GetValue());
                 GradientColor gradientColor;
-                gradientColor.SetColor(srcColor + destColor);
+                gradientColor.SetColor((srcColor + destColor).ToColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
             }
@@ -47,7 +47,7 @@ public:
                 LinearColor srcColor(srcColors[i].GetColor().GetValue());
                 LinearColor destColor(destColors[i].GetColor().GetValue());
                 GradientColor gradientColor;
-                gradientColor.SetColor(srcColor + destColor);
+                gradientColor.SetColor((srcColor + destColor).ToColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
             }
@@ -70,7 +70,7 @@ public:
                 LinearColor srcColor(srcColors[i].GetColor().GetValue());
                 LinearColor destColor(destColors[i].GetColor().GetValue());
                 GradientColor gradientColor;
-                gradientColor.SetColor(srcColor - destColor);
+                gradientColor.SetColor((srcColor - destColor).ToColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
             }
@@ -80,7 +80,7 @@ public:
                 LinearColor srcColor(srcColors[i].GetColor().GetValue());
                 LinearColor destColor(destColors[i].GetColor().GetValue());
                 GradientColor gradientColor;
-                gradientColor.SetColor(srcColor - destColor);
+                gradientColor.SetColor((srcColor - destColor).ToColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
             }
@@ -88,7 +88,7 @@ public:
                 LinearColor srcColor(Color::TRANSPARENT);
                 LinearColor destColor(destColors[i].GetColor().GetValue());
                 GradientColor gradientColor;
-                gradientColor.SetColor(srcColor - destColor);
+                gradientColor.SetColor((srcColor - destColor).ToColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
             }
@@ -103,7 +103,7 @@ public:
         for (size_t i = 0; i < srcColors.size(); i++) {
             LinearColor srcColor(srcColors[i].GetColor().GetValue());
             GradientColor gradientColor;
-            gradientColor.SetColor(srcColor * scale);
+            gradientColor.SetColor((srcColor * scale).ToColor());
             gradientColor.SetDimension(srcColors[i].GetDimension());
             gradient.AddColor(gradientColor);
         }

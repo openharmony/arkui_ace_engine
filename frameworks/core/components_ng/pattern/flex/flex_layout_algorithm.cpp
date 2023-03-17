@@ -464,6 +464,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                     allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper);
                     allocatedSize_ -= space_;
                     child.layoutWrapper->SetActive(false);
+                    --validSizeCount_;
                     child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
                     const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
                     if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {

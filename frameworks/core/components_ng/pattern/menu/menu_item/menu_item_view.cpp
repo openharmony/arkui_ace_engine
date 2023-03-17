@@ -34,7 +34,7 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
 {
     LOGI("MenuItemView::Create");
     auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int32_t nodeId = stack->ClaimNodeId();
     auto menuItem = FrameNode::GetOrCreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
     CHECK_NULL_VOID(menuItem);

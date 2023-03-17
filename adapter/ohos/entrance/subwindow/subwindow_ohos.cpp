@@ -333,7 +333,6 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t tar
     LOGI("SubwindowOhos::ShowMenuNG");
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
-    ContainerScope scope(childContainerId_);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();

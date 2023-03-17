@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#define private public
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_v2/list/list_properties.h"
@@ -1282,8 +1283,7 @@ HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
      * @tc.steps: step4. Scroll 100px, RunMeasureAndLayout and check onScroll, onScrollIndex called.
      * @tc.expected: The onScroll, onScrollIndex callback is called.
      */
-    const float scrollOffset1 = -100.f;
-    pattern->UpdateCurrentOffset(scrollOffset1, SCROLL_FROM_UPDATE);
+    pattern->UpdateCurrentOffset(-100.f, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
     EXPECT_TRUE(isScrollEventCalled);
     EXPECT_TRUE(isScrollIndexEventCalled);
@@ -1293,32 +1293,37 @@ HWTEST_F(ListTestNg, ListEventTest001, TestSize.Level1)
      * @tc.expected: The onScroll, onReachStart callback is called.
      */
     isScrollEventCalled = false;
-    const float scrollOffset2 = 100.f;
-    pattern->UpdateCurrentOffset(scrollOffset2, SCROLL_FROM_ANIMATION);
+    pattern->UpdateCurrentOffset(100.f, SCROLL_FROM_ANIMATION);
     RunMeasureAndLayout(frameNode);
     EXPECT_TRUE(isScrollEventCalled);
     EXPECT_TRUE(isReachStartEventCalled);
 
+    /**
+     * @tc.steps: step5. Scroll 100px, change ScrollState and RunMeasureAndLayout.
+     * @tc.expected: The onScroll callback is called.
+     */
+    isScrollEventCalled = false;
+    pattern->UpdateCurrentOffset(-100.f, SCROLL_FROM_ANIMATION_SPRING);
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(isScrollEventCalled);
 
     /**
      * @tc.steps: step5. Scroll 100px, change ScrollState and RunMeasureAndLayout.
-     * @tc.expected: The onReachStart, onScroll callback is called.
+     * @tc.expected: The onScroll callback is called.
      */
     isScrollEventCalled = false;
-    const float scrollOffset3 = -100.f;
-    pattern->UpdateCurrentOffset(scrollOffset3, SCROLL_FROM_ANIMATION_SPRING);
+    pattern->UpdateCurrentOffset(100.f, SCROLL_FROM_NONE);
     RunMeasureAndLayout(frameNode);
     EXPECT_TRUE(isScrollEventCalled);
 
     /**
      * @tc.steps: step6. Scroll 100px, change ScrollState and RunMeasureAndLayout.
-     * @tc.expected: The onScroll, onReachEnd callback is called.
+     * @tc.expected: The onReachEnd callback is called.
      */
-    isScrollEventCalled = false;
-    const float scrollOffset4 = -100.f;
-    pattern->UpdateCurrentOffset(scrollOffset4, SCROLL_FROM_NONE);
+    pattern->UpdateCurrentOffset(100.f, SCROLL_FROM_UPDATE);
     RunMeasureAndLayout(frameNode);
-    EXPECT_TRUE(isScrollEventCalled);
+    pattern->UpdateCurrentOffset(-200.f, SCROLL_FROM_UPDATE);
+    RunMeasureAndLayout(frameNode);
     EXPECT_TRUE(isReachEndEventCalled);
 }
 
@@ -1448,5 +1453,286 @@ HWTEST_F(ListTestNg, ListEventTest003, TestSize.Level1)
     eventHub->HandleOnItemDragCancel();
     EXPECT_EQ(eventHub->draggedIndex_, 0);
     EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
+}
+
+/**
+ * @tc.name: ListSelectTest001
+ * @tc.desc: Test mouse click to select, only PRESS and RELEASE the mouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 9;
+    /**
+     * @tc.steps: step1. Create List and SetMultiSelectable.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetMultiSelectable(true);
+    CreateListItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout and set MouseButton::LEFT_BUTTON.
+     */
+    RunMeasureAndLayout(frameNode);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+
+    /**
+     * @tc.steps: step4. Click the (0, 0) point of firstItem.
+     * @tc.expected: The 1st item is selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(0.f, 0.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<ListItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern->MarkIsSelected(false);
+    EXPECT_FALSE(firstItemPattern->IsSelected());
+
+    /**
+     * @tc.steps: step5. Click the middle of the 4th item.
+     * @tc.expected: The 4th item is selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(240.f, 350.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<ListItemPattern> fourthItemPattern = GetItemPattern(frameNode, 3);
+    EXPECT_TRUE(fourthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    fourthItemPattern->MarkIsSelected(false);
+
+    /**
+     * @tc.steps: step6. Click the lower boundary of the 4th item .
+     * @tc.expected: The 4th and 5th items are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(240.f, 400.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    fourthItemPattern = GetItemPattern(frameNode, 3);
+    EXPECT_TRUE(fourthItemPattern->IsSelected());
+    RefPtr<ListItemPattern> fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    fourthItemPattern->MarkIsSelected(false);
+    fifthItemPattern->MarkIsSelected(false);
+}
+
+/**
+ * @tc.name: ListSelectTest002
+ * @tc.desc: Test mouse box selection, PRESS, MOVE and RELEASE the mouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListSelectTest002, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 9;
+    const Offset LEFT_TOP = Offset(120.f, 250.f);
+    const Offset LEFT_BOTTOM = Offset(120.f, 350.f);
+    const Offset RIGHT_TOP = Offset(360.f, 250.f);
+    const Offset RIGHT_BOTTOM = Offset(360.f, 350.f);
+
+    /**
+     * @tc.steps: step1. Create List and SetMultiSelectable.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetMultiSelectable(true);
+    CreateListItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout and set MouseButton::LEFT_BUTTON.
+     */
+    RunMeasureAndLayout(frameNode);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+
+    /**
+     * @tc.steps: step4. Select (0, 0) - (200, 100) zone.
+     * @tc.expected: The 1st and 2nd items are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(0.f, 0.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(200.f, 100.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<ListItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    RefPtr<ListItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    firstItemPattern->MarkIsSelected(false);
+    secondItemPattern->MarkIsSelected(false);
+
+    /**
+     * @tc.steps: step6. Select (120, 150) - (360, 250) zone, from the LEFT_TOP to the RIGHT_BOTTOM.
+     * @tc.expected: The 3rd and 4th are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(LEFT_TOP);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(RIGHT_BOTTOM);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<ListItemPattern> thirdItemPattern = GetItemPattern(frameNode, 2);
+    EXPECT_TRUE(thirdItemPattern->IsSelected());
+    RefPtr<ListItemPattern> fourthItemPattern = GetItemPattern(frameNode, 3);
+    EXPECT_TRUE(fourthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    thirdItemPattern->MarkIsSelected(false);
+    fourthItemPattern->MarkIsSelected(false);
+
+    /**
+     * @tc.steps: step6. Select (120, 150) - (360, 250) zone, from the RIGHT_TOP to the LEFT_BOTTOM.
+     * @tc.expected: The 3rd and 4th are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(RIGHT_TOP);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(LEFT_BOTTOM);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    thirdItemPattern = GetItemPattern(frameNode, 2);
+    EXPECT_TRUE(thirdItemPattern->IsSelected());
+    fourthItemPattern = GetItemPattern(frameNode, 3);
+    EXPECT_TRUE(fourthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    thirdItemPattern->MarkIsSelected(false);
+    fourthItemPattern->MarkIsSelected(false);
+
+    /**
+     * @tc.steps: step6. Select (120, 150) - (360, 250) zone, from the LEFT_BOTTOM to the RIGHT_TOP.
+     * @tc.expected: The 3rd and 4th are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(LEFT_BOTTOM);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(RIGHT_TOP);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    thirdItemPattern = GetItemPattern(frameNode, 2);
+    EXPECT_TRUE(thirdItemPattern->IsSelected());
+    fourthItemPattern = GetItemPattern(frameNode, 3);
+    EXPECT_TRUE(fourthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    thirdItemPattern->MarkIsSelected(false);
+    fourthItemPattern->MarkIsSelected(false);
+
+    /**
+     * @tc.steps: step6. Select (120, 150) - (360, 250) zone, from the RIGHT_BOTTOM to the LEFT_TOP.
+     * @tc.expected: The 3rd and 4th are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(RIGHT_BOTTOM);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(LEFT_TOP);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    thirdItemPattern = GetItemPattern(frameNode, 2);
+    EXPECT_TRUE(thirdItemPattern->IsSelected());
+    fourthItemPattern = GetItemPattern(frameNode, 3);
+    EXPECT_TRUE(fourthItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    thirdItemPattern->MarkIsSelected(false);
+    fourthItemPattern->MarkIsSelected(false);
+}
+
+/**
+ * @tc.name: ListSelectTest003
+ * @tc.desc: Test listItem selectable property and onSelect callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListSelectTest003, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 9;
+
+    /**
+     * @tc.steps: step1. Create List and SetMultiSelectable.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    listModelNG.SetMultiSelectable(true);
+
+    /**
+     * @tc.steps: step2. Create listItem.
+     */
+    bool isFifthItemSelected = false;
+    auto selectCallback = [&isFifthItemSelected](bool) { isFifthItemSelected = true; };
+    for (int32_t i = 0; i < ITEM_COUNT; i++) {
+        ListItemModelNG listItemModel;
+        listItemModel.Create();
+        SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+        SetWidth(DEFAULT_ITEM_CROSS_SIZE);
+        if (i == 3) {
+            listItemModel.SetSelectable(false);
+        }
+        if (i == 4) {
+            listItemModel.SetSelectCallback(std::move(selectCallback));
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    /**
+     * @tc.steps: step3. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step4. RunMeasureAndLayout and set MouseButton::LEFT_BUTTON.
+     */
+    RunMeasureAndLayout(frameNode);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+
+    /**
+     * @tc.steps: step5. Select (120, 250) - (360, 350) zone.
+     * @tc.expected: The 4th item is not selected but 5th item is selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(120.f, 350.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(360.f, 450.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<ListItemPattern> fourthItemPattern = GetItemPattern(frameNode, 3);
+    EXPECT_FALSE(fourthItemPattern->IsSelected());
+    RefPtr<ListItemPattern> fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    EXPECT_TRUE(isFifthItemSelected);
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    fourthItemPattern->MarkIsSelected(false);
+    fifthItemPattern->MarkIsSelected(false);
 }
 } // namespace OHOS::Ace::NG

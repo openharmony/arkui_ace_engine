@@ -18,9 +18,9 @@
 #include "base/utils/utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -85,12 +85,12 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
     AttachProperty(size_);
 }
 
-void CheckBoxGroupModifier::PaintCheckBox(DrawingContext& context, const OffsetF& paintOffset,
-    const SizeF& contentSize) const
+void CheckBoxGroupModifier::PaintCheckBox(
+    DrawingContext& context, const OffsetF& paintOffset, const SizeF& contentSize) const
 {
     auto canvas = context.canvas;
     auto color = activeColor_;
-    
+
     RSPen pen;
     RSBrush brush;
     pen.SetWidth(borderWidth_);
@@ -105,7 +105,7 @@ void CheckBoxGroupModifier::PaintCheckBox(DrawingContext& context, const OffsetF
         PaintCheckBoxGroupPartStatus(canvas, paintOffset, brush, pen, contentSize);
         return;
     }
-    if (UIStatus(uiStatus_->Get()) == UIStatus::OFF_TO_ON) {
+    if (UIStatus(uiStatus_->Get()) == UIStatus::OFF_TO_ON || UIStatus(uiStatus_->Get()) == UIStatus::PART_TO_ON) {
         brush.SetColor(ToRSColor(color->Get()));
         brush.SetAntiAlias(true);
         pen.SetColor(ToRSColor(pointColor_->Get()));
@@ -124,22 +124,22 @@ void CheckBoxGroupModifier::PaintCheckBox(DrawingContext& context, const OffsetF
         DrawActiveBorder(canvas, paintOffset, brush, contentSize);
         DrawAnimationOnToOff(canvas, paintOffset, pen, contentSize);
     } else if (UIStatus(uiStatus_->Get()) == UIStatus::UNSELECTED ||
-        UIStatus(uiStatus_->Get()) == UIStatus::PART_TO_OFF) {
+               UIStatus(uiStatus_->Get()) == UIStatus::PART_TO_OFF) {
         brush.SetColor(ToRSColor(inactivePointColor_));
         pen.SetColor(ToRSColor(inactiveColor_->Get()));
         if (!enabled_->Get()) {
             brush.SetColor(
                 ToRSColor(inactivePointColor_.BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
-            pen.SetColor(ToRSColor(inactiveColor_->Get().BlendOpacity(
-                static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
+            pen.SetColor(
+                ToRSColor(inactiveColor_->Get().BlendOpacity(static_cast<float>(DISABLED_ALPHA) / ENABLED_ALPHA)));
         }
         DrawUnselectedBorder(canvas, paintOffset, brush, contentSize);
         DrawUnselected(canvas, paintOffset, pen, contentSize);
     }
 }
 
-void CheckBoxGroupModifier::PaintCheckBoxGroupPartStatus(RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush,
-    RSPen pen, const SizeF& paintSize) const
+void CheckBoxGroupModifier::PaintCheckBoxGroupPartStatus(
+    RSCanvas& canvas, const OffsetF& paintOffset, RSBrush& brush, RSPen pen, const SizeF& paintSize) const
 {
     auto color = activeColor_;
     brush.SetColor(ToRSColor(color->Get()));
@@ -191,11 +191,9 @@ void CheckBoxGroupModifier::DrawUnselectedBorder(
     canvas.DrawRoundRect(rrect);
 }
 
-void CheckBoxGroupModifier::DrawPart(
-    RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
+void CheckBoxGroupModifier::DrawPart(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const
 {
-    if (checkMarkPaintSize_->Get() == CHECKBOX_GROUP_LENGTH_ZERO ||
-        checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {
+    if (checkMarkPaintSize_->Get() == CHECKBOX_GROUP_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {
         return;
     }
     RSPath path;
@@ -223,8 +221,7 @@ void CheckBoxGroupModifier::DrawPart(
 
 void CheckBoxGroupModifier::DrawMark(RSCanvas& canvas, RSPath& path, RSPen& pen) const
 {
-    if (checkMarkPaintSize_->Get() == CHECKBOX_GROUP_LENGTH_ZERO ||
-        checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {
+    if (checkMarkPaintSize_->Get() == CHECKBOX_GROUP_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {
         return;
     }
     RSPen shadowPen = RSPen(pen);
@@ -247,8 +244,8 @@ void CheckBoxGroupModifier::DrawAnimationOffToOn(
         checkMarkPaintSize_->Get() * CHECK_MARK_START_Y_POSITION);
     const Offset middle = Offset(checkMarkPaintSize_->Get() * CHECK_MARK_MIDDLE_X_POSITION,
         checkMarkPaintSize_->Get() * CHECK_MARK_MIDDLE_Y_POSITION);
-    const Offset end = Offset(checkMarkPaintSize_->Get() * CHECK_MARK_END_X_POSITION,
-        checkMarkPaintSize_->Get() * CHECK_MARK_END_Y_POSITION);
+    const Offset end = Offset(
+        checkMarkPaintSize_->Get() * CHECK_MARK_END_X_POSITION, checkMarkPaintSize_->Get() * CHECK_MARK_END_Y_POSITION);
 
     float deltaX = middle.GetX() - start.GetX();
     float deltaY = middle.GetY() - start.GetY();
@@ -259,30 +256,32 @@ void CheckBoxGroupModifier::DrawAnimationOffToOn(
     float ratio = DEFAULT_MIN_CHECKBOX_SHAPE_SCALE;
     if (shapeScale_->Get() < CHECK_MARK_LEFT_ANIMATION_PERCENT) {
         ratio = shapeScale_->Get() / CHECK_MARK_LEFT_ANIMATION_PERCENT;
-        path.LineTo(originX + start.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) /
-            CHECKBOX_GROUP_DOUBLE_RATIO + deltaX * ratio, originY + start.GetY() +
-            (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO + deltaY * ratio);
+        path.LineTo(originX + start.GetX() +
+                        (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO + deltaX * ratio,
+            originY + start.GetY() + (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO +
+                deltaY * ratio);
     } else {
-        path.LineTo(originX + middle.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) /
-            CHECKBOX_GROUP_DOUBLE_RATIO, originY + middle.GetY() +
-            (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO);
+        path.LineTo(
+            originX + middle.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO,
+            originY + middle.GetY() + (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO);
     }
     DrawMark(canvas, path, pen);
     if (shapeScale_->Get() > CHECK_MARK_LEFT_ANIMATION_PERCENT) {
         deltaX = end.GetX() - middle.GetX();
         deltaY = middle.GetY() - end.GetY();
-        path.MoveTo(originX + middle.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) /
-            CHECKBOX_GROUP_DOUBLE_RATIO, originY + middle.GetY() +
-            (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO);
+        path.MoveTo(
+            originX + middle.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO,
+            originY + middle.GetY() + (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO);
         if (shapeScale_->Get() == DEFAULT_MAX_CHECKBOX_SHAPE_SCALE) {
-            path.LineTo(originX + (paintSize.Width() - checkMarkPaintSize_->Get()) /
-                CHECKBOX_GROUP_DOUBLE_RATIO + end.GetX(), originY + end.GetY() +
-                (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO);
+            path.LineTo(
+                originX + (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO + end.GetX(),
+                originY + end.GetY() + (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO);
         } else {
             ratio = (shapeScale_->Get() - CHECK_MARK_LEFT_ANIMATION_PERCENT) / CHECK_MARK_RIGHT_ANIMATION_PERCENT;
             path.LineTo(originX + (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO +
-                middle.GetX() + deltaX * ratio, originY + middle.GetY() +
-                (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO - deltaY * ratio);
+                            middle.GetX() + deltaX * ratio,
+                originY + middle.GetY() +
+                    (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO - deltaY * ratio);
         }
         DrawMark(canvas, path, pen);
     }
@@ -291,8 +290,8 @@ void CheckBoxGroupModifier::DrawAnimationOffToOn(
 void CheckBoxGroupModifier::DrawAnimationOnToOff(RSCanvas& canvas, const OffsetF& origin, RSPen& pen,
     const SizeF& paintSize) const
 {
-    if (shapeScale_->Get() == DEFAULT_MIN_CHECKBOX_SHAPE_SCALE || checkMarkPaintSize_->Get() ==
-        CHECKBOX_GROUP_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {
+    if (shapeScale_->Get() == DEFAULT_MIN_CHECKBOX_SHAPE_SCALE ||
+        checkMarkPaintSize_->Get() == CHECKBOX_GROUP_LENGTH_ZERO || checkStroke_->Get() == CHECKBOX_GROUP_LENGTH_ZERO) {
         return;
     }
     RSPath path;
@@ -303,8 +302,8 @@ void CheckBoxGroupModifier::DrawAnimationOnToOff(RSCanvas& canvas, const OffsetF
         checkMarkPaintSize_->Get() * CHECK_MARK_START_Y_POSITION);
     const Offset middle = Offset(checkMarkPaintSize_->Get() * CHECK_MARK_MIDDLE_X_POSITION,
         checkMarkPaintSize_->Get() * CHECK_MARK_MIDDLE_Y_POSITION);
-    const Offset end = Offset(checkMarkPaintSize_->Get() * CHECK_MARK_END_X_POSITION,
-        checkMarkPaintSize_->Get() * CHECK_MARK_END_Y_POSITION);
+    const Offset end = Offset(
+        checkMarkPaintSize_->Get() * CHECK_MARK_END_X_POSITION, checkMarkPaintSize_->Get() * CHECK_MARK_END_Y_POSITION);
     const Offset middlePoint = Offset(checkMarkPaintSize_->Get() / CHECKBOX_GROUP_DOUBLE_RATIO,
         checkMarkPaintSize_->Get() / CHECKBOX_GROUP_DOUBLE_RATIO);
     float deltaX = middlePoint.GetX() - start.GetX();
@@ -315,26 +314,30 @@ void CheckBoxGroupModifier::DrawAnimationOnToOff(RSCanvas& canvas, const OffsetF
     shadowPen.SetColor(ToRSColor(shadowColor_));
     pen.SetWidth(checkStroke_->Get());
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    path.MoveTo(originX + start.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) /
-        CHECKBOX_GROUP_DOUBLE_RATIO + deltaX * ratio, originY + start.GetY() +
-        (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO + deltaY * ratio);
+    path.MoveTo(originX + start.GetX() +
+                    (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO + deltaX * ratio,
+        originY + start.GetY() + (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO +
+            deltaY * ratio);
     deltaX = middlePoint.GetX() - middle.GetX();
     deltaY = middle.GetY() - middlePoint.GetY();
-    path.LineTo(originX + middle.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) /
-        CHECKBOX_GROUP_DOUBLE_RATIO + deltaX * ratio, originY + middle.GetY() +
-        (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO - deltaY * ratio);
+    path.LineTo(originX + middle.GetX() +
+                    (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO + deltaX * ratio,
+        originY + middle.GetY() + (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO -
+            deltaY * ratio);
     canvas.AttachPen(shadowPen);
     canvas.DrawPath(path);
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
-    path.MoveTo(originX + middle.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) /
-        CHECKBOX_GROUP_DOUBLE_RATIO + deltaX * ratio, originY + middle.GetY() +
-        (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO - deltaY * ratio);
+    path.MoveTo(originX + middle.GetX() +
+                    (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO + deltaX * ratio,
+        originY + middle.GetY() + (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO -
+            deltaY * ratio);
     deltaX = end.GetX() - middlePoint.GetX();
     deltaY = middlePoint.GetY() - end.GetY();
-    path.LineTo(originX + end.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) /
-        CHECKBOX_GROUP_DOUBLE_RATIO - deltaX * ratio, originY + end.GetY() +
-        (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO + deltaY * ratio);
+    path.LineTo(originX + end.GetX() + (paintSize.Width() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO -
+                    deltaX * ratio,
+        originY + end.GetY() + (paintSize.Height() - checkMarkPaintSize_->Get()) / CHECKBOX_GROUP_DOUBLE_RATIO +
+            deltaY * ratio);
     canvas.AttachPen(shadowPen);
     canvas.DrawPath(path);
     canvas.AttachPen(pen);

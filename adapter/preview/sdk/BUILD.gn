@@ -65,10 +65,21 @@ if (is_standard_system) {
     sources += [ "${out_path}/hiviewdfx/hilog_native/libhilog${dylib_suffix}" ]
 
     foreach(module, common_napi_libs) {
-      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
+      module_path_names = []
+      module_path_names = string_split(module, "/")
+      prefix_dir = module_path_names[0]
+
+      module_path = prefix_dir
+      if (prefix_dir != module) {
+        module_path = module_path_names[1]
+      }
+
+      module_name = string_replace(module_path, "_", "")
+      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module_name}",
                                 "root_out_dir")
-      deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
-      sources += [ "${out_path}/arkui/ace_engine/lib${module}${dylib_suffix}" ]
+      deps += [ "$ace_root/interfaces/napi/kits:${module_name}" ]
+      sources +=
+          [ "${out_path}/arkui/ace_engine/lib${module_name}${dylib_suffix}" ]
     }
 
     outputs =

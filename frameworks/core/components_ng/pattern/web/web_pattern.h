@@ -28,6 +28,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
+#include "core/components_ng/pattern/web/web_paint_property.h"
 #include "core/components_ng/pattern/web/web_pattern_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/render_surface.h"
@@ -103,6 +104,9 @@ public:
             OnWebSrcUpdate();
             webSrc_ = webSrc;
         }
+        if (webPaintProperty_) {
+            webPaintProperty_->SetWebPaintData(webSrc);
+        }
     }
 
     const std::optional<std::string>& GetWebSrc() const
@@ -118,8 +122,11 @@ public:
     void SetWebData(const std::string& webData)
     {
         if (webData_ != webData) {
-            OnWebDataUpdate();
             webData_ = webData;
+            OnWebDataUpdate();
+        }
+        if (webPaintProperty_) {
+            webPaintProperty_->SetWebPaintData(webData);
         }
     }
 
@@ -189,6 +196,17 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        if (!webPaintProperty_) {
+            webPaintProperty_ = MakeRefPtr<WebPaintProperty>();
+            if (!webPaintProperty_) {
+                LOGE("MakeRefPtr failed return null");
+            }
+        }
+        return webPaintProperty_;
     }
 
     ACE_DEFINE_PROPERTY_GROUP(WebProperty, WebPatternProperty);
@@ -381,6 +399,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<PanEvent> panEvent_ = nullptr;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_ = nullptr;
+    RefPtr<WebPaintProperty> webPaintProperty_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> insertHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle_ = nullptr;
     std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle_ = nullptr;

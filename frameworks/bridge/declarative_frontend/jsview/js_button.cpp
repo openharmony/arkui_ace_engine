@@ -218,7 +218,7 @@ void JSButton::GetFontContent(const JSRef<JSVal> font, NG::ButtonView::ButtonPar
     if (ParseJsDimensionFp(size, fontSize)) {
         buttonParameters.fontSize = fontSize;
     }
-    
+
     JSRef<JSVal> weight = obj->GetProperty("weight");
     if (weight->IsString()) {
         buttonParameters.fontWeight = ConvertStrToFontWeight(weight->ToString());
@@ -281,14 +281,13 @@ void JSButton::SetLableStyle(const JSCallbackInfo& info)
         LOGE("info[0] not is Object");
         return;
     }
-    
+
     NG::ButtonView::ButtonParameters buttonParameters;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> overflowValue = obj->GetProperty("overflow");
     if (!overflowValue->IsNull() && overflowValue->IsNumber()) {
         auto overflow = overflowValue->ToNumber<int32_t>();
-        if (overflow >= 0 &&
-            overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&
+        if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size()) &&
             TEXT_OVERFLOWS[overflow] != TextOverflow::MARQUEE) {
             buttonParameters.textOverflow = TEXT_OVERFLOWS[overflow];
         }
@@ -638,15 +637,22 @@ void JSButton::JsOnClick(const JSCallbackInfo& info)
 
 void JSButton::JsBackgroundColor(const JSCallbackInfo& info)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::JsBackgroundColor(info);
-        return;
-    }
     if (info.Length() < 1) {
         LOGE("The argv is wrong, it is supposed to have at least 1 argument");
         return;
     }
     Color backgroundColor;
+    if (Container::IsCurrentUseNewPipeline()) {
+        if (!ParseJsColor(info[0], backgroundColor)) {
+            auto buttonTheme = GetTheme<ButtonTheme>();
+            if (buttonTheme) {
+                backgroundColor = buttonTheme->GetBgColor();
+            }
+        }
+        ViewAbstractModel::GetInstance()->SetBackgroundColor(backgroundColor);
+        return;
+    }
+
     if (!ParseJsColor(info[0], backgroundColor)) {
         return;
     }
@@ -770,6 +776,18 @@ void JSButton::JsSize(const JSCallbackInfo& info)
         return;
     }
 
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+        Dimension width;
+        if (ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
+            NG::ViewAbstract::SetWidth(NG::CalcLength(width));
+        }
+        Dimension height;
+        if (ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
+            NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+        }
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     auto option = stack->GetImplicitAnimationOption();

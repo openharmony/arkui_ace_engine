@@ -46,7 +46,7 @@ void FormRenderer::InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     uiContent_->SetFormWidth(width_);
     uiContent_->SetFormHeight(height_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
-    uiContent_->UpdateFormDate(formJsInfo.formData);
+    uiContent_->UpdateFormData(formJsInfo.formData);
     uiContent_->Initialize(nullptr, formJsInfo.formSrc, nullptr);
 
     auto actionEventHandler = [weak = weak_from_this()](const std::string& action) {
@@ -135,7 +135,7 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
     }
 
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
-    uiContent_->UpdateFormDate(formJsInfo.formData);
+    uiContent_->UpdateFormData(formJsInfo.formData);
 }
 
 void FormRenderer::Destroy()

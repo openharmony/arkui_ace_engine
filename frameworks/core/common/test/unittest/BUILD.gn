@@ -21,10 +21,14 @@ group("unittest") {
     deps += [
       "clipboard:unittest",
       "environment:unittest",
+      "flutter:unittest",
       "ime:unittest",
       "plugin:unittest",
       "register:unittest",
+      "rosen:unittest",
+      "sharedata:unittest",
       "storage:unittest",
+      "vibrator:unittest",
     ]
   }
 }

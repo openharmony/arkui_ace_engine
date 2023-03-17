@@ -241,8 +241,16 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             napi_get_named_property(env, argv[0], "message", &asyncContext->messageNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
             napi_get_named_property(env, argv[0], "autoCancel", &asyncContext->autoCancel);
-            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
-            GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString);
+            if (!GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString)) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                return nullptr;
+            }
+            if (!GetNapiString(env, asyncContext->messageNApi, asyncContext->messageString)) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                return nullptr;
+            }
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);
@@ -266,8 +274,16 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_get_named_property(env, buttonArray, "color", &colorNApi);
                     std::string textString;
                     std::string colorString;
-                    GetNapiString(env, textNApi, textString);
-                    GetNapiString(env, colorNApi, colorString);
+                    if (!GetNapiString(env, textNApi, textString)) {
+                        delete asyncContext;
+                        asyncContext = nullptr;
+                        return nullptr;
+                    }
+                    if (!GetNapiString(env, colorNApi, colorString)) {
+                        delete asyncContext;
+                        asyncContext = nullptr;
+                        return nullptr;
+                    }
                     ButtonInfo buttonInfo = { .text = textString, .textColor = colorString };
                     asyncContext->buttons.emplace_back(buttonInfo);
                 }
@@ -517,7 +533,11 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             }
             napi_get_named_property(env, argv[0], "title", &asyncContext->titleNApi);
             napi_get_named_property(env, argv[0], "buttons", &asyncContext->buttonsNApi);
-            GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString);
+            if (!GetNapiString(env, asyncContext->titleNApi, asyncContext->titleString)) {
+                delete asyncContext;
+                asyncContext = nullptr;
+                return nullptr;
+            }
             bool isBool = false;
             napi_is_array(env, asyncContext->buttonsNApi, &isBool);
             napi_typeof(env, asyncContext->buttonsNApi, &valueType);

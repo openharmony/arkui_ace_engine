@@ -26,7 +26,6 @@ class ACE_EXPORT Inspector {
 public:
     static RefPtr<FrameNode> GetFrameNodeByKey(const std::string& key);
     static std::string GetInspectorNodeByKey(const std::string& key);
-    static std::string GetInspectorTree(bool isLayoutInspector = false);
     static bool SendEventByKey(const std::string& key, int action, const std::string& params);
     static std::string GetInspector(bool isLayoutInspector = false);
     static void HideAllMenus();
