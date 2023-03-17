@@ -1569,7 +1569,7 @@ void TextFieldPattern::OnModifyDone()
     if (IsTextArea()) {
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
-            InitScrollableEvent();
+            AddScrollEvent();
         }
         SetEdgeEffect(EdgeEffect::SPRING);
         SetScrollBar(DisplayMode::ON);
@@ -3182,24 +3182,6 @@ std::string TextFieldPattern::GetCopyOptionString() const
     return copyOptionString;
 }
 
-void TextFieldPattern::InitScrollableEvent()
-{
-    AddScrollEvent();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto textFieldEventHub = host->GetEventHub<TextFieldEventHub>();
-    auto onScrollBegin = textFieldEventHub->GetOnScrollBegin();
-    auto onScrollFrameBegin = textFieldEventHub->GetOnScrollFrameBegin();
-    auto scrollableEvent = GetScrollableEvent();
-    CHECK_NULL_VOID(scrollableEvent);
-    if (onScrollBegin) {
-        scrollableEvent->SetScrollBeginCallback(std::move(onScrollBegin));
-    }
-    if (onScrollFrameBegin) {
-        scrollableEvent->SetScrollFrameBeginCallback(std::move(onScrollFrameBegin));
-    }
-}
-
 void TextFieldPattern::UpdateScrollBarOffset()
 {
     if (textEditingValue_.text.empty()) {
@@ -3211,17 +3193,6 @@ void TextFieldPattern::UpdateScrollBarOffset()
     Size size(contentRect_.Width(), contentRect_.Height());
     UpdateScrollBarRegion(std::abs(textRect_.GetY()) - currentOffset_, textRect_.Height(), size);
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-}
-
-void TextFieldPattern::FireOnScrollStart()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID_NOLOG(hub);
-    auto onScrollStart = hub->GetOnScrollStart();
-    CHECK_NULL_VOID_NOLOG(onScrollStart);
-    onScrollStart();
 }
 
 bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
@@ -3247,11 +3218,7 @@ void TextFieldPattern::CheckScrollable()
     if (textEditingValue_.text.empty()) {
         scrollable_ = false;
     } else {
-        if (GreatNotEqual(textRect_.Height(), contentRect_.Height())) {
-            scrollable_ = true;
-        } else {
-            scrollable_ = false;
-        }
+        scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
     }
     SetScrollEnable(scrollable_);
 }
