@@ -107,12 +107,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *    - localStorage do not specify, will inherit from parent View.
    *
   */
-  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId : number = -1) {
+  constructor(parent: ViewPU, localStorage: LocalStorage, elmtId: number = -1) {
     super();
     // if set use the elmtId also as the ViewPU object's subscribable id.
     // these matching is requiremrnt for updateChildViewById(elmtId) being able to
     // find the child ViewPU object by given elmtId
-    this.id_= elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
+    this.id_ = elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
     this.providedVars_ = parent ? new Map(parent.providedVars_)
       : new Map<string, ObservedPropertyAbstractPU<any>>();
 
@@ -217,7 +217,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
-  protected updateStateVars(params: {}) : void {
+  protected updateStateVars(params: {}): void {
     stateMgmtConsole.warn("ViewPU.updateStateVars unimplemented. Pls upgrade to latest eDSL transpiler version.")
   }
 
@@ -294,14 +294,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.dirtDescendantElementIds_.delete(elmtId);
   }
 
-  public updateStateVarsOfChildByElmtId(elmtId, params: Object) : void {
+  public updateStateVarsOfChildByElmtId(elmtId, params: Object): void {
     stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - start`);
 
-    if (elmtId<0) {
+    if (elmtId < 0) {
       stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - invalid elmtId - internal error!`);
-      return ;
+      return;
     }
-    let child : ViewPU = this.getChildById(elmtId);
+    let child: ViewPU = this.getChildById(elmtId);
     if (!child) {
       stateMgmtConsole.warn(`ViewPU('${this.constructor.name}', ${this.id__()}).updateChildViewById(${elmtId}) - no child with this elmtId - internal error!`);
       return;
@@ -407,24 +407,24 @@ abstract class ViewPU extends NativeViewPartialUpdate
    */
   public updateDirtyElements() {
     do {
-        stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
+      stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
 
-        // request list of all (gloabbly) deleteelmtIds;
-        let deletedElmtIds: number[] = [];
-        this.getDeletedElemtIds(deletedElmtIds);
+      // request list of all (gloabbly) deleteelmtIds;
+      let deletedElmtIds: number[] = [];
+      this.getDeletedElemtIds(deletedElmtIds);
 
-        // see which elmtIds are managed by this View
-        // and clean up all book keeping for them
-        this.purgeDeletedElmtIds(deletedElmtIds);
+      // see which elmtIds are managed by this View
+      // and clean up all book keeping for them
+      this.purgeDeletedElmtIds(deletedElmtIds);
 
-        // process all elmtIds marked as needing update in ascending order.
-        // ascending order ensures parent nodes will be updated before their children
-        // prior cleanup ensure no already deleted Elements have their update func executed
-        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-            this.UpdateElement(elmtId);
-            this.dirtDescendantElementIds_.delete(elmtId);
-        });
-    } while(this.dirtDescendantElementIds_.size);
+      // process all elmtIds marked as needing update in ascending order.
+      // ascending order ensures parent nodes will be updated before their children
+      // prior cleanup ensure no already deleted Elements have their update func executed
+      Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+        this.UpdateElement(elmtId);
+        this.dirtDescendantElementIds_.delete(elmtId);
+      });
+    } while (this.dirtDescendantElementIds_.size);
   }
 
   //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
@@ -466,8 +466,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
   }
 
   // performs the update on a branch within if() { branch } else if (..) { branch } else { branch }
-  public ifElseBranchUpdateFunction(branchId : number, branchfunc : () => void ) : void {
-    const oldBranchid : number = If.getBranchId();
+  public ifElseBranchUpdateFunction(branchId: number, branchfunc: () => void): void {
+    const oldBranchid: number = If.getBranchId();
 
     if (branchId == oldBranchid) {
       stateMgmtConsole.log(`${this.constructor.name}[${this.id__()}] IfElse branch unchanged, no work to do.`);
@@ -478,23 +478,23 @@ abstract class ViewPU extends NativeViewPartialUpdate
     branchfunc();
   }
 
-   /**
-    Partial updates for ForEach.
-    * @param elmtId ID of element.
-    * @param itemArray Array of items for use of itemGenFunc.
-    * @param itemGenFunc Item generation function to generate new elements. If index parameter is
-    *                    given set itemGenFuncUsesIndex to true.
-    * @param idGenFunc   ID generation function to generate unique ID for each element. If index parameter is
-    *                    given set idGenFuncUsesIndex to true.
-    * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
-    * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
-    */
-  public forEachUpdateFunction(elmtId : number,
+  /**
+   Partial updates for ForEach.
+   * @param elmtId ID of element.
+   * @param itemArray Array of items for use of itemGenFunc.
+   * @param itemGenFunc Item generation function to generate new elements. If index parameter is
+   *                    given set itemGenFuncUsesIndex to true.
+   * @param idGenFunc   ID generation function to generate unique ID for each element. If index parameter is
+   *                    given set idGenFuncUsesIndex to true.
+   * @param itemGenFuncUsesIndex itemGenFunc optional index parameter is given or not.
+   * @param idGenFuncUsesIndex idGenFunc optional index parameter is given or not.
+   */
+  public forEachUpdateFunction(elmtId: number,
     itemArray: Array<any>,
     itemGenFunc: (item: any, index?: number) => void,
     idGenFunc?: (item: any, index?: number) => string,
     itemGenFuncUsesIndex: boolean = false,
-    idGenFuncUsesIndex: boolean = false) : void {
+    idGenFuncUsesIndex: boolean = false): void {
 
     stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: forEachUpdateFunction `);
 
@@ -510,60 +510,113 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     if (idGenFunc === undefined) {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
-      idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
+      idGenFunc = (item: any, index: number) => `${index}__${JSON.stringify(item)}`;
       idGenFuncUsesIndex = true;
     }
 
-    let diffIndexArray = []; // New indexes compared to old one.
-    let newIdArray = [];
-    let idDuplicates = [];
-    const arr = itemArray; // just to trigger a 'get' onto the array
+    const forEachUpdateContext: ForEachContextType = ForEach.GetContext();
+    const oldIdArray: Array<string> = forEachUpdateContext.idArray;
+    const oldElmtIdMap = forEachUpdateContext.elmtIdMap;
 
-    // ID gen is with index.
-    if (idGenFuncUsesIndex) {
-      stateMgmtConsole.debug(`ID Gen with index parameter or with default id gen func`);
-      // Create array of new ids.
-      arr.forEach((item, indx) => {
-        newIdArray.push(idGenFunc(item, indx));
-      });
-    }
-    else {
-      // Create array of new ids.
-      stateMgmtConsole.debug(`ID Gen without index parameter`);
-      arr.forEach((item, index) => {
-        newIdArray.push(`${itemGenFuncUsesIndex ? index + '_':''}` + idGenFunc(item));
-      });
-    }
+    // Map oldId -> index inside oldArray
+    let oldIdMap = new Map<string, number>();
+    oldIdArray.forEach((id, index) => oldIdMap.set(id, index));
 
-    // Set new array on C++ side.
-    // C++ returns array of indexes of newly added array items.
-    // these are indexes in new child list.
-    ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+    // compute new id array and for quicker search for existing ids turn it into a set
+    const newIdArray : Array<string> = itemArray.map(idGenFunc);
+    const newIdSet = new Set<string>(newIdArray);
 
-    // Its error if there are duplicate IDs.
-    if (idDuplicates.length > 0) {
-      idDuplicates.forEach((indx) => {
-        stateMgmtConsole.error(
-          `Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx == 2 ? "nd" : "rd" : "th"} array item ${arr[indx]}.`);
-      });
-      stateMgmtConsole.error(`Ids generated by the ForEach id gen function must be unique, error.`);
-    }
-
-    stateMgmtConsole.debug(
-      `${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
-
-    // Item gen is with index.
-    stateMgmtConsole.debug(`Item Gen ${itemGenFuncUsesIndex ? 'with' : "without"} index`);
-    // Create new elements if any.
-    diffIndexArray.forEach((indx) => {
-      ForEach.createNewChildStart(newIdArray[indx], this);
-      if (itemGenFuncUsesIndex) {
-        itemGenFunc(arr[indx], indx);
-      } else {
-        itemGenFunc(arr[indx]);
-      }
-      ForEach.createNewChildFinish(newIdArray[indx], this);
+    // identify to-be-deleted items by their index in the old array
+    let deletedItemsOldIndex = new Array<number>();
+    oldIdArray.forEach((oldItem, oldIndex) => {
+      if (!newIdSet.has(oldItem)) { deletedItemsOldIndex.push(oldIndex) }
     });
+    stateMgmtConsole.log(`to be deleted indexes of old array: ${deletedItemsOldIndex}`)
+
+    ForEach.StartUpdate();
+
+    itemArray.forEach((item, index) => {
+      const newId = newIdArray[index];
+
+      const oldIndex: number | undefined = oldIdMap.get(newId);
+      if (oldIndex) {
+        // existing item, move it
+        ForEach.UseItem(oldIndex);
+      } else {
+        const recycleIndex = deletedItemsOldIndex.shift();
+        if (recycleIndex != undefined) {
+          //  UpdateItem(recycleIndex);
+          ForEach.UseItem(recycleIndex)
+        } else {
+          // no old UINodes left to update
+          // render new UINodes for this item
+          ForEach.createNewChildStart(newId, this);
+          if (itemGenFuncUsesIndex) {
+            itemGenFunc(item, index);
+          } else {
+            itemGenFunc(item);
+          }
+          ForEach.createNewChildFinish(newId, this);
+        }
+      }
+    })
+
+    // FIXME oldElmtIdMap
+    ForEach.SetContext({ idArray: newIdArray, elmtIdMap: oldElmtIdMap});
+    ForEach.CompleteUpdate();
+
+    /*
+      let diffIndexArray = []; // New indexes compared to old one.
+      let idDuplicates = [];
+      const arr = itemArray; // just to trigger a 'get' onto the array
+  
+      // ID gen is with index.
+      if (idGenFuncUsesIndex) {
+        stateMgmtConsole.debug(`ID Gen with index parameter or with default id gen func`);
+        // Create array of new ids.
+        arr.forEach((item, indx) => {
+          newIdArray.push(idGenFunc(item, indx));
+        });
+      }
+      else {
+        // Create array of new ids.
+        stateMgmtConsole.debug(`ID Gen without index parameter`);
+        arr.forEach((item, index) => {
+          newIdArray.push(`${itemGenFuncUsesIndex ? index + '_' : ''}` + idGenFunc(item));
+        });
+      }
+  
+      // Set new array on C++ side.
+      // C++ returns array of indexes of newly added array items.
+      // these are indexes in new child list.
+      ForEach.setIdArray(elmtId, newIdArray, diffIndexArray, idDuplicates);
+  
+      // Its error if there are duplicate IDs.
+      if (idDuplicates.length > 0) {
+        idDuplicates.forEach((indx) => {
+          stateMgmtConsole.error(
+            `Error: ${newIdArray[indx]} generated for ${indx}${indx < 4 ? indx == 2 ? "nd" : "rd" : "th"} array item ${arr[indx]}.`);
+        });
+        stateMgmtConsole.error(`Ids generated by the ForEach id gen function must be unique, error.`);
+      }
+  
+      stateMgmtConsole.debug(
+        `${this.constructor.name}[${this.id__()}]: diff indexes ${JSON.stringify(diffIndexArray)} . `);
+  
+      // Item gen is with index.
+      stateMgmtConsole.debug(`Item Gen ${itemGenFuncUsesIndex ? 'with' : "without"} index`);
+      // Create new elements if any.
+      diffIndexArray.forEach((indx) => {
+        ForEach.createNewChildStart(newIdArray[indx], this);
+        if (itemGenFuncUsesIndex) {
+          itemGenFunc(arr[indx], indx);
+        } else {
+          itemGenFunc(arr[indx]);
+        }
+        ForEach.createNewChildFinish(newIdArray[indx], this);
+      });
+  
+      */
   }
 
   /**

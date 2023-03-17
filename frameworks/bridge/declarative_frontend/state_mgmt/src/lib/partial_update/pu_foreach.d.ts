@@ -24,14 +24,16 @@
  *
  */
 
+type ForEachContextType = { idArray: Array<string>, elmtIdMap: Map<string, Array<number>> };
+
 declare class ForEach {
 
-  // forEach improved
-  static startUpdate(): void;
-  static setContext(): void;
-  static getContext(): void;
-  static useItem(): void;
-  static completeUpdate(): void;
+  // ForEach optimisation uses a new set of API functions
+  static StartUpdate(): void;
+  static SetContext(context: ForEachContextType): void;
+  static GetContext(): ForEachContextType
+  static UseItem(oldIndex : number): void;
+  static CompleteUpdate(): void;
 
   static create(): void;
   static pop(): void;
