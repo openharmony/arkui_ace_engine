@@ -182,7 +182,6 @@ void ScrollPattern::ResetPosition()
 {
     currentOffset_ = 0.0f;
     lastOffset_ = 0.0f;
-    UpdateScrollBarOffset();
 }
 
 bool ScrollPattern::IsAtTop() const
