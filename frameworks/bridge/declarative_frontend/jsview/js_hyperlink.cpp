@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,66 +15,63 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 
-#include "base/log/ace_trace.h"
-#include "core/components/hyperlink/hyperlink_component.h"
-#include "core/components/text/text_component.h"
-#include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
+#include "frameworks/bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model.h"
+#include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<HyperlinkModel> HyperlinkModel::instance_ = nullptr;
+
+HyperlinkModel* HyperlinkModel::GetInstance()
+{
+    if (!instance_) {
+#ifdef NG_BUILD
+        instance_.reset(new NG::HyperlinkModelNG());
+#else
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::HyperlinkModelNG());
+        } else {
+            instance_.reset(new Framework::HyperlinkModelImpl());
+        }
+#endif
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
-void JSHyperlink::Create(const JSCallbackInfo& args)
+void JSHyperlink::JSBind(BindingTarget globalObj)
 {
-    std::list<RefPtr<Component>> children;
-    RefPtr<OHOS::Ace::HyperlinkComponent> component = AceType::MakeRefPtr<HyperlinkComponent>(children);
-    if (args.Length() == 1) {
-        std::string address;
-        if (ParseJsString(args[0], address)) {
-            component->SetAddress(address);
-        }
-    } else if (args.Length() == 2) {
-        std::string address;
-        if (ParseJsString(args[0], address)) {
-            component->SetAddress(address);
-        }
-        std::string summary;
-        if (ParseJsString(args[1], summary)) {
-            component->SetSummary(summary);
-        }
-    }
+    JSClass<JSHyperlink>::Declare("Hyperlink");
 
-    ViewStackProcessor::GetInstance()->Push(component);
-    JSInteractableView::SetFocusable(false);
-    JSInteractableView::SetFocusNode(true);
+    MethodOptions opt = MethodOptions::NONE;
+    JSClass<JSHyperlink>::StaticMethod("create", &JSHyperlink::Create, opt);
+    JSClass<JSHyperlink>::StaticMethod("color", &JSHyperlink::SetColor, opt);
+    JSClass<JSHyperlink>::StaticMethod("pop", &JSHyperlink::Pop);
+
+    JSClass<JSHyperlink>::Inherit<JSViewAbstract>();
+    JSClass<JSHyperlink>::Inherit<JSInteractableView>();
+    JSClass<JSHyperlink>::Bind(globalObj);
 }
 
-void JSHyperlink::Pop()
+void JSHyperlink::Create(const JSCallbackInfo& args)
 {
-    auto hyperlink =
-        AceType::DynamicCast<OHOS::Ace::HyperlinkComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    JSContainerBase::Pop();
-    if (hyperlink) {
-        std::string summary = hyperlink->GetSummary();
-        std::list<RefPtr<Component>> children = hyperlink->GetChildren();
-        std::list<RefPtr<Component>> flexChild;
-        if (!summary.empty()) {
-            RefPtr<OHOS::Ace::TextComponent> text = AceType::MakeRefPtr<TextComponent>(summary);
-            flexChild.emplace_back(text);
-        }
-        for (const auto& child : children) {
-            flexChild.emplace_back(child);
-        }
-        RefPtr<OHOS::Ace::ColumnComponent> columnComponent =
-            AceType::MakeRefPtr<OHOS::Ace::ColumnComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, flexChild);
-        columnComponent->SetMainAxisSize(MainAxisSize::MIN);
-        columnComponent->SetCrossAxisSize(CrossAxisSize::MIN);
-        hyperlink->ClearChildren();
-        hyperlink->AppendChild(columnComponent);
+    std::string address;
+    ParseJsString(args[0], address);
+
+    std::string summary;
+    if (args.Length() == 2) {
+        ParseJsString(args[1], summary);
     }
+
+    HyperlinkModel::GetInstance()->Create(address, summary);
 }
 
 void JSHyperlink::SetColor(const JSCallbackInfo& info)
@@ -87,34 +84,17 @@ void JSHyperlink::SetColor(const JSCallbackInfo& info)
     if (!ParseJsColor(info[0], color)) {
         return;
     }
-    auto component = GetComponent();
-    if (!component) {
-        LOGE("component is not valid");
+    HyperlinkModel::GetInstance()->SetColor(color);
+}
+
+void JSHyperlink::Pop()
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSViewAbstract::Pop();
         return;
     }
-    component->SetColor(color);
-}
 
-void JSHyperlink::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSHyperlink>::Declare("Hyperlink");
-
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSHyperlink>::StaticMethod("create", &JSHyperlink::Create, opt);
-    JSClass<JSHyperlink>::StaticMethod("color", &JSHyperlink::SetColor, opt);
-    JSClass<JSHyperlink>::StaticMethod("pop", &JSHyperlink::Pop, opt);
-    JSClass<JSHyperlink>::Inherit<JSContainerBase>();
-    JSClass<JSHyperlink>::Inherit<JSViewAbstract>();
-    JSClass<JSHyperlink>::Bind<>(globalObj);
-}
-
-RefPtr<HyperlinkComponent> JSHyperlink::GetComponent()
-{
-    auto stack = ViewStackProcessor::GetInstance();
-    if (!stack) {
-        return nullptr;
-    }
-    return AceType::DynamicCast<HyperlinkComponent>(stack->GetMainComponent());
+    HyperlinkModel::GetInstance()->Pop();
 }
 
 } // namespace OHOS::Ace::Framework

@@ -57,6 +57,7 @@ namespace {
 const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
+const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 static int32_t g_instanceId = 0;
 
 FrontendType GetFrontendType(const std::string& frontendType)
@@ -359,7 +360,8 @@ void AceAbility::OnStart(const Want& want)
             [this](const std::string& address) {
                 AAFwk::Want want;
                 want.AddEntity(Want::ENTITY_BROWSER);
-                want.SetParam("address", address);
+                want.SetUri(address);
+                want.SetAction(ACTION_VIEWDATA);
                 this->StartAbility(want);
             }),
         false, useNewPipe);
