@@ -24,7 +24,9 @@ namespace OHOS::Ace::NG {
 void LinePainter::DrawLine(RSCanvas& canvas, const LinePaintProperty& linePaintProperty, OffsetF offset)
 {
     RSPen pen;
-    ShapePainter::SetPan(pen, linePaintProperty);
+    if (!ShapePainter::SetPen(pen, linePaintProperty)) {
+        return;
+    }
     canvas.AttachPen(pen);
     PointF startPoint_ = PointF(linePaintProperty.GetStartPointValue().first.ConvertToPx(),
         linePaintProperty.GetStartPointValue().second.ConvertToPx());

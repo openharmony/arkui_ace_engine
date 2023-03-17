@@ -21,8 +21,19 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
-void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProperty)
+bool ShapePainter::SetPen(RSPen& pen, const ShapePaintProperty& shapePaintProperty)
 {
+    if (shapePaintProperty.HasStrokeWidth()) {
+        // Return false will not call 'AttachPen'.
+        // The shape will be stroked once 'AttachPen' has been called even if the strokeWidth is zero.
+        if (NearZero(shapePaintProperty.GetStrokeWidth()->Value())) {
+            return false;
+        }
+        pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.GetStrokeWidthValue().ConvertToPx()));
+    } else {
+        pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
+    }
+
     if (shapePaintProperty.HasAntiAlias()) {
         pen.SetAntiAlias(shapePaintProperty.GetAntiAliasValue());
     } else {
@@ -55,12 +66,6 @@ void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProper
         pen.SetJoinStyle(RSPen::JoinStyle::MITER_JOIN);
     }
 
-    if (shapePaintProperty.HasStrokeWidth()) {
-        pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.GetStrokeWidthValue().ConvertToPx()));
-    } else {
-        pen.SetWidth(static_cast<RSScalar>(shapePaintProperty.STOKE_WIDTH_DEFAULT.ConvertToPx()));
-    }
-
     Color strokeColor = Color::TRANSPARENT;
     if (shapePaintProperty.HasStroke()) {
         strokeColor = shapePaintProperty.GetStrokeValue();
@@ -87,6 +92,7 @@ void ShapePainter::SetPan(RSPen& pen, const ShapePaintProperty& shapePaintProper
     if (shapePaintProperty.HasStrokeMiterLimit()) {
         pen.SetMiterLimit(static_cast<RSScalar>(shapePaintProperty.GetStrokeMiterLimitValue()));
     }
+    return true;
 }
 
 void ShapePainter::SetBrush(RSBrush& brush, const ShapePaintProperty& shapePaintProperty)
