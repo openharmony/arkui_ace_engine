@@ -3852,6 +3852,14 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
 */
 // denotes a missing elemntId, this is the case during initial render
 const UndefinedElmtId = -1;
+// Create ID generator at TS/JS side to avoid hops to native
+class UniqueId {
+    static Make() {
+        return "autoid_" + (++UniqueId.currentId);
+    }
+}
+// Static properties shared by all instances
+UniqueId.currentId = Date.now();
 // Nativeview
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -4241,10 +4249,10 @@ class ViewPU extends NativeViewPartialUpdate {
             
             //idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
             idGenFunc = (item, index) => {
-                console.error(`OLEG idGenFunc, index:  ${index} item: ${item}`);
-                //return `${index}__${JSON.stringify(item)}`;
-                if ((item === null) || !(typeof item === 'object') ||
-                    ((typeof item === 'object') && Array.isArray(item))) {
+                // TODO clean up for final version
+                console.log(`OLEG/6 idGenFunc, index:  ${index} item: ${item}`);
+                if (!item || !(typeof item === 'object') || ((typeof item === 'object') && Array.isArray(item))) {
+                    //if (!item || !(typeof item === 'object')) {
                     console.error(`OLEG idGenFunc not object/array index:  ${index},  ${JSON.stringify(item)}`);
                     return `${index}__${JSON.stringify(item)}`;
                 }
@@ -4253,10 +4261,14 @@ class ViewPU extends NativeViewPartialUpdate {
                     // in several ForEach components
                     var propName = `__ace_id_${elmtId}__`;
                     if (!item.hasOwnProperty(propName)) {
-                        item[propName] = "autoid_" + ForEach.getNextId(elmtId);
-                        console.error(`OLEG idGenFunc, Object **NO** ${propName}, setting`);
+                        Object.defineProperty(item, propName, {
+                            value: UniqueId.Make(),
+                            writable: false,
+                            enumerable: false
+                        });
+                        console.error(`OLEG idGenFunc/6, Object **NO** ${propName.toString()}, setting`);
                     }
-                    console.error(`OLEG idGenFunc, ${propName}: ${item[propName]}`);
+                    console.error(`OLEG idGenFunc/6, ${propName.toString()}: ${item[propName]}`);
                     return item[propName];
                 }
             }; // idGenFunc

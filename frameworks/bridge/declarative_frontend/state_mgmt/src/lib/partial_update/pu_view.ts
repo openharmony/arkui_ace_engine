@@ -37,6 +37,16 @@ const UndefinedElmtId = -1;
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 
+// Create ID generator at TS/JS side to avoid hops to native
+class UniqueId {
+  // Static properties shared by all instances
+  static currentId = Date.now();
+  static Make() : string {
+    return "autoid_" + (++UniqueId.currentId);
+  }
+}
+
+
 // Nativeview
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -512,11 +522,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
       //idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
       idGenFunc = (item: any, index : number) => {
-        console.error(`OLEG idGenFunc, index:  ${index} item: ${item}`);
-        //return `${index}__${JSON.stringify(item)}`;
-
-        if ((item === null) || !(typeof item === 'object') ||
-          ((typeof item === 'object') && Array.isArray(item))) {
+        // TODO clean up for final version
+        console.log(`OLEG/6 idGenFunc, index:  ${index} item: ${item}`);
+        if (!item || !(typeof item === 'object') || ((typeof item === 'object') && Array.isArray(item))) {
           console.error(`OLEG idGenFunc not object/array index:  ${index},  ${JSON.stringify(item)}`);
           return `${index}__${JSON.stringify(item)}`
         } else {
@@ -524,10 +532,14 @@ abstract class ViewPU extends NativeViewPartialUpdate
           // in several ForEach components
           var propName = `__ace_id_${elmtId}__`;
           if (!item.hasOwnProperty(propName)) {
-            item[propName] = "autoid_" + ForEach.getNextId(elmtId);
-            console.error(`OLEG idGenFunc, Object **NO** ${propName}, setting`);
+            Object.defineProperty(item, propName, {
+              value: UniqueId.Make(),
+              writable: false,
+              enumerable: false
+            });
+            console.error(`OLEG idGenFunc/6, Object **NO** ${propName.toString()}, setting`);
           }
-          console.error(`OLEG idGenFunc, ${propName}: ${item[propName]}`);
+          console.error(`OLEG idGenFunc/6, ${propName.toString()}: ${item[propName]}`);
           return item[propName];
         }
       } // idGenFunc

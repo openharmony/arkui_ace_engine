@@ -54,12 +54,6 @@ const std::list<std::string>& ForEachModelNG::GetCurrentIdList(int32_t nodeId)
     return forEachNode->GetTempIds();
 }
 
-int32_t ForEachModelNG::GetNextId(int32_t nodeId)
-{
-    auto forEachNode = ForEachNode::GetOrCreateForEachNode(nodeId);
-    return forEachNode->GetNextId();
-}
-
 void ForEachModelNG::SetNewIds(std::list<std::string>&& newIds)
 {
     auto* stack = ViewStackProcessor::GetInstance();

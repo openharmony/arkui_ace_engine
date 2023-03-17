@@ -57,18 +57,12 @@ public:
         ids_ = std::move(ids);
     }
 
-    int32_t GetNextId()
-    {
-        return ++nextId_;
-    }
-
 private:
     std::list<std::string> ids_;
 
     // temp items use to compare each update.
     std::list<std::string> tempIds_;
     std::list<RefPtr<UINode>> tempChildren_;
-    int32_t nextId_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ForEachNode);
 };

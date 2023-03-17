@@ -30,7 +30,6 @@ public:
     static void Pop();
     static void GetIdArray(const JSCallbackInfo& info);
     static void SetIdArray(const JSCallbackInfo& info);
-    static void GetNextId(const JSCallbackInfo& info);
 
     // function to call before exec item generator function
     // signature is
