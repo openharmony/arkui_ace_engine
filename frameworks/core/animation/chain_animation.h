@@ -27,8 +27,8 @@
 
 namespace OHOS::Ace {
 enum class ChainEdgeEffect {
-    StretchFront,
-    StretchAll,
+    DEFAULT,
+    STRETCH,
 };
 
 class ChainAnimationNode : public AceType {
@@ -118,7 +118,7 @@ private:
     float intensity_ = DEFAULT_INTENSITY;
     float edgeEffectIntensity_ = DEFAULT_EDGE_EFFECT_INTENSITY;
     bool isOverDrag_ = false;
-    ChainEdgeEffect edgeEffect_ = ChainEdgeEffect::StretchFront;
+    ChainEdgeEffect edgeEffect_ = ChainEdgeEffect::DEFAULT;
 };
 } // namespace OHOS::Ace
 #endif

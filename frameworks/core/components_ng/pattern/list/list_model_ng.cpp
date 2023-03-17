@@ -91,6 +91,23 @@ void ListModelNG::SetChainAnimation(bool enableChainAnimation)
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ChainAnimation, enableChainAnimation);
 }
 
+void ListModelNG::SetChainAnimationOptions(const Dimension& minSpace, const Dimension& maxSpace, float conductivity,
+    float intensity, int32_t edgeEffect)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    ChainAnimationOptions options = {
+        .minSpace = minSpace,
+        .maxSpace = maxSpace,
+        .conductivity = conductivity,
+        .intensity = intensity,
+        .edgeEffect = edgeEffect,
+    };
+    pattern->SetChainAnimationOptions(options);
+}
+
 void ListModelNG::SetLanes(int32_t lanes)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes);

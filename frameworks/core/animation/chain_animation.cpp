@@ -86,7 +86,7 @@ void ChainAnimation::SetDelta(float delta, bool isOverDrag)
     if (isOverDrag) {
         factor *= edgeEffectIntensity_;
     }
-    if (edgeEffect_ == ChainEdgeEffect::StretchAll && isOverDrag) {
+    if (edgeEffect_ == ChainEdgeEffect::STRETCH && isOverDrag) {
         for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
             auto value = delta > 0 ? delta * factor : -delta * factor;
             nodes_[i]->SetDelta(value, static_cast<float>(duration));

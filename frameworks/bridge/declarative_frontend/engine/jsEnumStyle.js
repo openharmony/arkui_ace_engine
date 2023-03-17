@@ -489,6 +489,12 @@ var StickyStyle;
   StickyStyle[StickyStyle["Footer"] = 2] = "Footer";
 })(StickyStyle || (StickyStyle = {}));
 
+var ChainEdgeEffect;
+(function (ChainEdgeEffect) {
+  ChainEdgeEffect[ChainEdgeEffect["DEFAULT"] = 0] = "DEFAULT";
+  ChainEdgeEffect[ChainEdgeEffect["STRETCH"] = 1] = "STRETCH";
+})(ChainEdgeEffect || (ChainEdgeEffect = {}));
+
 var Week;
 (function (Week) {
   Week["Mon"] = 0b0000001;
