@@ -107,9 +107,12 @@ void AceContainer::Initialize()
         auto compatibleVersion = appInfo->GetMinAPIVersion();
         auto targetVersion = appInfo->GetTargetAPIVersion();
         auto releaseType = appInfo->GetApiReleaseType();
-        labelId_ = appInfo->GetLabelId();
+        labelId_ = hapModuleInfo->GetLabelId();
         bool enablePartialUpdate = hapModuleInfo->GetPartialUpdateFlag();
-        installationFree_ = hapModuleInfo->IsInstallationFree();
+        // only app should have menubar, card don't need
+        if (type_ == FrontendType::DECLARATIVE_JS) {
+            installationFree_ = appInfo->IsInstallationFree();
+        }
         useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage("", compatibleVersion, targetVersion,
             releaseType, !enablePartialUpdate);
     } else if (faContext) {
@@ -441,6 +444,9 @@ void AceContainer::InitializeCallback()
 
 void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, const AceRunArgs& runArgs)
 {
+    // for ohos container use newPipeline
+    SystemProperties::SetExtSurfaceEnabled(!runArgs.containerSdkPath.empty());
+
     auto context = Context::CreateContext(runArgs.projectModel == ProjectModel::STAGE, runArgs.appResourcesPath);
     auto aceContainer = AceType::MakeRefPtr<AceContainer>(instanceId, type, context);
     AceEngine::Get().AddContainer(aceContainer->GetInstanceId(), aceContainer);

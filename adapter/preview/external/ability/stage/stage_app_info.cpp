@@ -24,6 +24,7 @@ void StageAppInfo::Parse(const std::unique_ptr<JsonValue>& root)
     }
     apiReleaseType_ = root->GetString("apiReleaseType");
     bundleName_ = root->GetString("bundleName");
+    bundleType_ = root->GetString("bundleType");
     icon_ = root->GetString("icon");
     label_ = root->GetString("label");
     vendor_ = root->GetString("vendor");
@@ -100,5 +101,13 @@ uint32_t StageAppInfo::GetTargetAPIVersion() const
 uint32_t StageAppInfo::GetVersionCode() const
 {
     return versionCode_;
+}
+
+bool StageAppInfo::IsInstallationFree() const
+{
+    if (bundleType_ == "atomicService") {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace
