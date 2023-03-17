@@ -34,13 +34,13 @@ public:
     const std::string& GetCompileMode() const;
     const std::string& GetModuleName() const;
     bool GetPartialUpdateFlag() const;
-    bool IsInstallationFree() const;
+    uint32_t GetLabelId() const;
 
 private:
     std::string compileMode_;
     std::string moduleName_;
-    bool installationFree_ = false;
     bool isPartialUpdate_ = true;
+    uint32_t labelId_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(StageHapModuleInfo);
 };
 } // namespace OHOS::Ace
