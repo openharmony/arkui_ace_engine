@@ -640,6 +640,60 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RadioPatternTest019
+ * @tc.desc: Test OnTouchDown   OnTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest019, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitMouseEvent();
+    pattern->HandleMouseEvent(false);
+    ASSERT_EQ(pattern->isHover_, false);
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
+    EXPECT_TRUE(pattern->isTouch_);
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    EXPECT_FALSE(pattern->isTouch_);
+
+}
+
+/**
+ * @tc.name: RadioPatternTest020
+ * @tc.desc: Test OnTouchDown   OnTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest020, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitMouseEvent();
+    pattern->HandleMouseEvent(true);
+    EXPECT_TRUE(pattern->isHover_);
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::HOVER_TO_PRESS);
+    EXPECT_TRUE(pattern->isTouch_);
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS_TO_HOVER);
+    EXPECT_FALSE(pattern->isTouch_);
+
+}
+
+/**
  * @tc.name: RadioLayoutAlgorithmTest001
  * @tc.desc: Verify that RadioLayoutAlgorithm can correctly InitializeParam.
  * @tc.type: FUNC
