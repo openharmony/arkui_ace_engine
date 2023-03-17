@@ -34,6 +34,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+struct ChainAnimationOptions {
+    Dimension minSpace;
+    Dimension maxSpace;
+    float conductivity;
+    float intensity;
+    int32_t edgeEffect;
+};
 
 class ListPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
@@ -174,6 +181,7 @@ public:
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation(bool enable);
+    void SetChainAnimationOptions(const ChainAnimationOptions& options);
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
     void ProcessDragUpdate(float dragOffset, int32_t source);
@@ -258,6 +266,7 @@ private:
     RefPtr<ChainAnimation> chainAnimation_;
     bool dragFromSpring_ = false;
     RefPtr<SpringProperty> springProperty_;
+    std::optional<ChainAnimationOptions> chainAnimationOptions_;
 
     // multiSelectable
     bool multiSelectable_ = false;

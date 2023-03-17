@@ -130,6 +130,29 @@ void JSList::SetChainAnimation(bool enableChainAnimation)
     ListModel::GetInstance()->SetChainAnimation(enableChainAnimation);
 }
 
+void JSList::SetChainAnimationOptions(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        Dimension minSpace = 10.0_vp;
+        ParseJsDimensionVp(jsObj->GetProperty("minSpace"), minSpace);
+        Dimension maxSpace = 40.0_vp;
+        ParseJsDimensionVp(jsObj->GetProperty("maxSpace"), maxSpace);
+        float conductivity = 0.7f;
+        ConvertFromJSValue(jsObj->GetProperty("conductivity"), conductivity);
+        float intensity = 0.3f;
+        ConvertFromJSValue(jsObj->GetProperty("intensity"), intensity);
+        int32_t edgeEffect = 0;
+        ConvertFromJSValue(jsObj->GetProperty("edgeEffect"), edgeEffect);
+        ListModel::GetInstance()->SetChainAnimationOptions(minSpace, maxSpace, conductivity, intensity, edgeEffect);
+    }
+}
+
 void JSList::JsWidth(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsWidth(info);
@@ -507,6 +530,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("editMode", &JSList::SetEditMode);
     JSClass<JSList>::StaticMethod("cachedCount", &JSList::SetCachedCount);
     JSClass<JSList>::StaticMethod("chainAnimation", &JSList::SetChainAnimation);
+    JSClass<JSList>::StaticMethod("chainAnimationOptions", &JSList::SetChainAnimationOptions);
     JSClass<JSList>::StaticMethod("multiSelectable", &JSList::SetMultiSelectable);
     JSClass<JSList>::StaticMethod("alignListItem", &JSList::SetListItemAlign);
     JSClass<JSList>::StaticMethod("lanes", &JSList::SetLanes);

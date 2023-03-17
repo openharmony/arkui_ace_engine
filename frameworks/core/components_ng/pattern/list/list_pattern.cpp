@@ -698,20 +698,46 @@ void ListPattern::SetChainAnimation(bool enable)
         return;
     }
     if (!chainAnimation_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+        auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
         CHECK_NULL_VOID(listLayoutProperty);
         auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
         springProperty_ =
             AceType::MakeRefPtr<SpringProperty>(CHAIN_SPRING_MASS, CHAIN_SPRING_STIFFNESS, CHAIN_SPRING_DAMPING);
-        chainAnimation_ =
-            AceType::MakeRefPtr<ChainAnimation>(space, space * 2, space / 2, springProperty_); /* 2:double */
+        if (chainAnimationOptions_.has_value()) {
+            float maxSpace = chainAnimationOptions_.value().maxSpace.ConvertToPx();
+            float minSpace = chainAnimationOptions_.value().minSpace.ConvertToPx();
+            chainAnimation_ =
+                AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
+            chainAnimation_->SetConductivity(chainAnimationOptions_.value().conductivity);
+            chainAnimation_->SetIntensity(chainAnimationOptions_.value().intensity);
+            auto effect = chainAnimationOptions_.value().edgeEffect;
+            chainAnimation_->SetEdgeEffect(effect == 1 ? ChainEdgeEffect::STRETCH : ChainEdgeEffect::DEFAULT);
+        } else {
+            chainAnimation_ =
+                AceType::MakeRefPtr<ChainAnimation>(space, space * 2, space / 2, springProperty_); /* 2:double */
+        }
         chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_VOID(list);
             list->MarkDirtyNodeSelf();
         });
+    }
+}
+
+void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
+{
+    chainAnimationOptions_ = options;
+    if (chainAnimation_) {
+        auto listLayoutProperty = GetLayoutProperty<ListLayoutProperty>();
+        CHECK_NULL_VOID(listLayoutProperty);
+        auto space = listLayoutProperty->GetSpace().value_or(CHAIN_INTERVAL_DEFAULT).ConvertToPx();
+        float maxSpace = options.maxSpace.ConvertToPx();
+        float minSpace = options.minSpace.ConvertToPx();
+        chainAnimation_->SetSpace(space, maxSpace, minSpace);
+        chainAnimation_->SetConductivity(options.conductivity);
+        chainAnimation_->SetIntensity(options.intensity);
+        auto effect = options.edgeEffect;
+        chainAnimation_->SetEdgeEffect(effect == 1 ? ChainEdgeEffect::STRETCH : ChainEdgeEffect::DEFAULT);
     }
 }
 
