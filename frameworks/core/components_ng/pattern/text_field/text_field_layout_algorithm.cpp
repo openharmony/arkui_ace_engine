@@ -136,10 +136,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     if (pattern->IsTextArea()) {
         auto useHeight = static_cast<float>(paragraph_->GetHeight());
-        if (textFieldLayoutProperty->GetCalcLayoutConstraint() &&
-            textFieldLayoutProperty->GetCalcLayoutConstraint()->maxSize.has_value() &&
-            textFieldLayoutProperty->GetCalcLayoutConstraint()->maxSize.value().Height().has_value()) {
-            auto maxHeightSize = textFieldLayoutProperty->GetCalcLayoutConstraint()->maxSize.value()
+        const auto& calcLayoutConstraint = textFieldLayoutProperty->GetCalcLayoutConstraint();
+        if (calcLayoutConstraint &&
+            calcLayoutConstraint->maxSize.has_value() &&
+            calcLayoutConstraint->maxSize.value().Height().has_value()) {
+            auto maxHeightSize = calcLayoutConstraint->maxSize.value()
                 .Height().value().GetDimension();
             if (maxHeightSize.Unit() == DimensionUnit::PERCENT) {
                 idealHeight = maxHeightSize.ConvertToPxWithSize(contentConstraint.percentReference.Height());

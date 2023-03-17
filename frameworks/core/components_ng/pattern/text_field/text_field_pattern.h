@@ -514,7 +514,6 @@ public:
     }
 
     void UpdateEditingValueToRecord();
-    void InitScrollableEvent();
     void UpdateScrollBarOffset() override;
     bool UpdateCurrentOffset(float offset, int32_t source) override
     {
@@ -591,7 +590,6 @@ private:
     void AddScrollEvent();
     void OnTextAreaScroll(float offset);
     bool OnScrollCallback(float offset, int32_t source) override;
-    void FireOnScrollStart();
     void CheckScrollable();
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
