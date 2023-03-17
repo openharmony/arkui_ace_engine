@@ -116,6 +116,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     };
     panRecognizer_->SetOnActionCancel(actionCancel);
 
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    longPressRecognizer_->SetGestureHub(gestureEventHub_);
+#endif
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     if (!SequencedRecognizer_) {
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);

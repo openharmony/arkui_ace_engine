@@ -326,6 +326,12 @@ public:
         touchable_ = touchable;
     }
 
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    void SetPixelMap(RefPtr<PixelMap> pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+#endif
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
     void HandleOnDragUpdate(const GestureEvent& info);
@@ -372,6 +378,10 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     bool touchable_ = true;
+
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    RefPtr<PixelMap> pixelMap_;
+#endif
 };
 
 } // namespace OHOS::Ace::NG
