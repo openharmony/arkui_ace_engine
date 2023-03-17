@@ -25,11 +25,11 @@ class JSVideo : public JSViewAbstract, public JSInteractableView {
 public:
     using EventCallback = std::function<void(const std::string&)>;
     static void Create(const JSCallbackInfo& info);
-    static void JsMuted(bool isMuted);
-    static void JsAutoPlay(bool autoPlay);
-    static void JsControls(bool controls);
-    static void JsLoop(bool loop);
-    static void JsObjectFit(int32_t objectFit);
+    static void JsMuted(const JSCallbackInfo& info);
+    static void JsAutoPlay(const JSCallbackInfo& info);
+    static void JsControls(const JSCallbackInfo& info);
+    static void JsLoop(const JSCallbackInfo& info);
+    static void JsObjectFit(const JSCallbackInfo& info);
 
     static void JsOnStart(const JSCallbackInfo& args);
     static void JsOnPause(const JSCallbackInfo& args);
