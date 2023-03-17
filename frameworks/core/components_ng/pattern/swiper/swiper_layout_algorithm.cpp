@@ -35,6 +35,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr Dimension INDICATOR_PADDING = 8.0_vp;
+constexpr uint32_t INDICATOR_HAS_CHILD = 2;
 } // namespace
 
 void SwiperLayoutAlgorithm::AddToItemRange(int32_t index)
@@ -367,6 +368,9 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 void SwiperLayoutAlgorithm::PlaceDigitChild(
     const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty)
 {
+    if (indicatorWrapper->GetTotalChildCount() != INDICATOR_HAS_CHILD) {
+        return;
+    }
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutProperty);
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto indicatorGeometryNode = indicatorWrapper->GetGeometryNode();

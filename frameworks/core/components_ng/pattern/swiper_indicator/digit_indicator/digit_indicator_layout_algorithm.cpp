@@ -78,8 +78,9 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frontTextGeometryNode);
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(layoutGeometryNode);
-    auto frontCurrentOffset = OffsetF { INDICATOR_PADDING.Value(),(layoutGeometryNode->GetMarginFrameSize().Height() -
-        frontTextGeometryNode->GetMarginFrameSize().Height()) * 0.5 };
+    auto frontCurrentOffset = OffsetF{ INDICATOR_PADDING.ConvertToPx(),
+        (layoutGeometryNode->GetMarginFrameSize().Height() - frontTextGeometryNode->GetMarginFrameSize().Height()) *
+        0.5 };
     frontTextGeometryNode->SetMarginFrameOffset(frontCurrentOffset);
     frontTextWrapper->Layout();
 
@@ -87,10 +88,10 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(backTextWrapper);
     auto backTextGeometryNode = backTextWrapper->GetGeometryNode();
     CHECK_NULL_VOID(backTextGeometryNode);
-    auto backTextCurrentOffset = OffsetF { layoutGeometryNode->GetMarginFrameSize().Width() -
-        backTextGeometryNode->GetMarginFrameSize().Width() - INDICATOR_PADDING.Value(),
-        (layoutGeometryNode->GetMarginFrameSize().Height() -
-        backTextGeometryNode->GetMarginFrameSize().Height()) * 0.5 };
+    auto backTextCurrentOffset = OffsetF{ layoutGeometryNode->GetMarginFrameSize().Width() -
+        backTextGeometryNode->GetMarginFrameSize().Width() - INDICATOR_PADDING.ConvertToPx(),
+        (layoutGeometryNode->GetMarginFrameSize().Height() - backTextGeometryNode->GetMarginFrameSize().Height()) *
+        0.5};
     backTextGeometryNode->SetMarginFrameOffset(backTextCurrentOffset);
     backTextWrapper->Layout();
 }
