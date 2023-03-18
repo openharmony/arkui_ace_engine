@@ -107,6 +107,8 @@ public:
 
     std::string GetDotIndicatorStyle() const
     {
+        auto swiperParameters = GetSwiperParameters();
+        CHECK_NULL_RETURN(swiperParameters, "");
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("left", swiperParameters_->dimLeft.value_or(0.0_vp).ToString().c_str());
         jsonValue->Put("top", swiperParameters_->dimTop.value_or(0.0_vp).ToString().c_str());
@@ -126,6 +128,8 @@ public:
 
     std::string GetDigitIndicatorStyle() const
     {
+        auto swiperParameters = GetSwiperDigitalParameters();
+        CHECK_NULL_RETURN(swiperParameters, "");
         auto jsonValue = JsonUtil::Create(true);
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, "");
@@ -247,8 +251,8 @@ public:
     }
 
     SwiperIndicatorType GetIndicatorType() const;
-    std::shared_ptr<SwiperParameters> GetSwiperParameters();
-    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
+    std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
+    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -360,8 +364,8 @@ private:
 
     ChangeEventPtr changeEvent_;
 
-    std::shared_ptr<SwiperParameters> swiperParameters_;
-    std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
+    mutable std::shared_ptr<SwiperParameters> swiperParameters_;
+    mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
     SizeF maxChildSize_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
