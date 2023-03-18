@@ -400,21 +400,14 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Ellipse", JSEllipse::JSBind },
     { "Radio", JSRadio::JSBind },
     { "QRCode", JSQRCode::JSBind },
-#ifndef WEARABLE_PRODUCT
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
-#endif
-
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
-
-#ifdef ABILITY_COMPONENT_SUPPORTED
-    { "AbilityController", JSAbilityComponentController::JSBind },
-#endif
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
     { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
     { "CanvasGradient", JSCanvasGradient::JSBind },
@@ -430,9 +423,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
-#if defined(MODEL_COMPONENT_SUPPORTED)
-    { "Model", JSSceneView::JSBind },
-#endif
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {

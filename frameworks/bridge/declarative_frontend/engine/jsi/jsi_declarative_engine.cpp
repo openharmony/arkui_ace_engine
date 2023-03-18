@@ -1961,7 +1961,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     // preload exports and requireNative
     shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
     global->SetProperty(arkRuntime, "exports", exportsUtilObj);
-    global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
 
     // preload js enums
     bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
