@@ -123,6 +123,7 @@ private:
 
     float mainLengthLimit_ = 0.0f;
     float crossLengthLimit_ = 0.0f;
+    std::list<RefPtr<LayoutWrapper>> outOfLayoutChildren_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WrapLayoutAlgorithm);
 };
