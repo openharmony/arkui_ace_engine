@@ -413,6 +413,9 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
 
 void ListPattern::FireOnScrollStart()
 {
+    if (scrollAbort_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ListEventHub>();
@@ -420,17 +423,6 @@ void ListPattern::FireOnScrollStart()
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID_NOLOG(onScrollStart);
     onScrollStart();
-}
-
-void ListPattern::FireOnScrollStop()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<ListEventHub>();
-    CHECK_NULL_VOID(hub);
-    auto onScrollStop = hub->GetOnScrollStop();
-    CHECK_NULL_VOID_NOLOG(onScrollStop);
-    onScrollStop();
 }
 
 bool ListPattern::OnScrollCallback(float offset, int32_t source)
@@ -442,7 +434,6 @@ bool ListPattern::OnScrollCallback(float offset, int32_t source)
             item->SwiperReset();
         }
         if (animator_ && !animator_->IsStopped()) {
-            FireOnScrollStop();
             scrollAbort_ = true;
             animator_->Stop();
         }
@@ -507,6 +498,9 @@ void ListPattern::CheckRestartSpring()
     }
     auto edgeEffect = GetScrollEdgeEffect();
     if (!edgeEffect || !edgeEffect->IsSpringEffect()) {
+        return;
+    }
+    if (animator_ && animator_->IsRunning()) {
         return;
     }
     FireOnScrollStart();
@@ -589,9 +583,6 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     if (!animator_->IsStopped()) {
         scrollAbort_ = true;
         animator_->Stop();
-    }
-    if (scrollAbort_) {
-        FireOnScrollStop();
     }
     animator_->ClearInterpolators();
 
