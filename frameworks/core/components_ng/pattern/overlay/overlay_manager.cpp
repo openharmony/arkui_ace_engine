@@ -445,18 +445,6 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     }
 }
 
-void OverlayManager::EraseIndexerPopup(int32_t targetId)
-{
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_VOID(rootNode);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        rootNode->RemoveChild(customPopupMap_[targetId]);
-        customPopupMap_.erase(it);
-    }
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
 void OverlayManager::RemoveIndexerPopup()
 {
     if (customPopupMap_.empty()) {
@@ -465,23 +453,11 @@ void OverlayManager::RemoveIndexerPopup()
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
     for (const auto& popup : customPopupMap_) {
-        auto targetId = popup.first;
         auto popupNode = popup.second;
-        customPopupMap_.erase(targetId);
         rootNode->RemoveChild(popupNode);
     }
+    customPopupMap_.clear();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-}
-
-RefPtr<FrameNode> OverlayManager::GetIndexerPopup(int32_t targetId)
-{
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        return customPopupMap_[targetId];
-    }
-    return nullptr;
 }
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
@@ -752,9 +728,9 @@ bool OverlayManager::RemoveOverlay()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
+    RemoveIndexerPopup();
     auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
-        RemoveIndexerPopup();
         // stage node is at index 0, remove overlay at index 1
         auto overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(1));
         CHECK_NULL_RETURN(overlay, false);
