@@ -205,7 +205,8 @@ public:
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
-    virtual void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys) = 0;
+    virtual void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;

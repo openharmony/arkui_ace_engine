@@ -5183,16 +5183,30 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
 {
-    if (info.Length() != 2) {
-        LOGE("JsKeyboardShortcut: The arg is wrong, it is supposed to have 2 arguments");
+    // KeyboardShortcut only allows 2 or 3 params.
+    if (info.Length() < 2 || info.Length() > 3) {
+        LOGE("JsKeyboardShortcut: The arg is wrong, it is supposed to have 2 or 3 arguments");
         return;
     }
-    if (!info[0]->IsString() || !info[1]->IsArray()) {
+    if ((!info[0]->IsString() && !info[0]->IsNumber()) || !info[1]->IsArray()) {
         LOGE("JsKeyboardShortcut: The param type is invalid.");
-        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>());
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
         return;
     }
-    std::string value = info[0]->ToString();
+
+    std::string value;
+    if (info[0]->IsString()) {
+        value = info[0]->ToString();
+        if (value.empty() || value.size() > 1) {
+            LOGE("KeyboardShortcut value arg is wrong, return");
+            ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
+            return;
+        }
+    } else {
+        FunctionKey functionkey = static_cast<FunctionKey>(info[0]->ToNumber<int32_t>());
+        value = GetFunctionKeyName(functionkey);
+    }
+
     auto keysArray = JSRef<JSArray>::Cast(info[1]);
     size_t size = keysArray->Length();
     std::vector<CtrlKey> keys(size);
@@ -5203,7 +5217,19 @@ void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
             keys.emplace_back(static_cast<CtrlKey>(key->ToNumber<int32_t>()));
         }
     }
-    ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys);
+
+    // KeyboardShortcut allows 3 params, the third param is function callback.
+    if (info.Length() == 3 && info[2]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[2]));
+        auto onKeyboardShortcutAction = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onKeyboardShortcutAction");
+            func->ExecuteJS();
+        };
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, nullptr);
 }
 
 } // namespace OHOS::Ace::Framework

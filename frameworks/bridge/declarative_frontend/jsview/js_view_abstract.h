@@ -343,6 +343,54 @@ public:
         }
         return false;
     }
+
+    static std::string GetFunctionKeyName(FunctionKey functionkey)
+    {
+        switch (functionkey) {
+            case FunctionKey::ESC:
+                return "ESC";
+                break;
+            case FunctionKey::F1:
+                return "F1";
+                break;
+            case FunctionKey::F2:
+                return "F2";
+                break;
+            case FunctionKey::F3:
+                return "F3";
+                break;
+            case FunctionKey::F4:
+                return "F4";
+                break;
+            case FunctionKey::F5:
+                return "F5";
+                break;
+            case FunctionKey::F6:
+                return "F6";
+                break;
+            case FunctionKey::F7:
+                return "F7";
+                break;
+            case FunctionKey::F8:
+                return "F8";
+                break;
+            case FunctionKey::F9:
+                return "F9";
+                break;
+            case FunctionKey::F10:
+                return "F10";
+                break;
+            case FunctionKey::F11:
+                return "F11";
+                break;
+            case FunctionKey::F12:
+                return "F12";
+                break;
+            default:
+                return "";
+                break;
+        }
+    }
 };
 } // namespace OHOS::Ace::Framework
 #endif // JS_VIEW_ABSTRACT_H
