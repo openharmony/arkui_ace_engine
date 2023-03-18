@@ -211,14 +211,13 @@ void RefreshPattern::LoadingProgressReset()
 
 void RefreshPattern::OnExitAnimationFinish()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    TriggerFinish();
     if (customBuilder_) {
         CustomBuilderReset();
+        TriggerFinish();
         return;
     }
     ReplaceLoadingProgressNode();
+    TriggerFinish();
     CHECK_NULL_VOID(progressChild_);
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
@@ -758,11 +757,11 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
     auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
     if (customBuilder_ && layoutProperty->GetIsCustomBuilderExistValue(false)) {
         if (refreshingProp) {
-            isRefreshing_ = true;
             auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
             if (NearZero(static_cast<double>(customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height()))) {
                 return false;
             }
+            isRefreshing_ = true;
             scrollOffset_.SetY(distance + customBuilder_->GetGeometryNode()->GetMarginFrameSize().Height());
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
