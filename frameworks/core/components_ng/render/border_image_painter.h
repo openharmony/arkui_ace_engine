@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,15 +30,8 @@ class BorderImagePainter : public virtual AceType {
     DECLARE_ACE_TYPE(BorderImagePainter, AceType);
 
 public:
-    BorderImagePainter(bool hasBorderWidthProperty, const BorderImageProperty& borderImageProperty,
-        const BorderWidthProperty& borderWidthProperty, const SizeF& paintSize, const RSImage& image, double dipscale)
-        : hasBorderWidthProperty_(hasBorderWidthProperty), borderImageProperty_(borderImageProperty),
-          borderWidthProperty_(borderWidthProperty), paintSize_(paintSize), rsImage(image), dipscale_(dipscale)
-    {
-        imageWidth_ = rsImage.GetWidth();
-        imageHeight_ = rsImage.GetHeight();
-        InitPainter();
-    }
+    BorderImagePainter(BorderImageProperty bdImageProps, const std::unique_ptr<BorderWidthProperty>& widthProp,
+        const SizeF& paintSize, const RSImage& image, double dipScale);
     ~BorderImagePainter() override = default;
     void PaintBorderImage(const OffsetF& offset, RSCanvas& canvas) const;
 
@@ -56,11 +49,11 @@ private:
     void InitBorderImageOutset();
     void ParseNegativeNumberToZeroOrCeil(double& value);
 
-    bool hasBorderWidthProperty_;
+    bool hasWidthProp_  = false;
     BorderImageProperty borderImageProperty_;
-    BorderWidthProperty borderWidthProperty_;
+    BorderWidthProperty widthProp_;
     SizeF paintSize_;
-    RSImage rsImage;
+    RSImage image_;
 
     double imageWidth_ = 0.0;
     double imageHeight_ = 0.0;
@@ -69,7 +62,7 @@ private:
     double borderCenterWidth_ = 0.0;
     double borderCenterHeight_ = 0.0;
 
-    double dipscale_ = 0.0;
+    double dipScale_ = 0.0;
     double leftWidth_ = 0.0;
     double topWidth_ = 0.0;
     double rightWidth_ = 0.0;
