@@ -138,6 +138,7 @@ RefPtr<FrameNode> PanelPatternTestNg::CreateSlidingPanel(const TestProperty& tes
 }
 
 /**
+ * 
  * @tc.name: PanelPatternTest001
  * @tc.desc: Verify whether the layout property, layoutAlgorithm and event functions are created.
  * @tc.type: FUNC
