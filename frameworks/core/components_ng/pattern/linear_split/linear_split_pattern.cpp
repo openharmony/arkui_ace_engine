@@ -83,6 +83,7 @@ void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
     if (!resizeable_) {
         return;
     }
+    isDraged_ = true;
 
     for (std::size_t i = 0; i < splitRects_.size(); i++) {
         if (splitRects_[i].IsInRegion(Point(localOffset.GetX(), localOffset.GetY()))) {
@@ -96,7 +97,6 @@ void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
     }
 
     isDragedMoving_ = true;
-    isDraged_ = true;
 
     if (splitType_ == SplitType::ROW_SPLIT) {
         preOffset_ = xOffset;
@@ -211,13 +211,21 @@ void LinearSplitPattern::HandlePanEnd(const GestureEvent& info)
     mouseDragedSplitIndex_ = DEFAULT_DRAG_INDEX;
 
     if (info.GetSourceDevice() == SourceType::MOUSE) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto frame = GetHost();
-        CHECK_NULL_VOID(frame);
-        auto frameId = frame->GetId();
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
-        pipeline->FreeMouseStyleHoldNode(frameId);
+        const auto& globalLocation = info.GetGlobalLocation();
+        auto localOffset = OffsetF(static_cast<float>(globalLocation.GetX()) - parentOffset_.GetX(),
+            static_cast<float>(globalLocation.GetY()) - parentOffset_.GetY());
+        GetdragedSplitIndexOrIsMoving(Point(localOffset.GetX(), localOffset.GetY()));
+        if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto frame = GetHost();
+            CHECK_NULL_VOID(frame);
+            auto frameId = frame->GetId();
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+            pipeline->FreeMouseStyleHoldNode(frameId);
+        }
+        dragedSplitIndex_ = DEFAULT_DRAG_INDEX;
+        isDragedMoving_ = false;
     }
 }
 
@@ -265,7 +273,9 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
         if (mouseDragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
             mouseDragedSplitIndex_ = dragedSplitIndex_;
         }
-        pipeline->ChangeMouseStyle(frameId, GetMouseFormat());
+        if (mouseDragedSplitIndex_ != DEFAULT_DRAG_INDEX) {
+            pipeline->ChangeMouseStyle(frameId, GetMouseFormat());
+        }
         return;
     }
     auto localOffset = OffsetF(static_cast<float>(globalLocation.GetX()) - parentOffset_.GetX(),
@@ -275,8 +285,10 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
     for (std::size_t i = 0; i < splitRects_.size(); i++) {
         if (splitRects_[i].IsInRegion(Point(localOffset.GetX(), localOffset.GetY()))) {
             mouseDragedSplitIndex_ = i;
-            dragedSplitIndex_ = i;
-            isDragedMoving_ = true;
+            if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+                dragedSplitIndex_ = i;
+                isDragedMoving_ = true;
+            }
             break;
         }
     }
@@ -284,7 +296,9 @@ void LinearSplitPattern::HandleMouseEvent(MouseInfo& info)
     if (mouseDragedSplitIndex_ != DEFAULT_DRAG_INDEX) {
         pipeline->ChangeMouseStyle(frameId, GetMouseFormat());
     } else {
-        pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        if (dragedSplitIndex_ == DEFAULT_DRAG_INDEX) {
+            pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        }
     }
     pipeline->FreeMouseStyleHoldNode(frameId);
 }
