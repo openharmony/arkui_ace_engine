@@ -449,7 +449,7 @@ bool ViewFunctions::HasMeasure() const
 
 void ViewFunctions::ExecuteAboutToBeDeleted()
 {
-    ExecuteFunction(jsAboutToBeDeletedFunc_, "aboutToDisappear");
+    ExecuteFunction(jsAboutToBeDeletedFunc_, "aboutToBeDeleted");
 }
 
 void ViewFunctions::ExecuteAboutToRender()

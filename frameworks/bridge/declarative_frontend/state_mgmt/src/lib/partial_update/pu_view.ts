@@ -49,8 +49,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
   readonly compareNumber = (a: number, b: number): number => {
     if (this.hasRecycleManager()) {
       stateMgmtConsole.info(`${this.constructor.name}[${this.id__()}]: sort by RecycleManager order`);
-      let ta = this.getRecycleManager().queryRecycleNodeCurrentElmtId(a);
-      let tb = this.getRecycleManager().queryRecycleNodeCurrentElmtId(b);
+      let ta = this.getRecycleManager().getRecycleNodeCurrentElmtId(a);
+      let tb = this.getRecycleManager().getRecycleNodeCurrentElmtId(b);
       return (ta < tb) ? -1 : (ta > tb) ? 1 : 0;
     }
     return (a < b) ? -1 : (a > b) ? 1 : 0;
@@ -504,30 +504,39 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.recycleManager = new RecycleManager;
   }
 
-  // recycle creation
+  /**
+   * @function observeRecycleComponentCreation
+   * @description custom node recycle creation
+   * @param name custom node name
+   * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+   * @return void
+   */
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
     // convert recycle update func to update func
     const compilerAssignedUpdateFunc: UpdateFunc = (element, isFirstRender) => {
       recycleUpdateFunc(element, isFirstRender, undefined)
     };
     let node: ViewPU;
-    if (!this.hasRecycleManager() || !(node = this.getRecycleManager().get(name))) {
+    // if there is no suitable recycle node, run a normal creation function.
+    if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
       stateMgmtConsole.info(`${this.constructor.name}[${this.id__()}]: cannot init node by recycle, crate new node`);
       this.observeComponentCreation(compilerAssignedUpdateFunc);
       return;
     }
     const currentElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const elmtId: number =  node.id__();
+    // store the current id and origin id, used for dirty element sort in {compareNumber}
     this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
-    recycleUpdateFunc(elmtId, /* is first rneder */ true, node);
+    recycleUpdateFunc(elmtId, /* is first render */ true, node);
     this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
   }
 
-  // add current js view to it's parent recycle manager
+  // add current JS object to it's parent recycle manager
   public recycleSelf(name: string): void {
     if (this.parent_) {
-      this.parent_.getOrCreateRecycleManager().add(name, this);
+      this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
     } else {
+      this.resetRecycleCustomNode();
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
     }
   }

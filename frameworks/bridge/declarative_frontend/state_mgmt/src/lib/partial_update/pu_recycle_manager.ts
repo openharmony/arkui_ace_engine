@@ -18,11 +18,14 @@
 */
 
 /**
- * Manage the js cache of all recycled node
+ * @class RecycleManager
+ * @description manage the JS object cached of current node
  */
 class RecycleManager {
+  // key: recycle node name
+  // value: recycle node JS object
   private cachedRecycleNodes: Map<string, Array<ViewPU>> = undefined
-  // key: recycleNode element ID
+  // key: recycle node element ID
   // value: current assigned ID, used for sort rerender dirty element nodes
   private recycleElmtIdMap: Map<number, number> = undefined
 
@@ -31,32 +34,34 @@ class RecycleManager {
     this.recycleElmtIdMap = new Map<number, number>();
   }
 
-  public add(name: string, node: ViewPU): void {
+  public pushRecycleNode(name: string, node: ViewPU): void {
     if (!this.cachedRecycleNodes.get(name)) {
       this.cachedRecycleNodes.set(name, new Array<ViewPU>());
     }
     this.cachedRecycleNodes.get(name)?.push(node);
   }
 
-  public get(name: string): ViewPU {
+  public popRecycleNode(name: string): ViewPU {
     return this.cachedRecycleNodes.get(name)?.pop();
-  }
-
-  public queryRecycleNodeCurrentElmtId(recycleElmtId: number): number {
-    if (this.recycleElmtIdMap.has(recycleElmtId)) {
-      return this.recycleElmtIdMap.get(recycleElmtId);
-    }
-    return recycleElmtId;
   }
 
   public setRecycleNodeCurrentElmtId(recycleElmtId: number, currentElmtId: number): void {
     this.recycleElmtIdMap.set(recycleElmtId, currentElmtId);
   }
 
+  public getRecycleNodeCurrentElmtId(recycleElmtId: number): number {
+    if (this.recycleElmtIdMap.has(recycleElmtId)) {
+      return this.recycleElmtIdMap.get(recycleElmtId);
+    }
+    return recycleElmtId;
+  }
+
+  // When parent JS View is deleted, release all cached nodes
   public purgeAllCachedRecycleNode(removedElmtIds: number[]): void {
     this.cachedRecycleNodes.forEach((nodes, _) => {
       nodes.forEach((node) => {
-        removedElmtIds.push(node.id__())
+        node.resetRecycleCustomNode();
+        removedElmtIds.push(node.id__());
       })
     })
     this.cachedRecycleNodes.clear();

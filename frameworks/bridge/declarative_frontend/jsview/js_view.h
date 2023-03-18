@@ -356,6 +356,13 @@ public:
 
     void JSGetProxiedItemRenderState(const JSCallbackInfo& info);
 
+    // Release the UINode hold on the JS object and trigger the delete phase.
+    void JSResetRecycleCustomNode(const JSCallbackInfo& info)
+    {
+        LOGI("JSResetRecycleCustomNode %d", recycleCustomNode_->RefCount());
+        recycleCustomNode_.Reset();
+    }
+
     bool isFullUpdate() const override
     {
         return false;
@@ -387,11 +394,6 @@ public:
         auto node = RefPtr<NG::CustomNodeBase>(recycleCustomNode_);
         recycleCustomNode_.Reset();
         return node;
-    }
-
-    void ResetRecycleCustomNode()
-    {
-        recycleCustomNode_.Reset();
     }
 
     const std::string& GetRecycleCustomNodeName()

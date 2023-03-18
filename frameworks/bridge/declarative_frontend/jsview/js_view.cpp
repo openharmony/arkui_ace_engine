@@ -633,6 +633,16 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         jsView->jsViewFunction_->ExecuteForceNodeRerender(nodeId);
     };
 
+    auto recycleCustomNode = [weak = AceType::WeakClaim(this)](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        recycleNode->ResetRecycle();
+        AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
+        jsView->SetRecycleCustomNode(recycleNode);
+        jsView->jsViewFunction_->ExecuteDisappear();
+        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+    };
+
     NodeInfoPU info = { .appearFunc = std::move(appearFunc),
         .renderFunc = std::move(renderFunction),
         .updateFunc = std::move(updateFunction),
@@ -641,6 +651,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
         .pageTransitionFunc = std::move(pageTransitionFunction),
         .reloadFunc = std::move(reloadFunction),
         .nodeUpdateFunc = std::move(nodeUpdateFunc),
+        .recycleCustomNodeFunc = recycleCustomNode,
         .hasMeasureOrLayout = jsViewFunction_->HasMeasure() || jsViewFunction_->HasLayout(),
         .isStatic = IsStatic(),
         .jsViewName = GetJSViewName() };
@@ -662,17 +673,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode()
     if (jsViewFunction_->HasLayout()) {
         info.layoutFunc = std::move(layoutFunc);
     }
-
-    auto recycleCustomNode = [weak = AceType::WeakClaim(this)](const RefPtr<NG::CustomNodeBase>& recycleNode) -> void {
-        auto jsView = weak.Upgrade();
-        CHECK_NULL_VOID(jsView);
-        recycleNode->ResetRecycle();
-        AceType::DynamicCast<NG::UINode>(recycleNode)->SetActive(false);
-        jsView->SetRecycleCustomNode(recycleNode);
-        jsView->jsViewFunction_->ExecuteDisappear();
-        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
-    };
-    info.recycleCustomNodeFunc = recycleCustomNode;
 
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
 #ifdef PREVIEW
@@ -809,6 +809,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("isFirstRender", &JSViewPartialUpdate::IsFirstRender);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
+    JSClass<JSViewPartialUpdate>::CustomMethod(
+        "resetRecycleCustomNode", &JSViewPartialUpdate::JSResetRecycleCustomNode);
     JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
     JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
 }

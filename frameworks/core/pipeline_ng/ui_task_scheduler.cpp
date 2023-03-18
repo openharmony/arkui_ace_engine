@@ -192,12 +192,12 @@ void UITaskScheduler::AddPredictTask(PredictTask&& task)
 
 void UITaskScheduler::FlushPredictTask(int64_t deadline)
 {
-    // decltype(predictTask_) tasks(std::move(predictTask_));
-    // for (const auto& task : tasks) {
-    //     if (task) {
-    //         task(deadline);
-    //     }
-    // }
+    decltype(predictTask_) tasks(std::move(predictTask_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task(deadline);
+        }
+    }
 }
 
 void UITaskScheduler::CleanUp()

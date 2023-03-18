@@ -131,11 +131,11 @@ void LazyForEachNode::PostIdleTask(std::list<int32_t>&& items)
             auto itemInfo = node->builder_->CreateChildByIndex(*item);
             node->builder_->SetCacheItemInfo(*item, itemInfo.first);
             auto uiNode = itemInfo.second;
-            // if (uiNode) {
-            //     ViewStackProcessor::GetInstance()->SetPredict(true);
-            //     uiNode->Build();
-            //     ViewStackProcessor::GetInstance()->SetPredict(false);
-            // }
+            if (uiNode) {
+                ViewStackProcessor::GetInstance()->SetPredict(true);
+                uiNode->Build();
+                ViewStackProcessor::GetInstance()->SetPredict(false);
+            }
             item++;
         }
     });

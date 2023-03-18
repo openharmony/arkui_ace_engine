@@ -3877,8 +3877,8 @@ class ViewPU extends NativeViewPartialUpdate {
         this.compareNumber = (a, b) => {
             if (this.hasRecycleManager()) {
                 
-                let ta = this.getRecycleManager().queryRecycleNodeCurrentElmtId(a);
-                let tb = this.getRecycleManager().queryRecycleNodeCurrentElmtId(b);
+                let ta = this.getRecycleManager().getRecycleNodeCurrentElmtId(a);
+                let tb = this.getRecycleManager().getRecycleNodeCurrentElmtId(b);
                 return (ta < tb) ? -1 : (ta > tb) ? 1 : 0;
             }
             return (a < b) ? -1 : (a > b) ? 1 : 0;
@@ -4240,30 +4240,39 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         this.recycleManager = new RecycleManager;
     }
-    // recycle creation
+    /**
+     * @function observeRecycleComponentCreation
+     * @description custom node recycle creation
+     * @param name custom node name
+     * @param recycleUpdateFunc custom node recycle update which can be converted to a normal update function
+     * @return void
+     */
     observeRecycleComponentCreation(name, recycleUpdateFunc) {
         // convert recycle update func to update func
         const compilerAssignedUpdateFunc = (element, isFirstRender) => {
             recycleUpdateFunc(element, isFirstRender, undefined);
         };
         let node;
-        if (!this.hasRecycleManager() || !(node = this.getRecycleManager().get(name))) {
+        // if there is no suitable recycle node, run a normal creation function.
+        if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
             
             this.observeComponentCreation(compilerAssignedUpdateFunc);
             return;
         }
         const currentElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const elmtId = node.id__();
+        // store the current id and origin id, used for dirty element sort in {compareNumber}
         this.getRecycleManager().setRecycleNodeCurrentElmtId(elmtId, currentElmtId);
-        recycleUpdateFunc(elmtId, /* is first rneder */ true, node);
+        recycleUpdateFunc(elmtId, /* is first render */ true, node);
         this.updateFuncByElmtId.set(elmtId, compilerAssignedUpdateFunc);
     }
-    // add current js view to it's parent recycle manager
+    // add current JS object to it's parent recycle manager
     recycleSelf(name) {
         if (this.parent_) {
-            this.parent_.getOrCreateRecycleManager().add(name, this);
+            this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
         }
         else {
+            this.resetRecycleCustomNode();
             stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
         }
     }
@@ -4406,40 +4415,45 @@ class ViewPU extends NativeViewPartialUpdate {
 * all definitions in this file are framework internal
 */
 /**
- * Manage the js cache of all recycled node
+ * @class RecycleManager
+ * @description manage the JS object cached of current node
  */
 class RecycleManager {
     constructor() {
+        // key: recycle node name
+        // value: recycle node JS object
         this.cachedRecycleNodes = undefined;
-        // key: recycleNode element ID
+        // key: recycle node element ID
         // value: current assigned ID, used for sort rerender dirty element nodes
         this.recycleElmtIdMap = undefined;
         this.cachedRecycleNodes = new Map();
         this.recycleElmtIdMap = new Map();
     }
-    add(name, node) {
+    pushRecycleNode(name, node) {
         var _a;
         if (!this.cachedRecycleNodes.get(name)) {
             this.cachedRecycleNodes.set(name, new Array());
         }
         (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.push(node);
     }
-    get(name) {
+    popRecycleNode(name) {
         var _a;
         return (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
     }
-    queryRecycleNodeCurrentElmtId(recycleElmtId) {
+    setRecycleNodeCurrentElmtId(recycleElmtId, currentElmtId) {
+        this.recycleElmtIdMap.set(recycleElmtId, currentElmtId);
+    }
+    getRecycleNodeCurrentElmtId(recycleElmtId) {
         if (this.recycleElmtIdMap.has(recycleElmtId)) {
             return this.recycleElmtIdMap.get(recycleElmtId);
         }
         return recycleElmtId;
     }
-    setRecycleNodeCurrentElmtId(recycleElmtId, currentElmtId) {
-        this.recycleElmtIdMap.set(recycleElmtId, currentElmtId);
-    }
+    // When parent JS View is deleted, release all cached nodes
     purgeAllCachedRecycleNode(removedElmtIds) {
         this.cachedRecycleNodes.forEach((nodes, _) => {
             nodes.forEach((node) => {
+                node.resetRecycleCustomNode();
                 removedElmtIds.push(node.id__());
             });
         });
