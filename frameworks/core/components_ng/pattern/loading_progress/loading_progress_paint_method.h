@@ -72,8 +72,11 @@ public:
                 loadingProgressModifier_->StartTransToRecycleAnimation();
                 break;
             case REFRESH_STATE_RESYCLE:
-            case REFRESH_STATE_FADEAWAY:
                 loadingProgressModifier_->StartRecycle();
+                break;
+            case REFRESH_STATE_FADEAWAY:
+                loadingProgressModifier_->ChangeRefreshFollowData(
+                    paintProperty->GetRefreshFadeAwayRatio().value_or(0.0f));
                 break;
             default:;
         }

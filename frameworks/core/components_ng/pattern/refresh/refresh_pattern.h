@@ -108,6 +108,7 @@ private:
     void OnExitAnimationFinish();
     void ResetLoadingProgressColor();
     float GetFollowRatio();
+    float GetFadeAwayRatio();
     float GetCustomBuilderOpacityRatio();
     float GetScrollOffset(float delta);
     bool ScrollComponentReactInMove();
@@ -120,6 +121,7 @@ private:
     void CustomBuilderRefreshingAnimation();
     void ScrollableNodeResetAnimation();
     void OnAppearAnimationFinish();
+    void UpdateLoadingMarginTop(float top);
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;

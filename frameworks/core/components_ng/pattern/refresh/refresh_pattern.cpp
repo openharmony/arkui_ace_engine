@@ -18,6 +18,8 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/refresh/refresh_theme.h"
@@ -312,11 +314,7 @@ void RefreshPattern::HandleDragUpdate(float delta)
     if (scrollOffset_.GetY() > triggerLoadingDistance_) {
         auto refreshFollowRadio = GetFollowRatio();
         UpdateLoadingProgress(STATE_PROGRESS_DRAG, refreshFollowRadio);
-        auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
-        CHECK_NULL_VOID(progressLayoutProperty);
-        MarginProperty marginProperty;
-        marginProperty.top = CalcLength(scrollOffset_.GetY());
-        progressLayoutProperty->UpdateMargin(marginProperty);
+        UpdateLoadingMarginTop(scrollOffset_.GetY());
         auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
         CHECK_NULL_VOID(progressPaintProperty);
         progressPaintProperty->UpdateRefreshFollowRatio(refreshFollowRadio);
@@ -334,17 +332,14 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     auto scale = std::clamp(ratio, 0.0f, 1.0f);
-    MarginProperty marginProperty;
     switch (state) {
         case STATE_PROGRESS_LOADING:
             scale = 0.0f;
-            marginProperty.top = CalcLength(triggerLoadingDistance_);
-            progressLayoutProperty->UpdateMargin(marginProperty);
+            UpdateLoadingMarginTop(triggerLoadingDistance_);
             break;
         case STATE_PROGRESS_RECYCLE:
             scale = 1.0f;
-            marginProperty.top = CalcLength(TRIGGER_REFRESH_DISTANCE.ConvertToPx());
-            progressLayoutProperty->UpdateMargin(marginProperty);
+            UpdateLoadingMarginTop(TRIGGER_REFRESH_DISTANCE.ConvertToPx());
             break;
         default:;
     }
@@ -360,9 +355,28 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
 
 float RefreshPattern::GetFollowRatio()
 {
-    auto refreshFollowRadio = (scrollOffset_.GetY() - std::clamp(triggerLoadingDistance_, 0.0f,
-        static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) / TRIGGER_REFRESH_DISTANCE.ConvertToPx();
-    return std::clamp(static_cast<float>(refreshFollowRadio), 0.0f, 1.0f);
+    auto triggerLoading = std::clamp(triggerLoadingDistance_, 0.0f,
+        static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+    if (GreatNotEqual(TRIGGER_REFRESH_DISTANCE.ConvertToPx(), triggerLoading)) {
+        return (scrollOffset_.GetY() - triggerLoading) / (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoading);
+    }
+    return 1.0f;
+}
+
+float RefreshPattern::GetFadeAwayRatio()
+{
+    CHECK_NULL_RETURN(progressChild_, 0.0f);
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_RETURN(progressLayoutProperty, 0.0f);
+    auto& marginProperty = progressLayoutProperty->GetMarginProperty();
+    CHECK_NULL_RETURN(marginProperty, 0.0f);
+    auto triggerLoading = std::clamp(triggerLoadingDistance_, 0.0f,
+        static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()));
+    if (GreatNotEqual(TRIGGER_REFRESH_DISTANCE.ConvertToPx(), triggerLoading)) {
+        return (marginProperty->top->GetDimension().ConvertToPx() - triggerLoading) /
+               (TRIGGER_REFRESH_DISTANCE.ConvertToPx() - triggerLoading);
+    }
+    return 0.0f;
 }
 
 void RefreshPattern::TransitionPeriodAnimation()
@@ -380,7 +394,7 @@ void RefreshPattern::TransitionPeriodAnimation()
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     pipeline->FlushUITasks();
 
-    auto curve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
+    auto curve = AceType::MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
     AnimationOption option;
     option.SetDuration(FOLLOW_TO_RECYCLE_DURATION);
     option.SetCurve(curve);
@@ -393,9 +407,7 @@ void RefreshPattern::TransitionPeriodAnimation()
     });
     auto distance = TRIGGER_REFRESH_DISTANCE.ConvertToPx();
     scrollOffset_.SetY(distance);
-    MarginProperty marginProperty;
-    marginProperty.top = CalcLength(distance);
-    progressLayoutProperty->UpdateMargin(marginProperty);
+    UpdateLoadingMarginTop(distance);
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
@@ -429,6 +441,7 @@ void RefreshPattern::LoadingProgressExit()
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateRefreshAnimationState(static_cast<int32_t>(RefreshAnimationState::FADEAWAY));
+    progressPaintProperty->UpdateRefreshFadeAwayRatio(GetFadeAwayRatio());
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -445,6 +458,7 @@ void RefreshPattern::LoadingProgressExit()
 
     scrollOffset_.SetY(0.0f);
     UpdateLoadingProgress(STATE_PROGRESS_LOADING, 0.0f);
+    progressPaintProperty->UpdateRefreshFadeAwayRatio(0.0f);
     progressChild_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     pipeline->FlushUITasks();
     AnimationUtils::CloseImplicitAnimation();
@@ -767,5 +781,24 @@ bool RefreshPattern::OnDirtyLayoutWrapperSwap(
         }
     }
     return false;
+}
+
+void RefreshPattern::UpdateLoadingMarginTop(float top)
+{
+    if (LessNotEqual(top, 0.0)) {
+        return;
+    }
+    CHECK_NULL_VOID(progressChild_);
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    MarginProperty marginProperty;
+    if (progressLayoutProperty->GetMarginProperty()) {
+        const auto& originMargin = (*progressLayoutProperty->GetMarginProperty());
+        marginProperty.left = originMargin.left;
+        marginProperty.right = originMargin.right;
+        marginProperty.bottom = originMargin.bottom;
+    }
+    marginProperty.top = CalcLength(top);
+    progressLayoutProperty->UpdateMargin(marginProperty);
 }
 } // namespace OHOS::Ace::NG
