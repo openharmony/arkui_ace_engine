@@ -30,6 +30,11 @@ public:
 
     bool IsScrollable() const override;
 
+    bool HasRange() const override
+    {
+        return true;
+    }
+
     AccessibilityValue GetAccessibilityValue() const override;
 
 private:

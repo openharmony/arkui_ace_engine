@@ -46,7 +46,10 @@ public:
     RefPtr<ScrollBarAccessibilityProperty> scrollBarAccessibilityProperty_;
 };
 
-void ScrollBarAccessibilityPropertyTestNg::SetUp() {}
+void ScrollBarAccessibilityPropertyTestNg::SetUp()
+{
+    ASSERT_TRUE(InitScrollBarTestNg());
+}
 
 void ScrollBarAccessibilityPropertyTestNg::TearDown()
 {
@@ -76,7 +79,6 @@ bool ScrollBarAccessibilityPropertyTestNg::InitScrollBarTestNg()
  */
 HWTEST_F(ScrollBarAccessibilityPropertyTestNg, ScrollBarAccessibilityPropertyIsScrollable001, TestSize.Level1)
 {
-    ASSERT_TRUE(InitScrollBarTestNg());
     EXPECT_FALSE(scrollBarAccessibilityProperty_->IsScrollable());
 
     scrollBarPattern_->scrollableDistance_ = SCROLLABLE_DISTANCE;
@@ -90,7 +92,7 @@ HWTEST_F(ScrollBarAccessibilityPropertyTestNg, ScrollBarAccessibilityPropertyIsS
  */
 HWTEST_F(ScrollBarAccessibilityPropertyTestNg, ScrollBarAccessibilityPropertyGetAccessibilityValue001, TestSize.Level1)
 {
-    ASSERT_TRUE(InitScrollBarTestNg());
+    EXPECT_TRUE(scrollBarAccessibilityProperty_->HasRange());
     AccessibilityValue result = scrollBarAccessibilityProperty_->GetAccessibilityValue();
     EXPECT_EQ(result.min, MIN_DISTANCE);
     EXPECT_EQ(result.max, MIN_DISTANCE);
