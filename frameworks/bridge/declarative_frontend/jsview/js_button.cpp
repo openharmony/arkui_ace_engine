@@ -639,7 +639,19 @@ void JSButton::JsSize(const JSCallbackInfo& info)
         LOGE("arg is not Object or String.");
         return;
     }
-
+    
+    if (Container::IsCurrentUseNewPipeline()) {
+        JSRef<JSObject> sizeObj = JSRef<JSObject>::Cast(info[0]);
+        Dimension width;
+        if (ParseJsDimensionVp(sizeObj->GetProperty("width"), width)) {
+            NG::ViewAbstract::SetWidth(NG::CalcLength(width));
+        }
+        Dimension height;
+        if (ParseJsDimensionVp(sizeObj->GetProperty("height"), height)) {
+            NG::ViewAbstract::SetHeight(NG::CalcLength(height));
+        }
+        return;
+    }
     auto stack = ViewStackProcessor::GetInstance();
     auto buttonComponent = AceType::DynamicCast<ButtonComponent>(stack->GetMainComponent());
     auto option = stack->GetImplicitAnimationOption();
