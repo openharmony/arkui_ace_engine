@@ -57,6 +57,8 @@ ohos_unittest("refresh_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/anticipate_curve.cpp",
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
+    "$ace_root/frameworks/core/animation/spring_curve.cpp",
+    "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
