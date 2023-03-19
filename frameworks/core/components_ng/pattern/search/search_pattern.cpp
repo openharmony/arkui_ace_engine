@@ -172,6 +172,7 @@ void SearchPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
+    InitFocusEvent(focusHub);
 }
 
 void SearchPattern::InitButtonAndImageClickEvent()
@@ -706,6 +707,47 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
     option.SetCurve(curve);
     AnimationUtils::Animate(
         option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+}
+
+void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+}
+
+void SearchPattern::HandleFocusEvent()
+{
+    LOGI("Search %{public}d on focus", GetHost()->GetId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->HandleFocusEvent();
+}
+
+void SearchPattern::HandleBlurEvent()
+{
+    LOGI("Search %{public}d on blur", GetHost()->GetId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->HandleBlurEvent();
 }
 
 bool SearchPattern::HandleInputChildOnFocus() const

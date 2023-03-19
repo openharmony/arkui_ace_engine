@@ -425,7 +425,7 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto height = height_ + focusPaintPadding * 2;
     auto width = width_ + focusPaintPadding * 2;
     auto radio = height / 2.0;
-    auto Rect = RectF(-focusPaintPadding, -focusPaintPadding, width, height);
+    auto Rect = RectF(offset_.GetX() - focusPaintPadding, offset_.GetY() - focusPaintPadding, width, height);
 
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radio, radio);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radio, radio);

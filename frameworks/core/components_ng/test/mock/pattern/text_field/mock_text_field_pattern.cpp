@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_v2/inspector/utils.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
@@ -108,4 +108,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
     return true;
 }
 void TextFieldPattern::UpdateScrollBarOffset() {}
+
+void TextFieldPattern::HandleBlurEvent() {}
+void TextFieldPattern::HandleFocusEvent() {}
 } // namespace OHOS::Ace::NG

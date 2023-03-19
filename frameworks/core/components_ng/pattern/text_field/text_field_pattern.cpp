@@ -232,6 +232,12 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 bool TextFieldPattern::HasFocus() const
 {
     auto focusHub = GetHost()->GetOrCreateFocusHub();
+
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        focusHub = parentFrameNode->GetOrCreateFocusHub();
+    }
+
     CHECK_NULL_RETURN(focusHub, false);
     return focusHub->IsCurrentFocus();
 }
@@ -261,14 +267,15 @@ void TextFieldPattern::UpdateCaretInfoToController() const
 // return: true if text rect offset will NOT be further changed by caret position
 bool TextFieldPattern::UpdateCaretPosition()
 {
-    // If the parent node is a Search, do not check whether it is a focus state.
-    if (!IsSearchParentNode()) {
-        auto focusHub = GetHost()->GetOrCreateFocusHub();
-        if (focusHub && !focusHub->IsCurrentFocus()) {
-            CloseSelectOverlay();
-            LOGW("Not on focus, cannot update caret");
-            return true;
-        }
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        focusHub = parentFrameNode->GetOrCreateFocusHub();
+    }
+    if (focusHub && !focusHub->IsCurrentFocus()) {
+        CloseSelectOverlay();
+        LOGW("Not on focus, cannot update caret");
+        return true;
     }
     // text input has higher priority than events such as mouse press
     if (caretUpdateType_ == CaretUpdateType::INPUT) {
@@ -820,30 +827,21 @@ void TextFieldPattern::HandleFocusEvent()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    bool focusEventConsumed = false;
-    if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
-        auto searchPattern = parentFrameNode->GetPattern<SearchPattern>();
-        CHECK_NULL_VOID(searchPattern);
-        focusEventConsumed = searchPattern->HandleInputChildOnFocus();
+    auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
+    caretUpdateType_ = CaretUpdateType::EVENT;
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (setSelectAllFlag_ && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
+        !textEditingValue_.GetWideText().empty()) {
+        setSelectAllFlag_ = false;
+        HandleOnSelectAll();
     }
-    if (!focusEventConsumed) {
-        auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-        UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
-        caretUpdateType_ = CaretUpdateType::EVENT;
-        auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        if (setSelectAllFlag_ && paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE &&
-            !textEditingValue_.GetWideText().empty()) {
-            setSelectAllFlag_ = false;
-            HandleOnSelectAll();
-        }
-        CloseSelectOverlay();
-        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                          : PROPERTY_UPDATE_MEASURE);
-    }
+    CloseSelectOverlay();
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    GetHost()->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
+                                                                                        : PROPERTY_UPDATE_MEASURE);
 }
 
 void TextFieldPattern::HandleSetSelection(int32_t start, int32_t end)
@@ -1416,6 +1414,12 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     LOGI("TextFieldPattern::HandleClickEvent");
     UpdateTextFieldManager(info.GetGlobalLocation(), frameRect_.Height());
     auto focusHub = GetHost()->GetOrCreateFocusHub();
+
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        focusHub = parentFrameNode->GetOrCreateFocusHub();
+    }
+
     if (!focusHub->IsFocusable()) {
         return;
     }
@@ -1639,6 +1643,12 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     isUsingMouse_ = false;
     LOGI("TextField %{public}d handle long press", GetHost()->GetId());
     auto focusHub = GetHost()->GetOrCreateFocusHub();
+
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        focusHub = parentFrameNode->GetOrCreateFocusHub();
+    }
+
     if (!focusHub->RequestFocusImmediately()) {
         LOGE("Long press request focus failed");
         StopTwinkling();
@@ -2017,6 +2027,12 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
 
     auto focusHub = GetHost()->GetOrCreateFocusHub();
+
+    if (IsSearchParentNode()) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        focusHub = parentFrameNode->GetOrCreateFocusHub();
+    }
+
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         LOGI("Handle mouse right click");
         if (info.GetAction() == MouseAction::PRESS) {
@@ -3142,7 +3158,7 @@ std::string TextFieldPattern::GetInputFilter() const
     return layoutProperty->GetInputFilterValue("");
 }
 
-bool TextFieldPattern::IsSearchParentNode()
+bool TextFieldPattern::IsSearchParentNode() const
 {
     auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
     return parentFrameNode && parentFrameNode->GetTag() == V2::SEARCH_ETS_TAG;
