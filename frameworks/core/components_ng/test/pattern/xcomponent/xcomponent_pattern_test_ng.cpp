@@ -454,8 +454,8 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     pattern->OnRebuildFrame(); // type="surface", IsSurfaceValid=false
     // goto other branch
     pattern->type_ = XCOMPONENT_COMPONENT_TYPE_VALUE;
-    pattern->XComponentSizeInit(0.0f, 0.0f); // IsSurfaceValid=false
-    pattern->OnRebuildFrame();               // type="component"
+    pattern->XComponentSizeInit(); // IsSurfaceValid=false
+    pattern->OnRebuildFrame();     // type="component"
 
     /**
      * @tc.steps: step3. call OnDirtyLayoutWrapperSwap adjust frameOffsetChanges, contentOffsetChanges and
