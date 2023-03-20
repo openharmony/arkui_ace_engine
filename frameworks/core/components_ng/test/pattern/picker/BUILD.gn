@@ -110,6 +110,7 @@ ohos_unittest("picker_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_column_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_layout_algorithm.cpp",
@@ -219,6 +220,7 @@ ohos_unittest("picker_pattern_test_ng") {
 
     # self
     "datepicker_pattern_test_ng.cpp",
+    "textpicker_accessibility_property_test_ng.cpp",
     "textpicker_pattern_test_ng.cpp",
     "timepicker_pattern_test_ng.cpp",
     "toss_animation_controller_test_ng.cpp",
