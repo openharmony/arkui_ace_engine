@@ -4251,9 +4251,7 @@ class ViewPU extends NativeViewPartialUpdate {
                     return `${index}__${JSON.stringify(item)}`;
                 }
                 else {
-                    // We need dynamic prop name if case "item" is used
-                    // in several ForEach components
-                    var propName = `__ace_id_${elmtId}__`;
+                    const propName = "__ace_id__";
                     if (!item.hasOwnProperty(propName)) {
                         Object.defineProperty(item, propName, {
                             value: UniqueId.get(),
