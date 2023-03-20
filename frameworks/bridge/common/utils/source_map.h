@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "base/memory/referenced.h"
@@ -47,6 +48,8 @@ public:
     static void ExtractKeyInfo(const std::string& sourceMap, std::vector<std::string>& sourceKeyInfo);
     void Init(const std::string& sourceMap);
     static void MergeInit(const std::string& sourceMap, RefPtr<RevSourceMap>& RevSourceMap);
+    static void StageModeSourceMapSplit(
+        const std::string& sourceMap, std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps);
 
 private:
     SourceMapInfo nowPos_;
