@@ -151,6 +151,13 @@ std::string JsiBaseUtils::GenerateSummaryBody(
     summaryBody.append("Error message: ");
     summaryBody.append(messageStr).append("\n");
 
+    if (error->HasProperty(runtime, "code")) {
+        shared_ptr<JsValue> code = error->GetProperty(runtime, "code");
+        std::string codeStr = code->ToString(runtime);
+        summaryBody.append("Error code: ");
+        summaryBody.append(codeStr).append("\n");
+    }
+
     shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
     std::string rawStack = stack->ToString(runtime);
     if (rawStack.empty()) {
