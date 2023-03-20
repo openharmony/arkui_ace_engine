@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
+#include "test/unittest/core/pipeline/common_constants.h"
+
 #include "core/common/event_manager.h"
-#include "core/pipeline_ng/test/unittest/common_constants.h"
 
 namespace OHOS::Ace {
 void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<RenderNode>& renderNode,
@@ -139,6 +140,8 @@ bool EventManager::DispatchRotationEvent(
 {
     return true;
 }
+
+void EventManager::DispatchKeyboardShortcut(const KeyEvent& event) {}
 
 void EventManager::ClearResults() {}
 

@@ -15,26 +15,16 @@
 
 #include "core/pipeline_ng/pipeline_context.h"
 
-#include "base/memory/ace_type.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/event/ace_events.h"
-#include "core/event/touch_event.h"
-
-#ifdef ENABLE_ROSEN_BACKEND
-#include "render_service_client/core/transaction/rs_transaction.h"
-#include "render_service_client/core/ui/rs_ui_director.h"
-
-#include "core/components_ng/render/adapter/rosen_window.h"
-#endif
-
 #include <algorithm>
 #include <cinttypes>
 #include <cstdint>
 #include <memory>
+
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/transaction/rs_transaction.h"
+#include "render_service_client/core/ui/rs_ui_director.h"
+#include "core/components_ng/render/adapter/rosen_window.h"
+#endif
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/ace_trace.h"
@@ -42,6 +32,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
+#include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
 #include "base/thread/task_executor.h"
@@ -56,16 +47,23 @@
 #include "core/common/window.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/event/ace_events.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"

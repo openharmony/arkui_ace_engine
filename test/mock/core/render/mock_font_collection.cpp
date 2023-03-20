@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/image/image_cache.h"
+#include "core/components_ng/render/font_collection.h"
 
-namespace OHOS::Ace {
-void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image) {}
-
-RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)
+namespace OHOS::Ace::NG {
+RefPtr<FontCollection> FontCollection::Current()
 {
     return nullptr;
 }
-
-void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj) {}
-
-RefPtr<ImageCache> ImageCache::Create()
-{
-    return nullptr;
-}
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG

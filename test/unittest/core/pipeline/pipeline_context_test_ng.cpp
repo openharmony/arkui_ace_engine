@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,18 +15,20 @@
 #include <cstdint>
 
 #include "gtest/gtest.h"
-#include "test/mock/core/common/mock_container.h"
-
-#include "core/components/common/layout/constants.h"
 
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
 
+#include "common_constants.h"
+#include "mock_schedule_task.h"
+#include "test/mock/core/common/mock_container.h"
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/common/ace_engine.h"
 #include "core/common/event_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -40,8 +42,6 @@
 #include "core/pipeline_ng/test/mock/mock_frontend.h"
 #include "core/pipeline_ng/test/mock/mock_task_executor.h"
 #include "core/pipeline_ng/test/mock/mock_window.h"
-#include "core/pipeline_ng/test/unittest/common_constants.h"
-#include "core/pipeline_ng/test/unittest/mock_schedule_task.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -52,7 +52,6 @@ constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t DEFAULT_INT0 = 0;
 constexpr int32_t DEFAULT_INT1 = 1;
 constexpr int32_t DEFAULT_INT3 = 3;
-constexpr int32_t DEFAULT_INT4 = 4;
 constexpr int32_t DEFAULT_INT10 = 10;
 constexpr uint32_t DEFAULT_SIZE1 = 1;
 constexpr uint32_t DEFAULT_SIZE2 = 2;
@@ -72,9 +71,7 @@ public:
     static void ResetEventFlag(int32_t testFlag);
     static bool GetEventFlag(int32_t testFlag);
     static void SetUpTestSuite();
-    static void TearDownTestSuite() {}
-    void SetUp() override {}
-    void TearDown() override {}
+    static void TearDownTestSuite();
 
 private:
     static ElementIdType frameNodeId_;
@@ -110,12 +107,28 @@ void PipelineContextTestNg::SetUpTestSuite()
     // AddUINode is called in the function.
     customNode_ = CustomNode::CreateCustomNode(customNodeId_, TEST_TAG);
     ElementRegister::GetInstance()->AddUINode(frameNode_);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
+    auto window = std::make_shared<MockWindow>();
+    EXPECT_CALL(*window, RequestFrame()).Times(AnyNumber());
+    EXPECT_CALL(*window, FlushTasks()).Times(AnyNumber());
+    EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
+    EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
+    EXPECT_CALL(*window, FlushCustomAnimation(NANO_TIME_STAMP))
+        .Times(AtLeast(1))
+        .WillOnce(testing::Return(true))
+        .WillRepeatedly(testing::Return(false));
+    EXPECT_CALL(*window, SetRootFrameNode(_)).Times(AnyNumber());
     context_ = AceType::MakeRefPtr<PipelineContext>(
-        std::make_unique<MockWindow>(), AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
+        window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
-    RefPtr<Container> container = AceType::MakeRefPtr<MockContainer>(context_);
-    AceEngine::Get().AddContainer(DEFAULT_INSTANCE_ID, container);
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = context_;
+}
+
+void PipelineContextTestNg::TearDownTestSuite()
+{
+    context_->window_.reset();
+    MockContainer::TearDown();
 }
 
 /**
@@ -154,14 +167,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg002, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
-    auto mockWindow = std::make_unique<MockWindow>();
-    Mock::AllowLeak(mockWindow.get());
-    EXPECT_CALL(*mockWindow, FlushCustomAnimation(NANO_TIME_STAMP))
-        .Times(AtLeast(1))
-        .WillOnce(testing::Return(true))
-        .WillRepeatedly(testing::Return(false));
-    context_->window_ = std::move(mockWindow);
     context_->SetupRootElement();
 
     /**
@@ -214,7 +219,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg003, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
 
     /**
@@ -289,7 +293,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     ASSERT_NE(context_, nullptr);
     context_->SetupRootElement();
 
@@ -336,7 +339,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg007, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     ASSERT_NE(context_, nullptr);
     /**
      * @tc.steps2: Call the function SetupRootElement with isJsCard_ = true.
@@ -368,7 +370,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg008, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     ASSERT_NE(context_, nullptr);
 
     /**
@@ -399,7 +400,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg009, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      * @tc.expected: All pointer is non-null.
      */
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     ASSERT_NE(context_, nullptr);
     context_->rootWidth_ = DEFAULT_INT10;
     context_->rootHeight_ = DEFAULT_INT10;
@@ -517,7 +517,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg012, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
     context_->onWindowFocusChangedCallbacks_.clear();
     context_->AddWindowFocusChangedCallback(ElementRegister::UndefinedElementId);
@@ -659,7 +658,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg016, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
     context_->onWindowStateChangedCallbacks_.clear();
     context_->AddWindowStateChangedCallback(ElementRegister::UndefinedElementId);
@@ -695,7 +693,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
     auto manager = context_->GetDragDropManager();
 
@@ -739,7 +736,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg018, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->windowModal_ = WindowModal::CONTAINER_MODAL;
     context_->SetupRootElement();
     ASSERT_NE(context_->rootNode_, nullptr);
@@ -779,7 +775,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg019, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->windowModal_ = WindowModal::CONTAINER_MODAL;
     context_->SetupRootElement();
     ASSERT_NE(context_->rootNode_, nullptr);
@@ -819,7 +814,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg020, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->windowModal_ = WindowModal::CONTAINER_MODAL;
     context_->SetupRootElement();
     ASSERT_NE(context_->rootNode_, nullptr);
@@ -906,7 +900,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     context_->SetEventManager(eventManager);
@@ -971,7 +964,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg023, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
     MouseEvent event;
 
@@ -1066,7 +1058,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg024, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
     TouchEvent event;
     context_->touchEvents_.clear();
@@ -1102,7 +1093,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg025, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
 
     /**
@@ -1163,7 +1153,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg026, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
 
     /**
@@ -1224,7 +1213,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg027, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
     auto& windowConfig = frontend->GetWindowConfig();
@@ -1276,7 +1264,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
     context_->SetupRootElement();
     auto frontend = AceType::MakeRefPtr<MockFrontend>();
     auto& windowConfig = frontend->GetWindowConfig();
@@ -1290,6 +1277,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg028, TestSize.Level1)
      */
     context_->designWidthScale_ = DEFAULT_DOUBLE1;
     context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1);
-    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT0);
+    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_DOUBLE1);
 }
 } // namespace OHOS::Ace::NG

@@ -13,22 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/app_bar/app_bar_view.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> AppBarView::Create(RefPtr<FrameNode>& content)
+RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
-    return nullptr;
-}
-
-RefPtr<FrameNode> AppBarView::BuildBarTitle()
-{
-    return nullptr;
-}
-
-RefPtr<FrameNode> AppBarView::BuildIconButton(
-    InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton)
-{
-    return nullptr;
+    return AceType::MakeRefPtr<MockParagraph>();
 }
 } // namespace OHOS::Ace::NG

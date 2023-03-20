@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/common/mock_container.h"
+
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
@@ -20,9 +22,11 @@ namespace {
 int32_t g_id = 0;
 } // namespace
 
+RefPtr<MockContainer> MockContainer::container_;
+
 int32_t Container::CurrentId()
 {
-    return 0;
+    return g_id;
 }
 
 RefPtr<Container> Container::GetActive()
@@ -34,5 +38,30 @@ RefPtr<Container> Container::GetActive()
 void Container::UpdateCurrent(int32_t id)
 {
     g_id = id;
+}
+
+RefPtr<Container> Container::Current()
+{
+    return MockContainer::Current();
+}
+
+bool Container::Dump(const std::vector<std::string>& /* params */, std::vector<std::string>& /* info */)
+{
+    return true;
+}
+
+void MockContainer::SetUp()
+{
+    container_ = AceType::MakeRefPtr<MockContainer>();
+}
+
+void MockContainer::TearDown()
+{
+    container_ = nullptr;
+}
+
+RefPtr<MockContainer> MockContainer::Current()
+{
+    return container_;
 }
 } // namespace OHOS::Ace

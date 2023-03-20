@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_PROPERTIES_H
 
+#include <cstddef>
+
+#include "core/components_ng/test/mock/rosen/testing_rect.h"
+
 namespace OHOS::Ace::Testing {
 enum class TextDirection {
     RTL,
@@ -45,6 +49,7 @@ public:
 
     struct TextBox {
         TextDirection direction_;
+        TestingRect rect_;
     };
 
     struct PositionAndAffinity {
@@ -58,7 +63,7 @@ public:
         T start_, end_;
         Range() : start_(), end_() {}
         Range(T a, T b) : start_(a), end_(b) {}
-        bool operator == (const Range<T>& rhs) const
+        bool operator==(const Range<T>& rhs) const
         {
             return start_ == rhs.start_ && end_ == rhs.end_;
         }

@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_STYLE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_STYLE_H
+
+#include <string>
+#include <vector>
+
+#include "core/components_ng/test/mock/rosen/testing_typography.h"
+#include "core/components_ng/test/mock/rosen/testing_typography_properties.h"
+
+namespace OHOS::Ace::Testing {
+class TestingTypographyStyle {
+public:
+    static const std::u16string ELLIPSIS;
+    TextDirection textDirection_;
+    std::string locale_;
+    WordBreakType wordBreakType_ = WordBreakType::WordBreakTypeBreakWord;
+    double fontSize_ = 14;
+    std::u16string ellipsis_;
+    TextAlign textAlign_ = TextAlign::START;
+    size_t maxLines_ = std::numeric_limits<size_t>::max();
+};
+} // namespace OHOS::Ace::Testing
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_STYLE_H
