@@ -312,6 +312,23 @@ void PipelineContext::FlushBuildFinishCallbacks()
     }
 }
 
+void PipelineContext::RegisterRootEvent()
+{
+    if (!IsFormRender()) {
+        return;
+    }
+
+    // To avoid conflicts between longPress and click events on the card,
+    // use an empty longPress event placeholder in the EtsCard scenario
+    auto hub = rootNode_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+    auto event = [](const GestureEvent& info) mutable {
+        LOGD("Not Support LongPress");
+    };
+    auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
+    hub->SetLongPressEvent(longPress, false, true);
+}
+
 void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
@@ -319,6 +336,7 @@ void PipelineContext::SetupRootElement()
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
+    RegisterRootEvent();
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
