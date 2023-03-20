@@ -357,6 +357,10 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.customNode, info);
     } else {
         dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.pixelMap, info);
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    } else {
+        dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(pixelMap_, info);
+#endif
     }
     if (!dragDropProxy_) {
         LOGE("HandleOnDragStart: drag start error");

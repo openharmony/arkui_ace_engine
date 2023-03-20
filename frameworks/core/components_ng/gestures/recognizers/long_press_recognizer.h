@@ -19,7 +19,15 @@
 #include "base/thread/cancelable_callback.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+#include "core/components_ng/event/gesture_event_hub.h"
+#endif
+
 namespace OHOS::Ace::NG {
+
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+class GestureEventHub;
+#endif
 
 class LongPressInfo : public TouchLocationInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LongPressInfo, TouchLocationInfo);
@@ -66,6 +74,10 @@ public:
         duration_ = duration;
     }
 
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    void SetGestureHub(WeakPtr<GestureEventHub> gestureHub);
+#endif
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -79,7 +91,14 @@ private:
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
+#ifdef OHOS_BUILD_ENABLE_COORDINATION
+    void ThumbnailTimer(int32_t time);
+    void GetThumbnailPixelMap();
 
+    RefPtr<GestureEventHub> gestureHub_;
+    CancelableCallback<void()> thumbnailTimer_;
+    int32_t thumbnailDeadline = 150;
+#endif
     OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;
