@@ -311,20 +311,11 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
     return idealSize;
 }
 
-void CreateChildrenConstraint(
-    SizeF& size, const std::unique_ptr<MarginProperty>& margin, const std::unique_ptr<PaddingProperty>& padding)
+void CreateChildrenConstraint(SizeF& size, const std::unique_ptr<PaddingProperty>& padding)
 {
     float width = 0;
     float height = 0;
 
-    if (margin) {
-        float marginLeft = margin->left.has_value() ? margin->left->GetDimension().ConvertToPx() : 0;
-        float marginRight = margin->right.has_value() ? margin->right->GetDimension().ConvertToPx() : 0;
-        float marginTop = margin->top.has_value() ? margin->top->GetDimension().ConvertToPx() : 0;
-        float marginBottom = margin->bottom.has_value() ? margin->bottom->GetDimension().ConvertToPx() : 0;
-        width += (marginLeft + marginRight);
-        height += (marginTop + marginBottom);
-    }
     if (padding) {
         float paddingLeft = padding->left.has_value() ? padding->left->GetDimension().ConvertToPx() : 0;
         float paddingRight = padding->right.has_value() ? padding->right->GetDimension().ConvertToPx() : 0;
