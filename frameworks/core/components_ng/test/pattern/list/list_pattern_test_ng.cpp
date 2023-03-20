@@ -2461,7 +2461,6 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
      * @tc.steps: case1: VERTICAL, KEY_DPAD_UP, next = scroll
      * @tc.expected: step2. equal.
      */
-    listPattern->scrollIndex_ = 0;
     result = listPattern->HandleDirectionKey({ KeyCode::KEY_DPAD_UP, KeyAction::DOWN });
     EXPECT_FALSE(result);
 
@@ -2471,7 +2470,6 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->maxListItemIndex_ = 1;
-    listPattern->scrollIndex_ = 1;
     result = listPattern->HandleDirectionKey({ KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN });
     EXPECT_FALSE(result);
 
@@ -2492,7 +2490,6 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
      * @tc.steps: case3: HORIZONTAL, KEY_DPAD_LEFT, next != scroll
      * @tc.expected: step2. equal.
      */
-    listPattern1->scrollIndex_ = 1;
     result = listPattern1->HandleDirectionKey({ KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN });
     EXPECT_FALSE(result);
 
@@ -2502,7 +2499,6 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern1->maxListItemIndex_ = LIST_ITEM_NUMBER;
-    listPattern1->scrollIndex_ = 1;
     result = listPattern1->HandleDirectionKey({ KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN });
     EXPECT_FALSE(result);
 }
