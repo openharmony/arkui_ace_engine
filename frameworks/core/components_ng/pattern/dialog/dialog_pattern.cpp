@@ -21,6 +21,7 @@
 #include "base/geometry/dimension.h"
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
@@ -30,6 +31,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
@@ -282,8 +284,8 @@ RefPtr<FrameNode> DialogPattern::BuildContent(const DialogProperties& props)
         contentPaddingInTheme =
             props.buttons.empty() ? dialogTheme_->GetDefaultPadding() : dialogTheme_->GetAdjustPadding();
     } else {
-        contentPaddingInTheme = props.buttons.empty() ? dialogTheme_->GetContentDefaultPadding()
-                                                                 : dialogTheme_->GetContentAdjustPadding();
+        contentPaddingInTheme =
+            props.buttons.empty() ? dialogTheme_->GetContentDefaultPadding() : dialogTheme_->GetContentAdjustPadding();
     }
     PaddingProperty contentPadding;
     contentPadding.left = CalcLength(contentPaddingInTheme.Left());
@@ -310,7 +312,7 @@ void DialogPattern::BindCloseCallBack(const RefPtr<GestureEventHub>& hub, int32_
     hub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(closeCallback));
 }
 
-RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t index)
+RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t index, bool isCancel)
 {
     auto buttonNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<ButtonPattern>());
@@ -328,7 +330,11 @@ RefPtr<FrameNode> DialogPattern::CreateButton(const ButtonInfo& params, int32_t 
     }
 
     // to close dialog when clicked inside button rect
-    BindCloseCallBack(hub, index);
+    if (!isCancel) {
+        BindCloseCallBack(hub, index);
+    } else {
+        BindCloseCallBack(hub, -1);
+    }
 
     // add scale animation
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
@@ -530,14 +536,24 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(true));
     // column -> button
     for (size_t i = 0; i < buttons.size(); ++i) {
-        auto button = CreateButton(buttons[i], i);
+        RefPtr<FrameNode> button;
+        if (i != (buttons.size() - 1)) {
+            button = CreateButton(buttons[i], i);
+        } else {
+            button = CreateButton(buttons[i], i, true);
+        }
         CHECK_NULL_RETURN(button, nullptr);
         auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
         props->UpdateFlexGrow(1);
         props->UpdateFlexShrink(1);
 
         button->MountToParent(menu);
+        button->MarkModifyDone();
     }
+    auto menuProps = menu->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(menuProps, nullptr);
+    menuProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
+    menuProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     return menu;
 }
 
