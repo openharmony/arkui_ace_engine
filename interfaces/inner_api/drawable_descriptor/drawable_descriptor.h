@@ -92,12 +92,17 @@ private:
 class DrawableDescriptorFactory {
 public:
     static std::unique_ptr<DrawableDescriptor> Create(
-        int32_t id, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, uint32_t density)
+        int32_t id, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
+        Global::Resource::RState &state, uint32_t density)
     {
         std::string type;
         size_t len;
         std::unique_ptr<uint8_t[]> jsonBuf;
-        resourceMgr->GetDrawableInfoById(id, type, len, jsonBuf, density);
+        state = resourceMgr->GetDrawableInfoById(id, type, len, jsonBuf, density);
+        if (state != Global::Resource::SUCCESS) {
+            HILOG_ERROR("Failed to get drawable info from resmgr");
+            return nullptr;
+        }
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
@@ -111,12 +116,17 @@ public:
     }
 
     static std::unique_ptr<DrawableDescriptor> Create(
-        const char* name, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, uint32_t density)
+        const char* name, std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr,
+        Global::Resource::RState &state, uint32_t density)
     {
         std::string type;
         size_t len;
         std::unique_ptr<uint8_t[]> jsonBuf;
-        resourceMgr->GetDrawableInfoByName(name, type, len, jsonBuf, density);
+        state = resourceMgr->GetDrawableInfoByName(name, type, len, jsonBuf, density);
+        if (state != Global::Resource::SUCCESS) {
+            HILOG_ERROR("Failed to get drawable info from resmgr");
+            return nullptr;
+        }
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             return std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
