@@ -784,4 +784,11 @@ void SliderPattern::UpdateBlock()
         }
     }
 }
+
+void SliderPattern::LayoutImageNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
 } // namespace OHOS::Ace::NG
