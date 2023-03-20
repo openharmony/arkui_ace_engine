@@ -382,6 +382,13 @@ void NavigationView::SetTitle(const std::string& title, bool hasSubTitle)
             break;
         }
         auto titleProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+        // if no subtitle, title's maxLine = 1. if has subtitle, title's maxLine = 2.
+        if (!hasSubTitle && navBarNode->GetSubtitle()) {
+            navBarNode->SetSubtitle(nullptr);
+            titleProperty->UpdateMaxLines(1);
+        } else {
+            titleProperty->UpdateMaxLines(2);
+        }
         // previous title is not a text node and might be custom, we remove it and create a new node
         if (!titleProperty) {
             navBarNode->UpdateTitleNodeOperation(ChildNodeOperation::REPLACE);

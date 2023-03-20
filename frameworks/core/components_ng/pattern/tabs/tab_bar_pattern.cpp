@@ -1032,7 +1032,7 @@ float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
     CHECK_NULL_RETURN(host, 0.0f);
     float backChildrenMainSize = 0.0f;
     auto childCount = host->GetChildren().size();
-    for (uint32_t index = indicator + 1; index < childCount; ++index) {
+    for (uint32_t index = static_cast<uint32_t>(indicator) + 1; index < childCount; ++index) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
         CHECK_NULL_RETURN(childFrameNode, 0.0f);
         auto childGeometryNode = childFrameNode->GetGeometryNode();
