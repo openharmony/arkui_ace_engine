@@ -257,16 +257,16 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     if (navBarNode && layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
         navigationContentNode->Clean();
         navigationContentNode->AddChild(navDestination);
-        navigationContentNode->MarkModifyDone();
-        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navigationNode->MarkModifyDone();
+        navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
     SetBackButtonVisible(navDestination);
     navigationContentNode->Clean();
     navigationContentNode->AddChild(navDestination);
-    navigationContentNode->MarkModifyDone();
-    navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    navigationNode->MarkModifyDone();
+    navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavRouterGroupNode::SetOnStateChangeFalse(
