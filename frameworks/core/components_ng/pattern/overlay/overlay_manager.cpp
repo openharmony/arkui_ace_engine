@@ -75,7 +75,7 @@ void OnDialogCloseEvent(const RefPtr<UINode>& root, const RefPtr<FrameNode>& nod
     }
 
     root->RemoveChild(node);
-    root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     auto lastChild = AceType::DynamicCast<FrameNode>(root->GetLastChild());
     if (lastChild) {
         auto pattern = lastChild->GetPattern();
@@ -103,7 +103,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
     auto root = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(root && node);
     node->MountToParent(root);
-    root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
     AnimationOption option;
     // default opacity animation params
