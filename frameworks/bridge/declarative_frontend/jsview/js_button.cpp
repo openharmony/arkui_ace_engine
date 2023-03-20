@@ -406,7 +406,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ButtonView::Create(V2::BUTTON_ETS_TAG);
+        NG::ButtonView::CreateWithLabel("");
         if (!labelSet && info[0]->IsObject()) {
             SetTypeAndStateEffect(JSRef<JSObject>::Cast(info[0]));
         }
