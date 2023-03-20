@@ -53,6 +53,43 @@ if (is_standard_system) {
     dylib_suffix = ".so"
   }
 
+  ohos_copy("copy_ets_utils_container_library") {
+    container_names = [
+      "arraylist",
+      "deque",
+      "queue",
+      "vector",
+      "linkedlist",
+      "list",
+      "stack",
+      "struct",
+      "treemap",
+      "treeset",
+      "hashmap",
+      "hashset",
+      "lightweightmap",
+      "lightweightset",
+      "plainarray",
+    ]
+    deps = []
+    sources = []
+    out_path = get_label_info(
+            "//commonlibrary/ets_utils/js_util_module/container:container_packages",
+            "root_out_dir")
+    deps += [
+      "//commonlibrary/ets_utils/js_util_module/container:container_packages",
+    ]
+    foreach(item, container_names) {
+      sources +=
+          [ "${out_path}/commonlibrary/ets_utils/lib${item}${dylib_suffix}" ]
+    }
+
+    outputs = [ target_out_dir +
+                "/previewer/common/bin/module/util/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/module/util/"
+    module_install_name = ""
+  }
+
   # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
   # which are called by the napi framework, can be added to this script.
   ohos_copy("copy_napi_modules_shared_library") {
@@ -63,6 +100,13 @@ if (is_standard_system) {
             "root_out_dir")
     deps += [ "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi" ]
     sources += [ "${out_path}/hiviewdfx/hilog_native/libhilog${dylib_suffix}" ]
+
+    out_path = get_label_info(
+            "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages",
+            "root_out_dir")
+    deps += [ "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages" ]
+    sources +=
+        [ "${out_path}/commonlibrary/ets_utils/libbuffer${dylib_suffix}" ]
 
     foreach(module, common_napi_libs) {
       module_path_names = []
