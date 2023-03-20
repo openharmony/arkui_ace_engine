@@ -42,7 +42,7 @@ bool SystemProperties::GetDebugEnabled()
     return false;
 }
 
-ACE_WEAK_SYM float SystemProperties::GetAnimationScale()
+float SystemProperties::GetAnimationScale()
 {
     return defaultAnimationScale;
 }
