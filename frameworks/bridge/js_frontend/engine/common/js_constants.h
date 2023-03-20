@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,6 +127,7 @@ ACE_EXPORT extern const char CURVES_CUBIC_BEZIER[];
 ACE_EXPORT extern const char CUBIC_BEZIER_CURVE[];
 ACE_EXPORT extern const char CURVES_SPRING[];
 ACE_EXPORT extern const char SPRING_CURVE[];
+ACE_EXPORT extern const char INTERPOLATING_SPRING[];
 ACE_EXPORT extern const char CURVES_STEPS[];
 ACE_EXPORT extern const char STEPS_CURVE[];
 ACE_EXPORT extern const char CURVE_INTERPOLATE[];
@@ -134,6 +135,7 @@ ACE_EXPORT extern const char SPRING_MOTION[];
 ACE_EXPORT extern const char RESPONSIVE_SPRING_MOTION[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_SPRING_MOTION[];
 ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_RESPONSIVE_SPRING_MOTION[];
+ACE_EXPORT extern const char DOM_ANIMATION_TIMING_FUNCTION_INTERPOLATING_SPRING[];
 
 // for grid
 ACE_EXPORT extern const char GRID_GET_SYSTEM_LAYOUT_INFO[];

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,6 +125,7 @@ const char CURVES_CUBIC_BEZIER[] = "cubicBezier";
 const char CUBIC_BEZIER_CURVE[] = "cubicBezierCurve";
 const char CURVES_SPRING[] = "spring";
 const char SPRING_CURVE[] = "springCurve";
+const char INTERPOLATING_SPRING[] = "interpolatingSpring";
 const char CURVES_STEPS[] = "steps";
 const char STEPS_CURVE[] = "stepsCurve";
 const char CURVE_INTERPOLATE[] = "interpolate";
@@ -132,6 +133,7 @@ const char SPRING_MOTION[] = "springMotion";
 const char RESPONSIVE_SPRING_MOTION[] = "responsiveSpringMotion";
 const char DOM_ANIMATION_TIMING_FUNCTION_SPRING_MOTION[] = "spring-motion";
 const char DOM_ANIMATION_TIMING_FUNCTION_RESPONSIVE_SPRING_MOTION[] = "responsive-spring-motion";
+const char DOM_ANIMATION_TIMING_FUNCTION_INTERPOLATING_SPRING[] = "interpolating-spring";
 
 // for grid
 const char GRID_GET_SYSTEM_LAYOUT_INFO[] = "getSystemLayoutInfo";
