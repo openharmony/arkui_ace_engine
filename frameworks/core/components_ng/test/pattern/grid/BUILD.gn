@@ -28,6 +28,8 @@ ohos_unittest("grid_pattern_test_ng") {
     "$ace_root/frameworks/core/animation/cubic_curve.cpp",
     "$ace_root/frameworks/core/animation/curves.cpp",
     "$ace_root/frameworks/core/animation/friction_motion.cpp",
+    "$ace_root/frameworks/core/animation/spring_curve.cpp",
+    "$ace_root/frameworks/core/animation/spring_model.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_clipboard.cpp",
