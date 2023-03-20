@@ -117,14 +117,14 @@ bool ArkJSRuntime::StartDebugger()
     return ret;
 }
 
-bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const std::string& filename)
+bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const std::string& filename, bool needUpdate)
 {
 #if defined(PREVIEW)
-    return JSNApi::ExecuteModuleBuffer(vm_, data, size, filename);
+    return JSNApi::ExecuteModuleBuffer(vm_, data, size, filename, needUpdate);
 #else
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
-    bool ret = JSNApi::ExecuteModuleBuffer(vm_, data, size, filename);
+    bool ret = JSNApi::ExecuteModuleBuffer(vm_, data, size, filename, needUpdate);
     HandleUncaughtException();
     return ret;
 #endif

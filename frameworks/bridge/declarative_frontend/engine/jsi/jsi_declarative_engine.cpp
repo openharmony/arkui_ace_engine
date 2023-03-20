@@ -1078,7 +1078,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         LOGI("JsiDeclarativeEngine::ExecuteCardAbc abcPath = %{public}s", abcPath.c_str());
         {
             std::lock_guard<std::mutex> lock(loadFormMutex_);
-            if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath)) {
+            if (!arkRuntime->ExecuteModuleBuffer(content.data(), content.size(), abcPath, true)) {
                 LOGE("ExecuteCardAbc ExecuteModuleBuffer \"%{public}s\" failed.", fileName.c_str());
                 return false;
             }
