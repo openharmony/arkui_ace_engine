@@ -11,10 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
-
-group("core_unittest") {
+group("core_pattern_unittest") {
   testonly = true
-  deps = [ "pattern:core_pattern_unittest" ]
+  deps = [ "ui_extension:ui_extension_pattern_test_ng" ]
 }
