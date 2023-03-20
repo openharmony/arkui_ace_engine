@@ -52,6 +52,7 @@ class ACE_EXPORT PixelMap : public AceType {
 
 public:
     static RefPtr<PixelMap> CreatePixelMap(void* sptrAddr);
+    static RefPtr<PixelMap> GetFromDrawable(void* ptr);
     static RefPtr<PixelMap> CreatePixelMapFromDataAbility(void* uniquePtr);
     static RefPtr<PixelMap> ConvertSkImageToPixmap(const uint32_t *colors, uint32_t colorLength,
         int32_t width, int32_t height);

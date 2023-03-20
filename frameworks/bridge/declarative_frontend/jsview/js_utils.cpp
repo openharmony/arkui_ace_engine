@@ -86,23 +86,18 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
     return PixelMap::CreatePixelMap(pixmapPtrAddr);
 }
 
-const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
+namespace {
+void* UnwrapNapiValue(const JSRef<JSVal>& obj)
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (!obj->IsObject()) {
-        LOGE("info[0] is not an object when try CreateRSNodeFromNapiValue");
+        LOGE("info[0] is not an object when try CreateFromNapiValue");
         return nullptr;
     }
     auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        LOGE("CreateRSNodeFromNapiValue engine is null");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(engine, nullptr);
     auto nativeEngine = engine->GetNativeEngine();
-    if (nativeEngine == nullptr) {
-        LOGE("nativeEngine is nullptr.");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
 #ifdef USE_ARK_ENGINE
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
 #endif
@@ -110,16 +105,21 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
 
     ScopeRAII scope(nativeEngine->GetScopeManager());
     NativeValue* nativeValue = nativeEngine->ValueToNativeValue(valueWrapper);
-    if (nativeValue == nullptr) {
-        LOGE("nativeValue is nullptr.");
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(nativeValue, nullptr);
     NativeObject* object = static_cast<NativeObject*>(nativeValue->GetInterface(NativeObject::INTERFACE_ID));
-    if (object == nullptr) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(object, nullptr);
+    return object->GetNativePointer();
+}
+} // namespace
 
-    auto nodePtr = static_cast<std::shared_ptr<Rosen::RSNode>*>(object->GetNativePointer());
+RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj)
+{
+    return PixelMap::GetFromDrawable(UnwrapNapiValue(obj));
+}
+
+const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
+{
+    auto nodePtr = static_cast<std::shared_ptr<Rosen::RSNode>*>(UnwrapNapiValue(obj));
     if (nodePtr == nullptr) {
         return nullptr;
     }

@@ -177,28 +177,31 @@ void JSImage::Create(const JSCallbackInfo& info)
     std::string bundleName;
     std::string moduleName;
     std::string src;
-    auto noPixMap = ParseJsMedia(info[0], src);
+    auto noPixmap = ParseJsMedia(info[0], src);
     if (context->IsFormRender() && info[0]->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
-        bool notSupport = (
-            srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
         if (notSupport) {
             LOGE("Not supported src : %{public}s when form render", src.c_str());
             src.clear();
         }
     }
     GetJsMediaBundleInfo(info[0], bundleName, moduleName);
-    RefPtr<PixelMap> pixMap = nullptr;
+    RefPtr<PixelMap> pixmap = nullptr;
 #if defined(PIXEL_MAP_SUPPORTED)
-    if (!noPixMap) {
+    if (!noPixmap) {
         if (context->IsFormRender()) {
-            LOGE("Not supported pixMap when form render");
+            LOGE("Not supported pixmap when form render");
         } else {
-            pixMap = CreatePixelMapFromNapiValue(info[0]);
+            if (IsDrawable(info[0])) {
+                pixmap = GetDrawablePixmap(info[0]);
+            } else {
+                pixmap = CreatePixelMapFromNapiValue(info[0]);
+            }
         }
     }
 #endif
-    ImageModel::GetInstance()->Create(src, noPixMap, pixMap, bundleName, moduleName);
+    ImageModel::GetInstance()->Create(src, noPixmap, pixmap, bundleName, moduleName);
 }
 
 // Interim programme
@@ -216,6 +219,21 @@ void JSImage::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bun
             moduleName = module->ToString();
         }
     }
+}
+
+bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsUndefined()) {
+        return false;
+    }
+
+    // if jsObject has function getPixelMap, it's a DrawableDescriptor object
+    JSRef<JSVal> func = jsObj->GetProperty("getPixelMap");
+    return (!func->IsNull() && func->IsFunction());
 }
 
 void JSImage::JsBorder(const JSCallbackInfo& info)

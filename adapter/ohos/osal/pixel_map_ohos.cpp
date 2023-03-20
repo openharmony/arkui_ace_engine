@@ -17,9 +17,10 @@
 
 #include <sstream>
 
+#include "drawable_descriptor.h"
+
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "drawable_descriptor.h"
 
 namespace OHOS::Ace {
 
@@ -71,15 +72,19 @@ AlphaType PixelMapOhos::AlphaTypeConverter(Media::AlphaType alphaType)
 
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
-    auto pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
-    auto drawablePtr = reinterpret_cast<std::shared_ptr<Napi::LayeredDrawableDescriptor>*>(rawPtr);
-    if (pixmapPtr && *pixmapPtr) {
-        return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
+    std::shared_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
+    if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
+        LOGW("pixmap pointer is nullptr when CreatePixelMap.");
+        return nullptr;
     }
-    if (drawablePtr && *drawablePtr) {
-        return  AceType::MakeRefPtr<PixelMapOhos>((*drawablePtr)->GetPixelMap());
-    }
-    return nullptr;
+    return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
+}
+
+RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
+{
+    CHECK_NULL_RETURN(ptr, nullptr);
+    auto* drawable = reinterpret_cast<Napi::DrawableDescriptor*>(ptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(drawable->GetPixelMap());
 }
 
 RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)

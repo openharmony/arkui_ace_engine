@@ -31,8 +31,8 @@ constexpr char DRAWABLE_LAYERED[] = "LayeredDrawableDescriptor";
 } // namespace
 
 namespace OHOS::Ace::Napi {
-thread_local napi_ref JsDrawableDescriptor::baseConstructor_ = nullptr;
-thread_local napi_ref JsDrawableDescriptor::layeredConstructor_ = nullptr;
+thread_local napi_ref JsDrawableDescriptor::baseConstructor_;
+thread_local napi_ref JsDrawableDescriptor::layeredConstructor_;
 
 napi_value JsDrawableDescriptor::Constructor(napi_env env, napi_callback_info info)
 {
@@ -87,7 +87,7 @@ napi_value JsDrawableDescriptor::ToNapi(napi_env env, DrawableDescriptor* drawab
     if (!drawable) {
         return nullptr;
     }
-    if (!baseConstructor_) {
+    if (!layeredConstructor_) {
         // init js class constructor by importing module manually
         napi_value globalValue;
         napi_get_global(env, &globalValue);
@@ -102,13 +102,7 @@ napi_value JsDrawableDescriptor::ToNapi(napi_env env, DrawableDescriptor* drawab
 
     napi_value constructor = nullptr;
     napi_value result = nullptr;
-    napi_status status;
-    if (static_cast<LayeredDrawableDescriptor*>(drawable)) {
-        status = napi_get_reference_value(env, layeredConstructor_, &constructor);
-    } else {
-        status = napi_get_reference_value(env, baseConstructor_, &constructor);
-    }
-
+    napi_status status = napi_get_reference_value(env, layeredConstructor_, &constructor);
     if (status == napi_status::napi_ok) {
         NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &result));
         NAPI_CALL(env, napi_wrap(env, result, drawable, Destructor, nullptr, nullptr));
