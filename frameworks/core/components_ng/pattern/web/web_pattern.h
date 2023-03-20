@@ -119,6 +119,11 @@ public:
         isPopup_ = popup;
     }
 
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
+    }
+
     void SetWebData(const std::string& webData)
     {
         if (webData_ != webData) {
@@ -424,6 +429,7 @@ private:
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
     bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
