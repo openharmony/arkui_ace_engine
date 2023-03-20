@@ -250,6 +250,7 @@ void RosenRenderImage::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& imag
         imageObj_->ClearData();
     }
     CacheImageObject();
+    contentChanged_ = true;
 }
 
 void RosenRenderImage::CacheImageObject()
@@ -571,6 +572,13 @@ RefPtr<ImageObject> RosenRenderImage::QueryCacheSvgImageObject()
 
 void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
 {
+    if (contentChanged_) {
+        auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
+        if (rsNode) {
+            rsNode->MarkContentChanged(true);
+        }
+        contentChanged_ = false;
+    }
     if (imageObj_ && imageObj_->IsSvg() && !useSkiaSvg_ && !directPaint_) {
         DrawSVGImageCustom(context, offset);
         return;
