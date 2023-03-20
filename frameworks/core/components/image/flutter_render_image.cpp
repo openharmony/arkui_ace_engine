@@ -528,6 +528,7 @@ void FlutterRenderImage::Paint(RenderContext& context, const Offset& offset)
     if (skImage && skImage->GetImage()) {
         colorSpace = skImage->GetImage()->refColorSpace();
     }
+    CHECK_NULL_VOID(paint.paint());
 #ifdef USE_SYSTEM_SKIA
     paint.paint()->setColor4f(paint.paint()->getColor4f(), colorSpace.get());
 #else
