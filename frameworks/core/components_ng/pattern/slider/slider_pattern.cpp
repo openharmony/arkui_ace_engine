@@ -422,7 +422,9 @@ void SliderPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 {
     UpdateCircleCenterOffset();
-    auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
     auto paintWidth = appTheme->GetFocusWidthVp();
@@ -466,8 +468,10 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     auto frameSize = GetHostFrameSize();
     CHECK_NULL_VOID(frameSize);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
     auto focusSideDistance = theme->GetFocusSideDistance();
     auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
     float offsetX = 0;

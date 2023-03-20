@@ -70,8 +70,7 @@ group("pattern_unittest") {
     "select:select_pattern_test_ng",
     "shape:shape_pattern_unit_test",
     "side_bar:side_bar_pattern_test_ng",
-
-    # "slider:slider_pattern_test_ng",
+    "slider:slider_pattern_test_ng",
     "stack:stack_pattern_test_ng",
     "stage:stage_pattern_test_ng",
     "stepper:stepper_pattern_test_ng",
