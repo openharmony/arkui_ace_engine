@@ -747,6 +747,7 @@ void WebPattern::OnPinchSmoothModeEnabledUpdate(bool value)
 
 void WebPattern::OnBackgroundColorUpdate(int32_t value)
 {
+    UpdateBackgroundColorRightNow(value);
     if (delegate_) {
         delegate_->UpdateBackgroundColor(value);
     }
@@ -1553,5 +1554,14 @@ void WebPattern::OnVisibleChange(bool isVisible)
         LOGI("web is not visible");
         CloseSelectOverlay();
     }
+}
+
+void WebPattern::UpdateBackgroundColorRightNow(int32_t color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackgroundColor(Color(static_cast<uint32_t>(color)));
 }
 } // namespace OHOS::Ace::NG
