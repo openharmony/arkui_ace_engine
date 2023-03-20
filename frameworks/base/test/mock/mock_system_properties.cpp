@@ -46,4 +46,9 @@ float SystemProperties::GetAnimationScale()
 {
     return defaultAnimationScale;
 }
+
+bool SystemProperties::GetIsUseMemoryMonitor()
+{
+    return false;
+}
 } // namespace OHOS::Ace
