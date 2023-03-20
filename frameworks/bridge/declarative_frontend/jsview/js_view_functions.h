@@ -30,11 +30,6 @@ class ComposedElement;
 
 namespace OHOS::Ace::Framework {
 
-enum class ViewAppearType {
-    INIT_CREATION = 0,
-    RECYCLE_UPDATE,
-};
-
 class JSView;
 
 class ViewFunctions : public AceType {
@@ -55,7 +50,7 @@ public:
     void ExecuteRerender();
     void ExecuteReload(bool deep);
     void ExecuteForceNodeRerender(int32_t elemId);
-    void ExecuteAppear(ViewAppearType type = ViewAppearType::INIT_CREATION);
+    void ExecuteAppear();
     void ExecuteDisappear();
     void ExecuteMeasure(NG::LayoutWrapper* layoutWrapper);
     void ExecuteLayout(NG::LayoutWrapper* layoutWrapper);

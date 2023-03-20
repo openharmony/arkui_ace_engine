@@ -419,17 +419,9 @@ void ViewFunctions::ExecuteRender()
     jsRenderResult_ = func->Call(jsThis);
 }
 
-void ViewFunctions::ExecuteAppear(ViewAppearType type)
+void ViewFunctions::ExecuteAppear()
 {
-    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
-    if (jsAppearFunc_.IsEmpty()) {
-        LOGD("View doesn't have aboutToAppear method!");
-        return;
-    }
-    ACE_SCOPED_TRACE("%s", "aboutToAppear");
-    JSRef<JSVal> jsObject = jsObject_.Lock();
-    auto appearType = JSRef<JSVal>::Make(ToJSValue(type));
-    jsAppearFunc_.Lock()->Call(jsObject, 1, &appearType);
+    ExecuteFunction(jsAppearFunc_, "aboutToAppear");
 }
 
 void ViewFunctions::ExecuteDisappear()

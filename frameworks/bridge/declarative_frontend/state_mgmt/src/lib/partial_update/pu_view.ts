@@ -48,7 +48,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // Array.sort() converts array items to string to compare them, sigh!
   readonly compareNumber = (a: number, b: number): number => {
     if (this.hasRecycleManager()) {
-      stateMgmtConsole.info(`${this.constructor.name}[${this.id__()}]: sort by RecycleManager order`);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: sort by RecycleManager order`);
       let ta = this.getRecycleManager().getRecycleNodeCurrentElmtId(a);
       let tb = this.getRecycleManager().getRecycleNodeCurrentElmtId(b);
       return (ta < tb) ? -1 : (ta > tb) ? 1 : 0;
@@ -162,7 +162,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     if (this.hasRecycleManager()) {
       this.getRecycleManager().purgeAllCachedRecycleNode(removedElmtIds);
-      stateMgmtConsole.info(`ViewPU('${this.constructor.name}', ${this.id__()}).aboutToBeDeletedInternal: purgeAllCachedRecycleNode ${removedElmtIds.length}`);
+      stateMgmtConsole.debug(`ViewPU('${this.constructor.name}', ${this.id__()}).aboutToBeDeletedInternal: purgeAllCachedRecycleNode ${removedElmtIds.length}`);
     }
 
     this.updateFuncByElmtId.forEach((value: UpdateFunc, key: number) => {
@@ -519,7 +519,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     let node: ViewPU;
     // if there is no suitable recycle node, run a normal creation function.
     if (!this.hasRecycleManager() || !(node = this.getRecycleManager().popRecycleNode(name))) {
-      stateMgmtConsole.info(`${this.constructor.name}[${this.id__()}]: cannot init node by recycle, crate new node`);
+      stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: cannot init node by recycle, crate new node`);
       this.observeComponentCreation(compilerAssignedUpdateFunc);
       return;
     }
