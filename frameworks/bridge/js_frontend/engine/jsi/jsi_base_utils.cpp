@@ -124,7 +124,11 @@ std::string JsiBaseUtils::GenerateSummaryBody(
         auto frontEnd = container->GetFrontend();
         if (frontEnd) {
             pageUrl = frontEnd->GetCurrentPageUrl();
-            pageMap = frontEnd->GetCurrentPageSourceMap();
+            if (!JSNApi::IsBundle(vm)) {
+                frontEnd->GetStageSourceMap(sourceMaps);
+            } else {
+                pageMap = frontEnd->GetCurrentPageSourceMap();
+            }
             appMap = frontEnd->GetFaAppSourceMap();
         }
     } else {
