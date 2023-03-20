@@ -30,6 +30,8 @@ const SizeF MIN_SIZE(MIN_WIDTH, MIN_HEIGHT);
 
 const int32_t CANVAS_WIDTH = 300;
 const int32_t CANVAS_HEIGHT = 300;
+const int32_t IMAGEDATA_WIDTH = 40;
+const int32_t IMAGEDATA_HEIGHT = 40;
 const int32_t DEFAULT_INSTANCE_ID = 0;
 
 const double DEFAULT_DOUBLE0 = 0.0;

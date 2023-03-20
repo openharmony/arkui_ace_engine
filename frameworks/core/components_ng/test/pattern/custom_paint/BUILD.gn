@@ -22,6 +22,7 @@ ohos_unittest("custom_paint_pattern_test_ng") {
   sources = [
     "canvas_paint_method_test_ng.cpp",
     "common_constants.cpp",
+    "custom_paint_paint_method_test_ng.cpp",
     "custom_paint_pattern_test_ng.cpp",
     "offscreen_canvas_paint_method_test_ng.cpp",
     "offscreen_canvas_paint_pattern_test_ng.cpp",
@@ -35,7 +36,7 @@ ohos_unittest("custom_paint_pattern_test_ng") {
 
   configs = [
     ":config_custom_paint_test",
-    "$ace_root:ace_config",
+    "$ace_root/test/unittest:ace_unittest_config",
   ]
 }
 
