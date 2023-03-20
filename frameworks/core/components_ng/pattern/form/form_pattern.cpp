@@ -44,7 +44,7 @@ void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
     }
 }
 
-constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 2000;
+constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 } // namespace
 
 FormPattern::FormPattern() = default;
@@ -256,6 +256,12 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(formComponentContext);
             formComponentContext->AddChild(externalRenderContext, 0);
 
+            auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+            layoutProperty->UpdateVisibility(visible);
+            formComponent->isLoaded_ = true;
+
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             auto parent = host->GetParent();
             CHECK_NULL_VOID(parent);
@@ -353,7 +359,7 @@ void FormPattern::CreateCardContainer()
 
     auto eventhHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventhHub);
-    eventhHub->SetOnDisappear([weak = WeakClaim(this)]() {
+    eventhHub->SetOnOnCache([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
