@@ -34,6 +34,7 @@ ohos_shared_library("drawable_descriptor") {
 
   sources = [
     "drawable_descriptor.cpp",
+    "image_converter.cpp",
     "js_drawable_descriptor.cpp",
   ]
 

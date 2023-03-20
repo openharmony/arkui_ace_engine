@@ -25,6 +25,11 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
     return nullptr;
 }
 
+RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
+{
+    return nullptr;
+}
+
 RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)
 {
     return nullptr;
