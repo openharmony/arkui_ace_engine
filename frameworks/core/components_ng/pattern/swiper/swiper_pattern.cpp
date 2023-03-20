@@ -1185,7 +1185,7 @@ SwiperIndicatorType SwiperPattern::GetIndicatorType() const
     return swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT);
 }
 
-std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters()
+std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
 {
     if (swiperParameters_ == nullptr) {
         swiperParameters_ = std::make_shared<SwiperParameters>();
@@ -1207,7 +1207,7 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters()
     return swiperParameters_;
 }
 
-std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters()
+std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters() const
 {
     if (swiperDigitalParameters_ == nullptr) {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>();
