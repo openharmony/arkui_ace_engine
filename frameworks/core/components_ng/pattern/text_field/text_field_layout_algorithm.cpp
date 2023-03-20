@@ -171,7 +171,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     float imageSize = 0.0f;
     imageSize = showPasswordIcon ? preferredHeight : 0.0f;
     if (contentConstraint.selfIdealSize.Height()) {
-        imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
+        imageSize = contentConstraint.selfIdealSize.Height().value();
     }
 
     if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
