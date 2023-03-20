@@ -565,13 +565,13 @@ public:
     std::string GetInputStyleString() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void HandleBlurEvent();
+    void HandleFocusEvent();
     bool OnBackPressed();
     void CheckScrollable();
 
 private:
-    void HandleBlurEvent();
     bool HasFocus() const;
-    void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void ParseAppendValue(KeyCode keycode, std::string& appendElement);
     void HandleDirectionalKey(const KeyEvent& keyEvent);
@@ -668,7 +668,7 @@ private:
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
 
-    bool IsSearchParentNode();
+    bool IsSearchParentNode() const;
 
     RectF frameRect_;
     RectF contentRect_;

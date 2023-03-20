@@ -145,6 +145,9 @@ private:
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;
