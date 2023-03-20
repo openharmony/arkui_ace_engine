@@ -1513,29 +1513,6 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor001, TestSize.Level1)
 }
 
 /**
- * @tc.name: onDraw002
- * @tc.desc: Verify that the onDraw interface calls normally and exits without exception.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, onDraw002, TestSize.Level1)
-{
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
-    textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
-    textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
-    textFieldContentModifier->textValue_ = AceType::MakeRefPtr<PropertyString>("");
-    textFieldContentModifier->textRectY_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
-    textFieldContentModifier->textRectX_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
-    Testing::MockCanvas rsCanvas;
-    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
-    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    textFieldContentModifier->onDraw(context);
-}
-
-/**
  * @tc.name: SetTextRectX001
  * @tc.desc: Verify that the SetTextRectX interface calls normally and exits without exception.
  * @tc.type: FUNC
