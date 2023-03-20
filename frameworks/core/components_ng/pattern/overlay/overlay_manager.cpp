@@ -397,39 +397,24 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     CHECK_NULL_VOID(customNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        rootNode->RemoveChild(customPopupMap_[targetId]);
-        customPopupMap_.erase(it);
+    if (!customPopupMap_[targetId] || customPopupMap_[targetId] != customNode) {
+        customPopupMap_[targetId] = customNode;
+        customNode->MountToParent(rootNode);
+        customNode->MarkModifyDone();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    customPopupMap_[targetId] = customNode;
-    auto popupNode = customPopupMap_[targetId];
-    customNode->MountToParent(rootNode);
-    customNode->MarkModifyDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::EraseIndexerPopup(int32_t targetId)
+void OverlayManager::RemoveIndexerPopup()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        rootNode->RemoveChild(customPopupMap_[targetId]);
-        customPopupMap_.erase(it);
+    for (const auto& popup : customPopupMap_) {
+        auto popupNode = popup.second;
+        rootNode->RemoveChild(popupNode);
     }
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
-RefPtr<FrameNode> OverlayManager::GetIndexerPopup(int32_t targetId)
-{
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        return customPopupMap_[targetId];
-    }
-    return nullptr;
+    customPopupMap_.clear();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
@@ -691,6 +676,7 @@ bool OverlayManager::RemoveOverlay()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
+    RemoveIndexerPopup();
     auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
         // stage node is at index 0, remove overlay at index 1

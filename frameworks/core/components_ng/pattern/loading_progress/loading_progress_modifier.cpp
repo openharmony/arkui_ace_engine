@@ -32,8 +32,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float TOTAL_ANGLE = 360.0f;
-constexpr float ROTATEX = 100.f;
-constexpr float ROTATEZ = 30.0f;
+constexpr float ROTATEX = -116.0f;
+constexpr float ROTATEY = 30.0f;
+constexpr float ROTATEZ = 22.0f;
 constexpr float COUNT = 50.0f;
 constexpr float HALF = 0.5f;
 constexpr float DOUBLE = 2.0f;
@@ -47,7 +48,7 @@ constexpr float INITIAL_SIZE_SCALE = 0.825f;
 constexpr float INITIAL_OPACITY_SCALE = 0.7f;
 constexpr float COMET_TAIL_ANGLE = 3.0f;
 constexpr int32_t LOADING_DURATION = 1200;
-constexpr float FOLLOW_START = 58.0f;
+constexpr float FOLLOW_START = 72.0f;
 constexpr float FOLLOW_SPAN = 10.0f;
 constexpr float FULL_COUNT = 100.0f;
 constexpr float STAGE1 = 0.25f;
@@ -64,6 +65,9 @@ constexpr float SIZE_SCALE3 = 0.93f;
 constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
+constexpr Dimension REFRESH_LOADING_WIDTH_BASE = 32.0_vp;
+constexpr Dimension REFRESH_COMET_RADIUS = 2.4_vp;
+constexpr Dimension REFRESH_RING_STROKE_WIDTH = 1.76_vp;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : date_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0.0f)),
@@ -87,12 +91,14 @@ void LoadingProgressModifier::onDraw(DrawingContext& context)
     float date = date_->Get();
     auto diameter = std::min(context.width, context.height);
     RingParam ringParam;
-    ringParam.strokeWidth = LoadingProgressUtill::GetRingStrokeWidth(diameter);
+    ringParam.strokeWidth = loadingProgressOwner_ == LoadingProgressOwner::REFRESH ?
+        GetRefreshRingStrokeWidth(context) : LoadingProgressUtill::GetRingStrokeWidth(diameter);
     ringParam.radius = LoadingProgressUtill::GetRingRadius(diameter);
     ringParam.movement = (ringParam.radius * DOUBLE + ringParam.strokeWidth) * centerDeviation_->Get();
 
     CometParam cometParam;
-    cometParam.radius = LoadingProgressUtill::GetCometRadius(diameter);
+    cometParam.radius = loadingProgressOwner_ == LoadingProgressOwner::REFRESH ?
+        GetRefreshCometRadius(context) : LoadingProgressUtill::GetCometRadius(diameter);
     cometParam.alphaScale = cometOpacity_->Get();
     cometParam.sizeScale = cometSizeScale_->Get();
     cometParam.pointCount = GetCometNumber();
@@ -132,8 +138,9 @@ void LoadingProgressModifier::DrawOrbit(
     double angle = TOTAL_ANGLE * date / FULL_COUNT;
     auto* camera_ = new RSCamera3D();
     camera_->Save();
-    camera_->RotateYDegrees(ROTATEZ);
+    camera_->RotateYDegrees(ROTATEY);
     camera_->RotateXDegrees(ROTATEX);
+    camera_->RotateZDegrees(ROTATEZ);
     RSMatrix matrix;
     camera_->ApplyToMatrix(matrix);
     camera_->Restore();
@@ -287,6 +294,9 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
 
 void LoadingProgressModifier::ChangeRefreshFollowData(float refreshFollowRatio)
 {
+    if (isLoading_) {
+        return;
+    }
     CHECK_NULL_VOID(date_);
     auto ratio = CorrectNormalize(refreshFollowRatio);
     date_->Set(FOLLOW_START + FOLLOW_SPAN * ratio);
@@ -305,5 +315,17 @@ float LoadingProgressModifier::CorrectNormalize(float originData)
         ratio = 1.0f;
     };
     return ratio;
+}
+
+float LoadingProgressModifier::GetRefreshCometRadius(DrawingContext& context)
+{
+    return REFRESH_COMET_RADIUS.ConvertToPx() * std::min(context.width, context.height) /
+           REFRESH_LOADING_WIDTH_BASE.ConvertToPx();
+}
+
+float LoadingProgressModifier::GetRefreshRingStrokeWidth(DrawingContext& context)
+{
+    return REFRESH_RING_STROKE_WIDTH.ConvertToPx() * std::min(context.width, context.height) /
+           REFRESH_LOADING_WIDTH_BASE.ConvertToPx();
 }
 } // namespace OHOS::Ace::NG

@@ -51,6 +51,7 @@ public:
     void DrawCustomStyle(DrawingContext& context);
     void RefreshRecycle(DrawingContext& context, Color& color, float scale);
     void ChangeRefreshFollowData(float refreshFollowRatio);
+    void ChangeFadeAwayData(float fadeAwayRatio);
     float CorrectNormalize(float originData);
 
     LoadingProgressOwner GetOwner()
@@ -61,6 +62,9 @@ public:
 private:
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);
+    float GetRefreshCometRadius(DrawingContext& context);
+    float GetRefreshRingStrokeWidth(DrawingContext& context);
+
     uint32_t GetCometNumber();
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<AnimatablePropertyColor> color_;
