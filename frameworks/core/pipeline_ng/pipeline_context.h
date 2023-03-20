@@ -342,6 +342,8 @@ private:
 
     void DumpPipelineInfo() const;
 
+    void RegisterRootEvent();
+
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
     template<typename T>
