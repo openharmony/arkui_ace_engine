@@ -152,9 +152,6 @@ void CheckBoxPattern::OnClick()
     }
     paintProperty->UpdateCheckBoxSelect(!isSelected);
     UpdateState();
-    auto checkboxEventHub = GetEventHub<CheckBoxEventHub>();
-    CHECK_NULL_VOID(checkboxEventHub);
-    checkboxEventHub->UpdateChangeEvent(!isSelected);
 }
 
 void CheckBoxPattern::OnTouchDown()
@@ -258,6 +255,9 @@ void CheckBoxPattern::UpdateState()
         if (lastSelect_ != isSelected) {
             UpdateUIStatus(isSelected);
             SetLastSelect(isSelected);
+            auto checkboxEventHub = GetEventHub<CheckBoxEventHub>();
+            CHECK_NULL_VOID(checkboxEventHub);
+            checkboxEventHub->UpdateChangeEvent(isSelected);
         }
     }
     UpdateCheckBoxGroupStatus(host, checkBoxGroupMap, isSelected);
