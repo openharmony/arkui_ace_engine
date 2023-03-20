@@ -1289,7 +1289,6 @@ void UIContentImpl::Destroy()
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
 {
     LOGI("UIContent OnNewWant");
-    Platform::AceContainer::OnShow(instanceId_);
     std::string params = want.GetStringParam(START_PARAMS_KEY);
     Platform::AceContainer::OnNewRequest(instanceId_, params);
 }
