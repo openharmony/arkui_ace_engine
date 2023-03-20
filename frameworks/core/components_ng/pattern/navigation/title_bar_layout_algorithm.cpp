@@ -270,7 +270,11 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
         TitleBarParentType::NAV_DESTINATION) {
-        if (titleBarNode->GetBackButton()) {
+        auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+        CHECK_NULL_VOID(backButtonNode);
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        if (backButtonLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::GONE) {
             OffsetF offset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()) +
                                          static_cast<float>(BACK_BUTTON_ICON_SIZE.ConvertToPx()) +
                                          static_cast<float>(HORIZONTAL_MARGIN_M.ConvertToPx()),
