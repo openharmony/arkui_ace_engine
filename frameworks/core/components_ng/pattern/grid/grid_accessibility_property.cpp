@@ -76,9 +76,9 @@ AceCollectionInfo GridAccessibilityProperty::GetCollectionInfo() const
     auto gridPattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, aceCollectionInfo);
     auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
-    aceCollectionInfo.rows = gridLayoutInfo.gridMatrix_.size();
+    aceCollectionInfo.rows = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.size());
     if (aceCollectionInfo.rows > 0) {
-        aceCollectionInfo.columns = gridLayoutInfo.gridMatrix_.begin()->second.size();
+        aceCollectionInfo.columns = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.begin()->second.size());
     } else {
         aceCollectionInfo.columns = 0;
     }
