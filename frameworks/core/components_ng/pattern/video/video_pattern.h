@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components/video/video_controller_v2.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/video/video_accessibility_property.h"
 #include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
@@ -56,6 +57,11 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<VideoLayoutAlgorithm>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<VideoAccessibilityProperty>();
     }
 
     void UpdateMuted(bool muted)
@@ -106,6 +112,16 @@ public:
     void SetHiddenChangeEvent(HiddenChangeEvent&& hiddenChangeEvent)
     {
         hiddenChangeEvent_ = std::move(hiddenChangeEvent);
+    }
+
+    uint32_t GetCurrentPos() const
+    {
+        return currentPos_;
+    }
+
+    uint32_t GetDuration() const
+    {
+        return duration_;
     }
 
     bool OnBackPressed();
