@@ -82,6 +82,8 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // create a default instance on demand if none is initialized
   protected localStoragebackStore_: LocalStorage = undefined;
 
+  protected static autoIdProp = Symbol("__ace_id__");
+
   protected get localStorage_() {
     if (!this.localStoragebackStore_) {
       stateMgmtConsole.info(`${this.constructor.name} is accessing LocalStorage without being provided an instance. Creating a default instance.`);
@@ -523,15 +525,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
         if (!item || !(typeof item === 'object') || ((typeof item === 'object') && Array.isArray(item))) {
           return `${index}__${JSON.stringify(item)}`
         } else {
-          const propName = "__ace_id__";
-          if (!item.hasOwnProperty(propName)) {
-            Object.defineProperty(item, propName, {
-              value: UniqueId.get(),
-              writable: false,
-              enumerable: false
-            });
+          if (!item[ViewPU.autoIdProp]) {
+            item[ViewPU.autoIdProp] = UniqueId.get();
           }
-          return item[propName];
+          return item[ViewPU.autoIdProp];
         }
       } // idGenFunc
       idGenFuncUsesIndex = true;
