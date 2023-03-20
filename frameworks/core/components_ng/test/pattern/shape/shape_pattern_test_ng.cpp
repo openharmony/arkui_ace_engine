@@ -70,19 +70,24 @@ HWTEST_F(ShapePatternTestNg, LayoutAlgorithm001, TestSize.Level1)
     shapeAbstactModel.SetHeight(height);
     RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
     RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     EXPECT_EQ(frameNode == nullptr, false);
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     EXPECT_EQ(pattern == nullptr, false);
     auto layoutProperty = frameNode->GetLayoutProperty();
     EXPECT_EQ(layoutProperty == nullptr, false);
-    auto layoutAlgorithm = AceType::DynamicCast<ShapeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    auto layoutAlgorithm = AceType::DynamicCast<BoxLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
     EXPECT_EQ(layoutAlgorithm == nullptr, false);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.percentReference.SetWidth(WIDTH);
     layoutConstraint.percentReference.SetHeight(HEIGHT);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
-    auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), nullptr);
+    auto size = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(),
+                                            AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(size.has_value(), true);
     EXPECT_FLOAT_EQ(size.value().Width(), WIDTH);
     EXPECT_FLOAT_EQ(size.value().Height(), HEIGHT);

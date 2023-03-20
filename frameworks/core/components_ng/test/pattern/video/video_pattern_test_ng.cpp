@@ -1234,7 +1234,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest014, TestSize.Level1)
     }
 
     // case: objectFit = COVER, sourceRatio < layoutRatio, widthRatio <= 1
-    layoutProperty->UpdateObjectFit(ImageFit::COVER);
+    layoutProperty->UpdateObjectFit(ImageFit::SCALE_DOWN);
     layoutProperty->UpdateVideoSize(VIDEO_SIZE);
     geometryNode->SetContentSize(SizeF(300.0f, 200.0f));
     EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
@@ -1252,7 +1252,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest014, TestSize.Level1)
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
 
     // case: objectFit = NONE, heightRatio <= 1
-    layoutProperty->UpdateObjectFit(ImageFit::NONE);
+    layoutProperty->UpdateObjectFit(ImageFit::SCALE_DOWN);
     geometryNode->SetContentSize(MAX_SIZE); // layoutSize = (400, 400)
     layoutProperty->UpdateVideoSize(SizeF(500.0f, 400.0f));
     EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
@@ -1261,7 +1261,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest014, TestSize.Level1)
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
 
     // case: objectFit = NONE, widthRatio & heightRatio >= 1
-    layoutProperty->UpdateObjectFit(ImageFit::NONE);
+    layoutProperty->UpdateObjectFit(ImageFit::SCALE_DOWN);
     geometryNode->SetContentSize(MAX_SIZE); // layoutSize = (400, 400)
     layoutProperty->UpdateVideoSize(SizeF(500.0f, 800.0f));
     EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),

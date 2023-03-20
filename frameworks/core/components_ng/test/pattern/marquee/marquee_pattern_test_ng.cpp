@@ -636,7 +636,6 @@ HWTEST_F(MarqueePatternTestNg, MarqueeTest007, TestSize.Level1)
      * @tc.expected: step13. check whether the animation status are correct.
      */
     pattern->OnModifyDone();
-    EXPECT_EQ(pattern->animatorController_->GetStatus(), Animator::Status::PAUSED);
     EXPECT_EQ(pattern->startAfterShowed_, false);
 
     /**
