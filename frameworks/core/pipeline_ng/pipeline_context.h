@@ -324,6 +324,8 @@ private:
 
     void FlushBuildFinishCallbacks();
 
+    void RegisterRootEvent();
+
     template<typename T>
     struct NodeCompare {
         bool operator()(const T& nodeLeft, const T& nodeRight) const
