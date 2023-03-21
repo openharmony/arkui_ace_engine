@@ -327,6 +327,16 @@ public:
         OnMountToParentDone();
     }
 
+    bool IsExclusiveEventForChild() const
+    {
+        return exclusiveEventForChild_;
+    }
+
+    void SetExclusiveEventForChild(bool exclusiveEventForChild)
+    {
+        exclusiveEventForChild_ = exclusiveEventForChild;
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;
@@ -397,6 +407,8 @@ private:
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
 
+    // for container, this flag controls only the last child in touch area is consuming event.
+    bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
 

@@ -1051,7 +1051,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             consumed = true;
             if ((child->GetHitTestMode() == HitTestMode::HTMBLOCK) ||
                 (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
-                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF)) {
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild())) {
                 break;
             }
         }
@@ -1059,7 +1060,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         // In normal process, the node block the brother node.
         if (childHitResult == HitTestResult::BUBBLING &&
             ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
-                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF))) {
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
             consumed = true;
             break;
         }
