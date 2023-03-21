@@ -236,7 +236,15 @@ class LocalStorage extends NativeLocalStorage {
             stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
             return undefined;
         }
-        let linkResult = p.createLink(linkUser, propName);
+        let linkResult;
+        if (ViewStackProcessor.UsesNewPipeline()) {
+            linkResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleTwoWayPU(p, linkUser, propName)
+                : new SynchedPropertyObjectTwoWayPU(p, linkUser, propName);
+        }
+        else {
+            linkResult = p.createLink(linkUser, propName);
+        }
         linkResult.setInfo(subscribersName);
         return linkResult;
     }
@@ -279,7 +287,15 @@ class LocalStorage extends NativeLocalStorage {
             stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
             return undefined;
         }
-        let propResult = p.createProp(propUser, propName);
+        let propResult;
+        if (ViewStackProcessor.UsesNewPipeline()) {
+            propResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleOneWayPU(p, propUser, propName)
+                : new SynchedPropertyObjectOneWayPU(p, propUser, propName);
+        }
+        else {
+            propResult = p.createProp(propUser, propName);
+        }
         propResult.setInfo(subscribersName);
         return propResult;
     }
