@@ -103,6 +103,7 @@ private:
 
     void PlaceDigitChild(const RefPtr<LayoutWrapper>& indicatorWrapper, const RefPtr<LayoutProperty>& layoutProperty);
     double GetValidEdgeLength(float swiperLength, float indicatorLength, const Dimension& edge);
+    void LayoutOffScreen(LayoutWrapper* layoutWrapper, Axis axis) const;
 
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;
