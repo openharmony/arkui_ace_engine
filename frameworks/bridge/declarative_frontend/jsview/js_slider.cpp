@@ -78,7 +78,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
 double GetStep(double step, double max, double min)
 {
     if (LessOrEqual(step, 0.0) || step > max - min) {
-        step = max - min;
+        step = 1;
     }
     return step;
 }
