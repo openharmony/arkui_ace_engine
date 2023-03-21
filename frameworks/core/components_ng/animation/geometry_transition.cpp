@@ -130,7 +130,7 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
     }
     str += "old value: ";
     str += which.Upgrade() ? std::to_string(which.Upgrade()->GetId()) : "null";
-    str += ", new value: "
+    str += ", new value: ";
     str += value.Upgrade() ? std::to_string(value.Upgrade()->GetId()) : "null";
     LOGD("GeometryTransition %{public}s", str.c_str());
     return ret;
