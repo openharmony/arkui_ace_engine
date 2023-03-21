@@ -1984,7 +1984,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 
     globalRuntime_ = nullptr;
     cardRuntime_ = runtime;
-    JSNApi::TriggerGC(vm);
+    JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework
