@@ -374,7 +374,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
         nextMain == gridLayoutInfo_.gridMatrix_.end()) {
         auto currentIndex = gridLayoutInfo_.endIndex_ + 1;
         float secondLineHeight = -1.0f;
-        for (uint32_t i = mainIter->second.rbegin()->first; i < crossCount_; i++) {
+        for (uint32_t i = (mainIter->second.empty() ? 0 : mainIter->second.rbegin()->first); i < crossCount_; i++) {
             // Step1. Get wrapper of [GridItem]
             auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
             if (!itemWrapper) {
@@ -446,7 +446,7 @@ void GridScrollLayoutAlgorithm::GetTargetIndexInfoWithBenchMark(
             auto gridSpan = layoutProperty->GetCrossSpan(gridLayoutInfo_.axis_);
             if (crossGridReserve >= gridSpan) {
                 crossGridReserve -= gridSpan;
-            } else if (gridLayoutInfo_.crossCount_ >= static_cast<uint32_t>(gridSpan)) {
+            } else if (gridLayoutInfo_.crossCount_ >= gridSpan) {
                 ++mainStartIndex;
                 headOfMainStartLine = currentIndex;
                 crossGridReserve = gridLayoutInfo_.crossCount_ - gridSpan;
