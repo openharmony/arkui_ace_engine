@@ -1439,6 +1439,7 @@ class Environment {
         prop = AppStorage.SetAndProp(key, tmp);
         this.props_.set(key, prop);
         
+        return true;
     }
     envProps(properties) {
         properties.forEach(property => {
@@ -1826,6 +1827,65 @@ SubscribableHandler.IS_OBSERVED_OBJECT = Symbol("_____is_observed_object__");
 SubscribableHandler.RAW_OBJECT = Symbol("_____raw_object__");
 SubscribableHandler.SUBSCRIBE = Symbol("_____subscribe__");
 SubscribableHandler.UNSUBSCRIBE = Symbol("_____unsubscribe__");
+class SubscribableArrayHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+        // In-place array modification functions
+        this.arrFunctions = ["copyWithin", "fill", "reverse", "sort", "splice"];
+    }
+    /**
+     * Get trap for Array type proxy
+     * Functions that modify array in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * In general, functions that change the array length or return a new array, don't
+     * need to be intercepted.
+     * @param target Original array
+     * @param property
+     * @returns
+     */
+    get(target, property) {
+        let ret = super.get(target, property);
+        if (this.arrFunctions.includes(property.toString()) &&
+            typeof ret === "function" && target["length"] > 0) {
+            const self = this;
+            return function () {
+                // execute original function with given arguments
+                ret.apply(this, arguments);
+                self.notifyObjectPropertyHasChanged(property.toString(), this[0]);
+            }.bind(target); // bind "this" to target inside the function
+        }
+        return ret;
+    }
+}
+class SubscribableDateHandler extends SubscribableHandler {
+    constructor(owningProperty) {
+        super(owningProperty);
+    }
+    /**
+     * Get trap for Date type proxy
+     * Functions that modify Date in-place are intercepted and replaced with a function
+     * that executes the original function and notifies the handler of a change.
+     * @param target Original Date object
+     * @param property
+     * @returns
+     */
+    get(target, property) {
+        let ret = super.get(target, property);
+        if (typeof ret === "function" && property.toString() &&
+            property.toString().startsWith('set')) {
+            const self = this;
+            return function () {
+                // execute original function with given arguments
+                ret.apply(this, arguments);
+                self.notifyObjectPropertyHasChanged(property.toString(), this);
+            }.bind(target); // bind "this" to target inside the function
+        }
+        else if (typeof ret === "function") {
+            ret = ret.bind(target);
+        }
+        return ret;
+    }
+}
 class ExtendableProxy {
     constructor(obj, handler) {
         return new Proxy(obj, handler);
@@ -1911,39 +1971,62 @@ class ObservedObject extends ExtendableProxy {
      * this rule applies for each individual object or array found in the recursive process
      * subscriber info will not be copied from the source object to its copy.
      * @param obj object, array of simple type data item to be deep copied
+     * @param variable Variable name of the object to be copied
      * @returns deep copied object, optionally wrapped inside an ObservedObject
      */
-    static GetDeepCopyOfObject(obj) {
-        
-        if (obj === null || typeof obj !== 'object') {
+    static GetDeepCopyOfObject(obj, variable) {
+        if (!obj || typeof obj !== 'object') {
             return obj;
         }
-        let copy = Array.isArray(obj) ? [] : !obj.constructor ? {} : new obj.constructor();
-        Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
-        if (obj instanceof Set) {
-            for (let setKey of obj.keys()) {
-                copy.add(ObservedObject.GetDeepCopyOfObject(setKey));
+        let stack = new Array();
+        let copiedObjects = new Map();
+        return GetDeepCopyOfObjectRecursive(obj);
+        function GetDeepCopyOfObjectRecursive(obj) {
+            if (!obj || typeof obj !== 'object') {
+                return obj;
             }
-        }
-        else if (obj instanceof Map) {
-            for (let mapKey of obj.keys()) {
-                copy.set(mapKey, ObservedObject.GetDeepCopyOfObject(obj.get(mapKey)));
+            const alreadyCopiedObject = copiedObjects.get(obj);
+            if (alreadyCopiedObject) {
+                let msg = `@Prop DeepCopyObject: Found reference to already copied object: Path ${variable ? variable : 'unknown variable'}`;
+                stack.forEach(stackItem => msg += ` - ${stackItem.name}`);
+                stateMgmtConsole.warn(msg);
+                return alreadyCopiedObject;
             }
-        }
-        else if (obj instanceof Object) {
-            for (let objKey of Object.keys(obj)) {
-                copy[objKey] = ObservedObject.GetDeepCopyOfObject(obj[objKey]);
+            let copy;
+            if (obj instanceof Set) {
+                copy = new Set();
+                for (const setKey of obj.keys()) {
+                    stack.push({ name: setKey });
+                    copiedObjects.set(obj, copy);
+                    copy.add(GetDeepCopyOfObjectRecursive(setKey));
+                    stack.pop();
+                }
             }
-        }
-        else if (obj instanceof Date) {
-            copy.setTime(obj.getTime());
-        }
-        for (let key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                copy[key] = ObservedObject.GetDeepCopyOfObject(obj[key]);
+            else if (obj instanceof Map) {
+                copy = new Map();
+                for (const mapKey of obj.keys()) {
+                    stack.push({ name: mapKey });
+                    copiedObjects.set(obj, copy);
+                    copy.set(mapKey, GetDeepCopyOfObjectRecursive(obj.get(mapKey)));
+                    stack.pop();
+                }
             }
+            else if (obj instanceof Date) {
+                copy = new Date();
+                copy.setTime(obj.getTime());
+            }
+            else if (obj instanceof Object) {
+                copy = Array.isArray(obj) ? [] : {};
+                Object.setPrototypeOf(copy, Object.getPrototypeOf(obj));
+                for (const objKey of Object.keys(obj)) {
+                    stack.push({ name: objKey });
+                    copiedObjects.set(obj, copy);
+                    Reflect.set(copy, objKey, GetDeepCopyOfObjectRecursive(obj[objKey]));
+                    stack.pop();
+                }
+            }
+            return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
         }
-        return ObservedObject.IsObservedObject(obj) ? ObservedObject.createNew(copy, null) : copy;
     }
     /**
      * Create a new ObservableObject and subscribe its owner to propertyHasChanged
@@ -1955,7 +2038,9 @@ class ObservedObject extends ExtendableProxy {
         if (ObservedObject.IsObservedObject(obj)) {
             throw new Error("Invalid constructor argument error: ObservableObject contructor called with an ObservedObject as parameer");
         }
-        let handler = new SubscribableHandler(objectOwningProperty);
+        let handler = Array.isArray(obj) ? new SubscribableArrayHandler(objectOwningProperty)
+            : (obj instanceof Date) ? new SubscribableDateHandler(objectOwningProperty)
+                : new SubscribableHandler(objectOwningProperty);
         super(obj, handler);
         if (ObservedObject.IsObservedObject(obj)) {
             stateMgmtConsole.error("ObservableOject constructor: INTERNAL ERROR: after jsObj is observedObject already");
@@ -3424,7 +3509,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             this.source_.set(sourceChangedValue);
         }
         else {
-            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset from '${JSON.stringify(this.localCopyObservedObject)}' to '${JSON.stringify(sourceChangedValue)}' No source_. Internal error!`);
+            stateMgmtConsole.error(`SynchedPropertyObjectOneWayPU[${this.id__()}, '${this.info() || "unknown"}']: reset --- No source_. Internal error!`);
         }
     }
     /*
@@ -3441,7 +3526,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
             stateMgmtConsole.error(`SynchedPropertyOneWayObjectPU[${this.id__()}]: setLocalValue new value must be an Object. Not setting.`);
             return false;
         }
-        // unsubscribe from old wappedValue ObservedOject  
+        // unsubscribe from old wrappedValue ObservedOject  
         ObservedObject.removeOwningProperty(this.localCopyObservedObject, this);
         if (newObservedObjectValue == undefined) {
             // case: newObservedObjectValue undefined
@@ -3451,7 +3536,7 @@ class SynchedPropertyObjectOneWayPU extends ObservedPropertyObjectAbstractPU {
         // deep copy value 
         // needed whenever newObservedObjectValue comes from source
         // not needed on a local set (aka when called from set() method)
-        let copy = needDeepCopy ? ObservedObject.GetDeepCopyOfObject(newObservedObjectValue) : newObservedObjectValue;
+        let copy = needDeepCopy ? ObservedObject.GetDeepCopyOfObject(newObservedObjectValue, this.info_) : newObservedObjectValue;
         if (ObservedObject.IsObservedObject(copy)) {
             // case: new ObservedObject
             this.localCopyObservedObject = copy;
