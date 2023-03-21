@@ -30,14 +30,36 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-namespace {
-
-constexpr uint32_t MIN_GRID_COUNTS = 2;
-constexpr uint32_t MAX_GRID_COUNTS = 6;
-
-} // namespace
-
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr uint32_t MIN_GRID_COUNTS = 2;
+constexpr uint32_t GRID_COUNTS_4 = 4;
+constexpr uint32_t GRID_COUNTS_6 = 6;
+constexpr uint32_t GRID_COUNTS_8 = 8;
+constexpr uint32_t GRID_COUNTS_12 = 12;
+
+uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(columnInfo, GRID_COUNTS_8);
+    auto currentColumns = columnInfo->GetParent()->GetColumns();
+    auto maxGridCounts = GRID_COUNTS_8;
+    switch (currentColumns) {
+        case GRID_COUNTS_4:
+            maxGridCounts = GRID_COUNTS_4;
+            break;
+        case GRID_COUNTS_8:
+            maxGridCounts = GRID_COUNTS_6;
+            break;
+        case GRID_COUNTS_12:
+            maxGridCounts = GRID_COUNTS_8;
+            break;
+        default:
+            break;
+    }
+    return maxGridCounts;
+}
+} // namespace
 
 void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
@@ -90,7 +112,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto leftSpace = position_.GetX();
     auto rightSpace = screenSize_.Width() - leftSpace;
     float maxWidth = std::min(std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding_,
-        columnInfo->GetWidth(MAX_GRID_COUNTS));
+        columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
     childConstraint.maxSize.SetWidth(maxWidth);
     childConstraint.percentReference.SetWidth(maxWidth);
 
@@ -144,7 +166,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         y -= pageOffset_.GetY();
     }
     x = std::clamp(x, 0.0f, screenSize_.Width() - size.Width() - outPadding_ * 2.0f);
-    y = std::clamp(y, 0.0f, screenSize_.Height() - size.Height() - outPadding_* 2.0f);
+    y = std::clamp(y, 0.0f, screenSize_.Height() - size.Height() - outPadding_ * 2.0f);
 
     MarginPropertyF margin;
     if (!menuPattern->IsMultiMenu()) {
