@@ -270,9 +270,6 @@ private:
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
-    // Init auto play, show next item in duration time when auto play.
-    void InitAutoPlay();
-
     // Init controller of swiper, controller support showNext, showPrevious and finishAnimation interface.
     void InitSwiperController();
 
@@ -287,7 +284,8 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
 
-    void PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false);
+    void PlayTranslateAnimation(
+        float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, bool needPostTask = false);
     void PlaySpringAnimation(double dragVelocity);
     void PlayFadeAnimation();
 
@@ -297,8 +295,6 @@ private:
     void StopTranslateAnimation();
     void StopSpringAnimation();
 
-    // Timer tick callback, duration is in millisecond.
-    void Tick(uint64_t duration);
     void StopAutoPlay();
     void StartAutoPlay();
     bool IsOutOfBoundary(float mainOffset) const;
@@ -324,6 +320,11 @@ private:
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
+    void PostTranslateTask(uint32_t delayTime);
+    void RegisterVisibleAreaChange();
+    bool NeedAutoPlay() const;
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool needPostTask);
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -357,10 +358,12 @@ private:
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
     bool isInit_ = true;
+    bool hasVisibleChangeRegistered_ = false;
+    bool isVisible_ = true;
+    bool taskPosted_ = false;
+    bool autoPlayStopped_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
-
-    uint64_t elapsedTime_ = 0; // millisecond.
 
     ChangeEventPtr changeEvent_;
 
