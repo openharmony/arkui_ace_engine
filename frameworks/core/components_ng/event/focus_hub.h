@@ -304,7 +304,7 @@ public:
         isDefaultGroupFocus_ = isDefaultGroupFocus;
     }
 
-    bool IsFocusOnTouch() const
+    std::optional<bool> IsFocusOnTouch() const
     {
         return isFocusOnTouch_;
     }
@@ -337,7 +337,7 @@ private:
     OnKeyCallbackFunc onKeyEventCallback_;
     GestureEventFunc onClickEventCallback_;
 
-    bool isFocusOnTouch_ { false };
+    std::optional<bool> isFocusOnTouch_;
     bool isDefaultFocus_ = { false };
     bool isDefaultHasFocused_ = { false };
     bool isDefaultGroupFocus_ = { false };
@@ -664,7 +664,7 @@ public:
         focusCallbackEvents_->SetIsDefaultGroupFocus(isDefaultGroupFocus);
     }
 
-    bool IsFocusOnTouch() const
+    std::optional<bool> IsFocusOnTouch() const
     {
         return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : false;
     }

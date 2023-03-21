@@ -197,7 +197,7 @@ void FrameNode::FocusToJsonValue(std::unique_ptr<JsonValue>& json) const
         focused = focusHub->IsCurrentFocus();
         defaultFocus = focusHub->IsDefaultFocus();
         groupDefaultFocus = focusHub->IsDefaultGroupFocus();
-        focusOnTouch = focusHub->IsFocusOnTouch();
+        focusOnTouch = focusHub->IsFocusOnTouch().value_or(false);
         tabIndex = focusHub->GetTabIndex();
     }
     json->Put("enabled", enabled);
