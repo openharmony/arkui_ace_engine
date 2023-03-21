@@ -965,11 +965,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest021, TestSize.Level1)
 HWTEST_F(RefreshPatternTestNg, RefreshTest022, TestSize.Level1)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->progressChild_ = frameNode;
     pattern->OnExitAnimationFinish();
 
@@ -977,7 +977,6 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest022, TestSize.Level1)
     refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
     pattern->customBuilder_ = frameNode;
     pattern->OnModifyDone();
-    EXPECT_FALSE(pattern->customBuilder_ == nullptr);
     pattern->scrollOffset_.SetY(0.2f);
     pattern->OnExitAnimationFinish();
     EXPECT_EQ(pattern->scrollOffset_.GetY(), 0.0f);
@@ -994,10 +993,9 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest023, TestSize.Level1)
     modelNG.Create();
     modelNG.SetCustomBuilder(nullptr);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
-    EXPECT_TRUE(pattern->customBuilder_ == nullptr);
+    ASSERT_NE(pattern, nullptr);
     pattern->scrollOffset_.SetY(10.0f);
     float delta = 20.0f;
 
@@ -1015,13 +1013,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest024, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
-    EXPECT_FALSE(refreshRenderProperty == nullptr);
+    ASSERT_NE(refreshRenderProperty, nullptr);
     pattern->scrollOffset_.SetY(0.2f);
     refreshLayoutProperty->UpdateCustomBuilderIndex(1);
     refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
@@ -1045,12 +1043,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest025, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
-    EXPECT_FALSE(refreshRenderProperty == nullptr);
+    ASSERT_NE(refreshRenderProperty, nullptr);
 
     refreshRenderProperty->UpdateIsRefreshing(true);
     pattern->HandleDragStart();
@@ -1067,11 +1066,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest026, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     pattern->customBuilder_ = frameNode;
-    EXPECT_FALSE(pattern->customBuilder_ == nullptr);
+    ASSERT_NE(pattern->customBuilder_, nullptr);
 
     pattern->HandleDragStart();
     EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::DRAG);
@@ -1087,11 +1086,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest027, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     float delta = 100.0;
     refreshLayoutProperty->UpdateIsRefresh(true);
     pattern->HandleDragUpdate(delta);
@@ -1112,11 +1111,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest028, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     refreshLayoutProperty->UpdateCustomBuilderIndex(1);
     refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
     refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(20.0f, 20.0f));
@@ -1141,9 +1140,9 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest029, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     pattern->isRefreshing_ = true;
 
     pattern->HandleDragEnd();
@@ -1160,11 +1159,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest030, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->scrollOffset_.SetY(70.0f);
     refreshLayoutProperty->UpdateCustomBuilderIndex(1);
     refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
@@ -1185,11 +1184,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest031, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->scrollOffset_.SetY(50.0f);
     pattern->HandleDragEnd();
     EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
@@ -1209,11 +1208,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest032, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->scrollOffset_.SetY(70.0f);
     refreshLayoutProperty->UpdateCustomBuilderIndex(1);
     refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
@@ -1233,20 +1232,20 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest033, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_FALSE(customNode == nullptr);
+    ASSERT_NE(customNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-    EXPECT_FALSE(textChild == nullptr);
+    ASSERT_NE(textChild, nullptr);
     frameNode->AddChild(textChild);
     auto loadingProgressChild =
         FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
-    EXPECT_FALSE(loadingProgressChild == nullptr);
+    ASSERT_NE(loadingProgressChild, nullptr);
     frameNode->AddChild(loadingProgressChild);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->AddCustomBuilderNode(customNode);
     EXPECT_TRUE(refreshLayoutProperty->GetIsCustomBuilderExist() == true);
 
@@ -1269,11 +1268,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest034, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(65.0, 65.0));
     pattern->CustomBuilderAppear();
     EXPECT_TRUE(refreshLayoutProperty->GetIsCustomBuilderExist() == false);
@@ -1294,11 +1293,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest035, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->customBuilder_ = frameNode;
     pattern->triggerLoadingDistance_ = 180.0f;
     pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
@@ -1326,9 +1325,9 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest036, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     pattern->refreshStatus_ = RefreshStatus::REFRESH;
 
     pattern->TriggerFinish();
@@ -1345,11 +1344,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest037, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->customBuilder_ = frameNode;
     pattern->triggerLoadingDistance_ = 180.0f;
     pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
@@ -1368,11 +1367,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest038, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->customBuilder_ = frameNode;
     pattern->triggerLoadingDistance_ = 180.0f;
     pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
@@ -1391,18 +1390,18 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest039, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-    EXPECT_FALSE(textChild == nullptr);
+    ASSERT_NE(textChild, nullptr);
     frameNode->AddChild(textChild);
     auto loadingProgressChild =
         FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, -1, AceType::MakeRefPtr<LoadingProgressPattern>());
-    EXPECT_FALSE(loadingProgressChild == nullptr);
+    ASSERT_NE(loadingProgressChild, nullptr);
     frameNode->AddChild(loadingProgressChild);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->customBuilder_ = frameNode;
     pattern->triggerLoadingDistance_ = 16.0f;
     pattern->scrollOffset_.SetY(60.0f);
@@ -1423,13 +1422,13 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest040, TestSize.Level1)
     RefreshModelNG modelNG;
     modelNG.Create();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_FALSE(frameNode == nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<RefreshPattern> pattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
-    EXPECT_FALSE(refreshLayoutProperty == nullptr);
+    ASSERT_NE(refreshLayoutProperty, nullptr);
     auto refreshRenderProperty = frameNode->GetPaintProperty<RefreshRenderProperty>();
-    EXPECT_FALSE(refreshRenderProperty == nullptr);
+    ASSERT_NE(refreshRenderProperty, nullptr);
     DirtySwapConfig swapConfig;
     pattern->customBuilder_ = frameNode;
     pattern->triggerLoadingDistance_ = 16.0f;
