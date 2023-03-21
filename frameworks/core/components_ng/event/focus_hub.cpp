@@ -340,7 +340,8 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
     if (!focusCallbackEvents_) {
         focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
     }
-    if (focusCallbackEvents_->IsFocusOnTouch() == isFocusOnTouch) {
+    if (focusCallbackEvents_->IsFocusOnTouch().has_value() &&
+        focusCallbackEvents_->IsFocusOnTouch().value() == isFocusOnTouch) {
         return;
     }
     focusCallbackEvents_->SetIsFocusOnTouch(isFocusOnTouch);

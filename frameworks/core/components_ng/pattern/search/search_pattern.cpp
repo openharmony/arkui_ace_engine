@@ -332,28 +332,34 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     if (event.code == KeyCode::KEY_DPAD_LEFT || event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
             focusChoice_ = FocusChoice::SEARCH;
-        } else if (focusChoice_ == FocusChoice::SEARCH_BUTTON) {
+            PaintFocusState();
+            return true;
+        }
+        if (focusChoice_ == FocusChoice::SEARCH_BUTTON) {
             if (NearZero(cancelButtonSize_.Height())) {
                 focusChoice_ = FocusChoice::SEARCH;
             } else {
                 focusChoice_ = FocusChoice::CANCEL_BUTTON;
             }
+            PaintFocusState();
+            return true;
         }
-        PaintFocusState();
-        return true;
     }
-    if (event.code == KeyCode::KEY_DPAD_RIGHT || event.code == KeyCode::KEY_TAB) {
+    if (event.code == KeyCode::KEY_DPAD_RIGHT || (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::SEARCH) {
             if (NearZero(cancelButtonSize_.Height())) {
                 focusChoice_ = FocusChoice::SEARCH_BUTTON;
             } else {
                 focusChoice_ = FocusChoice::CANCEL_BUTTON;
             }
-        } else if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
-            focusChoice_ = FocusChoice::SEARCH_BUTTON;
+            PaintFocusState();
+            return true;
         }
-        PaintFocusState();
-        return true;
+        if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            focusChoice_ = FocusChoice::SEARCH_BUTTON;
+            PaintFocusState();
+            return true;
+        }
     }
 
     auto host = GetHost();
