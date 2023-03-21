@@ -1300,61 +1300,13 @@ HWTEST_F(GridPatternTestNg, GridSelectTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Click the (0, 0) point of firstItem.
-     * @tc.expected: The 1st item is selected.
+     * @tc.expected: item not selected on MouseAction::PRESS.
      */
     info.SetAction(MouseAction::PRESS);
     info.SetLocalLocation(Offset(0.f, 0.f));
     pattern->HandleMouseEventWithoutKeyboard(info);
     RefPtr<GridItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
-    EXPECT_TRUE(firstItemPattern->IsSelected());
-    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
-    pattern->HandleMouseEventWithoutKeyboard(info);
-
-    /**
-     * @tc.steps: step5. Click on the boundary between the 1st and 2nd items.
-     * @tc.expected: The 1st and 2nd items are selected.
-     */
-    info.SetAction(MouseAction::PRESS);
-    info.SetLocalLocation(Offset(180.f, 50.f));
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    firstItemPattern = GetItemPattern(frameNode, 0);
-    EXPECT_TRUE(firstItemPattern->IsSelected());
-    RefPtr<GridItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
-    EXPECT_TRUE(secondItemPattern->IsSelected());
-    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
-    pattern->HandleMouseEventWithoutKeyboard(info);
-
-    /**
-     * @tc.steps: step5. Click on the boundary between the 1st and 5th items.
-     * @tc.expected: The 1st and 2nd items are selected.
-     */
-    info.SetAction(MouseAction::PRESS);
-    info.SetLocalLocation(Offset(90.f, 100.f));
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    // When mouse press, ClearMultiSelect func would deselect all items.
-    EXPECT_FALSE(secondItemPattern->IsSelected());
-    firstItemPattern = GetItemPattern(frameNode, 0);
-    EXPECT_TRUE(firstItemPattern->IsSelected());
-    RefPtr<GridItemPattern> fifthItemPattern = GetItemPattern(frameNode, 4);
-    EXPECT_TRUE(fifthItemPattern->IsSelected());
-    info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
-    pattern->HandleMouseEventWithoutKeyboard(info);
-
-    /**
-     * @tc.steps: step7. Click on the halfway point between the 1st, 2nd, 5th, 6th items.
-     * @tc.expected: The 1st, 2nd, 5th, 6th items are selected.
-     */
-    info.SetAction(MouseAction::PRESS);
-    info.SetLocalLocation(Offset(180.f, 100.f));
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    firstItemPattern = GetItemPattern(frameNode, 0);
-    EXPECT_TRUE(firstItemPattern->IsSelected());
-    secondItemPattern = GetItemPattern(frameNode, 1);
-    EXPECT_TRUE(secondItemPattern->IsSelected());
-    fifthItemPattern = GetItemPattern(frameNode, 4);
-    EXPECT_TRUE(fifthItemPattern->IsSelected());
-    RefPtr<GridItemPattern> sixthItemPattern = GetItemPattern(frameNode, 5);
-    EXPECT_TRUE(sixthItemPattern->IsSelected());
+    EXPECT_FALSE(firstItemPattern->IsSelected());
     info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
     pattern->HandleMouseEventWithoutKeyboard(info);
 }
