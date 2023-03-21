@@ -38,12 +38,17 @@ void MountNavBar(const RefPtr<NavigationGroupNode>& hostNode)
     CHECK_NULL_VOID(navBarLayoutProperty);
     auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-        navBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+
+    if (navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         eventHub->FireNavBarStateChangeEvent(false);
     } else {
-        navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        eventHub->FireNavBarStateChangeEvent(true);
+        if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
+            navBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+            eventHub->FireNavBarStateChangeEvent(false);
+        } else {
+            navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+            eventHub->FireNavBarStateChangeEvent(true);
+        }
     }
     navBarNode->MarkModifyDone();
 }

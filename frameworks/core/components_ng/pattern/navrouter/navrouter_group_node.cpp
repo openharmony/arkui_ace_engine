@@ -190,7 +190,6 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
                 layoutProperty->UpdateDestinationChange(true);
                 return;
             }
-
             navRouter->BackToNavBar(navigation);
             navRouter->SetOnStateChangeFalse(navDestination, navigation, true);
             layoutProperty->UpdateDestinationChange(false);
@@ -284,9 +283,8 @@ void NavRouterGroupNode::SetOnStateChangeFalse(
         return;
     }
 
-    if (isBackButton) {
-        auto newDestiantion = AceType::DynamicCast<FrameNode>(navDestination->GetPreNode());
-        CHECK_NULL_VOID(newDestiantion);
+    auto newDestiantion = AceType::DynamicCast<FrameNode>(navDestination->GetPreNode());
+    if (isBackButton && newDestiantion) {
         auto newEventHub = newDestiantion->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(newEventHub);
         newEventHub->FireChangeEvent(true);
