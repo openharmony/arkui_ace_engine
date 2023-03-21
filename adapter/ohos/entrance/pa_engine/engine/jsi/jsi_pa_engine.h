@@ -28,12 +28,12 @@
 #include "values_bucket.h"
 #include "want.h"
 
-#include "adapter/ohos/entrance/pa_engine/backend_delegate.h"
 #include "adapter/ohos/entrance/pa_engine/engine/common/js_backend_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/js_message_dispatcher.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
+#include "js_backend_asset_manager.h"
 #include "runtime.h"
 
 namespace OHOS::Ace {
@@ -53,20 +53,14 @@ public:
     explicit JsiPaEngine(int32_t instanceId) : instanceId_(instanceId) {}
     ~JsiPaEngine() override;
 
-    bool Initialize(const RefPtr<BackendDelegate>& delegate) override;
+    bool Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type) override;
+    void SetAssetManager(const RefPtr<AssetManager>& assetManager) override;
+
     // Load and initialize a JS bundle into the JS Framework
     void LoadJs(const std::string& url, const OHOS::AAFwk::Want& want) override;
-    // Fire AsyncEvent on JS
-    void FireAsyncEvent(const std::string& eventId, const std::string& param) override;
-    // Fire SyncEvent on JS
-    void FireSyncEvent(const std::string& eventId, const std::string& param) override;
-
-    RefPtr<GroupJsBridge> GetGroupJsBridge() override;
-    void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher) override;
 
     // destroy application instance according packageName
     void DestroyApplication(const std::string& packageName) override;
-    void OnCommandApplication(const std::string& intent, int startId) override;
 
     // data
     int32_t Insert(const Uri& uri, const OHOS::NativeRdb::ValuesBucket& value, const CallingInfo& callingInfo) override;
@@ -104,9 +98,7 @@ public:
     void OnVisibilityChanged(const std::map<int64_t, int32_t>& formEventsMap) override;
     int32_t OnAcquireFormState(const OHOS::AAFwk::Want& want) override;
     bool OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams) override;
-    void DumpHeapSnapshot(bool isPrivate) override;
 
-    RefPtr<BackendDelegate> GetDelegate() const;
     std::shared_ptr<JsRuntime> GetJsRuntime() const;
     NativeEngine* GetNativeEngine() const;
 
@@ -159,7 +151,6 @@ private:
     void RegisterInitWorkerFunc();
     void RegisterAssetFunc();
     bool InitJsEnv(bool debuggerMode, const std::unordered_map<std::string, void*>& extraNativeObject);
-    bool FireJsEvent(const std::string& eventId);
     void RegisterPaModule();
     void RegisterConsoleModule();
     void RegisterConsoleModule(ArkNativeEngine* engine);
@@ -180,7 +171,9 @@ private:
     int32_t instanceId_ = 0;
     std::unique_ptr<AbilityRuntime::Runtime> jsAilityRuntime_ = nullptr;
     std::shared_ptr<JsRuntime> runtime_ = nullptr;
-    RefPtr<BackendDelegate> backendDelegate_ = nullptr;
+    RefPtr<TaskExecutor> taskExecutor_ = nullptr;
+    RefPtr<JsBackendAssetManager> jsBackendAssetManager_ = nullptr;
+    BackendType type_ = BackendType::SERVICE;
     bool blockWaiting_ = false;
     shared_ptr<JsValue> asyncResult_ = nullptr;
     bool isDebugMode_ = true;
