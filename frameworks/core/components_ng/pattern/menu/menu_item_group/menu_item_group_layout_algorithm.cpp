@@ -42,6 +42,7 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutConstraint);
 
     auto childConstraint = props->CreateChildConstraint();
+    childConstraint.minSize = layoutConstraint->minSize;
 
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         childConstraint.selfIdealSize.SetWidth(layoutConstraint->selfIdealSize.Width().value());
