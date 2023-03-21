@@ -61,8 +61,6 @@ public:
 private:
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);
-    float GetRefreshCometRadius(DrawingContext& context);
-    float GetRefreshRingStrokeWidth(DrawingContext& context);
 
     uint32_t GetCometNumber();
     RefPtr<AnimatablePropertyFloat> date_;
@@ -71,6 +69,7 @@ private:
     RefPtr<AnimatablePropertyFloat> cometOpacity_;
     RefPtr<AnimatablePropertyFloat> cometSizeScale_;
     RefPtr<AnimatablePropertyFloat> cometTailLen_;
+    RefPtr<AnimatablePropertyFloat> sizeScale_;
 
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;

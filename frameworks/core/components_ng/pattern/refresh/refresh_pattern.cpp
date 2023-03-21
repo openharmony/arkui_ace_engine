@@ -53,8 +53,6 @@ constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
 constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
 constexpr Dimension CUSTOM_BUILDER_HIGHT_LIGHT_SIZE = 32.0_vp;
 constexpr float DEFAULT_FRICTION = 64.0f;
-constexpr float HALF = 0.5f;
-constexpr float TWO = 2.0f;
 constexpr int32_t STATE_PROGRESS_LOADING = 1;
 constexpr int32_t STATE_PROGRESS_RECYCLE = 2;
 constexpr int32_t STATE_PROGRESS_DRAG = 3;
@@ -204,11 +202,16 @@ void RefreshPattern::LoadingProgressReset()
 {
     CHECK_NULL_VOID(progressChild_);
     UpdateLoadingProgress(STATE_PROGRESS_LOADING, 0.0f);
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    progressLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
     ResetLoadingProgressColor();
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
     scrollOffset_.SetY(0.0f);
+    progressChild_->MarkDirtyNode();
 }
 
 void RefreshPattern::OnExitAnimationFinish()
@@ -343,11 +346,6 @@ void RefreshPattern::UpdateLoadingProgress(int32_t state, float ratio)
             break;
         default:;
     }
-    progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(
-        CalcLength(
-            LOADING_PROGRESS_SIZE.ConvertToPx() * (std::sqrt(TWO) * HALF + (1.0 - std::sqrt(TWO) * HALF) * scale)),
-        CalcLength(
-            LOADING_PROGRESS_SIZE.ConvertToPx() * (std::sqrt(TWO) * HALF + (1.0 - std::sqrt(TWO) * HALF) * scale))));
     auto progressContext = progressChild_->GetRenderContext();
     CHECK_NULL_VOID_NOLOG(progressContext);
     progressContext->UpdateOpacity(scale);
