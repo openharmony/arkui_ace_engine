@@ -36,10 +36,10 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -112,8 +112,8 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!textFieldOverlayModifier_) {
-            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this),
-                AceType::WeakClaim(AceType::RawPtr(GetScrollBar())), GetScrollEdgeEffect());
+            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(
+                WeakClaim(this), AceType::WeakClaim(AceType::RawPtr(GetScrollBar())), GetScrollEdgeEffect());
         }
         if (!textFieldContentModifier_) {
             textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
@@ -470,6 +470,9 @@ public:
 
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
+
+    void InitSurfaceChangedCallback();
+    void InitSurfacePositionChangedCallback();
 
     bool HasSurfaceChangedCallback()
     {

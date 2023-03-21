@@ -388,6 +388,7 @@ void SearchModelNG::SetPlaceholderFont(const Font& font)
     if (!font.fontFamilies.empty()) {
         textFieldLayoutProperty->UpdatePlaceholderFontFamily(font.fontFamilies);
     }
+    textFieldLayoutProperty->UpdatePreferredPlaceholderLineHeightNeedToUpdate(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -411,6 +412,7 @@ void SearchModelNG::SetTextFont(const Font& font)
     if (!font.fontFamilies.empty()) {
         textFieldLayoutProperty->UpdateFontFamily(font.fontFamilies);
     }
+    textFieldLayoutProperty->UpdatePreferredTextLineHeightNeedToUpdate(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -514,33 +516,27 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
         V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto textEditingValue = pattern->GetTextEditingValue();
     if (textFieldLayoutProperty) {
-        if (value) {
-            if (!textFieldLayoutProperty->HasLastValue() || textFieldLayoutProperty->GetLastValue() != value.value()) {
-                pattern->InitEditingValueText(value.value());
-                textFieldLayoutProperty->UpdateLastValue(value.value());
-                textFieldLayoutProperty->UpdateValue(value.value());
-            }
+        if (value.has_value() && value.value() != textEditingValue.text) {
+            pattern->InitEditingValueText(value.value());
         }
-        if (placeholder) {
-            textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());
-        }
+        textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
         textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
     }
-
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
-
+    pattern->InitSurfaceChangedCallback();
+    pattern->InitSurfacePositionChangedCallback();
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-    textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
 
     PaddingProperty padding;
     padding.left = CalcLength(0.0);
@@ -550,8 +546,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     if (!hasTextFieldNode) {
         frameNode->MountToParent(parentNode);
-        frameNode->MarkModifyDone();
     }
+    frameNode->MarkModifyDone();
 }
 
 void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode)

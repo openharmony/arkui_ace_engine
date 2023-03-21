@@ -67,7 +67,7 @@ void ButtonView::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const st
     auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
     auto textStyle = buttonTheme->GetTextStyle();
     textLayoutProperty->UpdateContent(label);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateMaxLines(buttonTheme->GetTextMaxLines());
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());

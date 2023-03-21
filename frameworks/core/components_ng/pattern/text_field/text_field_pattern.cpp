@@ -2712,6 +2712,44 @@ void TextFieldPattern::HandleSurfacePositionChanged(int32_t posX, int32_t posY) 
     UpdateCaretInfoToController();
 }
 
+void TextFieldPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
+                }
+            });
+        LOGI("Add surface changed callback id %{public}d", callbackId);
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
+}
+
+void TextFieldPattern::InitSurfacePositionChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfacePositionChangedCallback()) {
+        auto callbackId =
+            pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t posX, int32_t posY) {
+                auto pattern = weak.Upgrade();
+                if (pattern) {
+                    pattern->HandleSurfacePositionChanged(posX, posY);
+                }
+            });
+        LOGI("Add position changed callback id %{public}d", callbackId);
+        UpdateSurfacePositionChangedCallbackId(callbackId);
+    }
+}
+
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     LOGI("Handle DeleteBackward %{public}d characters", length);
