@@ -126,6 +126,7 @@ const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj)
     return *nodePtr;
 #else
     return nullptr;
+}
 #endif
 }
 
