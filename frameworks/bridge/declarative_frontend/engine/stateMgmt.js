@@ -3937,6 +3937,13 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
 */
 // denotes a missing elemntId, this is the case during initial render
 const UndefinedElmtId = -1;
+// Create ID generator at TS/JS side to avoid hops to native
+class UniqueId {
+    static get() {
+        return "autoid_" + (++UniqueId.currentId);
+    }
+}
+UniqueId.currentId = Date.now();
 // Nativeview
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -4324,7 +4331,17 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         if (idGenFunc === undefined) {
             
-            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
+            idGenFunc = (item, index) => {
+                if (!item || !(typeof item === 'object') || ((typeof item === 'object') && Array.isArray(item))) {
+                    return `${index}__${JSON.stringify(item)}`;
+                }
+                else {
+                    if (!item[ViewPU.autoIdProp]) {
+                        item[ViewPU.autoIdProp] = UniqueId.get();
+                    }
+                    return item[ViewPU.autoIdProp];
+                }
+            }; // idGenFunc
             idGenFuncUsesIndex = true;
         }
         let diffIndexArray = []; // New indexes compared to old one.
@@ -4415,6 +4432,7 @@ class ViewPU extends NativeViewPartialUpdate {
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
+ViewPU.autoIdProp = Symbol("__ace_id__");
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
