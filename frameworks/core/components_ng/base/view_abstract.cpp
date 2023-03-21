@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/option/option_paint_property.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -69,7 +70,13 @@ void ViewAbstract::SetWidth(const CalcLength& width)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, std::nullopt));
+    // get previously user defined ideal height
+    std::optional<CalcLength> height = std::nullopt;
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        height = layoutConstraint->selfIdealSize->Height();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
 void ViewAbstract::SetHeight(const CalcLength& height)
@@ -82,7 +89,13 @@ void ViewAbstract::SetHeight(const CalcLength& height)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, height));
+    // get previously user defined ideal width
+    std::optional<CalcLength> width = std::nullopt;
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (layoutConstraint && layoutConstraint->selfIdealSize) {
+        width = layoutConstraint->selfIdealSize->Width();
+    }
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, height));
 }
 
 void ViewAbstract::ClearWidthOrHeight(bool isWidth)
