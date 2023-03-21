@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -650,39 +650,54 @@ void RosenRenderContext::PaintAccessibilityFocus()
     rsNode_->DrawOnNode(Rosen::RSModifierType::OVERLAY_STYLE, paintAccessibilityFocusTask);
 }
 
+void RosenRenderContext::BdImagePaintTask(RSCanvas& canvas)
+{
+    CHECK_NULL_VOID(GetBorderImage());
+    auto paintRect = GetPaintRectWithoutTransform();
+    if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProps = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProps);
+    const auto& widthProp = layoutProps->GetBorderWidthProperty();
+
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dipScale = pipeline->GetDipScale();
+
+    CHECK_NULL_VOID(bdImage_);
+    auto image = DynamicCast<SkiaCanvasImage>(bdImage_)->GetCanvasImage();
+    CHECK_NULL_VOID(image);
+    RSImage rsImage(&image);
+
+    BorderImagePainter borderImagePainter(*GetBdImage(), widthProp, paintRect.GetSize(), rsImage, dipScale);
+    borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), canvas);
+}
+
 void RosenRenderContext::PaintBorderImage()
 {
     CHECK_NULL_VOID(rsNode_);
-    auto paintBorderImageTask = [weak = WeakClaim(this)](std::shared_ptr<SkCanvas> canvas) {
+
+    auto paintTask = [weak = WeakClaim(this)](RSCanvas& canvas) {
         auto ctx = weak.Upgrade();
-        CHECK_NULL_VOID(ctx && ctx->GetBorderImage());
-        CHECK_NULL_VOID(ctx->bdImageLoadingCtx_ && ctx->bdImage_);
-
-        auto layoutProperty = ctx->GetHost()->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        auto paintRect = ctx->GetPaintRectWithoutTransform();
-        if (NearZero(paintRect.Width()) || NearZero(paintRect.Height())) {
-            return;
-        }
-        auto borderWidthProperty = layoutProperty->GetBorderWidthProperty()
-                                       ? (*layoutProperty->GetBorderWidthProperty())
-                                       : BorderWidthProperty();
-
-        auto image = DynamicCast<SkiaCanvasImage>(ctx->bdImage_)->GetCanvasImage();
-        CHECK_NULL_VOID(image);
-        RSImage rsImage(&ctx->bdImage_);
-        RSCanvas rsCanvas(&canvas);
-        BorderImagePainter borderImagePainter(layoutProperty->GetBorderWidthProperty() != nullptr, *ctx->GetBdImage(),
-            borderWidthProperty, paintRect.GetSize(), rsImage, PipelineBase::GetCurrentContext()->GetDipScale());
-        borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
+        CHECK_NULL_VOID(ctx);
+        ctx->BdImagePaintTask(canvas);
     };
 
-    rsNode_->DrawOnNode(Rosen::RSModifierType::FOREGROUND_STYLE, paintBorderImageTask);
+    if (!borderImageModifier_) {
+        borderImageModifier_ = std::make_shared<BorderImageModifier>();
+        rsNode_->AddModifier(borderImageModifier_);
+    }
+    borderImageModifier_->SetPaintTask(std::move(paintTask));
+    borderImageModifier_->Modify();
 }
 
 DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto rosenRenderContext = weak.Upgrade();
         CHECK_NULL_VOID(rosenRenderContext);
         auto imageSourceInfo = rosenRenderContext->GetBorderImageSource().value_or(ImageSourceInfo(""));
@@ -694,12 +709,11 @@ DataReadyNotifyTask RosenRenderContext::CreateBorderImageDataReadyCallback()
         LOGI("borderImage data ready %{public}s", sourceInfo.ToString().c_str());
         rosenRenderContext->bdImageLoadingCtx_->MakeCanvasImage(SizeF(), true, ImageFit::NONE);
     };
-    return task;
 }
 
 LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
 {
-    auto task = [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
+    return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
         auto imageSourceInfo = ctx->GetBorderImageSource().value_or(ImageSourceInfo(""));
@@ -716,7 +730,6 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
             ctx->RequestNextFrame();
         }
     };
-    return task;
 }
 
 void RosenRenderContext::OnBorderImageUpdate(const RefPtr<BorderImage>& /*borderImage*/)
@@ -773,23 +786,20 @@ void RosenRenderContext::PaintBorderImageGradient()
     CHECK_NULL_VOID(layoutProperty);
 
     auto borderImageProperty = *GetBdImage();
-    auto borderWidthProperty =
-        layoutProperty->GetBorderWidthProperty() ? (*layoutProperty->GetBorderWidthProperty()) : BorderWidthProperty();
-    bool hasBorderWidthProperty = layoutProperty->GetBorderWidthProperty() != nullptr;
-    auto paintTask = [paintSize, borderImageProperty, borderWidthProperty, hasBorderWidthProperty](
-                         const NG::Gradient& gradient, RSCanvas& rsCanvas) mutable {
+    auto&& borderWidthProperty = layoutProperty->GetBorderWidthProperty();
+    auto paintTask = [paintSize, borderImageProperty, &borderWidthProperty, gradient](RSCanvas& rsCanvas) mutable {
         auto rsImage = SkiaDecorationPainter::CreateBorderImageGradient(gradient, paintSize);
-        BorderImagePainter borderImagePainter(hasBorderWidthProperty, borderImageProperty, borderWidthProperty,
-            paintSize, rsImage, PipelineBase::GetCurrentContext()->GetDipScale());
+        BorderImagePainter borderImagePainter(borderImageProperty, borderWidthProperty, paintSize, rsImage,
+            PipelineBase::GetCurrentContext()->GetDipScale());
         borderImagePainter.PaintBorderImage(OffsetF(0.0, 0.0), rsCanvas);
     };
 
     if (!borderImageModifier_) {
         borderImageModifier_ = std::make_shared<BorderImageModifier>();
-        borderImageModifier_->SetPaintTask(std::move(paintTask));
         rsNode_->AddModifier(borderImageModifier_);
     }
-    borderImageModifier_->SetCustomData(gradient);
+    borderImageModifier_->SetPaintTask(std::move(paintTask));
+    borderImageModifier_->Modify();
 }
 
 void RosenRenderContext::OnModifyDone()
