@@ -278,8 +278,10 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
     } else {
         auto renderContext = frameNode->GetRenderContext();
-        if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
-            textStyle.SetTextColor(Color::FOREGROUND);
+        if (renderContext->HasForegroundColor()) {
+            textStyle.SetTextColor(renderContext->GetForegroundColor().value());
+        } else if (renderContext->HasForegroundColorStrategy()) {
+            textStyle.SetTextColor(Color::BLACK);
         } else {
             textStyle.SetTextColor(
                 layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
