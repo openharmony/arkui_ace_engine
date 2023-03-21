@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/pipeline/base/constants.h"
 
 using namespace testing;
@@ -738,7 +739,7 @@ RefPtr<FrameNode> TestScrollGrid(OptionalSizeF gridSize, double gridItemHeight, 
 }
 
 /**
- * @tc.name: GridTest009
+ * @tc.name: GridTest008
  * @tc.desc: grid with fixed column
  * @tc.type: FUNC
  */
@@ -751,7 +752,7 @@ HWTEST_F(GridPatternTestNg, GridTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest010
+ * @tc.name: GridTest009
  * @tc.desc: grid with fixed column, some griditem not show
  * @tc.type: FUNC
  */
@@ -764,7 +765,7 @@ HWTEST_F(GridPatternTestNg, GridTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest011
+ * @tc.name: GridTest010
  * @tc.desc: grid with fixed column, some griditem not fully show
  * @tc.type: FUNC
  */
@@ -777,7 +778,7 @@ HWTEST_F(GridPatternTestNg, GridTest010, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest012
+ * @tc.name: GridTest011
  * @tc.desc: grid with fixed column, scroll to show one more line
  * @tc.type: FUNC
  */
@@ -790,7 +791,7 @@ HWTEST_F(GridPatternTestNg, GridTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest013
+ * @tc.name: GridTest012
  * @tc.desc: grid with fixed column, scroll to end
  * @tc.type: FUNC
  */
@@ -803,7 +804,7 @@ HWTEST_F(GridPatternTestNg, GridTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest014
+ * @tc.name: GridTest013
  * @tc.desc: grid with fixed column, scroll to index not fully showed at last line
  * @tc.type: FUNC
  */
@@ -828,7 +829,7 @@ HWTEST_F(GridPatternTestNg, GridTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest015
+ * @tc.name: GridTest014
  * @tc.desc: grid with fixed column, scroll to index not fully showed at first line
  * @tc.type: FUNC
  */
@@ -853,7 +854,7 @@ HWTEST_F(GridPatternTestNg, GridTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest016
+ * @tc.name: GridTest015
  * @tc.desc: grid with fixed column, scroll to index fully showed
  * @tc.type: FUNC
  */
@@ -878,7 +879,7 @@ HWTEST_F(GridPatternTestNg, GridTest015, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest017
+ * @tc.name: GridTest016
  * @tc.desc: grid with fixed column, scroll to index not fully showed at last line
  * @tc.type: FUNC
  */
@@ -901,7 +902,7 @@ HWTEST_F(GridPatternTestNg, GridTest016, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest018
+ * @tc.name: GridTest017
  * @tc.desc: grid with fixed column, scroll to index out of view
  * @tc.type: FUNC
  */
@@ -944,7 +945,7 @@ HWTEST_F(GridPatternTestNg, GridTest017, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest019
+ * @tc.name: GridTest018
  * @tc.desc: Test all the properties of grid.
  * @tc.type: FUNC
  */
@@ -1022,7 +1023,7 @@ HWTEST_F(GridPatternTestNg, GridTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest020
+ * @tc.name: GridTest019
  * @tc.desc: Test OnDirtyLayoutWrapperSwap function of grid.
  * @tc.type: FUNC
  */
@@ -1068,7 +1069,7 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: GridTest021
+ * @tc.name: GridTest020
  * @tc.desc: Test all the properties of gridItem.
  * @tc.type: FUNC
  */
@@ -1106,6 +1107,159 @@ HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->onSelect_, nullptr);
+}
+
+
+/**
+ * @tc.name: GridTest021
+ * @tc.desc: Test GetInsertPosition func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridTest021, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode, pattern, eventHub and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step3. Mock GetPaintRectWithTransform.
+     */
+    RectF gridRect(0.f, 0.f, DEVICE_WIDTH, DEVICE_HEIGHT);
+    EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_))),
+        GetPaintRectWithTransform()).WillRepeatedly(Return(gridRect));
+
+    /**
+     * @tc.steps: step4. Run GetInsertPosition func.
+     * @tc.expected: Verify return value.
+     */
+    int32_t insertPosition = -1;
+    insertPosition = eventHub->GetInsertPosition(0.f, 0.f); // 0, 0
+    EXPECT_EQ(insertPosition, 0);
+    insertPosition = -1;
+    insertPosition = eventHub->GetInsertPosition(90.f, 50.f); // first item
+    EXPECT_EQ(insertPosition, 0);
+    insertPosition = -1;
+    insertPosition = eventHub->GetInsertPosition(360.f, 50.f); // between the second and third
+    EXPECT_EQ(insertPosition, 1);
+    insertPosition = -1;
+    insertPosition = eventHub->GetInsertPosition(360.f, 100.f); // between the 2nd, 3rd, 6th, 7th
+    EXPECT_EQ(insertPosition, 1);
+    insertPosition = -1;
+    insertPosition = eventHub->GetInsertPosition(180.f, 300.f); // in grid but not on item
+    EXPECT_EQ(insertPosition, ITEM_COUNT);
+    insertPosition = -1;
+    pattern->GetGridLayoutInfo().currentRect_ = RectF(0.f, 0.f, 100.f, 100.f); // on currentRect_
+    insertPosition = eventHub->GetInsertPosition(50.f, 50.f);
+    EXPECT_EQ(insertPosition, 0);
+}
+
+/**
+ * @tc.name: GridAccessibilityTest001
+ * @tc.desc: Test Grid Accessibility func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridAccessibilityTest001, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode, accessibility and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibility = frameNode->GetAccessibilityProperty<GridAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step3. Run accessibility func.
+     * @tc.expected: Verify return value.
+     */
+    EXPECT_TRUE(accessibility->IsScrollable());
+    EXPECT_FALSE(accessibility->IsEditable());
+    EXPECT_EQ(accessibility->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibility->GetEndIndex(), ITEM_COUNT - 1);
+    AceCollectionInfo info = accessibility->GetCollectionInfo();
+    EXPECT_EQ(info.rows, 2);
+    EXPECT_EQ(info.columns, 4);
+}
+
+/**
+ * @tc.name: GridAccessibilityTest002
+ * @tc.desc: Test GridItem Accessibility func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridAccessibilityTest002, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode, accessibility and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step3. Get itemFrameNode, itemAccessibility.
+     */
+    auto itemFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
+    ASSERT_NE(itemFrameNode, nullptr);
+    auto itemAccessibility = itemFrameNode->GetAccessibilityProperty<GridItemAccessibilityProperty>();
+    ASSERT_NE(itemAccessibility, nullptr);
+
+    /**
+     * @tc.steps: step3. Run itemAccessibility func.
+     * @tc.expected: Verify return value.
+     */
+    EXPECT_FALSE(itemAccessibility->IsSelected());
+    AceCollectionItemInfo info = itemAccessibility->GetCollectionItemInfo();
+    EXPECT_EQ(info.row, 0);
+    EXPECT_EQ(info.column, 1);
+    EXPECT_EQ(info.rowSpan, 1);
+    EXPECT_EQ(info.columnSpan, 1);
 }
 
 /**
@@ -1467,5 +1621,131 @@ HWTEST_F(GridPatternTestNg, GridSelectTest004, TestSize.Level1)
         auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
         EXPECT_TRUE(itemPattern->IsSelected());
     }
+}
+
+/**
+ * @tc.name: GridDragTest001
+ * @tc.desc: Verify drag func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridDragTest001, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetEditable(true);
+    CreateGridItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. SetOnItemDragStart to get customNode.
+     */
+    auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
+        auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
+        return AceType::DynamicCast<UINode>(dragItem);
+    };
+    gridModel.SetOnItemDragStart(onItemDragStart);
+
+    /**
+     * @tc.steps: step3. Get frameNode and eventHub and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step4. RunMeasureAndLayout and set info.
+     */
+    GestureEvent info;
+    Point globalPoint = Point(270.f, 50.f); // Point at the second item.
+    info.SetGlobalPoint(globalPoint);
+
+    /**
+     * @tc.steps: step5. Trigger HandleOnItemDragStart.
+     * @tc.expected: Verify some values of the drag.
+     */
+    eventHub->HandleOnItemDragStart(info);
+    EXPECT_EQ(eventHub->draggedIndex_, 1);
+    auto itemFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
+
+    /**
+     * @tc.steps: step6. Trigger HandleOnItemDragUpdate, HandleOnItemDragEnd.
+     * @tc.expected: Verify some values of the drag.
+     */
+    eventHub->HandleOnItemDragUpdate(info);
+    eventHub->HandleOnItemDragEnd(info);
+
+    /**
+     * @tc.steps: step7. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd.
+     * @tc.expected: Verify some values of the drag.
+     */
+    eventHub->HandleOnItemDragStart(info);
+    eventHub->HandleOnItemDragUpdate(info);
+    eventHub->HandleOnItemDragCancel();
+}
+
+/**
+ * @tc.name: GridDragTest002
+ * @tc.desc: Verify drag func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridDragTest002, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetEditable(true);
+    CreateGridItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode, pattern and eventHub and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step3. Run FireOnItemDragEnter, FireOnItemDragLeave.
+     * @tc.expected: Verify GetOriginalIndex.
+     */
+    ItemDragInfo dragInfo;
+    dragInfo.SetX(0.f);
+    dragInfo.SetY(0.f);
+    eventHub->FireOnItemDragEnter(dragInfo);
+    eventHub->FireOnItemDragLeave(dragInfo, -1);
+    EXPECT_EQ(pattern->GetOriginalIndex(), ITEM_COUNT);
+
+    /**
+     * @tc.steps: step3. Run FireOnItemDragEnter, FireOnItemDragMove, FireOnItemDrop.
+     * @tc.expected: Verify GetOriginalIndex.
+     */
+    eventHub->FireOnItemDragEnter(dragInfo);
+    eventHub->FireOnItemDragMove(dragInfo, 1, 5);
+    EXPECT_EQ(pattern->GetOriginalIndex(), 5);
+    eventHub->FireOnItemDragMove(dragInfo, 5, 2);
+    EXPECT_EQ(pattern->GetOriginalIndex(), 2);
+    eventHub->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_EQ(pattern->GetOriginalIndex(), -1);
 }
 } // namespace OHOS::Ace::NG
