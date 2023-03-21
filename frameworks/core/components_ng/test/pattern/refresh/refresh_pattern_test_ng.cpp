@@ -1053,7 +1053,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest025, TestSize.Level1)
 
     refreshRenderProperty->UpdateIsRefreshing(true);
     pattern->HandleDragStart();
-    EXPECT_FALSE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_NE(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -1073,7 +1073,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest026, TestSize.Level1)
     ASSERT_NE(pattern->customBuilder_, nullptr);
 
     pattern->HandleDragStart();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::DRAG);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DRAG);
 }
 
 /**
@@ -1094,11 +1094,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest027, TestSize.Level1)
     float delta = 100.0;
     refreshLayoutProperty->UpdateIsRefresh(true);
     pattern->HandleDragUpdate(delta);
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 
     delta = 0.0;
     pattern->HandleDragUpdate(delta);
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -1121,9 +1121,9 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest028, TestSize.Level1)
     refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(20.0f, 20.0f));
     pattern->customBuilder_ = frameNode;
     float delta = 100.0f;
-    EXPECT_TRUE(pattern->scrollOffset_.GetY() == 0.0f);
+    EXPECT_EQ(pattern->scrollOffset_.GetY(), 0.0f);
     pattern->HandleDragUpdate(delta);
-    EXPECT_FALSE(pattern->scrollOffset_.GetY() == 100.0f);
+    EXPECT_EQ(pattern->scrollOffset_.GetY(), 42.0f);
 
     delta = 0.0;
     pattern->HandleDragUpdate(delta);
@@ -1146,7 +1146,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest029, TestSize.Level1)
     pattern->isRefreshing_ = true;
 
     pattern->HandleDragEnd();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -1171,7 +1171,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest030, TestSize.Level1)
     pattern->customBuilder_ = frameNode;
 
     pattern->HandleDragEnd();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -1191,11 +1191,11 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest031, TestSize.Level1)
     ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->scrollOffset_.SetY(50.0f);
     pattern->HandleDragEnd();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 
     pattern->scrollOffset_.SetY(70.0f);
     pattern->HandleDragEnd();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
 }
 
 /**
@@ -1247,15 +1247,14 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest033, TestSize.Level1)
     auto refreshLayoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
     ASSERT_NE(refreshLayoutProperty, nullptr);
     pattern->AddCustomBuilderNode(customNode);
-    EXPECT_TRUE(refreshLayoutProperty->GetIsCustomBuilderExist() == true);
-
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), true);
     refreshLayoutProperty->UpdateCustomBuilderIndex(1);
     pattern->AddCustomBuilderNode(frameNode);
-    EXPECT_TRUE(refreshLayoutProperty->GetIsCustomBuilderExist() == true);
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), true);
 
     refreshLayoutProperty->UpdateCustomBuilderIndex(4);
     pattern->AddCustomBuilderNode(frameNode);
-    EXPECT_TRUE(refreshLayoutProperty->GetIsCustomBuilderExist() == true);
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), true);
 }
 
 /**
@@ -1275,12 +1274,12 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest034, TestSize.Level1)
     ASSERT_NE(refreshLayoutProperty, nullptr);
     refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(65.0, 65.0));
     pattern->CustomBuilderAppear();
-    EXPECT_TRUE(refreshLayoutProperty->GetIsCustomBuilderExist() == false);
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), false);
 
     refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(0.0f, 0.0f));
     pattern->triggerLoadingDistance_ = 16.0f;
     pattern->CustomBuilderExit();
-    EXPECT_TRUE(refreshLayoutProperty->GetIsCustomBuilderExist() == false);
+    EXPECT_EQ(refreshLayoutProperty->GetIsCustomBuilderExist(), false);
 }
 
 /**
@@ -1312,7 +1311,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest035, TestSize.Level1)
     pattern->scrollOffset_.SetY(65.0f);
     refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(200.0f, 200.0f));
     pattern->CheckCustomBuilderDragUpdateStage();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -1331,7 +1330,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest036, TestSize.Level1)
     pattern->refreshStatus_ = RefreshStatus::REFRESH;
 
     pattern->TriggerFinish();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::DONE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::DONE);
 }
 
 /**
@@ -1354,7 +1353,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest037, TestSize.Level1)
     pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
 
     pattern->CheckCustomBuilderDragEndStage();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -1377,7 +1376,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest038, TestSize.Level1)
     pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
 
     pattern->CheckCustomBuilderDragEndStage();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -1409,7 +1408,7 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest039, TestSize.Level1)
     refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(200.0f, 200.0f));
 
     pattern->CustomBuilderRefreshingAnimation();
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
 /**
@@ -1436,15 +1435,15 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest040, TestSize.Level1)
     pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(20.0f, 20.0f));
     refreshLayoutProperty->UpdateCustomBuilderOffset(OffsetF(200.0f, 200.0f));
     pattern->OnDirtyLayoutWrapperSwap(nullptr, swapConfig);
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 
     refreshLayoutProperty->UpdateIsCustomBuilderExist(true);
     refreshRenderProperty->UpdateIsRefreshing(true);
     pattern->OnDirtyLayoutWrapperSwap(nullptr, swapConfig);
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 
     pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(0.0f, 0.0f));
     pattern->OnDirtyLayoutWrapperSwap(nullptr, swapConfig);
-    EXPECT_TRUE(pattern->refreshStatus_ == RefreshStatus::INACTIVE);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
 }
 } // namespace OHOS::Ace::NG
