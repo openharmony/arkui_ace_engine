@@ -286,8 +286,7 @@ private:
     void HandleTouchDown();
     void HandleTouchUp();
 
-    void PlayTranslateAnimation(
-        float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false, bool needPostTask = false);
+    void PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay = false);
     void PlaySpringAnimation(double dragVelocity);
     void PlayFadeAnimation();
 
@@ -325,7 +324,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool needPostTask);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -362,8 +361,6 @@ private:
     bool isInit_ = true;
     bool hasVisibleChangeRegistered_ = false;
     bool isVisible_ = true;
-    bool taskPosted_ = false;
-    bool autoPlayStopped_ = false;
 
     Axis direction_ = Axis::HORIZONTAL;
 
@@ -374,6 +371,8 @@ private:
     SizeF maxChildSize_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
+
+    CancelableCallback<void()> translateTask_;
 };
 } // namespace OHOS::Ace::NG
 
