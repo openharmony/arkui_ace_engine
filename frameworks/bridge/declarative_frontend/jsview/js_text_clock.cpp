@@ -95,7 +95,7 @@ void JSTextClock::Create(const JSCallbackInfo& info)
         auto* jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextClockController>();
         if (jsController != nullptr) {
             if (controller) {
-                jsController->SetController(controller);
+                jsController->AddController(controller);
             } else {
                 LOGE("TextClockController is nullptr");
             }
@@ -188,15 +188,19 @@ void JSTextClockController::Destructor(JSTextClockController* scroller)
 
 void JSTextClockController::Start()
 {
-    if (controller_) {
-        controller_->Start();
+    if (!controller_.empty()) {
+        for (auto& i : controller_) {
+            i->Start();
+        }
     }
 }
 
 void JSTextClockController::Stop()
 {
-    if (controller_) {
-        controller_->Stop();
+    if (!controller_.empty()) {
+        for (auto& i : controller_) {
+            i->Stop();
+        }
     }
 }
 } // namespace OHOS::Ace::Framework
