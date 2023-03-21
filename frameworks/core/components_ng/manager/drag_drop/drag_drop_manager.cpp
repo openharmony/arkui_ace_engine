@@ -313,7 +313,8 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
 
     // use -1 for grid item not in eventGrid
-    auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType](RefPtr<FrameNode>& eventGrid) {
+    auto getDraggedIndex = [draggedGrid = draggedGridFrameNode_, draggedIndex, dragType]
+        (const RefPtr<FrameNode>& eventGrid) {
         return (dragType == DragType::GRID) ? (eventGrid == draggedGrid ? draggedIndex : -1) : draggedIndex;
     };
 
