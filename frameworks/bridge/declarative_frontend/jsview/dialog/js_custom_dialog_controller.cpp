@@ -400,11 +400,13 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
             }
         };
 
+        WeakPtr<NG::FrameNode> dialog;
         if (dialogProperties_.isShowInSubWindow) {
-            dialog_ = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties_, customNode);
+            dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties_, customNode);
         } else {
-            dialog_ = overlayManager->ShowDialog(dialogProperties_, customNode, false);
+            dialog = overlayManager->ShowDialog(dialogProperties_, customNode, false);
         }
+        dialogs_.emplace_back(dialog);
         return;
     }
 
@@ -438,7 +440,11 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        auto dialog = dialog_.Upgrade();
+        if (dialogs_.empty()) {
+            LOGW("dialogs are empty");
+            return;
+        }
+        auto dialog = dialogs_.back().Upgrade();
         if (!dialog) {
             LOGW("dialog is null");
             return;
@@ -458,6 +464,7 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
         auto overlayManager = context->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseDialog(dialog);
+        dialogs_.pop_back();
         return;
     }
     CloseDialog();
