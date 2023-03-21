@@ -66,7 +66,7 @@ public:
         return MakeRefPtr<RefreshAccessibilityProperty>();
     }
 
-    bool GetIsRefreshing() const
+    bool IsRefreshing() const
     {
         return isRefreshing_;
     }

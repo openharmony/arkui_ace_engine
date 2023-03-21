@@ -25,6 +25,6 @@ bool RefreshAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    return !pattern->GetIsRefreshing();
+    return !pattern->IsRefreshing();
 }
 } // namespace OHOS::Ace::NG
