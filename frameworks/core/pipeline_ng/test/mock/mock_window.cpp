@@ -13,20 +13,16 @@
  * limitations under the License.
  */
 
-#include "core/image/image_cache.h"
+#include "core/common/window.h"
 
 namespace OHOS::Ace {
-void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image) {}
+Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow)) {}
 
-RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)
-{
-    return nullptr;
-}
+void Window::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
-void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj) {}
+void Window::RequestFrame() {}
 
-RefPtr<ImageCache> ImageCache::Create()
-{
-    return nullptr;
-}
+void Window::SetRootRenderNode(const RefPtr<RenderNode>& root) {}
+
+void Window::SetVsyncCallback(AceVsyncCallback&& callback) {}
 } // namespace OHOS::Ace

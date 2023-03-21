@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_TEST_MOCK_MOCK_CONTAINER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_TEST_MOCK_MOCK_CONTAINER_H
+#ifndef FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_CONTAINER_H
+#define FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_CONTAINER_H
 
 #include "gmock/gmock.h"
 
@@ -26,10 +26,16 @@ class MockContainer final : public Container {
 
 public:
     explicit MockContainer(RefPtr<PipelineBase> pipelineContext = nullptr) : pipelineContext_(pipelineContext) {}
+
     RefPtr<PipelineBase> GetPipelineContext() const override
     {
         return pipelineContext_;
     }
+
+    static void SetUp();
+    static void TearDown();
+    static RefPtr<MockContainer> Current();
+
     MOCK_METHOD(void, Initialize, (), (override));
     MOCK_METHOD(void, Destroy, (), (override));
     MOCK_METHOD(int32_t, GetInstanceId, (), (const, override));
@@ -46,8 +52,10 @@ public:
     MOCK_METHOD(uint32_t, GetWindowId, (), (const, override));
     MOCK_METHOD(void*, GetView, (), (const, override));
 
+    static RefPtr<MockContainer> container_;
+
 private:
     RefPtr<PipelineBase> pipelineContext_;
 };
 } // namespace OHOS::Ace
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_TEST_MOCK_MOCK_CONTAINER_H
+#endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_CONTAINER_H

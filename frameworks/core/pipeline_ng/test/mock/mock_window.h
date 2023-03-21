@@ -16,20 +16,33 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_WINDOW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_WINDOW_H
 
-#include "gmock/gmock-function-mocker.h"
 #include "gmock/gmock.h"
-#include "core/common/window.h"
-#include "core/components/test/unittest/image/image_test_utils.h"
 
-namespace OHOS::Ace::NG {
-class MockWindow : public Window {
+#include "core/common/window.h"
+
+namespace OHOS::Ace {
+class ACE_EXPORT MockWindow : public Window {
 public:
     MockWindow() = default;
-    MOCK_METHOD(void, RequestFrame, (), (override));
-    MOCK_METHOD(void, Destroy, (), (override));
-    MOCK_METHOD(void, SetRootRenderNode, (const RefPtr<RenderNode>& root), (override));
-    MOCK_METHOD(void, RecordFrameTime, (uint64_t timeStamp, const std::string& name), (override));
-    MOCK_METHOD(bool, FlushCustomAnimation, (uint64_t timeStamp), (override));
+    ~MockWindow() override = default;
+
+    MOCK_METHOD0(RequestFrame, void());
+    MOCK_METHOD0(Destroy, void());
+    MOCK_METHOD0(Init, void());
+    MOCK_METHOD0(OnShow, void());
+    MOCK_METHOD0(OnHide, void());
+    MOCK_METHOD0(FlushTasks, void());
+    MOCK_CONST_METHOD0(GetRefreshRate, float());
+    MOCK_CONST_METHOD0(GetCurrentWindowRect, Rect());
+    MOCK_CONST_METHOD0(GetRSUIDirector, std::shared_ptr<Rosen::RSUIDirector>());
+    MOCK_METHOD1(SetDrawTextAsBitmap, void(bool useBitmap));
+    MOCK_METHOD1(SetRootFrameNode, void(const RefPtr<NG::FrameNode>& root));
+    MOCK_METHOD1(SetInstanceId, void(int32_t instanceId));
+    MOCK_METHOD1(SetTaskExecutor, void(const RefPtr<TaskExecutor>& taskExecutor));
+    MOCK_METHOD1(SetVsyncCallback, void(AceVsyncCallback&& callback));
+    MOCK_METHOD1(SetRootRenderNode, void(const RefPtr<RenderNode>& root));
+    MOCK_METHOD1(FlushCustomAnimation, bool(uint64_t timeStamp));
+    MOCK_METHOD2(RecordFrameTime, void(uint64_t timeStamp, const std::string& name));
 };
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_TEST_MOCK_MOCK_WINDOW_H

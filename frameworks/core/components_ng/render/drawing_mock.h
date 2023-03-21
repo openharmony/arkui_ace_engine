@@ -22,6 +22,7 @@
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_color.h"
 #include "core/components_ng/test/mock/rosen/testing_filter.h"
+#include "core/components_ng/test/mock/rosen/testing_font_collection.h"
 #include "core/components_ng/test/mock/rosen/testing_mask_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_path.h"
 #include "core/components_ng/test/mock/rosen/testing_path_effect.h"
@@ -32,6 +33,8 @@
 #include "core/components_ng/test/mock/rosen/testing_shadowflags.h"
 #include "core/components_ng/test/mock/rosen/testing_text_style.h"
 #include "core/components_ng/test/mock/rosen/testing_typography.h"
+#include "core/components_ng/test/mock/rosen/testing_typography_create.h"
+#include "core/components_ng/test/mock/rosen/testing_typography_style.h"
 
 namespace OHOS::Ace {
 using RSCanvas = Testing::TestingCanvas;
@@ -67,8 +70,10 @@ using RSTextStyle = Testing::TestingTextStyle;
 using RSColorQuad = uint32_t;
 using RSScalar = float;
 using RSPathFillType = Testing::TestingPathFillType;
-
 using RSParagraph = Testing::TestingTypography;
 using RSTypographyProperties = Testing::TestingTypographyProperties;
+using RSParagraphStyle = Testing::TestingTypographyStyle;
+using RSParagraphBuilder = Testing::TestingTypographyCreate;
+using RSFontCollection = Testing::TestingFontCollection;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H

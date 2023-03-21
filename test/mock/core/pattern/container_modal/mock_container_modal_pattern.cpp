@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco)
+void ContainerModalPattern::ShowTitle(bool /* isShow */, bool hasDeco)
 {
+    hasDeco_ = hasDeco;
+    windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
     moveX_ = 1.0;
+    moveY_ = 1.0;
 }
 
 void ContainerModalPattern::InitContainerEvent() {}
@@ -35,7 +38,8 @@ void ContainerModalPattern::ChangeTitle(const RefPtr<FrameNode>& titleNode, bool
 void ContainerModalPattern::ChangeFloatingTitle(const RefPtr<FrameNode>& floatingNode, bool isFocus) {}
 
 void ContainerModalPattern::ChangeTitleButtonIcon(
-    const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus) {}
+    const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus)
+{}
 
 bool ContainerModalPattern::CanShowFloatingTitle()
 {

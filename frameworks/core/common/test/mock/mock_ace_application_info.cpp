@@ -87,6 +87,12 @@ const std::string& AceApplicationInfo::GetPackageName() const
 {
     return packageName_;
 }
+
+const std::string& AceApplicationInfo::GetProcessName() const
+{
+    return processName_;
+}
+
 #endif
 
 AceApplicationInfo& AceApplicationInfo::GetInstance()

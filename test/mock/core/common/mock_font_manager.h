@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/image/image_cache.h"
+#ifndef FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_FONT_MANAGER_H
+#define FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_FONT_MANAGER_H
+
+#include "gmock/gmock.h"
+
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace {
-void ImageCache::CacheImage(const std::string& key, const std::shared_ptr<CachedImage>& image) {}
+class MockFontManager : public FontManager {
+    DECLARE_ACE_TYPE(MockFontManager, FontManager);
 
-RefPtr<NG::ImageObject> ImageCache::GetCacheImgObjNG(const std::string& key)
-{
-    return nullptr;
-}
-
-void ImageCache::CacheImgObjNG(const std::string& key, const RefPtr<NG::ImageObject>& imgObj) {}
-
-RefPtr<ImageCache> ImageCache::Create()
-{
-    return nullptr;
-}
+public:
+    MOCK_METHOD0(VaryFontCollectionWithFontWeightScale, void());
+    MOCK_METHOD0(LoadSystemFont, void());
+};
 } // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_FONT_MANAGER_H

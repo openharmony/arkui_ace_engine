@@ -35,6 +35,7 @@ ohos_unittest("ImeTest") {
   deps = [
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "$ace_root/build:ace_ohos_unittest_base",
+    "//third_party/googletest:gmock_main",
   ]
 
   external_deps = [ "ability_base:base" ]

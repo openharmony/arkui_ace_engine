@@ -60,6 +60,7 @@ ohos_fuzztest("UtilEngineFuzzTest") {
     #"$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "//foundation/window/window_manager/utils:libwmutil",
     "//foundation/window/window_manager/wm:libwm",
+    "//third_party/googletest:gmock_main",
     "//third_party/icu/icu4c:shared_icui18n",
     "//third_party/icu/icu4c:shared_icuuc",
   ]
