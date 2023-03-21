@@ -48,6 +48,12 @@ void ButtonView::CreateWithLabel(const std::string& label)
     buttonAccessibilityProperty->SetText(label);
     stack->Push(buttonNode);
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Label, label);
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    auto padding = buttonTheme->GetPadding();
+    PaddingProperty defaultPadding({ CalcLength(padding.Left()), CalcLength(padding.Right()), CalcLength(padding.Top()),
+        CalcLength(padding.Bottom()) });
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
 }
 
 void ButtonView::Create(const std::string& tagName)
@@ -72,10 +78,6 @@ void ButtonView::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const st
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
-    auto padding = buttonTheme->GetPadding();
-    PaddingProperty defaultPadding({ CalcLength(padding.Left()), CalcLength(padding.Right()), CalcLength(padding.Top()),
-        CalcLength(padding.Bottom()) });
-    textLayoutProperty->UpdatePadding(defaultPadding);
 }
 
 void ButtonView::SetType(ButtonType buttonType)
@@ -107,8 +109,8 @@ void ButtonView::SetLableStyle(ButtonParameters& buttonParameters)
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontSize, buttonParameters.maxFontSize.value());
     }
     if (buttonParameters.heightAdaptivePolicy.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, HeightAdaptivePolicy,
-            buttonParameters.heightAdaptivePolicy.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value());
     }
     if (buttonParameters.fontSize.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonParameters.fontSize.value());
