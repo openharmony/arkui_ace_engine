@@ -114,6 +114,9 @@ void SelectPattern::RegisterOnClick()
         pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
+    if (!gestureHub->GetTouchable()) {
+        return;
+    }
     gestureHub->BindMenu(std::move(callback));
 }
 
