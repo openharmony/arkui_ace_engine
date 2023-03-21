@@ -117,18 +117,21 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
 {
     bool ret = false;
     std::string str;
-    if (which.Upgrade() == inNode_) {
+    if (which.Upgrade() == inNode_.Upgrade()) {
         str += "inNode updated: ";
         inNode_ = value;
         ret = true;
-    } else if (which.Upgrade() == outNode_) {
+    } else if (which.Upgrade() == outNode_.Upgrade()) {
         str += "outNode updated: ";
         outNode_ = value;
         ret = true;
     } else {
         str += "noneNode updated: ";
     }
+    str += "old value: ";
     str += which.Upgrade() ? std::to_string(which.Upgrade()->GetId()) : "null";
+    str += ", new value: "
+    str += value.Upgrade() ? std::to_string(value.Upgrade()->GetId()) : "null";
     LOGD("GeometryTransition %{public}s", str.c_str());
     return ret;
 }
