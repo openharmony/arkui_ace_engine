@@ -1321,6 +1321,9 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 void TextFieldPattern::HandleTouchDown(const Offset& offset)
 {
     LOGI("HandleTouchDown");
+    if (HasStateStyle(UI_STATE_PRESSED)) {
+        return;
+    }
     if (enableTouchAndHoverEffect_ && !isMousePressed_) {
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
@@ -3268,6 +3271,15 @@ void TextFieldPattern::CheckScrollable()
         scrollable_ = GreatNotEqual(textRect_.Height(), contentRect_.Height());
     }
     SetScrollEnable(scrollable_);
+}
+
+bool TextFieldPattern::HasStateStyle(UIState state) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto hub = host->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(hub, false);
+    return hub->HasStateStyle(state);
 }
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const

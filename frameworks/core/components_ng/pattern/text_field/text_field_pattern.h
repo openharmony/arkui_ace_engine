@@ -590,6 +590,7 @@ private:
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
+    bool HasStateStyle(UIState state) const;
 
     void AddScrollEvent();
     void OnTextAreaScroll(float offset);
