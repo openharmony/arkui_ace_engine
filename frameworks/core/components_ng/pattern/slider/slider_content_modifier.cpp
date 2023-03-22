@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
 #include <optional>
+#include <utility>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
@@ -34,7 +35,7 @@ constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 } // namespace
 SliderContentModifier::SliderContentModifier(const Parameters& parameters, std::function<void()> updateImageFunc)
-    : updateImageFunc_(updateImageFunc),
+    : updateImageFunc_(std::move(updateImageFunc)),
       boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
 {
     // animatable property
@@ -309,6 +310,7 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
 
 void SliderContentModifier::SetBoardColor()
 {
+    CHECK_NULL_VOID(boardColor_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
@@ -319,12 +321,10 @@ void SliderContentModifier::SetBoardColor()
     auto duration = mousePressedFlag_ ? static_cast<int32_t>(theme->GetPressAnimationDuration())
                                       : static_cast<int32_t>(theme->GetHoverAnimationDuration());
     auto curve = mousePressedFlag_ ? Curves::SHARP : Curves::FRICTION;
-    if (boardColor_) {
-        AnimationOption option = AnimationOption();
-        option.SetDuration(duration);
-        option.SetCurve(curve);
-        AnimationUtils::Animate(option, [&]() { boardColor_->Set(LinearColor(shadowColor)); });
-    }
+    AnimationOption option = AnimationOption();
+    option.SetDuration(duration);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(option, [&]() { boardColor_->Set(LinearColor(shadowColor)); });
 }
 
 void SliderContentModifier::UpdateData(const Parameters& parameters)

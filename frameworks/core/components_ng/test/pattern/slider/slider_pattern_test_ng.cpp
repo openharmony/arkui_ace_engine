@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "base/utils/utils.h"
 #define private public
 #define protected public
 #include "core/components_ng/base/view_stack_processor.h"
@@ -38,7 +39,7 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float VALUE = 50.0f;
-constexpr float STEP = 10.0f;
+constexpr float STEP = 1.0f;
 constexpr float MIN = 0.0f;
 constexpr float MAX = 100.0f;
 const SliderModel::SliderMode TEST_SLIDERMODE = SliderModel::SliderMode::INSET;
@@ -139,8 +140,6 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg002, TestSize.Level1)
     sliderModelNG.SetBlockColor(TEST_COLOR);
     sliderModelNG.SetTrackBackgroundColor(TEST_COLOR);
     sliderModelNG.SetSelectColor(TEST_COLOR);
-    sliderModelNG.SetMinLabel(MIN_LABEL);
-    sliderModelNG.SetMaxLabel(MAX_LABEL);
     sliderModelNG.SetShowSteps(BOOL_VAULE);
     sliderModelNG.SetThickness(WIDTH);
     std::function<void(float, int32_t)> eventOnChange = [](float floatValue, int32_t intValue) {};
@@ -154,8 +153,8 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg002, TestSize.Level1)
      */
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     EXPECT_NE(sliderPaintProperty, nullptr);
-    EXPECT_EQ(sliderPaintProperty->GetMax(), MAX_LABEL);
-    EXPECT_EQ(sliderPaintProperty->GetMin(), MIN_LABEL);
+    EXPECT_EQ(sliderPaintProperty->GetMax(), MAX);
+    EXPECT_EQ(sliderPaintProperty->GetMin(), MIN);
     EXPECT_EQ(sliderPaintProperty->GetStep(), STEP);
     EXPECT_EQ(sliderPaintProperty->GetValue(), VALUE);
     EXPECT_EQ(sliderPaintProperty->GetReverse(), BOOL_VAULE);
@@ -361,28 +360,28 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg006, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_DPAD_LEFT;
     EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
-    EXPECT_EQ(sliderPattern->valueRatio_, 0.4f);
+    EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
     /**
      * @tc.cases: case3. direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_RIGHT;
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
     EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
-    EXPECT_EQ(sliderPattern->valueRatio_, 0.5f);
+    EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.5f));
     /**
      * @tc.cases: case4. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP, MoveStep(-1).
      */
     sliderPattern->direction_ = Axis::VERTICAL;
     event.code = KeyCode::KEY_DPAD_UP;
     EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
-    EXPECT_EQ(sliderPattern->valueRatio_, 0.4f);
+    EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.49f));
     /**
      * @tc.cases: case5. direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN, MoveStep(1).
      */
     event.code = KeyCode::KEY_DPAD_DOWN;
     sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
     EXPECT_EQ(sliderPattern->OnKeyEvent(event), false);
-    EXPECT_EQ(sliderPattern->valueRatio_, 0.5f);
+    EXPECT_TRUE(NearEqual(sliderPattern->valueRatio_, 0.5f));
 }
 
 /**
@@ -431,6 +430,56 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg007, TestSize.Level1)
     sliderPaintProperty->UpdateReverse(true);
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_EQ(sliderPattern->value_, 62);
+}
+
+/**
+ * @tc.name: SliderPatternTestNg008
+ * @tc.desc: Test Slider min max value steps error value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and slider min value is greater than max value.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MAX_LABEL, MIN_LABEL);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    EXPECT_NE(sliderPattern, nullptr);
+    auto paintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    /**
+     * @tc.cases: case1. when slider min value is greater than max value, take 0 as min value,
+     *                   and take 100 as max value by default.
+     */
+    sliderPattern->OnModifyDone();
+    EXPECT_EQ(paintProperty->GetMin().value(), MIN);
+    EXPECT_EQ(paintProperty->GetMax().value(), MAX);
+    /**
+     * @tc.cases: case2. when slider value is greater than max value, take max value as current value;
+     *                   when slider value is less than min value, take min value as current value.
+     */
+    paintProperty->UpdateMin(MIN_LABEL);
+    paintProperty->UpdateMax(MAX_LABEL);
+    sliderPattern->OnModifyDone();
+    EXPECT_EQ(paintProperty->GetValue().value(), MAX_LABEL);
+    paintProperty->UpdateValue(0);
+    sliderPattern->OnModifyDone();
+    EXPECT_EQ(paintProperty->GetValue().value(), MIN_LABEL);
+    /**
+     * @tc.cases: case3. when slider stepSize value is less than or equal to 0, take 1 by defualt;
+     */
+    paintProperty->UpdateValue(VALUE);
+    paintProperty->UpdateStep(0);
+    paintProperty->UpdateMin(MIN);
+    paintProperty->UpdateMax(MAX);
+    sliderPattern->OnModifyDone();
+    EXPECT_EQ(paintProperty->GetStep().value(), STEP);
+    paintProperty->UpdateStep(-1);
+    sliderPattern->OnModifyDone();
+    EXPECT_EQ(paintProperty->GetStep().value(), STEP);
 }
 
 /**

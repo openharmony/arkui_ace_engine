@@ -96,7 +96,7 @@ public:
 
 private:
     void OnModifyDone() override;
-    void CancelExceptionValue(float& min, float& max);
+    void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     void CreateParagraphFunc();

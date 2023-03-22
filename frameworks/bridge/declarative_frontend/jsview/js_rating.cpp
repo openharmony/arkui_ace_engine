@@ -42,7 +42,11 @@ RatingModel* RatingModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
+namespace {
+constexpr double RATING_SCORE_DEFAULT = 0;
+constexpr int32_t STARS_DEFAULT = 5;
+constexpr double STEPS_DEFAULT = 0.5;
+} // namespace
 void JSRating::Create(const JSCallbackInfo& info)
 {
     double rating = 0;
@@ -55,6 +59,10 @@ void JSRating::Create(const JSCallbackInfo& info)
             rating = getRating->ToNumber<double>();
         } else {
             LOGE("create rating fail because the rating is not value");
+        }
+        if (rating < 0) {
+            LOGW("rating number is invalid, and it will use 0 by default.");
+            rating = RATING_SCORE_DEFAULT;
         }
         if (getIndicator->IsBoolean()) {
             indicator = getIndicator->ToBoolean();
@@ -77,7 +85,12 @@ void JSRating::SetStars(const JSCallbackInfo& info)
         return;
     }
 
-    RatingModel::GetInstance()->SetStars(info[0]->ToNumber<int32_t>());
+    auto stars = info[0]->ToNumber<int32_t>();
+    if (stars <= 0) {
+        LOGW("stars is invalid, and it will use 5 by default.");
+        stars = STARS_DEFAULT;
+    }
+    RatingModel::GetInstance()->SetStars(stars);
 }
 
 void JSRating::SetStepSize(const JSCallbackInfo& info)
@@ -92,7 +105,12 @@ void JSRating::SetStepSize(const JSCallbackInfo& info)
         return;
     }
 
-    RatingModel::GetInstance()->SetStepSize(info[0]->ToNumber<double>());
+    auto steps = info[0]->ToNumber<double>();
+    if (steps <= 0) {
+        LOGW("steps is invalid, and it will use 0.5 by default.");
+        steps = STEPS_DEFAULT;
+    }
+    RatingModel::GetInstance()->SetStepSize(steps);
 }
 
 void JSRating::SetStarStyle(const JSCallbackInfo& info)
