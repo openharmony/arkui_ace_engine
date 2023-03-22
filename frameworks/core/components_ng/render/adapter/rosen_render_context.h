@@ -148,8 +148,8 @@ public:
     {
         return propTransitionDisappearing_ != nullptr;
     }
-    void OnNodeAppear() override;
-    void OnNodeDisappear() override;
+    void OnNodeAppear(bool recursive) override;
+    void OnNodeDisappear(bool recursive) override;
     void ClipWithRect(const RectF& rectF) override;
 
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
@@ -249,7 +249,7 @@ private:
     void OnClipEdgeUpdate(bool isClip) override;
     void OnClipMaskUpdate(const RefPtr<BasicShape>& basicShape) override;
 
-    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& prgress) override;
+    void OnProgressMaskUpdate(const RefPtr<ProgressMaskProperty>& progress) override;
 
     void OnLinearGradientUpdate(const NG::Gradient& value) override;
     void OnSweepGradientUpdate(const NG::Gradient& value) override;
@@ -268,6 +268,7 @@ private:
     void OnOverlayTextUpdate(const OverlayOptions& overlay) override;
     void OnMotionPathUpdate(const MotionPathOption& motionPath) override;
 
+    void OnFreezeUpdate(bool isFreezed) override;
     void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
 
     void NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn);
@@ -339,6 +340,7 @@ private:
     bool isPositionChanged_ = false;
     bool isSynced_ = false;
     bool firstTransitionIn_ = false;
+    bool transitionWithAnimation_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
     bool isDisappearing_ = false;

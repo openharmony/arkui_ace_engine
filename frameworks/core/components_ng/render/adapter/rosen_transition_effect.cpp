@@ -74,19 +74,18 @@ void RosenTransitionEffect::CombineWith(const RefPtr<RosenTransitionEffect>& eff
 
 void RosenTransitionEffect::SetAnimationOption(const std::shared_ptr<AnimationOption>& option)
 {
-    animationOption = option;
+    animationOption_ = option;
 }
 
 void RosenTransitionEffect::ApplyAnimationOption(const std::function<void()>& func, bool withAnimation)
 {
     // no animation option or animation disabled, just call func directly
-    if (withAnimation == false || animationOption == nullptr) {
+    if (withAnimation == false || animationOption_ == nullptr) {
         func();
         return;
     }
-    // kick off animation with animation option
-    AnimationUtils::Animate(
-        *animationOption, [func]() { func(); }, animationOption->GetOnFinishEvent());
+    // update animation option and reuse the finish callback (the callback in animationOption will be ignored)
+    AnimationUtils::AnimateWithCurrentCallback(*animationOption_, [func]() { func(); });
 }
 
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEffect(
@@ -167,9 +166,12 @@ void PropertyTransitionEffectImpl<Modifier, PropertyType>::OnAttach(
         return;
     }
 
+    // record the current status
     isActive_ = activeTransition;
+    // create the property corresponding to current status
     property_ =
         std::make_shared<Rosen::RSAnimatableProperty<PropertyType>>(activeTransition ? activeValue_ : identityValue_);
+    // create the modifier and attach it to the context
     modifier_ = std::make_shared<Modifier>(property_);
     context->AddModifier(modifier_);
 
@@ -180,6 +182,7 @@ template<typename Modifier, typename PropertyType>
 void PropertyTransitionEffectImpl<Modifier, PropertyType>::OnDetach(RefPtr<RosenRenderContext> context)
 {
     CHECK_NULL_VOID(context);
+    // remove the modifier
     context->RemoveModifier(modifier_);
     property_.reset();
     modifier_.reset();
@@ -200,7 +203,7 @@ void RosenAsymmetricTransitionEffect::SetTransitionOutEffect(const RefPtr<RosenT
 void RosenAsymmetricTransitionEffect::OnAttach(RefPtr<RosenRenderContext> context, bool activeTransition)
 {
     CHECK_NULL_VOID(context);
-    // upon attach, we should only the active the transition in effect
+    // upon attach, we should only active the transitionIn_ branch if activeTransition is true.
     if (transitionIn_) {
         transitionIn_->OnAttach(context, activeTransition);
     }
@@ -246,6 +249,7 @@ void RosenAsymmetricTransitionEffect::OnDisappear(bool activeTransition)
     }
 }
 
+// update the frame size of the transition effect, currently only used for slide transition
 void RosenAsymmetricTransitionEffect::UpdateFrameSize(const SizeF& size)
 {
     RosenTransitionEffect::UpdateFrameSize(size);
@@ -257,6 +261,7 @@ void RosenAsymmetricTransitionEffect::UpdateFrameSize(const SizeF& size)
     }
 }
 
+// convert the transition edge to the corresponding translate value
 Rosen::Vector2f RosenSlideTransitionEffect::GetTranslateValue(TransitionEdge edge, const SizeF& size)
 {
     switch (edge) {
@@ -279,5 +284,13 @@ void RosenSlideTransitionEffect::UpdateFrameSize(const SizeF& size)
         ->SetActiveValue(GetTranslateValue(transitionInEdge_, size));
     DynamicCast<RosenTranslateTransitionEffect>(transitionOut_)
         ->SetActiveValue(GetTranslateValue(transitionOutEdge_, size));
+}
+
+// Identity animation option, with duration 0 and delay 0.
+static const auto identityOption = std::make_shared<AnimationOption>();
+RosenIdentityTransition::RosenIdentityTransition() : RosenTransitionEffect()
+{
+    // Set animation option. And disable other options by overriding SetAnimationOption().
+    RosenTransitionEffect::SetAnimationOption(identityOption);
 }
 } // namespace OHOS::Ace::NG

@@ -39,6 +39,12 @@ public:
     static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback);
     static void AddKeyFrame(float fraction, const PropertyCallback& callback);
 
+    // similar to Animate, but re-use current options and replace callback
+    static void AnimateWithCurrentOptions(
+        const PropertyCallback& callback, const FinishCallback& finishCallback, bool timingSensitive = true);
+    // similar to Animate, but use current callback and replace options
+    static void AnimateWithCurrentCallback(const AnimationOption& option, const PropertyCallback& callback);
+
     static std::shared_ptr<AnimationUtils::Animation> StartAnimation(const AnimationOption& option,
         const PropertyCallback& callback, const FinishCallback& finishCallback = nullptr);
     static void StopAnimation(const std::shared_ptr<AnimationUtils::Animation>& animation);

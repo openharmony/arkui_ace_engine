@@ -64,7 +64,7 @@ FrameNode::~FrameNode()
     }
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
-        OnDetachFromMainTree();
+        OnDetachFromMainTree(false);
     }
     TriggerVisibleAreaChangeCallback(true);
     visibleAreaUserCallbacks_.clear();
@@ -288,11 +288,11 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("id", propInspectorId_.value_or("").c_str());
 }
 
-void FrameNode::OnAttachToMainTree()
+void FrameNode::OnAttachToMainTree(bool recursive)
 {
-    UINode::OnAttachToMainTree();
+    UINode::OnAttachToMainTree(recursive);
     eventHub_->FireOnAppear();
-    renderContext_->OnNodeAppear();
+    renderContext_->OnNodeAppear(recursive);
     if (IsResponseRegion() || HasPositionProp()) {
         auto parent = GetParent();
         while (parent) {
@@ -322,10 +322,10 @@ void FrameNode::OnVisibleChange(bool isVisible)
     TriggerVisibleAreaChangeCallback(true);
 }
 
-void FrameNode::OnDetachFromMainTree()
+void FrameNode::OnDetachFromMainTree(bool recursive)
 {
     eventHub_->FireOnDisappear();
-    renderContext_->OnNodeDisappear();
+    renderContext_->OnNodeDisappear(recursive);
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -1553,5 +1553,19 @@ void FrameNode::UpdateAnimatablePropertyFloat(const std::string& propertyName, f
     auto property = AceType::DynamicCast<NodeAnimatablePropertyFloat>(iter->second);
     CHECK_NULL_VOID(property);
     property->Set(value);
+}
+
+void FrameNode::OnAddDisappearingChild()
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateFreeze(true);
+}
+
+void FrameNode::OnRemoveDisappearingChild()
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    context->UpdateFreeze(false);
 }
 } // namespace OHOS::Ace::NG

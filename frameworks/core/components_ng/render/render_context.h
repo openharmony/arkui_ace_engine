@@ -141,8 +141,8 @@ public:
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
-    virtual void OnNodeDisappear() {}
-    virtual void OnNodeAppear() {}
+    virtual void OnNodeDisappear(bool recursive) {}
+    virtual void OnNodeAppear(bool recursive) {}
     virtual bool HasTransitionOutAnimation() const
     {
         return false;
@@ -350,6 +350,9 @@ public:
     // accessibility
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AccessibilityFocus, bool);
 
+    // freeze
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(Freeze, bool);
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -406,6 +409,7 @@ protected:
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
+    virtual void OnFreezeUpdate(bool isFreezed) {}
 
 private:
     std::function<void()> requestFrame_;

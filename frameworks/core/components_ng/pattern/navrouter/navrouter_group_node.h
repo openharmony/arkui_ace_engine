@@ -52,8 +52,8 @@ public:
         return navDestinationNode_;
     }
 
-    void OnDetachFromMainTree() override;
-    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree(bool recursive) override;
+    void OnAttachToMainTree(bool recursive) override;
 
 private:
     void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);

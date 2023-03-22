@@ -71,9 +71,9 @@ void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
     UINode::RemoveChildAtIndex(slot);
 }
 
-void NavRouterGroupNode::OnDetachFromMainTree()
+void NavRouterGroupNode::OnDetachFromMainTree(bool recursive)
 {
-    FrameNode::OnDetachFromMainTree();
+    FrameNode::OnDetachFromMainTree(recursive);
     auto parent = GetParent();
     while (parent) {
         if (CleanNodeInNavigation(parent)) {
@@ -83,9 +83,9 @@ void NavRouterGroupNode::OnDetachFromMainTree()
     }
 }
 
-void NavRouterGroupNode::OnAttachToMainTree()
+void NavRouterGroupNode::OnAttachToMainTree(bool recursive)
 {
-    FrameNode::OnAttachToMainTree();
+    FrameNode::OnAttachToMainTree(recursive);
     auto parent = GetParent();
     while (parent) {
         auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);

@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 class RosenRenderContext;
 
+// Base class for transition effect, providing basic functions for transition effect.
 class RosenTransitionEffect : public AceType {
     DECLARE_ACE_TYPE(RosenTransitionEffect, AceType);
 
@@ -38,13 +39,15 @@ public:
     virtual void OnAttach(RefPtr<RosenRenderContext> context, bool activeTransition);
     virtual void OnDetach(RefPtr<RosenRenderContext> context);
     virtual void UpdateFrameSize(const SizeF& size);
-    static RefPtr<RosenTransitionEffect> ConvertToRosenTransitionEffect(const RefPtr<ChainedTransitionEffect>& effect);
 
     void Appear();
     void Disappear(bool activeTransition = true);
 
+    // Chain with another transition effect, the chained effect will be applied after this effect.
     void CombineWith(const RefPtr<RosenTransitionEffect>& effect);
-    void SetAnimationOption(const std::shared_ptr<AnimationOption>& option);
+    virtual void SetAnimationOption(const std::shared_ptr<AnimationOption>& option);
+
+    static RefPtr<RosenTransitionEffect> ConvertToRosenTransitionEffect(const RefPtr<ChainedTransitionEffect>& effect);
 
 protected:
     virtual void OnAppear();
@@ -54,11 +57,12 @@ protected:
 
 private:
     RefPtr<RosenTransitionEffect> chainedEffect_ = nullptr;
-    std::shared_ptr<AnimationOption> animationOption = nullptr;
+    std::shared_ptr<AnimationOption> animationOption_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenTransitionEffect);
 };
 
+// Template class for property transition effect, applying identity and active value to target property/modifier.
 template<typename Modifier, typename PropertyType>
 class PropertyTransitionEffectImpl final : public RosenTransitionEffect {
     DECLARE_ACE_TYPE(PropertyTransitionEffectImpl, RosenTransitionEffect);
@@ -127,8 +131,11 @@ private:
 using RosenOpacityTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSAlphaModifier, float>;
 using RosenTranslateTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSTranslateModifier, Rosen::Vector2f>;
 using RosenRotationTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSRotationModifier, float>;
+using RosenRotationXTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSRotationXModifier, float>;
+using RosenRotationYTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSRotationYModifier, float>;
 using RosenScaleTransitionEffect = PropertyTransitionEffectImpl<Rosen::RSScaleModifier, Rosen::Vector2f>;
 
+// Asymmetric transition effect, support in and out chaining with different transition effect.
 class RosenAsymmetricTransitionEffect : public RosenTransitionEffect {
     DECLARE_ACE_TYPE(RosenAsymmetricTransitionEffect, RosenTransitionEffect);
 
@@ -154,7 +161,8 @@ protected:
     RefPtr<RosenTransitionEffect> transitionOut_;
 };
 
-class RosenSlideTransitionEffect : public RosenAsymmetricTransitionEffect {
+// Slide transition effect, slide in and out by frame size.
+class RosenSlideTransitionEffect final : public RosenAsymmetricTransitionEffect {
     DECLARE_ACE_TYPE(RosenSlideTransitionEffect, RosenAsymmetricTransitionEffect);
 
 public:
@@ -170,6 +178,17 @@ private:
     static Rosen::Vector2f GetTranslateValue(TransitionEdge edge, const SizeF& size);
     TransitionEdge transitionInEdge_;
     TransitionEdge transitionOutEdge_;
+    ACE_DISALLOW_COPY_AND_MOVE(RosenSlideTransitionEffect);
+};
+
+// Identity transition effect, do noting and execute immediately.
+class RosenIdentityTransition final : public RosenTransitionEffect {
+    DECLARE_ACE_TYPE(RosenIdentityTransition, RosenTransitionEffect);
+    ACE_DISALLOW_COPY_AND_MOVE(RosenIdentityTransition);
+
+public:
+    RosenIdentityTransition();
+    void SetAnimationOption(const std::shared_ptr<AnimationOption>& option) override {}
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_ADAPTER_ROSEN_TRANSITION_EFFECT_H

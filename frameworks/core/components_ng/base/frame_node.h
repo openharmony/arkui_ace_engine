@@ -290,8 +290,8 @@ public:
     void OnAccessibilityEvent(AccessibilityEventType eventType) const;
     void MarkNeedRenderOnly();
 
-    void OnDetachFromMainTree() override;
-    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree(bool recursive) override;
+    void OnAttachToMainTree(bool recursive) override;
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -386,6 +386,9 @@ private:
     void OnGenerateOneDepthVisibleFrameWithTransition(
         std::list<RefPtr<FrameNode>>& visibleList, uint32_t index) override;
     void OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>& allList) override;
+
+    void OnAddDisappearingChild() override;
+    void OnRemoveDisappearingChild() override;
 
     bool IsMeasureBoundary();
     bool IsRenderBoundary();
