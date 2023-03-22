@@ -39,6 +39,8 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CalculateLanes(listLayoutProperty_, layoutConstraint, contentIdealSize.CrossSize(axis_), axis_);
     auto itemLayoutConstraint = layoutProperty->CreateChildConstraint();
     UpdateListItemConstraint(contentIdealSize, itemLayoutConstraint);
+    auto headerFooterLayoutConstraint = layoutProperty->CreateChildConstraint();
+    headerFooterLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
     spaceWidth_ = ConvertToPx(space, layoutConstraint.scaleProperty, mainPercentRefer).value_or(0);
     if (layoutProperty->GetDivider().has_value()) {
         auto divider = layoutProperty->GetDivider().value();
@@ -54,12 +56,12 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     totalMainSize_ = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     if (headerIndex_ >= 0) {
         auto headerWrapper = layoutWrapper->GetOrCreateChildByIndex(headerIndex_);
-        headerWrapper->Measure(layoutProperty->CreateChildConstraint());
+        headerWrapper->Measure(headerFooterLayoutConstraint);
         headerMainSize_ = GetMainAxisSize(headerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
     if (footerIndex_ >= 0) {
         auto footerWrapper = layoutWrapper->GetOrCreateChildByIndex(footerIndex_);
-        footerWrapper->Measure(layoutProperty->CreateChildConstraint());
+        footerWrapper->Measure(headerFooterLayoutConstraint);
         footerMainSize_ = GetMainAxisSize(footerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
     totalMainSize_ = std::max(totalMainSize_, headerMainSize_ + footerMainSize_);
