@@ -37,15 +37,6 @@ const UndefinedElmtId = -1;
 // function type of partial update function
 type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 
-// Create ID generator at TS/JS side to avoid hops to native
-class UniqueId {
-  static currentId = Date.now();
-  static get() : string {
-    return "autoid_" + (++UniqueId.currentId);
-  }
-}
-
-
 // Nativeview
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -81,8 +72,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // my LocalStorge instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
   protected localStoragebackStore_: LocalStorage = undefined;
-
-  protected static autoIdProp = Symbol("__ace_id__");
 
   protected get localStorage_() {
     if (!this.localStoragebackStore_) {
@@ -521,16 +510,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     if (idGenFunc === undefined) {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
-      idGenFunc = (item: any, index : number) => {
-        if (!item || !(typeof item === 'object') || ((typeof item === 'object') && Array.isArray(item))) {
-          return `${index}__${JSON.stringify(item)}`
-        } else {
-          if (!item[ViewPU.autoIdProp]) {
-            item[ViewPU.autoIdProp] = UniqueId.get();
-          }
-          return item[ViewPU.autoIdProp];
-        }
-      } // idGenFunc
+      idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
       idGenFuncUsesIndex = true;
     }
 
