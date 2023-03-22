@@ -1017,6 +1017,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {
+        settingData.dialogTitleDate = ParseDate(selectedTime);
         timePickerProperty["selected"] = ParseTime(selectedTime);
     }
     JSDatePicker::ParseTextProperties(paramObj, settingData.properties);
@@ -1069,5 +1070,27 @@ PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
         pickerTime.SetSecond(second->ToNumber<int32_t>());
     }
     return pickerTime;
+}
+
+PickerDate JSTimePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
+{
+    auto pickerDate = PickerDate();
+    if (!dateVal->IsObject()) {
+        return pickerDate;
+    }
+    auto dateObj = JSRef<JSObject>::Cast(dateVal);
+    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
+    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
+    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
+    JSRef<JSVal> year = yearFunc->Call(dateObj);
+    JSRef<JSVal> month = monthFunc->Call(dateObj);
+    JSRef<JSVal> date = dateFunc->Call(dateObj);
+
+    if (year->IsNumber() && month->IsNumber() && date->IsNumber()) {
+        pickerDate.SetYear(year->ToNumber<int32_t>());
+        pickerDate.SetMonth(month->ToNumber<int32_t>() + 1); // 0-11 means 1 to 12 months
+        pickerDate.SetDay(date->ToNumber<int32_t>());
+    }
+    return pickerDate;
 }
 } // namespace OHOS::Ace::Framework

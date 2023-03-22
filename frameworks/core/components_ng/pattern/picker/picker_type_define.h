@@ -71,6 +71,7 @@ struct TextPickerSettingData {
 
 struct TimePickerSettingData {
     bool isUseMilitaryTime;
+    PickerDate dialogTitleDate;
     PickerTextProperties properties;
 };
 } // namespace OHOS::Ace::NG
