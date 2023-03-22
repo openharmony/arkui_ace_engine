@@ -647,17 +647,13 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
 void SwiperPattern::StopAutoPlay()
 {
     if (IsAutoPlay()) {
-        autoPlayStopped_ = true;
+        translateTask_.Cancel();
     }
 }
 
 void SwiperPattern::StartAutoPlay()
 {
-    if (IsAutoPlay()) {
-        autoPlayStopped_ = false;
-    }
-
-    if (NeedAutoPlay() && !taskPosted_) {
+    if (NeedAutoPlay()) {
         PostTranslateTask(GetInterval());
     }
 }
@@ -668,7 +664,7 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
         isVisible_ = true;
         StartAutoPlay();
     } else {
-        isVisible_ = false;
+        StopAutoPlay();
     }
 }
 
@@ -864,15 +860,8 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     moveDirection_ = dragVelocity <= 0;
 }
 
-void SwiperPattern::PlayTranslateAnimation(
-    float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay, bool needPostTask)
+void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t nextIndex, bool restartAutoPlay)
 {
-    if (!isVisible_) {
-        LOGD("SwiperPattern::PlayTranslateAnimation swiper is inVisible and does not need to play animation.");
-        taskPosted_ = false;
-        return;
-    }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto curve = GetCurve();
@@ -909,10 +898,10 @@ void SwiperPattern::PlayTranslateAnimation(
         swiper->FireAnimationStartEvent();
     });
 
-    controller_->AddStopListener([weak, nextIndex, restartAutoPlay, needPostTask]() {
+    controller_->AddStopListener([weak, nextIndex, restartAutoPlay]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        swiper->OnTranslateFinish(nextIndex, restartAutoPlay, needPostTask);
+        swiper->OnTranslateFinish(nextIndex, restartAutoPlay);
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
@@ -1286,29 +1275,26 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
     CHECK_NULL_VOID(taskExecutor);
 
     auto weak = AceType::WeakClaim(this);
-    taskExecutor->PostDelayedTask(
-        [weak, delayTime] {
-            auto swiper = weak.Upgrade();
-            if (swiper) {
-                auto childrenSize = swiper->TotalCount();
-                auto displayCount = swiper->GetDisplayCount();
-                if (childrenSize <= 0 || displayCount <= 0) {
-                    return;
-                }
-
-                auto endPosition = swiper->GetTranslateLength();
-                swiper->PlayTranslateAnimation(
-                    0, -endPosition, (swiper->currentIndex_ + 1) % childrenSize, false, true);
+    translateTask_.Reset([weak, delayTime] {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            auto childrenSize = swiper->TotalCount();
+            auto displayCount = swiper->GetDisplayCount();
+            if (childrenSize <= 0 || displayCount <= 0) {
+                return;
             }
-        },
-        TaskExecutor::TaskType::UI, delayTime);
 
-    taskPosted_ = true;
+            auto endPosition = swiper->GetTranslateLength();
+            swiper->PlayTranslateAnimation(0, -endPosition, (swiper->currentIndex_ + 1) % childrenSize, false);
+        }
+    });
+
+    taskExecutor->PostDelayedTask(translateTask_, TaskExecutor::TaskType::UI, delayTime);
 }
 
 void SwiperPattern::RegisterVisibleAreaChange()
 {
-    if (hasVisibleChangeRegistered_) {
+    if (hasVisibleChangeRegistered_ || !IsAutoPlay()) {
         return;
     }
 
@@ -1322,6 +1308,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
             swiperPattern->StartAutoPlay();
         } else {
             swiperPattern->isVisible_ = false;
+            swiperPattern->translateTask_.Cancel();
         }
     };
     auto host = GetHost();
@@ -1337,7 +1324,7 @@ bool SwiperPattern::NeedAutoPlay() const
     return IsAutoPlay() && !reachEnd && isVisible_;
 }
 
-void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool needPostTask)
+void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
 {
     currentOffset_ = 0.0;
     targetIndex_.reset();
@@ -1364,10 +1351,8 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, b
 
     auto delayTime = GetInterval() - GetDuration();
     delayTime = std::clamp(delayTime, 0, delayTime);
-    if (needPostTask && NeedAutoPlay() && !autoPlayStopped_) {
+    if (NeedAutoPlay()) {
         PostTranslateTask(delayTime);
-    } else {
-        taskPosted_ = false;
     }
 }
 } // namespace OHOS::Ace::NG
