@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 enum class CaretUpdateType {
     PRESSED,
     LONG_PRESSED,
+    ICON_PRESSED,
     DEL,
     EVENT,
     HANDLE_MOVE,
