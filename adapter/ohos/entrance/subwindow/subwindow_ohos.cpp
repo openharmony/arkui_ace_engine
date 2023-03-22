@@ -579,9 +579,29 @@ bool SubwindowOhos::CreateEventRunner()
     return true;
 }
 
-void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom)
 {
-    LOGI("SubwindowOhos::ShowToast begin");
+    LOGI("SubwindowOhos::ShowToastForAbility Show the toast");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        LOGE("Get container failed, it is null");
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return;
+    }
+    delegate->ShowToast(message, duration, bottom);
+}
+
+void SubwindowOhos::ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom)
+{
+    LOGI("SubwindowOhos::ShowToastForService begin");
     bool ret = CreateEventRunner();
     if (!ret) {
         return;
@@ -623,14 +643,45 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
         LOGE("Post sync task error");
         return;
     }
-    LOGI("SubwindowOhos::ShowToast end");
+    LOGI("SubwindowOhos::ShowToastForService end");
 }
 
-void SubwindowOhos::ShowDialog(const std::string& title, const std::string& message,
+void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+        ShowToastForService(message, duration, bottom);
+    } else {
+        ShowToastForAbility(message, duration, bottom);
+    }
+}
+
+void SubwindowOhos::ShowDialogForAbility(const std::string& title, const std::string& message,
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    LOGI("SubwindowOhos::ShowDialog begin");
+    LOGI("Show the dialog");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        LOGE("Get container failed, it is null");
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return;
+    }
+    delegate->ShowDialog(title, message, buttons, autoCancel, std::move(callback), callbacks);
+}
+
+void SubwindowOhos::ShowDialogForService(const std::string& title, const std::string& message,
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    LOGI("SubwindowOhos::ShowDialogForService begin");
     bool ret = CreateEventRunner();
     if (!ret) {
         return;
@@ -667,10 +718,42 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
         LOGE("Post sync task error");
         return;
     }
-    LOGI("SubwindowOhos::ShowDialog end");
+    LOGI("SubwindowOhos::ShowDialogForService end");
 }
 
-void SubwindowOhos::ShowActionMenu(
+void SubwindowOhos::ShowDialog(const std::string& title, const std::string& message,
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+        ShowDialogForService(title, message, buttons, autoCancel, std::move(callback), callbacks);
+    } else {
+        ShowDialogForAbility(title, message, buttons, autoCancel, std::move(callback), callbacks);
+    }
+}
+
+void SubwindowOhos::ShowActionMenuForAbility(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+{
+    LOGI("Show the action menu");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        LOGE("Get container failed, it is null");
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return;
+    }
+    delegate->ShowActionMenu(title, button, std::move(callback));
+}
+
+void SubwindowOhos::ShowActionMenuForService(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     LOGI("SubwindowOhos::ShowActionMenu begin");
@@ -727,6 +810,16 @@ void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, 
         ViewportConfig config(width, height, density);
         Platform::AceViewOhos::SetViewportMetrics(aceView, config);
         Platform::AceViewOhos::SurfaceChanged(aceView, width, height, 0);
+    }
+}
+
+void SubwindowOhos::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+        ShowActionMenuForService(title, button, std::move(callback));
+    } else {
+        ShowActionMenuForAbility(title, button, std::move(callback));
     }
 }
 } // namespace OHOS::Ace

@@ -31,6 +31,7 @@
 namespace OHOS::Ace {
 
 constexpr int32_t MIN_SUBCONTAINER_ID = 1000000;
+constexpr int32_t MIN_PA_SERVICE_ID = 100000;
 
 using SubwindowMap = std::unordered_map<int32_t, RefPtr<Subwindow>>;
 
