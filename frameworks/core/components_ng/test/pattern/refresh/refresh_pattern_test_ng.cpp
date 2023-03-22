@@ -71,6 +71,7 @@ public:
 protected:
     static RefPtr<FrameNode> CreateRefreshNode();
     static RefPtr<FrameNode> CreateRefreshNodeAndInitParam();
+    static void RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode);
 };
 
 void RefreshPatternTestNg::SetUpTestCase()
@@ -110,6 +111,21 @@ RefPtr<FrameNode> RefreshPatternTestNg::CreateRefreshNodeAndInitParam()
     modelNG.Pop();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     return frameNode;
+}
+
+void RefreshPatternTestNg::RunMeasureAndLayout(const RefPtr<FrameNode>& frameNode)
+{
+    RefPtr<LayoutWrapper> gridLayoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    gridLayoutWrapper->SetActive();
+    gridLayoutWrapper->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
+    LayoutConstraint.percentReference = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
+    LayoutConstraint.selfIdealSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
+    LayoutConstraint.maxSize = { CONTAINER_WIDTH, CONTAINER_HEIGHT };
+    gridLayoutWrapper->Measure(LayoutConstraint);
+    gridLayoutWrapper->Layout();
+    gridLayoutWrapper->MountToHostOnMainThread();
 }
 
 /**
@@ -1445,5 +1461,41 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest040, TestSize.Level1)
     pattern->customBuilder_->GetGeometryNode()->SetFrameSize(SizeF(0.0f, 0.0f));
     pattern->OnDirtyLayoutWrapperSwap(nullptr, swapConfig);
     EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: RefreshTest041
+ * @tc.desc: Test CustomBuilder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshPatternTestNg, RefreshTest041, TestSize.Level1)
+{
+    RefreshModelNG modelNG;
+    modelNG.Create();
+
+    /**
+     * @tc.steps: step1. SetRefreshing, SetCustomBuilder.
+     * @tc.expected: Verify GetIsCustomBuilderExistValue.
+     */
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
+    auto builder = AceType::DynamicCast<UINode>(test);
+    modelNG.SetRefreshing(true);
+    modelNG.SetCustomBuilder(builder);
+
+    /**
+     * @tc.steps: step2. Get framNode.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout.
+     * @tc.expected: Verify isRefresh.
+     */
+    RunMeasureAndLayout(frameNode);
+    EXPECT_TRUE(pattern->isRefreshing_);
+    EXPECT_EQ(pattern->refreshStatus_, RefreshStatus::REFRESH);
 }
 } // namespace OHOS::Ace::NG
