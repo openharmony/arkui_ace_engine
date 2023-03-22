@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 namespace {
 
 constexpr double FULL_ALPHA = 255.0;
+constexpr float HALF = 0.5f;
 
 } // namespace
 
@@ -44,7 +45,7 @@ void ScrollBarPainter::PaintRectBar(RSCanvas& canvas, const RefPtr<ScrollBar>& s
         RSColor bgColor = ToRSColor(scrollBar->GetBackgroundColor());
         brush.SetColor(bgColor);
         pen.SetColor(bgColor);
-        double filletRadius = bgRect.GetWidth() * SK_ScalarHalf;
+        double filletRadius = bgRect.GetWidth() * HALF;
         canvas.AttachPen(pen);
         canvas.AttachBrush(brush);
         canvas.DrawRoundRect({ bgRect, filletRadius, filletRadius });

@@ -26,7 +26,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/font/constants_converter.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/frame_node.h"
@@ -103,7 +102,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     bool showPlaceHolder = false;
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
-    
+
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
@@ -137,11 +136,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     if (pattern->IsTextArea()) {
         auto useHeight = static_cast<float>(paragraph_->GetHeight());
         const auto& calcLayoutConstraint = textFieldLayoutProperty->GetCalcLayoutConstraint();
-        if (calcLayoutConstraint &&
-            calcLayoutConstraint->maxSize.has_value() &&
+        if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
             calcLayoutConstraint->maxSize.value().Height().has_value()) {
-            auto maxHeightSize = calcLayoutConstraint->maxSize.value()
-                .Height().value().GetDimension();
+            auto maxHeightSize = calcLayoutConstraint->maxSize.value().Height().value().GetDimension();
             if (maxHeightSize.Unit() == DimensionUnit::PERCENT) {
                 idealHeight = maxHeightSize.ConvertToPxWithSize(contentConstraint.percentReference.Height());
             } else {
@@ -258,8 +255,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
-    TextStyle& textStyle, bool isDisabled)
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
+    bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));

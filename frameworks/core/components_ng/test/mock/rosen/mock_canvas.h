@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_ROSEN_MOCK_CANVAS_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_ROSEN_MOCK_CANVAS_H
 
-#include "gmock/gmock-function-mocker.h"
 #include "gmock/gmock.h"
 #include "testing_canvas.h"
 #include "testing_path.h"

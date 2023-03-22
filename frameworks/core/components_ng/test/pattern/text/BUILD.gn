@@ -189,7 +189,6 @@ ohos_unittest("text_pattern_test_ng") {
 
   configs = [
     "$ace_root:ace_config",
-
     "$ace_root:ace_test_config",
     "$ace_flutter_engine_root:flutter_config",
     "$ace_flutter_engine_root/skia:skia_config",

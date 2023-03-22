@@ -19,8 +19,8 @@
 #include <memory>
 #include <string>
 
-#include "core/components_ng/test/mock/rosen/testing_text_style.h"
-#include "core/components_ng/test/mock/rosen/testing_typography.h"
+#include "testing_text_style.h"
+#include "testing_typography.h"
 
 namespace OHOS::Ace::Testing {
 class TestingFontCollection {

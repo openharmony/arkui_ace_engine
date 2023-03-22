@@ -18,7 +18,7 @@
 
 #include <cstddef>
 
-#include "core/components_ng/test/mock/rosen/testing_rect.h"
+#include "testing_rect.h"
 
 namespace OHOS::Ace::Testing {
 enum class TextDirection {

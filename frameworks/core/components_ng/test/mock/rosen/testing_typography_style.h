@@ -19,8 +19,8 @@
 #include <string>
 #include <vector>
 
-#include "core/components_ng/test/mock/rosen/testing_typography.h"
-#include "core/components_ng/test/mock/rosen/testing_typography_properties.h"
+#include "testing_typography.h"
+#include "testing_typography_properties.h"
 
 namespace OHOS::Ace::Testing {
 class TestingTypographyStyle {
@@ -33,6 +33,7 @@ public:
     std::u16string ellipsis_;
     TextAlign textAlign_ = TextAlign::START;
     size_t maxLines_ = std::numeric_limits<size_t>::max();
+    std::string fontFamily_ = "";
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_STYLE_H

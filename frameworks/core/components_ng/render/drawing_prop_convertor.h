@@ -33,5 +33,7 @@ RSTextDirection ToRSTextDirection(const TextDirection& txtDir);
 RSTextAlign ToRSTextAlign(const TextAlign& align);
 RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak);
 RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& textStyle);
+RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration);
+RSFontWeight ToRSFontWeight(FontWeight fontWeight);
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_PROP_CONVERTOR_H
