@@ -1315,6 +1315,8 @@ void SwiperPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+
+    pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }
 
@@ -1354,5 +1356,17 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
     if (NeedAutoPlay()) {
         PostTranslateTask(delayTime);
     }
+}
+
+void SwiperPattern::OnWindowShow()
+{
+    isVisible_ = true;
+    StartAutoPlay();
+}
+
+void SwiperPattern::OnWindowHide()
+{
+    isVisible_ = false;
+    StopAutoPlay();
 }
 } // namespace OHOS::Ace::NG
