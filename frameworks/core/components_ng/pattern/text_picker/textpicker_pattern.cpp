@@ -371,7 +371,7 @@ std::string TextPickerPattern::GetRangeStr() const
             result += "\"";
             result += ",";
         }
-        result = result.substr(0, result.size() - 1);
+        result.pop_back();
         result += "]";
         return result;
     }
