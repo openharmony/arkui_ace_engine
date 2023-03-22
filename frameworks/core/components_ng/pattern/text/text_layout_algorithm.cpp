@@ -494,7 +494,11 @@ std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
 void TextLayoutAlgorithm::UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
 {
     auto renderContext = frameNode->GetRenderContext();
-    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+    if (renderContext->HasForegroundColor()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != textStyle.GetTextColor().GetValue()) {
+            textStyle.SetTextColor(Color::FOREGROUND);
+        }
+    } else if (renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
     }
 }
