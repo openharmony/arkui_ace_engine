@@ -30,6 +30,7 @@
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_bitmap.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -357,7 +358,7 @@ HWTEST_F(QRCodePropertyTestNg, QRCodePatternTest009, TestSize.Level1)
      * @tc.steps: step2. get paintWrapper and execute paint method
      * @tc.expected: paintWrapper is not null
      */
-    RefPtr<RenderContext> renderContext;
+    RefPtr<MockRenderContext> renderContext = AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_);
     auto qrcodePaintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, qrcodePaintProperty);
