@@ -750,7 +750,7 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
 
 void ListPattern::ProcessDragStart(float startPosition)
 {
-    CHECK_NULL_VOID(chainAnimation_);
+    CHECK_NULL_VOID_NOLOG(chainAnimation_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto globalOffset = host->GetTransformRelativeOffset();
@@ -772,7 +772,7 @@ void ListPattern::ProcessDragStart(float startPosition)
 
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 {
-    CHECK_NULL_VOID(chainAnimation_);
+    CHECK_NULL_VOID_NOLOG(chainAnimation_);
     if (NearZero(dragOffset)) {
         return;
     }
