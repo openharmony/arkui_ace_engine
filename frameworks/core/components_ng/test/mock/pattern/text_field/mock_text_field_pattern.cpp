@@ -111,4 +111,7 @@ void TextFieldPattern::UpdateScrollBarOffset() {}
 
 void TextFieldPattern::HandleBlurEvent() {}
 void TextFieldPattern::HandleFocusEvent() {}
+
+void TextFieldPattern::InitSurfaceChangedCallback() {}
+void TextFieldPattern::InitSurfacePositionChangedCallback() {}
 } // namespace OHOS::Ace::NG

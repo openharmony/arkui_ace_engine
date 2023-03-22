@@ -396,7 +396,7 @@ void JSButton::CreateWithLabel(const JSCallbackInfo& info)
         auto buttonTheme = GetTheme<ButtonTheme>();
         auto textStyle = buttonTheme ? buttonTheme->GetTextStyle() : textComponent->GetTextStyle();
         textStyle.SetMaxLines(buttonTheme ? buttonTheme->GetTextMaxLines() : 1);
-        textStyle.SetTextOverflow(TextOverflow::CLIP);
+        textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
         textComponent->SetTextStyle(textStyle);
         auto padding = AceType::MakeRefPtr<PaddingComponent>();
         padding->SetPadding(buttonTheme ? buttonTheme->GetPadding() : Edge());

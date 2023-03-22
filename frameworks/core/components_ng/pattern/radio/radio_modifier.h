@@ -199,7 +199,7 @@ private:
     RefPtr<PropertyFloat> pointScale_;
     RefPtr<PropertyFloat> ringPointScale_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;
-    TouchHoverAnimationType touchHoverType_;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(RadioModifier);
 };

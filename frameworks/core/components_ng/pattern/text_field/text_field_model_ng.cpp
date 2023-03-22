@@ -53,31 +53,10 @@ void TextFieldModelNG::CreateNode(
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    pattern->InitSurfaceChangedCallback();
+    pattern->InitSurfacePositionChangedCallback();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (!pattern->HasSurfaceChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
-                auto pattern = weakPattern.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
-                }
-            });
-        LOGI("Add surface changed callback id %{public}d", callbackId);
-        pattern->UpdateSurfaceChangedCallbackId(callbackId);
-    }
-    if (!pattern->HasSurfacePositionChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfacePositionChangedCallback(
-            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](int32_t posX, int32_t posY) {
-                auto pattern = weakPattern.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfacePositionChanged(posX, posY);
-                }
-            });
-        LOGI("Add position changed callback id %{public}d", callbackId);
-        pattern->UpdateSurfacePositionChangedCallbackId(callbackId);
-    }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();

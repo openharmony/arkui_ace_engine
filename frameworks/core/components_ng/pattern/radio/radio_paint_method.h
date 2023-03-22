@@ -127,7 +127,7 @@ private:
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    TouchHoverAnimationType touchHoverType_;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<RadioModifier> radioModifier_;
 };

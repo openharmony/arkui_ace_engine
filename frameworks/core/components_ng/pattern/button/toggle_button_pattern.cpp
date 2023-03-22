@@ -37,6 +37,9 @@ namespace OHOS::Ace::NG {
 void ToggleButtonPattern::OnAttachToFrameNode()
 {
     InitParameters();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 void ToggleButtonPattern::InitParameters()
