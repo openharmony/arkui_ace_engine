@@ -666,7 +666,7 @@ public:
 
     std::optional<bool> IsFocusOnTouch() const
     {
-        return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : false;
+        return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : std::nullopt;
     }
     void SetIsFocusOnTouch(bool isFocusOnTouch);
 
