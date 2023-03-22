@@ -18,11 +18,11 @@
 
 #include "gmock/gmock.h"
 
-#include "core/pipeline/pipeline_base.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
-namespace OHOS::Ace {
-class MockPipelineBase : public PipelineBase {
-    DECLARE_ACE_TYPE(MockPipelineBase, PipelineBase);
+namespace OHOS::Ace::NG {
+class MockPipelineBase : public PipelineContext {
+    DECLARE_ACE_TYPE(MockPipelineBase, PipelineContext);
 
 public:
     MockPipelineBase() = default;
@@ -96,5 +96,5 @@ public:
 
     static RefPtr<MockPipelineBase> pipeline_;
 };
-} // namespace OHOS::Ace
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H

@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
@@ -55,36 +56,34 @@ constexpr Dimension CHECK_MARK_SIZE = Dimension(10.0);
 constexpr Dimension CHECK_MARK_SIZE_INCORRECT_VALUE = Dimension(-1.0);
 constexpr Dimension CHECK_MARK_WIDTH = Dimension(5.0);
 const bool SELECT_STATE = true;
+RefPtr<PipelineContext> pipeline = nullptr;
 } // namespace
 
-class CheckBoxPropertyTestNg : public testing::Test {
+class CheckBoxTestNG : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
 
-void CheckBoxPropertyTestNg::SetUpTestCase()
+void CheckBoxTestNG::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<CheckboxTheme>()));
 }
-void CheckBoxPropertyTestNg::TearDownTestCase()
+
+void CheckBoxTestNG::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }
-void CheckBoxPropertyTestNg::SetUp() {}
-void CheckBoxPropertyTestNg::TearDown() {}
 
 /**
  * @tc.name: CheckBoxPaintPropertyTest001
  * @tc.desc: Set CheckBox value into CheckBoxPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -118,7 +117,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintPropertyTest001, TestSize.Level1)
  * @tc.desc: Set CheckBox value into CheckBoxEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventHubPropertyTest002, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxEventHubPropertyTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -143,7 +142,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventHubPropertyTest002, TestSize.Level
  * @tc.desc: Test CheckBox onChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventTest003, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxEventTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -175,7 +174,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventTest003, TestSize.Level1)
  * @tc.desc: Test CheckBox onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest004, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -202,7 +201,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest004, TestSize.Level1)
  * @tc.desc: Test CheckBox Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxMeasureTest005, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -242,7 +241,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxMeasureTest005, TestSize.Level1)
  * @tc.desc: Test CheckBox pattern method OnTouchUp.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest006, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -272,7 +271,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest006, TestSize.Level1)
  * @tc.desc: Test CheckBox pattern method OnTouchDown.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest007, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -302,7 +301,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest007, TestSize.Level1)
  * @tc.desc: Test CheckBox pattern method OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest008, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -337,7 +336,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest008, TestSize.Level1)
  * @tc.desc: Test CheckBox pattern method HandleMouseEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest009, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -369,7 +368,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest009, TestSize.Level1)
  * @tc.desc: Test CheckBox pattern Init methods.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest010, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -422,7 +421,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest010, TestSize.Level1)
  * @tc.desc: Test CheckBox pattern Update methods.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest011, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -462,7 +461,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest011, TestSize.Level1)
  * @tc.desc: Set CheckBox value into CheckBoxEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventHubPropertyTest012, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxEventHubPropertyTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -487,7 +486,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventHubPropertyTest012, TestSize.Level
  * @tc.desc: Set CheckBox value into CheckBoxEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventHubPropertyTest013, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxEventHubPropertyTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBox node
@@ -512,7 +511,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxEventHubPropertyTest013, TestSize.Level
  * @tc.desc: Test CheckBox onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest014, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest014, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -539,7 +538,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest014, TestSize.Level1)
  * @tc.desc: Test UpdateAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest015, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest015, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
@@ -556,7 +555,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest015, TestSize.Level1)
  * @tc.desc: Test UpdateAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest016, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest016, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
@@ -573,7 +572,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest016, TestSize.Level1)
  * @tc.desc: Test UpdateCheckBoxGroupStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest017, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest017, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG1;
     checkBoxModelNG1.Create(NAME, GROUP_NAME, TAG);
@@ -623,7 +622,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest017, TestSize.Level1)
  * @tc.desc: Test CheckBoxGroupIsTrue.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest018, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest018, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG1;
     checkBoxModelNG1.Create(NAME, GROUP_NAME, TAG);
@@ -639,7 +638,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest018, TestSize.Level1)
  * @tc.desc: Test GetInnerFocusPaintRect.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest019, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest019, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
@@ -659,7 +658,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest019, TestSize.Level1)
  * @tc.desc: Set unSelectedColor into CheckBoxPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest020, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest020, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
@@ -676,7 +675,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest020, TestSize.Level1)
  * @tc.desc: Set checkMarkColor into CheckBoxPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest021, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest021, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
@@ -693,7 +692,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest021, TestSize.Level1)
  * @tc.desc: Set checkMarkSize into CheckBoxPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest022, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest022, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
@@ -710,7 +709,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest022, TestSize.Level1)
  * @tc.desc: Set checkMarkWidth into CheckBoxPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest023, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest023, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG;
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
@@ -727,7 +726,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPatternTest023, TestSize.Level1)
  * @tc.desc: Test CheckBox PaintMethod PaintCheckBox.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest001, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest001, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -754,7 +753,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest001, TestSize.Level1)
  * @tc.desc: Test checkbox method UpdateContentModifier will update value into modifier.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest002, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest002, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -774,10 +773,10 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest002, TestSize.Level1)
         checkBoxPaintProperty->UpdateCheckBoxCheckMarkSize(CHECK_MARK_SIZE);
         checkBoxPaintProperty->UpdateCheckBoxCheckMarkWidth(CHECK_MARK_WIDTH);
     }
-    
+
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    auto checkboxModifier = AceType::MakeRefPtr<CheckBoxModifier>(false,
-        Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
+    auto checkboxModifier =
+        AceType::MakeRefPtr<CheckBoxModifier>(false, Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
     ASSERT_NE(checkboxModifier, nullptr);
     CheckBoxPaintMethod checkBoxPaintMethod(checkboxModifier);
     checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
@@ -785,10 +784,10 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest002, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->userActiveColor_, SELECTED_COLOR);
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->inactiveColor_, UNSELECTED_COLOR);
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->pointColor_, CHECK_MARK_COLOR);
-    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(),
-        static_cast<float>(CHECK_MARK_SIZE.ConvertToPx()));
-    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(),
-        static_cast<float>(CHECK_MARK_WIDTH.ConvertToPx()));
+    EXPECT_EQ(
+        checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CHECK_MARK_SIZE.ConvertToPx()));
+    EXPECT_EQ(
+        checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), static_cast<float>(CHECK_MARK_WIDTH.ConvertToPx()));
 }
 
 /**
@@ -796,7 +795,7 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest002, TestSize.Level1)
  * @tc.desc: Test checkbox method UpdateContentModifier will update incorrect value into modifier.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest003, TestSize.Level1)
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest003, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -811,13 +810,71 @@ HWTEST_F(CheckBoxPropertyTestNg, CheckBoxPaintMethodTest003, TestSize.Level1)
     if (checkBoxPaintProperty) {
         checkBoxPaintProperty->UpdateCheckBoxCheckMarkSize(CHECK_MARK_SIZE_INCORRECT_VALUE);
     }
-    
+
     PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
-    auto checkboxModifier = AceType::MakeRefPtr<CheckBoxModifier>(false,
-        Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
+    auto checkboxModifier =
+        AceType::MakeRefPtr<CheckBoxModifier>(false, Color::BLUE, Color::BLACK, Color::BLACK, Color::GRAY);
     ASSERT_NE(checkboxModifier, nullptr);
     CheckBoxPaintMethod checkBoxPaintMethod(checkboxModifier);
     checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CONTENT_SIZE.Width()));
+}
+
+/**
+ * @tc.name: CheckBoxAccessibilityPropertyTestNg001
+ * @tc.desc: Test the IsCheckable property of CheckBox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxAccessibilityPropertyTestNg001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->IsCheckable());
+}
+
+/**
+ * @tc.name: CheckBoxAccessibilityPropertyTestNg002
+ * @tc.desc: Test the IsChecked property of CheckBox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxAccessibilityPropertyTestNg002, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateCheckBoxSelect(true);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->IsChecked());
+
+    paintProperty->UpdateCheckBoxSelect(false);
+    EXPECT_FALSE(accessibilityProperty->IsChecked());
+}
+
+/**
+ * @tc.name: CheckBoxAccessibilityPropertyTestNg003
+ * @tc.desc: Test the GetText property of CheckBox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxAccessibilityPropertyTestNg003, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(), NAME);
 }
 } // namespace OHOS::Ace::NG

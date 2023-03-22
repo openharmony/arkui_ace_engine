@@ -14,7 +14,9 @@
  */
 
 #include <cmath>
+
 #include "gtest/gtest.h"
+
 #include "base/geometry/matrix3.h"
 
 using namespace testing;
@@ -42,35 +44,9 @@ constexpr int32_t INVALID_COL_POS = 5;
 
 constexpr uint32_t ROW_NUM = 4;
 constexpr uint32_t COLUMN_NUM = 4;
-}
+} // namespace
 
-class Matrix3Test : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void Matrix3Test::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "Matrix3Test SetUpTestCase";
-}
-
-void Matrix3Test::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "Matrix3Test TearDownTestCase";
-}
-
-void Matrix3Test::SetUp()
-{
-    GTEST_LOG_(INFO) << "Matrix3Test SetUp";
-}
-
-void Matrix3Test::TearDown()
-{
-    GTEST_LOG_(INFO) << "Matrix3Test TearDown";
-}
+class Matrix3Test : public testing::Test {};
 
 /**
  * @tc.name: Matrix3Test001
@@ -229,7 +205,7 @@ HWTEST_F(Matrix3Test, Matrix3Test004, TestSize.Level1)
      */
     Matrix3N matrix3NObj2 = matrixObj1 * matrix3NObj1;
     EXPECT_EQ(matrix3NObj1.ToString(), matrix3NObj2.ToString());
-    
+
     /**
      * @tc.steps3:  Call the function operator* of classes Matrix3N.
      * @tc.expected: The product of matrixes matrix3NObj1 and matrixN3Obj1 is equal to matrixObj1.

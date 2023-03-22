@@ -28,16 +28,16 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #define private public
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
