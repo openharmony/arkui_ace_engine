@@ -369,6 +369,11 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     CHECK_NULL_VOID(pageNode);
     auto pagePattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
+    auto layoutProperty = pageNode->GetLayoutProperty();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (pipeline && layoutProperty) {
+        layoutProperty->SetSafeArea(pipeline->GetCurrentViewSafeArea());
+    }
     pagePattern->OnShow();
     // With or without a page transition, we need to make the coming page visible first
     pagePattern->ProcessShowState();

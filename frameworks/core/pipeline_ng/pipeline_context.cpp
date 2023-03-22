@@ -27,6 +27,7 @@
 #endif
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
@@ -609,6 +610,21 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
         RequestFrame();
     }
+}
+
+void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
+{
+    if (window_) {
+        window_->SetGetViewSafeAreaImpl(std::move(callback));
+    }
+}
+
+SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
+{
+    if (window_) {
+        return window_->GetCurrentViewSafeArea();
+    }
+    return {};
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)

@@ -695,6 +695,7 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
     if (pipelineContext) {
         pipelineContext->SetDisplayWindowRectInfo(
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
+        pipelineContext->SetIsLayoutFullScreen(Ability::GetWindow()->IsLayoutFullScreen());
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
