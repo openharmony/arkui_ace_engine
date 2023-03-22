@@ -27,6 +27,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
     static void SetDivider(const JSCallbackInfo& args);
+    static void SetAspectRatio(const JSCallbackInfo& args);
 };
 
 } // namespace OHOS::Ace::Framework
