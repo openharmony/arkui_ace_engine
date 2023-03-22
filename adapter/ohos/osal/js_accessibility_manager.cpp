@@ -618,6 +618,8 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     }
     nodeInfo.SetHint(accessibilityProperty->GetHintText());
     nodeInfo.SetTextLengthLimit(accessibilityProperty->GetTextLengthLimit());
+    nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
+    nodeInfo.SetChecked(accessibilityProperty->IsChecked());
     nodeInfo.SetSelected(accessibilityProperty->IsSelected());
     nodeInfo.SetPassword(accessibilityProperty->IsPassword());
     nodeInfo.SetScrollable(accessibilityProperty->IsScrollable());
@@ -676,6 +678,13 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
 
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
     nodeInfo.SetComponentType(node->GetTag());
+
+    auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
+    if (gestureEventHub) {
+        nodeInfo.SetClickable(gestureEventHub->IsClickable());
+        nodeInfo.SetLongClickable(gestureEventHub->IsLongClickable());
+    }
+
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocusable(node->GetFocusHub() ? node->GetFocusHub()->IsFocusable() : false);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
