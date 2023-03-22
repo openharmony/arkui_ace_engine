@@ -310,61 +310,6 @@ HWTEST_F(TextPatternTestNg, TextFrameNodeCreator003, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextFrameNodeCreator004
- * @tc.desc: Test TextAccessibilityProperty.cpp.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPatternTestNg, TextFrameNodeCreator004, TestSize.Level1)
-{
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    EXPECT_FALSE(frameNode == nullptr);
-    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-    EXPECT_FALSE(textAccessibilityProperty == nullptr);
-    textAccessibilityProperty->SetHost(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    EXPECT_EQ(textAccessibilityProperty->GetText(), CREATE_VALUE);
-}
-
-/**
- * @tc.name: TextFrameNodeCreator005
- * @tc.desc: Test TextAccessibilityProperty.cpp.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPatternTestNg, TextFrameNodeCreator005, TestSize.Level1)
-{
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    EXPECT_FALSE(frameNode == nullptr);
-    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-    EXPECT_FALSE(textAccessibilityProperty == nullptr);
-    textAccessibilityProperty->SetHost(nullptr);
-    EXPECT_EQ(textAccessibilityProperty->GetText(), "");
-}
-
-/**
- * @tc.name: TextFrameNodeCreator006
- * @tc.desc: Test TextAccessibilityProperty.cpp.
- * @tc.type: FUNC
- */
-HWTEST_F(TextPatternTestNg, TextFrameNodeCreator006, TestSize.Level1)
-{
-    TextModelNG textModelNG;
-    textModelNG.Create(CREATE_VALUE);
-
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    EXPECT_FALSE(frameNode == nullptr);
-    auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
-    EXPECT_FALSE(textAccessibilityProperty == nullptr);
-    textAccessibilityProperty->SetHost(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    frameNode->layoutProperty_ = nullptr;
-    EXPECT_EQ(textAccessibilityProperty->GetText(), "");
-}
-
-/**
  * @tc.name: OnAttachToFrameNode001
  * @tc.desc: Test TextPattern OnAttachToFrameNode when GetHost is nullptr.
  * @tc.type: FUNC

@@ -109,6 +109,7 @@ ohos_unittest("text_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
 
     # components_ng_property
+    "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
@@ -166,6 +167,7 @@ ohos_unittest("text_pattern_test_ng") {
 
     # self
     "span_pattern_test_ng.cpp",
+    "text_accessibility_property_test_ng.cpp",
     "text_layout_test_ng.cpp",
     "text_pattern_test_ng.cpp",
   ]
