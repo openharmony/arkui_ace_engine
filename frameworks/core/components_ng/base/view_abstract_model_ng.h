@@ -688,6 +688,9 @@ public:
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+#ifdef ENABLE_DRAG_FRAMEWORK
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 

@@ -21,26 +21,23 @@
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-#include "adapter/ohos/osal/pixel_map_ohos.h"
+#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/render_context.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
-#endif
+#endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
+#ifdef ENABLE_DRAG_FRAMEWORK
 using namespace OHOS::Rosen;
-#endif
+#endif // ENABLE_DRAG_FRAMEWORK
 namespace {
-
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
-RefPtr<PixelMap> pixelMap_ {};
+#ifdef ENABLE_DRAG_FRAMEWORK
+std::shared_ptr<Media::PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
-#endif
+#endif // ENABLE_DRAG_FRAMEWORK
 constexpr double MAX_THRESHOLD = 15.0;
 constexpr int32_t MAX_FINGERS = 10;
 } // namespace
@@ -73,7 +70,7 @@ void LongPressRecognizer::OnRejected()
     refereeState_ = RefereeState::FAIL;
 }
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
+#ifdef ENABLE_DRAG_FRAMEWORK
 class DrawDragThumbnailCallback : public SurfaceCaptureCallback {
 public:
     void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
@@ -82,8 +79,8 @@ public:
             LOGE("%{public}s: failed to get pixelmap, return nullptr", __func__);
             return;
         }
-        pixelMap_ = AceType::MakeRefPtr<PixelMapOhos>(pixelMap);
         std::unique_lock<std::mutex> lock(g_mutex);
+        g_pixelMap = pixelMap;
         thumbnailGet.notify_all();
         LOGI("Get pixelmap success");
     }
@@ -107,7 +104,7 @@ void LongPressRecognizer::GetThumbnailPixelMap()
     RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode, drawDragThumbnailCallback, 1, 1);
     std::unique_lock<std::mutex> lock(g_mutex);
     thumbnailGet.wait(lock);
-    gestureHub->SetPixelMap(pixelMap_);
+    gestureHub->SetPixelMap(g_pixelMap);
 }
 
 void LongPressRecognizer::ThumbnailTimer(int32_t time)
@@ -127,7 +124,7 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     taskExecutor.PostDelayedTask(thumbnailTimer_, time);
 }
-#endif
+#endif // ENABLE_DRAG_FRAMEWORK
 
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
@@ -168,9 +165,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             DeadlineTimer(curDuration, false);
         }
     }
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
+#ifdef ENABLE_DRAG_FRAMEWORK
     ThumbnailTimer(thumbnailDeadline);
-#endif
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
@@ -339,10 +336,10 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     return true;
 }
 
-#ifdef OHOS_BUILD_ENABLE_COORDINATION
+#ifdef ENABLE_DRAG_FRAMEWORK
 void LongPressRecognizer::SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
 {
     gestureHub_ = gestureHub;
 }
-#endif
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG
