@@ -241,6 +241,7 @@ build_component_ng("pattern_ng") {
     "rating/rating_model_ng.cpp",
     "rating/rating_modifier.cpp",
     "rating/rating_pattern.cpp",
+    "refresh/refresh_accessibility_property.cpp",
     "refresh/refresh_layout_algorithm.cpp",
     "refresh/refresh_model_ng.cpp",
     "refresh/refresh_pattern.cpp",
