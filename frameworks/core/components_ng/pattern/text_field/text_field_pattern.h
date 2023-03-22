@@ -635,7 +635,6 @@ private:
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
-    int32_t GetLineNumber(float offsetY);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
