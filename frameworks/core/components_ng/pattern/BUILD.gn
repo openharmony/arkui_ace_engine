@@ -308,6 +308,7 @@ build_component_ng("pattern_ng") {
     "stage/page_pattern.cpp",
     "stage/page_transition_model_ng.cpp",
     "stage/stage_manager.cpp",
+    "stepper/stepper_accessibility_property.cpp",
     "stepper/stepper_item_model_ng.cpp",
     "stepper/stepper_layout_algorithm.cpp",
     "stepper/stepper_model_ng.cpp",
