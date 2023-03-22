@@ -597,7 +597,11 @@ CaretMetricsF TextFieldPattern::CalcCursorOffsetByPosition(int32_t position)
 
 float TextFieldPattern::AdjustTextRectOffsetX()
 {
+    auto cursorWidth = static_cast<float>(CURSOR_WIDTH.ConvertToPx());
+    auto contentLeftBoundary = contentRect_.GetX();
+    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width();
     if (IsTextArea()) {
+        caretRect_.SetLeft(std::clamp(caretRect_.GetX(), contentLeftBoundary, contentRightBoundary - cursorWidth));
         return 0.0f;
     }
     // text rect length exceeds content length, but cursor is still in the region
@@ -605,15 +609,13 @@ float TextFieldPattern::AdjustTextRectOffsetX()
         return 0.0f;
     }
     auto offsetToParagraphBeginning = caretRect_.GetX() - textRect_.GetX();
-    auto contentLeftBoundary = contentRect_.GetX();
-    auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width();
     float dx = 0.0f;
     if (caretRect_.GetX() < contentLeftBoundary) {
         dx = contentLeftBoundary - caretRect_.GetX();
         caretRect_.SetLeft(caretRect_.GetX() + dx);
         textRect_.SetLeft(caretRect_.GetX() - offsetToParagraphBeginning);
-    } else if (caretRect_.GetX() + CURSOR_WIDTH.ConvertToPx() > contentRightBoundary) {
-        dx = (contentRightBoundary - static_cast<float>(CURSOR_WIDTH.ConvertToPx())) - caretRect_.GetX();
+    } else if (caretRect_.GetX() + cursorWidth > contentRightBoundary) {
+        dx = (contentRightBoundary - static_cast<float>(cursorWidth)) - caretRect_.GetX();
         caretRect_.SetLeft(caretRect_.GetX() + dx);
         textRect_.SetLeft(caretRect_.GetX() - offsetToParagraphBeginning);
     }
