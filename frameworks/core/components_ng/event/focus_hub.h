@@ -138,7 +138,7 @@ class ACE_EXPORT FocusPattern : public virtual AceType {
     DECLARE_ACE_TYPE(FocusPattern, AceType)
 
 public:
-    explicit FocusPattern() = default;
+    FocusPattern() = default;
     FocusPattern(FocusType focusType, bool focusable) : focusType_(focusType), focusable_(focusable) {}
     FocusPattern(FocusType focusType, bool focusable, FocusStyleType styleType)
         : focusType_(focusType), focusable_(focusable), styleType_(styleType)
@@ -241,7 +241,7 @@ struct ScopeFocusAlgorithm final {
 class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
     DECLARE_ACE_TYPE(FocusCallbackEvents, AceType)
 public:
-    explicit FocusCallbackEvents() = default;
+    FocusCallbackEvents() = default;
     ~FocusCallbackEvents() override = default;
 
     void SetOnFocusCallback(OnFocusFunc&& onFocusCallback)

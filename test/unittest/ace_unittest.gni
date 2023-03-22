@@ -78,6 +78,7 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
   "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
   "$ace_root/frameworks/core/components_ng/property/property.cpp",
+  "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
   "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
 
   # components_v2
@@ -95,7 +96,6 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid_container/mock_grid_container_layout_property.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
-  "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",

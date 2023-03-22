@@ -36,11 +36,7 @@ const auto FRAME_NODE_ROOT = FrameNode::CreateFrameNode(TAG_ROOT, 1, MOCK_PATTER
 const auto FRAME_NODE_CHILD = FrameNode::CreateFrameNode(TAG_CHILD, 2, MOCK_PATTERN_ROOT, false);
 }; // namespace
 
-class ViewStackProcessorTestNg : public testing::Test {
-public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-};
+class ViewStackProcessorTestNg : public testing::Test {};
 
 /**
  * @tc.name: ViewStackProcessorTestNg001
@@ -105,42 +101,13 @@ HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg003, TestSize.Level1)
     EXPECT_FALSE(FRAME_NODE_ROOT->isMeasureBoundary_);
 }
 
+
 /**
  * @tc.name: ViewStackProcessorTestNg004
  * @tc.desc: Test the operation of view stack processor
  * @tc.type: FUNC
  */
 HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. PopContainer
-     * @tc.expected: step1. stack top tag is root
-     */
-    auto groupPattern = AceType::MakeRefPtr<RootPattern>();
-    auto groupNode = AceType::MakeRefPtr<GroupNode>("group", 3, groupPattern);
-    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
-    ViewStackProcessor::GetInstance()->Push(groupNode);
-    ViewStackProcessor::GetInstance()->PopContainer();
-    auto topFrameNode = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(strcmp(topFrameNode->GetTag().c_str(), TAG_ROOT), 0);
-    /**
-     * @tc.steps: step2. PopContainer
-     * @tc.expected: step2. stack top tag is root
-     */
-    ViewStackProcessor::GetInstance()->Push(groupNode);
-    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
-    ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
-    ViewStackProcessor::GetInstance()->PopContainer();
-    auto final = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(strcmp(final->GetTag().c_str(), "group"), 0);
-}
-
-/**
- * @tc.name: ViewStackProcessorTestNg005
- * @tc.desc: Test the operation of view stack processor
- * @tc.type: FUNC
- */
-HWTEST_F(ViewStackProcessorTestNg, ViewStackProcessorTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. push key one and two

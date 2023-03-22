@@ -23,20 +23,20 @@
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components/text_field/textfield_theme.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextFieldPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(TextFieldPaintMethod, NodePaintMethod)
 public:
     TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,
-                         const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
-                         const RefPtr<TextFieldContentModifier>& textFieldContentModifier);
+        const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
+        const RefPtr<TextFieldContentModifier>& textFieldContentModifier);
 
     ~TextFieldPaintMethod() override = default;
 
@@ -47,8 +47,8 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void UpdateTextStyleToModifier(const RefPtr<TextFieldLayoutProperty>& layoutProperty,
-        const RefPtr<TextFieldTheme>& theme, bool isDisabled);
+    void UpdateTextStyleToModifier(
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, bool isDisabled);
 
 private:
     WeakPtr<Pattern> pattern_;

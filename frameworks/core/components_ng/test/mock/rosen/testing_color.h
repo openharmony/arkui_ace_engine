@@ -21,9 +21,23 @@
 namespace OHOS::Ace::Testing {
 class TestingColor {
 public:
+    constexpr static uint32_t COLOR_TRANSPARENT = 0;
+    constexpr static uint32_t COLOR_BLACK = 0xFF000000;
+    constexpr static uint32_t COLOR_DKGRAY = 0xFF444444;
+    constexpr static uint32_t COLOR_GRAY = 0xFF888888;
+    constexpr static uint32_t COLOR_LTGRAY = 0xFFCCCCCC;
+    constexpr static uint32_t COLOR_WHITE = 0xFFFFFFFF;
+    constexpr static uint32_t COLOR_RED = 0xFFFF0000;
+    constexpr static uint32_t COLOR_GREEN = 0xFF00FF00;
+    constexpr static uint32_t COLOR_BLUE = 0xFF0000FF;
+    constexpr static uint32_t COLOR_YELLOW = 0xFFFFFF00;
+    constexpr static uint32_t COLOR_CYAN = 0xFF00FFFF;
+    constexpr static uint32_t COLOR_MAGENTA = 0xFFFF00FF;
+
+    TestingColor() = default;
     TestingColor(uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha) {}
     explicit TestingColor(uint32_t rgba) {}
-    ~TestingColor() = default;
+    virtual ~TestingColor() = default;
 
     float GetAlphaF()
     {

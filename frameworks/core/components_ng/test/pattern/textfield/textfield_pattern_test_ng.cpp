@@ -15,20 +15,30 @@
 
 #include "gtest/gtest.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #define private public
 #define protected public
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "textfield_test_ng_utils.h"
-#include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
+#include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
+#include "core/components_ng/pattern/text_field/text_field_controller.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_paint_method.h"
+#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
+#include "core/components_ng/base/view_stack_processor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,29 +59,101 @@ const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 constexpr float CONTEXT_WIDTH_VALUE = 10.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 10.0f;
+const std::string EMPTY_TEXT_VALUE;
+const std::string TEXT_EDITING_VALUE("textEditingValue");
+constexpr int32_t ONECE_MOVE_POS = 1;
+const std::string PLACEHOLDER = "DEFAULT PLACEHOLDER";
 } // namespace
 class TextFieldPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {};
-    static void TearDownTestCase() {};
     void SetUp() override;
     void TearDown() override;
+    RefPtr<FrameNode> GetFrameNode();
     RefPtr<TextFieldPattern> GetTextFieldPattern();
     RefPtr<TextFieldLayoutProperty> GetLayoutPropertyFromHost(const RefPtr<TextFieldPattern>& pattern);
-    RefPtr<FrameNode> GetFrameNode();
+    RefPtr<TextFieldLayoutProperty> CreateNodeAndGetLayoutProperty(TextFieldModelNG& textFieldModelInstance);
+    RefPtr<TextFieldPaintProperty> CreateNodeAndGetPaintProperty(TextFieldModelNG& textFieldModelInstance);
+    RefPtr<TextFieldLayoutProperty> GetTextFieldLayoutProperty();
+    void CreatOnTextChangedListenerImplInstance();
+    RefPtr<FrameNode> CreatTextFieldNode(const std::optional<std::string>& placeholder = PLACEHOLDER,
+        const std::optional<std::string>& value = EMPTY_TEXT_VALUE, bool isTextArea = false);
+
+    std::shared_ptr<OnTextChangedListenerImpl> textChangedListenerImpl_;
     RefPtr<FrameNode> host_;
 };
 
-void TextFieldPatternTestNg::SetUp() {}
+void TextFieldPatternTestNg::SetUp()
+{
+    CreatOnTextChangedListenerImplInstance();
+}
 
 void TextFieldPatternTestNg::TearDown()
 {
     host_ = nullptr;
+    textChangedListenerImpl_ = nullptr;
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+RefPtr<FrameNode> TextFieldPatternTestNg::CreatTextFieldNode(
+    const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool isTextArea)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateNode(placeholder, value, isTextArea);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return frameNode;
+}
+
+void TextFieldPatternTestNg::CreatOnTextChangedListenerImplInstance()
+{
+    host_ = CreatTextFieldNode();
+    if (!host_) {
+        GTEST_LOG_(INFO) << "create textfield node failed!";
+        return;
+    }
+    auto pattern = host_->GetPattern<TextFieldPattern>();
+    if (!pattern) {
+        GTEST_LOG_(INFO) << "Get TextFieldPattern failed!";
+        return;
+    }
+    WeakPtr<TextFieldPattern> textFieldPattern(pattern);
+    textChangedListenerImpl_ = std::make_shared<OnTextChangedListenerImpl>(textFieldPattern);
+}
+
+RefPtr<TextFieldLayoutProperty> TextFieldPatternTestNg::CreateNodeAndGetLayoutProperty(
+    TextFieldModelNG& textFieldModelInstance)
+{
+    textFieldModelInstance.CreateNode(PLACEHOLDER, EMPTY_TEXT_VALUE, false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode) {
+        GTEST_LOG_(INFO) << "create textfield node failed!";
+        return nullptr;
+    }
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    return layoutProperty;
+}
+
+RefPtr<TextFieldPaintProperty> TextFieldPatternTestNg::CreateNodeAndGetPaintProperty(
+    TextFieldModelNG& textFieldModelInstance)
+{
+    textFieldModelInstance.CreateNode(PLACEHOLDER, EMPTY_TEXT_VALUE, false);
+    auto frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    if (!frameNode_) {
+        GTEST_LOG_(INFO) << "create textfield node failed!";
+        return nullptr;
+    }
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    return paintProperty;
+}
+
+RefPtr<TextFieldLayoutProperty> TextFieldPatternTestNg::GetTextFieldLayoutProperty()
+{
+    host_ = CreatTextFieldNode();
+    return host_ ? host_->GetLayoutProperty<TextFieldLayoutProperty>() : nullptr;
 }
 
 RefPtr<TextFieldPattern> TextFieldPatternTestNg::GetTextFieldPattern()
 {
-    host_ = TextFieldTestNgUtils::CreatTextFieldNode();
+    host_ = CreatTextFieldNode();
     return host_ ? host_->GetPattern<TextFieldPattern>() : nullptr;
 }
 
@@ -1528,5 +1610,852 @@ HWTEST_F(TextFieldPatternTestNg, SetTextRectX001, TestSize.Level1)
     const float value = 1.0;
     textFieldContentModifier.SetTextRectX(value);
     EXPECT_EQ(textFieldContentModifier.textRectX_->Get(), value);
+}
+
+/**
+ * @tc.name: CreateNode001
+ * @tc.desc: Create frameNode of empty value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CreateNode001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    textFieldModelInstance.CreateNode(PLACEHOLDER, EMPTY_TEXT_VALUE, false);
+    EXPECT_TRUE(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+}
+
+/**
+ * @tc.name: CreateNode002
+ * @tc.desc: Create frameNode of value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CreateNode002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    textFieldModelInstance.CreateNode(PLACEHOLDER, "value", false);
+    EXPECT_TRUE(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+}
+
+/**
+ * @tc.name: CreateTextInput001
+ * @tc.desc: Create frameNode of empty value about textinput
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CreateTextInput001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto controller = textFieldModelInstance.CreateTextInput(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    EXPECT_TRUE(controller);
+}
+
+/**
+ * @tc.name: CreateTextArea001
+ * @tc.desc: Create frameNode of empty value about textarea
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CreateTextArea001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto controller = textFieldModelInstance.CreateTextArea(PLACEHOLDER, EMPTY_TEXT_VALUE);
+    EXPECT_TRUE(controller);
+}
+
+/**
+ * @tc.name: SetType001
+ * @tc.desc: Create frameNode and settype
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetType001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    textFieldModelInstance.SetType(TextInputType::TEXT);
+    EXPECT_EQ(layoutProperty->GetTextInputTypeValue(), TextInputType::TEXT);
+    textFieldModelInstance.SetType(TextInputType::MULTILINE);
+    EXPECT_EQ(layoutProperty->GetTextInputTypeValue(), TextInputType::MULTILINE);
+    EXPECT_TRUE(layoutProperty->GetTypeChangedValue());
+}
+
+/**
+ * @tc.name: SetPlaceholderColor001
+ * @tc.desc: Create frameNode and PlaceholderColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetPlaceholderColor001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    textFieldModelInstance.SetPlaceholderColor(Color::WHITE);
+    EXPECT_TRUE(layoutProperty->HasPlaceholderTextColor());
+}
+
+/**
+ * @tc.name: SetPlaceholderFont001
+ * @tc.desc: Create frameNode and SetPlaceholderFont
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetPlaceholderFont001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    std::vector<std::string> fontFamilies;
+    fontFamilies.push_back("fontFamilies");
+    Font font { .fontWeight = Ace::FontWeight::W200,
+        .fontSize = Dimension(10.0),
+        .fontStyle = Ace::FontStyle::NORMAL,
+        .fontFamilies = fontFamilies };
+    textFieldModelInstance.SetPlaceholderFont(font);
+    EXPECT_EQ(layoutProperty->GetPlaceholderFontSize().value().Value(), 10.0);
+    EXPECT_EQ(layoutProperty->GetPlaceholderItalicFontStyle().value(), Ace::FontStyle::NORMAL);
+    EXPECT_EQ(layoutProperty->GetPlaceholderFontWeight().value(), Ace::FontWeight::W200);
+    EXPECT_EQ(layoutProperty->GetPlaceholderFontFamily().value().size(), fontFamilies.size());
+    EXPECT_TRUE(layoutProperty->GetPreferredTextLineHeightNeedToUpdate().value());
+}
+
+/**
+ * @tc.name: SetEnterKeyType001
+ * @tc.desc: Create frameNode and SetEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetEnterKeyType001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    textFieldModelInstance.SetEnterKeyType(TextInputAction::GO);
+    auto textFieldPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
+    EXPECT_TRUE(textFieldPattern);
+}
+
+/**
+ * @tc.name: SetOnEditChanged001
+ * @tc.desc: Create frameNode and SetOnEditChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetOnEditChanged001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelInstance;
+    auto layoutProperty = CreateNodeAndGetLayoutProperty(textFieldModelInstance);
+    if (!layoutProperty) {
+        EXPECT_TRUE(layoutProperty);
+        return;
+    }
+    bool callback = false;
+    textFieldModelInstance.SetOnEditChanged([&callback](bool info) { callback = info; });
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    if (!eventHub) {
+        EXPECT_TRUE(eventHub);
+        return;
+    }
+    eventHub->FireOnEditChanged(true);
+    EXPECT_TRUE(callback);
+}
+
+/**
+ * @tc.name: TextInputType001
+ * @tc.desc: Update TextInputType layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextInputType001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasTextInputType());
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::MULTILINE);
+    EXPECT_TRUE(textFieldLayoutProperty->HasTextInputType());
+    EXPECT_EQ(textFieldLayoutProperty->GetTextInputTypeValue(), TextInputType::MULTILINE);
+
+    textFieldLayoutProperty->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    EXPECT_TRUE(textFieldLayoutProperty->HasTextInputType());
+    EXPECT_EQ(textFieldLayoutProperty->GetTextInputTypeValue(), TextInputType::EMAIL_ADDRESS);
+}
+
+/**
+ * @tc.name: TypeChanged001
+ * @tc.desc: Update TypeChanged layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TypeChanged001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasTypeChanged());
+    textFieldLayoutProperty->UpdateTypeChanged(true);
+    EXPECT_TRUE(textFieldLayoutProperty->HasTypeChanged());
+    EXPECT_TRUE(textFieldLayoutProperty->GetTypeChangedValue());
+
+    textFieldLayoutProperty->UpdateTypeChanged(false);
+    EXPECT_TRUE(textFieldLayoutProperty->HasTypeChanged());
+    EXPECT_FALSE(textFieldLayoutProperty->GetTypeChangedValue());
+}
+
+/**
+ * @tc.name: PlaceholderTextColor001
+ * @tc.desc: Update PlaceholderTextColor layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PlaceholderTextColor001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasPlaceholderTextColor());
+    textFieldLayoutProperty->UpdatePlaceholderTextColor(Color::RED);
+    EXPECT_TRUE(textFieldLayoutProperty->HasPlaceholderTextColor());
+}
+
+/**
+ * @tc.name: Font001
+ * @tc.desc: Update Font structure layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, Font001, TestSize.Level1)
+{
+    std::vector<std::string> fontFamilies;
+    Font font { .fontWeight = Ace::FontWeight::W200,
+        .fontSize = Dimension(10.0),
+        .fontStyle = Ace::FontStyle::NORMAL,
+        .fontFamilies = fontFamilies };
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasPlaceholderFontSize());
+    EXPECT_FALSE(textFieldLayoutProperty->HasPlaceholderItalicFontStyle());
+    EXPECT_FALSE(textFieldLayoutProperty->HasPlaceholderFontWeight());
+    EXPECT_FALSE(textFieldLayoutProperty->HasPlaceholderFontFamily());
+
+    textFieldLayoutProperty->UpdatePlaceholderFontSize(font.fontSize.value());
+    if (textFieldLayoutProperty->HasPlaceholderFontSize()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderFontSize().value().Value(), 10.0);
+    }
+
+    textFieldLayoutProperty->UpdatePlaceholderItalicFontStyle(font.fontStyle.value());
+    if (textFieldLayoutProperty->HasPlaceholderItalicFontStyle()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderItalicFontStyle().value(), Ace::FontStyle::NORMAL);
+    }
+
+    textFieldLayoutProperty->UpdatePlaceholderFontWeight(font.fontWeight.value());
+    if (textFieldLayoutProperty->HasPlaceholderFontWeight()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderFontWeight().value(), Ace::FontWeight::W200);
+    }
+
+    textFieldLayoutProperty->UpdatePlaceholderFontFamily(font.fontFamilies);
+    if (textFieldLayoutProperty->HasPlaceholderFontFamily()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetPlaceholderFontFamily().value().size(), fontFamilies.size());
+    }
+}
+
+/**
+ * @tc.name: TextAlign001
+ * @tc.desc: Update TextAlign layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextAlign001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+
+    EXPECT_FALSE(textFieldLayoutProperty->HasTextAlign());
+    textFieldLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    if (textFieldLayoutProperty->HasTextAlign()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetTextAlign().value(), TextAlign::CENTER);
+    }
+}
+
+/**
+ * @tc.name: MaxLength001
+ * @tc.desc: Update MaxLength layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, MaxLength001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    uint32_t length = 32;
+    EXPECT_FALSE(textFieldLayoutProperty->HasMaxLength());
+    textFieldLayoutProperty->UpdateMaxLength(length);
+    if (textFieldLayoutProperty->HasMaxLength()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetMaxLength().value(), length);
+    }
+}
+
+/**
+ * @tc.name: MaxLines001
+ * @tc.desc: Update MaxLines layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, MaxLines001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    uint32_t lines = 32;
+    textFieldLayoutProperty->UpdateMaxLines(lines);
+    if (textFieldLayoutProperty->HasMaxLines()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetMaxLines().value(), lines);
+    }
+}
+
+/**
+ * @tc.name: FontSize001
+ * @tc.desc: Update FontSize layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, FontSize001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasFontSize());
+    textFieldLayoutProperty->UpdateFontSize(Dimension(10.0));
+    if (textFieldLayoutProperty->HasFontSize()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetFontSize().value().Value(), 10.0);
+    }
+}
+
+/**
+ * @tc.name: PreferredTextLineHeightNeedToUpdate001
+ * @tc.desc: Update PreferredTextLineHeightNeedToUpdate layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PreferredTextLineHeightNeedToUpdate001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasPreferredTextLineHeightNeedToUpdate());
+    textFieldLayoutProperty->UpdatePreferredTextLineHeightNeedToUpdate(true);
+    if (textFieldLayoutProperty->HasPreferredTextLineHeightNeedToUpdate()) {
+        EXPECT_TRUE(textFieldLayoutProperty->GetPreferredTextLineHeightNeedToUpdate().value());
+    }
+}
+
+/**
+ * @tc.name: TextColor001
+ * @tc.desc: Update TextColor layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextColor001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasTextColor());
+    textFieldLayoutProperty->UpdateTextColor(Color::RED);
+    if (textFieldLayoutProperty->HasTextColor()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetTextColor().value(), Color::RED);
+    }
+}
+
+/**
+ * @tc.name: ItalicFontStyle001
+ * @tc.desc: Update ItalicFontStyle layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ItalicFontStyle001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasItalicFontStyle());
+    textFieldLayoutProperty->UpdateItalicFontStyle(Ace::FontStyle::NORMAL);
+    if (textFieldLayoutProperty->HasItalicFontStyle()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::NORMAL);
+    }
+}
+
+/**
+ * @tc.name: FontFamily001
+ * @tc.desc: Update FontFamily layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, FontFamily001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    std::vector<std::string> fontFamilies;
+    EXPECT_FALSE(textFieldLayoutProperty->HasFontFamily());
+    textFieldLayoutProperty->UpdateFontFamily(fontFamilies);
+    if (textFieldLayoutProperty->HasFontFamily()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetFontFamily().value().size(), fontFamilies.size());
+    }
+}
+
+/**
+ * @tc.name: InputFilter001
+ * @tc.desc: Update InputFilter layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, InputFilter001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    std::string filterTest = "filterTest";
+    EXPECT_FALSE(textFieldLayoutProperty->HasInputFilter());
+    textFieldLayoutProperty->UpdateInputFilter(filterTest);
+    if (textFieldLayoutProperty->HasInputFilter()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetInputFilterValue(), filterTest);
+    }
+}
+
+/**
+ * @tc.name: ShowPasswordIcon001
+ * @tc.desc: Update ShowPasswordIcon layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ShowPasswordIcon001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasShowPasswordIcon());
+    textFieldLayoutProperty->UpdateShowPasswordIcon(true);
+    if (textFieldLayoutProperty->HasShowPasswordIcon()) {
+        EXPECT_TRUE(textFieldLayoutProperty->GetShowPasswordIcon().value());
+    }
+}
+
+/**
+ * @tc.name: CopyOptions001
+ * @tc.desc: Update CopyOptions layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CopyOptions001, TestSize.Level1)
+{
+    auto textFieldLayoutProperty = GetTextFieldLayoutProperty();
+    EXPECT_TRUE(textFieldLayoutProperty);
+    if (!textFieldLayoutProperty) {
+        return;
+    }
+    EXPECT_FALSE(textFieldLayoutProperty->HasCopyOptions());
+    textFieldLayoutProperty->UpdateCopyOptions(CopyOptions::Local);
+    if (textFieldLayoutProperty->HasCopyOptions()) {
+        EXPECT_EQ(textFieldLayoutProperty->GetCopyOptions().value(), CopyOptions::Local);
+    }
+}
+
+/**
+ * @tc.name: GetWideText001
+ * @tc.desc: test GetWideText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetWideText001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    EXPECT_EQ(StringUtils::ToString(textEditingStructure.GetWideText()), EMPTY_TEXT_VALUE);
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    EXPECT_EQ(StringUtils::ToString(textEditingStructure.GetWideText()), TEXT_EDITING_VALUE);
+}
+
+/**
+ * @tc.name: CursorMoveLeft001
+ * @tc.desc: test CursorMoveLeft
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMoveLeft001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    auto textLength = static_cast<int32_t>(textEditingStructure.text.size());
+    textEditingStructure.CursorMoveLeft();
+    EXPECT_EQ(textEditingStructure.caretPosition, 0);
+    textEditingStructure.caretPosition = textLength;
+    textEditingStructure.CursorMoveLeft();
+    EXPECT_EQ(textEditingStructure.caretPosition, textLength - ONECE_MOVE_POS);
+}
+
+/**
+ * @tc.name: CursorMoveRight001
+ * @tc.desc: test CursorMoveRight
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMoveRight001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    auto textLength = static_cast<int32_t>(textEditingStructure.text.size());
+    textEditingStructure.CursorMoveRight();
+    EXPECT_EQ(textEditingStructure.caretPosition, ONECE_MOVE_POS);
+    textEditingStructure.caretPosition = textLength;
+    textEditingStructure.CursorMoveRight();
+    EXPECT_EQ(textEditingStructure.caretPosition, textLength);
+}
+
+/**
+ * @tc.name: CursorMoveToPosition001
+ * @tc.desc: test CursorMoveToPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, CursorMoveToPosition001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    auto textLength = static_cast<int32_t>(textEditingStructure.text.size());
+    textEditingStructure.CursorMoveToPosition(-1);
+    EXPECT_EQ(textEditingStructure.caretPosition, 0);
+    textEditingStructure.CursorMoveToPosition(textLength + ONECE_MOVE_POS);
+    EXPECT_EQ(textEditingStructure.caretPosition, textLength);
+    textEditingStructure.CursorMoveToPosition(textLength - ONECE_MOVE_POS);
+    EXPECT_EQ(textEditingStructure.caretPosition, textLength - ONECE_MOVE_POS);
+}
+
+/**
+ * @tc.name: GetValueBeforeCursor_GetValueAfterCursor001
+ * @tc.desc: test GetValueBeforeCursor and GetValueAfterCursor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetValueBeforeCursor_GetValueAfterCursor001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    EXPECT_EQ(textEditingStructure.GetValueBeforeCursor(), EMPTY_TEXT_VALUE);
+    EXPECT_EQ(textEditingStructure.GetValueAfterCursor(), EMPTY_TEXT_VALUE);
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    textEditingStructure.CursorMoveRight();
+    EXPECT_EQ(textEditingStructure.GetValueBeforeCursor(), "t");
+    EXPECT_EQ(textEditingStructure.GetValueAfterCursor(), "extEditingValue");
+}
+
+/**
+ * @tc.name: GetValueBeforePosition_GetValueAfterPosition001
+ * @tc.desc: test GetValueBeforePosition and GetValueAfterPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetValueBeforePosition_GetValueAfterPosition001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    EXPECT_EQ(textEditingStructure.GetValueBeforePosition(ONECE_MOVE_POS), EMPTY_TEXT_VALUE);
+    EXPECT_EQ(textEditingStructure.GetValueAfterPosition(ONECE_MOVE_POS), EMPTY_TEXT_VALUE);
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    EXPECT_EQ(textEditingStructure.GetValueBeforePosition(ONECE_MOVE_POS), "t");
+    EXPECT_EQ(textEditingStructure.GetValueAfterPosition(ONECE_MOVE_POS), "extEditingValue");
+}
+
+/**
+ * @tc.name: GetSelectedText001
+ * @tc.desc: test GetSelectedText
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, GetSelectedText001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    EXPECT_EQ(textEditingStructure.GetSelectedText(ONECE_MOVE_POS, ONECE_MOVE_POS * 2), EMPTY_TEXT_VALUE);
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    auto textLength = static_cast<int32_t>(textEditingStructure.text.size());
+    EXPECT_GT(textLength, 0);
+    EXPECT_EQ(textEditingStructure.GetSelectedText(textLength, 0), EMPTY_TEXT_VALUE);
+    EXPECT_EQ(textEditingStructure.GetSelectedText(0, textLength), "textEditingValue");
+}
+
+/**
+ * @tc.name: ToString001
+ * @tc.desc: test ToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ToString001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    textEditingStructure.CursorMoveRight();
+    EXPECT_EQ(textEditingStructure.ToString(), "t|extEditingValue");
+}
+
+/**
+ * @tc.name: Reset001
+ * @tc.desc: test Reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, Reset001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure;
+    textEditingStructure.text = TEXT_EDITING_VALUE;
+    textEditingStructure.CursorMoveRight();
+    textEditingStructure.Reset();
+    EXPECT_EQ(textEditingStructure.text, EMPTY_TEXT_VALUE);
+    EXPECT_EQ(textEditingStructure.caretPosition, 0);
+}
+
+/**
+ * @tc.name: operator001
+ * @tc.desc: test operator
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, operator001, TestSize.Level1)
+{
+    struct TextEditingValueNG textEditingStructure1;
+    struct TextEditingValueNG textEditingStructure2;
+    textEditingStructure1.text = TEXT_EDITING_VALUE;
+    textEditingStructure1.caretPosition = 1;
+    textEditingStructure2.text = TEXT_EDITING_VALUE;
+    textEditingStructure2.caretPosition = 2;
+    EXPECT_EQ(textEditingStructure1, textEditingStructure2);
+}
+
+/**
+ * @tc.name: InsertText001
+ * @tc.desc: Test insert Text Field
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, InsertText001, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    const std::string default_text = "X";
+    textChangedListenerImpl_->InsertText(to_utf16(default_text));
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: InsertText002
+ * @tc.desc: Test to insert an empty text field
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, InsertText002, TestSize.Level2)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    std::string emptyString;
+    textChangedListenerImpl_->InsertText(to_utf16(emptyString));
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: DeleteBackward001
+ * @tc.desc: Test to delete 8 length text fields backward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, DeleteBackward001, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    int32_t length = 8;
+    textChangedListenerImpl_->DeleteBackward(length);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: DeleteBackward002
+ * @tc.desc: Test to delete a text field with illegal length backwards
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, DeleteBackward002, TestSize.Level2)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    int32_t errLength = -1;
+    textChangedListenerImpl_->DeleteBackward(errLength);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: DeleteForward001
+ * @tc.desc: Test to delete a text field with a length of 8 forward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, DeleteForward001, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    int32_t length = 8;
+    textChangedListenerImpl_->DeleteForward(length);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: DeleteForward002
+ * @tc.desc: Test to delete the text field with illegal length forward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, DeleteForward002, TestSize.Level2)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    int32_t errLength = -1;
+    textChangedListenerImpl_->DeleteForward(errLength);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: SetKeyboardStatus001
+ * @tc.desc: test set KeyboardStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetKeyboardStatus001, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    textChangedListenerImpl_->SetKeyboardStatus(true);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: SendKeyboardInfo001
+ * @tc.desc: Test the valid FunctionKey parameter of send
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SendKeyboardInfo001, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    MiscServices::KeyboardInfo info;
+    int32_t index = 1;
+    info.SetFunctionKey(index);
+    textChangedListenerImpl_->SendKeyboardInfo(info);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: SendKeyboardInfo002
+ * @tc.desc: Test the invalid FunctionKey parameter of send
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SendKeyboardInfo002, TestSize.Level2)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    MiscServices::KeyboardInfo info;
+    int32_t index = -1;
+    info.SetFunctionKey(index);
+    textChangedListenerImpl_->SendKeyboardInfo(info);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: MoveCursor001
+ * @tc.desc: Test moving the cursor up
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, MoveCursor001, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    textChangedListenerImpl_->MoveCursor(MiscServices::Direction::UP);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: MoveCursor002
+ * @tc.desc: Test moving the cursor up
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, MoveCursor002, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    textChangedListenerImpl_->MoveCursor(MiscServices::Direction::DOWN);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: MoveCursor003
+ * @tc.desc: Test moving the cursor left
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, MoveCursor003, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    textChangedListenerImpl_->MoveCursor(MiscServices::Direction::LEFT);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
+}
+
+/**
+ * @tc.name: MoveCursor004
+ * @tc.desc: Test moving the cursor right
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, MoveCursor004, TestSize.Level1)
+{
+    if (!textChangedListenerImpl_) {
+        EXPECT_TRUE(textChangedListenerImpl_);
+        return;
+    }
+    textChangedListenerImpl_->MoveCursor(MiscServices::Direction::RIGHT);
+    EXPECT_TRUE(textChangedListenerImpl_);
+    EXPECT_TRUE(host_->GetPattern<TextFieldPattern>());
 }
 } // namespace OHOS::Ace::NG
