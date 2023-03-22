@@ -78,13 +78,27 @@ void HostWindowPattern::InitContent()
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
 
+    if (session_->GetSessionState() == Rosen::SessionState::STATE_BACKGROUND) {
+        // auto snapShot = session_->GetSnapShot();
+        startingNode_ = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        // auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
+        // if (imageLayoutProperty) {
+        //     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(snapShot));
+        // }
+        startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        startingNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+        host->AddChild(startingNode_);
+        return;
+    }
+
     if (!HasStartingPage()) {
         host->AddChild(contentNode_);
     } else {
         startingNode_ = FrameNode::CreateFrameNode(
             V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(0xffffffff));
+        startingNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
         host->AddChild(startingNode_);
 
         surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
@@ -127,14 +141,14 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
     auto windowRect = geometryNode->GetFrameRect();
-    Rosen::WSRect rect = { .posX_ = std::round(windowRect.GetX()),
+    Rosen::WSRect rect = {
+        .posX_ = std::round(windowRect.GetX()),
         .posY_ = std::round(windowRect.GetY()),
         .width_ = std::round(windowRect.Width()),
-        .height_ = std::round(windowRect.Height()) };
+        .height_ = std::round(windowRect.Height())
+    };
 
     CHECK_NULL_RETURN(session_, false);
-    LOGI("update session rect: [%{public}d, %{public}d, %{public}d, %{public}d]", rect.posX_, rect.posY_, rect.width_,
-        rect.height_);
     session_->UpdateRect(rect, Rosen::SizeChangeReason::SHOW);
     return false;
 }
@@ -168,5 +182,4 @@ void HostWindowPattern::DispatchKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEve
         LOGE("DispatchPointerEvent failed, errCode=%{public}d", static_cast<int>(errCode));
     }
 }
-
 } // namespace OHOS::Ace::NG

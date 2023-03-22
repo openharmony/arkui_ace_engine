@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,12 @@
 #include "core/components_ng/pattern/window_scene/scene/host/host_window_pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class HostWindowScene : public HostWindowPattern {
     DECLARE_ACE_TYPE(HostWindowScene, HostWindowPattern);
 
 public:
     HostWindowScene(const sptr<Rosen::Session>& session);
-    ~HostWindowScene() override = default;
+    ~HostWindowScene() override;
 
 protected:
     bool HasStartingPage() override
@@ -38,7 +37,6 @@ protected:
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_SCENE_H

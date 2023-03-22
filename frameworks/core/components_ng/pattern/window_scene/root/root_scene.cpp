@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "wm_common.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
 class InputEventListener : public MMI::IInputEventConsumer {
 public:
     explicit InputEventListener(RootScene* rootScene): rootScene_(rootScene) {}
@@ -43,6 +43,7 @@ public:
 private:
     RootScene* rootScene_;
 };
+} // namespace
 
 extern "C" ACE_EXPORT void* OHOS_ACE_CreateRootScene()
 {
@@ -62,12 +63,7 @@ void RootScene::LoadContent(const std::string& contentUrl, NativeEngine* engine,
     uiContent_->Initialize(shared_from_this(), contentUrl, storage);
 
     uiContent_->Foreground();
-
-    ViewportConfig config;
-    config.SetPosition(0, 0);
-    config.SetSize(720, 1280);
-    config.SetDensity(1.5); // TODO: get display density
-    UpdateViewportConfig(config, Rosen::WindowSizeChangeReason::UNDEFINED);
+    UpdateViewportConfig(Rect(0, 0, 720, 1280), Rosen::WindowSizeChangeReason::UNDEFINED);
 }
 
 void RootScene::RegisterInputEventListener()
@@ -82,5 +78,4 @@ void RootScene::RegisterInputEventListener()
     }
     MMI::InputManager::GetInstance()->SetWindowInputEventConsumer(listener, eventHandler_);
 }
-
 } // namespace OHOS::Ace::NG

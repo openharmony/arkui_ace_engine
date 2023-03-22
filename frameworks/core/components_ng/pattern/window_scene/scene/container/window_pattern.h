@@ -16,10 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
 
-#include <mutex>
-
 #include "include/vsync_station.h"
-#include "pointer_event.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "session/container/include/session_stage.h"
 #include "ui_window.h"
@@ -30,7 +27,6 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class WindowPattern : public UIWindow,
                       public Pattern,
                       public Window,
@@ -49,7 +45,7 @@ public:
     void LoadContent(const std::string& contentUrl, NativeEngine* engine, NativeValue* storage,
         AbilityRuntime::Context* context = nullptr) override;
 
-    void UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason);
+    void UpdateViewportConfig(const Rect& rect, Rosen::WindowSizeChangeReason reason);
 
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode()
     {
@@ -122,13 +118,12 @@ private:
     std::recursive_mutex mutex_;
 
     WeakPtr<TaskExecutor> taskExecutor_;
-    int32_t instanceId_ = 0;
+    int32_t instanceId_ = -1;
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector_;
     std::shared_ptr<Rosen::VsyncCallback> vsyncCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(WindowPattern);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_PATTERN_H
