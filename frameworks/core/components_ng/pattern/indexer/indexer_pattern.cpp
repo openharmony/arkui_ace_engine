@@ -520,9 +520,9 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
     }
     auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
     auto userDefinePositionX =
-        layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP).ConvertToPx());
+        layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ConvertToPx();
     auto userDefinePositionY =
-        layoutProperty->GetPopupPositionY().value_or(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP).ConvertToPx());
+        layoutProperty->GetPopupPositionY().value_or(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ConvertToPx();
     auto zeroPositionX = host->GetOffsetRelativeToWindow().GetX() + indexerWidth / 2;
     auto zeroPosiitonY = host->GetOffsetRelativeToWindow().GetY();
     auto renderContext = customNode->GetRenderContext();

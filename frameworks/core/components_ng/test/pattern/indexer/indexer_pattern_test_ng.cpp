@@ -16,6 +16,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "base/geometry/dimension.h"
 
 #define protected public
 #define private public
@@ -83,8 +84,8 @@ struct TestProperty {
     std::optional<Dimension> itemSizeValue = std::nullopt;
     std::optional<AlignStyle> alignStyleValue = std::nullopt;
     std::optional<int32_t> selectedValue = std::nullopt;
-    std::optional<float> popupPositionXValue = std::nullopt;
-    std::optional<float> popupPositionYValue = std::nullopt;
+    std::optional<Dimension> popupPositionXValue = std::nullopt;
+    std::optional<Dimension> popupPositionYValue = std::nullopt;
     std::optional<Color> popupSelectedColorValue = std::nullopt;
     std::optional<Color> popupUnselectedColorValue = std::nullopt;
     std::optional<Color> popupItemBackgroundValue = std::nullopt;
@@ -1230,8 +1231,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest003, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    testProperty.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
-    testProperty.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty.popupPositionXValue = std::make_optional(Dimension(POPUP_POSITIONX_VALUE, DimensionUnit::VP));
+    testProperty.popupPositionYValue = std::make_optional(Dimension(POPUP_POSITIONY_VALUE, DimensionUnit::VP));
 
     /**
      * @tc.steps: step2. create indexer frameNode and get indexerLayoutProperty.
@@ -1274,8 +1275,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    testProperty.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
-    testProperty.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty.popupPositionXValue = std::make_optional(Dimension(POPUP_POSITIONX_VALUE, DimensionUnit::VP));
+    testProperty.popupPositionYValue = std::make_optional(Dimension(POPUP_POSITIONY_VALUE, DimensionUnit::VP));
     testProperty.itemSizeValue = std::make_optional(ITEM_SIZE_VALUE);
     testProperty.usingPopupValue = false;
 
@@ -1304,8 +1305,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty1;
-    testProperty1.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
-    testProperty1.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty1.popupPositionXValue = std::make_optional(Dimension(POPUP_POSITIONX_VALUE, DimensionUnit::VP));
+    testProperty1.popupPositionYValue = std::make_optional(Dimension(POPUP_POSITIONY_VALUE, DimensionUnit::VP));
     testProperty1.itemSizeValue = std::make_optional(ITEM_SIZE_VALUE);
     testProperty1.usingPopupValue = true;
 
