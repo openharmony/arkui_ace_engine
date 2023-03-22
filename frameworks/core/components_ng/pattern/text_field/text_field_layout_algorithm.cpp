@@ -209,17 +209,22 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     auto align = Alignment::CENTER;
+    bool hasAlign = false;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+        hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
     }
     // Update content position.
-    OffsetF contentOffset;
+    OffsetF contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     if (pattern->IsTextArea()) {
-        content->SetOffset(pattern->GetUtilPadding().Offset());
+        if (hasAlign) {
+            content->SetOffset(OffsetF(pattern->GetUtilPadding().Offset().GetX(), contentOffset.GetY()));
+        } else {
+            content->SetOffset(pattern->GetUtilPadding().Offset());
+        }
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
         return;
     }
-    contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
     auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
