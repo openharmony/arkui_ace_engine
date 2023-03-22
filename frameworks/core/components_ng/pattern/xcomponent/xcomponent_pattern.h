@@ -39,6 +39,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+class XComponentExtSurfaceCallbackClient;
 class XComponentPattern : public Pattern {
     DECLARE_ACE_TYPE(XComponentPattern, Pattern);
 
@@ -84,14 +85,10 @@ public:
         CHECK_NULL_VOID(nativeXComponent_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pipelineContext = host->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto width = geometryNode->GetContentSize().Width();
-        auto height = geometryNode->GetContentSize().Height();
-        nativeXComponentImpl_->SetXComponentWidth(static_cast<int>(width));
-        nativeXComponentImpl_->SetXComponentHeight(static_cast<int>(height));
+        auto width = initSize_.Width();
+        auto height = initSize_.Height();
+        nativeXComponentImpl_->SetXComponentWidth(static_cast<uint32_t>(width));
+        nativeXComponentImpl_->SetXComponentHeight(static_cast<uint32_t>(height));
         auto* surface = const_cast<void*>(nativeXComponentImpl_->GetSurface());
         const auto* callback = nativeXComponentImpl_->GetCallback();
         if (callback && callback->OnSurfaceCreated != nullptr) {
@@ -107,7 +104,8 @@ public:
         const std::vector<XComponentTouchPoint>& xComponentTouchPoints);
     void NativeXComponentDispatchMouseEvent(const OH_NativeXComponent_MouseEvent& mouseEvent);
 
-    void XComponentSizeInit(float textureWidth, float textureHeight);
+    void InitNativeWindow(float textureWidth, float textureHeight);
+    void XComponentSizeInit();
     void XComponentSizeChange(float textureWidth, float textureHeight);
 
     void* GetNativeWindow()
@@ -175,6 +173,10 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<InputEvent> mouseHoverEvent_;
     std::vector<XComponentTouchPoint> nativeXComponentTouchPoints_;
+    RefPtr<XComponentExtSurfaceCallbackClient> extSurfaceClient_;
+    WeakPtr<NG::PipelineContext> context_;
+    int32_t scopeId_;
+    SizeF initSize_;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
