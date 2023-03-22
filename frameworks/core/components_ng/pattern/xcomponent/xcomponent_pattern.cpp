@@ -19,13 +19,14 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/declarative_frontend.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -81,18 +82,22 @@ XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
 void XComponentPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE) {
         renderSurface_ = RenderSurface::Create();
         renderContextForSurface_ = RenderContext::Create();
         renderContextForSurface_->InitContext(false, id_ + "Surface");
         renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+        scopeId_ = Container::CurrentId();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
             renderSurface_->SetRenderContext(renderContextForSurface_);
         } else {
             auto pipelineContext = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->AddOnAreaChangeNode(host->GetId());
+            extSurfaceClient_ = MakeRefPtr<XComponentExtSurfaceCallbackClient>(WeakClaim(this));
+            renderSurface_->SetExtSurfaceCallback(extSurfaceClient_);
         }
         renderSurface_->InitSurface();
         renderSurface_->UpdateXComponentConfig();
@@ -184,8 +189,11 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
 
     if (!hasXComponentInit_) {
+        initSize_ = drawSize;
         auto position = geometryNode->GetContentOffset() + geometryNode->GetFrameOffset();
-        XComponentSizeInit(drawSize.Width(), drawSize.Height());
+        if (!SystemProperties::GetExtSurfaceEnabled()) {
+            XComponentSizeInit();
+        }
         NativeXComponentOffset(position.GetX(), position.GetY());
         hasXComponentInit_ = true;
     } else {
@@ -194,10 +202,20 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
             NativeXComponentOffset(position.GetX(), position.GetY());
         }
         if (config.contentSizeChange) {
-            XComponentSizeChange(drawSize.Width(), drawSize.Height());
+            if (!SystemProperties::GetExtSurfaceEnabled()) {
+                XComponentSizeChange(drawSize.Width(), drawSize.Height());
+            }
         }
     }
     auto offset = geometryNode->GetContentOffset();
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto transformRelativeOffset = host->GetTransformRelativeOffset();
+        renderSurface_->SetExtSurfaceBounds(static_cast<int32_t>(transformRelativeOffset.GetX() + offset.GetX()),
+            static_cast<int32_t>(transformRelativeOffset.GetY() + offset.GetY()),
+            static_cast<int32_t>(drawSize.Width()), static_cast<int32_t>(drawSize.Height()));
+    }
     renderContextForSurface_->SetBounds(offset.GetX(), offset.GetY(), drawSize.Width(), drawSize.Height());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -266,19 +284,24 @@ void XComponentPattern::NativeXComponentDispatchTouchEvent(
     callback->DispatchTouchEvent(nativeXComponent_.get(), surface);
 }
 
-void XComponentPattern::XComponentSizeInit(float textureWidth, float textureHeight)
+void XComponentPattern::InitNativeWindow(float textureWidth, float textureHeight)
 {
-    auto host = GetHost();
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
     if (renderSurface_->IsSurfaceValid() && type_ == XComponentType::SURFACE) {
         float viewScale = context->GetViewScale();
         renderSurface_->CreateNativeWindow();
         renderSurface_->AdjustNativeWindowSize(
-            static_cast<int>(textureWidth * viewScale), static_cast<int>(textureHeight * viewScale));
+            static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
     }
+}
 
+void XComponentPattern::XComponentSizeInit()
+{
+    ContainerScope scope(scopeId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    InitNativeWindow(initSize_.Width(), initSize_.Height());
     auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
     platformTaskExecutor.PostTask([weak = WeakClaim(this)] {
         auto pattern = weak.Upgrade();
@@ -294,11 +317,12 @@ void XComponentPattern::XComponentSizeInit(float textureWidth, float textureHeig
 
 void XComponentPattern::XComponentSizeChange(float textureWidth, float textureHeight)
 {
+    ContainerScope scope(scopeId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto viewScale = context->GetViewScale();
     renderSurface_->AdjustNativeWindowSize(
-        static_cast<int>(textureWidth * viewScale), static_cast<int>(textureHeight * viewScale));
+        static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
     NativeXComponentChange(textureWidth, textureHeight);
 }
 
@@ -516,14 +540,15 @@ void XComponentPattern::SetTouchPoint(
 
 ExternalEvent XComponentPattern::CreateExternalEvent()
 {
-    return
-        [weak = AceType::WeakClaim(this)](const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
-            CHECK_NULL_VOID(frontEnd);
-            auto jsEngine = frontEnd->GetJsEngine();
-            jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
-        };
+    return [weak = AceType::WeakClaim(this), scopeId = scopeId_](
+               const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
+        ContainerScope scope(scopeId);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
+        CHECK_NULL_VOID(frontEnd);
+        auto jsEngine = frontEnd->GetJsEngine();
+        jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
+    };
 }
 } // namespace OHOS::Ace::NG
