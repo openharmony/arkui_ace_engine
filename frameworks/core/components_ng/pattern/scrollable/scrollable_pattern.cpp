@@ -295,6 +295,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         Offset viewOffset = { paddingOffset.GetX(), paddingOffset.GetY() };
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
+        scrollBar_->OnScrollEnd();
         scrollBar_->MarkNeedRender();
     }
 
