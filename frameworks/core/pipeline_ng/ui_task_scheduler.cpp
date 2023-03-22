@@ -100,6 +100,9 @@ void UITaskScheduler::FlushTask()
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
     FlushLayoutTask();
+    if (!afterLayoutTasks_.empty()) {
+        FlushAfterLayoutTask();
+    }
     FlushRenderTask();
 }
 
@@ -130,6 +133,21 @@ bool UITaskScheduler::isEmpty()
         return true;
     }
     return false;
+}
+
+void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
+{
+    afterLayoutTasks_.emplace_back(std::move(task));
+}
+
+void UITaskScheduler::FlushAfterLayoutTask()
+{
+    decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG
