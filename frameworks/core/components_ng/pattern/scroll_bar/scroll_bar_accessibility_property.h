@@ -13,26 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_ACCESSIBILITY_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_ACCESSIBILITY_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_ACCESSIBILITY_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_BAR_SCROLL_BAR_ACCESSIBILITY_PROPERTY_H
 
 #include "base/utils/utils.h"
 #include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class SwiperAccessibilityProperty : public AccessibilityProperty {
-    DECLARE_ACE_TYPE(SwiperAccessibilityProperty, AccessibilityProperty);
+class ScrollBarAccessibilityProperty : public AccessibilityProperty {
+    DECLARE_ACE_TYPE(ScrollBarAccessibilityProperty, AccessibilityProperty);
 
 public:
-    SwiperAccessibilityProperty() = default;
+    ScrollBarAccessibilityProperty() = default;
 
-    ~SwiperAccessibilityProperty() override = default;
+    ~ScrollBarAccessibilityProperty() override = default;
 
-    int32_t GetCurrentIndex() const override;
-
-    int32_t GetBeginIndex() const override;
-
-    int32_t GetEndIndex() const override;
+    bool IsScrollable() const override;
 
     bool HasRange() const override
     {
@@ -41,14 +37,8 @@ public:
 
     AccessibilityValue GetAccessibilityValue() const override;
 
-    void SetSpecificSupportAction() override;
-
-    bool IsScrollable() const override;
-
-    int32_t GetCollectionItemCounts() const override;
-
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(SwiperAccessibilityProperty);
+    ACE_DISALLOW_COPY_AND_MOVE(ScrollBarAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG
 
