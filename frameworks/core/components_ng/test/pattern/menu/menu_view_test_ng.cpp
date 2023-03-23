@@ -72,19 +72,21 @@ HWTEST_F(MenuViewTestNg, MenuViewTestNgCreate001, TestSize.Level1)
     ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
-    auto children = menuNode->GetChildren();
-    ASSERT_EQ(children.size(), 2);
-    auto firstChild = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
-    ASSERT_NE(firstChild, nullptr);
-    EXPECT_EQ(firstChild->GetTag(), V2::OPTION_ETS_TAG);
-    auto firstPattern = firstChild->GetPattern<OptionPattern>();
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 2);
+
+    auto firstOption = menuPattern->GetOptions()[0];
+    ASSERT_NE(firstOption, nullptr);
+    EXPECT_EQ(firstOption->GetTag(), V2::OPTION_ETS_TAG);
+    auto firstPattern = firstOption->GetPattern<OptionPattern>();
     ASSERT_NE(firstPattern, nullptr);
     EXPECT_EQ(firstPattern->GetText(), "MenuItem1");
     EXPECT_EQ(firstPattern->GetIcon(), "fakeIcon");
-    auto secondChild = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(1));
-    ASSERT_NE(secondChild, nullptr);
-    EXPECT_EQ(secondChild->GetTag(), V2::OPTION_ETS_TAG);
-    auto secondPattern = secondChild->GetPattern<OptionPattern>();
+    auto secondOption = menuPattern->GetOptions()[1];
+    ASSERT_NE(secondOption, nullptr);
+    EXPECT_EQ(secondOption->GetTag(), V2::OPTION_ETS_TAG);
+    auto secondPattern = secondOption->GetPattern<OptionPattern>();
     ASSERT_NE(secondPattern, nullptr);
     EXPECT_EQ(secondPattern->GetText(), "MenuItem2");
     EXPECT_EQ(secondPattern->GetIcon(), "");
@@ -113,9 +115,11 @@ HWTEST_F(MenuViewTestNg, MenuViewTestNgCreate002, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     menuPattern->OnModifyDone();
-    auto children = menuNode->GetChildren();
+    auto column = menuPattern->GetMenuColumn();
+    ASSERT_NE(column, nullptr);
+    auto children = column->GetChildren();
     ASSERT_EQ(children.size(), 3);
-    auto titleChild = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    auto titleChild = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
     ASSERT_NE(titleChild, nullptr);
     EXPECT_EQ(titleChild->GetTag(), V2::TEXT_ETS_TAG);
     auto textProperty = titleChild->GetLayoutProperty<TextLayoutProperty>();
@@ -131,11 +135,11 @@ HWTEST_F(MenuViewTestNg, MenuViewTestNgCreate002, TestSize.Level1)
  */
 HWTEST_F(MenuViewTestNg, MenuViewTestNgCreate003, TestSize.Level1)
 {
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textNode, nullptr);
     MenuParam menuParam;
-    menuParam.positionOffset = {10.0f, 10.0f};
+    menuParam.positionOffset = { 10.0f, 10.0f };
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));

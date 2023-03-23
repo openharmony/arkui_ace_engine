@@ -46,8 +46,8 @@ void UpdateFontSize(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutP
     }
 }
 
-void UpdateFontWeight(RefPtr<TextLayoutProperty>& textProperty,
-    RefPtr<MenuLayoutProperty>& menuProperty, const std::optional<FontWeight>& fontWeight)
+void UpdateFontWeight(RefPtr<TextLayoutProperty>& textProperty, RefPtr<MenuLayoutProperty>& menuProperty,
+    const std::optional<FontWeight>& fontWeight)
 {
     if (fontWeight.has_value()) {
         textProperty->UpdateFontWeight(fontWeight.value());
@@ -89,7 +89,7 @@ void UpdateIconSrc(RefPtr<FrameNode>& node, const std::string& src, const Dimens
     CHECK_NULL_VOID(iconRenderProperty);
     iconRenderProperty->UpdateSvgFillColor(color);
 }
-}
+} // namespace
 
 void MenuItemPattern::OnMountToParentDone()
 {
@@ -121,9 +121,18 @@ void MenuItemPattern::OnModifyDone()
         CHECK_NULL_VOID(contentProperty);
         contentProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
     }
-
-    RefPtr<FrameNode> leftRow = host->GetChildAtIndex(0)
-        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    /*
+     * The structure of menu item is designed as follows :
+     * |--menu_item
+     *   |--left_row
+     *     |--icon
+     *     |--content
+     *   |--right_row
+     *     |--label
+     *     |--end_icon
+     */
+    RefPtr<FrameNode> leftRow =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
     AddSelectIcon(leftRow);
     UpdateIcon(leftRow, true);
@@ -131,8 +140,8 @@ void MenuItemPattern::OnModifyDone()
     auto menuProperty = menuNode ? menuNode->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
     UpdateText(leftRow, menuProperty, false);
 
-    RefPtr<FrameNode> rightRow = host->GetChildAtIndex(1)
-        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+    RefPtr<FrameNode> rightRow =
+        host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
     UpdateIcon(rightRow, false);
@@ -173,10 +182,7 @@ void MenuItemPattern::ShowSubMenu()
     LOGI("MenuItemPattern::ShowSubMenu menu item id is %{public}d", host->GetId());
     auto buildFunc = GetSubBuilder();
     if (buildFunc && !isSubMenuShowed_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
+        isSubMenuShowed_ = true;
 
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         buildFunc();
@@ -192,42 +198,24 @@ void MenuItemPattern::ShowSubMenu()
         auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
         menuWrapperPattern->AddSubMenuId(host->GetId());
+        subMenu->MountToParent(menuWrapper);
 
-        isSubMenuShowed_ = true;
         OffsetF offset = GetSubMenuPostion(host);
-        overlayManager->ShowMenu(host->GetId(), offset, subMenu);
-
+        auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuProps);
+        menuProps->UpdateMenuOffset(offset);
+        menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         RegisterWrapperMouseEvent();
     }
 }
 
 void MenuItemPattern::CloseMenu()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    if (GetSubBuilder() != nullptr && isSubMenuShowed_) {
-        int32_t itemId = GetHost()->GetId();
-        overlayManager->HideMenu(itemId);
-    }
-
-    int32_t menuTargetId = 0;
-
     auto menuWrapper = GetMenuWrapper();
-    if (menuWrapper) {
-        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        menuWrapperPattern->HideMenu();
-    } else {
-        auto subMenu = GetMenu();
-        CHECK_NULL_VOID(subMenu);
-        auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(subMenuPattern);
-        menuTargetId = subMenuPattern->IsSubMenu() ? subMenuPattern->GetTargetId() : -1;
-
-        overlayManager->HideMenu(menuTargetId);
-    }
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->HideMenu();
 }
 
 void MenuItemPattern::RegisterOnClick()
@@ -445,8 +433,7 @@ void MenuItemPattern::AddSelectIcon(RefPtr<FrameNode>& row)
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     CHECK_NULL_VOID(iconTheme);
     auto userIcon = itemProperty->GetSelectIconSrc().value_or("");
-    auto iconPath = userIcon.empty()
-        ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
+    auto iconPath = userIcon.empty() ? iconTheme->GetIconPath(InternalResource::ResourceId::MENU_OK_SVG) : userIcon;
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
     UpdateIconSrc(selectIcon_, iconPath, selectTheme->GetIconSideLength(), Color::BLACK);
@@ -518,8 +505,8 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto fontWeight = isLabel ? itemProperty->GetLabelFontWeight() : itemProperty->GetFontWeight();
     UpdateFontWeight(textProperty, menuProperty, fontWeight);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
-    UpdateFontColor(textProperty, menuProperty, fontColor,
-        isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+    UpdateFontColor(
+        textProperty, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
     textProperty->UpdateContent(content);
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
@@ -533,12 +520,12 @@ void MenuItemPattern::UpdateTextNodes()
     auto menuNode = GetMenu();
     CHECK_NULL_VOID(menuNode);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    RefPtr<FrameNode> leftRow = host->GetChildAtIndex(0)
-        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    RefPtr<FrameNode> leftRow =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
     CHECK_NULL_VOID(leftRow);
     UpdateText(leftRow, menuProperty, false);
-    RefPtr<FrameNode> rightRow = host->GetChildAtIndex(1)
-        ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+    RefPtr<FrameNode> rightRow =
+        host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
     CHECK_NULL_VOID(rightRow);
     UpdateText(rightRow, menuProperty, true);
 }

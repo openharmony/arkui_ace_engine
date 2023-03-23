@@ -245,12 +245,6 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
         }
         root->RemoveChild(menu);
         root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        if (!menuPattern || !menuPattern->IsSubMenu()) {
-            return;
-        }
-        menuPattern->RemoveParentHoverStyle();
     });
 
     auto context = menu->GetRenderContext();
@@ -551,7 +545,7 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
     props->UpdateMenuOffset(offset);
-    menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     return true;
 }
 
