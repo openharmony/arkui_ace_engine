@@ -96,7 +96,10 @@ void RenderBadge::Update(const RefPtr<Component>& component)
     }
     clickRecognizer_->SetUseCatchMode(catchMode);
     textData_.clear();
-    showMessage_ = ParseBadgeStatus(badgeLabel, messageCount, countLimit);
+    // double check for badge
+    if (showMessage_) {
+        showMessage_ = ParseBadgeStatus(badgeLabel, messageCount, countLimit);
+    }
     badgeTextComponent_ = AceType::MakeRefPtr<TextComponent>(textData_);
     if (!badgeRenderText_) {
         InitialBadgeText();
