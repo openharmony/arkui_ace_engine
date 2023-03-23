@@ -378,6 +378,7 @@ class LocalStorage extends NativeLocalStorage {
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
+        this.storage_.clear();
         
         return true;
     }
