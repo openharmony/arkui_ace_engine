@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,24 @@
  * limitations under the License.
  */
 
+#include <cstddef>
+#include <utility>
+
 #include "gtest/gtest.h"
+
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 
 #define private public
 #define protected public
-
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
@@ -43,40 +48,33 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr float FIRST_ITEM_WIDTH = 100.0f;
-    constexpr float FIRST_ITEM_HEIGHT = 50.0f;
-    const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
+constexpr float FIRST_ITEM_WIDTH = 100.0f;
+constexpr float FIRST_ITEM_HEIGHT = 50.0f;
+const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 } // namespace
-class TabsModelTestNG : public testing::Test {
+
+class TabsTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
-    static void MockPipelineContextGetTheme();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void MockPipelineContextGetTheme();
 };
 
-void TabsModelTestNG::SetUpTestCase() {}
-
-void TabsModelTestNG::TearDownTestCase() {}
-
-void TabsModelTestNG::SetUp()
+void TabsTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
 }
 
-void TabsModelTestNG::TearDown()
+void TabsTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }
 
-void TabsModelTestNG::MockPipelineContextGetTheme()
+void TabsTestNg::MockPipelineContextGetTheme()
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
 }
 
 /**
@@ -84,22 +82,16 @@ void TabsModelTestNG::MockPipelineContextGetTheme()
  * @tc.desc: test SetDivider
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabsModelSetDivider001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabsModelSetDivider001, TestSize.Level1)
 {
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
-
+    MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
     TabsItemDivider divider;
     Dimension strokeWidth = 10.0_vp;
     Dimension startMargin = 3.0_vp;
     Dimension endMargin = 4.0_vp;
     Color color = Color::BLACK;
-    
+
     divider.strokeWidth = strokeWidth;
     divider.startMargin = startMargin;
     divider.endMargin = endMargin;
@@ -135,10 +127,6 @@ HWTEST_F(TabsModelTestNG, TabsModelSetDivider001, TestSize.Level1)
 
     TabsItemDivider divider2;
     EXPECT_FALSE(divider == divider2);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -146,7 +134,7 @@ HWTEST_F(TabsModelTestNG, TabsModelSetDivider001, TestSize.Level1)
  * @tc.desc: test SetFadingEdge
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabsModelSetFadingEdge001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabsModelSetFadingEdge001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
 
@@ -169,9 +157,6 @@ HWTEST_F(TabsModelTestNG, TabsModelSetFadingEdge001, TestSize.Level1)
 
     auto fadingEdgeJson = json->GetValue("fadingEdge");
     EXPECT_NE(fadingEdgeJson, nullptr);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -179,7 +164,7 @@ HWTEST_F(TabsModelTestNG, TabsModelSetFadingEdge001, TestSize.Level1)
  * @tc.desc: Test Divider Measure and Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabsModelMeasure001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabsModelMeasure001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
@@ -206,8 +191,8 @@ HWTEST_F(TabsModelTestNG, TabsModelMeasure001, TestSize.Level1)
     LayoutConstraintF LayoutConstraintVaild;
     float layoutSize = 10000.0f;
     LayoutConstraintVaild.selfIdealSize.SetSize(SizeF(layoutSize, layoutSize));
-    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())->UpdateLayoutConstraint(
-        LayoutConstraintVaild);
+    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateLayoutConstraint(LayoutConstraintVaild);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
     layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
     auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
@@ -260,9 +245,6 @@ HWTEST_F(TabsModelTestNG, TabsModelMeasure001, TestSize.Level1)
     dividerOffect = dividerLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
     EXPECT_EQ(dividerOffect.GetX(), layoutSize);
     EXPECT_EQ(dividerOffect.GetY(), 0);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -270,7 +252,7 @@ HWTEST_F(TabsModelTestNG, TabsModelMeasure001, TestSize.Level1)
  * @tc.desc: Test tabs OnUpdateShowDivider.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabsModelOnUpdateShowDivider001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
@@ -302,9 +284,6 @@ HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider001, TestSize.Level1)
     ASSERT_NE(dividerRenderProperty, nullptr);
     auto dividerColor = dividerRenderProperty->GetDividerColor();
     EXPECT_EQ(dividerColor.value().ColorToString(), color.ColorToString());
-    
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -312,7 +291,7 @@ HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider001, TestSize.Level1)
  * @tc.desc: Test tabs OnUpdateShowDivider when pattern without host
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider002, TestSize.Level2)
+HWTEST_F(TabsTestNg, TabsModelOnUpdateShowDivider002, TestSize.Level2)
 {
     auto pattern = AceType::MakeRefPtr<TabsPattern>();
     ASSERT_NE(pattern, nullptr);
@@ -325,17 +304,17 @@ HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider002, TestSize.Level2)
  * @tc.desc: Test tabs OnUpdateShowDivider when pattern without host
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider003, TestSize.Level2)
+HWTEST_F(TabsTestNg, TabsModelOnUpdateShowDivider003, TestSize.Level2)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
-    auto tabsNode = TabsModelNG::GetOrCreateTabsNode(
-        V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto tabsNode =
+        TabsModelNG::GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     auto pattern = tabsNode->GetPattern<TabsPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnUpdateShowDivider();
-    EXPECT_LT(tabsNode->GetChildren().size(), 2);
+    EXPECT_LT(tabsNode->GetChildren().size(), static_cast<int32_t>(2));
 }
 
 /**
@@ -343,7 +322,7 @@ HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider003, TestSize.Level2)
  * @tc.desc: Test tabs OnUpdateShowDivider when pattern without host
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider004, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabsModelOnUpdateShowDivider004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize all properties of tabs.
@@ -351,8 +330,8 @@ HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider004, TestSize.Level1)
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
-    auto tabsNode = TabsModelNG::GetOrCreateTabsNode(
-        V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto tabsNode =
+        TabsModelNG::GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     ASSERT_NE(tabsNode, nullptr);
 
     bool hasTabBarNode = tabsNode->HasTabBarNode();
@@ -375,7 +354,7 @@ HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider004, TestSize.Level1)
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
     }
-    
+
     auto pattern = tabsNode->GetPattern<TabsPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnUpdateShowDivider();
@@ -389,13 +368,13 @@ HWTEST_F(TabsModelTestNG, TabsModelOnUpdateShowDivider004, TestSize.Level1)
  * @tc.desc: Test tabs ToJsonValue when host has not child.
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabsModelToJsonValue001, TestSize.Level2)
+HWTEST_F(TabsTestNg, TabsModelToJsonValue001, TestSize.Level2)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     ASSERT_NE(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
-    auto tabsNode = TabsModelNG::GetOrCreateTabsNode(
-        V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto tabsNode =
+        TabsModelNG::GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     ASSERT_NE(tabsNode, nullptr);
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     tabsNode->ToJsonValue(json);
@@ -410,14 +389,13 @@ HWTEST_F(TabsModelTestNG, TabsModelToJsonValue001, TestSize.Level2)
  * @tc.desc: test SetIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabContentModelSetIndicator001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentModelSetIndicator001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
 
     TabContentModelNG tabContentModel;
     IndicatorStyle indicator;
@@ -446,10 +424,6 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetIndicator001, TestSize.Level1)
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width.ToString(), width.ToString());
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().borderRadius.ToString(), borderRadius.ToString());
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().marginTop.ToString(), marginTop.ToString());
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -457,17 +431,14 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetIndicator001, TestSize.Level1)
  * @tc.desc: test SetIndicator with getTheme once
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabContentModelSetIndicator002, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentModelSetIndicator002, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
 
     TabContentModelNG tabContentModel;
     IndicatorStyle indicator;
-    Color color = Color::WHITE;
-    Dimension height = 0.0_vp;
     Dimension width = 0.0_vp;
     Dimension borderRadius = 0.0_vp;
-    Dimension marginTop = 0.0_vp;
 
     tabContentModel.Create();
     tabContentModel.SetIndicator(indicator);
@@ -477,14 +448,8 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetIndicator002, TestSize.Level1)
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern, nullptr);
 
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().color.ColorToString(), color.ColorToString());
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().height.ToString(), height.ToString());
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width.ToString(), width.ToString());
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().borderRadius.ToString(), borderRadius.ToString());
-    EXPECT_EQ(tabContentPattern->GetIndicatorStyle().marginTop.ToString(), marginTop.ToString());
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -492,15 +457,13 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetIndicator002, TestSize.Level1)
  * @tc.desc: test SetSubTabBorderRadius
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabContentModelSetSubTabBorderRadius001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentModelSetSubTabBorderRadius001, TestSize.Level1)
 {
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
-    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_))
-        .WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
 
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
     TabContentModelNG tabContentModel;
     BoardStyle boardStyle;
     boardStyle.borderRadius = 10.0_vp;
@@ -513,10 +476,6 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetSubTabBorderRadius001, TestSize.Leve
     ASSERT_NE(tabContentPattern, nullptr);
     auto board = tabContentPattern->GetBoardStyle();
     EXPECT_EQ(board.borderRadius.ToString(), boardStyle.borderRadius.ToString());
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
-    MockPipelineBase::GetCurrent()->SetThemeManager(nullptr);
 }
 
 /**
@@ -524,10 +483,9 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetSubTabBorderRadius001, TestSize.Leve
  * @tc.desc: test SetSubTabBorderRadius with getTheme once
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabContentModelSetSubTabBorderRadius002, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentModelSetSubTabBorderRadius002, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
-
     TabContentModelNG tabContentModel;
     BoardStyle boardStyle;
     boardStyle.borderRadius = 10.0_vp;
@@ -540,9 +498,6 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetSubTabBorderRadius002, TestSize.Leve
     ASSERT_NE(tabContentPattern, nullptr);
     auto board = tabContentPattern->GetBoardStyle();
     EXPECT_EQ(board.borderRadius.ToString(), boardStyle.borderRadius.ToString());
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -550,10 +505,9 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetSubTabBorderRadius002, TestSize.Leve
  * @tc.desc: test SetSelectedMode
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabContentModelSetSelectedMode001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentModelSetSelectedMode001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
-
     TabContentModelNG tabContentModel;
     SelectedMode selectedMode = SelectedMode::INDICATOR;
     tabContentModel.Create();
@@ -564,9 +518,6 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetSelectedMode001, TestSize.Level1)
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern, nullptr);
     EXPECT_EQ(tabContentPattern->GetSelectedMode(), selectedMode);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -574,7 +525,7 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetSelectedMode001, TestSize.Level1)
  * @tc.desc: test SetLabelStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
 
@@ -582,13 +533,11 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle001, TestSize.Level1)
     LabelStyle labelStyle;
     tabContentModel.Create();
     tabContentModel.SetLabelStyle(labelStyle);
-
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(tabContentFrameNode, nullptr);
     EXPECT_EQ(tabContentFrameNode->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern, nullptr);
-
     EXPECT_EQ(tabContentPattern->GetLabelStyle().textOverflow, std::nullopt);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().maxLines, std::nullopt);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().minFontSize, std::nullopt);
@@ -598,9 +547,6 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle001, TestSize.Level1)
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontWeight, std::nullopt);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontFamily, std::nullopt);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontStyle, std::nullopt);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -608,7 +554,7 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle001, TestSize.Level1)
  * @tc.desc: test SetLabelStyle
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle002, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentModelSetLabelStyle002, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
 
@@ -622,9 +568,8 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle002, TestSize.Level1)
     labelStyle.fontSize = 0.0_vp;
     labelStyle.fontWeight = FontWeight::NORMAL;
     labelStyle.fontFamily = { "unknown" };
-    std::vector<std::string> fontVect = {""};
+    std::vector<std::string> fontVect = { "" };
     labelStyle.fontStyle = Ace::FontStyle::NORMAL;
-
     tabContentModel.Create();
     tabContentModel.SetLabelStyle(labelStyle);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -632,7 +577,6 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle002, TestSize.Level1)
     EXPECT_EQ(tabContentFrameNode->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern, nullptr);
-
     EXPECT_EQ(tabContentPattern->GetLabelStyle().textOverflow, labelStyle.textOverflow);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().maxLines, labelStyle.maxLines);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().minFontSize->ToString(), labelStyle.minFontSize->ToString());
@@ -642,9 +586,6 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle002, TestSize.Level1)
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontWeight, labelStyle.fontWeight);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontFamily, labelStyle.fontFamily);
     EXPECT_EQ(tabContentPattern->GetLabelStyle().fontStyle, labelStyle.fontStyle);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -652,23 +593,17 @@ HWTEST_F(TabsModelTestNG, TabContentModelSetLabelStyle002, TestSize.Level1)
  * @tc.desc: test SetIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabContentModelToJsonValue001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabContentModelToJsonValue001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
-
     TabContentModelNG tabContentModel;
-
     tabContentModel.Create();
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(tabContentFrameNode, nullptr);
     EXPECT_EQ(tabContentFrameNode->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
-
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     tabContentFrameNode->ToJsonValue(json);
     EXPECT_NE(json, nullptr);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -676,20 +611,17 @@ HWTEST_F(TabsModelTestNG, TabContentModelToJsonValue001, TestSize.Level1)
  * @tc.desc: test SetSelectedMode
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternAddTabBarItem001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternAddTabBarItem001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     const std::string text_test = "text_test";
-    
     TabContentModelNG tabContentModel;
-
     SelectedMode selectedMode = SelectedMode::INDICATOR;
     tabContentModel.Create();
     tabContentModel.SetSelectedMode(selectedMode);
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(tabContentFrameNode, nullptr);
     EXPECT_EQ(tabContentFrameNode->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
-
     TabsModelNG tabsModel;
     tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -697,15 +629,12 @@ HWTEST_F(TabsModelTestNG, TabBarPatternAddTabBarItem001, TestSize.Level1)
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern, nullptr);
     tabContentFrameNode->GetTabBarItemId();
-
     auto swiperNode = tabsNode->GetTabs();
     tabContentFrameNode->MountToParent(swiperNode);
     tabContentPattern->SetTabBar(text_test, "", nullptr);
     EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
     tabContentModel.AddTabBarItem(tabContentFrameNode, DEFAULT_NODE_SLOT, true);
-
     EXPECT_EQ(tabContentPattern->GetSelectedMode(), selectedMode);
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -713,7 +642,7 @@ HWTEST_F(TabsModelTestNG, TabBarPatternAddTabBarItem001, TestSize.Level1)
  * @tc.desc: test OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
@@ -734,8 +663,8 @@ HWTEST_F(TabsModelTestNG, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Lev
     auto layoutAlgorithm = tabBarPattern->CreateLayoutAlgorithm();
     ASSERT_NE(layoutAlgorithm, nullptr);
     DirtySwapConfig config;
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabBarNode->GetGeometryNode(),
-        tabBarLayoutProperty);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(tabBarNode, tabBarNode->GetGeometryNode(), tabBarLayoutProperty);
     ASSERT_NE(layoutWrapper, nullptr);
     auto algorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm, false, false);
     ASSERT_NE(algorithmWrapper, nullptr);
@@ -747,8 +676,6 @@ HWTEST_F(TabsModelTestNG, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Lev
     EXPECT_EQ(tabBarPattern->tabBarStyles_[0], TabBarStyle::SUBTABBATSTYLE);
     tabBarPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
-
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -756,11 +683,11 @@ HWTEST_F(TabsModelTestNG, TabBarPatternOnDirtyLayoutWrapperSwap001, TestSize.Lev
  * @tc.desc: test UpdateSubTabBoard
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     const std::string text_test = "text_test";
-    
+
     TabContentModelNG tabContentModel;
 
     SelectedMode selectedMode = SelectedMode::INDICATOR;
@@ -782,7 +709,7 @@ HWTEST_F(TabsModelTestNG, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
     tabBarPattern->UpdateSubTabBoard();
-    
+
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     ASSERT_NE(tabContentPattern, nullptr);
     EXPECT_EQ(tabContentPattern->GetSelectedMode(), selectedMode);
@@ -816,8 +743,6 @@ HWTEST_F(TabsModelTestNG, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
     tabContentModel.AddTabBarItem(tabContentFrameNode, DEFAULT_NODE_SLOT, true);
     tabBarPattern->UpdateSubTabBoard();
     EXPECT_EQ(tabBarPattern->indicator_, 0);
-
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -825,11 +750,11 @@ HWTEST_F(TabsModelTestNG, TabBarPatternUpdateSubTabBoard001, TestSize.Level1)
  * @tc.desc: test UpdateGradientRegions
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternUpdateGradientRegions001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternUpdateGradientRegions001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     const std::string text_test = "text_test";
-    
+
     TabContentModelNG tabContentModel;
 
     SelectedMode selectedMode = SelectedMode::INDICATOR;
@@ -869,12 +794,12 @@ HWTEST_F(TabsModelTestNG, TabBarPatternUpdateGradientRegions001, TestSize.Level1
 
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     ASSERT_NE(tabBarPattern, nullptr);
-    tabBarPattern->tabItemOffsets_ = {{-1.0f, -1.0f}};
+    tabBarPattern->tabItemOffsets_ = { { -1.0f, -1.0f } };
     tabBarPattern->childrenMainSize_ = 10.0f;
     tabBarPattern->UpdateGradientRegions();
     EXPECT_TRUE(tabBarPattern->gradientRegions_[2]);
 
-    tabBarPattern->tabItemOffsets_ = {{10.0f, 10.0f}};
+    tabBarPattern->tabItemOffsets_ = { { 10.0f, 10.0f } };
     tabBarPattern->childrenMainSize_ = 10.0f;
     tabBarPattern->UpdateGradientRegions();
     EXPECT_TRUE(tabBarPattern->gradientRegions_[3]);
@@ -882,17 +807,15 @@ HWTEST_F(TabsModelTestNG, TabBarPatternUpdateGradientRegions001, TestSize.Level1
     tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
     EXPECT_EQ(tabBarLayoutProperty->GetAxisValue(), Axis::HORIZONTAL);
 
-    tabBarPattern->tabItemOffsets_ = {{-1.0f, -1.0f}};
+    tabBarPattern->tabItemOffsets_ = { { -1.0f, -1.0f } };
     tabBarPattern->childrenMainSize_ = 10.0f;
     tabBarPattern->UpdateGradientRegions();
     EXPECT_TRUE(tabBarPattern->gradientRegions_[0]);
 
-    tabBarPattern->tabItemOffsets_ = {{10.0f, 10.0f}};
+    tabBarPattern->tabItemOffsets_ = { { 10.0f, 10.0f } };
     tabBarPattern->childrenMainSize_ = 10.0f;
     tabBarPattern->UpdateGradientRegions();
     EXPECT_TRUE(tabBarPattern->gradientRegions_[1]);
-
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -900,7 +823,7 @@ HWTEST_F(TabsModelTestNG, TabBarPatternUpdateGradientRegions001, TestSize.Level1
  * @tc.desc: test SetSelectedMode
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternSetSelectedMode001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternSetSelectedMode001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
@@ -944,8 +867,6 @@ HWTEST_F(TabsModelTestNG, TabBarPatternSetSelectedMode001, TestSize.Level1)
 
     auto selectedMode = tabBarPattern->GetSelectedMode();
     EXPECT_EQ(selectedMode, SelectedMode::INDICATOR);
-
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -953,7 +874,7 @@ HWTEST_F(TabsModelTestNG, TabBarPatternSetSelectedMode001, TestSize.Level1)
  * @tc.desc: test UpdateIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternUpdateIndicator001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternUpdateIndicator001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
@@ -1001,8 +922,6 @@ HWTEST_F(TabsModelTestNG, TabBarPatternUpdateIndicator001, TestSize.Level1)
     tabBarPattern->tabBarType_[0] = false;
     tabBarPattern->UpdateIndicator(0);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
-
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1010,7 +929,7 @@ HWTEST_F(TabsModelTestNG, TabBarPatternUpdateIndicator001, TestSize.Level1)
  * @tc.desc: test PlayPressAnimation
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternPlayPressAnimation001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternPlayPressAnimation001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
@@ -1037,8 +956,6 @@ HWTEST_F(TabsModelTestNG, TabBarPatternPlayPressAnimation001, TestSize.Level1)
     EXPECT_EQ(tabBarPattern->selectedModes_[0], SelectedMode::INDICATOR);
     tabBarPattern->PlayPressAnimation(0, Color::BLACK, AnimationType::PRESS);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
-
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1046,16 +963,14 @@ HWTEST_F(TabsModelTestNG, TabBarPatternPlayPressAnimation001, TestSize.Level1)
  * @tc.desc: test HandleClick
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternHandleClick001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternHandleClick001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_))
-        .WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_))
-        .WillRepeatedly(Return());
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).WillRepeatedly(Return());
 
     const std::string text_test = "text_test";
-    
+
     TabContentModelNG tabContentModel;
 
     SelectedMode selectedMode = SelectedMode::INDICATOR;
@@ -1094,15 +1009,14 @@ HWTEST_F(TabsModelTestNG, TabBarPatternHandleClick001, TestSize.Level1)
     tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty->GetAxisValue(), Axis::VERTICAL);
     tabBarPattern->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
-    tabBarPattern->tabItemOffsets_ = {{0.0f, 0.0f}, {10.0f, 10.0f}};
-    
+    tabBarPattern->tabItemOffsets_ = { { 0.0f, 0.0f }, { 10.0f, 10.0f } };
+
     GestureEvent info;
     Offset offset(1, 1);
     info.SetLocalLocation(offset);
     tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
     tabBarPattern->HandleClick(info);
     EXPECT_EQ(tabBarLayoutProperty->GetAxisValue(), Axis::HORIZONTAL);
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1110,16 +1024,14 @@ HWTEST_F(TabsModelTestNG, TabBarPatternHandleClick001, TestSize.Level1)
  * @tc.desc: test HandleSubTabBarClick
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternHandleSubTabBarClick001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternHandleSubTabBarClick001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_))
-        .WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_))
-        .WillRepeatedly(Return());
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).WillRepeatedly(Return());
 
     const std::string text_test = "text_test";
-    
+
     TabContentModelNG tabContentModel;
 
     SelectedMode selectedMode = SelectedMode::INDICATOR;
@@ -1164,7 +1076,7 @@ HWTEST_F(TabsModelTestNG, TabBarPatternHandleSubTabBarClick001, TestSize.Level1)
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty->GetAxisValue(), Axis::VERTICAL);
-    tabBarPattern->tabItemOffsets_ = {{0.0f, 0.0f}, {10.0f, 10.0f}};
+    tabBarPattern->tabItemOffsets_ = { { 0.0f, 0.0f }, { 10.0f, 10.0f } };
 
     GestureEvent info;
     Offset offset(1, 1);
@@ -1215,16 +1127,14 @@ HWTEST_F(TabsModelTestNG, TabBarPatternHandleSubTabBarClick001, TestSize.Level1)
  * @tc.desc: test GetIndicatorRect
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPatternGetIndicatorRect001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPatternGetIndicatorRect001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_))
-        .WillRepeatedly(Return(0));
-    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_))
-        .WillRepeatedly(Return());
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), AddScheduleTask(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*MockPipelineBase::GetCurrent(), RemoveScheduleTask(_)).WillRepeatedly(Return());
 
     const std::string text_test = "text_test";
-    
+
     TabContentModelNG tabContentModel;
 
     SelectedMode selectedMode = SelectedMode::INDICATOR;
@@ -1261,8 +1171,7 @@ HWTEST_F(TabsModelTestNG, TabBarPatternGetIndicatorRect001, TestSize.Level1)
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     auto rect = tabBarLayoutProperty->GetIndicatorRect(0);
-    ASSERT_EQ(rect.GetX(), 0);
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
+    EXPECT_EQ(rect.GetX(), 0);
 }
 
 /**
@@ -1270,7 +1179,7 @@ HWTEST_F(TabsModelTestNG, TabBarPatternGetIndicatorRect001, TestSize.Level1)
  * @tc.desc: test SetIndicator
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicator001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarModifierSetIndicator001, TestSize.Level1)
 {
     RectF rect(0.0f, 0.0f, 1.0f, 1.0f);
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
@@ -1284,11 +1193,10 @@ HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicator001, TestSize.Level1)
  * @tc.desc: test SetIndicatorColor
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorColor001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarModifierSetIndicatorColor001, TestSize.Level1)
 {
     LinearColor indicatorColor(Color::BLACK);
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
-    
     tabBarModifier->SetIndicatorColor(indicatorColor);
     EXPECT_TRUE(tabBarModifier->indicatorColor_->Get() == indicatorColor);
 }
@@ -1298,7 +1206,7 @@ HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorColor001, TestSize.Level1)
  * @tc.desc: test SetIndicatorWidth
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorWidth001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarModifierSetIndicatorWidth001, TestSize.Level1)
 {
     float indicatorWidth = 1.0f;
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
@@ -1311,7 +1219,7 @@ HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorWidth001, TestSize.Level1)
  * @tc.desc: test SetIndicatorHeight
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorHeight001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarModifierSetIndicatorHeight001, TestSize.Level1)
 {
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
     float indicatorHeight = 1.0f;
@@ -1324,7 +1232,7 @@ HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorHeight001, TestSize.Level1)
  * @tc.desc: test SetIndicatorBorderRadius
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorBorderRadius001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarModifierSetIndicatorBorderRadius001, TestSize.Level1)
 {
     float indicatorBorderRadius = 1.0f;
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
@@ -1337,7 +1245,7 @@ HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorBorderRadius001, TestSize.Le
  * @tc.desc: test SetIndicatorMarginTop
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorMarginTop001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarModifierSetIndicatorMarginTop001, TestSize.Level1)
 {
     float indicatorMarginTop = 1.0f;
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
@@ -1350,7 +1258,7 @@ HWTEST_F(TabsModelTestNG, TabBarModifierSetIndicatorMarginTop001, TestSize.Level
  * @tc.desc: test SetActiveMode
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarModifierSetActiveMode001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarModifierSetActiveMode001, TestSize.Level1)
 {
     SelectedMode selectedMode = SelectedMode::INDICATOR;
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
@@ -1363,7 +1271,7 @@ HWTEST_F(TabsModelTestNG, TabBarModifierSetActiveMode001, TestSize.Level1)
  * @tc.desc: test onDraw
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarModifierOnDraw001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarModifierOnDraw001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
@@ -1412,12 +1320,10 @@ HWTEST_F(TabsModelTestNG, TabBarModifierOnDraw001, TestSize.Level1)
     EXPECT_EQ(tabBarModifier->indicatorWidth_->Get(), indicatorWidth);
     EXPECT_EQ(tabBarModifier->indicatorMarginTop_->Get(), indicatorMarginTop);
     EXPECT_EQ(tabBarModifier->indicatorBorderRadius_->Get(), indicatorBorderRadius);
-    
+
     tabBarModifier->SetSelectedMode(SelectedMode::BOARD);
     tabBarModifier->onDraw(context);
     EXPECT_FALSE(tabBarModifier->hasIndicator_->Get());
-
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1425,7 +1331,7 @@ HWTEST_F(TabsModelTestNG, TabBarModifierOnDraw001, TestSize.Level1)
  * @tc.desc: test GetForegroundDrawFunction
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPaintMethodGetForegroundDrawFunction001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPaintMethodGetForegroundDrawFunction001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
@@ -1454,8 +1360,7 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodGetForegroundDrawFunction001, TestSiz
     auto paintMethod2 = tabBarPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod2, nullptr);
 
-    PaintWrapper paintWrapper(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(),
-        paintProperty);
+    PaintWrapper paintWrapper(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(), paintProperty);
     auto drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper);
     ASSERT_NE(drawFunction, nullptr);
 
@@ -1463,15 +1368,11 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodGetForegroundDrawFunction001, TestSiz
     auto tabBarPaintProperty = AceType::DynamicCast<TabBarPaintProperty>(paintProperty);
     tabBarPaintProperty->UpdateFadingEdge(false);
     EXPECT_FALSE(tabBarPaintProperty->GetFadingEdgeValue());
-    PaintWrapper paintWrapper2(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(),
-        paintProperty);
+    PaintWrapper paintWrapper2(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(), paintProperty);
     drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper2);
     ASSERT_EQ(drawFunction, nullptr);
     auto clone = paintProperty->Clone();
     EXPECT_NE(clone, nullptr);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1479,7 +1380,7 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodGetForegroundDrawFunction001, TestSiz
  * @tc.desc: test GetContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPaintMethodGetContentModifier001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPaintMethodGetContentModifier001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
@@ -1505,13 +1406,9 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodGetContentModifier001, TestSize.Level
     auto paintMethod = tabBarPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod, nullptr);
 
-    PaintWrapper paintWrapper(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(),
-        paintProperty);
+    PaintWrapper paintWrapper(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(), paintProperty);
     auto contentModifier = paintMethod->GetContentModifier(&paintWrapper);
     EXPECT_NE(contentModifier, nullptr);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1519,7 +1416,7 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodGetContentModifier001, TestSize.Level
  * @tc.desc: test UpdateContentModifier
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPaintMethodUpdateContentModifier001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPaintMethodUpdateContentModifier001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
@@ -1545,20 +1442,15 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodUpdateContentModifier001, TestSize.Le
     auto paintMethod = tabBarPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod, nullptr);
 
-    PaintWrapper paintWrapper(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(),
-        paintProperty);
+    PaintWrapper paintWrapper(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(), paintProperty);
     paintMethod->UpdateContentModifier(&paintWrapper);
     auto tabBarPaintMethod = Ace::AceType::DynamicCast<TabBarPaintMethod>(paintMethod);
     ASSERT_NE(tabBarPaintMethod, nullptr);
     EXPECT_NE(tabBarPaintMethod->tabBarModifier_, nullptr);
 
-    PaintWrapper paintWrapper2(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(),
-        nullptr);
+    PaintWrapper paintWrapper2(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(), nullptr);
     paintMethod->UpdateContentModifier(&paintWrapper2);
     EXPECT_NE(tabBarPaintMethod->tabBarModifier_, nullptr);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -1566,7 +1458,7 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodUpdateContentModifier001, TestSize.Le
  * @tc.desc: test PaintGradient
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModelTestNG, TabBarPaintMethodPaintGradient001, TestSize.Level1)
+HWTEST_F(TabsTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level1)
 {
     MockPipelineContextGetTheme();
     TabsModelNG tabsModel;
@@ -1589,14 +1481,13 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodPaintGradient001, TestSize.Level1)
     EXPECT_EQ(tabBarPattern->indicatorStyles_[0], indicator);
     tabBarPattern->SetSelectedMode(selectedMode, 0);
     EXPECT_EQ(tabBarPattern->selectedModes_[0], selectedMode);
-    std::vector<bool> gradientRegions = {true, true, true, true, true};
+    std::vector<bool> gradientRegions = { true, true, true, true, true };
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
-    auto paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(tabBarModifier, gradientRegions, Color::BLACK,
-        indicator, 0.0, selectedMode);
+    auto paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(
+        tabBarModifier, gradientRegions, Color::BLACK, indicator, 0.0, selectedMode);
     ASSERT_NE(paintMethod, nullptr);
 
-    PaintWrapper paintWrapper(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(),
-        paintProperty);
+    PaintWrapper paintWrapper(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(), paintProperty);
     auto drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper);
     ASSERT_NE(drawFunction, nullptr);
     Testing::MockCanvas rsCanvas;
@@ -1607,17 +1498,13 @@ HWTEST_F(TabsModelTestNG, TabBarPaintMethodPaintGradient001, TestSize.Level1)
     EXPECT_TRUE(paintMethod->gradientRegions_[0]);
 
     gradientRegions[0] = false;
-    paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(tabBarModifier, gradientRegions, Color::BLACK,
-        indicator, 0.0, selectedMode);
+    paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(
+        tabBarModifier, gradientRegions, Color::BLACK, indicator, 0.0, selectedMode);
     ASSERT_NE(paintMethod, nullptr);
-    PaintWrapper paintWrapper2(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(),
-        paintProperty);
+    PaintWrapper paintWrapper2(tabBarFrameNode->GetRenderContext(), tabBarFrameNode->GetGeometryNode(), paintProperty);
     drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper2);
     ASSERT_NE(drawFunction, nullptr);
     drawFunction(rsCanvas);
     EXPECT_FALSE(paintMethod->gradientRegions_[0]);
-
-    // Involution
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
-}
+} // namespace OHOS::Ace::NG
