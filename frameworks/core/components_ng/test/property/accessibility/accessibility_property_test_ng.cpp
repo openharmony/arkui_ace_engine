@@ -17,7 +17,11 @@
 
 #define private public
 #define protected public
-#include "frameworks/core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/pattern/pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -27,6 +31,11 @@ namespace {
 const size_t ARRAY_SIZE = 1;
 } // namespace
 
+class MockPattern : public Pattern {
+public:
+    MockPattern() = default;
+    ~MockPattern() override = default;
+};
 class AccessibilityPropertyTestNg : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -55,5 +64,50 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest001, TestSize.Lev
     props.supportActions_ = static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
     actions = props.GetSupportAction();
     EXPECT_EQ(actions.size(), ARRAY_SIZE);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest002
+ * @tc.desc: SetCommonSupportAction method test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    RefPtr<MockPattern> pattern = AceType::MakeRefPtr<MockPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("mockPattern", 1, pattern);
+    stack->Push(frameNode);
+    AccessibilityProperty props;
+    /**
+     * @tc.steps: step1. host_ is nullptr
+     * @tc.expected: supportActions_ = 0
+     */
+    props.SetCommonSupportAction();
+    EXPECT_EQ(props.supportActions_, 0);
+
+    /**
+     * @tc.steps: step2. host_ is not nullptr and  gestureEventHub->IsClickable() = true
+     * @tc.expected: supportActions_ = AceAction::ACTION_CLICK
+     */
+    frameNode->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    frameNode->eventHub_->GetOrCreateGestureEventHub();
+    frameNode->eventHub_->GetGestureEventHub()->CheckClickActuator();
+    props.host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    props.SetCommonSupportAction();
+    EXPECT_EQ(props.supportActions_, 1UL << static_cast<uint32_t>(AceAction::ACTION_CLICK));
+
+    props.supportActions_ = 0;
+    frameNode->eventHub_->GetGestureEventHub()->clickEventActuator_ = nullptr;
+    GestureEventFunc eventFunc;
+    eventFunc = [](GestureEvent& info) {};
+    auto longPressEvent = AceType::MakeRefPtr<LongPressEvent>(std::move(eventFunc));
+    frameNode->eventHub_->GetGestureEventHub()->SetLongPressEvent(longPressEvent);
+    props.SetCommonSupportAction();
+    EXPECT_EQ(props.supportActions_, 1UL << static_cast<uint32_t>(AceAction::ACTION_LONG_CLICK));
+    props.supportActions_ = 0;
+    frameNode->eventHub_->GetGestureEventHub()->longPressEventActuator_ = nullptr;
+    frameNode->eventHub_->GetOrCreateFocusHub();
+    props.SetCommonSupportAction();
+    EXPECT_FALSE(frameNode->GetFocusHub()->IsFocusable());
 }
 } // namespace OHOS::Ace::NG

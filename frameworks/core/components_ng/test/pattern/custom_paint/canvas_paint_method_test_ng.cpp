@@ -639,7 +639,7 @@ HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg012, TestSize.Level1)
  * @tc.desc: Test the function InitImageCallbacks of CanvasPaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg014, TestSize.Level1)
+HWTEST_F(CanvasPaintMethodTestNg, CanvasPaintMethodTestNg013, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.

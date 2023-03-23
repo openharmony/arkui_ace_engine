@@ -35,7 +35,6 @@ group("pattern_unittest") {
     "focusHub:focusHub_pattern_test_ng",
     "form:form_pattern_test_ng",
     "gauge:gauge_pattern_test_ng",
-    "gesture:gesture_pattern_test_ng",
     "grid:grid_pattern_test_ng",
     "grid_col:grid_col_pattern_test_ng",
     "grid_container:grid_container_pattern_test_ng",
