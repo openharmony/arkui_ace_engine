@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+
 #define private public
 #define protected public
 #include "core/components/checkable/checkable_theme.h"
@@ -31,9 +32,11 @@
 
 using namespace testing;
 using namespace testing::ext;
+
 namespace OHOS::Ace::NG {
 namespace {
 const std::string NAME = "radio";
+const std::string VALUE = "radio";
 const std::string NAME1 = "radio1";
 const std::string GROUP_NAME = "radioGroup";
 const std::string GROUP_NAME1 = "radioGroup1";
@@ -58,20 +61,18 @@ constexpr Color NORMAL_COLOR = Color(0xff0000ff);
 constexpr Color ERROR_COLOR = Color();
 } // namespace
 
-class RadioPatternTestNg : public testing::Test {
+class RadioTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override {}
-    void TearDown() override {}
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
 
-void RadioPatternTestNg::SetUpTestCase()
+void RadioTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
 }
 
-void RadioPatternTestNg::TearDownTestCase()
+void RadioTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }
@@ -81,7 +82,7 @@ void RadioPatternTestNg::TearDownTestCase()
  * @tc.desc: Set Radio value into RadioPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest001, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -101,7 +102,7 @@ HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest001, TestSize.Level1)
  * @tc.desc: Test SetCheckedBackgroundColor when the Radio is checked.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest002, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -129,7 +130,7 @@ HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest002, TestSize.Level1)
  * @tc.desc: Test SetUncheckedBorderColor when the Radio is unchecked.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest003, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -157,7 +158,7 @@ HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest003, TestSize.Level1)
  * @tc.desc: Test SetIndicatorColor when the Radio is select.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintPropertyTest004, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -185,7 +186,7 @@ HWTEST_F(RadioPatternTestNg, RadioPaintPropertyTest004, TestSize.Level1)
  * @tc.desc: Set Radio value into RadioEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
 {
     /**
      * @tc.cases: case1. RadioPattern can Create without value or group.
@@ -216,7 +217,7 @@ HWTEST_F(RadioPatternTestNg, RadioEventHubPropertyTest002, TestSize.Level1)
  * @tc.desc: Set Radio value into RadioEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioEventHubPropertyTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioEventHubPropertyTest003, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(std::nullopt, GROUP_NAME);
@@ -233,7 +234,7 @@ HWTEST_F(RadioPatternTestNg, RadioEventHubPropertyTest003, TestSize.Level1)
  * @tc.desc: Set Radio value into RadioEventHub and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioEventHubPropertyTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioEventHubPropertyTest004, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, std::nullopt);
@@ -250,7 +251,7 @@ HWTEST_F(RadioPatternTestNg, RadioEventHubPropertyTest004, TestSize.Level1)
  * @tc.desc: Test Radio onChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioEventTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioEventTest003, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -270,7 +271,7 @@ HWTEST_F(RadioPatternTestNg, RadioEventTest003, TestSize.Level1)
  * @tc.desc: Test Radio onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest004, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -305,7 +306,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest004, TestSize.Level1)
  * @tc.desc: Test UpdateUncheckStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest005, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest005, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -326,7 +327,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest005, TestSize.Level1)
  * @tc.desc: Test UpdateUncheckStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest006, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest006, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -351,7 +352,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest006, TestSize.Level1)
  * @tc.desc: Test UpdateGroupCheckStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest007, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest007, TestSize.Level1)
 {
     RadioModelNG radioModelNG0;
     radioModelNG0.Create(NAME, GROUP_NAME);
@@ -369,7 +370,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest007, TestSize.Level1)
     ASSERT_NE(radioPaintProperty, nullptr);
     EXPECT_EQ(radioPaintProperty->GetRadioCheckValue(), CHECKED);
     pattern0->UpdateGroupCheckStatus(frameNode0, false);
-    EXPECT_NE(radioPaintProperty->GetRadioCheckValue(), CHECKED);
+    EXPECT_TRUE(radioPaintProperty->GetRadioCheckValue());
 }
 
 /**
@@ -377,7 +378,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest007, TestSize.Level1)
  * @tc.desc: Test UpdateGroupCheckStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest008, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest008, TestSize.Level1)
 {
     auto frameNode0 =
         FrameNode::GetOrCreateFrameNode(V2::RADIO_ETS_TAG, 0, []() { return AceType::MakeRefPtr<RadioPattern>(); });
@@ -427,7 +428,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest008, TestSize.Level1)
  * @tc.desc: Test InitClickEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest009, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest009, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -447,7 +448,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest009, TestSize.Level1)
  * @tc.desc: Test InitTouchEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest010, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest010, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -467,7 +468,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest010, TestSize.Level1)
  * @tc.desc: Test InitMouseEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest011, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest011, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -487,7 +488,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest011, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest012, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest012, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -510,7 +511,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest012, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest013, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest013, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -533,7 +534,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest013, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest014, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest014, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -555,7 +556,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest014, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest015, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest015, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -571,7 +572,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest015, TestSize.Level1)
     radioPaintProperty->ResetRadioCheck();
     pattern->OnClick();
     auto select1 = radioPaintProperty->GetRadioCheckValue();
-    EXPECT_EQ(select1, false);
+    EXPECT_TRUE(select1);
 }
 
 /**
@@ -579,7 +580,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest015, TestSize.Level1)
  * @tc.desc: Test OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest016, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest016, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -594,7 +595,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest016, TestSize.Level1)
     radioPaintProperty->ResetRadioCheck();
     pattern->OnClick();
     auto select1 = radioPaintProperty->GetRadioCheckValue();
-    EXPECT_EQ(select1, false);
+    EXPECT_TRUE(select1);
 }
 
 /**
@@ -602,7 +603,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest016, TestSize.Level1)
  * @tc.desc: Test PlayAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest017, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest017, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -623,7 +624,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest017, TestSize.Level1)
  * @tc.desc: Test PlayAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest018, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest018, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -644,7 +645,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest018, TestSize.Level1)
  * @tc.desc: Test OnTouchDown   OnTouchUp.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest019, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest019, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -663,7 +664,6 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest019, TestSize.Level1)
     pattern->OnTouchUp();
     EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
     EXPECT_FALSE(pattern->isTouch_);
-
 }
 
 /**
@@ -671,7 +671,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest019, TestSize.Level1)
  * @tc.desc: Test OnTouchDown   OnTouchUp.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPatternTest020, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPatternTest020, TestSize.Level1)
 {
     RadioModelNG radioModelNG;
     radioModelNG.Create(NAME, GROUP_NAME);
@@ -690,7 +690,6 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest020, TestSize.Level1)
     pattern->OnTouchUp();
     EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS_TO_HOVER);
     EXPECT_FALSE(pattern->isTouch_);
-
 }
 
 /**
@@ -698,7 +697,7 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest020, TestSize.Level1)
  * @tc.desc: Test Radio PaintMethod PaintRadio.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintMethodTest001, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -721,7 +720,7 @@ HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest001, TestSize.Level1)
  * @tc.desc: Test Radio PaintMethod PaintRadio.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintMethodTest002, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -746,7 +745,7 @@ HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest002, TestSize.Level1)
  * @tc.desc: Test Radio PaintMethod PaintRadio.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintMethodTest003, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -761,11 +760,11 @@ HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest003, TestSize.Level1)
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
-    radioPaintMethod.radioModifier_->uiStatus_ = AceType::MakeRefPtr<PropertyInt>
-        (static_cast<int32_t>(UIStatus::SELECTED));
+    radioPaintMethod.radioModifier_->uiStatus_ =
+        AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::SELECTED));
     radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
-    radioPaintMethod.radioModifier_->uiStatus_ = AceType::MakeRefPtr<PropertyInt>
-        (static_cast<int32_t>(UIStatus::UNSELECTED));
+    radioPaintMethod.radioModifier_->uiStatus_ =
+        AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
 }
 
 /**
@@ -773,7 +772,7 @@ HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest003, TestSize.Level1)
  * @tc.desc: Test Radio PaintMethod PaintRadio.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioPaintMethodTest004, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -789,12 +788,12 @@ HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
     radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(false);
-    radioPaintMethod.radioModifier_->uiStatus_ = AceType::MakeRefPtr<PropertyInt>
-        (static_cast<int32_t>(UIStatus::SELECTED));
+    radioPaintMethod.radioModifier_->uiStatus_ =
+        AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::SELECTED));
     radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
     radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
-    radioPaintMethod.radioModifier_->uiStatus_ = AceType::MakeRefPtr<PropertyInt>
-        (static_cast<int32_t>(UIStatus::UNSELECTED));
+    radioPaintMethod.radioModifier_->uiStatus_ =
+        AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(UIStatus::UNSELECTED));
 }
 
 /**
@@ -802,7 +801,7 @@ HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest004, TestSize.Level1)
  * @tc.desc: Verify that RadioLayoutAlgorithm can correctly InitializeParam.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -825,7 +824,7 @@ HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest001, TestSize.Level1)
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -852,7 +851,7 @@ HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest002, TestSize.Level1)
              when The front end only sets width.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -878,7 +877,7 @@ HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest003, TestSize.Level1)
              when The front end only sets height.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -904,7 +903,7 @@ HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest004, TestSize.Level1)
              when Width and height are not set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -937,7 +936,7 @@ HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest005, TestSize.Level1)
              when Width and height are set in the front end.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -959,7 +958,7 @@ HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest006, TestSize.Level1)
              when The front end only sets width.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -980,12 +979,12 @@ HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest007, TestSize.Level1)
              when The front end only sets height.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
+HWTEST_F(RadioTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(AceType::MakeRefPtr<RadioTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RadioTheme>()));
     LayoutWrapper layoutWrapper(nullptr, nullptr, nullptr);
     RadioLayoutAlgorithm radioLayoutAlgorithm;
     LayoutConstraintF layoutConstraintSize;
@@ -995,4 +994,63 @@ HWTEST_F(RadioPatternTestNg, RadioLayoutAlgorithmTest008, TestSize.Level1)
     EXPECT_EQ(size.value(), SizeF(0, 0));
 }
 
+/**
+ * @tc.name: RadioAccessibilityPropertyTestNg001
+ * @tc.desc: Test the IsCheckable property of Radio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg001, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibility = frameNode->GetAccessibilityProperty<RadioAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_TRUE(accessibility->IsCheckable());
+}
+
+/**
+ * @tc.name: RadioAccessibilityPropertyTestNg002
+ * @tc.desc: Test the IsChecked property of Radio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg002, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto paintProperty = frameNode->GetPaintProperty<NG::RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateRadioCheck(true);
+    auto accessibility = frameNode->GetAccessibilityProperty<RadioAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_TRUE(accessibility->IsChecked());
+
+    paintProperty->UpdateRadioCheck(false);
+    EXPECT_FALSE(accessibility->IsChecked());
+}
+
+/**
+ * @tc.name: RadioAccessibilityPropertyTestNg003
+ * @tc.desc: Test the Text property of Radio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg003, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(radioEventHub, nullptr);
+    radioEventHub->SetValue(VALUE);
+
+    auto accessibility = frameNode->GetAccessibilityProperty<RadioAccessibilityProperty>();
+    EXPECT_NE(accessibility, nullptr);
+    EXPECT_EQ(accessibility->GetText(), VALUE);
+}
 } // namespace OHOS::Ace::NG

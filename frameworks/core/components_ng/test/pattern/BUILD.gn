@@ -59,7 +59,7 @@ group("pattern_unittest") {
     "plugin:plugin_pattern_test_ng",
     "progress:progress_pattern_test_ng",
     "qrcode:qrcode_pattern_test_ng",
-    "radio:radio_pattern_test_ng",
+    "radio:radio_test_ng",
     "rating:rating_pattern_test_ng",
     "refresh:refresh_pattern_test_ng",
     "relative_container:relative_container_pattern_test_ng",
