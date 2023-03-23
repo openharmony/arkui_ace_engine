@@ -88,6 +88,9 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     Dimension radius;
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
+        if (buttonLayoutProperty->HasBorderRadius()) {
+            minSize = buttonLayoutProperty->GetBorderRadiusValue().ConvertToPx();
+        }
         radius.SetValue(minSize / 2.0);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
         host->GetRenderContext()->UpdateBorderRadius(borderRadius);

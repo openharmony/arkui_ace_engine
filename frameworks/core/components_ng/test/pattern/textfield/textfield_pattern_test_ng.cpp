@@ -15,20 +15,30 @@
 
 #include "gtest/gtest.h"
 
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #define private public
 #define protected public
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "textfield_test_ng_utils.h"
-#include "core/components_ng/pattern/text_field/text_field_overlay_modifier.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
+#include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
+#include "core/components_ng/pattern/text_field/text_field_controller.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_paint_method.h"
+#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
+#include "core/components_ng/base/view_stack_processor.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1447,6 +1457,32 @@ HWTEST_F(TextFieldPatternTestNg, UpdateScrollBarOffset002, TestSize.Level1)
     pattern->textEditingValue_.text = "updateScrollBarOffset";
     pattern->UpdateScrollBarOffset();
     EXPECT_EQ(pattern->GetScrollBar(), nullptr);
+}
+
+/**
+ * @tc.name: SearchNodeTest001
+ * @tc.desc: Verify the parent search node branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SearchNodeTest001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = stack->ClaimNodeId();
+    auto searchNode = AceType::MakeRefPtr<FrameNode>(V2::SEARCH_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>(), false);
+    frameNode->MountToParent(searchNode);
+
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->HasFocus();
+    auto info = GestureEvent();
+    pattern->UpdateCaretInfoToController();
+    pattern->HandleClickEvent(info);
+    pattern->HandleLongPress(info);
+    auto mouseInfo = MouseInfo();
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_EQ(pattern->IsSearchParentNode(), true);
 }
 
 /**

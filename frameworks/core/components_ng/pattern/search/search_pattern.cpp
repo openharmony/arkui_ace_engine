@@ -772,6 +772,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) co
     CHECK_NULL_VOID(textFieldPattern);
 
     json->Put("value", textFieldPattern->GetTextEditingValue().text.c_str());
+    json->Put("placeholder", textFieldPattern->GetPlaceHolder().c_str());
     json->Put("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str());
     json->Put("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str());
     json->Put("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str());
@@ -817,7 +818,7 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     // icon path
     auto searchIconPath = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
     searchIconJson->Put("src", searchIconPath.c_str());
-    json->Put("searchIcon", searchIconJson);
+    json->Put("icon", searchIconJson);
 }
 
 void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json) const
