@@ -66,6 +66,11 @@ void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t sl
     UINode::AddChild(child);
 }
 
+void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
+{
+    UINode::RemoveChildAtIndex(slot);
+}
+
 void NavRouterGroupNode::OnDetachFromMainTree()
 {
     FrameNode::OnDetachFromMainTree();

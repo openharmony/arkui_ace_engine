@@ -287,6 +287,15 @@ public:
     {
         return childrenUpdatedFrom_;
     }
+    // These two interfaces are only used for fast preview.
+    // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
+    // FastPreviewUpdateChildDone: the new created node performs some special operations.
+    virtual void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild)
+    {
+        RemoveChildAtIndex(slot);
+        newChild->MountToParent(AceType::Claim(this), slot, false);
+    }
+    virtual void FastPreviewUpdateChildDone() {}
 
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)

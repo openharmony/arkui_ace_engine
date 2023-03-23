@@ -29,6 +29,12 @@ public:
     ~GroupNode() override = default;
     virtual void AddChildToGroup(const RefPtr<UINode>& children, int32_t slot = DEFAULT_NODE_SLOT) {};
     virtual void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) {};
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild) override
+    {
+        DeleteChildFromGroup(slot);
+        AddChildToGroup(newChild, slot);
+    }
 };
 
 } // namespace OHOS::Ace::NG
