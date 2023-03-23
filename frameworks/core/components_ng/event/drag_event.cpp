@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t PAN_FINGER = 1;
 constexpr double PAN_DISTANCE = 5.0;
-constexpr int32_t LONG_PRESS_DURATION = 300;
+constexpr int32_t LONG_PRESS_DURATION = 500;
 #ifdef ENABLE_DRAG_FRAMEWORK
 constexpr float FILTER_RADIUS = 1000;
 #endif // ENABLE_DRAG_FRAMEWORK
