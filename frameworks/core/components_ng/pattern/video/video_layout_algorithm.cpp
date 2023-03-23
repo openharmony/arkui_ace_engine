@@ -20,6 +20,7 @@
 #include "core/components/video/video_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
+#include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -80,12 +81,30 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             child->Measure(layoutConstraintForControlBar);
         }
     }
+
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsFullScreen()) {
+        SizeF fullSize = { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
+        layoutWrapper->GetGeometryNode()->SetFrameSize(fullSize);
+        return;
+    }
     PerformMeasureSelf(layoutWrapper);
 }
 
 std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    if (pattern->IsFullScreen()) {
+        SizeF fullSize = { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
+        return fullSize;
+    }
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                 : contentConstraint.maxSize;
     return layoutSize;

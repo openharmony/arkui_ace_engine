@@ -902,6 +902,7 @@ void VideoPattern::SetMethodCall()
 
 void VideoPattern::Start()
 {
+    LOGI("Video start to play.");
     if (!mediaPlayer_->IsMediaPlayerValid()) {
         LOGE("media player is invalid.");
         return;
@@ -934,7 +935,6 @@ void VideoPattern::Start()
         ++iter;
     }
 
-    LOGD("Video Start");
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {
         auto mediaPlayer = weak.Upgrade();
