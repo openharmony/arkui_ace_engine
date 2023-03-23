@@ -71,6 +71,9 @@ void LayoutProperty::Reset()
     measureType_.reset();
     layoutDirection_.reset();
     propVisibility_.reset();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    propIsBindOverlay_.reset();
+#endif // ENABLE_DRAG_FRAMEWORK
     CleanDirty();
 }
 
@@ -144,6 +147,9 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
     safeArea_ = layoutProperty->safeArea_;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)

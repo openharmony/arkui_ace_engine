@@ -125,7 +125,13 @@ public:
         }
         return false;
     }
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void MountToRootNode(const RefPtr<FrameNode>& imageNode);
+    void RemovePixelMap();
+    void RemoveFilter();
+    bool hasPixelMap {false};
+    bool hasFilter {false};
+#endif // ENABLE_DRAG_FRAMEWORK
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<RefPtr<UINode>()>&& buildNodeFunc, int32_t type, int32_t targetId);
 
@@ -157,6 +163,7 @@ private:
     std::unordered_map<int32_t, RefPtr<FrameNode>> customPopupMap_;
     std::stack<WeakPtr<FrameNode>> modalStack_;
     WeakPtr<UINode> rootNodeWeak_;
+    WeakPtr<FrameNode> columnNodeWeak_;
 
     std::function<void()> onHideMenuCallback_ = nullptr;
     CancelableCallback<void()> continuousTask_;

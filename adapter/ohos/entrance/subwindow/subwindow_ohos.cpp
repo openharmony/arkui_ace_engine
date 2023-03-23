@@ -40,6 +40,9 @@
 #include "core/common/text_field_manager.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/popup/popup_component.h"
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif // ENABLE_DRAG_FRAMEWORK
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
@@ -217,6 +220,10 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     overlayManager->HidePopup(targetId, popupInfo);
     context->FlushPipelineImmediately();
     HideWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HidePixelMap();
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::HidePopupNG()
@@ -233,6 +240,10 @@ void SubwindowOhos::HidePopupNG()
     overlayManager->HidePopup(popupTargetId_, popupInfo);
     context->FlushPipelineImmediately();
     HideWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HidePixelMap();
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
@@ -397,6 +408,10 @@ void SubwindowOhos::ClearMenuNG()
     overlay->CleanMenuInSubWindow();
     context->FlushPipelineImmediately();
     HideWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HidePixelMap();
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
@@ -822,4 +837,41 @@ void SubwindowOhos::ShowActionMenu(
         ShowActionMenuForAbility(title, button, std::move(callback));
     }
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void SubwindowOhos::HideFilter()
+{
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
+    auto parentPipeline = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(parentPipeline);
+    auto rootNode = parentPipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto childNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto manager = parentPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->hasFilter) {
+        auto children = childNode->GetChildren();
+        rootNode->RemoveChild(childNode);
+        for (auto& child: children) {
+            childNode->RemoveChild(child);
+            child->MountToParent(rootNode);
+        }
+        manager->hasFilter = false;
+        rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    }
+}
+
+void SubwindowOhos::HidePixelMap()
+{
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
+    auto parentPipeline = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(parentPipeline);
+    auto manager = parentPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemovePixelMap();
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace
