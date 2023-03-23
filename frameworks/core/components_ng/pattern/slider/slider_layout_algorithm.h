@@ -31,14 +31,17 @@ public:
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
+    void Measure(LayoutWrapper* layoutWrapper) override;
+    void Layout(LayoutWrapper* layoutWrapper) override;
 
     float GetTrackThickness() const
     {
         return trackThickness_;
     }
-    float GetBlockDiameter() const
+
+    SizeF GetBlockSize() const
     {
-        return blockDiameter_;
+        return blockSize_;
     }
 
     float GetBlockHotSize() const
@@ -47,8 +50,12 @@ public:
     }
 
 private:
+    void CalculateBlockOffset(
+        LayoutWrapper* layoutWrapper, const SizeF& selfSize, float selectOffset, Axis axis, bool reverse);
+
+private:
     float trackThickness_ = 0.0f;
-    float blockDiameter_ = 0.0f;
+    SizeF blockSize_;
     float blockHotSize_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderLayoutAlgorithm);

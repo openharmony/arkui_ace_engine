@@ -22,7 +22,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-const float PROGRSS_MAX_VALUE = 100.f;
+constexpr float PROGRSS_MAX_VALUE = 100.f;
 
 void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
@@ -41,6 +41,8 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("color", (GetColor().value_or(progressTheme->GetTrackSelectedColor())).ColorToString().c_str());
     json->Put(
         "backgroundColor", (GetBackgroundColor().value_or(progressTheme->GetTrackBgColor())).ColorToString().c_str());
+    json->Put(
+        "capsuleBorderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
 }
 
 std::string ProgressPaintProperty::ProgressOptions() const

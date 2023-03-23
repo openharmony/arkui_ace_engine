@@ -33,6 +33,9 @@ public:
     void SetSelectedTime(const PickerTime& selectedTime) override;
     void SetHour24(bool value) override;
     void SetOnChange(DateChangeEvent&& onChange) override;
+    void SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
+    void SetNormalTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
+    void SetSelectedTextStyle(const RefPtr<PickerTheme>& theme, const NG::PickerTextStyle& value) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_PICKER_MODEL_IMPL_H

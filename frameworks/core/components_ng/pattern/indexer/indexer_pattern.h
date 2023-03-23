@@ -100,27 +100,36 @@ private:
     void OnChildHover(int32_t index, bool isHover);
     void ResetStatus();
     void OnKeyEventDisapear();
-    void InitBubbleList(
-        std::vector<std::string>& currentListData, RefPtr<FrameNode>& parentNode, RefPtr<IndexerTheme>& indexerTheme);
+    void UpdateBubbleListItem(std::vector<std::string>& currentListData, const RefPtr<FrameNode>& parentNode,
+        RefPtr<IndexerTheme>& indexerTheme);
     void AddPopupTouchListener(RefPtr<FrameNode> popupNode);
     void OnPopupTouchDown(const TouchEventInfo& info);
     void AddListItemClickListener(RefPtr<FrameNode>& listItemNode, int32_t index);
     void OnListItemClick(int32_t index);
     void ChangeListItemsSelectedStyle(int32_t clickIndex);
-    RefPtr<FrameNode> InitBubbleView();
+    RefPtr<FrameNode> CreatePopupNode();
+    void UpdateBubbleView();
+    void UpdateBubbleSize();
+    void UpdateBubbleLetterView(bool showDivider);
+    void CreateBubbleListView(std::vector<std::string>& currentListData);
+    void UpdateBubbleListView(std::vector<std::string>& currentListData);
+    void UpdatePopupOpacity(float ratio);
+    void UpdatePopupVisibility(VisibleType visible);
+    bool NeedShowPopupView();
     bool NeedShowBubble();
     void ShowBubble();
     bool IfSelectIndexValid();
     int32_t GetSelectChildIndex(const Offset& offset);
-    void RemoveBubbleNode(int32_t popnodeId, int32_t targetId) const;
-    void StartBubbleAppearAnimation(RefPtr<FrameNode> animationNode);
+    void StartBubbleAppearAnimation();
     void IndexerHoverInAnimation();
     void IndexerHoverOutAnimation();
     void IndexerPressInAnimation();
     void IndexerPressOutAnimation();
+    int32_t GenerateAnimationId();
     void ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode);
     void ItemSelectedOutAnimation(RefPtr<FrameNode>& itemNode);
 
+    RefPtr<FrameNode> popupNode_;
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
     RefPtr<Animator> bubbleAnimator_;
@@ -128,7 +137,6 @@ private:
     bool isKeyEventRegisted_ = false;
     bool isTouch_ = false;
     bool isHover_ = false;
-    bool removePopupNode_ = true;
 
     std::vector<std::string> arrayValue_;
     int32_t itemCount_ = 0;
@@ -139,7 +147,12 @@ private:
     int32_t childHoverIndex_ = -1;
     int32_t childFocusIndex_ = -1;
     int32_t childPressIndex_ = -1;
+    int32_t animationId_ = 0;
+    int32_t lastPopupIndex_ = -1;
+    int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
+    int32_t lastSelectProp_ = -1;
+    int32_t popupClickedIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

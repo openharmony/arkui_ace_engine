@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -59,6 +59,8 @@ use_linux = "${current_os}_${current_cpu}" == "linux_x64"
 # Config path
 ace_root = "//foundation/arkui/ace_engine"
 ace_napi = "//foundation/arkui/napi"
+ace_graphic = "//foundation/graphic/graphic_2d"
+ace_hitrace = "//base/hiviewdfx/hitrace"
 
 if (!defined(aosp_libs_dir)) {
   aosp_libs_dir = "//prebuilts/aosp_prebuilt_libs/asdk_libs"

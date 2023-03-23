@@ -84,6 +84,11 @@ public:
         isPopup_ = popup;
     }
 
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
+    }
+
     void SetData(const std::string& data)
     {
         CHECK_NULL_VOID(declaration_);
@@ -764,6 +769,23 @@ public:
         onUrlLoadInterceptImpl_ = onUrlLoadInterceptImpl;
     }
 
+    using OnLoadInterceptImpl = std::function<bool(const BaseEventInfo* info)>;
+    bool OnLoadIntercept(const BaseEventInfo* info) const
+    {
+        if (onLoadInterceptImpl_) {
+            return onLoadInterceptImpl_(info);
+        }
+        return false;
+    }
+    void SetOnLoadIntercept(OnLoadInterceptImpl&& onLoadInterceptImpl)
+    {
+        if (onLoadInterceptImpl == nullptr) {
+            return;
+        }
+
+        onLoadInterceptImpl_ = onLoadInterceptImpl;
+    }
+
     using OnInterceptRequestImpl = std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>;
     RefPtr<WebResponse> OnInterceptRequest(const BaseEventInfo* info) const
     {
@@ -917,6 +939,7 @@ private:
     OnFileSelectorShowImpl onFileSelectorShowImpl_;
     OnFullScreenEnterImpl onFullScreenEnterImpl_;
     OnUrlLoadInterceptImpl onUrlLoadInterceptImpl_;
+    OnLoadInterceptImpl onLoadInterceptImpl_;
     OnHttpAuthRequestImpl onHttpAuthRequestImpl_;
     OnSslErrorRequestImpl onSslErrorRequestImpl_;
     OnSslSelectCertRequestImpl onSslSelectCertRequestImpl_;
@@ -961,6 +984,7 @@ private:
     bool isPinchSmoothModeEnabled_ = false;
     PreKeyEventCallback onPreKeyEvent_;
     bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
 };
 
 } // namespace OHOS::Ace

@@ -75,37 +75,44 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
-    const auto& rect = GetGeometryNode()->GetFrameRect();
-    if (!rect.IsInRegion(parentLocalPoint)) {
+    // The mousetest has been merged into touchtest.
+    // FormComponent does not support some mouse event(eg. Hover, HoverAnimation..).
+    // Mouse event like LEFT_BUTTON, RELEASE use touchevent to dispatch, so they work well on FormComponent
+    if (touchRestrict.hitTestType == SourceType::MOUSE) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
+    auto testResult = FrameNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
+    if (testResult == HitTestResult::OUT_OF_REGION) {
         return HitTestResult::OUT_OF_REGION;
     }
 
     auto context = GetContext();
-    CHECK_NULL_RETURN(context, HitTestResult::BUBBLING);
+    CHECK_NULL_RETURN(context, testResult);
 
     auto selfGlobalOffset = GetTransformRelativeOffset();
     auto pattern = GetPattern<FormPattern>();
-    CHECK_NULL_RETURN(pattern, HitTestResult::BUBBLING);
+    CHECK_NULL_RETURN(pattern, testResult);
     auto subContainer = pattern->GetSubContainer();
-    CHECK_NULL_RETURN(subContainer, HitTestResult::BUBBLING);
+    CHECK_NULL_RETURN(subContainer, testResult);
 
     // Send TouchEvent Info to FormRenderService when Provider is ArkTS Card.
     if (subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
         DispatchPointerEvent(touchRestrict.touchEvent);
-        auto callback = [weak = WeakClaim(this)] (const TouchEvent& point) {
+        auto callback = [weak = WeakClaim(this)](const TouchEvent& point) {
             auto formNode = weak.Upgrade();
             CHECK_NULL_VOID(formNode);
             formNode->DispatchPointerEvent(point);
         };
         context->AddEtsCardTouchEventCallback(callback);
-        return HitTestResult::BUBBLING;
+        return testResult;
     }
     auto subContext = DynamicCast<OHOS::Ace::PipelineBase>(subContainer->GetPipelineContext());
-    CHECK_NULL_RETURN(subContext, HitTestResult::BUBBLING);
+    CHECK_NULL_RETURN(subContext, testResult);
     subContext->SetPluginEventOffset(Offset(selfGlobalOffset.GetX(), selfGlobalOffset.GetY()));
     context->SetTouchPipeline(WeakPtr<PipelineBase>(subContext));
 
-    return HitTestResult::BUBBLING;
+    return testResult;
 }
 
 void FormNode::DispatchPointerEvent(const TouchEvent& point) const
@@ -139,4 +146,10 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
     return formNode;
 }
 
+void FormNode::OnDetachFromMainTree()
+{
+    auto eventHub = GetEventHub<FormEventHub>();
+    eventHub->FireOnCache();
+    FrameNode::OnDetachFromMainTree();
+}
 } // namespace OHOS::Ace::NG

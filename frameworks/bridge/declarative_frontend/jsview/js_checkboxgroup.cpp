@@ -276,12 +276,8 @@ void JSCheckboxGroup::JsPadding(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetPadding(NG::CalcLength(value));
+        JSViewAbstract::JsPadding(info);
         return;
     }
 

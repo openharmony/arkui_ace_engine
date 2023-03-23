@@ -18,7 +18,6 @@
 
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
-#include "core/components_ng/render/canvas.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 

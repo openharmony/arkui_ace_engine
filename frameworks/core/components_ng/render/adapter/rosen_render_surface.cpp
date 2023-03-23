@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,11 @@ void RosenRenderSurface::InitSurface()
         int32_t windowId = context->GetWindowId();
         surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);
         surfaceDelegate_->CreateSurface();
-        surfaceDelegate_->SetBounds(0, 0, EXT_SURFACE_DEFAULT_SIZE, EXT_SURFACE_DEFAULT_SIZE);
+        if (extSurfaceCallbackInterface_) {
+            surfaceDelegate_->AddSurfaceCallback(new ExtSurfaceCallback(extSurfaceCallbackInterface_));
+        } else {
+            surfaceDelegate_->SetBounds(0, 0, EXT_SURFACE_DEFAULT_SIZE, EXT_SURFACE_DEFAULT_SIZE);
+        }
         producerSurface_ = surfaceDelegate_->GetSurface();
     } else {
         CHECK_NULL_VOID(renderContext);
@@ -124,4 +128,32 @@ void RosenRenderSurface::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t 
     }
 }
 
+void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)
+{
+    extSurfaceCallbackInterface_ = extSurfaceCallback;
+}
+
+void ExtSurfaceCallback::OnSurfaceCreated(const sptr<Surface>& /* surface */)
+{
+    auto interface = weakInterface_.Upgrade();
+    if (interface) {
+        interface->ProcessSurfaceCreate();
+    }
+}
+
+void ExtSurfaceCallback::OnSurfaceChanged(const sptr<Surface>& /* surface */, int32_t width, int32_t height)
+{
+    auto interface = weakInterface_.Upgrade();
+    if (interface) {
+        interface->ProcessSurfaceChange(width, height);
+    }
+}
+
+void ExtSurfaceCallback::OnSurfaceDestroyed()
+{
+    auto interface = weakInterface_.Upgrade();
+    if (interface) {
+        interface->ProcessSurfaceDestroy();
+    }
+}
 } // namespace OHOS::Ace::NG

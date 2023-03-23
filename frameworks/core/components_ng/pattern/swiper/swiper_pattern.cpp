@@ -77,9 +77,9 @@ void SwiperPattern::OnIndexChange() const
         return;
     }
 
-    auto currentIndex = (currentIndex_ + totalCount) % totalCount;
+    auto oldIndex = (oldIndex_ + totalCount) % totalCount;
     auto targetIndex = (CurrentIndex() + totalCount) % totalCount;
-    if (currentIndex != targetIndex) {
+    if (oldIndex != targetIndex) {
         auto swiperEventHub = GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         swiperEventHub->FireChangeEvent(targetIndex);
@@ -98,12 +98,8 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    InitSwiperIndicator();
-    if (isInit_) {
-        isInit_ = false;
-    } else {
-        OnIndexChange();
-    }
+    oldIndex_ = currentIndex_;
+    InitIndicator();
 
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
@@ -114,7 +110,7 @@ void SwiperPattern::OnModifyDone()
     }
 
     CalculateCacheRange();
-    InitAutoPlay();
+    RegisterVisibleAreaChange();
     InitSwiperController();
     InitTouchEvent(gestureHub);
     if (IsDisableSwipe()) {
@@ -239,6 +235,12 @@ WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (isInit_) {
+        isInit_ = false;
+    } else {
+        OnIndexChange();
+    }
+
     auto curChild = dirty->GetOrCreateChildByIndex(currentIndex_);
     CHECK_NULL_RETURN(curChild, false);
     auto curChildFrame = curChild->GetHostNode();
@@ -255,6 +257,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+    oldIndex_ = currentIndex_;
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
@@ -331,6 +334,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     FireChangeEvent();
+    oldIndex_ = currentIndex_;
     CalculateCacheRange();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -350,7 +354,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     StopTranslateAnimation();
     targetIndex_ = targetIndex;
 
-    if (GetDuration() == 0) {
+    if (GetDuration() == 0 || !isVisible_) {
         SwipeToWithoutAnimation(index);
         return;
     }
@@ -362,6 +366,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::ShowNext()
 {
+    indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
@@ -372,8 +377,12 @@ void SwiperPattern::ShowNext()
     StopAutoPlay();
     StopTranslateAnimation();
     if (childrenSize > 0 && GetDisplayCount() != 0) {
-        auto endPosition = GetTranslateLength();
-        PlayTranslateAnimation(0, -endPosition, (currentIndex_ + 1) % childrenSize, true);
+        if (isVisible_) {
+            auto endPosition = GetTranslateLength();
+            PlayTranslateAnimation(0, -endPosition, (currentIndex_ + 1) % childrenSize, true);
+        } else {
+            SwipeToWithoutAnimation((currentIndex_ + 1) % childrenSize);
+        }
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -382,6 +391,7 @@ void SwiperPattern::ShowNext()
 
 void SwiperPattern::ShowPrevious()
 {
+    indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
@@ -392,8 +402,12 @@ void SwiperPattern::ShowPrevious()
     StopAutoPlay();
     StopTranslateAnimation();
     if (childrenSize > 0 && GetDisplayCount() != 0) {
-        auto endPosition = GetTranslateLength();
-        PlayTranslateAnimation(0, endPosition, (currentIndex_ + childrenSize - 1) % childrenSize, true);
+        if (isVisible_) {
+            auto endPosition = GetTranslateLength();
+            PlayTranslateAnimation(0, endPosition, (currentIndex_ + childrenSize - 1) % childrenSize, true);
+        } else {
+            SwipeToWithoutAnimation((currentIndex_ + childrenSize - 1) % childrenSize);
+        }
     }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -464,7 +478,7 @@ void SwiperPattern::InitSwiperController()
     });
 }
 
-void SwiperPattern::InitSwiperIndicator()
+void SwiperPattern::InitIndicator()
 {
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
@@ -488,35 +502,12 @@ void SwiperPattern::InitSwiperIndicator()
         }
     }
     CHECK_NULL_VOID(indicatorNode);
-    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
-    CHECK_NULL_VOID(indicatorPattern);
-    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (swiperParameters_.dimLeft.has_value()) {
-        layoutProperty->UpdateLeft(swiperParameters_.dimLeft.value());
-    }
-    if (swiperParameters_.dimTop.has_value()) {
-        layoutProperty->UpdateTop(swiperParameters_.dimTop.value());
-    }
-    if (swiperParameters_.dimRight.has_value()) {
-        layoutProperty->UpdateRight(swiperParameters_.dimRight.value());
-    }
-    if (swiperParameters_.dimBottom.has_value()) {
-        layoutProperty->UpdateBottom(swiperParameters_.dimBottom.value());
-    }
-    if (swiperParameters_.dimSize.has_value()) {
-        paintProperty->UpdateSize(swiperParameters_.dimSize.value());
-    }
-    if (swiperParameters_.maskValue.has_value()) {
-        paintProperty->UpdateIndicatorMask(swiperParameters_.maskValue.value());
-    }
-    if (swiperParameters_.colorVal.has_value()) {
-        paintProperty->UpdateColor(swiperParameters_.colorVal.value());
-    }
-    if (swiperParameters_.selectedColorVal.has_value()) {
-        paintProperty->UpdateSelectedColor(swiperParameters_.selectedColorVal.value());
+    if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
+        SaveDotIndicatorProperty(indicatorNode);
+    } else {
+        SaveDigitIndicatorProperty(indicatorNode);
     }
 
     auto renderContext = indicatorNode->GetRenderContext();
@@ -653,82 +644,24 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
     return false;
 }
 
-void SwiperPattern::InitAutoPlay()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto weak = AceType::WeakClaim(this);
-    if (!scheduler_) {
-        auto&& callback = [weak](uint64_t duration) {
-            auto swiper = weak.Upgrade();
-            if (swiper) {
-                swiper->Tick(duration);
-            }
-        };
-        scheduler_ = SchedulerBuilder::Build(callback, host->GetContext());
-    } else if (scheduler_->IsActive()) {
-        scheduler_->Stop();
-    }
-
-    if (IsAutoPlay() && !scheduler_->IsActive()) {
-        scheduler_->Start();
-    }
-}
-
-void SwiperPattern::Tick(uint64_t duration)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    auto childrenSize = TotalCount();
-    auto displayCount = GetDisplayCount();
-    if (childrenSize <= 0 || displayCount <= 0) {
-        return;
-    }
-
-    elapsedTime_ += duration;
-    if (elapsedTime_ >= static_cast<uint64_t>(GetInterval()) + static_cast<uint64_t>(GetDuration())) {
-        if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
-            LOGD("already last one, stop auto play because not loop");
-            if (scheduler_) {
-                scheduler_->Stop();
-            }
-        } else {
-            auto endPosition = GetTranslateLength();
-            PlayTranslateAnimation(0, -endPosition, (currentIndex_ + 1) % childrenSize);
-        }
-        elapsedTime_ = 0;
-    }
-}
-
 void SwiperPattern::StopAutoPlay()
 {
-    if (IsAutoPlay() && scheduler_) {
-        scheduler_->Stop();
-        elapsedTime_ = 0;
+    if (IsAutoPlay()) {
+        translateTask_.Cancel();
     }
 }
 
 void SwiperPattern::StartAutoPlay()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
-    if (!scheduler_ || !IsAutoPlay()) {
-        return;
-    }
-    bool reachEnd = currentIndex_ >= TotalCount() - 1 && !IsLoop();
-    if (reachEnd && scheduler_->IsActive()) {
-        scheduler_->Stop();
-    } else {
-        scheduler_->Start();
+    if (NeedAutoPlay()) {
+        PostTranslateTask(GetInterval());
     }
 }
 
 void SwiperPattern::OnVisibleChange(bool isVisible)
 {
     if (isVisible) {
+        isVisible_ = true;
         StartAutoPlay();
     } else {
         StopAutoPlay();
@@ -738,14 +671,26 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
-    turnPageRate_ = currentOffset_ / MainSize();
+    float contentSize = MainSize() - GetBorderAndPaddingWidth();
+    turnPageRate_ = currentOffset_ / contentSize;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG && touch_) {
+    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG && !indicatorDoingAnimation_) {
         auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
         indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+float SwiperPattern::GetBorderAndPaddingWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    return GetDirection() == Axis::HORIZONTAL ? padding.left.value_or(0.0f) + padding.right.value_or(0.0f)
+                                              : padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
 }
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -762,7 +707,7 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
-    touch_ = true;
+    indicatorDoingAnimation_ = false;
     // Stop translate animation when touch down.
     if (controller_ && controller_->IsRunning()) {
         controller_->Pause();
@@ -778,7 +723,6 @@ void SwiperPattern::HandleTouchDown()
 
 void SwiperPattern::HandleTouchUp()
 {
-    touch_ = false;
     if (controller_ && !controller_->IsStopped()) {
         controller_->Resume();
     }
@@ -957,27 +901,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
     controller_->AddStopListener([weak, nextIndex, restartAutoPlay]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        swiper->currentOffset_ = 0.0;
-        swiper->targetIndex_.reset();
-        if (swiper->currentIndex_ != nextIndex) {
-            swiper->currentIndex_ = nextIndex;
-            auto layoutProperty = swiper->GetLayoutProperty<SwiperLayoutProperty>();
-            CHECK_NULL_VOID(layoutProperty);
-            layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
-            swiper->FireChangeEvent();
-            swiper->CalculateCacheRange();
-        }
-        if (restartAutoPlay) {
-            swiper->StartAutoPlay();
-        }
-        swiper->FireAnimationEndEvent();
-        auto host = swiper->GetHost();
-        CHECK_NULL_VOID(host);
-        auto indicatorNode = host->GetLastChild();
-        CHECK_NULL_VOID(indicatorNode);
-        if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
-            indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        }
+        swiper->OnTranslateFinish(nextIndex, restartAutoPlay);
     });
     controller_->SetDuration(GetDuration());
     controller_->AddInterpolator(translate);
@@ -1195,6 +1119,58 @@ bool SwiperPattern::IsShowIndicator() const
     return swiperLayoutProperty->GetShowIndicatorValue(true);
 }
 
+SwiperIndicatorType SwiperPattern::GetIndicatorType() const
+{
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(swiperLayoutProperty, SwiperIndicatorType::DOT);
+    return swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT);
+}
+
+std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
+{
+    if (swiperParameters_ == nullptr) {
+        swiperParameters_ = std::make_shared<SwiperParameters>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        swiperParameters_->dimLeft = 0.0_vp;
+        swiperParameters_->dimTop = 0.0_vp;
+        swiperParameters_->dimRight = 0.0_vp;
+        swiperParameters_->dimBottom = 0.0_vp;
+        swiperParameters_->itemWidth = swiperIndicatorTheme->GetSize();
+        swiperParameters_->itemHeight = swiperIndicatorTheme->GetSize();
+        swiperParameters_->selectedItemWidth = swiperIndicatorTheme->GetSize();
+        swiperParameters_->selectedItemHeight = swiperIndicatorTheme->GetSize();
+        swiperParameters_->maskValue = true;
+        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+    }
+    return swiperParameters_;
+}
+
+std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters() const
+{
+    if (swiperDigitalParameters_ == nullptr) {
+        swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperDigitalParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        swiperDigitalParameters_->dimLeft = 0.0_vp;
+        swiperDigitalParameters_->dimTop = 0.0_vp;
+        swiperDigitalParameters_->dimRight = 0.0_vp;
+        swiperDigitalParameters_->dimBottom = 0.0_vp;
+        swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        swiperDigitalParameters_->selectedFontColor =
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        swiperDigitalParameters_->fontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+        swiperDigitalParameters_->selectedFontSize = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize();
+        swiperDigitalParameters_->fontWeight = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
+        swiperDigitalParameters_->selectedFontWeight =
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight();
+    }
+    return swiperDigitalParameters_;
+}
+
 int32_t SwiperPattern::TotalCount() const
 {
     auto host = GetHost();
@@ -1224,4 +1200,159 @@ bool SwiperPattern::IsOutOfHotRegion(const PointF& dragPoint) const
     return !hotRegion.IsInRegion(dragPoint + OffsetF(hotRegion.GetX(), hotRegion.GetY()));
 }
 
+void SwiperPattern::SaveDotIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto swiperParameters = GetSwiperParameters();
+    CHECK_NULL_VOID(swiperParameters);
+    layoutProperty->UpdateLeft(swiperParameters->dimLeft.value_or(0.0_vp));
+    layoutProperty->UpdateTop(swiperParameters->dimTop.value_or(0.0_vp));
+    layoutProperty->UpdateRight(swiperParameters->dimRight.value_or(0.0_vp));
+    layoutProperty->UpdateBottom(swiperParameters->dimBottom.value_or(0.0_vp));
+    paintProperty->UpdateItemWidth(swiperParameters->itemWidth.value_or(swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateItemHeight(swiperParameters->itemHeight.value_or(swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateSelectedItemWidth(swiperParameters->selectedItemWidth.value_or(
+        swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateSelectedItemHeight(swiperParameters->selectedItemHeight.value_or(
+        swiperIndicatorTheme->GetSize()));
+    paintProperty->UpdateIndicatorMask(swiperParameters->maskValue.value_or(false));
+    paintProperty->UpdateColor(swiperParameters->colorVal.value_or(swiperIndicatorTheme->GetColor()));
+    paintProperty->UpdateSelectedColor(swiperParameters->selectedColorVal.value_or(
+        swiperIndicatorTheme->GetSelectedColor()));
+}
+
+void SwiperPattern::SaveDigitIndicatorProperty(const RefPtr<FrameNode>& indicatorNode)
+{
+    CHECK_NULL_VOID(indicatorNode);
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    CHECK_NULL_VOID(indicatorPattern);
+    auto layoutProperty = indicatorNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperDigitalParameters = GetSwiperDigitalParameters();
+    CHECK_NULL_VOID(swiperDigitalParameters);
+    layoutProperty->UpdateLeft(swiperDigitalParameters->dimLeft.value_or(0.0_vp));
+    layoutProperty->UpdateTop(swiperDigitalParameters->dimTop.value_or(0.0_vp));
+    layoutProperty->UpdateRight(swiperDigitalParameters->dimRight.value_or(0.0_vp));
+    layoutProperty->UpdateBottom(swiperDigitalParameters->dimBottom.value_or(0.0_vp));
+    layoutProperty->UpdateFontColor(swiperDigitalParameters->fontColor.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()));
+    layoutProperty->UpdateSelectedFontColor(swiperDigitalParameters->selectedFontColor.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor()));
+    layoutProperty->UpdateFontSize(swiperDigitalParameters->fontSize.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
+    layoutProperty->UpdateSelectedFontSize(swiperDigitalParameters->selectedFontSize.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontSize()));
+    layoutProperty->UpdateFontWeight(swiperDigitalParameters->fontWeight.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters->selectedFontWeight.value_or(
+        swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
+    auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateLeft(swiperDigitalParameters->dimLeft.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateTop(swiperDigitalParameters->dimTop.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateRight(swiperDigitalParameters->dimRight.value_or(0.0_vp));
+    swiperLayoutProperty->UpdateBottom(swiperDigitalParameters->dimBottom.value_or(0.0_vp));
+}
+
+void SwiperPattern::PostTranslateTask(uint32_t delayTime)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto weak = AceType::WeakClaim(this);
+    translateTask_.Reset([weak, delayTime] {
+        auto swiper = weak.Upgrade();
+        if (swiper) {
+            auto childrenSize = swiper->TotalCount();
+            auto displayCount = swiper->GetDisplayCount();
+            if (childrenSize <= 0 || displayCount <= 0) {
+                return;
+            }
+
+            auto endPosition = swiper->GetTranslateLength();
+            swiper->PlayTranslateAnimation(0, -endPosition, (swiper->currentIndex_ + 1) % childrenSize, false);
+        }
+    });
+
+    taskExecutor->PostDelayedTask(translateTask_, TaskExecutor::TaskType::UI, delayTime);
+}
+
+void SwiperPattern::RegisterVisibleAreaChange()
+{
+    if (hasVisibleChangeRegistered_ || !IsAutoPlay()) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto swiperPattern = weak.Upgrade();
+        CHECK_NULL_VOID(swiperPattern);
+        if (visible) {
+            swiperPattern->isVisible_ = true;
+            swiperPattern->StartAutoPlay();
+        } else {
+            swiperPattern->isVisible_ = false;
+            swiperPattern->translateTask_.Cancel();
+        }
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+    hasVisibleChangeRegistered_ = true;
+}
+
+bool SwiperPattern::NeedAutoPlay() const
+{
+    bool reachEnd = currentIndex_ >= TotalCount() - 1 && !IsLoop();
+    return IsAutoPlay() && !reachEnd && isVisible_;
+}
+
+void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
+{
+    currentOffset_ = 0.0;
+    targetIndex_.reset();
+    if (currentIndex_ != nextIndex) {
+        currentIndex_ = nextIndex;
+        auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
+        FireChangeEvent();
+        oldIndex_ = nextIndex;
+        CalculateCacheRange();
+    }
+    if (restartAutoPlay) {
+        StartAutoPlay();
+    }
+    FireAnimationEndEvent();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto indicatorNode = host->GetLastChild();
+    CHECK_NULL_VOID(indicatorNode);
+    if (indicatorNode->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+        indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+
+    auto delayTime = GetInterval() - GetDuration();
+    delayTime = std::clamp(delayTime, 0, delayTime);
+    if (NeedAutoPlay()) {
+        PostTranslateTask(delayTime);
+    }
+}
 } // namespace OHOS::Ace::NG

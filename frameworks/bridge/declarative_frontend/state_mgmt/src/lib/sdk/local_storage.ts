@@ -217,7 +217,14 @@ class LocalStorage extends NativeLocalStorage {
       stateMgmtConsole.warn(`${this.constructor.name}: link: no property ${propName} error.`);
       return undefined;
     }
-    let linkResult = p.createLink(linkUser, propName);
+    let linkResult;
+    if (ViewStackProcessor.UsesNewPipeline()) {
+        linkResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleTwoWayPU<T>(p, linkUser, propName)
+                : new SynchedPropertyObjectTwoWayPU<T>(p, linkUser, propName);
+    } else {
+        linkResult = p.createLink(linkUser, propName);
+    }
     linkResult.setInfo(subscribersName);
     return linkResult;
   }
@@ -258,13 +265,21 @@ class LocalStorage extends NativeLocalStorage {
    *           return undefiend if named property does not already exist in LocalStorage.
    * @since 9
    */
-  public prop<S>(propName: string, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<S> | undefined {
-    var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
+  public prop<T>(propName: string, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> | undefined {
+    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (p == undefined) {
       stateMgmtConsole.warn(`${this.constructor.name}: prop: no property ${propName} error.`);
       return undefined;
     }
-    let propResult = p.createProp(propUser, propName)
+
+    let propResult;
+    if (ViewStackProcessor.UsesNewPipeline()) {
+        propResult = (p instanceof ObservedPropertySimple)
+                ? new SynchedPropertySimpleOneWayPU<T>(p, propUser, propName)
+                : new SynchedPropertyObjectOneWayPU<T>(p, propUser, propName);
+    } else {
+        propResult = p.createProp(propUser, propName);
+    }
     propResult.setInfo(subscribersName);
     return propResult;
   }
@@ -281,8 +296,8 @@ class LocalStorage extends NativeLocalStorage {
    *           Apps can use SDK functions of base class SubscribedAbstractProperty<S> 
    * @since 9
    */
-  public setAndProp<S>(propName: string, defaultValue: S, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<S> {
-    var p: ObservedPropertyAbstract<S> | undefined = this.storage_.get(propName);
+  public setAndProp<T>(propName: string, defaultValue: T, propUser?: IPropertySubscriber, subscribersName?: string): SubscribedAbstractProperty<T> {
+    var p: ObservedPropertyAbstract<T> | undefined = this.storage_.get(propName);
     if (!p) {
         this.setOrCreate(propName, defaultValue);
     }

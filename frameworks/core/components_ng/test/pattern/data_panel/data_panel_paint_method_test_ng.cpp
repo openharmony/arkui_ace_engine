@@ -73,7 +73,13 @@ void DataPanelPaintMethodTestNg::TearDownTestCase()
 class DataPanelTheme : public Theme {
     DECLARE_ACE_TYPE(DataPanelTheme, Theme)
 public:
-    DataPanelTheme() = default;
+    DataPanelTheme()
+    {
+        color.clear();
+        for (size_t i = 0; i < MAX_COUNT; i++) {
+            color.emplace_back(std::make_pair(Color::BLUE, Color::BLUE));
+        }
+    }
     ~DataPanelTheme() override = default;
 
     Dimension GetThickness() const
@@ -278,7 +284,6 @@ HWTEST_F(DataPanelPaintMethodTestNg, DataPanelPaintMethodTest007, TestSize.Level
 
     DataPanelModifier dataPanelModifier;
     Testing::MockCanvas rsCanvas;
-
     DrawingContext context { rsCanvas, -10.0f, -10.0f };
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -530,4 +535,35 @@ HWTEST_F(DataPanelPaintMethodTestNg, DataPanelPaintMethodTest015, TestSize.Level
     dataPanelModifier.PaintLinearProgress(context, OFFSET);
 }
 
+/**
+ * @tc.name: DataPanelPaintMethodTest16
+ * @tc.desc: Test DataPanel PaintMethod PaintLineProgress
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelPaintMethodTestNg, DataPanelPaintMethodTest016, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    dataPanelTheme->color = { { Color::WHITE, Color::BLACK }, { Color::WHITE, Color::BLACK },
+        { Color::WHITE, Color::BLACK } };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(dataPanelTheme));
+    DataPanelModifier dataPanelModifier;
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 10.0f, 10.0f };
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    dataPanelModifier.SetMax(20.0f);
+    std::vector<double> VALUES = { 0.0001f, 5.0f };
+    dataPanelModifier.SetValues(VALUES);
+    dataPanelModifier.PaintLinearProgress(context, OFFSET);
+    LinearData segmentLinearData;
+    segmentLinearData.offset = OFFSET;
+    segmentLinearData.xSegment = 5.0;
+    segmentLinearData.segmentWidth = 5.0;
+    segmentLinearData.height = 5.0;
+    dataPanelModifier.PaintColorSegmentFilterMask(rsCanvas, segmentLinearData);
+}
 } // namespace OHOS::Ace::NG

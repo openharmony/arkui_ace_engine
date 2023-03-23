@@ -83,6 +83,7 @@ void JSViewStackProcessor::JSBind(BindingTarget globalObj)
         "ImplicitPopBeforeContinue", &JSViewStackProcessor::JsImplicitPopBeforeContinue, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("visualState", JSVisualState, opt);
     JSClass<JSViewStackProcessor>::StaticMethod("MakeUniqueId", &JSViewStackProcessor::JSMakeUniqueId, opt);
+    JSClass<JSViewStackProcessor>::StaticMethod("UsesNewPipeline", &JSViewStackProcessor::JsUsesNewPipeline, opt);
     JSClass<JSViewStackProcessor>::Bind<>(globalObj);
 }
 
@@ -136,6 +137,13 @@ void JSViewStackProcessor::JSMakeUniqueId(const JSCallbackInfo& info)
 {
     const auto result = ElementRegister::GetInstance()->MakeUniqueId();
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+/**
+ * return true of current Container uses new Pipeline
+ */
+bool JSViewStackProcessor::JsUsesNewPipeline()
+{
+    return Container::IsCurrentUseNewPipeline();
 }
 
 } // namespace OHOS::Ace::Framework

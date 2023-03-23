@@ -18,7 +18,6 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
-
 void FormWindow::RequestFrame()
 {
     auto context = outSidePipelineContext_.Upgrade();
@@ -42,12 +41,6 @@ void FormWindow::SetVsyncCallback(AceVsyncCallback&& callback)
         LOGE("form set vsync callback fail due to null context");
         return;
     }
-    auto window = context->GetWindow();
-    if (!window) {
-        LOGE("form set vsync callback fail due to null window");
-        return;
-    }
-    window->SetVsyncCallback(std::move(callback));
+    context->SetFormVsyncCallback(std::move(callback), formWindowId_);
 }
-
 } // namespace OHOS::Ace

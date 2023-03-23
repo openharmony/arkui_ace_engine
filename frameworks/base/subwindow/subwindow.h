@@ -43,6 +43,7 @@ public:
     virtual void ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo) = 0;
     virtual void HidePopupNG(int32_t targetId) = 0;
     virtual void HidePopupNG() = 0;
+    virtual void GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo) = 0;
     virtual bool CancelPopup(const std::string& id) = 0;
     virtual void CloseMenu() = 0;
     virtual void ClearMenu() {};
@@ -70,6 +71,7 @@ public:
         const std::set<std::string>& callbacks) = 0;
     virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) = 0;
+    virtual void CloseDialog(int32_t instanceId) = 0;
 
 private:
     int32_t subwindowId_ = 0;

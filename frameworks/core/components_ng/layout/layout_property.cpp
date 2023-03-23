@@ -71,6 +71,9 @@ void LayoutProperty::Reset()
     measureType_.reset();
     layoutDirection_.reset();
     propVisibility_.reset();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    propIsBindOverlay_.reset();
+#endif // ENABLE_DRAG_FRAMEWORK
     CleanDirty();
 }
 
@@ -86,13 +89,13 @@ void LayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (padding_) {
         json->Put("padding", padding_->ToJsonString().c_str());
     } else {
-        json->Put("padding", "0.0");
+        json->Put("padding", "0.00vp");
     }
 
     if (margin_) {
         json->Put("margin", margin_->ToJsonString().c_str());
     } else {
-        json->Put("margin", "0.0");
+        json->Put("margin", "0.00vp");
     }
 
     json->Put("visibility", VisibleTypeToString(propVisibility_.value_or(VisibleType::VISIBLE)).c_str());
@@ -143,6 +146,10 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
+    safeArea_ = layoutProperty->safeArea_;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)

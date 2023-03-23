@@ -102,8 +102,8 @@ public:
 
 protected:
     RefPtr<FrameNode> CreateLabelButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
-    RefPtr<FrameNode> CreateLabelButtonParagraphForLableStyle(const std::string& createValue,
-        const LableStyleProperty& lableStyleProperty);
+    RefPtr<FrameNode> CreateLabelButtonParagraphForLableStyle(
+        const std::string& createValue, const LableStyleProperty& lableStyleProperty);
 };
 
 void ButtonPatternTestNg::SetUpTestCase()
@@ -666,7 +666,7 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest011, TestSize.Level1)
     buttonPattern->OnModifyDone();
     auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     ASSERT_NE(buttonLayoutProperty, nullptr);
-    std::vector<std::string> fontFamily = {"sans-serif"};
+    std::vector<std::string> fontFamily = { "sans-serif" };
     // update layout property
     buttonLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
     buttonLayoutProperty->UpdateMaxLines(10);
@@ -677,7 +677,6 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest011, TestSize.Level1)
     buttonLayoutProperty->UpdateFontFamily(fontFamily);
     buttonLayoutProperty->UpdateFontStyle(Ace::FontStyle::NORMAL);
     buttonLayoutProperty->UpdateHeightAdaptivePolicy(Ace::TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
-    
 
     /**
      * @tc.steps: step3. buttonPattern OnModifyDone.

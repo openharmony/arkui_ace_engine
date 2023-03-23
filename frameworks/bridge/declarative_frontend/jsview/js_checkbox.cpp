@@ -266,14 +266,11 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
         return;
     }
 
-    Dimension value;
-    if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
     if (Container::IsCurrentUseNewPipeline()) {
-        NG::ViewAbstract::SetPadding(NG::CalcLength(value));
+        JSViewAbstract::JsPadding(info);
         return;
     }
+
     if (info[0]->IsObject()) {
         auto argsPtrItem = JsonUtil::ParseJsonString(info[0]->ToString());
         if (!argsPtrItem || argsPtrItem->IsNull()) {

@@ -16,13 +16,78 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TEXT_STYLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TEXT_STYLE_H
 
+#include <string>
+#include <vector>
+
+#include "core/components_ng/test/mock/rosen/testing_color.h"
+#include "core/components_ng/test/mock/rosen/testing_pen.h"
+#include "core/components_ng/test/mock/rosen/testing_point.h"
+
 namespace OHOS::Ace::Testing {
+enum class TestingFontWeight {
+    W100, // thin
+    W200,
+    W300,
+    W400,
+    W500,
+    W600,
+    W700,
+    W800,
+    W900,
+};
+
+enum class TestingTextDecoration {
+    NONE = 0x0,
+    UNDERLINE = 0x1,
+    OVERLINE = 0x2,
+    LINETHROUGH = 0x4,
+};
+
+enum class TestingTextDecorationStyle {
+    SOLID,
+    DOUBLE,
+    DOTTED,
+    DASHED,
+    WAVY,
+};
+
+enum class TestingFontStyle {
+    NORMAL,
+    ITALIC,
+};
+
+enum class TestingTextBaseline {
+    ALPHABETIC,
+    IDEOGRAPHIC,
+};
+
+class TestingTextShadow {
+public:
+    TestingTextShadow() = default;
+    virtual ~TestingTextShadow() = default;
+
+    virtual bool hasShadow() const
+    {
+        return false;
+    }
+
+    TestingColor color_;
+    TestingPoint offset_;
+    double blurRadius_ = 0.0;
+};
+
+class TestingFontFeatures {
+public:
+    TestingFontFeatures() = default;
+    virtual ~TestingFontFeatures() = default;
+};
+
 class TestingTextStyle {
 public:
     TestingTextStyle() = default;
     ~TestingTextStyle() = default;
 
-    virtual bool equals(const TestingTextStyle&  /* rhs */) const
+    virtual bool equals(const TestingTextStyle& /* rhs */) const
     {
         return false;
     }
@@ -35,6 +100,20 @@ public:
     bool hasHeightOverride_ = false;
     bool hasBackground_ = false;
     bool hasForeground_ = false;
+    std::u16string ellipsis_;
+    std::string locale_;
+    std::vector<std::string> fontFamilies_;
+    TestingColor color_;
+    TestingTextDecoration decoration_ = TestingTextDecoration::NONE;
+    TestingColor decorationColor_;
+    TestingPen background_;
+    TestingPen foreground_;
+    TestingTextDecorationStyle decorationStyle_ = TestingTextDecorationStyle::SOLID;
+    TestingFontWeight fontWeight_ = TestingFontWeight::W400;
+    TestingFontStyle fontStyle_ = TestingFontStyle::NORMAL;
+    TestingTextBaseline textBaseline_ = TestingTextBaseline::ALPHABETIC;
+    std::vector<TestingTextShadow> textShadows_;
+    TestingFontFeatures fontFeatures_;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TEXT_STYLE_H

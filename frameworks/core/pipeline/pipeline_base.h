@@ -60,10 +60,8 @@ class Window;
 class FontManager;
 class ManagerInterface;
 enum class FrontendType;
-using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
-    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-    const std::string& abilityName)>;
-
+using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
+using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
 
@@ -156,8 +154,8 @@ public:
 
     virtual void ShowContainerTitle(bool isShow, bool hasDeco = true) = 0;
 
-    virtual void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+    virtual void OnSurfaceChanged(int32_t width, int32_t height,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) = 0;
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
@@ -433,12 +431,10 @@ public:
         sharePanelCallback_ = std::move(callback);
     }
 
-    void FireSharePanelCallback(const std::string& faBundleName, const std::string& faAbilityName,
-        const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-        const std::string& abilityName)
+    void FireSharePanelCallback(const std::string& bundleName, const std::string& abilityName)
     {
         if (sharePanelCallback_) {
-            sharePanelCallback_(faBundleName, faAbilityName, faModuleName, faHostPkgName, bundleName, abilityName);
+            sharePanelCallback_(bundleName, abilityName);
         }
     }
 
@@ -653,12 +649,13 @@ public:
     }
     bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard) const
     {
+        bool isConsume = false;
         for (const auto& iterVirtualKeyBoardCallback : virtualKeyBoardCallback_) {
             if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard)) {
-                return true;
+                isConsume = true;
             }
         }
-        return false;
+        return isConsume;
     }
 
     using configChangedCallback = std::function<void()>;
@@ -692,6 +689,10 @@ public:
     void SetGetWindowRectImpl(std::function<Rect()>&& callback);
 
     Rect GetCurrentWindowRect() const;
+
+    virtual void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) = 0;
+
+    virtual SafeAreaEdgeInserts GetCurrentViewSafeArea() const = 0;
 
     void SetPluginOffset(const Offset& offset)
     {
@@ -783,6 +784,30 @@ public:
         uiExtensionCallback_ = std::move(callback);
     }
 
+    void SetFormVsyncCallback(AceVsyncCallback&& callback, int32_t formWindowId);
+
+    void RemoveFormVsyncCallback(int32_t formWindowId);
+
+    void SetIsLayoutFullScreen(bool isLayoutFullScreen)
+    {
+        isLayoutFullScreen_ = isLayoutFullScreen;
+    }
+
+    bool GetIsLayoutFullScreen() const
+    {
+        return isLayoutFullScreen_;
+    }
+
+    void SetIsAppWindow(bool isAppWindow)
+    {
+        isAppWindow_ = isAppWindow;
+    }
+
+    bool GetIsAppWindow() const
+    {
+        return isAppWindow_;
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -813,10 +838,14 @@ protected:
     bool isFormRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
+    bool isLayoutFullScreen_ = false;
+    bool isAppWindow_ = true;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
 
     bool isJsPlugin_ = false;
+
+    std::unordered_map<int32_t, AceVsyncCallback> formVsyncCallbacks_;
     int32_t minPlatformVersion_ = 0;
     int32_t windowId_ = 0;
     int32_t appLabelId_ = 0;

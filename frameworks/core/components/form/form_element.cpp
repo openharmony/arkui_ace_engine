@@ -382,9 +382,6 @@ void FormElement::CreateCardContainer()
         LOGE("form component is null when try adding nonmatched container to form manager.");
         return;
     }
-    auto info = form->GetFormRequestInfo();
-    auto key = info.ToString();
-    FormManager::GetInstance().AddNonmatchedContainer(key, subContainer_);
 
     auto formNode = AceType::DynamicCast<RenderForm>(renderNode_);
     if (!formNode) {

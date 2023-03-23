@@ -68,26 +68,29 @@ public:
 
     bool IsRegister();
     void Register(bool state);
-    virtual bool SubscribeToastObserver();
-    virtual bool UnsubscribeToastObserver();
-    virtual bool SubscribeStateObserver(const int eventType);
-    virtual bool UnsubscribeStateObserver(const int eventType);
-    virtual int RegisterInteractionOperation(const int windowId);
-    virtual void DeregisterInteractionOperation();
-    virtual bool SendAccessibilitySyncEvent(
+    bool SubscribeToastObserver();
+    bool UnsubscribeToastObserver();
+    bool SubscribeStateObserver(int eventType);
+    bool UnsubscribeStateObserver(int eventType);
+    int RegisterInteractionOperation(int windowId);
+    void DeregisterInteractionOperation();
+    bool SendAccessibilitySyncEvent(
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
 
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
-        Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode);
+        Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
     void SearchElementInfosByText(const int32_t elementId, const std::string& text, const int32_t requestId,
-        Accessibility::AccessibilityElementOperatorCallback& callback);
+        Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void FindFocusedElementInfo(const int32_t elementId, const int32_t focusType, const int32_t requestId,
-        Accessibility::AccessibilityElementOperatorCallback& callback);
+        Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void FocusMoveSearch(const int32_t elementId, const int32_t direction, const int32_t requestId,
-        Accessibility::AccessibilityElementOperatorCallback& callback);
-    void ExecuteAction(const int32_t accessibilityId, const Accessibility::ActionType& action,
-        const std::map<std::string, std::string> actionArguments, const int32_t requestId,
-        Accessibility::AccessibilityElementOperatorCallback& callback);
+        Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
+    struct ActionParam {
+        Accessibility::ActionType action;
+        std::map<std::string, std::string> actionArguments;
+    };
+    void ExecuteAction(const int32_t accessibilityId, const ActionParam& param, const int32_t requestId,
+        Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     bool ClearCurrentFocus();
     void UpdateNodeChildIds(const RefPtr<AccessibilityNode>& node);
     void SendActionEvent(const Accessibility::ActionType& action, NodeId nodeId);
@@ -97,13 +100,12 @@ public:
 protected:
     void DumpHandleEvent(const std::vector<std::string>& params) override;
     void DumpProperty(const std::vector<std::string>& params) override;
-    void DumpProperty(const RefPtr<AccessibilityNode> node);
-    void DumpPropertyNG(const std::vector<std::string>& params);
     void DumpTree(int32_t depth, NodeId nodeID) override;
 
 private:
     class JsInteractionOperation : public Accessibility::AccessibilityElementOperator {
     public:
+        explicit JsInteractionOperation(int32_t windowId) : windowId_(windowId) {}
         virtual ~JsInteractionOperation() = default;
         // Accessibility override.
         void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,
@@ -115,7 +117,7 @@ private:
         void FocusMoveSearch(const int32_t elementId, const int32_t direction, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void ExecuteAction(const int32_t elementId, const int32_t action,
-            const std::map<std::string, std::string> &actionArguments, const int32_t requestId,
+            const std::map<std::string, std::string>& actionArguments, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void ClearFocus() override;
         void OutsideTouch() override;
@@ -132,6 +134,7 @@ private:
 
     private:
         WeakPtr<JsAccessibilityManager> js_;
+        int32_t windowId_ = 0;
     };
     class ToastAccessibilityConfigObserver : public AccessibilityConfig::AccessibilityConfigObserver {
     public:
@@ -175,17 +178,19 @@ private:
     RefPtr<AccessibilityNode> GetPreviousFocusableNode(
         const std::list<RefPtr<AccessibilityNode>>& nodeList, RefPtr<AccessibilityNode>& node);
 
-    void SearchElementInfoByAccessibilityIdNG(
-        int32_t elementId, int32_t mode, std::list<Accessibility::AccessibilityElementInfo>& infos);
+    void SearchElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);
 
-    void SearchElementInfosByTextNG(
-        int32_t elementId, const std::string& text, std::list<Accessibility::AccessibilityElementInfo>& infos);
+    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+        std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);
 
-    void FindFocusedElementInfoNG(int32_t elementId, int32_t focusType, Accessibility::AccessibilityElementInfo& info);
+    void FindFocusedElementInfoNG(int32_t elementId, int32_t focusType, Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context);
 
-    void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info);
+    void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context);
 
-    bool ExecuteActionNG(int32_t elementId, Accessibility::ActionType action);
+    bool ExecuteActionNG(int32_t elementId, Accessibility::ActionType action, const RefPtr<PipelineBase>& context);
 
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
@@ -201,6 +206,12 @@ private:
 
     void SetExecuteActionResult(
         Accessibility::AccessibilityElementOperatorCallback& callback, const bool succeeded, const int32_t requestId);
+
+    void DumpProperty(const RefPtr<AccessibilityNode>& node);
+    void DumpPropertyNG(const std::vector<std::string>& params);
+    RefPtr<NG::PipelineContext> FindPipelineByElementId(const int32_t elementId, RefPtr<NG::FrameNode>& node);
+    RefPtr<NG::FrameNode> FindNodeFromPipeline(const WeakPtr<PipelineBase>& context, const int32_t elementId);
+    RefPtr<PipelineBase> GetPipelineByWindowId(const int32_t windowId);
 
     std::string callbackKey_;
     int windowId_ = 0;

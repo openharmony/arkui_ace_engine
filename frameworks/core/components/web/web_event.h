@@ -519,6 +519,8 @@ public:
     virtual bool IsFrist() const = 0;
 
     virtual int32_t GetId() const = 0;
+
+    virtual int32_t GetParentNWebId() const = 0;
 };
 
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {
@@ -648,6 +650,23 @@ public:
 
 private:
     std::string data_;
+};
+
+class ACE_EXPORT LoadInterceptEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(LoadInterceptEvent, BaseEventInfo);
+
+public:
+    explicit LoadInterceptEvent(const RefPtr<WebRequest>& request) :
+        BaseEventInfo("LoadInterceptEvent"), request_(request) {}
+    ~LoadInterceptEvent() = default;
+
+    const RefPtr<WebRequest>& GetRequest() const
+    {
+        return request_;
+    }
+
+private:
+    RefPtr<WebRequest> request_;
 };
 
 class ACE_EXPORT LoadWebGeolocationHideEvent : public BaseEventInfo {

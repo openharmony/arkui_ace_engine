@@ -244,6 +244,7 @@ void RadioPattern::UpdateState()
 
             pageEventHub->RemoveRadioFromGroup(preGroup.value(), host->GetId());
             pageEventHub->AddRadioToGroup(group, host->GetId());
+            isGroupChanged_ = true;
         }
     }
     pattern->SetPreGroup(group);
@@ -273,10 +274,11 @@ void RadioPattern::UpdateState()
         // If the radio check is not set, set isFirstCreated_ to false.
         isFirstCreated_ = false;
     }
-    if (preCheck_ != check) {
+    if (preCheck_ != check || isGroupChanged_) {
         UpdateGroupCheckStatus(host, check);
     }
     preCheck_ = check;
+    isGroupChanged_ = false;
 }
 
 void RadioPattern::UpdateUncheckStatus(const RefPtr<FrameNode>& frameNode)
@@ -316,7 +318,9 @@ void RadioPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bo
         auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
         CHECK_NULL_VOID(radioPaintProperty);
         radioPaintProperty->UpdateRadioCheck(check);
-        PlayAnimation(false);
+        if (!isGroupChanged_) {
+            PlayAnimation(false);
+        }
     }
 
     if (!isFirstCreated_) {
@@ -521,7 +525,6 @@ bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     auto geometryNode = dirty->GetGeometryNode();
     offset_ = geometryNode->GetContentOffset();
     size_ = geometryNode->GetContentSize();
-
     if (isFirstAddhotZoneRect_) {
         AddHotZoneRect();
         isFirstAddhotZoneRect_ = false;
@@ -529,15 +532,14 @@ bool RadioPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         RemoveLastHotZoneRect();
         AddHotZoneRect();
     }
-
     return true;
 }
 
 // Set the default hot zone for the component.
 void RadioPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
     hotZoneSize_.SetWidth(
         size_.Width() + FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO * hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneSize_.SetHeight(

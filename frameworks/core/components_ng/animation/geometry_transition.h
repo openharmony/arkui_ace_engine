@@ -39,6 +39,11 @@ public:
     void WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper);
     void DidLayout(const RefPtr<LayoutWrapper>& root, const WeakPtr<FrameNode>& frameNode);
 
+    static void OnLayout(bool layoutStarted)
+    {
+        layoutStarted_ = layoutStarted;
+    }
+
 private:
     enum class State {
         IDLE,
@@ -58,7 +63,11 @@ private:
     State state_ = State::IDLE;
     bool hasInAnim_ = false;
     bool hasOutAnim_ = false;
+    bool buildDuringLayout_ = false;
     SizeF size_;
+    OffsetF outNodePos_;
+    OffsetF outNodeParentPos_;
+    static bool layoutStarted_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GeometryTransition);
 };

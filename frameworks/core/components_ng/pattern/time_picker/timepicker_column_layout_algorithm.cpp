@@ -25,7 +25,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const int32_t DIVIDER_SIZE = 2;
 const int32_t CHILD_SIZE = 3;
-const Dimension TEXT_BOUNDARY = 4.0_vp;
 } // namespace
 void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -85,17 +84,11 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
         frameSize.SetHeight(static_cast<float>(pickerTheme->GetDividerSpacing().ConvertToPx()));
-        layoutChildConstraint.selfIdealSize = { frameSize.Width() - TEXT_BOUNDARY.ConvertToPx(),
-            frameSize.Height() - TEXT_BOUNDARY.ConvertToPx() };
-        childLayoutWrapper->Measure(layoutChildConstraint);
-        childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     } else {
         frameSize.SetHeight(static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()));
-        layoutChildConstraint.selfIdealSize = { frameSize.Width() - TEXT_BOUNDARY.ConvertToPx(),
-            frameSize.Height() - TEXT_BOUNDARY.ConvertToPx() };
-        childLayoutWrapper->Measure(layoutChildConstraint);
-        childLayoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     }
+    layoutChildConstraint.selfIdealSize = { frameSize.Width(), frameSize.Height() };
+    childLayoutWrapper->Measure(layoutChildConstraint);
 }
 
 void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

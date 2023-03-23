@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,11 @@ public:
     bool IsAtomicNode() const override
     {
         return false;
+    }
+
+    bool IsMeasureBoundary() const override
+    {
+        return true;
     }
 
     bool UsResRegion() override
@@ -79,9 +84,53 @@ public:
         return tabBarParam_.GetTabBarStyle();
     }
 
+    void SetIndicatorStyle(const IndicatorStyle& indicatorStyle)
+    {
+        indicatorStyle_ = indicatorStyle;
+    }
+
+    const IndicatorStyle& GetIndicatorStyle() const
+    {
+        return indicatorStyle_;
+    }
+
+    void SetSelectedMode(SelectedMode selectedMode)
+    {
+        selectedMode_ = selectedMode;
+    }
+
+    SelectedMode GetSelectedMode() const
+    {
+        return selectedMode_;
+    }
+
+    void SetBoardStyle(const BoardStyle& boardStyle)
+    {
+        boardStyle_ = boardStyle;
+    }
+
+    const BoardStyle& GetBoardStyle() const
+    {
+        return boardStyle_;
+    }
+
+    void SetLabelStyle(const LabelStyle& labelStyle)
+    {
+        labelStyle_ = labelStyle;
+    }
+
+    const LabelStyle& GetLabelStyle() const
+    {
+        return labelStyle_;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;
+    IndicatorStyle indicatorStyle_;
+    SelectedMode selectedMode_ = SelectedMode::INDICATOR;
+    BoardStyle boardStyle_;
+    LabelStyle labelStyle_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TabContentPattern);
 };

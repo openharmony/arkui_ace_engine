@@ -20,12 +20,13 @@ build_component_ng("render_ng") {
     "adapter/fake_animation_utils.cpp",
     "adapter/fake_modifier_adapter.cpp",
     "adapter/form_render_window.cpp",
+    "adapter/image_painter_utils.cpp",
+    "adapter/path_painter.cpp",
     "adapter/pixelmap_image.cpp",
-    "adapter/skia_canvas.cpp",
+    "adapter/sk_painter.cpp",
     "adapter/skia_color_filter.cpp",
     "adapter/skia_decoration_painter.cpp",
     "adapter/skia_image.cpp",
-    "adapter/skia_paint.cpp",
     "adapter/svg_canvas_image.cpp",
     "adapter/txt_font_collection.cpp",
     "adapter/txt_paragraph.cpp",
@@ -39,7 +40,6 @@ build_component_ng("render_ng") {
     "line_painter.cpp",
     "media_player_creator.cpp",
     "paint_wrapper.cpp",
-    "path_painter.cpp",
     "polygon_painter.cpp",
     "rect_painter.cpp",
     "render_context.cpp",
@@ -47,7 +47,6 @@ build_component_ng("render_ng") {
     "render_property.cpp",
     "render_surface_creator.cpp",
     "shape_painter.cpp",
-    "sk_painter.cpp",
   ]
 
   if (enable_ng_build) {
@@ -59,6 +58,8 @@ build_component_ng("render_ng") {
   }
 
   rosen_sources = [
+    "adapter/component_snapshot.cpp",
+    "adapter/moon_progress_modifier.cpp",
     "adapter/rosen_animation_utils.cpp",
     "adapter/rosen_media_player.cpp",
     "adapter/rosen_modifier_adapter.cpp",

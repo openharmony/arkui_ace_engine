@@ -28,7 +28,6 @@
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
-#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/gestures/gesture_processor.h"
 #include "core/pipeline/base/render_context.h"
 
@@ -66,6 +65,24 @@
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
         CHECK_NULL_VOID(frameNode);                                             \
         auto cast##target = frameNode->GetLayoutProperty<target>();             \
+        CHECK_NULL_VOID(cast##target);                                          \
+        cast##target->Reset##name();                                            \
+    } while (false)
+
+#define ACE_RESET_PAINT_PROPERTY(target, name)                                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetPaintProperty<target>();              \
+        CHECK_NULL_VOID(cast##target);                                          \
+        cast##target->Reset##name();                                            \
+    } while (false)
+
+#define ACE_RESET_RENDER_CONTEXT(target, name)                                  \
+    do {                                                                        \
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
+        CHECK_NULL_VOID(frameNode);                                             \
+        auto cast##target = frameNode->GetRenderContext();                      \
         CHECK_NULL_VOID(cast##target);                                          \
         cast##target->Reset##name();                                            \
     } while (false)

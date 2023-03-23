@@ -63,6 +63,7 @@ connect_server_support = true
 hdc_register_support = true
 pa_engine_path = "adapter/ohos/entrance/pa_engine"
 enable_rosen_backend = true
+enable_drag_framework = false
 if (defined(global_parts_info.inputmethod_imf)) {
   enable_standard_input = true
 } else {
@@ -158,6 +159,10 @@ if (use_build_in_js_engine) {
 
 if (window_scene_support) {
   defines += [ "WINDOW_SCENE_SUPPORTED" ]
+}
+
+if (enable_drag_framework) {
+  defines += [ "ENABLE_DRAG_FRAMEWORK" ]
 }
 
 cflags_cc = [

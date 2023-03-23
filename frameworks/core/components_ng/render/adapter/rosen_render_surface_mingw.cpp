@@ -69,4 +69,8 @@ void RosenRenderSurface::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t 
 {
 }
 
+void RosenRenderSurface::SetExtSurfaceCallback(const RefPtr<ExtSurfaceCallbackInterface>& extSurfaceCallback)
+{
+}
+
 } // namespace OHOS::Ace::NG

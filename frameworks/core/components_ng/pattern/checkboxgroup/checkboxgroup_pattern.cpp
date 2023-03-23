@@ -518,8 +518,8 @@ FocusPattern CheckBoxGroupPattern::GetFocusPattern() const
 // Set the default hot zone for the component.
 void CheckBoxGroupPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
     hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
@@ -528,6 +528,13 @@ void CheckBoxGroupPattern::AddHotZoneRect()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->AddHotZoneRect(hotZoneRegion);
+}
+
+void CheckBoxGroupPattern::RemoveLastHotZoneRect() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveLastHotZoneRect();
 }
 
 void CheckBoxGroupPattern::InitializeModifierParam(CheckBoxGroupModifier::Parameters& paintParameters)
@@ -579,7 +586,6 @@ void CheckBoxGroupPattern::UpdateModifierParam(CheckBoxGroupModifier::Parameters
             paintParameters.checkMarkPaintSize = paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx();
         } else {
             paintParameters.checkMarkPaintSize = contentSize.Width();
-            paintProperty->UpdateCheckBoxGroupCheckMarkSize(Dimension(contentSize.Width()));
         }
     }
     if (paintProperty->HasCheckBoxGroupCheckMarkWidth()) {

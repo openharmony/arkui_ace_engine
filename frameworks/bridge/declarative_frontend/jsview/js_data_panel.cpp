@@ -191,6 +191,12 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
         strokeWidthDimension = theme->GetThickness();
     }
 
+    // If the parameter value is string(''), parse result 0.
+    // The value of 0 is allowed, but the value of string('') is not allowed, so use theme value.
+    if (info[0]->IsString() && info[0]->ToString().empty()) {
+        strokeWidthDimension = theme->GetThickness();
+    }
+
     if (strokeWidthDimension.IsNegative() || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
         strokeWidthDimension = theme->GetThickness();
     }
@@ -250,33 +256,40 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
 
 bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient)
 {
-    if (itemParam->IsObject()) {
-        JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(itemParam)->Unwrap<JSLinearGradient>();
-        if (!jsLinearGradient) {
-            return false;
-        }
-
-        size_t colorLength = jsLinearGradient->GetGradient().size();
-        for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
-            OHOS::Ace::NG::GradientColor gradientColor;
-            gradientColor.SetColor(jsLinearGradient->GetGradient().at(colorIndex).first);
-            gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
-            gradient.AddColor(gradientColor);
-        }
-    } else {
-        Color color;
-        if (!ParseJsColor(itemParam, color)) {
-            return false;
-        }
-        OHOS::Ace::NG::GradientColor gradientColorStart;
-        gradientColorStart.SetColor(color);
-        gradientColorStart.SetDimension(Dimension(0.0));
-        gradient.AddColor(gradientColorStart);
-        OHOS::Ace::NG::GradientColor gradientColorEnd;
-        gradientColorEnd.SetColor(color);
-        gradientColorEnd.SetDimension(Dimension(1.0));
-        gradient.AddColor(gradientColorEnd);
+    if (!itemParam->IsObject()) {
+        return ConvertResourceColor(itemParam, gradient);
     }
+
+    JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(itemParam)->Unwrap<JSLinearGradient>();
+    if (!jsLinearGradient) {
+        return ConvertResourceColor(itemParam, gradient);
+    }
+
+    size_t colorLength = jsLinearGradient->GetGradient().size();
+    for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetColor(jsLinearGradient->GetGradient().at(colorIndex).first);
+        gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
+        gradient.AddColor(gradientColor);
+    }
+    return true;
+}
+
+bool JSDataPanel::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, OHOS::Ace::NG::Gradient& gradient)
+{
+    Color color;
+    if (!ParseJsColor(itemParam, color)) {
+        LOGE("ParseJsColor error.");
+        return false;
+    }
+    OHOS::Ace::NG::GradientColor gradientColorStart;
+    gradientColorStart.SetColor(color);
+    gradientColorStart.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorStart);
+    OHOS::Ace::NG::GradientColor gradientColorEnd;
+    gradientColorEnd.SetColor(color);
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
     return true;
 }
 

@@ -17,6 +17,8 @@
 
 #include <sstream>
 
+#include "drawable_descriptor.h"
+
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 
@@ -78,15 +80,18 @@ RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
     return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
 }
 
-RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)
+RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
 {
-    std::unique_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::unique_ptr<Media::PixelMap>*>(uniquePtr);
-    if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
-        LOGW("pixmap pointer is nullptr when CreatePixelMapFromDataAbility.");
-        return nullptr;
-    }
-    auto rawPtr = (*pixmapPtr).release();
-    return AceType::MakeRefPtr<PixelMapOhos>(std::shared_ptr<Media::PixelMap>(rawPtr));
+    CHECK_NULL_RETURN(ptr, nullptr);
+    auto* drawable = reinterpret_cast<Napi::DrawableDescriptor*>(ptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(drawable->GetPixelMap());
+}
+
+RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* ptr)
+{
+    auto* pixmap = reinterpret_cast<Media::PixelMap*>(ptr);
+    CHECK_NULL_RETURN(pixmap, nullptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(std::shared_ptr<Media::PixelMap>(pixmap));
 }
 
 int32_t PixelMapOhos::GetWidth() const

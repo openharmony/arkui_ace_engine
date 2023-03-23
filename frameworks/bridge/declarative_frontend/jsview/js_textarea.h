@@ -40,6 +40,7 @@ public:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSTextAreaController* scroller);
     void CaretPosition(int32_t caretPosition);
+    void SetTextSelection(int32_t selectionStart, int32_t selectionEnd);
     void SetController(const RefPtr<TextFieldControllerBase>& controller)
     {
         controllerWeak_ = controller;

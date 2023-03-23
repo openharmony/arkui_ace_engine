@@ -124,7 +124,11 @@ std::string JsiBaseUtils::GenerateSummaryBody(
         auto frontEnd = container->GetFrontend();
         if (frontEnd) {
             pageUrl = frontEnd->GetCurrentPageUrl();
-            pageMap = frontEnd->GetCurrentPageSourceMap();
+            if (!JSNApi::IsBundle(vm)) {
+                frontEnd->GetStageSourceMap(sourceMaps);
+            } else {
+                pageMap = frontEnd->GetCurrentPageSourceMap();
+            }
             appMap = frontEnd->GetFaAppSourceMap();
         }
     } else {
@@ -150,6 +154,13 @@ std::string JsiBaseUtils::GenerateSummaryBody(
     std::string messageStr = message->ToString(runtime);
     summaryBody.append("Error message: ");
     summaryBody.append(messageStr).append("\n");
+
+    if (error->HasProperty(runtime, "code")) {
+        shared_ptr<JsValue> code = error->GetProperty(runtime, "code");
+        std::string codeStr = code->ToString(runtime);
+        summaryBody.append("Error code: ");
+        summaryBody.append(codeStr).append("\n");
+    }
 
     shared_ptr<JsValue> stack = error->GetProperty(runtime, "stack");
     std::string rawStack = stack->ToString(runtime);

@@ -19,7 +19,6 @@
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/paint.h"
 #include "core/components_ng/render/divider_painter.h"
 
 namespace OHOS::Ace::NG {
@@ -45,7 +44,7 @@ void DividerModifier::onDraw(DrawingContext& context)
     LineCap lineCap = LineCap(lineCap_->Get());
     lineCap = lineCap == LineCap::BUTT ? LineCap::SQUARE : lineCap;
     DividerPainter dividerPainter(
-        strokeWidth_->Get(), dividerLength_->Get(), vertical_->Get(), color_->Get(), lineCap);
+        strokeWidth_->Get(), dividerLength_->Get(), vertical_->Get(), color_->Get().ToColor(), lineCap);
     dividerPainter.DrawLine(context.canvas, offset_->Get());
 }
 } // namespace OHOS::Ace::NG

@@ -137,11 +137,6 @@ void UINode::Clean(bool cleanDirectly)
 {
     int32_t index = 0;
     for (const auto& child : children_) {
-        RemoveDisappearingChild(child);
-        if (child->OnRemoveFromParent()) {
-            disappearingChildren_.emplace_back(child, index);
-        }
-
         if (!cleanDirectly && child->MarkRemoving()) {
             // pending remove child is removed from tree but not cleaned completely, we'll keep reference of it
             // and hold its tree integrity temporarily for transition use, of course the pending remove tree is
@@ -149,6 +144,11 @@ void UINode::Clean(bool cleanDirectly)
             // perform transition's layout.
             ElementRegister::GetInstance()->AddPendingRemoveNode(child);
             LOGD("GeometryTransition: pending remove child: %{public}d, parent: %{public}d", child->GetId(), GetId());
+        }
+
+        RemoveDisappearingChild(child);
+        if (child->OnRemoveFromParent()) {
+            disappearingChildren_.emplace_back(child, index);
         }
         ++index;
     }

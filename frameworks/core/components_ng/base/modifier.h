@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@
 #include "core/components_ng/animation/gradient_arithmetic.h"
 #include "core/components_ng/base/linear_vector.h"
 #include "core/components_ng/render/canvas_image.h"
-#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
@@ -193,11 +193,13 @@ DECLARE_PROP_TYPED_CLASS(PropertySizeF, NormalProperty, SizeF);
 DECLARE_PROP_TYPED_CLASS(PropertyOffsetF, NormalProperty, OffsetF);
 DECLARE_PROP_TYPED_CLASS(PropertyInt, NormalProperty, int32_t);
 DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
+DECLARE_PROP_TYPED_CLASS(PropertyString, NormalProperty, std::string);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyFloat, AnimatableProperty, float);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyColor, AnimatableProperty, LinearColor);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorFloat, AnimatableProperty, LinearVector<float>);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyVectorColor, AnimatableProperty, GradientArithmetic);
 DECLARE_PROP_TYPED_CLASS(AnimatablePropertyOffsetF, AnimatableProperty, OffsetF);
+DECLARE_PROP_TYPED_CLASS(AnimatablePropertySizeF, AnimatableProperty, SizeF);
 
 } // namespace OHOS::Ace::NG
 

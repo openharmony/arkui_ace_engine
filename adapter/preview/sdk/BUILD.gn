@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -53,6 +53,43 @@ if (is_standard_system) {
     dylib_suffix = ".so"
   }
 
+  ohos_copy("copy_ets_utils_container_library") {
+    container_names = [
+      "arraylist",
+      "deque",
+      "queue",
+      "vector",
+      "linkedlist",
+      "list",
+      "stack",
+      "struct",
+      "treemap",
+      "treeset",
+      "hashmap",
+      "hashset",
+      "lightweightmap",
+      "lightweightset",
+      "plainarray",
+    ]
+    deps = []
+    sources = []
+    out_path = get_label_info(
+            "//commonlibrary/ets_utils/js_util_module/container:container_packages",
+            "root_out_dir")
+    deps += [
+      "//commonlibrary/ets_utils/js_util_module/container:container_packages",
+    ]
+    foreach(item, container_names) {
+      sources +=
+          [ "${out_path}/commonlibrary/ets_utils/lib${item}${dylib_suffix}" ]
+    }
+
+    outputs = [ target_out_dir +
+                "/previewer/common/bin/module/util/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/module/util/"
+    module_install_name = ""
+  }
+
   # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
   # which are called by the napi framework, can be added to this script.
   ohos_copy("copy_napi_modules_shared_library") {
@@ -64,11 +101,29 @@ if (is_standard_system) {
     deps += [ "//base/hiviewdfx/hilog/interfaces/js/kits/napi:libhilognapi" ]
     sources += [ "${out_path}/hiviewdfx/hilog_native/libhilog${dylib_suffix}" ]
 
+    out_path = get_label_info(
+            "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages",
+            "root_out_dir")
+    deps += [ "//commonlibrary/ets_utils/js_api_module/buffer:buffer_packages" ]
+    sources +=
+        [ "${out_path}/commonlibrary/ets_utils/libbuffer${dylib_suffix}" ]
+
     foreach(module, common_napi_libs) {
-      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
+      module_path_names = []
+      module_path_names = string_split(module, "/")
+      prefix_dir = module_path_names[0]
+
+      module_path = prefix_dir
+      if (prefix_dir != module) {
+        module_path = module_path_names[1]
+      }
+
+      module_name = string_replace(module_path, "_", "")
+      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module_name}",
                                 "root_out_dir")
-      deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
-      sources += [ "${out_path}/arkui/ace_engine/lib${module}${dylib_suffix}" ]
+      deps += [ "$ace_root/interfaces/napi/kits:${module_name}" ]
+      sources +=
+          [ "${out_path}/arkui/ace_engine/lib${module_name}${dylib_suffix}" ]
     }
 
     outputs =
@@ -269,6 +324,7 @@ if (is_standard_system) {
       "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context",
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_base:librender_service_base",
       "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
+      "//third_party/flutter/build/skia:skia_shared",
       "//third_party/flutter/glfw:glfw",
     ]
 
@@ -277,6 +333,7 @@ if (is_standard_system) {
       "${rosen_path}/graphic/graphic_standard/libglfw_render_context${dylib_suffix}",
       "${rosen_path}/graphic/graphic_standard/librender_service_base${dylib_suffix}",
       "${rosen_path}/graphic/graphic_standard/librender_service_client${dylib_suffix}",
+      "${rosen_path}/thirdparty/flutter/libskia_shared${dylib_suffix}",
     ]
 
     # Add ark engine-related dynamic libraries

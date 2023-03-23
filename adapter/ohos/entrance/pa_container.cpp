@@ -23,6 +23,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
@@ -93,7 +94,6 @@ void PaContainer::CreateContainer(int32_t instanceId, BackendType type, void* pa
     auto back = aceContainer->GetBackend();
     CHECK_NULL_VOID_NOLOG(back);
     back->UpdateState(Backend::State::ON_CREATE);
-    back->SetJsMessageDispatcher(aceContainer);
 }
 
 bool PaContainer::RunPa(int32_t instanceId, const std::string& content, const OHOS::AAFwk::Want& want)
@@ -221,16 +221,23 @@ AppExecFwk::FormProviderData PaContainer::GetFormData(int32_t instanceId)
     return paBackend->GetFormData();
 }
 
+void PaContainer::Destroy()
+{
+    RefPtr<Backend> backend;
+    backend_.Swap(backend);
+    CHECK_NULL_VOID(backend);
+    backend->UpdateState(Backend::State::ON_DESTROY);
+}
+
 void PaContainer::DestroyContainer(int32_t instanceId)
 {
     LOGI("DestroyContainer with id %{private}d", instanceId);
+    SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
     CHECK_NULL_VOID(aceContainer);
-    auto back = aceContainer->GetBackend();
-    CHECK_NULL_VOID_NOLOG(back);
-    back->UpdateState(Backend::State::ON_DESTROY);
+    aceContainer->Destroy();
 }
 
 void PaContainer::AddAssetPath(int32_t instanceId, const std::string& packagePath, const std::string& hapPath,
@@ -503,16 +510,5 @@ std::shared_ptr<AppExecFwk::PacMap> PaContainer::Call(int32_t instanceId, const 
     CHECK_NULL_RETURN_NOLOG(back, ret);
     ret = back->Call(uri, method, arg, pacMap);
     return ret;
-}
-
-void PaContainer::DumpHeapSnapshot(bool isPrivate)
-{
-    taskExecutor_->PostTask(
-        [isPrivate, backend = WeakPtr<Backend>(backend_)] {
-            auto sp = backend.Upgrade();
-            CHECK_NULL_VOID_NOLOG(sp);
-            sp->DumpHeapSnapshot(isPrivate);
-        },
-        TaskExecutor::TaskType::JS);
 }
 } // namespace OHOS::Ace::Platform

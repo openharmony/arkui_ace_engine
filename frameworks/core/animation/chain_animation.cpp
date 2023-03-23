@@ -56,8 +56,7 @@ float ChainAnimationNode::GetDelta() const
     return curPosition_ - space_;
 }
 
-ChainAnimation::ChainAnimation(
-    float space, float maxSpace, float minSpace, RefPtr<SpringProperty> springProperty)
+ChainAnimation::ChainAnimation(float space, float maxSpace, float minSpace, RefPtr<SpringProperty> springProperty)
     : springProperty_(springProperty), space_(space), maxSpace_(maxSpace), minSpace_(minSpace)
 {
     for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
@@ -83,11 +82,23 @@ void ChainAnimation::SetDelta(float delta, bool isOverDrag)
     if (!isOverDrag) {
         duration = static_cast<double>(timestamp - timestamp_) / static_cast<double>(NANOS_TO_MILLS);
     }
-    float factor = conductionCoefficient_ * linkageCoefficient_;
-    for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
-        nodes_[i]->SetDelta(delta * factor, static_cast<float>(duration));
-        nodes_[-i]->SetDelta(-delta * factor, static_cast<float>(duration));
-        factor *= 1 - conductionCoefficient_;
+    float factor = (1 - conductivity_) * intensity_;
+    if (isOverDrag) {
+        factor *= edgeEffectIntensity_;
+    }
+    if (edgeEffect_ == ChainEdgeEffect::STRETCH && isOverDrag) {
+        for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
+            auto value = delta > 0 ? delta * factor : -delta * factor;
+            nodes_[i]->SetDelta(value, static_cast<float>(duration));
+            nodes_[-i]->SetDelta(value, static_cast<float>(duration));
+            factor *= conductivity_;
+        }
+    } else {
+        for (int32_t i = 1; i < CHAIN_NODE_NUMBER; i++) {
+            nodes_[i]->SetDelta(delta * factor, static_cast<float>(duration));
+            nodes_[-i]->SetDelta(-delta * factor, static_cast<float>(duration));
+            factor *= conductivity_;
+        }
     }
     if (!scheduler_->IsActive()) {
         scheduler_->Start();

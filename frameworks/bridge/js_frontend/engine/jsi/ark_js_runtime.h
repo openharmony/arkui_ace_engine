@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ENGINE_JSI_ARK_JS_RUNTIME_H
 
 #if defined(PREVIEW)
-#include <unordered_map>
+#include <map>
 #include "frameworks/bridge/declarative_frontend/engine/jsi/utils/jsi_module_searcher.h"
 #endif
 #include <memory>
@@ -69,7 +69,6 @@ public:
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
     bool EvaluateJsCode(
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) override;
-    bool ExecuteModuleBufferForForm(const uint8_t* buffer, int32_t size, const std::string& filePath) override;
     bool ExecuteJsBin(const std::string& fileName) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
@@ -92,6 +91,7 @@ public:
     bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
+    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename, bool needUpdate = false);
 
     const EcmaVM* GetEcmaVm() const
     {
@@ -133,6 +133,16 @@ public:
         return errorCallback_;
     }
 
+    void SetDebugMode(bool isDebugMode)
+    {
+        isDebugMode_ = isDebugMode;
+    }
+
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
 #if defined(PREVIEW)
     void SetPreviewFlag(bool flag)
     {
@@ -156,20 +166,21 @@ public:
 
     void AddPreviewComponent(const std::string &componentName, const panda::Global<panda::ObjectRef> &componentObj)
     {
-        previewComponents_.insert_or_assign(componentName, componentObj);
+        previewComponents_.emplace(componentName, componentObj);
     }
 
     panda::Global<panda::ObjectRef> GetPreviewComponent(EcmaVM* vm, const std::string &componentName)
     {
         auto iter = previewComponents_.find(componentName);
         if (iter != previewComponents_.end()) {
-            return iter->second;
+            auto retVal = iter->second;
+            previewComponents_.erase(iter);
+            return retVal;
         }
         panda::Global<panda::ObjectRef> undefined(vm, panda::JSValueRef::Undefined(vm));
         return undefined;
     }
 
-    bool ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename);
     void AddRootView(const panda::Global<panda::ObjectRef> &RootView)
     {
         RootView_ = RootView;
@@ -195,7 +206,7 @@ private:
 #if defined(PREVIEW)
     bool isComponentPreview_ = false;
     std::string requiredComponent_ {};
-    std::unordered_map<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
+    std::multimap<std::string, panda::Global<panda::ObjectRef>> previewComponents_;
     panda::Global<panda::ObjectRef> RootView_;
 #endif
 };

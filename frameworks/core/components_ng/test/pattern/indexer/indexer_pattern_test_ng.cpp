@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,22 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
-#define private public
 
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "base/geometry/dimension.h"
+
+#define protected public
+#define private public
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "core/components_ng/pattern/indexer/indexer_paint_property.h"
+#include "core/components_ng/pattern/indexer/indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/indexer/indexer_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -39,7 +45,6 @@ const std::vector<std::string> CREATE_ARRAY_VALUE = {"A", "B", "C", "D", "E", "F
 const std::vector<std::string> EMPTY_ARRAY_VALUE = {};
 constexpr int32_t CREATE_SELECTED_VALUE = 0;
 constexpr int32_t SELECTED_VALUE = 0;
-constexpr int32_t SPECIAL_SELECTED_VALUE = -1;
 constexpr int32_t COMMON_SELECTED_VALUE = 1;
 constexpr int32_t LARGE_SELECTED_VALUE = 100;
 constexpr int32_t MOVE_INDEX_STEP = 1;
@@ -56,6 +61,14 @@ constexpr float POPUP_POSITIONX_VALUE = -96.0f;
 constexpr float POPUP_POSITIONY_VALUE = 48.0f;
 constexpr float ITEM_SIZE_RENDER = 24.0f;
 constexpr float MOVE_INDEX_OFFSET = 50.0f;
+constexpr Dimension SPACE_VALUE = Dimension(50.0, DimensionUnit::PX);
+constexpr float INDEXER_SELECTED_INDEX = 2;
+constexpr float INDEXER_CLICK_INDEX = 0;
+
+std::vector<std::string> GetPopupData(int32_t)
+{
+    return { "白", "别" };
+}
 } // namespace
 
 struct TestProperty {
@@ -71,44 +84,55 @@ struct TestProperty {
     std::optional<Dimension> itemSizeValue = std::nullopt;
     std::optional<AlignStyle> alignStyleValue = std::nullopt;
     std::optional<int32_t> selectedValue = std::nullopt;
-    std::optional<float> popupPositionXValue = std::nullopt;
-    std::optional<float> popupPositionYValue = std::nullopt;
+    std::optional<Dimension> popupPositionXValue = std::nullopt;
+    std::optional<Dimension> popupPositionYValue = std::nullopt;
+    std::optional<Color> popupSelectedColorValue = std::nullopt;
+    std::optional<Color> popupUnselectedColorValue = std::nullopt;
+    std::optional<Color> popupItemBackgroundValue = std::nullopt;
+    std::optional<Dimension> fontSizeValue = std::nullopt;
+    std::optional<FontWeight> fontWeightValue = std::nullopt;
+    std::optional<Dimension> popupHorizontalSpaceValue = std::nullopt;
 };
 
 class IndexerPatternTestNg : public testing::Test {
 public:
-    static RefPtr<FrameNode> CreateIndexerParagraph(const std::vector<std::string> createArray,
-        const int32_t createSelected, const TestProperty& testProperty);
+    static RefPtr<FrameNode> CreateIndexerParagraph(const std::vector<std::string>& createArray,
+        int32_t createSelected, const TestProperty& testProperty);
+    static void SetIndexerProperty(IndexerView& indexerView, const TestProperty& testProperty);
+    static void SetBubbleProperty(IndexerView& indexerView, const TestProperty& testProperty);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp() override;
+    void TearDown() override;
 };
 
-RefPtr<FrameNode> IndexerPatternTestNg::CreateIndexerParagraph(
-    const std::vector<std::string> createArray, const int32_t createSelected, const TestProperty& testProperty)
+void IndexerPatternTestNg::SetUpTestCase()
 {
-    IndexerView indexerView;
-    indexerView.Create(createArray, createSelected);
+    MockPipelineBase::SetUp();
+}
+
+void IndexerPatternTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+    PipelineContext::GetCurrentContext()->Destroy();
+}
+
+void IndexerPatternTestNg::SetUp() {}
+void IndexerPatternTestNg::TearDown() {}
+
+void IndexerPatternTestNg::SetIndexerProperty(IndexerView& indexerView, const TestProperty& testProperty)
+{
     if (testProperty.colorValue.has_value()) {
         indexerView.SetColor(testProperty.colorValue.value());
     }
     if (testProperty.selectedColorValue.has_value()) {
         indexerView.SetSelectedColor(testProperty.selectedColorValue.value());
     }
-    if (testProperty.popupColorValue.has_value()) {
-        indexerView.SetPopupColor(testProperty.popupColorValue.value());
-    }
     if (testProperty.selectedBackgroundColorValue.has_value()) {
         indexerView.SetSelectedBackgroundColor(testProperty.selectedBackgroundColorValue.value());
     }
-    if (testProperty.popupBackgroundColorValue.has_value()) {
-        indexerView.SetPopupBackground(testProperty.popupBackgroundColorValue.value());
-    }
-    if (testProperty.usingPopupValue.has_value()) {
-        indexerView.SetUsingPopup(testProperty.usingPopupValue.value());
-    }
     if (testProperty.selectedFontValue.has_value()) {
         indexerView.SetSelectedFont(testProperty.selectedFontValue.value());
-    }
-    if (testProperty.popupFontValue.has_value()) {
-        indexerView.SetPopupFont(testProperty.popupFontValue.value());
     }
     if (testProperty.fontValue.has_value()) {
         indexerView.SetFont(testProperty.fontValue.value());
@@ -116,11 +140,27 @@ RefPtr<FrameNode> IndexerPatternTestNg::CreateIndexerParagraph(
     if (testProperty.itemSizeValue.has_value()) {
         indexerView.SetItemSize(testProperty.itemSizeValue.value());
     }
-    if (testProperty.alignStyleValue.has_value()) {
-        indexerView.SetAlignStyle(testProperty.alignStyleValue.value());
-    }
     if (testProperty.selectedValue.has_value()) {
         indexerView.SetSelected(testProperty.selectedValue.value());
+    }
+}
+
+void IndexerPatternTestNg::SetBubbleProperty(IndexerView& indexerView, const TestProperty& testProperty)
+{
+    if (testProperty.popupColorValue.has_value()) {
+        indexerView.SetPopupColor(testProperty.popupColorValue.value());
+    }
+    if (testProperty.popupBackgroundColorValue.has_value()) {
+        indexerView.SetPopupBackground(testProperty.popupBackgroundColorValue.value());
+    }
+    if (testProperty.usingPopupValue.has_value()) {
+        indexerView.SetUsingPopup(testProperty.usingPopupValue.value());
+    }
+    if (testProperty.popupFontValue.has_value()) {
+        indexerView.SetPopupFont(testProperty.popupFontValue.value());
+    }
+    if (testProperty.alignStyleValue.has_value()) {
+        indexerView.SetAlignStyle(testProperty.alignStyleValue.value());
     }
     if (testProperty.popupPositionXValue.has_value()) {
         indexerView.SetPopupPositionX(testProperty.popupPositionXValue.value());
@@ -128,101 +168,35 @@ RefPtr<FrameNode> IndexerPatternTestNg::CreateIndexerParagraph(
     if (testProperty.popupPositionYValue.has_value()) {
         indexerView.SetPopupPositionY(testProperty.popupPositionYValue.value());
     }
+    if (testProperty.popupSelectedColorValue.has_value()) {
+        indexerView.SetPopupSelectedColor(testProperty.popupSelectedColorValue.value());
+    }
+    if (testProperty.popupUnselectedColorValue.has_value()) {
+        indexerView.SetPopupUnselectedColor(testProperty.popupUnselectedColorValue.value());
+    }
+    if (testProperty.popupItemBackgroundValue.has_value()) {
+        indexerView.SetPopupItemBackground(testProperty.popupItemBackgroundValue.value());
+    }
+    if (testProperty.fontSizeValue.has_value()) {
+        indexerView.SetFontSize(testProperty.fontSizeValue.value());
+    }
+    if (testProperty.fontWeightValue.has_value()) {
+        indexerView.SetFontWeight(testProperty.fontWeightValue.value());
+    }
+    if (testProperty.popupHorizontalSpaceValue.has_value()) {
+        indexerView.SetPopupHorizontalSpace(testProperty.popupHorizontalSpaceValue.value());
+    }
+}
+
+RefPtr<FrameNode> IndexerPatternTestNg::CreateIndexerParagraph(
+    const std::vector<std::string>& createArray, int32_t createSelected, const TestProperty& testProperty)
+{
+    IndexerView indexerView;
+    indexerView.Create(createArray, createSelected);
+    SetIndexerProperty(indexerView, testProperty);
+    SetBubbleProperty(indexerView, testProperty);
+
     return AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-}
-
-/**
- * @tc.name: IndexerViewTest001
- * @tc.desc: Test all the properties of indexer.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerViewTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    testProperty.colorValue = std::make_optional(COLOR_VALUE);
-    testProperty.selectedColorValue = std::make_optional(COLOR_VALUE);
-    testProperty.popupColorValue = std::make_optional(COLOR_VALUE);
-    testProperty.selectedBackgroundColorValue = std::make_optional(COLOR_VALUE);
-    testProperty.popupBackgroundColorValue = std::make_optional(COLOR_VALUE);
-    testProperty.usingPopupValue = std::make_optional(true);
-    testProperty.selectedFontValue = std::make_optional(SELECTED_FONT_VALUE);
-    testProperty.popupFontValue = std::make_optional(POPUP_FONT_VALUE);
-    testProperty.fontValue = std::make_optional(FONT_VALUE);
-    testProperty.itemSizeValue = std::make_optional(ITEM_SIZE_VALUE);
-    testProperty.alignStyleValue = std::make_optional(ALIGN_STYLE_VALUE);
-    testProperty.selectedValue = std::make_optional(SELECTED_VALUE);
-    testProperty.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
-    testProperty.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
-
-    /**
-     * @tc.steps: step2. create indexer frameNode and get indexerLayoutProperty.
-     * @tc.expected: step2. get indexerLayoutProperty success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    RefPtr<IndexerLayoutProperty> indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutProperty);
-    EXPECT_NE(indexerLayoutProperty, nullptr);
-    auto paintProperty = frameNode->GetPaintProperty<IndexerPaintProperty>();
-    EXPECT_NE(paintProperty, nullptr);
-
-    /**
-     * @tc.steps: step3. compare indexer properties and expected value.
-     * @tc.expected: step3. indexer properties equals expected value.
-     */
-    EXPECT_EQ(indexerLayoutProperty->GetArrayValue().value(), CREATE_ARRAY_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetSelected().value(), CREATE_SELECTED_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetColor().value(), COLOR_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetSelectedColor().value(), COLOR_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetPopupColor().value(), COLOR_VALUE);
-    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor().value(), COLOR_VALUE);
-    EXPECT_EQ(paintProperty->GetPopupBackground().value(), COLOR_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetUsingPopup().value(), true);
-    EXPECT_EQ(indexerLayoutProperty->GetSelectedFont().value(), SELECTED_FONT_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetPopupFont().value(), POPUP_FONT_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetFont().value(), FONT_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetItemSize().value(), ITEM_SIZE_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetAlignStyle().value(), ALIGN_STYLE_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetSelected().value(), SELECTED_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetPopupPositionX().value(), POPUP_POSITIONX_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetPopupPositionY().value(), POPUP_POSITIONY_VALUE);
-}
-
-/**
- * @tc.name: IndexerViewTest002
- * @tc.desc: Test special value properties of indexer.
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerPatternTestNg, IndexerViewTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create testProperty and set properties of indexer.
-     */
-    TestProperty testProperty;
-    testProperty.selectedValue = std::make_optional(SPECIAL_SELECTED_VALUE);
-    testProperty.itemSizeValue = std::make_optional(SPECIAL_ITEM_SIZE_VALUE);
-
-    /**
-     * @tc.steps: step2. create indexer frameNode and get indexerLayoutProperty.
-     * @tc.expected: step2. get indexerLayoutProperty success.
-     */
-    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
-    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
-    RefPtr<IndexerLayoutProperty> indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutProperty);
-    EXPECT_NE(indexerLayoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step3. compare indexer properties and expected value.
-     * @tc.expected: step3. indexer properties equals expected value.
-     */
-    EXPECT_EQ(indexerLayoutProperty->GetSelected().value(), 0);
-    EXPECT_EQ(indexerLayoutProperty->GetItemSize().value(), Dimension(INDEXER_ITEM_SIZE, DimensionUnit::VP));
 }
 
 /**
@@ -245,9 +219,9 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern001, TestSize.Level1)
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
     /**
      * @tc.steps: step3. call indexerPattern OnModify function, compare result.
      * @tc.expected: step3. OnModify success and result correct.
@@ -256,13 +230,13 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern001, TestSize.Level1)
     uint32_t itemCount = CREATE_ARRAY_VALUE.size();
     for (uint32_t index = 0; index < itemCount; index++) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
-        EXPECT_NE(childFrameNode, nullptr);
+        ASSERT_NE(childFrameNode, nullptr);
         if (index == COMMON_SELECTED_VALUE) {
             auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childFrameNode->GetLayoutProperty());
-            EXPECT_NE(childLayoutProperty, nullptr);
+            ASSERT_NE(childLayoutProperty, nullptr);
         } else {
             auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childFrameNode->GetLayoutProperty());
-            EXPECT_NE(childLayoutProperty, nullptr);
+            ASSERT_NE(childLayoutProperty, nullptr);
         }
     }
 }
@@ -280,10 +254,10 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern002, TestSize.Level1)
      */
     TestProperty testProperty1;
     RefPtr<FrameNode> frameNode1 = CreateIndexerParagraph(EMPTY_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty1);
-    EXPECT_NE(frameNode1, nullptr);
+    ASSERT_NE(frameNode1, nullptr);
     RefPtr<IndexerPattern> indexerPattern1 = AceType::DynamicCast<IndexerPattern>(frameNode1->GetPattern());
-    EXPECT_NE(indexerPattern1, nullptr);
-    
+    ASSERT_NE(indexerPattern1, nullptr);
+
     indexerPattern1->OnModifyDone();
     EXPECT_EQ(indexerPattern1->itemCount_, 0);
 
@@ -294,10 +268,10 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern002, TestSize.Level1)
     TestProperty testProperty2;
     testProperty2.selectedValue = std::make_optional(SELECTED_VALUE);
     RefPtr<FrameNode> frameNode2 = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty2);
-    EXPECT_NE(frameNode2, nullptr);
+    ASSERT_NE(frameNode2, nullptr);
     RefPtr<IndexerPattern> indexerPattern2 = AceType::DynamicCast<IndexerPattern>(frameNode2->GetPattern());
-    EXPECT_NE(indexerPattern2, nullptr);
-    
+    ASSERT_NE(indexerPattern2, nullptr);
+
     indexerPattern2->OnModifyDone();
     EXPECT_EQ(indexerPattern2->selected_, 0);
 
@@ -308,10 +282,10 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern002, TestSize.Level1)
     TestProperty testProperty3;
     testProperty3.selectedValue = std::make_optional(LARGE_SELECTED_VALUE);
     RefPtr<FrameNode> frameNode3 = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty3);
-    EXPECT_NE(frameNode3, nullptr);
+    ASSERT_NE(frameNode3, nullptr);
     RefPtr<IndexerPattern> indexerPattern3 = AceType::DynamicCast<IndexerPattern>(frameNode3->GetPattern());
-    EXPECT_NE(indexerPattern3, nullptr);
-    
+    ASSERT_NE(indexerPattern3, nullptr);
+
     indexerPattern3->OnModifyDone();
     EXPECT_EQ(indexerPattern3->selected_, 0);
 
@@ -322,7 +296,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern002, TestSize.Level1)
     frameNode3->GetOrCreateGestureEventHub();
     indexerPattern3->OnModifyDone();
     EXPECT_EQ(indexerPattern3->selected_, 0);
-    EXPECT_NE(frameNode3->GetOrCreateGestureEventHub(), nullptr);
+    ASSERT_NE(frameNode3->GetOrCreateGestureEventHub(), nullptr);
 }
 
 /**
@@ -341,16 +315,16 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern003, TestSize.Level1)
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
-    EXPECT_NE(layoutWrapper, nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
     RefPtr<IndexerLayoutAlgorithm> indexerLayoutAlgorithm = AceType::MakeRefPtr<IndexerLayoutAlgorithm>(0);
     RefPtr<LayoutAlgorithmWrapper> layoutAlgorithmWrapper =
         AceType::MakeRefPtr<LayoutAlgorithmWrapper>(indexerLayoutAlgorithm);
@@ -413,21 +387,21 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern004, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.steps: case1: no panEvent
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
     indexerPattern->panEvent_ = nullptr;
 
     RefPtr<GestureEventHub> gestureEvent = frameNode->GetOrCreateGestureEventHub();
     indexerPattern->InitPanEvent(gestureEvent);
-    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+    ASSERT_NE(indexerPattern->panEvent_, nullptr);
 
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
@@ -435,8 +409,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern004, TestSize.Level1)
      * @tc.expected: step2. get indexerPattern success.
      */
     indexerPattern->InitPanEvent(gestureEvent);
-    EXPECT_NE(indexerPattern->panEvent_, nullptr);
-    
+    ASSERT_NE(indexerPattern->panEvent_, nullptr);
+
     /**
      * @tc.steps: step3. carry actions.
      * @tc.steps: case1: AXIS, mainDelta is 0
@@ -447,7 +421,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern004, TestSize.Level1)
     gestureEvent1.mainDelta_ = 0;
     indexerPattern->panEvent_->actionStart_(gestureEvent1);
     indexerPattern->panEvent_->actionUpdate_(gestureEvent1);
-    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+    ASSERT_NE(indexerPattern->panEvent_, nullptr);
 
     /**
      * @tc.steps: step3. carry actions.
@@ -458,7 +432,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern004, TestSize.Level1)
     gestureEvent1.mainDelta_ = 1;
     indexerPattern->panEvent_->actionStart_(gestureEvent1);
     indexerPattern->panEvent_->actionUpdate_(gestureEvent1);
-    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+    ASSERT_NE(indexerPattern->panEvent_, nullptr);
 
     /**
      * @tc.steps: step3. carry actions.
@@ -469,7 +443,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern004, TestSize.Level1)
     gestureEvent1.mainDelta_ = -1;
     indexerPattern->panEvent_->actionStart_(gestureEvent1);
     indexerPattern->panEvent_->actionUpdate_(gestureEvent1);
-    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+    ASSERT_NE(indexerPattern->panEvent_, nullptr);
 
     /**
      * @tc.steps: step3. carry actions.
@@ -479,7 +453,7 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern004, TestSize.Level1)
     gestureEvent1.inputEventType_ = InputEventType::KEYBOARD;
     indexerPattern->panEvent_->actionStart_(gestureEvent1);
     indexerPattern->panEvent_->actionUpdate_(gestureEvent1);
-    EXPECT_NE(indexerPattern->panEvent_, nullptr);
+    ASSERT_NE(indexerPattern->panEvent_, nullptr);
 }
 
 /**
@@ -493,20 +467,20 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern005, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.steps: case1: isHover
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
 
     indexerPattern->OnChildHover(COMMON_SELECTED_VALUE, true);
     EXPECT_EQ(indexerPattern->childHoverIndex_, COMMON_SELECTED_VALUE);
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.steps: case2: !isHover
@@ -527,21 +501,21 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern006, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.steps: case1: isInputEventRegisted_ = false
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
 
     indexerPattern->isInputEventRegisted_ = false;
     indexerPattern->InitInputEvent();
     EXPECT_EQ(indexerPattern->isInputEventRegisted_, true);
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.steps: case2: isInputEventRegisted_ = true
@@ -562,16 +536,16 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern007, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.steps: case1: isInputEventRegisted_ = false
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
 
     indexerPattern->itemCount_ = CREATE_ARRAY_VALUE.size();
     indexerPattern->InitChildInputEvent();
@@ -589,16 +563,16 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern008, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    
+    ASSERT_NE(indexerPattern, nullptr);
+
     /**
      * @tc.steps: step3. call indexerPattern MoveIndexByOffset function, compare result.
      * @tc.steps: case1: itemSizeRender is 0, return
@@ -665,15 +639,15 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern009, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
     indexerPattern->selected_ = COMMON_SELECTED_VALUE;
 
     /**
@@ -703,16 +677,16 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern010, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    
+    ASSERT_NE(indexerPattern, nullptr);
+
     /**
      * @tc.steps: step3. call indexerPattern GetSkipChildIndex function, compare result.
      * @tc.steps: case1: nextSelected < 0
@@ -754,15 +728,15 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern011, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
     indexerPattern->selected_ = COMMON_SELECTED_VALUE;
 
     /**
@@ -792,16 +766,17 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern012, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
     indexerPattern->selected_ = COMMON_SELECTED_VALUE;
+    indexerPattern->OnModifyDone();
 
     /**
      * @tc.steps: step3. call indexerPattern MoveIndexBySearch function, compare result.
@@ -839,24 +814,24 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern013, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
-    
+    ASSERT_NE(indexerPattern, nullptr);
+
     /**
      * @tc.steps: step3. call indexerPattern InitOnKeyEvent function, compare result.
      * @tc.expected: step3. InitOnKeyEvent success and result correct.
      */
     RefPtr<FocusHub> focusHub = frameNode->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
+    ASSERT_NE(focusHub, nullptr);
     indexerPattern->InitOnKeyEvent();
-    EXPECT_NE(focusHub->onKeyEventInternal_, nullptr);
+    ASSERT_NE(focusHub->onKeyEventInternal_, nullptr);
 }
 
 /**
@@ -870,15 +845,16 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern014, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
+    indexerPattern->OnModifyDone();
     indexerPattern->selected_ = COMMON_SELECTED_VALUE;
 
     /**
@@ -931,18 +907,18 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern015, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    
+
     /**
      * @tc.steps: step2. create indexer frameNode, get indexerPattern and indexerWrapper.
      * @tc.expected: step2. get indexerPattern success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
-    EXPECT_NE(indexerPattern, nullptr);
+    ASSERT_NE(indexerPattern, nullptr);
     auto indexerEventHub = frameNode->GetEventHub<IndexerEventHub>();
-    CHECK_NULL_VOID(indexerEventHub);
-    
+    ASSERT_NE(indexerEventHub, nullptr);
+
     /**
      * @tc.steps: step3. call indexerPattern ApplyIndexChange function, compare result.
      * @tc.steps: case1: have onSelected, onRequestPopupData, onPopupSelected, selected < 0
@@ -978,6 +954,155 @@ HWTEST_F(IndexerPatternTestNg, IndexerPattern015, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IndexerPattern016
+ * @tc.desc: Test indexer pattern InitBubbleList function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern016, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
+
+    TestProperty testProperty;
+    testProperty.usingPopupValue = std::make_optional(true);
+    testProperty.alignStyleValue = std::make_optional(ALIGN_STYLE_VALUE);
+    testProperty.popupUnselectedColorValue = std::make_optional(COLOR_VALUE);
+
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<IndexerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    ASSERT_NE(indexerPattern, nullptr);
+    auto indexerEventHub = frameNode->GetEventHub<IndexerEventHub>();
+    ASSERT_NE(indexerEventHub, nullptr);
+    indexerEventHub->SetOnRequestPopupData(GetPopupData);
+    indexerPattern->selected_ = INDEXER_SELECTED_INDEX;
+    indexerPattern->OnModifyDone();
+    indexerPattern->ApplyIndexChanged(true);
+    indexerPattern->UpdateBubbleView();
+
+    ASSERT_NE(indexerPattern->popupNode_, nullptr);
+    auto listNode = indexerPattern->popupNode_->GetLastChild();
+    auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
+    auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value(), COLOR_VALUE);
+}
+
+/**
+ * @tc.name: IndexerPattern017
+ * @tc.desc: Test indexer pattern SetPositionOfPopupNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern017, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
+
+    TestProperty testProperty;
+    testProperty.usingPopupValue = std::make_optional(true);
+    testProperty.popupHorizontalSpaceValue = std::make_optional(SPACE_VALUE);
+
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<IndexerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    ASSERT_NE(indexerPattern, nullptr);
+    auto indexerEventHub = frameNode->GetEventHub<IndexerEventHub>();
+    ASSERT_NE(indexerEventHub, nullptr);
+    indexerEventHub->SetOnRequestPopupData(GetPopupData);
+    indexerPattern->selected_ = INDEXER_SELECTED_INDEX;
+    indexerPattern->OnModifyDone();
+    indexerPattern->ApplyIndexChanged(true);
+    indexerPattern->UpdateBubbleView();
+
+    ASSERT_NE(indexerPattern->popupNode_, nullptr);
+    auto renderContext = indexerPattern->popupNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto rightValue = renderContext->GetPosition().value();
+
+    TestProperty testProperty2;
+    testProperty2.usingPopupValue = std::make_optional(true);
+    testProperty2.alignStyleValue = std::make_optional(ALIGN_STYLE_VALUE);
+    testProperty2.popupHorizontalSpaceValue = std::make_optional(SPACE_VALUE);
+
+    RefPtr<FrameNode> frameNode2 = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty2);
+    ASSERT_NE(frameNode2, nullptr);
+    auto paintProperty2 = frameNode2->GetPaintProperty<IndexerPaintProperty>();
+    ASSERT_NE(paintProperty2, nullptr);
+    RefPtr<IndexerPattern> indexerPattern2 = AceType::DynamicCast<IndexerPattern>(frameNode2->GetPattern());
+    ASSERT_NE(indexerPattern2, nullptr);
+    auto indexerEventHub2 = frameNode2->GetEventHub<IndexerEventHub>();
+    ASSERT_NE(indexerEventHub2, nullptr);
+    indexerEventHub2->SetOnRequestPopupData(GetPopupData);
+    indexerPattern2->selected_ = INDEXER_SELECTED_INDEX;
+    indexerPattern2->OnModifyDone();
+    indexerPattern2->ApplyIndexChanged(true);
+    indexerPattern2->UpdateBubbleView();
+
+    ASSERT_NE(indexerPattern2->popupNode_, nullptr);
+    auto renderContext2 = indexerPattern2->popupNode_->GetRenderContext();
+    ASSERT_NE(renderContext2, nullptr);
+    auto leftValue = renderContext2->GetPosition().value();
+
+    EXPECT_NE(rightValue, leftValue);
+}
+
+/**
+ * @tc.name: IndexerPattern018
+ * @tc.desc: Test indexer pattern ChangeListItemsSelectedStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerPatternTestNg, IndexerPattern018, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<IndexerTheme>()));
+
+    TestProperty testProperty;
+    testProperty.usingPopupValue = std::make_optional(true);
+    testProperty.popupSelectedColorValue = std::make_optional(COLOR_VALUE);
+    testProperty.popupUnselectedColorValue = std::make_optional(COLOR_VALUE);
+    testProperty.popupItemBackgroundValue = std::make_optional(COLOR_VALUE);
+
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<IndexerLayoutProperty> indexerLayoutProperty = AceType::DynamicCast<IndexerLayoutProperty>(layoutProperty);
+    auto paintProperty = frameNode->GetPaintProperty<IndexerPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    ASSERT_NE(indexerPattern, nullptr);
+    auto indexerEventHub = frameNode->GetEventHub<IndexerEventHub>();
+    ASSERT_NE(indexerEventHub, nullptr);
+    indexerEventHub->SetOnRequestPopupData(GetPopupData);
+    indexerPattern->selected_ = INDEXER_SELECTED_INDEX;
+    indexerPattern->OnModifyDone();
+    indexerPattern->ApplyIndexChanged(true);
+    indexerPattern->UpdateBubbleView();
+    indexerPattern->ChangeListItemsSelectedStyle(INDEXER_CLICK_INDEX);
+
+    ASSERT_NE(indexerPattern->popupNode_, nullptr);
+    auto listNode = indexerPattern->popupNode_->GetLastChild();
+    auto listItemNode = AceType::DynamicCast<FrameNode>(listNode->GetFirstChild());
+    auto textNode = AceType::DynamicCast<FrameNode>(listItemNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value(), COLOR_VALUE);
+}
+
+/**
  * @tc.name: IndexerAlgorithmTest001
  * @tc.desc: Test indexer algorithm Measure function and Layout function.
  * @tc.type: FUNC
@@ -996,13 +1121,13 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest001, TestSize.Level1)
      * @tc.expected: step2. get indexerLayoutProperty success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
-    
+
     /**
      * @tc.steps: step3. create indexer child frameNode and add to indexer.
      * @tc.expected: step3. create indexer layoutWrapper success.
@@ -1010,17 +1135,17 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest001, TestSize.Level1)
     int32_t itemCount = CREATE_ARRAY_VALUE.size();
     for (int32_t index = 0; index < itemCount; index++) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
-        EXPECT_NE(childFrameNode, nullptr);
+        ASSERT_NE(childFrameNode, nullptr);
         auto childGeometryNode = childFrameNode->GetGeometryNode();
-        EXPECT_NE(childGeometryNode, nullptr);
+        ASSERT_NE(childGeometryNode, nullptr);
         auto childLayoutProperty = childFrameNode->GetLayoutProperty();
-        EXPECT_NE(childLayoutProperty, nullptr);
+        ASSERT_NE(childLayoutProperty, nullptr);
         RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(childFrameNode,
             childGeometryNode, childLayoutProperty);
-        EXPECT_NE(childLayoutWrapper, nullptr);
+        ASSERT_NE(childLayoutWrapper, nullptr);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
-    
+
     /**
      * @tc.steps: step4. call indexerLayoutAlgorithm measure and layout function, compare result.
      * @tc.expected: step4. measure and layout success.
@@ -1031,9 +1156,9 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest001, TestSize.Level1)
 
     for (int32_t index = 0; index < itemCount; index++) {
         auto childWrapper = layoutWrapper.GetOrCreateChildByIndex(index);
-        EXPECT_NE(childWrapper, nullptr);
+        ASSERT_NE(childWrapper, nullptr);
         auto childGeometryNode = childWrapper->GetGeometryNode();
-        EXPECT_NE(childGeometryNode, nullptr);
+        ASSERT_NE(childGeometryNode, nullptr);
         OffsetF childFrameOffset = childGeometryNode->GetMarginFrameOffset();
         EXPECT_EQ(childFrameOffset.GetX(), 0);
         EXPECT_EQ(childFrameOffset.GetY(), 0);
@@ -1057,13 +1182,13 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest002, TestSize.Level1)
      * @tc.expected: step2. get indexerLayoutProperty success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
-    
+
     /**
      * @tc.steps: step3. create indexer child frameNode and add to indexer.
      * @tc.expected: step3. create indexer layoutWrapper success.
@@ -1071,14 +1196,14 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest002, TestSize.Level1)
     int32_t itemCount = CREATE_ARRAY_VALUE.size();
     for (int32_t index = 0; index < itemCount; index++) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(index));
-        EXPECT_NE(childFrameNode, nullptr);
+        ASSERT_NE(childFrameNode, nullptr);
         auto childGeometryNode = childFrameNode->GetGeometryNode();
-        EXPECT_NE(childGeometryNode, nullptr);
+        ASSERT_NE(childGeometryNode, nullptr);
         auto childLayoutProperty = childFrameNode->GetLayoutProperty();
-        EXPECT_NE(childLayoutProperty, nullptr);
+        ASSERT_NE(childLayoutProperty, nullptr);
         RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(childFrameNode,
             childGeometryNode, childLayoutProperty);
-        EXPECT_NE(childLayoutWrapper, nullptr);
+        ASSERT_NE(childLayoutWrapper, nullptr);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
     /**
@@ -1106,28 +1231,28 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest003, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    testProperty.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
-    testProperty.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty.popupPositionXValue = std::make_optional(Dimension(POPUP_POSITIONX_VALUE, DimensionUnit::VP));
+    testProperty.popupPositionYValue = std::make_optional(Dimension(POPUP_POSITIONY_VALUE, DimensionUnit::VP));
 
     /**
      * @tc.steps: step2. create indexer frameNode and get indexerLayoutProperty.
      * @tc.expected: step2. get indexerLayoutProperty success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
     geometryNode->SetFrameSize(SizeF(1, 1));
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
-    
+
     /**
      * @tc.steps: step4. call indexerLayoutAlgorithm layout function, compare result.
      * @tc.expected: step4. layout success.
      */
     IndexerLayoutAlgorithm indexerLayoutAlgorithm = IndexerLayoutAlgorithm(0);
-    
+
     indexerLayoutAlgorithm.itemSize_ = 0;
     indexerLayoutAlgorithm.Layout(&layoutWrapper);
     EXPECT_EQ(indexerLayoutAlgorithm.itemSizeRender_, 0);
@@ -1150,8 +1275,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty;
-    testProperty.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
-    testProperty.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty.popupPositionXValue = std::make_optional(Dimension(POPUP_POSITIONX_VALUE, DimensionUnit::VP));
+    testProperty.popupPositionYValue = std::make_optional(Dimension(POPUP_POSITIONY_VALUE, DimensionUnit::VP));
     testProperty.itemSizeValue = std::make_optional(ITEM_SIZE_VALUE);
     testProperty.usingPopupValue = false;
 
@@ -1160,11 +1285,11 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
      * @tc.expected: step2. get indexerLayoutProperty success.
      */
     RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
-    EXPECT_NE(layoutProperty, nullptr);
+    ASSERT_NE(layoutProperty, nullptr);
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
     IndexerLayoutAlgorithm indexerLayoutAlgorithm = IndexerLayoutAlgorithm(0);
 
@@ -1180,8 +1305,8 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
      * @tc.steps: step1. create testProperty and set properties of indexer.
      */
     TestProperty testProperty1;
-    testProperty1.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
-    testProperty1.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty1.popupPositionXValue = std::make_optional(Dimension(POPUP_POSITIONX_VALUE, DimensionUnit::VP));
+    testProperty1.popupPositionYValue = std::make_optional(Dimension(POPUP_POSITIONY_VALUE, DimensionUnit::VP));
     testProperty1.itemSizeValue = std::make_optional(ITEM_SIZE_VALUE);
     testProperty1.usingPopupValue = true;
 
@@ -1190,11 +1315,11 @@ HWTEST_F(IndexerPatternTestNg, IndexerAlgorithmTest004, TestSize.Level1)
      * @tc.expected: step2. get indexerLayoutProperty success.
      */
     RefPtr<FrameNode> frameNode1 = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty1);
-    EXPECT_NE(frameNode1, nullptr);
+    ASSERT_NE(frameNode1, nullptr);
     RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode1, nullptr);
+    ASSERT_NE(geometryNode1, nullptr);
     RefPtr<LayoutProperty> layoutProperty1 = frameNode1->GetLayoutProperty();
-    EXPECT_NE(layoutProperty1, nullptr);
+    ASSERT_NE(layoutProperty1, nullptr);
     LayoutWrapper layoutWrapper1 = LayoutWrapper(frameNode1, geometryNode1, layoutProperty1);
     IndexerLayoutAlgorithm indexerLayoutAlgorithm1 = IndexerLayoutAlgorithm(0);
 

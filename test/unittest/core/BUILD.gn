@@ -16,5 +16,9 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("core_unittest") {
   testonly = true
-  deps = []
+  deps = [
+    "gestures:gestures_test_ng",
+    "pattern:core_pattern_unittest",
+    "pipeline:pipeline_context_test_ng",
+  ]
 }

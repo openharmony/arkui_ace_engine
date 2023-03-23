@@ -37,16 +37,9 @@ struct PickerTextStyle {
     std::optional<FontWeight> fontWeight;
 };
 struct PickerTextProperties {
-    Color disappearColor_;
-    Color color_;
-    Color selectedColor_;
-    Dimension disappearFontSize_;
-    Dimension fontSize_;
-    Dimension selectedFontSize_;
-    FontWeight disappearWeight_;
-    FontWeight weight_;
-    FontWeight selectedWeight_;
-    uint32_t hasValueFlag = 0;
+    PickerTextStyle disappearTextStyle_;
+    PickerTextStyle normalTextStyle_;
+    PickerTextStyle selectedTextStyle_;
 };
 
 // textpicker column kind
@@ -78,6 +71,7 @@ struct TextPickerSettingData {
 
 struct TimePickerSettingData {
     bool isUseMilitaryTime;
+    PickerDate dialogTitleDate;
     PickerTextProperties properties;
 };
 } // namespace OHOS::Ace::NG

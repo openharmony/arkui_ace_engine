@@ -272,6 +272,9 @@ bool RosenMediaPlayer::SetMediaSource(std::string& filePath, int32_t& fd)
         }
     } else {
         // relative path
+        if (StringUtils::StartWith(filePath, "/")) {
+            filePath = filePath.substr(1);
+        }
         RelativePathPlay(filePath);
     }
     return true;

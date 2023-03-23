@@ -49,8 +49,9 @@ public:
         float height = paintWrapper->GetContentSize().Height();
         float width = paintWrapper->GetContentSize().Width();
         float radius = (width > height ? height : width) * 0.5;
-        return [value = radius, shapePaintProperty](
-                   RSCanvas& canvas) { CirclePainter::DrawCircle(canvas, value, *shapePaintProperty); };
+        return
+            [radiusValue = radius, offsetValue = paintWrapper->GetContentOffset(), shapePaintProperty](
+                RSCanvas& canvas) { CirclePainter::DrawCircle(canvas, radiusValue, offsetValue, *shapePaintProperty); };
     }
 
 private:

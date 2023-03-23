@@ -24,12 +24,16 @@ public:
     TextPickerModelImpl() = default;
     ~TextPickerModelImpl() override = default;
 
-    void Create(RefPtr<PickerTheme> pickerTheme) override;
+    void Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnKind) override;
     void SetSelected(uint32_t value) override;
-    void SetRange(const std::vector<std::string>& value) override;
+    void SetRange(const std::vector<NG::RangeContent>& value) override;
     void SetValue(const std::string& value) override {}
     void SetOnChange(TextChangeEvent&& onChange) override;
     void SetDefaultPickerItemHeight(const Dimension& value) override;
+    void SetDefaultAttributes(const RefPtr<PickerTheme>& pickerTheme) override {}
+    void SetDisappearTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
+    void SetNormalTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
+    void SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H

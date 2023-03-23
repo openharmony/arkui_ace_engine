@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -489,6 +489,12 @@ var StickyStyle;
   StickyStyle[StickyStyle["Footer"] = 2] = "Footer";
 })(StickyStyle || (StickyStyle = {}));
 
+var ChainEdgeEffect;
+(function (ChainEdgeEffect) {
+  ChainEdgeEffect[ChainEdgeEffect["DEFAULT"] = 0] = "DEFAULT";
+  ChainEdgeEffect[ChainEdgeEffect["STRETCH"] = 1] = "STRETCH";
+})(ChainEdgeEffect || (ChainEdgeEffect = {}));
+
 var Week;
 (function (Week) {
   Week["Mon"] = 0b0000001;
@@ -567,6 +573,12 @@ var BarMode;
   BarMode["Fixed"] = "Fixed";
   BarMode["Scrollable"] = "Scrollable";
 })(BarMode || (BarMode = {}));
+
+var SelectedMode;
+(function (SelectedMode) {
+  SelectedMode[SelectedMode["INDICATOR"] = 0] = "INDICATOR";
+  SelectedMode[SelectedMode["BOARD"] = 1] = "BOARD";
+})(SelectedMode || (SelectedMode = {}));
 
 var SizeType;
 (function (SizeType) {
@@ -1023,10 +1035,80 @@ var TransitionEdge;
     TransitionEdge['END']  = 3;
 })(TransitionEdge || (TransitionEdge = {}));
 
+var ModalTransition;
+(function (ModalTransition) {
+  ModalTransition[ModalTransition["Default"] = 0] = "Default";
+  ModalTransition[ModalTransition["None"] = 1] = "None";
+  ModalTransition[ModalTransition["Alpha"] = 2] = "Alpha";
+})(ModalTransition || (ModalTransition = {}));
+
+var CtrlKey;
+(function (CtrlKey) {
+  CtrlKey[CtrlKey["CTRL"] = 0] = "CTRL";
+  CtrlKey[CtrlKey["SHIFT"] = 1] = "SHIFT";
+  CtrlKey[CtrlKey["ALT"] = 2] = "ALT";
+})(CtrlKey || (CtrlKey = {}));
+
+var FunctionKey;
+(function (FunctionKey) {
+  FunctionKey[FunctionKey["ESC"] = 0] = "ESC";
+  FunctionKey[FunctionKey["F1"] = 1] = "F1";
+  FunctionKey[FunctionKey["F2"] = 2] = "F2";
+  FunctionKey[FunctionKey["F3"] = 3] = "F3";
+  FunctionKey[FunctionKey["F4"] = 4] = "F4";
+  FunctionKey[FunctionKey["F5"] = 5] = "F5";
+  FunctionKey[FunctionKey["F6"] = 6] = "F6";
+  FunctionKey[FunctionKey["F7"] = 7] = "F7";
+  FunctionKey[FunctionKey["F8"] = 8] = "F8";
+  FunctionKey[FunctionKey["F9"] = 9] = "F9";
+  FunctionKey[FunctionKey["F10"] = 10] = "F10";
+  FunctionKey[FunctionKey["F11"] = 11] = "F11";
+  FunctionKey[FunctionKey["F12"] = 12] = "F12";
+})(FunctionKey || (FunctionKey = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
     this.content = content;
+  }
+  static of(content) {
+    return new SubTabBarStyle(content);
+  }
+  indicator(arg) {
+    this.indicator = arg;
+    return this;
+  }
+  selectedMode(arg) {
+    this.selectedMode = arg;
+    return this;
+  }
+  board(arg) {
+    this.board = arg;
+    return this;
+  }
+  labelStyle(arg) {
+    this.labelStyle = arg;
+    return this;
+  }
+}
+
+
+class ProgressMask {
+  constructor(value, total, color) {
+    this.type = 'ProgressMask';
+    this.value = value;
+    this.total = total;
+    this.color = color;
+  }
+
+  updateProgress(arg) {
+    this.value = arg;
+    return this;
+  }
+
+  updateColor(arg) {
+    this.color = arg;
+    return this;
   }
 }
 
@@ -1035,6 +1117,92 @@ class BottomTabBarStyle {
     this.type = 'BottomTabBarStyle';
     this.icon = icon;
     this.text = text;
+  }
+  static of(icon, text) {
+    return new BottomTabBarStyle(icon, text);
+  }
+}
+
+class Indicator {
+  top(value) {
+    this.top = value;
+    return this;
+  }
+  left(value) {
+    this.left = value;
+    return this;
+  }
+  right(value) {
+    this.right = value;
+    return this;
+  }
+  bottom(value) {
+    this.bottom = value;
+    return this;
+  }
+  static dot() {
+    return new DotIndicator();
+  }
+  static digit() {
+    return new DigitIndicator();
+  }
+}
+
+class DotIndicator extends Indicator {
+  constructor() {
+    super();
+    this.type = 'DotIndicator';
+  }
+  itemWidth(value) {
+    this.itemWidth = value;
+    return this;
+  }
+  itemHeight(value) {
+    this.itemHeight = value;
+    return this;
+  }
+  selectedItemWidth(value) {
+    this.selectedItemWidth = value;
+    return this;
+  }
+  selectedItemHeight(value) {
+    this.selectedItemHeight = value;
+    return this;
+  }
+  mask(value) {
+    this.mask = value;
+    return this;
+  }
+  color(value) {
+    this.color = value;
+    return this;
+  }
+  selectedColor(value) {
+    this.selectedColor = value;
+    return this;
+  }
+}
+
+class DigitIndicator extends Indicator{
+  constructor() {
+    super();
+    this.type = 'DigitIndicator';
+  }
+  fontColor(value) {
+    this.fontColor = value;
+    return this;
+  }
+  selectedFontColor(value) {
+    this.selectedFontColor = value;
+    return this;
+  }
+  digitFont(value) {
+    this.digitFont = value;
+    return this;
+  }
+  selectedDigitFont(value) {
+    this.selectedDigitFont = value;
+    return this;
   }
 }
 
@@ -1116,3 +1284,48 @@ class TransitionEffect {
     return this;
   }
 }
+
+var SliderBlockType;
+(function (SliderBlockType) {
+  SliderBlockType[SliderBlockType["DEFAULT"] = 0] = "DEFAULT";
+  SliderBlockType[SliderBlockType["IMAGE"] = 1] = "IMAGE";
+  SliderBlockType[SliderBlockType["SHAPE"] = 2] = "SHAPE";
+})(SliderBlockType || (SliderBlockType = {}));
+
+var TitleStyle;
+(function (TitleStyle) {
+  TitleStyle[TitleStyle["ListMode"] = 0] = "ListMode";
+  TitleStyle[TitleStyle["ContentMode"] = 1] = "ContentMode";
+})(TitleStyle || (TitleStyle = {}));
+
+var OperationStyle;
+(function (OperationStyle) {
+  OperationStyle[OperationStyle["TextArrow"] = 0] = "TextArrow";
+  OperationStyle[OperationStyle["Button"] = 1] = "Button";
+  OperationStyle[OperationStyle["IconGroup"] = 2] = "IconGroup";
+})(OperationStyle || (OperationStyle = {}));
+
+var TabItemType;
+(function (TabItemType) {
+  TabItemType[TabItemType["Tex"] = 0] = "Text";
+  TabItemType[TabItemType["Icon"] = 1] = "Icon";
+})(TabItemType || (TabItemType = {}));
+
+var EditableLeftIconType;
+(function (EditableLeftIconType) {
+  EditableLeftIconType[EditableLeftIconType["Back"] = 0] = "Back";
+  EditableLeftIconType[EditableLeftIconType["Cancel"] = 1] = "Cancel";
+})(EditableLeftIconType || (EditableLeftIconType = {}));
+
+var ContentIconPosition;
+(function (ContentIconPosition) {
+  ContentIconPosition[ContentIconPosition["Top"] = 0] = "Top";
+  ContentIconPosition[ContentIconPosition["Center"] = 1] = "Center";
+})(ContentIconPosition || (ContentIconPosition = {}));
+
+var ContentTextStyle;
+(function (ContentTextStyle) {
+  ContentTextStyle[ContentTextStyle["SingleLine"] = 0] = "SingleLine";
+  ContentTextStyle[ContentTextStyle["DoubleLine"] = 1] = "DoubleLine";
+  ContentTextStyle[ContentTextStyle["ThreeLines"] = 2] = "ThreeLines";
+})(ContentTextStyle || (ContentTextStyle = {}));

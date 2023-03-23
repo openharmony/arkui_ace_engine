@@ -19,6 +19,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
@@ -26,7 +27,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-
 void FormView::Create(const RequestFormInfo& formInfo)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -35,6 +35,8 @@ void FormView::Create(const RequestFormInfo& formInfo)
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo);
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, VisibleType::INVISIBLE);
+    ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, VisibleType::VISIBLE);
 }
 
 void FormView::SetDimension(int32_t dimension)
@@ -118,6 +120,26 @@ void FormView::SetOnRouter(FormCallback&& onRouter)
     auto eventHub = frameNode->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnRouter(std::move(onRouter));
+}
+
+void FormView::SetOnLoad(FormCallback&& onLoad)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnLoad(std::move(onLoad));
+}
+
+void FormView::SetVisibility(VisibleType visible)
+{
+    if (visible != VisibleType::VISIBLE) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, visible);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Visibility, VisibleType::INVISIBLE);
+    }
+
+    ACE_UPDATE_LAYOUT_PROPERTY(FormLayoutProperty, VisibleType, VisibleType::VISIBLE);
 }
 
 } // namespace OHOS::Ace::NG

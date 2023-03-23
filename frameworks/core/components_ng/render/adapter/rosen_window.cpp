@@ -19,6 +19,7 @@
 
 #include "base/thread/task_executor.h"
 #include "base/utils/time_util.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/thread_checker.h"
@@ -69,7 +70,9 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); });
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
-    rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+    if (window->GetSurfaceNode()) {
+        rsUIDirector_->SetRSSurfaceNode(window->GetSurfaceNode());
+    }
     rsUIDirector_->SetCacheDir(AceApplicationInfo::GetInstance().GetDataFileDirPath());
     rsUIDirector_->Init();
     rsUIDirector_->SetUITaskRunner([taskExecutor, id](const std::function<void()>& task) {
@@ -77,6 +80,15 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
         CHECK_NULL_VOID_NOLOG(taskExecutor);
         taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
     });
+}
+
+void RosenWindow::Init()
+{
+    CHECK_NULL_VOID(rsWindow_);
+    auto surfaceNode = rsWindow_->GetSurfaceNode();
+    if (rsUIDirector_ && surfaceNode) {
+        rsUIDirector_->SetRSSurfaceNode(surfaceNode);
+    }
 }
 
 void RosenWindow::RequestFrame()
@@ -108,12 +120,14 @@ void RosenWindow::RequestFrame()
 void RosenWindow::OnShow()
 {
     Window::OnShow();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoForeground();
 }
 
 void RosenWindow::OnHide()
 {
     Window::OnHide();
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->GoBackground();
     rsUIDirector_->SendMessages();
 }
@@ -140,6 +154,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
     auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(root->GetRenderContext());
     CHECK_NULL_VOID(rosenRenderContext);
     if (rosenRenderContext->GetRSNode()) {
+        CHECK_NULL_VOID(rsUIDirector_);
         rsUIDirector_->SetRoot(rosenRenderContext->GetRSNode()->GetId());
     }
 }
@@ -147,6 +162,7 @@ void RosenWindow::SetRootFrameNode(const RefPtr<NG::FrameNode>& root)
 void RosenWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
 {
     LOGD("Rosenwindow RecordFrameTime");
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetTimeStamp(timeStamp, name);
 }
 
@@ -154,6 +170,7 @@ void RosenWindow::FlushTasks()
 {
     CHECK_RUN_ON(UI);
     LOGD("Rosenwindow flush tasks");
+    CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SendMessages();
 }
 

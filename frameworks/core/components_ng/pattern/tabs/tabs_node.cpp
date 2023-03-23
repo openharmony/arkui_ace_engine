@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
+#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -52,6 +53,7 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("barMode", GetTabBarMode() == TabBarMode::SCROLLABLE ? "BarMode.Scrollable" : "BarMode.Fixed");
     json->Put("barWidth", std::to_string(GetBarWidth().Value()).c_str());
     json->Put("barHeight", std::to_string(GetBarHeight().Value()).c_str());
+    json->Put("fadingEdge", GetFadingEdge() ? "true" : "false");
 }
 
 bool TabsNode::Scrollable() const
@@ -126,4 +128,15 @@ Dimension TabsNode::GetBarHeight() const
     return tabBarProperty->GetTabBarHeight().value_or(0.0_vp);
 }
 
+bool TabsNode::GetFadingEdge() const
+{
+    if (!tabBarId_.has_value()) {
+        return true;
+    }
+    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
+    CHECK_NULL_RETURN(tabBarNode, true);
+    auto tabBarProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_RETURN(tabBarProperty, true);
+    return tabBarProperty->GetFadingEdge().value_or(true);
+}
 } // namespace OHOS::Ace::NG

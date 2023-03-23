@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,31 +53,10 @@ void TextFieldModelNG::CreateNode(
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    pattern->InitSurfaceChangedCallback();
+    pattern->InitSurfacePositionChangedCallback();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (!pattern->HasSurfaceChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
-            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) {
-                auto pattern = weakPattern.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
-                }
-            });
-        LOGI("Add surface changed callback id %{public}d", callbackId);
-        pattern->UpdateSurfaceChangedCallbackId(callbackId);
-    }
-    if (!pattern->HasSurfacePositionChangedCallback()) {
-        auto callbackId = pipeline->RegisterSurfacePositionChangedCallback(
-            [weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern))](int32_t posX, int32_t posY) {
-                auto pattern = weakPattern.Upgrade();
-                if (pattern) {
-                    pattern->HandleSurfacePositionChanged(posX, posY);
-                }
-            });
-        LOGI("Add position changed callback id %{public}d", callbackId);
-        pattern->UpdateSurfacePositionChangedCallbackId(callbackId);
-    }
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
@@ -192,6 +171,30 @@ void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
 void TextFieldModelNG::SetCaretColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value);
+}
+
+void TextFieldModelNG::SetCaretStyle(const CaretStyle& value)
+{
+    if (value.caretWidth.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorWidth, value.caretWidth.value());
+    }
+}
+
+void TextFieldModelNG::SetCaretPosition(const int32_t& value)
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto caretPosition = layoutProperty->GetPlaceholderValue() == "" ? value : 0;
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CaretPosition, caretPosition);
+    pattern->SetCaretPosition(caretPosition);
+    pattern->UpdateCaretPositionByTextEdit();
+}
+
+void TextFieldModelNG::SetSelectedBackgroundColor(const Color& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, SelectedBackgroundColor, value);
 }
 
 void TextFieldModelNG::SetTextAlign(TextAlign value)

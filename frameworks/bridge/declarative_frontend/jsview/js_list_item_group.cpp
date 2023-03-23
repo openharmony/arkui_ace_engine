@@ -99,12 +99,17 @@ void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
     args.ReturnSelf();
 }
 
+void JSListItemGroup::SetAspectRatio(const JSCallbackInfo& args)
+{
+}
+
 void JSListItemGroup::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItemGroup>::Declare("ListItemGroup");
     JSClass<JSListItemGroup>::StaticMethod("create", &JSListItemGroup::Create);
 
     JSClass<JSListItemGroup>::StaticMethod("divider", &JSListItemGroup::SetDivider);
+    JSClass<JSListItemGroup>::StaticMethod("aspectRatio", &JSListItemGroup::SetAspectRatio);
 
     JSClass<JSListItemGroup>::Inherit<JSInteractableView>();
     JSClass<JSListItemGroup>::Inherit<JSContainerBase>();

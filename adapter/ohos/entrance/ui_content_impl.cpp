@@ -22,7 +22,6 @@
 #include "ability_info.h"
 #include "configuration.h"
 #include "dm/display_manager.h"
-#include "extension_ability_info.h"
 #include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -30,6 +29,7 @@
 #include "service_extension_context.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/ui/rs_ui_director.h"
@@ -68,6 +68,7 @@ const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
+const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
 } // namespace
 
@@ -636,7 +637,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
-                    want.SetParam("address", address);
+                    want.SetUri(address);
+                    want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
             false, false, useNewPipe);
@@ -691,27 +693,6 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
     if (!isFormRender_) {
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
-    // for atomic service
-    container->SetInstallationFree(hapModuleInfo ? hapModuleInfo->installationFree : false);
-        if (hapModuleInfo && hapModuleInfo->installationFree) {
-            container->SetSharePanelCallback(
-                [context = context_](const std::string& faBundleName, const std::string& faAbilityName,
-                    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-                    const std::string& abilityName) {
-                    auto sharedContext = context.lock();
-                    CHECK_NULL_VOID_NOLOG(sharedContext);
-                    auto abilityContext =
-                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
-                    CHECK_NULL_VOID_NOLOG(abilityContext);
-                    AAFwk::Want want;
-                    want.SetParam("bundleName", faBundleName);
-                    want.SetParam("moduleName", faModuleName);
-                    want.SetParam("abilityName", faAbilityName);
-                    want.SetParam("hostPkgName", faHostPkgName);
-                    want.SetElementName(bundleName, abilityName);
-                    abilityContext->StartAbility(want, REQUEST_CODE);
-                });
-        }
     }
 
     if (window_) {
@@ -769,7 +750,8 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
             CHECK_NULL_VOID(frontend);
             frontend->SetBundleName(bundleName_);
             frontend->SetModuleName(moduleName_);
-            frontend->SetIsBundle(isBundle_);
+            // arkTSCard only support "esModule" compile mode
+            frontend->SetIsBundle(false);
         } else {
             Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         }
@@ -783,7 +765,7 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
 
     if (isFormRender_ && !isFormRenderInit_) {
         container->UpdateFormSharedImage(formImageDataMap_);
-        container->UpdateFormDate(formData_);
+        container->UpdateFormData(formData_);
         isFormRenderInit_ = true;
     }
 
@@ -1095,7 +1077,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
-                    want.SetParam("address", address);
+                    want.SetUri(address);
+                    want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
             false, false, useNewPipe);
@@ -1144,22 +1127,21 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
     // for atomic service
-    container->SetInstallationFree(hapModuleInfo ? hapModuleInfo->installationFree : false);
+    container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
         container->SetSharePanelCallback(
-            [context = context_](const std::string& faBundleName, const std::string& faAbilityName,
-                const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-                const std::string& abilityName) {
+            [context = context_](const std::string& bundleName, const std::string& abilityName) {
                 auto sharedContext = context.lock();
                 CHECK_NULL_VOID_NOLOG(sharedContext);
                 auto abilityContext =
                     OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
                 CHECK_NULL_VOID_NOLOG(abilityContext);
+                auto abilityInfo = abilityContext->GetAbilityInfo();
                 AAFwk::Want want;
-                want.SetParam("bundleName", faBundleName);
-                want.SetParam("moduleName", faModuleName);
-                want.SetParam("abilityName", faAbilityName);
-                want.SetParam("hostPkgName", faHostPkgName);
+                want.SetParam("abilityName", abilityInfo->name);
+                want.SetParam("bundleName", abilityInfo->bundleName);
+                want.SetParam("moduleName", abilityInfo->moduleName);
+                want.SetParam("hostPkgName", abilityInfo->bundleName);
                 want.SetElementName(bundleName, abilityName);
                 abilityContext->StartAbility(want, REQUEST_CODE);
             });
@@ -1279,8 +1261,6 @@ void UIContentImpl::ReloadForm()
     auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
     flutterAssetManager->ReloadProvider();
     Platform::AceContainer::ClearEngineCache(instanceId_);
-    Platform::AceContainer::RunPage(instanceId_, Platform::AceContainer::GetContainer(instanceId_)->GeneratePageId(),
-        startUrl_, "");
 }
 
 void UIContentImpl::Focus()
@@ -1310,7 +1290,6 @@ void UIContentImpl::Destroy()
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
 {
     LOGI("UIContent OnNewWant");
-    Platform::AceContainer::OnShow(instanceId_);
     std::string params = want.GetStringParam(START_PARAMS_KEY);
     Platform::AceContainer::OnNewRequest(instanceId_, params);
 }
@@ -1441,12 +1420,13 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [config, container, reason, rsTransaction]() {
+        [config, container, reason, rsTransaction, rsWindow = window_]() {
             container->SetWindowPos(config.Left(), config.Top());
             auto pipelineContext = container->GetPipelineContext();
             if (pipelineContext) {
                 pipelineContext->SetDisplayWindowRectInfo(
                     Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+                pipelineContext->SetIsLayoutFullScreen(rsWindow->IsLayoutFullScreen());
             }
             auto aceView = static_cast<Platform::AceViewOhos*>(container->GetAceView());
             CHECK_NULL_VOID(aceView);
@@ -1578,12 +1558,12 @@ void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pix
     pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
 }
 
-void UIContentImpl::UpdateFormDate(const std::string& data)
+void UIContentImpl::UpdateFormData(const std::string& data)
 {
     if (isFormRenderInit_) {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_VOID(container);
-        container->UpdateFormDate(data);
+        container->UpdateFormData(data);
     } else {
         formData_ = data;
     }

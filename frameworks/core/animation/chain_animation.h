@@ -26,6 +26,11 @@
 #include "core/animation/spring_motion.h"
 
 namespace OHOS::Ace {
+enum class ChainEdgeEffect {
+    DEFAULT,
+    STRETCH,
+};
+
 class ChainAnimationNode : public AceType {
     DECLARE_ACE_TYPE(ChainAnimationNode, AceType);
 
@@ -73,22 +78,31 @@ public:
     {
         animationCallback_ = std::move(callback);
     }
-    void SetConductionCoefficient(float value)
+    void SetConductivity(float value)
     {
-        conductionCoefficient_ = value;
+        conductivity_ = value;
     }
-    void SetLinkageCoefficient(float value)
+    void SetIntensity(float value)
     {
-        linkageCoefficient_ = value;
+        intensity_ = value;
+    }
+    void SetEdgeEffectIntensity(float value)
+    {
+        edgeEffectIntensity_ = value;
+    }
+    void SetEdgeEffect(ChainEdgeEffect edgeEffect)
+    {
+        edgeEffect_ = edgeEffect;
     }
     void SetSpace(float space, float maxSpace, float minSpace);
     void SetOverDrag(bool isOverDrag);
 
+    static constexpr float DEFAULT_CONDUCTIVITY = 0.7f;
+    static constexpr float DEFAULT_INTENSITY = 0.3f;
+    static constexpr float DEFAULT_EDGE_EFFECT_INTENSITY = 0.3f;
+
 private:
     void TickAnimation();
-
-    static constexpr float DEFAULT_CONDUCTION = 0.3f;
-    static constexpr float DEFAULT_LINKAGE = 0.3f;
 
     std::function<void()> animationCallback_;
     std::map<int32_t, RefPtr<ChainAnimationNode>> nodes_;
@@ -100,9 +114,11 @@ private:
     float minSpace_;
     int32_t controlIndex_ = 0;
     int32_t maxIndex_ = 0;
-    float conductionCoefficient_ = DEFAULT_CONDUCTION;
-    float linkageCoefficient_ = DEFAULT_LINKAGE;
+    float conductivity_ = DEFAULT_CONDUCTIVITY;
+    float intensity_ = DEFAULT_INTENSITY;
+    float edgeEffectIntensity_ = DEFAULT_EDGE_EFFECT_INTENSITY;
     bool isOverDrag_ = false;
+    ChainEdgeEffect edgeEffect_ = ChainEdgeEffect::DEFAULT;
 };
 } // namespace OHOS::Ace
 #endif

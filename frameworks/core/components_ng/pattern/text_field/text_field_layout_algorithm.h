@@ -26,9 +26,10 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
-#include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
+class TextFieldContentModifier;
 
 class ACE_EXPORT TextFieldLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(TextFieldLayoutAlgorithm, LayoutAlgorithm);
@@ -97,6 +98,7 @@ private:
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
         const RefPtr<PipelineContext>& pipeline);
     bool DidExceedMaxLines(const LayoutConstraintF& contentConstraint);
+    void SetPropertyToModifier(const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier);
 
     float GetTextFieldDefaultHeight();
     float GetTextFieldDefaultImageHeight();

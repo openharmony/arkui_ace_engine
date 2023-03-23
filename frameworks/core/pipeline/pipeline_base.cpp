@@ -506,6 +506,10 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);
 
+    for (auto& callback : formVsyncCallbacks_) {
+        callback.second(nanoTimestamp, frameCount);
+    }
+
     if (onVsyncProfiler_) {
         AceTracker::Start();
     }
@@ -580,6 +584,18 @@ void PipelineBase::SendEventToAccessibility(const AccessibilityEvent& accessibil
     accessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
 }
 
+void PipelineBase::SetFormVsyncCallback(AceVsyncCallback&& callback, int32_t formWindowId)
+{
+    if (callback) {
+        formVsyncCallbacks_.try_emplace(formWindowId, std::move(callback));
+    }
+}
+
+void PipelineBase::RemoveFormVsyncCallback(int32_t formWindowId)
+{
+    formVsyncCallbacks_.erase(formWindowId);
+}
+
 void PipelineBase::Destroy()
 {
     CHECK_RUN_ON(UI);
@@ -599,5 +615,4 @@ void PipelineBase::Destroy()
     virtualKeyBoardCallback_.clear();
     LOGI("PipelineBase::Destroy end.");
 }
-
 } // namespace OHOS::Ace

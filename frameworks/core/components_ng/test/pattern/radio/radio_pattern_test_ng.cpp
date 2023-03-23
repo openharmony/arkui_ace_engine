@@ -640,6 +640,164 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest018, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RadioPatternTest019
+ * @tc.desc: Test OnTouchDown   OnTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest019, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitMouseEvent();
+    pattern->HandleMouseEvent(false);
+    ASSERT_EQ(pattern->isHover_, false);
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS);
+    EXPECT_TRUE(pattern->isTouch_);
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::NONE);
+    EXPECT_FALSE(pattern->isTouch_);
+
+}
+
+/**
+ * @tc.name: RadioPatternTest020
+ * @tc.desc: Test OnTouchDown   OnTouchUp.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPatternTest020, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    radioModelNG.SetChecked(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->InitMouseEvent();
+    pattern->HandleMouseEvent(true);
+    EXPECT_TRUE(pattern->isHover_);
+    pattern->OnTouchDown();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::HOVER_TO_PRESS);
+    EXPECT_TRUE(pattern->isTouch_);
+    pattern->OnTouchUp();
+    EXPECT_EQ(pattern->touchHoverType_, TouchHoverAnimationType::PRESS_TO_HOVER);
+    EXPECT_FALSE(pattern->isTouch_);
+
+}
+
+/**
+ * @tc.name: RadioPaintMethodTest001
+ * @tc.desc: Test Radio PaintMethod PaintRadio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest001, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto radioPaintProperty = AceType::MakeRefPtr<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, radioPaintProperty);
+    auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
+    RadioPaintMethod radioPaintMethod(radioModifier);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
+}
+
+/**
+ * @tc.name: RadioPaintMethodTest002
+ * @tc.desc: Test Radio PaintMethod PaintRadio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest002, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto radioPaintProperty = AceType::MakeRefPtr<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, radioPaintProperty);
+    auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
+    RadioPaintMethod radioPaintMethod(radioModifier);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(3);
+    radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(false);
+    radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
+    radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
+}
+
+/**
+ * @tc.name: RadioPaintMethodTest003
+ * @tc.desc: Test Radio PaintMethod PaintRadio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest003, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto radioPaintProperty = AceType::MakeRefPtr<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, radioPaintProperty);
+    auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
+    RadioPaintMethod radioPaintMethod(radioModifier);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
+    radioPaintMethod.radioModifier_->uiStatus_ = AceType::MakeRefPtr<PropertyInt>
+        (static_cast<int32_t>(UIStatus::SELECTED));
+    radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
+    radioPaintMethod.radioModifier_->uiStatus_ = AceType::MakeRefPtr<PropertyInt>
+        (static_cast<int32_t>(UIStatus::UNSELECTED));
+}
+
+/**
+ * @tc.name: RadioPaintMethodTest004
+ * @tc.desc: Test Radio PaintMethod PaintRadio.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, RadioPaintMethodTest004, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto radioPaintProperty = AceType::MakeRefPtr<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, radioPaintProperty);
+    auto radioModifier = AceType::MakeRefPtr<RadioModifier>();
+    RadioPaintMethod radioPaintMethod(radioModifier);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(4);
+    radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(false);
+    radioPaintMethod.radioModifier_->uiStatus_ = AceType::MakeRefPtr<PropertyInt>
+        (static_cast<int32_t>(UIStatus::SELECTED));
+    radioPaintMethod.radioModifier_->PaintRadio(canvas, false, CONTENT_SIZE, CONTENT_OFFSET);
+    radioPaintMethod.radioModifier_->enabled_ = AceType::MakeRefPtr<PropertyBool>(true);
+    radioPaintMethod.radioModifier_->uiStatus_ = AceType::MakeRefPtr<PropertyInt>
+        (static_cast<int32_t>(UIStatus::UNSELECTED));
+}
+
+/**
  * @tc.name: RadioLayoutAlgorithmTest001
  * @tc.desc: Verify that RadioLayoutAlgorithm can correctly InitializeParam.
  * @tc.type: FUNC

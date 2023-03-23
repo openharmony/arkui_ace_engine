@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -62,7 +63,7 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<LinearLayoutProperty>(isVertical_);
+        return MakeRefPtr<TimePickerLayoutProperty>();
     }
 
     void OnColumnsBuilding();
@@ -170,6 +171,16 @@ public:
     const PickerTime& GetSelectedTime()
     {
         return selectedTime_;
+    }
+
+    void SetDialogTitleDate(const PickerDate& value)
+    {
+        dialogTitleDate_ = value;
+    }
+
+    const PickerDate& GetDialogTitleDate()
+    {
+        return dialogTitleDate_;
     }
 
     bool HasAmPmNode() const
@@ -289,6 +300,7 @@ private:
     // true, use 24 hours style; false, use 12 hours style.
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
     PickerTime selectedTime_ = PickerTime::Current();
+    PickerDate dialogTitleDate_ = PickerDate::Current();
     std::optional<int32_t> amPmId_;
     std::optional<int32_t> hourId_;
     std::optional<int32_t> minuteId_;
@@ -299,7 +311,6 @@ private:
     bool hasSecond_ = false;
     std::vector<RefPtr<FrameNode>> timePickerColumns_;
     std::vector<std::string> vecAmPm_ = Localization::GetInstance()->GetAmPmStrings();
-    bool isVertical_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowPattern);
 };

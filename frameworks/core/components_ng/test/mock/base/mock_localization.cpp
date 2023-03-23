@@ -66,6 +66,11 @@ std::vector<std::string> Localization::GetMonths(bool isShortType, const std::st
     return months;
 }
 
+std::string Localization::GetLanguage()
+{
+    return "Chinese";
+}
+
 std::string Localization::GetLunarMonth(uint32_t month, bool isLeapMonth)
 {
     return "";
@@ -80,5 +85,16 @@ LunarDate Localization::GetLunarDate(Date date)
 {
     LunarDate dateRet;
     return dateRet;
+}
+
+std::vector<std::string> Localization::GetAmPmStrings()
+{
+    std::vector<std::string> amPms;
+    return amPms;
+}
+
+bool Localization::GetHourFormat(bool& isAmPm, bool& hasZero)
+{
+    return false;
 }
 } // namespace OHOS::Ace

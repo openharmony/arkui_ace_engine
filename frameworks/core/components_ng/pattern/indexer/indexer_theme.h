@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,6 +66,7 @@ inline constexpr uint32_t BUBBLE_BG_COLOR = 0xFFF1F3F5;
 inline constexpr double INDEXER_ITEM_SIZE = 16.0;      // circle mode, item size (VP)
 inline constexpr double INDEXER_ITEM_TEXT_SIZE = 12.0; // circle, mode font size (VP)
 inline constexpr float INDEXER_LIST_DIVIDER = 1.0;
+inline constexpr float INDEXER_BUBBLE_INVALID_SPACE = -1.0f;
 // data for circle mode
 inline constexpr int32_t INDEXER_COLLAPSE_ITEM_COUNT = 4;
 inline constexpr double INDEXER_CIRCLE_ITEM_SIZE = 24.0;          // circle mode, item size (VP)

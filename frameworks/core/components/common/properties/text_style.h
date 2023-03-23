@@ -438,7 +438,7 @@ private:
 
 namespace StringUtils {
 
-inline FontWeight StringToFontWeight(const std::string& weight)
+inline FontWeight StringToFontWeight(const std::string& weight, FontWeight defaultFontWeight = FontWeight::NORMAL)
 {
     static const LinearMapNode<FontWeight> fontWeightTable[] = {
         { "100", FontWeight::W100 },
@@ -454,10 +454,11 @@ inline FontWeight StringToFontWeight(const std::string& weight)
         { "bolder", FontWeight::BOLDER },
         { "lighter", FontWeight::LIGHTER },
         { "medium", FontWeight::MEDIUM },
+        { "normal", FontWeight::NORMAL },
         { "regular", FontWeight::REGULAR },
     };
     auto weightIter = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), weight.c_str());
-    return weightIter != -1 ? fontWeightTable[weightIter].value : FontWeight::NORMAL;
+    return weightIter != -1 ? fontWeightTable[weightIter].value : defaultFontWeight;
 }
 
 inline WordBreak StringToWordBreak(const std::string& wordBreak)

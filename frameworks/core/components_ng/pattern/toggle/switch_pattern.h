@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/toggle/switch_accessibility_property.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "core/components_ng/pattern/toggle/switch_layout_algorithm.h"
 #include "core/components_ng/pattern/toggle/switch_paint_method.h"
@@ -79,6 +80,11 @@ public:
         return paintMethod;
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<SwitchAccessibilityProperty>();
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         FocusPaintParam focusPaintParams;
@@ -92,6 +98,11 @@ public:
         focusPaintParams.SetFocusPadding(Dimension(2.0_vp));
 
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
+    }
+
+    bool IsChecked()
+    {
+        return isOn_.value_or(false);
     }
 
 private:
@@ -127,6 +138,7 @@ private:
     bool IsOutOfBoundary(double mainOffset) const;
     void OnClick();
     void AddHotZoneRect();
+    void RemoveLastHotZoneRect() const;
 
     RefPtr<PanEvent> panEvent_;
 
@@ -151,6 +163,7 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
+    bool isFirstAddhotZoneRect_ = true;
 
     RefPtr<SwitchModifier> switchModifier_;
 

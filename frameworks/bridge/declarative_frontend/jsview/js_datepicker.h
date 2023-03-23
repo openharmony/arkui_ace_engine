@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,9 @@ public:
     static void SetLunar(bool isLunar);
     static void OnChange(const JSCallbackInfo& info);
     static void PickerBackgroundColor(const JSCallbackInfo& info);
+    static void SetDisappearTextStyle(const JSCallbackInfo& info);
+    static void SetTextStyle(const JSCallbackInfo& info);
+    static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
     static void ParseTextProperties(const JSRef<JSObject>& paramObj, NG::PickerTextProperties& result);
     // keep compatible, need remove after
@@ -42,6 +45,7 @@ private:
     // keep compatible, need remove after
     static void CreateTimePicker(const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    static void SetDefaultAttributes();
     // keep compatible, need remove after
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
@@ -71,8 +75,12 @@ public:
     static void OnChange(const JSCallbackInfo& info);
     static void UseMilitaryTime(bool isUseMilitaryTime);
 
+    static void SetDisappearTextStyle(const JSCallbackInfo& info);
+    static void SetTextStyle(const JSCallbackInfo& info);
+    static void SetSelectedTextStyle(const JSCallbackInfo& info);
 private:
     static void CreateTimePicker(const JSRef<JSObject>& paramObj);
+    static void SetDefaultAttributes();
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
 };
 
@@ -87,6 +95,7 @@ public:
 private:
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DATEPICKER_H

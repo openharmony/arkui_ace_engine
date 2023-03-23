@@ -31,34 +31,6 @@
     } while (false)
 
 namespace OHOS::Ace::NG {
-namespace {
-FontWeight ConvertFontWeight(FontWeight fontWeight)
-{
-    FontWeight convertValue = fontWeight;
-    switch (fontWeight) {
-        case FontWeight::LIGHTER:
-            convertValue = FontWeight::W100;
-            break;
-        case FontWeight::NORMAL:
-        case FontWeight::REGULAR:
-            convertValue = FontWeight::W400;
-            break;
-        case FontWeight::MEDIUM:
-            convertValue = FontWeight::W500;
-            break;
-        case FontWeight::BOLD:
-            convertValue = FontWeight::W700;
-            break;
-        case FontWeight::BOLDER:
-            convertValue = FontWeight::W900;
-            break;
-        default:
-            convertValue = fontWeight;
-            break;
-    }
-    return convertValue;
-}
-} // namespace
 
 void SpanModelNG::Create(const std::string& content)
 {
@@ -87,7 +59,7 @@ void SpanModelNG::SetItalicFontStyle(Ace::FontStyle value)
 
 void SpanModelNG::SetFontWeight(Ace::FontWeight value)
 {
-    ACE_UPDATE_SPAN_PROPERTY(FontWeight, ConvertFontWeight(value));
+    ACE_UPDATE_SPAN_PROPERTY(FontWeight, value);
 }
 
 void SpanModelNG::SetFontFamily(const std::vector<std::string>& value)

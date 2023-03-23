@@ -37,6 +37,7 @@
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 #include "core/gestures/gesture_info.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace {
 
@@ -116,7 +117,7 @@ public:
 
     // transforms
     virtual void SetScale(float x, float y, float z) = 0;
-    virtual void SetPivot(const Dimension& x, const Dimension& y) = 0;
+    virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetRotate(float x, float y, float z, float angle) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
@@ -204,12 +205,16 @@ public:
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetHitTestMode(NG::HitTestMode hitTestMode) = 0;
+    virtual void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction) = 0;
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
     virtual void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
         const NG::MenuParam& menuParam) = 0;
     virtual void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) = 0;
+    virtual void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, int32_t type) = 0;
 
     // accessibility
     virtual void SetAccessibilityGroup(bool accessible) = 0;
@@ -217,6 +222,8 @@ public:
     virtual void SetAccessibilityDescription(const std::string& description) = 0;
     virtual void SetAccessibilityImportance(const std::string& importance) = 0;
 
+    // progress mask
+    virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;

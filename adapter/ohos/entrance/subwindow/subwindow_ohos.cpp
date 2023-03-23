@@ -40,6 +40,9 @@
 #include "core/common/text_field_manager.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/popup/popup_component.h"
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif // ENABLE_DRAG_FRAMEWORK
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
@@ -217,6 +220,10 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     overlayManager->HidePopup(targetId, popupInfo);
     context->FlushPipelineImmediately();
     HideWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HidePixelMap();
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::HidePopupNG()
@@ -233,6 +240,21 @@ void SubwindowOhos::HidePopupNG()
     overlayManager->HidePopup(popupTargetId_, popupInfo);
     context->FlushPipelineImmediately();
     HideWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HidePixelMap();
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
+}
+
+void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    popupInfo = overlayManager->GetPopupInfo(targetId);
 }
 
 void SubwindowOhos::ShowWindow()
@@ -386,6 +408,10 @@ void SubwindowOhos::ClearMenuNG()
     overlay->CleanMenuInSubWindow();
     context->FlushPipelineImmediately();
     HideWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    HidePixelMap();
+    HideFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::ShowMenu(const RefPtr<Component>& newComponent)
@@ -568,9 +594,29 @@ bool SubwindowOhos::CreateEventRunner()
     return true;
 }
 
-void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+void SubwindowOhos::ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom)
 {
-    LOGI("SubwindowOhos::ShowToast begin");
+    LOGI("SubwindowOhos::ShowToastForAbility Show the toast");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        LOGE("Get container failed, it is null");
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return;
+    }
+    delegate->ShowToast(message, duration, bottom);
+}
+
+void SubwindowOhos::ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom)
+{
+    LOGI("SubwindowOhos::ShowToastForService begin");
     bool ret = CreateEventRunner();
     if (!ret) {
         return;
@@ -612,14 +658,45 @@ void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, cons
         LOGE("Post sync task error");
         return;
     }
-    LOGI("SubwindowOhos::ShowToast end");
+    LOGI("SubwindowOhos::ShowToastForService end");
 }
 
-void SubwindowOhos::ShowDialog(const std::string& title, const std::string& message,
+void SubwindowOhos::ShowToast(const std::string& message, int32_t duration, const std::string& bottom)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+        ShowToastForService(message, duration, bottom);
+    } else {
+        ShowToastForAbility(message, duration, bottom);
+    }
+}
+
+void SubwindowOhos::ShowDialogForAbility(const std::string& title, const std::string& message,
     const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
     const std::set<std::string>& callbacks)
 {
-    LOGI("SubwindowOhos::ShowDialog begin");
+    LOGI("Show the dialog");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        LOGE("Get container failed, it is null");
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return;
+    }
+    delegate->ShowDialog(title, message, buttons, autoCancel, std::move(callback), callbacks);
+}
+
+void SubwindowOhos::ShowDialogForService(const std::string& title, const std::string& message,
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    LOGI("SubwindowOhos::ShowDialogForService begin");
     bool ret = CreateEventRunner();
     if (!ret) {
         return;
@@ -656,10 +733,42 @@ void SubwindowOhos::ShowDialog(const std::string& title, const std::string& mess
         LOGE("Post sync task error");
         return;
     }
-    LOGI("SubwindowOhos::ShowDialog end");
+    LOGI("SubwindowOhos::ShowDialogForService end");
 }
 
-void SubwindowOhos::ShowActionMenu(
+void SubwindowOhos::ShowDialog(const std::string& title, const std::string& message,
+    const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+    const std::set<std::string>& callbacks)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+        ShowDialogForService(title, message, buttons, autoCancel, std::move(callback), callbacks);
+    } else {
+        ShowDialogForAbility(title, message, buttons, autoCancel, std::move(callback), callbacks);
+    }
+}
+
+void SubwindowOhos::ShowActionMenuForAbility(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+{
+    LOGI("Show the action menu");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        LOGE("Get container failed, it is null");
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        LOGE("can not get delegate.");
+        return;
+    }
+    delegate->ShowActionMenu(title, button, std::move(callback));
+}
+
+void SubwindowOhos::ShowActionMenuForService(
     const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
 {
     LOGI("SubwindowOhos::ShowActionMenu begin");
@@ -701,6 +810,11 @@ void SubwindowOhos::ShowActionMenu(
     LOGI("SubwindowOhos::ShowActionMenu end");
 }
 
+void SubwindowOhos::CloseDialog(int32_t instanceId)
+{
+    Platform::DialogContainer::CloseWindow(instanceId);
+}
+
 void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, int32_t containerId)
 {
     auto container = Platform::DialogContainer::GetContainer(containerId);
@@ -713,4 +827,51 @@ void SubwindowOhos::UpdateAceView(int32_t width, int32_t height, float density, 
         Platform::AceViewOhos::SurfaceChanged(aceView, width, height, 0);
     }
 }
+
+void SubwindowOhos::ShowActionMenu(
+    const std::string& title, const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID) {
+        ShowActionMenuForService(title, button, std::move(callback));
+    } else {
+        ShowActionMenuForAbility(title, button, std::move(callback));
+    }
+}
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void SubwindowOhos::HideFilter()
+{
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
+    auto parentPipeline = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(parentPipeline);
+    auto rootNode = parentPipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto childNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto manager = parentPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->hasFilter) {
+        auto children = childNode->GetChildren();
+        rootNode->RemoveChild(childNode);
+        for (auto& child: children) {
+            childNode->RemoveChild(child);
+            child->MountToParent(rootNode);
+        }
+        manager->hasFilter = false;
+        rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    }
+}
+
+void SubwindowOhos::HidePixelMap()
+{
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
+    auto parentPipeline = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(parentPipeline);
+    auto manager = parentPipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemovePixelMap();
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace

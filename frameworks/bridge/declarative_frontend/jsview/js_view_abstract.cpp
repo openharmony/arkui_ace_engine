@@ -59,12 +59,15 @@
 #endif
 #include "core/common/card_scope.h"
 #include "core/common/container.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace {
 
 std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
+using DoubleBindCallback = std::function<void(const std::string&)>;
 
 ViewAbstractModel* ViewAbstractModel::GetInstance()
 {
@@ -207,8 +210,7 @@ void GetDefaultRotateVector(double& dx, double& dy, double& dz)
     }
 }
 
-void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy, float& dz, Dimension& centerX,
-    Dimension& centerY, std::optional<float>& angle)
+void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, NG::RotateOptions& rotate, std::optional<float>& angle)
 {
     // default: dx, dy, dz (0.0, 0.0, 0.0)
     double dxVal = 0.0;
@@ -220,17 +222,20 @@ void ParseJsRotate(std::unique_ptr<JsonValue>& argsPtrItem, float& dx, float& dy
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("x"), dxVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("y"), dyVal);
     JSViewAbstract::ParseJsonDouble(argsPtrItem->GetValue("z"), dzVal);
-    dx = static_cast<float>(dxVal);
-    dy = static_cast<float>(dyVal);
-    dz = static_cast<float>(dzVal);
+    rotate.xDirection = static_cast<float>(dxVal);
+    rotate.yDirection = static_cast<float>(dyVal);
+    rotate.zDirection = static_cast<float>(dzVal);
     // if specify centerX
     Dimension length;
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerX"), length)) {
-        centerX = length;
+        rotate.centerX = length;
     }
     // if specify centerY
     if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerY"), length)) {
-        centerY = length;
+        rotate.centerY = length;
+    }
+    if (JSViewAbstract::ParseJsonDimensionVp(argsPtrItem->GetValue("centerZ"), length)) {
+        rotate.centerZ = length;
     }
     // if specify angle
     JSViewAbstract::GetAngle("angle", argsPtrItem, angle);
@@ -369,8 +374,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedRotateTransition(
         }
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(
-            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
+        ParseJsRotate(rotateArgs, rotate, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             return AceType::MakeRefPtr<NG::ChainedRotateEffect>(rotate);
@@ -534,31 +538,24 @@ const std::vector<Placement> PLACEMENT = { Placement::LEFT, Placement::RIGHT, Pl
     Placement::TOP_LEFT, Placement::TOP_RIGHT, Placement::BOTTOM_LEFT, Placement::BOTTOM_RIGHT, Placement::LEFT_TOP,
     Placement::LEFT_BOTTOM, Placement::RIGHT_TOP, Placement::RIGHT_BOTTOM };
 
-void ParseShowObject(const JSCallbackInfo& info, const JSRef<JSObject>& showObj, const RefPtr<PopupParam>& popupParam)
+DoubleBindCallback ParseDoubleBindCallback(const JSCallbackInfo& info, const JSRef<JSObject>& callbackObj)
 {
-    JSRef<JSVal> changeEventVal = showObj->GetProperty("changeEvent");
-    if (!changeEventVal->IsFunction()) {
-        return;
+    JSRef<JSVal> changeEvent = callbackObj->GetProperty("changeEvent");
+    if (!changeEvent->IsFunction()) {
+        return {};
     }
-    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
-
-    if (popupParam) {
-        auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
-                                         const std::string& param) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-
-            if (param != "true" && param != "false") {
-                LOGE("param is not equal true or false, invalid.");
-                return;
-            }
-
-            bool newValue = StringToBool(param);
-            JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
-            func->ExecuteJS(1, &newJSVal);
-        };
-        popupParam->SetOnStateChange(onStateChangeCallback);
-        return;
-    }
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEvent));
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        if (param != "true" && param != "false") {
+            LOGE("param is not equal true or false, invalid.");
+            return;
+        }
+        bool newValue = StringToBool(param);
+        JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    return callback;
 }
 
 void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPtr<PopupParam>& popupParam)
@@ -638,8 +635,10 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
     if (showInSubWindowValue->IsBoolean()) {
         bool showInSubBoolean = showInSubWindowValue->ToBoolean();
 #if defined(PREVIEW)
-        LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
-        showInSubBoolean = false;
+        if (showInSubBoolean) {
+            LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Use normal type instead.");
+            showInSubBoolean = false;
+        }
 #endif
         if (popupParam) {
             popupParam->SetShowInSubWindow(showInSubBoolean);
@@ -738,8 +737,8 @@ void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj
                 auto clickCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnClickFunc)](
                                          GestureEvent& info) {
                     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-                    ACE_SCORING_EVENT("primaryButton.action");
-                    LOGI("Call primary click");
+                    ACE_SCORING_EVENT("secondaryButton.action");
+                    LOGI("Call secondary click");
                     func->Execute(info);
                 };
                 properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
@@ -896,7 +895,7 @@ void JSViewAbstract::JsScale(const JSCallbackInfo& info)
             Dimension centerY = 0.5_pct;
             ParseJsScale(argsPtrItem, scaleX, scaleY, scaleZ, centerX, centerY);
             ViewAbstractModel::GetInstance()->SetScale(scaleX, scaleY, scaleZ);
-            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY);
+            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY, 0.0_vp);
             return;
         }
     }
@@ -1031,17 +1030,13 @@ void JSViewAbstract::JsRotate(const JSCallbackInfo& info)
             LOGE("Js Parse object failed. argsPtr is null. %s", info[0]->ToString().c_str());
             return;
         }
-        float dx = 0.0f;
-        float dy = 0.0f;
-        float dz = 0.0f;
-        // default centerX, centerY 50% 50%;
-        Dimension centerX = 0.5_pct;
-        Dimension centerY = 0.5_pct;
+        NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(argsPtrItem, dx, dy, dz, centerX, centerY, angle);
+        ParseJsRotate(argsPtrItem, rotate, angle);
         if (angle) {
-            ViewAbstractModel::GetInstance()->SetRotate(dx, dy, dz, angle.value());
-            ViewAbstractModel::GetInstance()->SetPivot(centerX, centerY);
+            ViewAbstractModel::GetInstance()->SetRotate(
+                rotate.xDirection, rotate.yDirection, rotate.zDirection, angle.value());
+            ViewAbstractModel::GetInstance()->SetPivot(rotate.centerX, rotate.centerY, rotate.centerZ);
         } else {
             LOGE("Js JsRotate failed, not specify angle");
         }
@@ -1146,8 +1141,7 @@ NG::TransitionOptions JSViewAbstract::ParseTransition(std::unique_ptr<JsonValue>
         // default: dx, dy, dz (0.0, 0.0, 0.0), angle 0, centerX, centerY 50% 50%;
         NG::RotateOptions rotate(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct);
         std::optional<float> angle;
-        ParseJsRotate(
-            rotateArgs, rotate.xDirection, rotate.yDirection, rotate.zDirection, rotate.centerX, rotate.centerY, angle);
+        ParseJsRotate(rotateArgs, rotate, angle);
         if (angle.has_value()) {
             rotate.angle = angle.value();
             transitionOption.UpdateRotate(rotate);
@@ -1829,15 +1823,17 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsBackgroundBlurStyle", info, checkList)) {
+    if (info.Length() == 0) {
+        LOGW("The arg of backgroundBlurStyle is wrong, it is supposed to have at least 1 argument");
         return;
     }
     BlurStyleOption styleOption;
-    auto blurStyle = info[0]->ToNumber<int32_t>();
-    if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
-        blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
-        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    if (info[0]->IsNumber()) {
+        auto blurStyle = info[0]->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::THIN) &&
+            blurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
@@ -2779,6 +2775,12 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, Dimension& re
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
         return true;
     }
+    if (!type->IsNull() && type->IsNumber() &&
+        type->ToNumber<uint32_t>() == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(themeConstants->GetInt(resId->ToNumber<uint32_t>()));
+        result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
+        return true;
+    }
     result = themeConstants->GetDimension(resId->ToNumber<uint32_t>());
     return true;
 }
@@ -2957,7 +2959,7 @@ bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, Foregroun
     }
     if (jsValue->IsString()) {
         std::string colorStr = jsValue->ToString();
-         // Remove all " ".
+        // Remove all " ".
         colorStr.erase(std::remove(colorStr.begin(), colorStr.end(), ' '), colorStr.end());
         std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
         if (colorStr.compare("invert") == 0) {
@@ -3717,7 +3719,8 @@ void JSViewAbstract::JsBindPopup(const JSCallbackInfo& info)
         popupParam->SetIsShow(info[0]->ToBoolean());
     } else {
         JSRef<JSObject> showObj = JSRef<JSObject>::Cast(info[0]);
-        ParseShowObject(info, showObj, popupParam);
+        auto callback = ParseDoubleBindCallback(info, showObj);
+        popupParam->SetOnStateChange(std::move(callback));
         popupParam->SetIsShow(showObj->GetProperty("value")->ToBoolean());
     }
 
@@ -4165,7 +4168,41 @@ void JSViewAbstract::JsClip(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMask(const JSCallbackInfo& info)
 {
-    if (info.Length() > 0 && info[0]->IsObject()) {
+    if (info.Length() <= 0) {
+        return;
+    }
+
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> typeParam = paramObject->GetProperty("type");
+    if (!typeParam->IsNull()) {
+        if (typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
+            auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+            JSRef<JSVal> jValue = paramObject->GetProperty("value");
+            auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+            if (value < 0.0f) {
+                value = 0.0f;
+            }
+            progressMask->SetValue(value);
+            JSRef<JSVal> jTotal = paramObject->GetProperty("total");
+            auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+            if (total < 0.0f) {
+                total = DEFAULT_PROGRESS_TOTAL;
+            }
+            progressMask->SetMaxValue(total);
+            JSRef<JSVal> jColor = paramObject->GetProperty("color");
+            Color colorVal;
+            if (ParseJsColor(jColor, colorVal)) {
+                progressMask->SetColor(colorVal);
+            } else {
+                RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+                progressMask->SetColor(theme->GetMaskColor());
+            }
+            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+        }
+    } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
             return;
@@ -4405,6 +4442,49 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, std::move(buildFunc));
 }
 
+void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
+{
+    if (info.Length() != 2 && info.Length() != 3) {
+        LOGE("BindContentCover params number are not correct.");
+        return;
+    }
+
+    // parse isShow
+    bool isShow = false;
+    DoubleBindCallback callback = nullptr;
+    if (info[0]->IsBoolean()) {
+        isShow = info[1]->ToBoolean();
+    } else if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        callback = ParseDoubleBindCallback(info, callbackObj);
+        auto isShowObj = callbackObj->GetProperty("value");
+        isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
+    }
+
+    // parse builder
+    if (!info[1]->IsObject()) {
+        LOGE("builder is invalid.");
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+    auto builder = obj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        LOGE("builder param is not a function.");
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("BindContentCover");
+        func->Execute();
+    };
+
+    // parse ModalTransition
+    auto type = (info.Length() == 3 && info[2]->IsNumber()) ? info[2]->ToNumber<int32_t>() : 0;
+    ViewAbstractModel::GetInstance()->BindContentCover(isShow, std::move(callback), std::move(buildFunc), type);
+}
+
 void JSViewAbstract::JSBind()
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -4490,6 +4570,7 @@ void JSViewAbstract::JSBind()
 
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
+    JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
     JSClass<JSViewAbstract>::StaticMethod("onDragStart", &JSViewAbstract::JsOnDragStart);
     JSClass<JSViewAbstract>::StaticMethod("onDragEnter", &JSViewAbstract::JsOnDragEnter);
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
@@ -4544,6 +4625,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSViewAbstract>::StaticMethod("onVisibleAreaChange", &JSViewAbstract::JsOnVisibleAreaChange);
     JSClass<JSViewAbstract>::StaticMethod("hitTestBehavior", &JSViewAbstract::JsHitTestBehavior);
+    JSClass<JSViewAbstract>::StaticMethod("keyboardShortcut", &JSViewAbstract::JsKeyboardShortcut);
 }
 
 void JSViewAbstract::JsAlignRules(const JSCallbackInfo& info)
@@ -5097,6 +5179,57 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
+void JSViewAbstract::JsKeyboardShortcut(const JSCallbackInfo& info)
+{
+    // KeyboardShortcut only allows 2 or 3 params.
+    if (info.Length() < 2 || info.Length() > 3) {
+        LOGE("JsKeyboardShortcut: The arg is wrong, it is supposed to have 2 or 3 arguments");
+        return;
+    }
+    if ((!info[0]->IsString() && !info[0]->IsNumber()) || !info[1]->IsArray()) {
+        LOGE("JsKeyboardShortcut: The param type is invalid.");
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
+        return;
+    }
+
+    std::string value;
+    if (info[0]->IsString()) {
+        value = info[0]->ToString();
+        if (value.empty() || value.size() > 1) {
+            LOGE("KeyboardShortcut value arg is wrong, return");
+            ViewAbstractModel::GetInstance()->SetKeyboardShortcut("", std::vector<CtrlKey>(), nullptr);
+            return;
+        }
+    } else {
+        FunctionKey functionkey = static_cast<FunctionKey>(info[0]->ToNumber<int32_t>());
+        value = GetFunctionKeyName(functionkey);
+    }
+
+    auto keysArray = JSRef<JSArray>::Cast(info[1]);
+    size_t size = keysArray->Length();
+    std::vector<CtrlKey> keys(size);
+    keys.clear();
+    for (size_t i = 0; i < size; i++) {
+        JSRef<JSVal> key = keysArray->GetValueAt(i);
+        if (key->IsNumber()) {
+            keys.emplace_back(static_cast<CtrlKey>(key->ToNumber<int32_t>()));
+        }
+    }
+
+    // KeyboardShortcut allows 3 params, the third param is function callback.
+    if (info.Length() == 3 && info[2]->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[2]));
+        auto onKeyboardShortcutAction = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onKeyboardShortcutAction");
+            func->ExecuteJS();
+        };
+        ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetKeyboardShortcut(value, keys, nullptr);
 }
 
 } // namespace OHOS::Ace::Framework

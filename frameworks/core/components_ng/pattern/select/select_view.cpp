@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
 #include "core/components_ng/property/property.h"
@@ -36,14 +37,20 @@ void SelectView::Create(const std::vector<SelectParam>& params)
 
     auto pattern = select->GetPattern<SelectPattern>();
     pattern->BuildChild();
-
     // create menu node
-    auto menu = MenuView::Create(params, nodeId);
-    pattern->SetMenuNode(menu);
-    pattern->InitSelected();
-
+    if (!pattern->GetMenuNode()) {
+        auto menu = MenuView::Create(params, nodeId);
+        pattern->SetMenuNode(menu);
+        pattern->InitSelected();
+    } else {
+        auto menuNode = AceType::DynamicCast<FrameNode>(pattern->GetMenuNode()->GetChildAtIndex(0));
+        CHECK_NULL_VOID(menuNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->UpdateSelectParam(params);
+    }
     // store option pointers in select
-    auto menuContainer = menu->GetChildAtIndex(0);
+    auto menuContainer = pattern->GetMenuNode()->GetChildAtIndex(0);
     CHECK_NULL_VOID(menuContainer);
     pattern->ClearOptions();
     auto options = menuContainer->GetChildren();

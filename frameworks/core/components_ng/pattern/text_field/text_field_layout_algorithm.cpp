@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/font/constants_converter.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/base/frame_node.h"
@@ -97,11 +96,13 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto contentModifier = pattern->GetContentModifier();
     TextStyle textStyle;
     std::string textContent;
     bool showPlaceHolder = false;
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+
     if (!textFieldLayoutProperty->GetValueValue("").empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetValueValue("");
@@ -109,6 +110,10 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
         UpdatePlaceholderTextStyle(textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = textFieldLayoutProperty->GetPlaceholderValue("");
         showPlaceHolder = true;
+    }
+    if (contentModifier) {
+        SetPropertyToModifier(textStyle, contentModifier);
+        contentModifier->ModifyTextStyle(textStyle);
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
@@ -130,6 +135,16 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     if (pattern->IsTextArea()) {
         auto useHeight = static_cast<float>(paragraph_->GetHeight());
+        const auto& calcLayoutConstraint = textFieldLayoutProperty->GetCalcLayoutConstraint();
+        if (calcLayoutConstraint && calcLayoutConstraint->maxSize.has_value() &&
+            calcLayoutConstraint->maxSize.value().Height().has_value()) {
+            auto maxHeightSize = calcLayoutConstraint->maxSize.value().Height().value().GetDimension();
+            if (maxHeightSize.Unit() == DimensionUnit::PERCENT) {
+                idealHeight = maxHeightSize.ConvertToPxWithSize(contentConstraint.percentReference.Height());
+            } else {
+                idealHeight = maxHeightSize.ConvertToPx();
+            }
+        }
         textRect_.SetSize(SizeF(idealWidth, useHeight));
         return SizeF(idealWidth, std::min(idealHeight, useHeight));
     }
@@ -153,7 +168,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     float imageSize = 0.0f;
     imageSize = showPasswordIcon ? preferredHeight : 0.0f;
     if (contentConstraint.selfIdealSize.Height()) {
-        imageSize = std::min(imageSize, contentConstraint.selfIdealSize.Height().value());
+        imageSize = contentConstraint.selfIdealSize.Height().value();
     }
 
     if (textStyle.GetMaxLines() > 1 || pattern->IsTextArea()) {
@@ -191,23 +206,29 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     auto align = Alignment::CENTER;
+    bool hasAlign = false;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+        hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
     }
     // Update content position.
-    OffsetF contentOffset;
+    OffsetF contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     if (pattern->IsTextArea()) {
-        content->SetOffset(pattern->GetUtilPadding().Offset());
+        if (hasAlign) {
+            content->SetOffset(OffsetF(pattern->GetUtilPadding().Offset().GetX(), contentOffset.GetY()));
+        } else {
+            content->SetOffset(pattern->GetUtilPadding().Offset());
+        }
         textRect_.SetOffset(pattern->GetTextRect().GetOffset());
         return;
     }
-    contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
     content->SetOffset(OffsetF(pattern->GetPaddingLeft(), contentOffset.GetY()));
     // if handler is moving, no need to adjust text rect in pattern
     auto isHandleMoving = pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE ||
                           pattern->GetCaretUpdateType() == CaretUpdateType::HANDLE_MOVE_DONE;
     auto needForceCheck = pattern->GetCaretUpdateType() == CaretUpdateType::INPUT ||
-                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL;
+                          pattern->GetCaretUpdateType() == CaretUpdateType::DEL ||
+                          pattern->GetCaretUpdateType() == CaretUpdateType::ICON_PRESSED;
     auto needToKeepTextRect = isHandleMoving || pattern->GetMouseStatus() == MouseStatus::MOVE || !needForceCheck ||
                               pattern->GetIsMousePressed();
     if (needToKeepTextRect) {
@@ -240,8 +261,8 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
-    TextStyle& textStyle, bool isDisabled)
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
+    bool isDisabled)
 {
     const std::vector<std::string> defaultFontFamily = { "sans-serif" };
     textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
@@ -260,8 +281,10 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
         textStyle.SetTextColor(theme ? theme->GetDisableTextColor() : textStyle.GetTextColor());
     } else {
         auto renderContext = frameNode->GetRenderContext();
-        if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
-            textStyle.SetTextColor(Color::FOREGROUND);
+        if (renderContext->HasForegroundColor()) {
+            textStyle.SetTextColor(renderContext->GetForegroundColor().value());
+        } else if (renderContext->HasForegroundColorStrategy()) {
+            textStyle.SetTextColor(Color::BLACK);
         } else {
             textStyle.SetTextColor(
                 layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
@@ -383,4 +406,12 @@ float TextFieldLayoutAlgorithm::GetTextFieldDefaultImageHeight()
     return static_cast<float>(height.ConvertToPx());
 }
 
+void TextFieldLayoutAlgorithm::SetPropertyToModifier(
+    const TextStyle& textStyle, RefPtr<TextFieldContentModifier> modifier)
+{
+    CHECK_NULL_VOID(modifier);
+    modifier->SetFontSize(textStyle.GetFontSize());
+    modifier->SetFontWeight(textStyle.GetFontWeight());
+    modifier->SetTextColor(textStyle.GetTextColor());
+}
 } // namespace OHOS::Ace::NG

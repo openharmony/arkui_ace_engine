@@ -58,51 +58,53 @@ void RefreshModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TriggerRefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, Dimension(0.0, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, true);
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsCustomBuilderExist, false);
 }
 
 void RefreshModelNG::Pop()
 {
     auto refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(refreshNode);
-    if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
-        LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
-        return;
-    }
     auto layoutProperty = refreshNode->GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto refreshRenderProperty = refreshNode->GetPaintProperty<RefreshRenderProperty>();
     CHECK_NULL_VOID(refreshRenderProperty);
+    if (!layoutProperty->GetIsCustomBuilderExistValue()) {
+        if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
+            LOGI("%{public}s have %{public}d child", refreshNode->GetTag().c_str(), refreshNode->TotalChildCount());
+            return;
+        }
+        auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+        CHECK_NULL_VOID(textChild);
+        refreshNode->AddChild(textChild);
+        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (layoutProperty->GetIsShowLastTimeValue()) {
+            textLayoutProperty->UpdateContent(refreshRenderProperty->GetTimeTextValue());
+            auto lastTimeText = Localization::GetInstance()->GetEntryLetters(REFRESH_LAST_UPDATED);
+            refreshRenderProperty->UpdateLastTimeText(lastTimeText);
+            auto timeText = StringUtils::FormatString("");
+            refreshRenderProperty->UpdateTimeText(timeText);
+        }
+        auto textStyle = layoutProperty->GetTextStyle();
+        CHECK_NULL_VOID(textStyle);
+        textLayoutProperty->UpdateTextAlign(textStyle->GetTextAlign());
+        textLayoutProperty->UpdateTextBaseline(textStyle->GetTextBaseline());
+        textLayoutProperty->UpdateTextCase(textStyle->GetTextCase());
+        textLayoutProperty->UpdateTextColor(textStyle->GetTextColor());
+        textLayoutProperty->UpdateFontWeight(textStyle->GetFontWeight());
+        textLayoutProperty->UpdateFontFamily(textStyle->GetFontFamilies());
+        textLayoutProperty->UpdateTextDecoration(textStyle->GetTextDecoration());
+        textLayoutProperty->UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
+        textLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
 
-    auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_VOID(textChild);
-    refreshNode->AddChild(textChild);
-    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    if (layoutProperty->GetIsShowLastTimeValue()) {
-        textLayoutProperty->UpdateContent(refreshRenderProperty->GetTimeTextValue());
-        auto lastTimeText = Localization::GetInstance()->GetEntryLetters(REFRESH_LAST_UPDATED);
-        refreshRenderProperty->UpdateLastTimeText(lastTimeText);
-        auto timeText = StringUtils::FormatString("");
-        refreshRenderProperty->UpdateTimeText(timeText);
+        auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
+        CHECK_NULL_VOID(loadingProgressChild);
+        refreshNode->AddChild(loadingProgressChild);
+        auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
+        CHECK_NULL_VOID(progressLayoutProperty);
     }
-    auto textStyle = layoutProperty->GetTextStyle();
-    CHECK_NULL_VOID(textStyle);
-    textLayoutProperty->UpdateTextAlign(textStyle->GetTextAlign());
-    textLayoutProperty->UpdateTextBaseline(textStyle->GetTextBaseline());
-    textLayoutProperty->UpdateTextCase(textStyle->GetTextCase());
-    textLayoutProperty->UpdateTextColor(textStyle->GetTextColor());
-    textLayoutProperty->UpdateFontWeight(textStyle->GetFontWeight());
-    textLayoutProperty->UpdateFontFamily(textStyle->GetFontFamilies());
-    textLayoutProperty->UpdateTextDecoration(textStyle->GetTextDecoration());
-    textLayoutProperty->UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
-    textLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-
-    auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
-    CHECK_NULL_VOID(loadingProgressChild);
-    refreshNode->AddChild(loadingProgressChild);
-    auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
-    CHECK_NULL_VOID(progressLayoutProperty);
     NG::ViewStackProcessor::GetInstance()->PopContainer();
 }
 void RefreshModelNG::SetRefreshing(bool isRefreshing)
@@ -205,6 +207,16 @@ void RefreshModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
     auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
+}
+
+void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
+{
+    CHECK_NULL_VOID(customBuilder);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RefreshPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddCustomBuilderNode(customBuilder);
 }
 
 } // namespace OHOS::Ace::NG

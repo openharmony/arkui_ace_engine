@@ -319,17 +319,9 @@ public:
         ViewAbstract::MarkAnchor({ x, y });
     }
 
-    void SetScale(float x, float y, float z) override
-    {
-        VectorF scale(x, y);
-        ViewAbstract::SetScale(scale);
-    }
+    void SetScale(float x, float y, float z) override;
 
-    void SetPivot(const Dimension& x, const Dimension& y) override
-    {
-        DimensionOffset center(x, y);
-        ViewAbstract::SetPivot(center);
-    }
+    void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
 
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override
     {
@@ -451,6 +443,11 @@ public:
     void SetMask(const RefPtr<BasicShape>& shape) override
     {
         ViewAbstract::SetMask(shape);
+    }
+
+    void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override
+    {
+        ViewAbstract::SetProgressMask(progress);
     }
 
     void SetBackdropBlur(const Dimension& radius) override
@@ -682,16 +679,28 @@ public:
         ViewAbstract::SetHitTestMode(hitTestMode);
     }
 
+    void SetKeyboardShortcut(const std::string& value, const std::vector<CtrlKey>& keys,
+        std::function<void()>&& onKeyboardShortcutAction) override
+    {
+        ViewAbstract::SetKeyboardShortcut(value, keys, std::move(onKeyboardShortcutAction));
+    }
+
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+#ifdef ENABLE_DRAG_FRAMEWORK
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 
-    void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-        const MenuParam& menuParam) override;
+    void BindMenu(
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam) override;
 
     void BindContextMenu(ResponseType type, std::function<void()>&& buildFunc) override;
+
+    void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc, int32_t type) override;
 
     void SetAccessibilityGroup(bool accessible) override {}
     void SetAccessibilityText(const std::string& text) override {}
@@ -707,7 +716,6 @@ public:
     {
         ViewAbstract::SetForegroundColorStrategy(strategy);
     }
-
 };
 } // namespace OHOS::Ace::NG
 

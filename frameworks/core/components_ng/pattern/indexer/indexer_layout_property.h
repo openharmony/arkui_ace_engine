@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/property/property.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
+#include "core/components_ng/property/property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT IndexerLayoutProperty : public LayoutProperty {
@@ -50,6 +51,8 @@ public:
         value->propAlignStyle_ = CloneAlignStyle();
         value->propPopupPositionX_ = ClonePopupPositionX();
         value->propPopupPositionY_ = ClonePopupPositionY();
+        value->propFontSize_ = CloneFontSize();
+        value->propFontWeight_ = CloneFontWeight();
         return value;
     }
 
@@ -69,6 +72,8 @@ public:
         ResetAlignStyle();
         ResetPopupPositionX();
         ResetPopupPositionY();
+        ResetFontSize();
+        ResetFontWeight();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -84,8 +89,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Font, TextStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AlignStyle, NG::AlignStyle, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionX, float, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionY, float, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionX, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupPositionY, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
 
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);

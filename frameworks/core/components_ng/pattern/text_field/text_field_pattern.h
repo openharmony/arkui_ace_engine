@@ -36,6 +36,9 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
@@ -99,8 +102,8 @@ struct CaretMetricsF {
     }
 };
 
-class TextFieldPattern : public Pattern, public ValueChangeObserver {
-    DECLARE_ACE_TYPE(TextFieldPattern, Pattern, ValueChangeObserver);
+class TextFieldPattern : public ScrollablePattern, public ValueChangeObserver {
+    DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, ValueChangeObserver);
 
 public:
     TextFieldPattern();
@@ -108,7 +111,14 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this));
+        if (!textFieldOverlayModifier_) {
+            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(
+                WeakClaim(this), AceType::WeakClaim(AceType::RawPtr(GetScrollBar())), GetScrollEdgeEffect());
+        }
+        if (!textFieldContentModifier_) {
+            textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
+        }
+        return MakeRefPtr<TextFieldPaintMethod>(WeakClaim(this), textFieldOverlayModifier_, textFieldContentModifier_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -372,13 +382,13 @@ public:
 
     bool SelectOverlayIsOn();
     void CloseSelectOverlay();
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    void SetInputMethodStatus(bool imeAttached)
+    void SetInputMethodStatus(bool keyboardShown)
     {
-        imeAttached_ = imeAttached;
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+        imeShown_ = keyboardShown;
+#endif
     }
 
-#endif
     bool HasConnection() const
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -461,6 +471,9 @@ public:
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
 
+    void InitSurfaceChangedCallback();
+    void InitSurfacePositionChangedCallback();
+
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
@@ -504,6 +517,35 @@ public:
     }
 
     void UpdateEditingValueToRecord();
+    void UpdateScrollBarOffset() override;
+    bool UpdateCurrentOffset(float offset, int32_t source) override
+    {
+        return true;
+    }
+    bool IsAtTop() const override
+    {
+        return true;
+    }
+    bool IsAtBottom() const override
+    {
+        return true;
+    }
+    bool IsScrollable() const override
+    {
+        return scrollable_;
+    }
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+    float GetCurrentOffset() const
+    {
+        return currentOffset_;
+    }
+    RefPtr<TextFieldContentModifier> GetContentModifier()
+    {
+        return textFieldContentModifier_;
+    }
 
     // xts
     std::string TextInputTypeToString() const;
@@ -524,13 +566,15 @@ public:
     std::string GetCopyOptionString() const;
     std::string GetShowPasswordIconString() const;
     std::string GetInputStyleString() const;
-    void SetSelectionFlag(bool flag, int32_t selectionStart, int32_t selectionEnd);
+    void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void HandleBlurEvent();
+    void HandleFocusEvent();
+    bool OnBackPressed();
+    void CheckScrollable();
 
 private:
-    void HandleBlurEvent();
     bool HasFocus() const;
-    void HandleFocusEvent();
     bool OnKeyEvent(const KeyEvent& event);
     void ParseAppendValue(KeyCode keycode, std::string& appendElement);
     void HandleDirectionalKey(const KeyEvent& keyEvent);
@@ -546,9 +590,11 @@ private:
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
+    bool HasStateStyle(UIState state) const;
 
     void AddScrollEvent();
-    void OnTextAreaScroll(float dy);
+    void OnTextAreaScroll(float offset);
+    bool OnScrollCallback(float offset, int32_t source) override;
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
@@ -590,7 +636,6 @@ private:
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
-    int32_t GetLineNumber(float offsetY);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -614,8 +659,7 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
     void ResetBackgroundColor();
-    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-        int32_t duration, const RefPtr<Curve>& curve);
+    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange = false);
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -627,7 +671,7 @@ private:
     void OnImageLoadSuccess(bool checkHidePasswordIcon);
     void OnImageLoadFail(bool checkHidePasswordIcon);
 
-    bool IsSearchParentNode();
+    bool IsSearchParentNode() const;
 
     RectF frameRect_;
     RectF contentRect_;
@@ -686,8 +730,11 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     bool setSelectionFlag_ = false;
+    bool setSelectAllFlag_ = true;
     int32_t selectionStart_ = 0;
     int32_t selectionEnd_ = 0;
+    bool scrollable_ = true;
+    float currentOffset_ = 0.0f;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 
@@ -699,6 +746,8 @@ private:
     TextSelector textSelector_;
     RefPtr<SelectOverlayProxy> selectOverlayProxy_;
     std::vector<RSTypographyProperties::TextBox> textBoxes_;
+    RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;
+    RefPtr<TextFieldContentModifier> textFieldContentModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldPattern);
 
     RefPtr<Clipboard> clipboard_;
@@ -713,6 +762,7 @@ private:
 #endif
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
+    bool imeShown_ = false;
 #endif
     int32_t instanceId_ = -1;
 #if defined(PREVIEW)

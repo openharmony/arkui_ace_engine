@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,6 +76,9 @@ public:
 
     // Get the currently running JS page information in NG structure.
     RefPtr<Framework::RevSourceMap> GetFaAppSourceMap() const override;
+
+    void GetStageSourceMap(
+        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const override;
 
     RefPtr<NG::PageRouterManager> GetPageRouterManager() const;
 
@@ -214,7 +217,7 @@ public:
         return jsEngine_;
     }
 
-    void AttachSubPipelineContext(const RefPtr<PipelineContext>& context);
+    void AttachSubPipelineContext(const RefPtr<PipelineBase>& context);
 
     void FlushReload() override
     {

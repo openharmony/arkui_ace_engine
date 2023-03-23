@@ -33,7 +33,7 @@ class SliderContentModifier : public ContentModifier {
 public:
     struct Parameters {
         float trackThickness = 0.0f;
-        float blockDiameter = 0.0f;
+        SizeF blockSize;
         float stepRatio = 0.0f;
         float hotCircleShadowWidth = 0.0f;
         bool mouseHoverFlag_ = false;
@@ -48,7 +48,7 @@ public:
         Color blockColor;
     };
 
-    explicit SliderContentModifier(const Parameters& parameters);
+    explicit SliderContentModifier(const Parameters& parameters, std::function<void()> updateImageFunc);
     ~SliderContentModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -59,8 +59,6 @@ public:
     void DrawDefaultBlock(DrawingContext& context);
     void DrawHoverOrPress(DrawingContext& context);
     void DrawShadow(DrawingContext& context);
-    void GetMarkerPen(float sliderLength, float borderBlank, const OffsetF& offset, const SizeF& contentSize,
-        const RefPtr<SliderTheme>& theme, const Axis& direction, bool isShowSteps);
 
     void UpdateThemeColor()
     {
@@ -118,13 +116,6 @@ public:
 
     void SetCircleCenter(const PointF& center);
 
-    void SetBlockDiameter(float blockDiameter)
-    {
-        if (blockDiameter_) {
-            blockDiameter_->Set(blockDiameter);
-        }
-    }
-
     void SetStepRatio(float stepRatio)
     {
         if (stepRatio_) {
@@ -141,35 +132,151 @@ public:
     {
         needAnimate_ = true;
     }
+
+    void SetSliderMode(SliderModelNG::SliderMode sliderMode)
+    {
+        if (sliderMode_) {
+            sliderMode_->Set(static_cast<int>(sliderMode));
+        }
+    }
+
+    void SetTrackBorderRadius(float trackBorderRadius)
+    {
+        if (trackBorderRadius_) {
+            trackBorderRadius_->Set(trackBorderRadius);
+        }
+    }
+
+    void SetStepSize(float stepSize)
+    {
+        if (stepSize_) {
+            stepSize_->Set(stepSize);
+        }
+    }
+
+    void SetStepColor(const Color& stepColor)
+    {
+        if (stepColor_) {
+            stepColor_->Set(LinearColor(stepColor));
+        }
+    }
+
+    void SetShowSteps(bool showSteps)
+    {
+        if (isShowStep_) {
+            isShowStep_->Set(showSteps);
+        }
+    }
+
+    void SetBlockType(SliderModelNG::BlockStyleType type)
+    {
+        if (blockType_) {
+            blockType_->Set(static_cast<int>(type));
+        }
+    }
+
+    void SetBlockSize(const SizeF& blockSize)
+    {
+        if (blockSize_) {
+            blockSize_->Set(blockSize);
+        }
+    }
+
+    void SetBlockBorderColor(const Color& blockBorderColor)
+    {
+        if (blockBorderColor_) {
+            blockBorderColor_->Set(LinearColor(blockBorderColor));
+        }
+    }
+
+    void SetBlockBorderWidth(float blockBorderWidth)
+    {
+        if (blockBorderWidth_) {
+            blockBorderWidth_->Set(blockBorderWidth);
+        }
+    }
+
+    void SetBlockShape(const RefPtr<BasicShape>& shape);
+
+    void SetDirection(Axis axis)
+    {
+        if (directionAxis_) {
+            directionAxis_->Set(static_cast<int>(axis));
+        }
+    }
+
+    OffsetF GetBlockCenter()
+    {
+        return OffsetF(blockCenterX_->Get(), blockCenterY_->Get());
+    }
+
 private:
+    void InitializeShapeProperty();
+    RSRect GetTrackRect();
+
+    void DrawBlock(DrawingContext& context);
+    void DrawBlockShape(DrawingContext& context);
+    void DrawBlockShapeCircle(DrawingContext& context, RefPtr<Circle>& circle);
+    void DrawBlockShapeEllipse(DrawingContext& context, RefPtr<Ellipse>& ellipse);
+    void DrawBlockShapePath(DrawingContext& context, RefPtr<Path>& path);
+    void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
+
+private:
+    std::function<void()> updateImageFunc_;
+
     // animatable property
     RefPtr<AnimatablePropertyOffsetF> selectStart_;
     RefPtr<AnimatablePropertyOffsetF> selectEnd_;
     RefPtr<AnimatablePropertyOffsetF> backStart_;
     RefPtr<AnimatablePropertyOffsetF> backEnd_;
-    RefPtr<AnimatablePropertyOffsetF> circleCenter_;
+    RefPtr<AnimatablePropertyFloat> blockCenterX_;
+    RefPtr<AnimatablePropertyFloat> blockCenterY_;
     RefPtr<AnimatablePropertyFloat> trackThickness_;
     RefPtr<AnimatablePropertyColor> trackBackgroundColor_;
     RefPtr<AnimatablePropertyColor> selectColor_;
     RefPtr<AnimatablePropertyColor> blockColor_;
     RefPtr<AnimatablePropertyColor> boardColor_;
+
+    RefPtr<AnimatablePropertyFloat> trackBorderRadius_;
+    RefPtr<AnimatablePropertyFloat> stepSize_;
+    RefPtr<AnimatablePropertyColor> stepColor_;
+    RefPtr<AnimatablePropertySizeF> blockSize_;
+    RefPtr<AnimatablePropertyColor> blockBorderColor_;
+    RefPtr<AnimatablePropertyFloat> blockBorderWidth_;
+    RefPtr<AnimatablePropertyFloat> shapeWidth_;
+    RefPtr<AnimatablePropertyFloat> shapeHeight_;
+    RefPtr<AnimatablePropertyFloat> circleRadius_;
+    RefPtr<AnimatablePropertyFloat> ellipseRadiusX_;
+    RefPtr<AnimatablePropertyFloat> ellipseRadiusY_;
+    RefPtr<AnimatablePropertyFloat> rectTopLeftRadiusX_;
+    RefPtr<AnimatablePropertyFloat> rectTopLeftRadiusY_;
+    RefPtr<AnimatablePropertyFloat> rectTopRightRadiusX_;
+    RefPtr<AnimatablePropertyFloat> rectTopRightRadiusY_;
+    RefPtr<AnimatablePropertyFloat> rectBottomLeftRadiusX_;
+    RefPtr<AnimatablePropertyFloat> rectBottomLeftRadiusY_;
+    RefPtr<AnimatablePropertyFloat> rectBottomRightRadiusX_;
+    RefPtr<AnimatablePropertyFloat> rectBottomRightRadiusY_;
     // non-animatable property
-    RefPtr<PropertyFloat> blockDiameter_;
     RefPtr<PropertyFloat> stepRatio_;
+    RefPtr<PropertyInt> sliderMode_;
+    RefPtr<PropertyInt> directionAxis_;
+    RefPtr<PropertyBool> isShowStep_;
+    RefPtr<PropertyInt> blockType_;
 
     // others
     struct MarkerPenAndPath {
         RSPen pen;
+        RSBrush brush;
         RSPath path;
     } markerPenAndPath;
 
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
     bool reverse_ = false;
-    bool isShowStep_ = false;
     bool needAnimate_ = true;
     float hotCircleShadowWidth_ = 0.0f;
     Color blockOuterEdgeColor_;
+    RefPtr<BasicShape> shape_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderContentModifier);
 };
 

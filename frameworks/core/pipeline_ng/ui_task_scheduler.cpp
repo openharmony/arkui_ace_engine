@@ -58,17 +58,25 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     ACE_FUNCTION_TRACE();
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     std::vector<RefPtr<FrameNode>> orderedNodes;
-    bool needReorder = false;
+    bool hasNormalNode = false;
+    bool hasPriorityNode = false;
     for (auto&& pageNodes : dirtyLayoutNodes) {
         for (auto&& node : pageNodes.second) {
             if (!node || node->IsInDestroying()) {
                 continue;
             }
             orderedNodes.emplace_back(node);
-            needReorder = node->GetLayoutPriority() != 0 ? true : needReorder;
+            if (node->GetLayoutPriority() == 0) {
+                hasNormalNode = true;
+            } else {
+                hasPriorityNode = true;
+            }
         }
     }
-    if (needReorder) {
+    if (!hasNormalNode) {
+        dirtyLayoutNodes_ = std::move(dirtyLayoutNodes);
+        return;
+    } else if (hasPriorityNode) {
         std::sort(orderedNodes.begin(), orderedNodes.end(), Cmp);
     }
 
@@ -145,12 +153,19 @@ bool UITaskScheduler::NeedAdditionalLayout()
             }
             node->GetLayoutProperty()->CleanDirty();
             node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-            auto parent = AceType::DynamicCast<FrameNode>(node->GetParent());
-            if (parent) {
-                parent->GetLayoutProperty()->CleanDirty();
-                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            LOGD("GeometryTransition needs additional layout, node%{public}d is marked dirty", node->GetId());
+            auto parent = node->GetParent();
+            while (parent) {
+                auto frameNode = AceType::DynamicCast<FrameNode>(parent);
+                if (frameNode) {
+                    frameNode->GetLayoutProperty()->CleanDirty();
+                    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+                    LOGD("GeometryTransition needs additional layout, parent node%{public}d is marked dirty",
+                        frameNode->GetId());
+                    break;
+                }
+                parent = parent->GetParent();
             }
-            LOGD("GeometryTransition needs additional layout, nodes are arranged");
         }
     }
     return true;
@@ -160,9 +175,9 @@ void UITaskScheduler::FlushTask()
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("UITaskScheduler::FlushTask");
+    GeometryTransition::OnLayout(true);
     FlushLayoutTask();
-    // after first layout done if dirtynodes still exist due to new dirty nodes are added during fist layout,
-    // we need to initiate the second layout, otherwise the second will not be excuted.
+    GeometryTransition::OnLayout(false);
     if (NeedAdditionalLayout()) {
         FlushLayoutTask();
     }

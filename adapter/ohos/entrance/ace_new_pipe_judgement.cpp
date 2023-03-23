@@ -32,6 +32,7 @@ const std::string ACE_NEW_PIPE_DISABLED_TAG = "DISABLED";
 const std::string ACE_NEW_PIPE_ENABLED_FOR_ALL_TAG = "ENABLED_FOR_ALL";
 const std::string NEW_PIPE_ENABLED_RELEASE_TYPE = "Beta4";
 const std::string NEW_PIPE_ENABLED_RELEASE_TYPE_NEW = "Beta5";
+const std::string NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE = "Release";
 constexpr int32_t NEW_PIPE_MIN_VERSION = 9;
 
 } // namespace
@@ -58,6 +59,7 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(const std::string& packagenam
 {
     if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
              (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE ||
                  SystemProperties::GetExtSurfaceEnabled())) ||
             apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
         apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
@@ -83,6 +85,7 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledStage(const std::string& package
     }
     if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
              (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE ||
                  SystemProperties::GetExtSurfaceEnabled())) ||
             apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
         apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {

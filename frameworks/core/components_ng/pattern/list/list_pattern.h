@@ -34,6 +34,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+struct ChainAnimationOptions {
+    Dimension minSpace;
+    Dimension maxSpace;
+    float conductivity;
+    float intensity;
+    int32_t edgeEffect;
+};
 
 class ListPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
@@ -49,7 +56,7 @@ public:
         auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
         auto drawVertical = (axis == Axis::HORIZONTAL);
-        auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
+        auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
         paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
         paint->SetTotalItemCount(maxListItemIndex_ + 1);
         auto scrollEffect = GetScrollEdgeEffect();
@@ -63,7 +70,7 @@ public:
     {
         return false;
     }
-    
+
     bool UsResRegion() override
     {
         return false;
@@ -140,8 +147,15 @@ public:
         if (!property) {
             return {};
         }
-        auto isVertical = property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
-        return { isVertical, true, ScopeType::OTHERS };
+        return ScopeFocusAlgorithm(property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL, true,
+            ScopeType::OTHERS,
+            [wp = WeakClaim(this)](
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                auto list = wp.Upgrade();
+                if (list) {
+                    nextFocusNode = list->GetNextFocusNode(step, currFocusNode);
+                }
+            });
     }
 
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
@@ -166,6 +180,7 @@ public:
     void AnimateTo(float position, float duration, const RefPtr<Curve>& curve);
     void ScrollTo(float position);
     void ScrollToIndex(int32_t index, ScrollIndexAlignment align = ScrollIndexAlignment::ALIGN_TOP);
+    void ScrollToIndex(int32_t index, int32_t indexInGroup, ScrollIndexAlignment align);
     void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     bool ScrollPage(bool reverse);
     void ScrollBy(float offset);
@@ -174,6 +189,7 @@ public:
     void UpdateScrollBarOffset() override;
     // chain animation
     void SetChainAnimation(bool enable);
+    void SetChainAnimationOptions(const ChainAnimationOptions& options);
     float FlushChainAnimation(float dragOffset);
     void ProcessDragStart(float startPosition);
     void ProcessDragUpdate(float dragOffset, int32_t source);
@@ -186,6 +202,7 @@ public:
     }
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
+
 private:
     void OnScrollEndCallback() override;
 
@@ -195,7 +212,9 @@ private:
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
-    bool HandleDirectionKey(KeyCode code);
+    bool HandleDirectionKey(const KeyEvent& event);
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex);
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
@@ -208,7 +227,6 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void FireOnScrollStart();
-    void FireOnScrollStop();
     void CheckRestartSpring();
     void StopAnimate();
 
@@ -239,8 +257,8 @@ private:
     bool crossMatchChild_ = false;
 
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> jumpIndexInGroup_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
-    int32_t scrollIndex_ = 0;
     bool scrollable_ = true;
     bool paintStateFlag_ = false;
     bool isFramePaintStateValid_ = false;
@@ -258,6 +276,7 @@ private:
     RefPtr<ChainAnimation> chainAnimation_;
     bool dragFromSpring_ = false;
     RefPtr<SpringProperty> springProperty_;
+    std::optional<ChainAnimationOptions> chainAnimationOptions_;
 
     // multiSelectable
     bool multiSelectable_ = false;

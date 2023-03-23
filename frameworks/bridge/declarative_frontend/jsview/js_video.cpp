@@ -52,10 +52,8 @@ void JSVideo::Create(const JSCallbackInfo& info)
     }
     JSRef<JSObject> videoObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> srcValue = videoObj->GetProperty("src");
-    std::string videoPath;
-    JSRef<JSVal> currentProgressRateValue = videoObj->GetProperty("currentProgressRate");
-    double currentProgressRate;
     JSRef<JSVal> previewUriValue = videoObj->GetProperty("previewUri");
+    JSRef<JSVal> currentProgressRateValue = videoObj->GetProperty("currentProgressRate");
 
     auto controllerObj = videoObj->GetProperty("controller");
     RefPtr<VideoControllerV2> videoController = nullptr;
@@ -65,42 +63,72 @@ void JSVideo::Create(const JSCallbackInfo& info)
             videoController = jsVideoController->GetController();
         }
     }
-
     VideoModel::GetInstance()->Create(videoController);
-    if (ParseJsMedia(srcValue, videoPath)) {
-        VideoModel::GetInstance()->SetSrc(videoPath);
+
+    // Parse the src, if it is invalid, use the empty string.
+    std::string videoSrc;
+    if (!ParseJsMedia(srcValue, videoSrc)) {
+        LOGW("Video parse src failed.");
     }
-    if (ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
-        VideoModel::GetInstance()->SetProgressRate(currentProgressRate);
+    VideoModel::GetInstance()->SetSrc(videoSrc);
+
+    // Parse the rate, if it is invalid, set it as 1.0.
+    double currentProgressRate = 1.0;
+    if (!ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
+        LOGW("Video parse currentProgressRate failed.");
     }
-    if (!previewUriValue->IsUndefined() && !previewUriValue->IsNull()) {
-        std::string previewUri;
-        if (ParseJsMedia(previewUriValue, previewUri)) {
-            VideoModel::GetInstance()->SetPosterSourceInfo(previewUri);
-        } else {
-            // handle pixel map
-            LOGE("can not support pixel map");
-        }
+    VideoModel::GetInstance()->SetProgressRate(currentProgressRate);
+
+    std::string previewUri;
+    if (previewUriValue->IsUndefined() || previewUriValue->IsNull()) {
+        // When it is undefined, just set the empty image.
+        LOGW("Video parse previewUri failed, it is null.");
+        VideoModel::GetInstance()->SetPosterSourceInfo(previewUri);
+        return;
+    }
+    auto noPixMap = ParseJsMedia(previewUriValue, previewUri);
+    if (noPixMap) {
+        // Src is a string or resource
+        VideoModel::GetInstance()->SetPosterSourceInfo(previewUri);
+    } else {
+        // Src is a pixelmap.
+        LOGE("can not support pixel map");
     }
 }
 
-void JSVideo::JsMuted(bool isMuted)
+void JSVideo::JsMuted(const JSCallbackInfo& info)
 {
-    VideoModel::GetInstance()->SetMuted(isMuted);
+    bool muted = false;
+    if (info[0]->IsBoolean()) {
+        muted = info[0]->ToBoolean();
+    }
+    VideoModel::GetInstance()->SetMuted(muted);
 }
 
-void JSVideo::JsAutoPlay(bool autoPlay)
+void JSVideo::JsAutoPlay(const JSCallbackInfo& info)
 {
+    bool autoPlay = false;
+    if (info[0]->IsBoolean()) {
+        autoPlay = info[0]->ToBoolean();
+    }
     VideoModel::GetInstance()->SetAutoPlay(autoPlay);
 }
 
-void JSVideo::JsControls(bool controls)
+void JSVideo::JsControls(const JSCallbackInfo& info)
 {
+    bool controls = true;
+    if (info[0]->IsBoolean()) {
+        controls = info[0]->ToBoolean();
+    }
     VideoModel::GetInstance()->SetControls(controls);
 }
 
-void JSVideo::JsLoop(bool loop)
+void JSVideo::JsLoop(const JSCallbackInfo& info)
 {
+    bool loop = false;
+    if (info[0]->IsBoolean()) {
+        loop = info[0]->ToBoolean();
+    }
     VideoModel::GetInstance()->SetLoop(loop);
 }
 

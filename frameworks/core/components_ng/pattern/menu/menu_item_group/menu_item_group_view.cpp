@@ -31,7 +31,7 @@ void MenuItemGroupView::Create()
 {
     LOGI("MenuItemGroupView::Create");
     auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int32_t nodeId = stack->ClaimNodeId();
     auto menuItemGroup = FrameNode::GetOrCreateFrameNode(
         V2::MENU_ITEM_GROUP_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); });
     CHECK_NULL_VOID(menuItemGroup);

@@ -101,7 +101,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::SCOPE, true };
+        return { FocusType::SCOPE, true, FocusStyleType::INNER_BORDER };
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override

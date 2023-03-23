@@ -358,6 +358,73 @@ void UpdateRootComponent(const panda::Local<panda::ObjectRef>& obj)
     });
 }
 
+static const std::unordered_map<std::string, std::function<void(BindingTarget)>> formBindFuncs = {
+    { "Flex", JSFlexImpl::JSBind },
+    { "Text", JSText::JSBind },
+    { "Animator", JSAnimator::JSBind },
+    { "SpringProp", JSAnimator::JSBind },
+    { "SpringMotion", JSAnimator::JSBind },
+    { "ScrollMotion", JSAnimator::JSBind },
+    { "Animator", JSAnimator::JSBind },
+    { "Span", JSSpan::JSBind },
+    { "Button", JSButton::JSBind },
+    { "Canvas", JSCanvas::JSBind },
+    { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
+    { "List", JSList::JSBind },
+    { "ListItem", JSListItem::JSBind },
+    { "LoadingProgress", JSLoadingProgress::JSBind },
+    { "Image", JSImage::JSBind },
+    { "Counter", JSCounter::JSBind },
+    { "Progress", JSProgress::JSBind },
+    { "Column", JSColumn::JSBind },
+    { "Row", JSRow::JSBind },
+    { "GridContainer", JSGridContainer::JSBind },
+    { "Slider", JSSlider::JSBind },
+    { "Stack", JSStack::JSBind },
+    { "ForEach", JSForEach::JSBind },
+    { "Divider", JSDivider::JSBind },
+    { "If", JSIfElse::JSBind },
+    { "Scroll", JSScroll::JSBind },
+    { "GridRow", JSGridRow::JSBind },
+    { "GridCol", JSGridCol::JSBind },
+    { "Toggle", JSToggle::JSBind },
+    { "Blank", JSBlank::JSBind },
+    { "Calendar", JSCalendar::JSBind },
+    { "Rect", JSRect::JSBind },
+    { "Shape", JSShape::JSBind },
+    { "Path", JSPath::JSBind },
+    { "Circle", JSCircle::JSBind },
+    { "Line", JSLine::JSBind },
+    { "Polygon", JSPolygon::JSBind },
+    { "Polyline", JSPolyline::JSBind },
+    { "Ellipse", JSEllipse::JSBind },
+    { "Radio", JSRadio::JSBind },
+    { "QRCode", JSQRCode::JSBind },
+    { "Piece", JSPiece::JSBind },
+    { "Rating", JSRating::JSBind },
+    { "DataPanel", JSDataPanel::JSBind },
+    { "Badge", JSBadge::JSBind },
+    { "Gauge", JSGauge::JSBind },
+    { "Marquee", JSMarquee::JSBind },
+    { "SwiperController", JSSwiperController::JSBind },
+    { "CalendarController", JSCalendarController::JSBind },
+    { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
+    { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
+    { "CanvasGradient", JSCanvasGradient::JSBind },
+    { "ImageBitmap", JSRenderImage::JSBind },
+    { "ImageData", JSCanvasImageData::JSBind },
+    { "Path2D", JSPath2D::JSBind },
+    { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
+    { "Sheet", JSSheet::JSBind },
+    { "TextTimer", JSTextTimer::JSBind },
+    { "TextTimerController", JSTextTimerController::JSBind },
+    { "Checkbox", JSCheckbox::JSBind },
+    { "CheckboxGroup", JSCheckboxGroup::JSBind },
+    { "RelativeContainer", JSRelativeContainer::JSBind },
+    { "__Common__", JSCommonView::JSBind },
+    { "LinearGradient", JSLinearGradient::JSBind },
+};
+
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "Text", JSText::JSBind },
@@ -579,6 +646,28 @@ void RegisterAllModule(BindingTarget globalObj)
     RegisterExtraViews(globalObj);
 }
 
+void RegisterAllFormModule(BindingTarget globalObj)
+{
+    JSColumn::JSBind(globalObj);
+    JSCommonView::JSBind(globalObj);
+    JSSwiperController::JSBind(globalObj);
+    JSScroller::JSBind(globalObj);
+    JSCalendarController::JSBind(globalObj);
+    JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
+    JSCanvasGradient::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
+    JSPath2D::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
+    JSTextTimerController::JSBind(globalObj);
+    JSLinearGradient::JSBind(globalObj);
+    for (auto& iter : formBindFuncs) {
+        iter.second(globalObj);
+    }
+    RegisterExtraViews(globalObj);
+}
+
 void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 {
     auto func = bindFuncs.find(moduleName);
@@ -636,6 +725,35 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSCanvasImageData::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
+}
+
+void JsBindFormViews(BindingTarget globalObj)
+{
+    JSViewAbstract::JSBind();
+    JSContainerBase::JSBind();
+    JSShapeAbstract::JSBind();
+    JSView::JSBind(globalObj);
+    JSLocalStorage::JSBind(globalObj);
+
+    JSEnvironment::JSBind(globalObj);
+    JSViewContext::JSBind(globalObj);
+    JSViewStackProcessor::JSBind(globalObj);
+    JSTouchHandler::JSBind(globalObj);
+    JSPersistent::JSBind(globalObj);
+    JSDistributed::JSBind(globalObj);
+    JSScroller::JSBind(globalObj);
+
+    JSProfiler::JSBind(globalObj);
+
+    auto delegate = JsGetFrontendDelegate();
+    std::string jsModules;
+    if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
+        LOGI("JsRegisterViews register collection modules");
+        JsRegisterModules(globalObj, jsModules);
+    } else {
+        LOGI("JsRegisterViews register all modules");
+        RegisterAllFormModule(globalObj);
+    }
 }
 
 void JsBindViews(BindingTarget globalObj)

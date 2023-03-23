@@ -690,10 +690,88 @@ void DatePickerDialogView::SetDialogSwitchEvent(std::function<bool()> switchEven
 void DatePickerDialogView::SetDateTextProperties(const RefPtr<FrameNode>& frameNode,
     const PickerTextProperties& properties)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
+        pickerProperty->UpdateDisappearFontSize(properties.disappearTextStyle_.fontSize.value());
+    } else {
+        pickerProperty->UpdateDisappearFontSize(disappearStyle.GetFontSize());
+    }
+    pickerProperty->UpdateDisappearColor(
+        properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearWeight(
+        properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+
+    if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
+        pickerProperty->UpdateFontSize(properties.normalTextStyle_.fontSize.value());
+    } else {
+        pickerProperty->UpdateFontSize(normalStyle.GetFontSize());
+    }
+    pickerProperty->UpdateColor(
+        properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateWeight(
+        properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+
+    if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+        pickerProperty->UpdateSelectedFontSize(properties.selectedTextStyle_.fontSize.value());
+    } else {
+        pickerProperty->UpdateSelectedFontSize(selectedStyle.GetFontSize());
+    }
+    pickerProperty->UpdateSelectedColor(
+        properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    pickerProperty->UpdateSelectedWeight(
+        properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
 }
 
 void DatePickerDialogView::SetTimeTextProperties(const RefPtr<FrameNode>& frameNode,
     const PickerTextProperties& properties)
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
+    auto disappearStyle = pickerTheme->GetDisappearOptionStyle();
+    auto normalStyle = pickerTheme->GetOptionStyle(false, false);
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+
+    if (properties.disappearTextStyle_.fontSize.has_value() && properties.disappearTextStyle_.fontSize->IsValid()) {
+        pickerProperty->UpdateDisappearFontSize(properties.disappearTextStyle_.fontSize.value());
+    } else {
+        pickerProperty->UpdateDisappearFontSize(disappearStyle.GetFontSize());
+    }
+    pickerProperty->UpdateDisappearColor(
+        properties.disappearTextStyle_.textColor.value_or(disappearStyle.GetTextColor()));
+    pickerProperty->UpdateDisappearWeight(
+        properties.disappearTextStyle_.fontWeight.value_or(disappearStyle.GetFontWeight()));
+
+    if (properties.normalTextStyle_.fontSize.has_value() && properties.normalTextStyle_.fontSize->IsValid()) {
+        pickerProperty->UpdateFontSize(properties.normalTextStyle_.fontSize.value());
+    } else {
+        pickerProperty->UpdateFontSize(normalStyle.GetFontSize());
+    }
+    pickerProperty->UpdateColor(
+        properties.normalTextStyle_.textColor.value_or(normalStyle.GetTextColor()));
+    pickerProperty->UpdateWeight(
+        properties.normalTextStyle_.fontWeight.value_or(normalStyle.GetFontWeight()));
+
+    if (properties.selectedTextStyle_.fontSize.has_value() && properties.selectedTextStyle_.fontSize->IsValid()) {
+        pickerProperty->UpdateSelectedFontSize(properties.selectedTextStyle_.fontSize.value());
+    } else {
+        pickerProperty->UpdateSelectedFontSize(selectedStyle.GetFontSize());
+    }
+    pickerProperty->UpdateSelectedColor(
+        properties.selectedTextStyle_.textColor.value_or(selectedStyle.GetTextColor()));
+    pickerProperty->UpdateSelectedWeight(
+        properties.selectedTextStyle_.fontWeight.value_or(selectedStyle.GetFontWeight()));
 }
 } // namespace OHOS::Ace::NG

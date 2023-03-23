@@ -189,7 +189,7 @@ void ImagePainter::DrawImageWithRepeat(RSCanvas& canvas, const RectF& contentRec
     canvas.Save();
     auto clipRect = RSRect(offset.GetX(), offset.GetY(), static_cast<float>(offset.GetX() + contentWidth),
         static_cast<float>(offset.GetY() + contentHeight));
-    canvas.ClipRect(clipRect, OHOS::Rosen::Drawing::ClipOp::INTERSECT);
+    canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     uint32_t up = 0;
     uint32_t down = 1;
     uint32_t left = 2;

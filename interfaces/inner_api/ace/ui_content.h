@@ -123,7 +123,7 @@ public:
     // ArkTS Form
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetFormRootNode() = 0;
 
-    virtual void UpdateFormDate(const std::string& data) = 0;
+    virtual void UpdateFormData(const std::string& data) = 0;
     virtual void UpdateFormSharedImage(
         const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) {}
 

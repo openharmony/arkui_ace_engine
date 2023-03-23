@@ -35,6 +35,15 @@ public:
     void SetShowSteps(bool value) override;
     void SetShowTips(bool value) override;
     void SetThickness(const Dimension& value) override;
+    void SetBlockBorderColor(const Color& value) override;
+    void SetBlockBorderWidth(const Dimension& value) override;
+    void SetStepColor(const Color& value) override;
+    void SetTrackBorderRadius(const Dimension& value) override;
+    void SetBlockSize(const Size& value) override;
+    void SetBlockType(BlockStyleType value) override;
+    void SetBlockImage(const std::string& value) override;
+    void SetBlockShape(const RefPtr<BasicShape>& value) override;
+    void SetStepSize(const Dimension& value) override;
     void SetOnChange(SliderOnChangeEvent&& eventOnChange) override;
 };
 

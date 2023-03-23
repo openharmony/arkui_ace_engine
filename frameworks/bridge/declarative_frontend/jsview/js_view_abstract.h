@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,7 @@ namespace OHOS::Ace::Framework {
 
 constexpr int32_t DEFAULT_TAP_FINGERS = 1;
 constexpr int32_t DEFAULT_TAP_COUNTS = 1;
+constexpr float DEFAULT_PROGRESS_TOTAL = 100.0f;
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,
@@ -87,6 +88,7 @@ public:
     static void JsLightUpEffect(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
+    static void JsBindContentCover(const JSCallbackInfo& info);
     static void JsBorderColor(const JSCallbackInfo& info);
     static void ParseBorderColor(const JSRef<JSVal>& args);
     static void JsPadding(const JSCallbackInfo& info);
@@ -228,6 +230,7 @@ public:
 #endif
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
+    static void JsKeyboardShortcut(const JSCallbackInfo& info);
 
     static void JsAccessibilityGroup(bool accessible);
     static void JsAccessibilityText(const std::string& text);
@@ -339,6 +342,54 @@ public:
             return true;
         }
         return false;
+    }
+
+    static std::string GetFunctionKeyName(FunctionKey functionkey)
+    {
+        switch (functionkey) {
+            case FunctionKey::ESC:
+                return "ESC";
+                break;
+            case FunctionKey::F1:
+                return "F1";
+                break;
+            case FunctionKey::F2:
+                return "F2";
+                break;
+            case FunctionKey::F3:
+                return "F3";
+                break;
+            case FunctionKey::F4:
+                return "F4";
+                break;
+            case FunctionKey::F5:
+                return "F5";
+                break;
+            case FunctionKey::F6:
+                return "F6";
+                break;
+            case FunctionKey::F7:
+                return "F7";
+                break;
+            case FunctionKey::F8:
+                return "F8";
+                break;
+            case FunctionKey::F9:
+                return "F9";
+                break;
+            case FunctionKey::F10:
+                return "F10";
+                break;
+            case FunctionKey::F11:
+                return "F11";
+                break;
+            case FunctionKey::F12:
+                return "F12";
+                break;
+            default:
+                return "";
+                break;
+        }
     }
 };
 } // namespace OHOS::Ace::Framework

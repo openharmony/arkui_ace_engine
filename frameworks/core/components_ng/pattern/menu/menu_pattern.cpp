@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
+#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
@@ -248,5 +249,49 @@ void MenuPattern::UpdateMenuItemChildren(RefPtr<FrameNode>& host)
             // do nothing
         }
     }
+}
+
+void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
+{
+    if (!isSelectMenu_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    auto childCount = children.size();
+    auto paramCount = params.size();
+    size_t updateCount = std::min(paramCount, childCount);
+    auto childIt = children.begin();
+    for (size_t i = 0; i < updateCount; i++, childIt++) {
+        const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
+        CHECK_NULL_VOID(childNode);
+        if (i == 0) {
+            auto props = childNode->GetPaintProperty<OptionPaintProperty>();
+            CHECK_NULL_VOID(props);
+            props->UpdateNeedDivider(false);
+        }
+        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        optionPattern->UpdateText(params.at(i).first);
+        optionPattern->UpdateIcon(params.at(i).second);
+        childNode->MarkModifyDone();
+        childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    for (size_t i = updateCount; i < paramCount; i++) {
+        auto optionNode = OptionView::CreateSelectOption(params.at(i).first, params.at(i).second, i);
+        if (i == 0) {
+            auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
+            props->UpdateNeedDivider(false);
+        }
+        optionNode->MountToParent(host);
+        optionNode->MarkModifyDone();
+        optionNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+    for (size_t i = updateCount; i < childCount; i++) {
+        childIt = host->RemoveChild(*childIt);
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG

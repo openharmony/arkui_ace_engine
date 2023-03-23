@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,9 @@
 #include <memory>
 #include <vector>
 #include "base/json/json_util.h"
+#include "core/components/indexer/indexer_theme.h"
 #include "core/components_v2/inspector/utils.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -36,8 +38,8 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("AlignStyle",
         propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ? "AlignStyle::LEFT" : "AlignStyle::RIGHT");
     auto PopupPositionJsonObject = JsonUtil::Create(true);
-    PopupPositionJsonObject->Put("PopupPositionX", std::to_string(propPopupPositionX_.value_or(0)).c_str());
-    PopupPositionJsonObject->Put("PopupPositionY", std::to_string(propPopupPositionY_.value_or(0)).c_str());
+    PopupPositionJsonObject->Put("PopupPositionX", propPopupPositionX_.value_or(Dimension()).ToString().c_str());
+    PopupPositionJsonObject->Put("PopupPositionY", propPopupPositionY_.value_or(Dimension()).ToString().c_str());
     json->Put("PopupPosition", PopupPositionJsonObject);
     auto jsonArrayValue = JsonUtil::CreateArray(true);
     auto arrayValue = propArrayValue_.value_or(std::vector<std::string>());
@@ -54,11 +56,20 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     fontFamily.emplace_back(DEFAULT_FAMILY);
     defaultFont.SetFontFamilies(fontFamily);
     auto fontJsonObject = ToJsonObjectValue(propFont_.value_or(defaultFont));
-    json->Put("Font", fontJsonObject);
+    json->Put("font", fontJsonObject);
     auto selectFontJsonObject = ToJsonObjectValue(propSelectedFont_.value_or(defaultFont));
     json->Put("SelectFont", selectFontJsonObject);
     auto popupFontJsonObject = ToJsonObjectValue(propPopupFont_.value_or(defaultFont));
     json->Put("PopupFont", popupFontJsonObject);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto defaultFontSize = indexerTheme->GetPopupTextStyle().GetFontSize();
+    auto defaultFontWeight = indexerTheme->GetPopupTextStyle().GetFontWeight();
+    json->Put("popupItemFontSize", propFontSize_.value_or(defaultFontSize).ToString().c_str());
+    json->Put("popupItemFontWeight",
+        V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(defaultFontWeight)).c_str());
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)

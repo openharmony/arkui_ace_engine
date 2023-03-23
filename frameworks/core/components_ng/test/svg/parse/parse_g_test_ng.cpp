@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_g.h"
 #include "core/components_ng/svg/parse/svg_svg.h"
 #include "core/components_ng/svg/svg_dom.h"

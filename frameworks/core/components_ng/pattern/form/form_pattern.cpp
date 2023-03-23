@@ -43,7 +43,9 @@ void ShowPointEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
         return;
     }
 }
-}
+
+constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
+} // namespace
 
 FormPattern::FormPattern() = default;
 FormPattern::~FormPattern() = default;
@@ -91,6 +93,11 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (info.bundleName != cardInfo_.bundleName || info.abilityName != cardInfo_.abilityName ||
         info.moduleName != cardInfo_.moduleName || info.cardName != cardInfo_.cardName ||
         info.dimension != cardInfo_.dimension) {
+        // When cardInfo has changed, it will call AddForm in Fwk
+        // If the width or height equal to zero, it will not
+        if (NonPositive(size.Width()) || NonPositive(size.Height())) {
+            return false;
+        }
         cardInfo_ = info;
     } else {
         // for update form component
@@ -110,9 +117,15 @@ bool FormPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
             cardInfo_.width = info.width;
             cardInfo_.height = info.height;
-            subContainer_->SetFormPattern(WeakClaim(this));
-            subContainer_->UpdateRootElementSize();
-            subContainer_->UpdateSurfaceSizeWithAnimathion();
+            if (subContainer_) {
+                subContainer_->SetFormPattern(WeakClaim(this));
+                subContainer_->UpdateRootElementSize();
+                subContainer_->UpdateSurfaceSizeWithAnimathion();
+            }
+        }
+        if (isLoaded_) {
+            auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+            layoutProperty->UpdateVisibility(visible);
         }
         return false;
     }
@@ -243,12 +256,19 @@ void FormPattern::InitFormManagerDelegate()
             CHECK_NULL_VOID(formComponentContext);
             formComponentContext->AddChild(externalRenderContext, 0);
 
+            auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+            layoutProperty->UpdateVisibility(visible);
+            formComponent->isLoaded_ = true;
+
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             auto parent = host->GetParent();
             CHECK_NULL_VOID(parent);
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
             host->GetRenderContext()->RequestNextFrame();
+            formComponent->OnLoadEvent();
     });
 
     formManagerBridge_->AddFormSurfaceChangeCallback([weak = WeakClaim(this), instanceID](float width, float height) {
@@ -285,22 +305,24 @@ void FormPattern::CreateCardContainer()
     CHECK_NULL_VOID(context);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-
-    if (subContainer_) {
-        auto id = subContainer_->GetRunningCardId();
-        FormManager::GetInstance().RemoveSubContainer(id);
-        subContainer_->Destroy();
-        subContainer_.Reset();
+    auto hasContainer = false;
+    RemoveSubContainer();
+    if (cardInfo_.id != 0 && Container::IsCurrentUseNewPipeline()) {
+        auto subContainer = FormManager::GetInstance().GetSubContainer(cardInfo_.id);
+        if (subContainer && context->GetInstanceId() == subContainer->GetInstanceId() &&
+            subContainer->GetCardType() == FrontendType::JS_CARD) {
+            subContainer_ = subContainer;
+            FormManager::GetInstance().RemoveSubContainer(cardInfo_.id);
+            hasContainer = true;
+        }
     }
-
-    subContainer_ = AceType::MakeRefPtr<SubContainer>(context, context->GetInstanceId());
+    if (!subContainer_) {
+        subContainer_ = AceType::MakeRefPtr<SubContainer>(context, context->GetInstanceId());
+    }
     CHECK_NULL_VOID(subContainer_);
     subContainer_->Initialize();
     subContainer_->SetFormPattern(WeakClaim(this));
     subContainer_->SetNodeId(host->GetId());
-    auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
-    auto key = info.ToString();
-    FormManager::GetInstance().AddNonmatchedContainer(key, subContainer_);
 
     subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](size_t id) {
         auto pattern = weak.Upgrade();
@@ -316,6 +338,52 @@ void FormPattern::CreateCardContainer()
             pattern->FireOnAcquiredEvent(id);
         });
     });
+
+    subContainer_->SetFormLoadCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnLoadEvent();
+    });
+
+    subContainer_->AddFormVisiableCallback([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+        layoutProperty->UpdateVisibility(visible);
+        pattern->isLoaded_ = true;
+    });
+
+    auto eventhHub = host->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventhHub);
+    eventhHub->SetOnOnCache([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto subContainer = pattern->GetSubContainer();
+        CHECK_NULL_VOID(subContainer);
+        auto uiTaskExecutor =
+            SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        auto id = subContainer->GetRunningCardId();
+        FormManager::GetInstance().AddSubContainer(id, subContainer);
+        uiTaskExecutor.PostDelayedTask(
+            [id, nodeId = subContainer->GetNodeId()] {
+                auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
+                if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == nodeId) {
+                    FormManager::GetInstance().RemoveSubContainer(id);
+                    cachedubContainer->Destroy();
+                    cachedubContainer.Reset();
+                }
+            },
+            DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE);
+    });
+    if (hasContainer) {
+        subContainer_->RunSameCard();
+    }
 }
 
 std::unique_ptr<DrawDelegate> FormPattern::GetDrawDelegate()
@@ -407,6 +475,29 @@ void FormPattern::FireOnRouterEvent(const std::unique_ptr<JsonValue>& action) co
     eventHub->FireOnRouter(json->ToString());
 }
 
+void FormPattern::FireOnLoadEvent() const
+{
+    LOGI("FireOnLoadEvent");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<FormEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnLoad("");
+}
+
+void FormPattern::OnLoadEvent()
+{
+    LOGI("OnLoadEvent");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(host->GetContext()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireOnLoadEvent();
+    });
+}
+
 void FormPattern::OnActionEvent(const std::string& action) const
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
@@ -460,5 +551,18 @@ void FormPattern::DispatchPointerEvent(
 
     ShowPointEvent(pointerEvent);
     formManagerBridge_->DispatchPointerEvent(pointerEvent);
+}
+
+void FormPattern::RemoveSubContainer()
+{
+    if (subContainer_) {
+        auto id = subContainer_->GetRunningCardId();
+        auto cachedubContainer = FormManager::GetInstance().GetSubContainer(id);
+        if (cachedubContainer != nullptr && cachedubContainer->GetNodeId() == subContainer_->GetNodeId()) {
+            FormManager::GetInstance().RemoveSubContainer(id);
+        }
+        subContainer_->Destroy();
+        subContainer_.Reset();
+    }
 }
 } // namespace OHOS::Ace::NG

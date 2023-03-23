@@ -23,6 +23,7 @@
 #include "core/components/common/painter/flutter_svg_painter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/transform/render_transform.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/parse/svg_animation.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -105,6 +106,11 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
     if (!declaration_->SetSpecializedAttr(std::make_pair(name, value))) {
         declaration_->SetAttr({ std::make_pair(name, value) });
     }
+}
+
+RSPath SvgNode::AsRSPath(const Size& viewPort) const
+{
+    return {};
 }
 
 void SvgNode::InitStyle(const RefPtr<SvgBaseDeclaration>& parent)

@@ -22,12 +22,14 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/event/touch_event.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 
 constexpr int32_t MAX_PINCH_FINGERS = 5;
+constexpr double SCALE_PER_AXIS_EVENT = 0.1f;
 
 } // namespace
 
@@ -42,6 +44,13 @@ void PinchRecognizer::OnRejected()
 {
     LOGD("pinch gesture has been rejected!");
     refereeState_ = RefereeState::FAIL;
+}
+
+bool PinchRecognizer::IsCtrlBeingPressed()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->IsKeyInPressed(KeyCode::KEY_CTRL_LEFT) || pipeline->IsKeyInPressed(KeyCode::KEY_CTRL_RIGHT);
 }
 
 void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
@@ -75,14 +84,22 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
-    LOGD("pinch recognizer receives touch down event, begin to detect pinch event");
+    LOGD("pinch recognizer receives axis start event, begin to detect pinch event");
+    if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed()) {
+        LOGD("pinch recognizer exit cause of event's pinchAxisScale is zero and key-ctrl is not being pressed.");
+        Adjudicate(Claim(this), GestureDisposal::REJECT);
+        return;
+    }
     if (IsRefereeFinished()) {
         LOGD("referee has already receives the result");
         return;
     }
 
-    pinchCenter_ = Offset(event.x, event.y);
-    refereeState_ = RefereeState::DETECTING;
+    if (refereeState_ == RefereeState::READY) {
+        scale_ = 1.0f;
+        pinchCenter_ = Offset(event.x, event.y);
+        refereeState_ = RefereeState::DETECTING;
+    }
 }
 
 void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
@@ -107,7 +124,19 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    HandleTouchUpEvent(TouchEvent());
+    LOGD("pinch recognizer receives axis end event");
+
+    if (isPinchEnd_) {
+        return;
+    }
+    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+    if (refereeState_ == RefereeState::SUCCEED) {
+        SendCallbackMsg(onActionEnd_);
+        isPinchEnd_ = true;
+    }
 }
 
 void PinchRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
@@ -148,15 +177,41 @@ void PinchRecognizer::OnFlushTouchEventsEnd()
 
 void PinchRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    LOGD("pinch recognizer receives touch move event");
-    time_ = event.time;
-    if (refereeState_ == RefereeState::DETECTING) {
-        scale_ = event.pinchAxisScale;
-        Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+    LOGD("pinch recognizer receives axis update event");
+
+    if (isPinchEnd_) {
         return;
     }
-    if (refereeState_ == RefereeState::SUCCEED) {
-        scale_ = event.pinchAxisScale;
+    if (NearZero(event.pinchAxisScale) && !IsCtrlBeingPressed()) {
+        if (refereeState_ == RefereeState::DETECTING) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+            return;
+        }
+        if (refereeState_ == RefereeState::SUCCEED) {
+            refereeState_ = RefereeState::READY;
+            SendCallbackMsg(onActionEnd_);
+            isPinchEnd_ = true;
+            return;
+        }
+    }
+
+    time_ = event.time;
+    if (refereeState_ == RefereeState::DETECTING || refereeState_ == RefereeState::SUCCEED) {
+        if (event.pinchAxisScale != 0.0) {
+            scale_ = event.pinchAxisScale;
+        } else {
+            if (GreatNotEqual(event.verticalAxis, 0.0) || GreatNotEqual(event.horizontalAxis, 0.0)) {
+                scale_ -= SCALE_PER_AXIS_EVENT;
+            } else if (LessNotEqual(event.verticalAxis, 0.0) || LessNotEqual(event.horizontalAxis, 0)) {
+                scale_ += SCALE_PER_AXIS_EVENT;
+            }
+            if (LessNotEqual(scale_, 0.0)) {
+                scale_ = 0.0;
+            }
+        }
+        if (refereeState_ == RefereeState::DETECTING) {
+            Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
+        }
         SendCallbackMsg(onActionUpdate_);
     }
 }
@@ -174,9 +229,17 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 }
 
-void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& /*event*/)
+void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    HandleTouchCancelEvent(TouchEvent());
+    LOGD("pinch recognizer receives axis cancel event");
+    if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return;
+    }
+
+    if (refereeState_ == RefereeState::SUCCEED) {
+        SendCancelMsg();
+    }
 }
 
 double PinchRecognizer::ComputeAverageDeviation()

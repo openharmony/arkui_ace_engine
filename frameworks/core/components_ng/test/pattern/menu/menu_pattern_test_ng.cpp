@@ -19,6 +19,7 @@
 #define protected public
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_view.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
@@ -501,6 +502,333 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg011, TestSize.Level1)
     itemPattern->OnModifyDone();
     auto labelNode = itemPattern->GetLabelNode();
     ASSERT_EQ(labelNode, nullptr);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg012
+ * @tc.desc: Verify UpdateSelectParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg012, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    std::vector<SelectParam> params;
+    params.emplace_back("content1", "icon1");
+    params.emplace_back("content2", "");
+    params.emplace_back("", "icon3");
+    params.emplace_back("", "");
+    auto wrapperNode = MenuView::Create(params, TARGET_ID);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+    const auto& children = menuNode->GetChildren();
+    auto childIt = children.begin();
+    for (size_t i = 0; i < children.size(); i++, childIt++) {
+        const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
+        ASSERT_NE(childNode, nullptr);
+        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        ASSERT_NE(optionPattern, nullptr);
+        ASSERT_NE(optionPattern->text_, nullptr);
+        auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(textProps, nullptr);
+        auto param = params.at(i);
+        EXPECT_EQ(textProps->GetContent().value_or(""), param.first);
+        if (param.second.empty()) {
+            ASSERT_EQ(optionPattern->icon_, nullptr);
+        } else {
+            ASSERT_NE(optionPattern->icon_, nullptr);
+            auto imageProps = optionPattern->icon_->GetLayoutProperty<ImageLayoutProperty>();
+            ASSERT_NE(imageProps, nullptr);
+            auto imageSrcInfo = imageProps->GetImageSourceInfo();
+            ASSERT_TRUE(imageSrcInfo.has_value());
+            ASSERT_EQ(imageSrcInfo->GetSrc(), param.second);
+        }
+    }
+
+    params.clear();
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateSelectParam(params);
+    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg013
+ * @tc.desc: Verify UpdateSelectParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg013, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    std::vector<SelectParam> params;
+    auto wrapperNode = MenuView::Create(params, TARGET_ID);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+
+    params.emplace_back("content1", "icon1");
+    params.emplace_back("content2", "");
+    params.emplace_back("", "icon3");
+    params.emplace_back("", "");
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateSelectParam(params);
+    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+
+    const auto& children = menuNode->GetChildren();
+    auto childIt = children.begin();
+    for (size_t i = 0; i < children.size(); i++, childIt++) {
+        const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
+        ASSERT_NE(childNode, nullptr);
+        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        ASSERT_NE(optionPattern, nullptr);
+        ASSERT_NE(optionPattern->text_, nullptr);
+        auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(textProps, nullptr);
+        auto param = params.at(i);
+        EXPECT_EQ(textProps->GetContent().value_or(""), param.first);
+        if (param.second.empty()) {
+            ASSERT_EQ(optionPattern->icon_, nullptr);
+        } else {
+            ASSERT_NE(optionPattern->icon_, nullptr);
+            auto imageProps = optionPattern->icon_->GetLayoutProperty<ImageLayoutProperty>();
+            ASSERT_NE(imageProps, nullptr);
+            auto imageSrcInfo = imageProps->GetImageSourceInfo();
+            ASSERT_TRUE(imageSrcInfo.has_value());
+            ASSERT_EQ(imageSrcInfo->GetSrc(), param.second);
+        }
+    }
+}
+
+/**
+ * @tc.name: MenuPatternTestNg014
+ * @tc.desc: Verify UpdateSelectParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg014, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    std::vector<SelectParam> params;
+    auto wrapperNode = MenuView::Create(params, TARGET_ID);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateSelectParam(params);
+    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: MenuPatternTestNg015
+ * @tc.desc: Verify UpdateSelectParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg015, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    std::vector<SelectParam> params;
+    params.emplace_back("content1", "icon1");
+    params.emplace_back("content2", "");
+    params.emplace_back("", "icon3");
+    params.emplace_back("", "");
+    auto wrapperNode = MenuView::Create(params, TARGET_ID);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+
+    params.clear();
+    params.emplace_back("content1_new", "");
+    params.emplace_back("content2_new", "icon2_new");
+    params.emplace_back("", "");
+    params.emplace_back("", "icon4_new");
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateSelectParam(params);
+    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+
+    const auto& children = menuNode->GetChildren();
+    auto childIt = children.begin();
+    for (size_t i = 0; i < children.size(); i++, childIt++) {
+        const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
+        ASSERT_NE(childNode, nullptr);
+        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        ASSERT_NE(optionPattern, nullptr);
+        ASSERT_NE(optionPattern->text_, nullptr);
+        auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(textProps, nullptr);
+        auto param = params.at(i);
+        EXPECT_EQ(textProps->GetContent().value_or(""), param.first);
+        if (param.second.empty()) {
+            ASSERT_EQ(optionPattern->icon_, nullptr);
+        } else {
+            ASSERT_NE(optionPattern->icon_, nullptr);
+            auto imageProps = optionPattern->icon_->GetLayoutProperty<ImageLayoutProperty>();
+            ASSERT_NE(imageProps, nullptr);
+            auto imageSrcInfo = imageProps->GetImageSourceInfo();
+            ASSERT_TRUE(imageSrcInfo.has_value());
+            ASSERT_EQ(imageSrcInfo->GetSrc(), param.second);
+        }
+    }
+}
+
+/**
+ * @tc.name: MenuPatternTestNg016
+ * @tc.desc: Verify UpdateSelectParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg016, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    std::vector<SelectParam> params;
+    params.emplace_back("content1", "icon1");
+    params.emplace_back("content2", "");
+    params.emplace_back("", "icon3");
+    params.emplace_back("", "");
+    auto wrapperNode = MenuView::Create(params, TARGET_ID);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+
+    params.clear();
+    params.emplace_back("content1_new", "");
+    params.emplace_back("content2_new", "icon2_new");
+    params.emplace_back("", "");
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateSelectParam(params);
+    ASSERT_EQ(menuNode->GetChildren().size(), 3);
+
+    const auto& children = menuNode->GetChildren();
+    auto childIt = children.begin();
+    for (size_t i = 0; i < children.size(); i++, childIt++) {
+        const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
+        ASSERT_NE(childNode, nullptr);
+        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        ASSERT_NE(optionPattern, nullptr);
+        ASSERT_NE(optionPattern->text_, nullptr);
+        auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(textProps, nullptr);
+        auto param = params.at(i);
+        EXPECT_EQ(textProps->GetContent().value_or(""), param.first);
+        if (param.second.empty()) {
+            ASSERT_EQ(optionPattern->icon_, nullptr);
+        } else {
+            ASSERT_NE(optionPattern->icon_, nullptr);
+            auto imageProps = optionPattern->icon_->GetLayoutProperty<ImageLayoutProperty>();
+            ASSERT_NE(imageProps, nullptr);
+            auto imageSrcInfo = imageProps->GetImageSourceInfo();
+            ASSERT_TRUE(imageSrcInfo.has_value());
+            ASSERT_EQ(imageSrcInfo->GetSrc(), param.second);
+        }
+    }
+}
+
+/**
+ * @tc.name: MenuPatternTestNg017
+ * @tc.desc: Verify UpdateSelectParam.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg017, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    std::vector<SelectParam> params;
+    params.emplace_back("content1", "icon1");
+    params.emplace_back("content2", "");
+    params.emplace_back("", "icon3");
+    auto wrapperNode = MenuView::Create(params, TARGET_ID);
+    ASSERT_NE(wrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+
+    ASSERT_EQ(menuNode->GetChildren().size(), 3);
+
+    params.clear();
+    params.emplace_back("content1_new", "");
+    params.emplace_back("content2_new", "icon2_new");
+    params.emplace_back("", "");
+    params.emplace_back("", "icon4_new");
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->UpdateSelectParam(params);
+    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+
+    const auto& children = menuNode->GetChildren();
+    auto childIt = children.begin();
+    for (size_t i = 0; i < children.size(); i++, childIt++) {
+        const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
+        ASSERT_NE(childNode, nullptr);
+        auto optionPattern = childNode->GetPattern<OptionPattern>();
+        ASSERT_NE(optionPattern, nullptr);
+        ASSERT_NE(optionPattern->text_, nullptr);
+        auto textProps = optionPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+        ASSERT_NE(textProps, nullptr);
+        auto param = params.at(i);
+        EXPECT_EQ(textProps->GetContent().value_or(""), param.first);
+        if (param.second.empty()) {
+            ASSERT_EQ(optionPattern->icon_, nullptr);
+        } else {
+            ASSERT_NE(optionPattern->icon_, nullptr);
+            auto imageProps = optionPattern->icon_->GetLayoutProperty<ImageLayoutProperty>();
+            ASSERT_NE(imageProps, nullptr);
+            auto imageSrcInfo = imageProps->GetImageSourceInfo();
+            ASSERT_TRUE(imageSrcInfo.has_value());
+            ASSERT_EQ(imageSrcInfo->GetSrc(), param.second);
+        }
+    }
+}
+
+/**
+ * @tc.name: MenuPatternTestNg018
+ * @tc.desc: Verify UpdateMenuItemChildren.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, MenuPatternTestNg018, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+
+    MenuView::Create();
+    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+    std::vector<SelectParam> params;
+    params.emplace_back("content1", "icon1");
+    menuPattern->UpdateSelectParam(params);
+    ASSERT_EQ(menuNode->GetChildren().size(), 0);
 }
 } // namespace
 } // namespace OHOS::Ace::NG

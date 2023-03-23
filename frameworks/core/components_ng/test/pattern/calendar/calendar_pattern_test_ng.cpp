@@ -18,6 +18,9 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "core/components/calendar/calendar_data_adapter.h"
+#include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 #define private public
 #define protected public
@@ -32,6 +35,8 @@
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_view.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_paint_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -41,6 +46,17 @@ struct TestProperty {};
 namespace {
 const Color COLOR_VALUE = Color(0xffbbffff);
 const Dimension SIZE_VALUE = 1.2_px;
+
+const int32_t DAY_VALUE = 1;
+const int32_t MONTH_VALUE = 1;
+const int32_t YEAR_VALUE = 1;
+const int32_t INDEX_VALUE = 1;
+const int32_t FIRST_DAY_INDEX_VALUE = 1;
+const std::string LUNAR_MONTH_VALUE = "五月";
+const std::string LUNAR_DAY_VALUE = "初五";
+const std::string DAY_MARK = "MARK";
+const std::string DAY_MARK_VALUE = "MARK_VALUE";
+const std::string OFF_DAYS_VALUE = "OFF_DAYS";
 } // namespace
 
 class CalendarPatternTestNg : public testing::Test {
@@ -226,5 +242,94 @@ HWTEST_F(CalendarPatternTestNg, CalendarViewTest001, TestSize.Level1)
     EXPECT_EQ(calendarPaintProperty->GetWorkStateWidthValue(1.0_px), SIZE_VALUE);
     EXPECT_EQ(calendarPaintProperty->GetWorkStateHorizontalMovingDistanceValue(1.0_px), SIZE_VALUE);
     EXPECT_EQ(calendarPaintProperty->GetWorkStateVerticalMovingDistanceValue(1.0_px), SIZE_VALUE);
+}
+
+HWTEST_F(CalendarPatternTestNg, CalendarViewTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    RefPtr<CalendarPattern> initPattern = AceType::MakeRefPtr<CalendarPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("testNode", 1, initPattern);
+    stack->Push(frameNode);
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = YEAR_VALUE;
+    obtainedMonth.month = MONTH_VALUE;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+    CalendarView::SetCurrentData(obtainedMonth);
+    CalendarView::SetPreData(obtainedMonth);
+    CalendarView::SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = INDEX_VALUE;
+    calendarDay.day = DAY_VALUE;
+    calendarDay.weekend = true;
+    calendarDay.today = false;
+    calendarDay.focused = false;
+    calendarDay.touched = true;
+    calendarDay.isFirstOfLunar = false;
+    calendarDay.hasSchedule = true;
+    calendarDay.markLunarDay = false;
+    calendarDay.lunarMonth = LUNAR_MONTH_VALUE;
+    calendarDay.lunarDay = LUNAR_DAY_VALUE;
+    calendarDay.dayMark = DAY_MARK;
+    calendarDay.dayMarkValue = DAY_MARK_VALUE;
+    CalendarMonth calendarMonth;
+    calendarMonth.year = YEAR_VALUE;
+    calendarMonth.month = MONTH_VALUE;
+    calendarDay.month = calendarMonth;
+    CalendarView::SetCalendarDay(calendarDay);
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<CalendarPattern>();
+
+    EXPECT_EQ(pattern->GetCurrentMonthData().year, YEAR_VALUE);
+    EXPECT_EQ(pattern->GetCurrentMonthData().month, MONTH_VALUE);
+    EXPECT_EQ(pattern->GetCurrentMonthData().firstDayIndex, FIRST_DAY_INDEX_VALUE);
+    EXPECT_EQ(pattern->GetPreMonthData().year, YEAR_VALUE);
+    EXPECT_EQ(pattern->GetPreMonthData().month, MONTH_VALUE);
+    EXPECT_EQ(pattern->GetPreMonthData().firstDayIndex, FIRST_DAY_INDEX_VALUE);
+    EXPECT_EQ(pattern->GetNextMonthData().year, YEAR_VALUE);
+    EXPECT_EQ(pattern->GetNextMonthData().month, MONTH_VALUE);
+    EXPECT_EQ(pattern->GetNextMonthData().firstDayIndex, FIRST_DAY_INDEX_VALUE);
+
+    EXPECT_EQ(pattern->GetCalendarDay().index, INDEX_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().day, DAY_VALUE);
+    EXPECT_TRUE(pattern->GetCalendarDay().weekend);
+    EXPECT_FALSE(pattern->GetCalendarDay().today);
+    EXPECT_FALSE(pattern->GetCalendarDay().focused);
+    EXPECT_TRUE(pattern->GetCalendarDay().touched);
+    EXPECT_FALSE(pattern->GetCalendarDay().isFirstOfLunar);
+    EXPECT_TRUE(pattern->GetCalendarDay().hasSchedule);
+    EXPECT_FALSE(pattern->GetCalendarDay().markLunarDay);
+    EXPECT_EQ(pattern->GetCalendarDay().lunarMonth, LUNAR_MONTH_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().lunarDay, LUNAR_DAY_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().dayMark, DAY_MARK);
+    EXPECT_EQ(pattern->GetCalendarDay().dayMarkValue, DAY_MARK_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().month.year, YEAR_VALUE);
+    EXPECT_EQ(pattern->GetCalendarDay().month.month, MONTH_VALUE);
+}
+
+HWTEST_F(CalendarPatternTestNg, CalendarViewTest003, TestSize.Level1)
+{
+    CalendarData calendarData;
+    CalendarView::Create(calendarData);
+    CalendarView::SetShowLunar(false);
+    CalendarView::SetShowHoliday(false);
+    CalendarView::SetNeedSlide(true);
+    CalendarView::SetStartOfWeek(Week::Sun);
+    CalendarView::SetOffDays(OFF_DAYS_VALUE);
+    CalendarView::SetDirection(Axis::HORIZONTAL);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto swiperNode = stack->GetMainFrameNode()->GetFirstChild();
+    auto swiperFrameNode = AceType::DynamicCast<FrameNode>(swiperNode);
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetFirstChild());
+    auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+
+    EXPECT_FALSE(calendarPaintProperty->GetShowLunarValue());
+    EXPECT_FALSE(calendarPaintProperty->GetShowHolidayValue());
+    EXPECT_FALSE(swiperPaintProperty->GetDisableSwipeValue());
+    EXPECT_EQ(calendarPaintProperty->GetStartOfWeekValue(), Week::Sun);
+    EXPECT_EQ(calendarPaintProperty->GetOffDaysValue(), OFF_DAYS_VALUE);
+    EXPECT_EQ(swiperLayoutProperty->GetDirectionValue(), Axis::HORIZONTAL);
 }
 } // namespace OHOS::Ace::NG

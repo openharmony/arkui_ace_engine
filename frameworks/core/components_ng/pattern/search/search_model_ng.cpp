@@ -51,24 +51,15 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
     bool hasCancelImageNode = frameNode->HasCancelImageNode();
     bool hasCancelButtonNode = frameNode->HasCancelButtonNode();
 
-    // TextField frameNode
-    auto searchTheme = PipelineBase::GetCurrentContext()->GetTheme<SearchTheme>();
     CreateTextField(frameNode, placeholder, value, hasTextFieldNode);
 
-    // Image frameNode
     std::string src;
     if (icon.has_value()) {
         src = icon.value();
     }
     CreateImage(frameNode, src, hasImageNode);
-
-    // CancelImage frameNode
     CreateCancelImage(frameNode, hasCancelImageNode);
-
-    // CancelButton frameNode
     CreateCancelButton(frameNode, hasCancelButtonNode);
-
-    // Button frameNode
     CreateButton(frameNode, hasButtonNode);
 
     // Set search background
@@ -152,10 +143,10 @@ void SearchModelNG::SetSearchIconSize(const Dimension& value)
 
     auto imageRenderContext = imageFrameNode->GetRenderContext();
     CHECK_NULL_VOID(imageRenderContext);
-    auto imageOriginHeigth = searchTheme->GetIconHeight().ConvertToPx();
+    auto imageOriginHeight = searchTheme->GetIconHeight().ConvertToPx();
     double imageScale = 0.0;
-    if (!NearZero(imageOriginHeigth)) {
-        imageScale = value.ConvertToPx() / imageOriginHeigth;
+    if (!NearZero(imageOriginHeight)) {
+        imageScale = value.ConvertToPx() / imageOriginHeight;
     }
     imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
 
@@ -256,29 +247,27 @@ void SearchModelNG::SetCancelButtonStyle(CancelButtonStyle style)
     auto textHost = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     CHECK_NULL_VOID(textHost);
 
-    auto cancelButtonrenderContext = buttonHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelButtonrenderContext);
-    auto cancelImagerenderContext = imageHost->GetRenderContext();
-    CHECK_NULL_VOID(cancelImagerenderContext);
-
+    auto cancelButtonRenderContext = buttonHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelButtonRenderContext);
+    auto cancelImageRenderContext = imageHost->GetRenderContext();
+    CHECK_NULL_VOID(cancelImageRenderContext);
     auto textLayoutProperty = textHost->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-
     auto cancelButtonEvent = buttonHost->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     auto imageEvent = imageHost->GetEventHub<ImageEventHub>();
-    CHECK_NULL_VOID(cancelButtonEvent);
+    CHECK_NULL_VOID(imageEvent);
 
     if ((style == CancelButtonStyle::CONSTANT) ||
         ((style == CancelButtonStyle::INPUT) &&
           textLayoutProperty->HasValue() && !textLayoutProperty->GetValue()->empty())) {
-        cancelButtonrenderContext->UpdateOpacity(1.0);
-        cancelImagerenderContext->UpdateOpacity(1.0);
+        cancelButtonRenderContext->UpdateOpacity(1.0);
+        cancelImageRenderContext->UpdateOpacity(1.0);
         cancelButtonEvent->SetEnabled(true);
         imageEvent->SetEnabled(true);
     } else {
-        cancelButtonrenderContext->UpdateOpacity(0.0);
-        cancelImagerenderContext->UpdateOpacity(0.0);
+        cancelButtonRenderContext->UpdateOpacity(0.0);
+        cancelImageRenderContext->UpdateOpacity(0.0);
         cancelButtonEvent->SetEnabled(false);
         imageEvent->SetEnabled(false);
     }
@@ -303,10 +292,10 @@ void SearchModelNG::SetCancelIconSize(const Dimension& value)
     auto imageRenderContext = imageFrameNode->GetRenderContext();
     CHECK_NULL_VOID(imageRenderContext);
 
-    auto imageOriginHeigth = searchTheme->GetIconHeight().ConvertToPx();
+    auto imageOriginHeight = searchTheme->GetIconHeight().ConvertToPx();
     double imageScale = 0.0;
-    if (!NearZero(imageOriginHeigth)) {
-        imageScale = value.ConvertToPx() / imageOriginHeigth;
+    if (!NearZero(imageOriginHeight)) {
+        imageScale = value.ConvertToPx() / imageOriginHeight;
     }
     imageRenderContext->UpdateTransformScale(VectorF(imageScale, imageScale));
 
@@ -343,14 +332,14 @@ void SearchModelNG::SetSearchButtonFontSize(const Dimension& value)
     CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
 
     buttonLayoutProperty->UpdateFontSize(value);
-
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    ACE_UPDATE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButtonFontSize, value);
 }
 
 void SearchModelNG::SetSearchButtonFontColor(const Color& color)
@@ -359,12 +348,10 @@ void SearchModelNG::SetSearchButtonFontColor(const Color& color)
     CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-
     auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
 
     buttonLayoutProperty->UpdateFontColor(color);
-
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -401,6 +388,7 @@ void SearchModelNG::SetPlaceholderFont(const Font& font)
     if (!font.fontFamilies.empty()) {
         textFieldLayoutProperty->UpdatePlaceholderFontFamily(font.fontFamilies);
     }
+    textFieldLayoutProperty->UpdatePreferredPlaceholderLineHeightNeedToUpdate(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -424,6 +412,7 @@ void SearchModelNG::SetTextFont(const Font& font)
     if (!font.fontFamilies.empty()) {
         textFieldLayoutProperty->UpdateFontFamily(font.fontFamilies);
     }
+    textFieldLayoutProperty->UpdatePreferredTextLineHeightNeedToUpdate(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -527,31 +516,25 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
         V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto textEditingValue = pattern->GetTextEditingValue();
     if (textFieldLayoutProperty) {
-        if (value) {
-            if (!textFieldLayoutProperty->HasLastValue() || textFieldLayoutProperty->GetLastValue() != value.value()) {
-                pattern->InitEditingValueText(value.value());
-                textFieldLayoutProperty->UpdateLastValue(value.value());
-                textFieldLayoutProperty->UpdateValue(value.value());
-            }
+        if (value.has_value() && value.value() != textEditingValue.text) {
+            pattern->InitEditingValueText(value.value());
         }
-        if (placeholder) {
-            textFieldLayoutProperty->UpdatePlaceholder(placeholder.value());
-        }
+        textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
         textFieldLayoutProperty->UpdateTextColor(searchTheme->GetTextColor());
     }
-
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
     pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
-
+    pattern->InitSurfaceChangedCallback();
+    pattern->InitSurfacePositionChangedCallback();
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
-    auto radius = textFieldTheme->GetBorderRadius();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
 
@@ -560,16 +543,11 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     padding.right = CalcLength(0.0);
     textFieldLayoutProperty->UpdatePadding(padding);
     pattern->SetEnableTouchAndHoverEffect(false);
-
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    textFieldPattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    textFieldPattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
-    auto textInputRenderContext = frameNode->GetRenderContext();
-    textInputRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     if (!hasTextFieldNode) {
         frameNode->MountToParent(parentNode);
-        frameNode->MarkModifyDone();
     }
+    frameNode->MarkModifyDone();
 }
 
 void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std::string& src, bool hasImageNode)
@@ -591,8 +569,8 @@ void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std:
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    auto iconHeigth = searchTheme->GetIconHeight();
-    CalcSize imageCalcSize((CalcLength(iconHeigth)), CalcLength(iconHeigth));
+    auto iconHeight = searchTheme->GetIconHeight();
+    CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
@@ -622,8 +600,8 @@ void SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool
         V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    auto iconHeigth = searchTheme->GetIconHeight();
-    CalcSize imageCalcSize((CalcLength(iconHeigth)), CalcLength(iconHeigth));
+    auto iconHeight = searchTheme->GetIconHeight();
+    CalcSize imageCalcSize((CalcLength(iconHeight)), CalcLength(iconHeight));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 
     auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
@@ -632,7 +610,6 @@ void SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool
 
     if (!hasCancelImageNode) {
         frameNode->MountToParent(parentNode);
-        auto cancelImagelayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
         auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
         CHECK_NULL_VOID(cancelButtonEvent);
         cancelButtonEvent->SetEnabled(false);
@@ -656,8 +633,6 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
         CHECK_NULL_VOID(textNode);
         frameNode->AddChild(textNode);
     }
-
-    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
 
     auto buttonRenderContext = frameNode->GetRenderContext();
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
@@ -704,8 +679,8 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
-    auto cancelButtonlayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    cancelButtonlayoutProperty->UpdateType(ButtonType::CIRCLE);
+    auto cancelButtonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    cancelButtonLayoutProperty->UpdateType(ButtonType::CIRCLE);
     auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     cancelButtonEvent->SetEnabled(false);

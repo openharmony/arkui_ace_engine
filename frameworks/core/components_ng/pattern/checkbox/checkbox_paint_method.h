@@ -20,8 +20,6 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/checkbox/checkbox_modifier.h"
 #include "core/components_ng/pattern/checkbox/checkbox_paint_property.h"
-#include "core/components_ng/render/canvas.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 namespace OHOS::Ace::NG {
 class CheckBoxPaintMethod : public NodePaintMethod {
@@ -63,8 +61,6 @@ public:
         if (paintProperty->HasCheckBoxCheckMarkSize()) {
             if (paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx() >= 0) {
                 strokePaintSize = paintProperty->GetCheckBoxCheckMarkSizeValue().ConvertToPx();
-            } else {
-                paintProperty->UpdateCheckBoxCheckMarkSize(Dimension(strokePaintSize));
             }
         }
         checkboxModifier_->SetStrokeSize(strokePaintSize);

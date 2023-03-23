@@ -34,7 +34,7 @@ public:
     static void Create(const std::string& webData);
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
     static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
-        SetHapPathCallback&& setHapPathCallback, bool popup = false);
+        SetHapPathCallback&& setHapPathCallback, int32_t parentWebId = -1, bool popup = false);
     static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);
     static void SetOnPageStart(OnWebAsyncFunc&& onPageStart);
     static void SetOnPageFinish(OnWebAsyncFunc&& onPageEnd);
@@ -58,6 +58,7 @@ public:
     static void SetOnInterceptRequest(
         std::function<RefPtr<WebResponse>(const std::shared_ptr<BaseEventInfo>& info)>&& onInterceptRequestImpl);
     static void SetOnUrlLoadIntercept(OnWebSyncFunc&& onUrlLoadInterceptImpl);
+    static void SetOnLoadIntercept(OnWebSyncFunc&& onLoadInterceptImpl);
     static void SetOnFileSelectorShow(OnWebSyncFunc&& onFileSelectorShowImpl);
     static void SetOnContextMenuShow(OnWebSyncFunc&& onContextMenuImpl);
     static void SetFileAccessEnabled(bool isFileAccessEnabled);
@@ -113,6 +114,7 @@ public:
     static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
     static void SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged);
     static void SetFirstContentfulPaintId(OnWebAsyncFunc&& firstContentfulPaintId);
+    static void NotifyPopupWindowResult(int32_t webId, bool result);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

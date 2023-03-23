@@ -45,26 +45,6 @@ napi_value GetReturnObject(napi_env env, std::string callbackString)
     return returnObj;
 }
 
-void GetNapiString(napi_env env, napi_value value, std::string& retStr)
-{
-    size_t ret = 0;
-    napi_valuetype valueType = napi_undefined;
-    napi_typeof(env, value, &valueType);
-    if (valueType == napi_string) {
-        size_t valueLen = GetParamLen(value) + 1;
-        std::unique_ptr<char[]> titleChar = std::make_unique<char[]>(valueLen);
-        napi_get_value_string_utf8(env, value, titleChar.get(), valueLen, &ret);
-        retStr = titleChar.get();
-    } else if (valueType == napi_object) {
-        int32_t id = 0;
-        int32_t type = 0;
-        std::vector<std::string> params;
-        if (ParseResourceParam(env, value, id, type, params)) {
-            ParseString(id, type, params, retStr);
-        }
-    }
-}
-
 static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 {
     size_t requireArgc = 1;
@@ -319,10 +299,6 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
         if (asyncContext == nullptr) {
             return;
         }
-        if (!asyncContext->valid) {
-            LOGE("%{public}s, module exported object is invalid.", __func__);
-            return;
-        }
 
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
@@ -338,6 +314,27 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
                 PromptAsyncContext* asyncContext = (PromptAsyncContext*)work->data;
                 if (asyncContext == nullptr) {
+                    LOGE("%{public}s, asyncContext is nullptr.", __func__);
+                    delete work;
+                    work = nullptr;
+                    return;
+                }
+
+                if (!asyncContext->valid) {
+                    LOGE("%{public}s, module exported object is invalid.", __func__);
+                    delete asyncContext;
+                    delete work;
+                    work = nullptr;
+                    return;
+                }
+
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncContext->env, &scope);
+                if (scope == nullptr) {
+                    LOGE("%{public}s, open handle scope failed.", __func__);
+                    delete asyncContext;
+                    delete work;
+                    work = nullptr;
                     return;
                 }
 
@@ -377,6 +374,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
                 napi_delete_async_work(asyncContext->env, asyncContext->work);
+                napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
                 delete work;
                 work = nullptr;
@@ -392,8 +390,8 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     napi_wrap(env, thisVar, (void*)asyncContext, [](napi_env env, void* data, void* hint) {
         PromptAsyncContext* cbInfo = (PromptAsyncContext*)data;
         if (cbInfo != nullptr) {
+            LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
             cbInfo->valid = false;
-            delete cbInfo;
         }
     }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
@@ -624,10 +622,6 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         if (asyncContext == nullptr) {
             return;
         }
-        if (!asyncContext->valid) {
-            LOGE("%{public}s, module exported object is invalid.", __func__);
-            return;
-        }
 
         asyncContext->callbackType = callbackType;
         asyncContext->successType = successType;
@@ -643,8 +637,30 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
                 ShowActionMenuAsyncContext* asyncContext = (ShowActionMenuAsyncContext*)work->data;
                 if (asyncContext == nullptr) {
+                    LOGE("%{public}s, asyncContext is nullptr.", __func__);
+                    delete work;
+                    work = nullptr;
                     return;
                 }
+
+                if (!asyncContext->valid) {
+                    LOGE("%{public}s, module exported object is invalid.", __func__);
+                    delete asyncContext;
+                    delete work;
+                    work = nullptr;
+                    return;
+                }
+
+                napi_handle_scope scope = nullptr;
+                napi_open_handle_scope(asyncContext->env, &scope);
+                if (scope == nullptr) {
+                    LOGE("%{public}s, open handle scope failed.", __func__);
+                    delete asyncContext;
+                    delete work;
+                    work = nullptr;
+                    return;
+                }
+
                 napi_value ret;
                 napi_value successIndex = nullptr;
                 napi_create_int32(asyncContext->env, asyncContext->successType, &successIndex);
@@ -681,6 +697,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                     napi_delete_reference(asyncContext->env, asyncContext->callbackRef);
                 }
                 napi_delete_async_work(asyncContext->env, asyncContext->work);
+                napi_close_handle_scope(asyncContext->env, scope);
                 delete asyncContext;
                 delete work;
                 work = nullptr;
@@ -696,8 +713,8 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     napi_wrap(env, thisVar, (void*)asyncContext, [](napi_env env, void* data, void* hint) {
         ShowActionMenuAsyncContext* cbInfo = (ShowActionMenuAsyncContext*)data;
         if (cbInfo != nullptr) {
+            LOGE("%{public}s, thisVar JavaScript object is ready for garbage-collection.", __func__);
             cbInfo->valid = false;
-            delete cbInfo;
         }
     }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM

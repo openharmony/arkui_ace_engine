@@ -43,6 +43,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/property/progress_mask_property.h"
 
 namespace OHOS::Ace::NG {
 struct OptionParam {
@@ -198,6 +199,8 @@ public:
     static void SetFlexGrow(float value);
     static void SetFlexBasis(const Dimension& value);
     static void SetDisplayIndex(int32_t value);
+    static void SetKeyboardShortcut(
+        const std::string& value, const std::vector<CtrlKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
     // Bind properties
     static void BindPopup(
@@ -226,6 +229,8 @@ public:
     static void SetOverlay(const NG::OverlayOptions& overlay);
     // motionPath
     static void SetMotionPath(const MotionPathOption& motionPath);
+    // progress mask
+    static void SetProgressMask(const RefPtr<ProgressMaskProperty>& progress);
 
     static void Pop();
 

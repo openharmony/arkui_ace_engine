@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/group_node.h"
+#include "core/components_ng/pattern/tabs/tabs_model.h"
 
 namespace OHOS::Ace::NG {
 
@@ -44,12 +45,25 @@ public:
         return tabBarId_.has_value();
     }
 
+    bool HasDividerNode() const
+    {
+        return dividerId_.has_value();
+    }
+
     int32_t GetSwiperId()
     {
         if (!swiperId_.has_value()) {
             swiperId_ = ElementRegister::GetInstance()->MakeUniqueId();
         }
         return swiperId_.value();
+    }
+
+    int32_t GetDividerId()
+    {
+        if (!dividerId_.has_value()) {
+            dividerId_ = ElementRegister::GetInstance()->MakeUniqueId();
+        }
+        return dividerId_.value();
     }
 
     int32_t GetTabBarId()
@@ -89,9 +103,11 @@ private:
     Dimension GetBarWidth() const;
     Dimension GetBarHeight() const;
     int32_t GetIndex() const;
+    bool GetFadingEdge() const;
 
     std::optional<int32_t> swiperId_;
     std::optional<int32_t> tabBarId_;
+    std::optional<int32_t> dividerId_;
     std::set<int32_t> swiperChildren_;
     std::map<int32_t, RefPtr<UINode>> builderNode_; // Key is id of TabContent, value is id of builder of TabBar.
 };

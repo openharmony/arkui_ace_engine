@@ -155,6 +155,7 @@ void RosenRenderImage::InitializeCallbacks()
 void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
     LOGD("image obj ready info : %{public}s", sourceInfo_.ToString().c_str());
+    CHECK_NULL_VOID(imageObj);
     imageObj_ = imageObj;
     auto imageSize = imageObj_->GetImageSize();
     bool canStartUploadImageObj = !autoResize_ && (imageObj_->GetFrameCount() == 1);
@@ -222,6 +223,7 @@ void RosenRenderImage::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& imag
     int32_t dstWidth = static_cast<int32_t>(previousResizeTarget_.Width() + precision);
     int32_t dstHeight = static_cast<int32_t>(previousResizeTarget_.Height() + precision);
     bool isTargetSource = ((dstWidth == image->GetWidth()) && (dstHeight == image->GetHeight()));
+    CHECK_NULL_VOID(imageObj_);
     if (!isTargetSource && (imageObj_->GetFrameCount() <= 1) && !background_) {
         LOGW("The size of returned image is not as expected, rejecting it. imageSrc: %{private}s,"
              "expected: [%{private}d x %{private}d], get [%{private}d x %{private}d]",
@@ -250,6 +252,7 @@ void RosenRenderImage::ImageDataPaintSuccess(const RefPtr<NG::CanvasImage>& imag
         imageObj_->ClearData();
     }
     CacheImageObject();
+    contentChanged_ = true;
 }
 
 void RosenRenderImage::CacheImageObject()
@@ -281,7 +284,7 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_) {
+    if (proceedPreviousLoading_ && imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS) {
         LOGD("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;
@@ -310,6 +313,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
 {
     return [sourceInfo = sourceInfo_, pipelineContext = GetContext(), weak = AceType::WeakClaim(this),
                id = Container::CurrentId()]() {
+#ifdef OHOS_PLATFORM
         ContainerScope scope(id);
         auto context = pipelineContext.Upgrade();
         if (!context) {
@@ -358,6 +362,7 @@ std::function<void()> RosenRenderImage::GenerateThumbnailLoadTask()
                 renderImage->UpdatePixmap(pixmapOhos);
             },
             TaskExecutor::TaskType::UI);
+#endif
     };
 }
 
@@ -569,6 +574,13 @@ RefPtr<ImageObject> RosenRenderImage::QueryCacheSvgImageObject()
 
 void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
 {
+    if (contentChanged_) {
+        auto rsNode = static_cast<RosenRenderContext*>(&context)->GetRSNode();
+        if (rsNode) {
+            rsNode->MarkContentChanged(true);
+        }
+        contentChanged_ = false;
+    }
     if (imageObj_ && imageObj_->IsSvg() && !useSkiaSvg_ && !directPaint_) {
         DrawSVGImageCustom(context, offset);
         return;

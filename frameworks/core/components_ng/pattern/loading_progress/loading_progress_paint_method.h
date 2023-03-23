@@ -56,10 +56,13 @@ public:
         auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
         auto renderContext = paintWrapper->GetRenderContext();
-        if (renderContext) {
-            if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+        if (renderContext->HasForegroundColor()) {
+            if (renderContext->GetForegroundColorValue().GetValue() !=
+                paintProperty->GetColor().value_or(Color::FOREGROUND).GetValue()) {
                 paintProperty->UpdateColor(Color::FOREGROUND);
             }
+        } else if (renderContext->HasForegroundColorStrategy()) {
+            paintProperty->UpdateColor(Color::FOREGROUND);
         }
         color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
         loadingProgressModifier_->SetColor(LinearColor(color_));
@@ -78,8 +81,11 @@ public:
                 loadingProgressModifier_->StartTransToRecycleAnimation();
                 break;
             case REFRESH_STATE_RESYCLE:
-            case REFRESH_STATE_FADEAWAY:
                 loadingProgressModifier_->StartRecycle();
+                break;
+            case REFRESH_STATE_FADEAWAY:
+                loadingProgressModifier_->ChangeRefreshFollowData(
+                    paintProperty->GetRefreshFadeAwayRatio().value_or(0.0f));
                 break;
             default:;
         }

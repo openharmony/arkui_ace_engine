@@ -124,16 +124,18 @@ private:
     // Init touch and hover event
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitTextFieldMouseEvent();
     void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void OnTouchDown();
     void OnTouchUp();
-    void SetMouseStyle(MouseFormat& format);
+    void SetMouseStyle(MouseFormat format);
     void OnButtonTouchDown(int32_t childId);
     void OnButtonTouchUp(int32_t childId);
     void HandleHoverEvent(bool isHover);
     void HandleMouseEvent(const MouseInfo& info);
     void HandleButtonMouseEvent(bool isHover, int32_t childId);
+    void HandleTextFieldHoverEvent(bool isHoverOverTextField);
 
     void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const;
@@ -143,6 +145,9 @@ private:
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;

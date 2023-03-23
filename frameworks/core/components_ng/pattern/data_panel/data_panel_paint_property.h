@@ -108,8 +108,8 @@ public:
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<DataPanelTheme>();
             auto colors = theme->GetColorsArray();
-            Gradient gradient;
             for (const auto& item : colors) {
+                Gradient gradient;
                 CreateGradient(item, gradient);
                 valueColors.emplace_back(gradient);
             }
@@ -123,7 +123,7 @@ public:
                 auto gradientColor = gradientItem.GetColors()[index];
                 auto gradientColorJosn = JsonUtil::Create(true);
                 gradientColorJosn->Put("color", gradientColor.GetColor().ColorToString().c_str());
-                gradientColorJosn->Put("offset", gradientColor.GetDimension().ToString().c_str());
+                gradientColorJosn->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
                 gradientItemJsonArray->Put(std::to_string(index).c_str(), gradientColorJosn);
             }
             valueColorsJosnArray->Put(std::to_string(i).c_str(), gradientItemJsonArray);
@@ -153,8 +153,8 @@ public:
                 trackShadow.colors = propValueColors_.value();
             } else {
                 auto colors = theme->GetColorsArray();
-                Gradient gradient;
                 for (const auto& item : colors) {
+                    Gradient gradient;
                     CreateGradient(item, gradient);
                     trackShadow.colors.emplace_back(gradient);
                 }
@@ -173,7 +173,7 @@ public:
                 auto gradientColor = gradientItem.GetColors()[index];
                 auto gradientColorJosn = JsonUtil::Create(true);
                 gradientColorJosn->Put("color", gradientColor.GetColor().ColorToString().c_str());
-                gradientColorJosn->Put("offset", gradientColor.GetDimension().ToString().c_str());
+                gradientColorJosn->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
                 gradientItemJsonArray->Put(std::to_string(index).c_str(), gradientColorJosn);
             }
             colorsJosnArray->Put(std::to_string(i).c_str(), gradientItemJsonArray);

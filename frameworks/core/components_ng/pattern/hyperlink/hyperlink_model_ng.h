@@ -22,12 +22,12 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT HyperlinkModelNG : public HyperlinkModel {
 public:
-    void Create(const std::string& address, const std::string& summary) override;
+    void Create(const std::string& address, const std::string& content) override;
     void Pop() override {};
     void SetColor(const Color& value) override;
 
 private:
-    void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& label);
+    void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content);
 };
 } // namespace OHOS::Ace::NG
 

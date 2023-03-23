@@ -43,6 +43,7 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
         return;
     }
+    outOfLayoutChildren_.clear();
     auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(flexProp);
     direction_ = flexProp->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
@@ -82,6 +83,10 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             continue;
         }
         item->Measure(childLayoutConstraint);
+        if (item->IsOutOfLayout()) {
+            outOfLayoutChildren_.emplace_back(item);
+            continue;
+        }
         // can place current child at current row
         if (mainLengthLimit_ >= currentMainLength + GetItemMainAxisLength(item->GetGeometryNode())) {
             currentMainLength += GetItemMainAxisLength(item->GetGeometryNode());

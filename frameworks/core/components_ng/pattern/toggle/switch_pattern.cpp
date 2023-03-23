@@ -59,11 +59,13 @@ bool SwitchPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     width_ = width;
     height_ = height;
     auto geometryNode = dirty->GetGeometryNode();
-    auto offset = geometryNode->GetContentOffset();
-    auto size = geometryNode->GetContentSize();
-    if (offset != offset_ || size != size_) {
-        offset_ = offset;
-        size_ = size;
+    offset_ = geometryNode->GetContentOffset();
+    size_ = geometryNode->GetContentSize();
+    if (isFirstAddhotZoneRect_) {
+        AddHotZoneRect();
+        isFirstAddhotZoneRect_ = false;
+    } else {
+        RemoveLastHotZoneRect();
         AddHotZoneRect();
     }
     return true;
@@ -423,7 +425,7 @@ void SwitchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto height = height_ + focusPaintPadding * 2;
     auto width = width_ + focusPaintPadding * 2;
     auto radio = height / 2.0;
-    auto Rect = RectF(-focusPaintPadding, -focusPaintPadding, width, height);
+    auto Rect = RectF(offset_.GetX() - focusPaintPadding, offset_.GetY() - focusPaintPadding, width, height);
 
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, radio, radio);
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, radio, radio);
@@ -484,8 +486,8 @@ bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 // Set the default hot zone for the component.
 void SwitchPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
     hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
@@ -496,4 +498,10 @@ void SwitchPattern::AddHotZoneRect()
     host->AddHotZoneRect(hotZoneRegion);
 }
 
+void SwitchPattern::RemoveLastHotZoneRect() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveLastHotZoneRect();
+}
 } // namespace OHOS::Ace::NG

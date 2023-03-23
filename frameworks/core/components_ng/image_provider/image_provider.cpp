@@ -61,24 +61,14 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
         return true;
     }
     // if image object has no skData, reload data.
-    std::string errorMessage;
-    do {
-        auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
-        if (!imageLoader) {
-            errorMessage = "Fail to create image loader. Image source type is not supported";
-            break;
-        }
-        auto newLoadedData = imageLoader->GetImageData(
-            imageObj->GetSourceInfo(), WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
-        if (!newLoadedData) {
-            errorMessage = "Fail to load data, please check if data source is invalid";
-            break;
-        }
-        // load data success
-        imageObj->SetData(newLoadedData);
-        return true;
-    } while (false);
-    return false;
+    auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
+    CHECK_NULL_RETURN(imageLoader, false);
+    auto newLoadedData = imageLoader->GetImageData(
+        imageObj->GetSourceInfo(), WeakClaim(RawPtr(NG::PipelineContext::GetCurrentContext())));
+    CHECK_NULL_RETURN(newLoadedData, false);
+    // load data success
+    imageObj->SetData(newLoadedData);
+    return true;
 }
 
 RefPtr<ImageObject> ImageProvider::QueryImageObjectFromCache(const ImageSourceInfo& src)
@@ -214,6 +204,7 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
 void ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
     std::scoped_lock<std::mutex> lock(taskMtx_);
+    LOGD("try cancel bgTask %{public}s", key.c_str());
     auto it = tasks_.find(key);
     CHECK_NULL_VOID(it != tasks_.end());
     CHECK_NULL_VOID(it->second.ctxs_.find(ctx) != it->second.ctxs_.end());

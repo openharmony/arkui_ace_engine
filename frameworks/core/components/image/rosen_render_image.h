@@ -143,6 +143,8 @@ private:
 
     CancelableTask fetchImageObjTask_;
     bool backgroundTaskCanceled_ = false;
+
+    bool contentChanged_ = false;
 };
 
 } // namespace OHOS::Ace

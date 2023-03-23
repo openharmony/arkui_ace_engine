@@ -63,16 +63,22 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> GeometryTransition::GetMatchedPa
     return { self.Upgrade(), target.Upgrade() };
 }
 
+bool GeometryTransition::layoutStarted_ = false;
+
 // Build should be called during node tree build phase dealing with node add/remove or appearing/disappearing
 void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn)
 {
     state_ = State::IDLE;
-    CHECK_NULL_VOID(frameNode.Upgrade());
-    LOGD("GeometryTransition build node%{public}d %{public}s", frameNode.Upgrade()->GetId(), isNodeIn ? "in" : "out");
+    buildDuringLayout_ = GeometryTransition::layoutStarted_;
+    auto node = frameNode.Upgrade();
+    CHECK_NULL_VOID(node);
+    LOGD("GeometryTransition build node%{public}d %{public}s", node->GetId(), isNodeIn ? "in" : "out");
 
     if (!isNodeIn && (frameNode == inNode_ || frameNode == outNode_)) {
         SwapInAndOut(frameNode == inNode_);
         hasOutAnim_ = true;
+        outNodeParentPos_ = node->GetPaintRectOffset(true);
+        outNodePos_ = node->GetPaintRectOffset();
     }
     if (isNodeIn && (frameNode != inNode_)) {
         hasOutAnim_ = !inNode_.Upgrade() && outNode_.Upgrade() ? true : hasOutAnim_;
@@ -111,18 +117,21 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
 {
     bool ret = false;
     std::string str;
-    if (which.Upgrade() == inNode_) {
+    if (which.Upgrade() == inNode_.Upgrade()) {
         str += "inNode updated: ";
         inNode_ = value;
         ret = true;
-    } else if (which.Upgrade() == outNode_) {
+    } else if (which.Upgrade() == outNode_.Upgrade()) {
         str += "outNode updated: ";
         outNode_ = value;
         ret = true;
     } else {
         str += "noneNode updated: ";
     }
+    str += "old value: ";
     str += which.Upgrade() ? std::to_string(which.Upgrade()->GetId()) : "null";
+    str += ", new value: ";
+    str += value.Upgrade() ? std::to_string(value.Upgrade()->GetId()) : "null";
     LOGD("GeometryTransition %{public}s", str.c_str());
     return ret;
 }
@@ -131,6 +140,9 @@ bool GeometryTransition::Update(const WeakPtr<FrameNode>& which, const WeakPtr<F
 // impact self and children's measure and layout.
 void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
+    if (buildDuringLayout_ && GeometryTransition::layoutStarted_) {
+        return;
+    }
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
     if (IsNodeInAndActive(hostNode)) {
@@ -143,6 +155,10 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
 // Called after layout, perform final adjustments of geometry position
 void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& root, const WeakPtr<FrameNode>& frameNode)
 {
+    if (buildDuringLayout_ && GeometryTransition::layoutStarted_) {
+        buildDuringLayout_ = false;
+        return;
+    }
     auto node = frameNode.Upgrade();
     CHECK_NULL_VOID(node);
     if (IsNodeInAndActive(frameNode)) {
@@ -213,9 +229,9 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto geometryNode = self->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     // get own parent's global position
-    auto parentPos = self->GetPaintRectOffset(true);
+    auto parentPos = self->IsRemoving() ? outNodeParentPos_ : self->GetPaintRectOffset(true);
     // get target's global position
-    auto targetPos = target->GetPaintRectOffset();
+    auto targetPos = target->IsRemoving() ? outNodePos_ : target->GetPaintRectOffset();
     // adjust self's position to match with target's position, here we only need to adjust node self,
     // its children's positions are still determined by layout process.
     auto activeFrameRect = isNodeIn ? RectF(targetPos - parentPos, size_) :

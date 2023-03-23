@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class LoadingProgressModifier : public ContentModifier {
@@ -51,6 +50,7 @@ public:
     void DrawCustomStyle(DrawingContext& context);
     void RefreshRecycle(DrawingContext& context, Color& color, float scale);
     void ChangeRefreshFollowData(float refreshFollowRatio);
+    void ChangeFadeAwayData(float fadeAwayRatio);
     float CorrectNormalize(float originData);
 
     LoadingProgressOwner GetOwner()
@@ -61,6 +61,7 @@ public:
 private:
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);
+
     uint32_t GetCometNumber();
     RefPtr<AnimatablePropertyFloat> date_;
     RefPtr<AnimatablePropertyColor> color_;
@@ -68,6 +69,7 @@ private:
     RefPtr<AnimatablePropertyFloat> cometOpacity_;
     RefPtr<AnimatablePropertyFloat> cometSizeScale_;
     RefPtr<AnimatablePropertyFloat> cometTailLen_;
+    RefPtr<AnimatablePropertyFloat> sizeScale_;
 
     LoadingProgressOwner loadingProgressOwner_;
     bool isLoading_ = false;

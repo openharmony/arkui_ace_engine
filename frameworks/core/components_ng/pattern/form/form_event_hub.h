@@ -24,6 +24,7 @@
 namespace OHOS::Ace::NG {
 
 using FormCallback = std::function<void(const std::string&)>;
+using FormCacheCallback = std::function<void()>;
 
 class FormEventHub : public EventHub {
     DECLARE_ACE_TYPE(FormEventHub, EventHub)
@@ -50,6 +51,16 @@ public:
     void SetOnRouter(FormCallback&& onRouter)
     {
         onRouter_ = std::move(onRouter);
+    }
+
+    void SetOnLoad(FormCallback&& onLoad)
+    {
+        onLoad_ = std::move(onLoad);
+    }
+
+    void SetOnOnCache(FormCacheCallback&& onCache)
+    {
+        onCache_ = std::move(onCache);
     }
 
     void FireOnAcquired(const std::string& param) const
@@ -80,11 +91,27 @@ public:
         }
     }
 
+    void FireOnLoad(const std::string& param) const
+    {
+        if (onLoad_) {
+            onLoad_(param);
+        }
+    }
+
+    void FireOnCache() const
+    {
+        if (onCache_) {
+            onCache_();
+        }
+    }
+
 private:
     FormCallback onAcquired_;
     FormCallback onError_;
     FormCallback onUninstall_;
     FormCallback onRouter_;
+    FormCallback onLoad_;
+    FormCacheCallback onCache_;
 };
 
 } // namespace OHOS::Ace::NG

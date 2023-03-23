@@ -47,6 +47,11 @@ public:
         return deltaY_;
     }
 
+    const std::optional<Dimension>& GetZ() const
+    {
+        return deltaZ_;
+    }
+
     void SetX(Dimension& x)
     {
         deltaX_ = x;
@@ -55,6 +60,11 @@ public:
     void SetY(Dimension& y)
     {
         deltaY_ = y;
+    }
+
+    void SetZ(const Dimension& z)
+    {
+        deltaZ_ = z;
     }
 
     DimensionOffset operator+(const DimensionOffset& dimensionOffset) const
@@ -74,12 +84,13 @@ public:
 
     bool operator==(const DimensionOffset& dimensionOffset) const 
     {
-        return deltaX_ == dimensionOffset.deltaX_ && deltaY_ == dimensionOffset.deltaY_;
+        return deltaX_ == dimensionOffset.deltaX_ && deltaY_ == dimensionOffset.deltaY_ && deltaZ_ == deltaZ_;
     }
 
 private:
     Dimension deltaX_;
     Dimension deltaY_;
+    std::optional<Dimension> deltaZ_;
 };
 
 } // namespace OHOS::Ace

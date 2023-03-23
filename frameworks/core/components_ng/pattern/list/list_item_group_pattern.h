@@ -39,11 +39,6 @@ public:
         return false;
     }
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::SCOPE, true };
-    }
-
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ListItemGroupLayoutProperty>();
@@ -94,9 +89,21 @@ public:
         return itemPosition_;
     }
 
+    void SetIndexInList(int32_t index)
+    {
+        indexInList_ = index;
+    }
+
+    int32_t GetIndexInList() const
+    {
+        return indexInList_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     RefPtr<ShallowBuilder> shallowBuilder_;
+
+    int32_t indexInList_ = 0;
 
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;

@@ -39,7 +39,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_skia_image_data.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animated_image.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_pixmap_image.cpp",
-    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_skia_canvas_image.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/render/mock_skia_image.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_svg_canvas_image.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
 

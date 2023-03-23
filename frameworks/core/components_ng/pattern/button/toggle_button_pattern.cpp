@@ -37,6 +37,9 @@ namespace OHOS::Ace::NG {
 void ToggleButtonPattern::OnAttachToFrameNode()
 {
     InitParameters();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 void ToggleButtonPattern::InitParameters()
@@ -181,7 +184,10 @@ void ToggleButtonPattern::InitButtonAndText()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonHeight_)));
+    if ((!layoutProperty->GetCalcLayoutConstraint() ||
+            !layoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height().has_value())) {
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonHeight_)));
+    }
     if (!layoutProperty->HasBorderRadius()) {
         layoutProperty->UpdateBorderRadius(buttonRadius_);
     }
@@ -192,15 +198,18 @@ void ToggleButtonPattern::InitButtonAndText()
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateFontSize(textFontSize_);
+    if (!textLayoutProperty->HasFontSize()) {
+        textLayoutProperty->UpdateFontSize(textFontSize_);
+    } else {
+        layoutProperty->UpdateFontSize(textLayoutProperty->GetFontSizeValue(textFontSize_));
+    }
+    layoutProperty->UpdateLabel(textLayoutProperty->GetContentValue(""));
     textLayoutProperty->UpdateTextColor(textColor_);
 
     if (!textLayoutProperty->GetMarginProperty()) {
         MarginProperty margin;
         margin.left = CalcLength(textMargin_.ConvertToPx());
         margin.right = CalcLength(textMargin_.ConvertToPx());
-        margin.top = CalcLength(textMargin_.ConvertToPx());
-        margin.bottom = CalcLength(textMargin_.ConvertToPx());
         textLayoutProperty->UpdateMargin(margin);
     }
     textNode->MarkModifyDone();

@@ -27,6 +27,7 @@ namespace OHOS::Ace::Framework {
  * register C++ classes that are to be exposed to JS
  */
 void JsRegisterViews(BindingTarget globalObj);
+void JsRegisterFormViews(BindingTarget globalObj);
 
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIEW_REGISTER_H

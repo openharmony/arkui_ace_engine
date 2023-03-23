@@ -36,7 +36,7 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     auto theme = pipeline->GetTheme<DividerTheme>();
     CHECK_NULL_RETURN(theme, std::nullopt);
     Dimension strokeWidth = dividerLayoutProperty->GetStrokeWidth().value_or(theme->GetStokeWidth());
-    constrainStrokeWidth_ = NonNegative(strokeWidth.ConvertToPx())
+    constrainStrokeWidth_ = Positive(strokeWidth.ConvertToPx())
                                 ? static_cast<float>(strokeWidth.ConvertToPx())
                                 : static_cast<float>(theme->GetStokeWidth().ConvertToPx());
     vertical_ = dividerLayoutProperty->GetVertical().value_or(false);

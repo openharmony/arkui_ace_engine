@@ -19,6 +19,7 @@
 #include <cstddef>
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/slider/slider_content_modifier.h"
 #include "core/components_ng/pattern/slider/slider_event_hub.h"
 #include "core/components_ng/pattern/slider/slider_layout_algorithm.h"
 #include "core/components_ng/pattern/slider/slider_layout_property.h"
@@ -37,7 +38,8 @@ public:
     {
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
-            sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(paintParameters);
+            sliderContentModifier_ =
+                AceType::MakeRefPtr<SliderContentModifier>(paintParameters, [this]() { LayoutImageNode(); });
         }
         SliderPaintMethod::TipParameters tipParameters { bubbleSize_, bubbleOffset_, textOffset_, bubbleFlag_ };
         if (!sliderTipModifier_ && bubbleFlag_) {
@@ -74,9 +76,27 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
     }
 
+    const OffsetF& GetBlockCenter() const
+    {
+        return circleCenter_;
+    }
+
+    const OffsetF GetAnimatableBlockCenter() const
+    {
+        if (sliderContentModifier_ != nullptr) {
+            return sliderContentModifier_->GetBlockCenter();
+        }
+        return OffsetF();
+    }
+
+    float GetValueRatio() const
+    {
+        return valueRatio_;
+    }
+
 private:
     void OnModifyDone() override;
-    void CancelExceptionValue(float& min, float& max);
+    void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     void CreateParagraphFunc();
@@ -118,6 +138,8 @@ private:
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetCirclePosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
+    void UpdateBlock();
+    void LayoutImageNode();
 
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
@@ -136,8 +158,8 @@ private:
     OffsetF circleCenter_ = { 0, 0 };
 
     float trackThickness_ = 0.0f;
-    float blockDiameter_ = 0.0f;
     float blockHotSize_ = 0.0f;
+    SizeF blockSize_;
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickListener_;
@@ -146,6 +168,7 @@ private:
     RefPtr<InputEvent> hoverEvent_;
 
     RefPtr<SliderContentModifier> sliderContentModifier_;
+
     // tip Parameters
     bool bubbleFlag_ = false;
     RefPtr<Paragraph> paragraph_;
@@ -153,6 +176,9 @@ private:
     OffsetF bubbleOffset_;
     OffsetF textOffset_;
     RefPtr<SliderTipModifier> sliderTipModifier_;
+
+    RefPtr<FrameNode> imageFrameNode_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SliderPattern);
 };
 } // namespace OHOS::Ace::NG
