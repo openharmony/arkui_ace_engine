@@ -50,7 +50,6 @@ class ACE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
-
     LayoutProperty() = default;
 
     ~LayoutProperty() override = default;
@@ -377,16 +376,6 @@ public:
             (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
     }
 
-    SafeAreaEdgeInserts GetSafeArea() const
-    {
-        return safeArea_;
-    }
-
-    void SetSafeArea(SafeAreaEdgeInserts safeArea)
-    {
-        safeArea_ = safeArea;
-    }
-
 protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
@@ -418,7 +407,6 @@ private:
 
     WeakPtr<FrameNode> host_;
 
-    SafeAreaEdgeInserts safeArea_;
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

@@ -232,13 +232,6 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 {
     return true;
 }
-
-void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) {}
-
-SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
-{
-    return SafeAreaEdgeInserts();
-};
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
