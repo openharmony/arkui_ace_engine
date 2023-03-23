@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
@@ -77,24 +78,23 @@ void SelectPattern::OnModifyDone()
 
 void SelectPattern::ShowSelectMenu()
 {
-    if (menu_) {
-        LOGI("start executing click callback %d", menu_->GetId());
+    if (menuWrapper_) {
+        LOGI("start executing click callback %d", menuWrapper_->GetId());
     }
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto selectNode = GetHost();
-    CHECK_NULL_VOID(selectNode);
-    auto select = selectNode->GetPattern<SelectPattern>();
-    CHECK_NULL_VOID(select);
-    auto offset = selectNode->GetPaintRectOffset();
-    offset.AddY(select->GetSelectSize().Height());
 
-    auto selectTheme = context->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(selectTheme);
-    offset.AddY(static_cast<float>(selectTheme->GetSelectMenuPadding().ConvertToPx()));
-    overlayManager->ShowMenu(selectNode->GetId(), offset, menu_);
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    menuLayoutProps->UpdateTargetSize(selectSize_);
+    auto offset = GetHost()->GetPaintRectOffset();
+    offset.AddY(selectSize_.Height());
+    LOGD("select offset %{public}s size %{public}s", offset.ToString().c_str(), selectSize_.ToString().c_str());
+    overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }
 
 // add click event to show menu
@@ -114,6 +114,9 @@ void SelectPattern::RegisterOnClick()
         pattern->ShowSelectMenu();
     };
     auto gestureHub = host->GetOrCreateGestureEventHub();
+    if (!gestureHub->GetTouchable()) {
+        return;
+    }
     gestureHub->BindMenu(std::move(callback));
 }
 
@@ -630,9 +633,6 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     auto newSelectedPros = newSelectedNode->GetPaintProperty<OptionPaintProperty>();
     CHECK_NULL_VOID(newSelectedPros);
     newSelectedPros->UpdateNeedDivider(false);
-
-    CHECK_NULL_VOID(menu_);
-    menu_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SelectPattern::UpdateText(int32_t index)
@@ -770,13 +770,10 @@ std::string SelectPattern::InspectorGetSelectedFont() const
 
 bool SelectPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (config.skipMeasure || dirty->SkipMeasureContent()) {
-        return false;
-    }
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SetSelectSize(geometryNode->GetFrameSize());
-    return true;
+    return false;
 }
 
 void SelectPattern::SetSpace(const Dimension& value)

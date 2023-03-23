@@ -44,7 +44,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const bool RATING_INDICATOR = true;
 const bool DEFAULT_RATING_INDICATOR = false;
-const int32_t DEFAULT_STAR_NUM_0 = 0;
 const int32_t DEFAULT_STAR_NUM = 5;
 const int32_t RATING_STAR_NUM = 10;
 constexpr double RATING_SCORE = 3.0;
@@ -58,6 +57,7 @@ const std::string RATING_SECONDARY_URL = "common/img3.png";
 constexpr double DEFAULT_RATING_SCORE = 0.0;
 constexpr double DEFAULT_STEP_SIZE = 0.5;
 constexpr double RATING_STEP_SIZE = 0.7;
+constexpr double RATING_STEP_SIZE_2 = DEFAULT_STAR_NUM + DEFAULT_STAR_NUM;
 const float CONTAINER_WIDTH = 300.0f;
 const float CONTAINER_HEIGHT = 300.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
@@ -247,14 +247,18 @@ HWTEST_F(RatingPatternTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
      * @tc.steps: step1. Create Rating with its the ratingScore and starNums are both negative.
      * @tc.expected: Constrain them with the values defined in theme.
      */
+    auto ratingTheme = AceType::MakeRefPtr<RatingTheme>();
+    ratingTheme->starNum_ = DEFAULT_STAR_NUM;
+    ratingTheme->ratingScore_ = DEFAULT_RATING_SCORE;
+    ratingTheme->stepSize_ = DEFAULT_STEP_SIZE;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RatingTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(ratingTheme));
     RatingModelNG rating;
     rating.Create();
     rating.SetRatingScore(RATING_SCORE_2);
     rating.SetStars(RATING_STAR_NUM_1);
-    rating.SetStepSize(DEFAULT_STEP_SIZE);
+    rating.SetStepSize(RATING_STEP_SIZE_2);
 
     /**
      * @tc.steps: step2. Set Rating OnChange Event.
@@ -276,8 +280,9 @@ HWTEST_F(RatingPatternTestNg, RatingConstrainsPropertyTest006, TestSize.Level1)
      * @tc.expected: onChange Event will be fired, and unknownRatingScore will be assigned the correct value when it is
      * initialized for the first time.
      */
-    EXPECT_EQ(ratingLayoutProperty->GetStars().value_or(DEFAULT_STAR_NUM), DEFAULT_STAR_NUM_0);
+    EXPECT_EQ(ratingLayoutProperty->GetStars().value_or(DEFAULT_STAR_NUM), DEFAULT_STAR_NUM);
     EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), DEFAULT_RATING_SCORE);
+    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(DEFAULT_STEP_SIZE), DEFAULT_STEP_SIZE);
     ratingLayoutProperty->UpdateStars(DEFAULT_STAR_NUM);
     ratingRenderProperty->UpdateRatingScore(RATING_SCORE);
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();

@@ -112,8 +112,8 @@ void ButtonView::SetLableStyle(ButtonParameters& buttonParameters)
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontSize, buttonParameters.maxFontSize.value());
     }
     if (buttonParameters.heightAdaptivePolicy.has_value()) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, HeightAdaptivePolicy,
-            buttonParameters.heightAdaptivePolicy.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(
+            ButtonLayoutProperty, HeightAdaptivePolicy, buttonParameters.heightAdaptivePolicy.value());
     }
     if (buttonParameters.fontSize.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonParameters.fontSize.value());

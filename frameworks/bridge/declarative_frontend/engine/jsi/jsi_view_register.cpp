@@ -1027,6 +1027,179 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     return panda::BooleanRef::New(vm, result);
 }
 
+void JsRegisterFormViews(BindingTarget globalObj)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        LOGE("JsRegisterViews can't find runtime");
+        return;
+    }
+    auto vm = runtime->GetEcmaVm();
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadEtsCard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadEtsCard));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "postCardAction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSPostCardAction));
+#if defined(PREVIEW)
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewComponent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsPreviewerComponent));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPreviewComponentFlag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetPreviewComponentFlag));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "storePreviewComponents"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsStorePreviewComponents));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "GetRootView"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetRootView));
+#endif
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "dumpMemoryStats"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsDumpMemoryStats));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$s"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetI18nResource));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$m"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetMediaResource));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodes"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodeById"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodeById));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorTree));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendTouchEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendTouchEvent));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendKeyEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendKeyEvent));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendMouseEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendMouseEvent));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "vp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "px2vp"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Vp));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "fp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Fp2Px));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "px2fp"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Fp));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "lpx2px"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+
+    JsBindFormViews(globalObj);
+
+    JSObjectTemplate toggleType;
+    toggleType.Constant("Checkbox", 0);
+    toggleType.Constant("Switch", 1);
+    toggleType.Constant("Button", 2); // 2 means index of constant
+
+    JSObjectTemplate refreshStatus;
+    refreshStatus.Constant("Inactive", 0);
+    refreshStatus.Constant("Drag", 1);
+    refreshStatus.Constant("OverDrag", 2);
+    refreshStatus.Constant("Refresh", 3); // 3 means index of constant
+    refreshStatus.Constant("Done", 4);    // 4 means index of constant
+
+    JSObjectTemplate mainAxisAlign;
+    mainAxisAlign.Constant("Start", 1);
+    mainAxisAlign.Constant("Center", 2);       // 2 means index of constant
+    mainAxisAlign.Constant("End", 3);          // 3 means index of constant
+    mainAxisAlign.Constant("SpaceBetween", 6); // 6 means index of constant
+    mainAxisAlign.Constant("SpaceAround", 7);  // 7 means index of constant
+
+    JSObjectTemplate crossAxisAlign;
+    crossAxisAlign.Constant("Start", 1);
+
+    crossAxisAlign.Constant("Center", 2);  // 2 means index of constant
+    crossAxisAlign.Constant("End", 3);     // 3 means index of constant
+    crossAxisAlign.Constant("Stretch", 4); // 4 means index of constant
+
+    JSObjectTemplate direction;
+    direction.Constant("Horizontal", 0);
+    direction.Constant("Vertical", 1);
+
+    JSObjectTemplate loadingProgressStyle;
+    loadingProgressStyle.Constant("Default", 1);
+    loadingProgressStyle.Constant("Circular", 2); // 2 means index of constant
+    loadingProgressStyle.Constant("Orbital", 3);  // 3 means index of constant
+
+    JSObjectTemplate progressStyle;
+    progressStyle.Constant("Linear", 0);
+    progressStyle.Constant("Ring", 1);      // 1 means index of constant
+    progressStyle.Constant("Eclipse", 2);   // 2 means index of constant
+    progressStyle.Constant("ScaleRing", 3); // 3 means index of constant
+    progressStyle.Constant("Capsule", 4);   // 4 means index of constant
+
+    JSObjectTemplate stackFit;
+    stackFit.Constant("Keep", 0);
+    stackFit.Constant("Stretch", 1);
+    stackFit.Constant("Inherit", 2);    // 2 means index of constant
+    stackFit.Constant("FirstChild", 3); // 3 means index of constant
+
+    JSObjectTemplate overflow;
+    overflow.Constant("Clip", 0);
+    overflow.Constant("Observable", 1);
+
+    JSObjectTemplate alignment;
+    alignment.Constant("TopLeft", 0);
+    alignment.Constant("TopCenter", 1);
+    alignment.Constant("TopRight", 2);     // 2 means index of constant
+    alignment.Constant("CenterLeft", 3);   // 3 means index of constant
+    alignment.Constant("Center", 4);       // 4 means index of constant
+    alignment.Constant("CenterRight", 5);  // 5 means index of constant
+    alignment.Constant("BottomLeft", 6);   // 6 means index of constant
+    alignment.Constant("BottomCenter", 7); // 7 means index of constant
+    alignment.Constant("BottomRight", 8);  // 8 means index of constant
+
+    JSObjectTemplate sliderStyle;
+    sliderStyle.Constant("OutSet", 0);
+    sliderStyle.Constant("InSet", 1);
+
+    JSObjectTemplate sliderChangeMode;
+    sliderChangeMode.Constant("Begin", 0);
+    sliderChangeMode.Constant("Moving", 1);
+    sliderChangeMode.Constant("End", 2); // 2 means index of constant
+
+    JSObjectTemplate pickerStyle;
+    pickerStyle.Constant("Inline", 0);
+    pickerStyle.Constant("Block", 1);
+    pickerStyle.Constant("Fade", 2); // 2 means index of constant
+
+    JSObjectTemplate buttonType;
+    buttonType.Constant("Normal", (int)ButtonType::NORMAL);
+    buttonType.Constant("Capsule", (int)ButtonType::CAPSULE);
+    buttonType.Constant("Circle", (int)ButtonType::CIRCLE);
+    buttonType.Constant("Arc", (int)ButtonType::ARC);
+
+    JSObjectTemplate iconPosition;
+    iconPosition.Constant("Start", 0);
+    iconPosition.Constant("End", 1);
+
+    JSObjectTemplate badgePosition;
+    badgePosition.Constant("RightTop", 0);
+    badgePosition.Constant("Right", 1);
+    badgePosition.Constant("Left", 2); // 2 means index of constant
+
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "MainAxisAlign"), *mainAxisAlign);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "CrossAxisAlign"), *crossAxisAlign);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Direction"), *direction);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "StackFit"), *stackFit);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "RefreshStatus"), *refreshStatus);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderStyle"), *sliderStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderChangeMode"), *sliderChangeMode);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
+    LOGD("View classes and jsCreateDocument, registerObservableObject functions registered.");
+}
+
+
 void JsRegisterViews(BindingTarget globalObj)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());

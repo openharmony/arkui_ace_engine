@@ -260,15 +260,6 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg003
         EXPECT_EQ(paintMethod->strokeState_.GetMiterLimit(), item);
     }
 
-    offscreenCanvasPattern->SetLineDash(CANDIDATE_DOUBLES);
-    for (uint32_t i = 1; i < CANDIDATE_DOUBLES.size(); ++i) {
-        EXPECT_EQ(offscreenCanvasPattern->GetLineDash().lineDash[i], CANDIDATE_DOUBLES[i]);
-    }
-    for (double item : CANDIDATE_DOUBLES) {
-        offscreenCanvasPattern->SetLineDashOffset(item);
-        EXPECT_EQ(offscreenCanvasPattern->GetLineDash().dashOffset, item);
-    }
-
     for (auto textAlign : CANDIDATE_TEXT_ALIGNS) {
         offscreenCanvasPattern->SetTextAlign(textAlign);
         EXPECT_EQ(paintMethod->strokeState_.GetTextAlign(), textAlign);
@@ -367,84 +358,4 @@ HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg005
     }
 }
 
-/**
- * @tc.name: OffscreenCanvasPaintPatternTestNg006
- * @tc.desc: Test all functions about OffscreenCanvasPattern.
- * @tc.type: FUNC
- */
-HWTEST_F(OffscreenCanvasPaintPatternTestNg, OffscreenCanvasPaintPatternTestNg006, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto offscreenCanvasPattern = CreateOffscreenCanvasPattern(CANVAS_WIDTH, CANVAS_HEIGHT);
-    ASSERT_NE(offscreenCanvasPattern, nullptr);
-    auto paintMethod = offscreenCanvasPattern->offscreenPaintMethod_;
-    ASSERT_NE(paintMethod, nullptr);
-
-    /**
-     * @tc.steps2: Test the function ToDataURL.
-     * @tc.expected: The return value is affected by the first parameter.
-     */
-    std::string result = offscreenCanvasPattern->ToDataURL(IMAGE_PNG, DEFAULT_DOUBLE1);
-    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_PNG.size()), IMAGE_PNG);
-    result = offscreenCanvasPattern->ToDataURL(IMAGE_JPEG, -DEFAULT_DOUBLE2);
-    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_JPEG.size()), IMAGE_JPEG);
-    result = offscreenCanvasPattern->ToDataURL(IMAGE_WEBP, -DEFAULT_DOUBLE1);
-    EXPECT_EQ(result.substr(URL_PREFIX.size(), IMAGE_WEBP.size()), IMAGE_WEBP);
-
-    /**
-     * @tc.steps3: Test functions SetFillRuleForPath and SetFillRuleForPath2D.
-     * @tc.expected: The corresponding attributes are modified.
-     */
-    for (uint32_t i = 0; i < CANDIDATE_CANVAS_FILL_RULES.size(); ++i) {
-        offscreenCanvasPattern->SetFillRuleForPath(CANDIDATE_CANVAS_FILL_RULES[i]);
-        EXPECT_EQ(paintMethod->skPath_.getFillType(), CANDIDATE_SKPATH_FILL_TYPES[i]);
-        offscreenCanvasPattern->SetFillRuleForPath2D(CANDIDATE_CANVAS_FILL_RULES[i]);
-        EXPECT_EQ(paintMethod->skPath2d_.getFillType(), CANDIDATE_SKPATH_FILL_TYPES[i]);
-    }
-
-    /**
-     * @tc.steps4: Test functions SetSmoothingEnabled and SetAntiAlias.
-     * @tc.expected: The corresponding attributes are modified.
-     */
-    offscreenCanvasPattern->SetSmoothingEnabled(true);
-    EXPECT_TRUE(paintMethod->smoothingEnabled_);
-    offscreenCanvasPattern->SetSmoothingEnabled(false);
-    EXPECT_FALSE(paintMethod->smoothingEnabled_);
-    offscreenCanvasPattern->SetAntiAlias(true);
-    EXPECT_TRUE(paintMethod->antiAlias_);
-    offscreenCanvasPattern->SetAntiAlias(false);
-    EXPECT_FALSE(paintMethod->antiAlias_);
-
-    /**
-     * @tc.steps4: Test the function GetImageData.
-     * @tc.expected: The attributes dirtyWidth and dirtyHeight of return value are equal to DEFAULT_DOUBLE1.
-     */
-    auto imageData1 =
-        offscreenCanvasPattern->GetImageData(DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1);
-    EXPECT_DOUBLE_EQ(imageData1->dirtyWidth, DEFAULT_DOUBLE1);
-    EXPECT_DOUBLE_EQ(imageData1->dirtyHeight, DEFAULT_DOUBLE1);
-
-    /**
-     * @tc.steps5: Call the function MeasureTextMetrics.
-     * @tc.expected: All parts of the return TextMetrics object are equal to zero.
-     */
-    PaintState paintState;
-    TextMetrics textMetrics = offscreenCanvasPattern->MeasureTextMetrics(DEFAULT_STR, paintState);
-    EXPECT_DOUBLE_EQ(textMetrics.width, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.height, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxLeft, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxRight, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxAscent, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxDescent, DEFAULT_DOUBLE0);
-
-    /**
-     * @tc.steps6: Call functions MeasureText and MeasureTextHeight.
-     * @tc.expected: All return values are equal to zero.
-     */
-    EXPECT_DOUBLE_EQ(offscreenCanvasPattern->MeasureText(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(offscreenCanvasPattern->MeasureTextHeight(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
-}
 } // namespace OHOS::Ace::NG

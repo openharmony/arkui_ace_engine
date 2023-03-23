@@ -289,23 +289,7 @@ public:
 
     void SetSourceMap(const std::string& pageMap)
     {
-        std::size_t s = 0;
-        std::size_t j = 0;
-        std::string value;
-        std::string key;
-        while ((s = pageMap.find(": {", j)) != std::string::npos)
-        {
-            j = pageMap.find("},", s);
-            uint32_t q = s;
-            uint32_t jj = j;
-            value = pageMap.substr(q + 1, jj - q+2);
-            uint32_t sources = value.find("\"sources\": [");
-            uint32_t names = value.find("],");
-            key = value.substr(sources + 20, names - sources - 26);
-            RefPtr<RevSourceMap> curMapData = AceType::MakeRefPtr<RevSourceMap>();;
-            OHOS::Ace::Framework::RevSourceMap::MergeInit(value, curMapData);
-            sourceMaps_.emplace(key, curMapData);
-        }
+        RevSourceMap::StageModeSourceMapSplit(pageMap, sourceMaps_);
     }
 
     const std::unordered_map<std::string, RefPtr<RevSourceMap>>& GetSourceMap() const

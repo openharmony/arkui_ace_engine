@@ -30,7 +30,13 @@ const SizeF MIN_SIZE(MIN_WIDTH, MIN_HEIGHT);
 
 const int32_t CANVAS_WIDTH = 300;
 const int32_t CANVAS_HEIGHT = 300;
+const int32_t IMAGEDATA_WIDTH = 40;
+const int32_t IMAGEDATA_HEIGHT = 40;
 const int32_t DEFAULT_INSTANCE_ID = 0;
+const int32_t DEFAULT_INSTANCE_ID1 = 1;
+const int32_t DEFAULT_INSTANCE_ID2 = 2;
+const int32_t BLENDMODE_VALUE_BEGIN = 3;
+const int32_t BLENDMODE_VALUE_END = 5;
 
 const double DEFAULT_DOUBLE0 = 0.0;
 const double DEFAULT_DOUBLE1 = 1.0;

@@ -1307,7 +1307,7 @@ var OperationStyle;
 
 var TabItemType;
 (function (TabItemType) {
-  TabItemType[TabItemType["Tex"] = 0] = "Text";
+  TabItemType[TabItemType["Text"] = 0] = "Text";
   TabItemType[TabItemType["Icon"] = 1] = "Icon";
 })(TabItemType || (TabItemType = {}));
 

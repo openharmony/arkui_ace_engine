@@ -590,6 +590,7 @@ private:
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
+    bool HasStateStyle(UIState state) const;
 
     void AddScrollEvent();
     void OnTextAreaScroll(float offset);
@@ -635,7 +636,6 @@ private:
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
-    int32_t GetLineNumber(float offsetY);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();

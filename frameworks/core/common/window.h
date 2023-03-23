@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
@@ -139,6 +140,20 @@ public:
         return rect;
     }
 
+    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
+    {
+        viewSafeAreaImpl_ = std::move(callback);
+    }
+
+    SafeAreaEdgeInserts GetCurrentViewSafeArea() const
+    {
+        SafeAreaEdgeInserts viewSafeArea;
+        if (viewSafeAreaImpl_) {
+            viewSafeArea = viewSafeAreaImpl_();
+        }
+        return viewSafeArea;
+    }
+
     virtual void SetDrawTextAsBitmap(bool useBitmap) {}
 
     virtual float GetRefreshRate() const
@@ -150,6 +165,18 @@ public:
     {
         return lastRequestVsyncTime_;
     }
+
+    SafeAreaEdgeInserts GetSafeArea() const
+    {
+        return viewSafeArea_;
+    }
+
+    void SetSafeArea(SafeAreaEdgeInserts viewSafeArea)
+    {
+        viewSafeArea_ = viewSafeArea;
+    }
+
+    SafeAreaEdgeInserts viewSafeArea_;
 
 protected:
     bool isRequestVsync_ = false;
@@ -171,6 +198,7 @@ protected:
 
 private:
     std::function<Rect()> windowRectImpl_;
+    std::function<SafeAreaEdgeInserts()> viewSafeAreaImpl_;
     std::unique_ptr<PlatformWindow> platformWindow_;
 
     ACE_DISALLOW_COPY_AND_MOVE(Window);

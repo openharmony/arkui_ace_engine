@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
 #include <optional>
+#include <utility>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
@@ -33,8 +34,9 @@ constexpr Dimension CIRCLE_SHADOW_WIDTH = 1.0_vp;
 constexpr float SPRING_MOTION_RESPONSE = 0.314f;
 constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 } // namespace
-SliderContentModifier::SliderContentModifier(const Parameters& parameters)
-    : boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
+SliderContentModifier::SliderContentModifier(const Parameters& parameters, std::function<void()> updateImageFunc)
+    : updateImageFunc_(std::move(updateImageFunc)),
+      boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
 {
     // animatable property
     selectStart_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(parameters.selectStart - PointF());
@@ -203,18 +205,26 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         auto trackBorderRadius = trackBorderRadius_->Get();
         auto direction = static_cast<Axis>(directionAxis_->Get());
         auto blockCenter = PointF(blockCenterX_->Get(), blockCenterY_->Get());
+        auto blockSize = blockSize_->Get();
+        auto trackThickness = trackThickness_->Get();
+        auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
         auto rect = GetTrackRect();
+        auto insetOffset = .0f;
+        if (sliderMode == SliderModelNG::SliderMode::INSET) {
+            insetOffset = direction == Axis::HORIZONTAL ? blockSize.Width() * HALF : blockSize.Height() * HALF;
+            insetOffset = std::min(insetOffset + hotCircleShadowWidth_, trackThickness * HALF);
+        }
         if (!reverse_) {
             if (direction == Axis::HORIZONTAL) {
-                rect.SetRight(blockCenter.GetX() + trackBorderRadius);
+                rect.SetRight(blockCenter.GetX() + std::max(trackBorderRadius, insetOffset));
             } else {
-                rect.SetBottom(blockCenter.GetY() + trackBorderRadius);
+                rect.SetBottom(blockCenter.GetY() + std::max(trackBorderRadius, insetOffset));
             }
         } else {
             if (direction == Axis::HORIZONTAL) {
-                rect.SetLeft(blockCenter.GetX() - trackBorderRadius);
+                rect.SetLeft(blockCenter.GetX() - std::max(trackBorderRadius, insetOffset));
             } else {
-                rect.SetTop(blockCenter.GetY() - trackBorderRadius);
+                rect.SetTop(blockCenter.GetY() - std::max(trackBorderRadius, insetOffset));
             }
         }
 
@@ -300,6 +310,7 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
 
 void SliderContentModifier::SetBoardColor()
 {
+    CHECK_NULL_VOID(boardColor_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
@@ -310,12 +321,10 @@ void SliderContentModifier::SetBoardColor()
     auto duration = mousePressedFlag_ ? static_cast<int32_t>(theme->GetPressAnimationDuration())
                                       : static_cast<int32_t>(theme->GetHoverAnimationDuration());
     auto curve = mousePressedFlag_ ? Curves::SHARP : Curves::FRICTION;
-    if (boardColor_) {
-        AnimationOption option = AnimationOption();
-        option.SetDuration(duration);
-        option.SetCurve(curve);
-        AnimationUtils::Animate(option, [&]() { boardColor_->Set(LinearColor(shadowColor)); });
-    }
+    AnimationOption option = AnimationOption();
+    option.SetDuration(duration);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(option, [&]() { boardColor_->Set(LinearColor(shadowColor)); });
 }
 
 void SliderContentModifier::UpdateData(const Parameters& parameters)
@@ -404,15 +413,17 @@ RSRect SliderContentModifier::GetTrackRect()
         }
     } else {
         if (direction == Axis::HORIZONTAL) {
-            rect.SetLeft(backStart.GetX() - std::max(trackBorderRadius, blockSize.Width() * HALF));
-            rect.SetRight(backEnd.GetX() + std::max(trackBorderRadius, blockSize.Width() * HALF));
+            auto offset = std::max(trackBorderRadius, blockSize.Width() * HALF + hotCircleShadowWidth_);
+            rect.SetLeft(backStart.GetX() - std::min(offset, trackThickness * HALF));
+            rect.SetRight(backEnd.GetX() + std::min(offset, trackThickness * HALF));
             rect.SetTop(backStart.GetY() - trackThickness * HALF);
             rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
         } else {
+            auto offset = std::max(trackBorderRadius, blockSize.Height() * HALF + hotCircleShadowWidth_);
             rect.SetLeft(backStart.GetX() - trackThickness * HALF);
             rect.SetRight(backEnd.GetX() + trackThickness * HALF);
-            rect.SetTop(backStart.GetY() - std::max(trackBorderRadius, blockSize.Height() * HALF));
-            rect.SetBottom(backEnd.GetY() + std::max(trackBorderRadius, blockSize.Height() * HALF));
+            rect.SetTop(backStart.GetY() - std::min(offset, trackThickness * HALF));
+            rect.SetBottom(backEnd.GetY() + std::min(offset, trackThickness * HALF));
         }
     }
 
@@ -426,6 +437,10 @@ void SliderContentModifier::DrawBlock(DrawingContext& context)
         DrawDefaultBlock(context);
     } else if (blockType == SliderModelNG::BlockStyleType::SHAPE) {
         DrawBlockShape(context);
+    } else if (blockType == SliderModelNG::BlockStyleType::IMAGE) {
+        if (updateImageFunc_ != nullptr) {
+            updateImageFunc_();
+        }
     }
 }
 

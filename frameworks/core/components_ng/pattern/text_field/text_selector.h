@@ -20,13 +20,14 @@
 #include <string>
 
 #include "base/geometry/ng/offset_t.h"
-#include "frameworks/base/geometry/ng/rect_t.h"
+#include "base/geometry/ng/rect_t.h"
 
 namespace OHOS::Ace::NG {
 
 enum class CaretUpdateType {
     PRESSED,
     LONG_PRESSED,
+    ICON_PRESSED,
     DEL,
     EVENT,
     HANDLE_MOVE,

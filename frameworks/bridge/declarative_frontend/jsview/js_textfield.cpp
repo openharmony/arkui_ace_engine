@@ -270,7 +270,10 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         font.fontSize = Dimension(-1);
     } else {
         Dimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+        if (fontSize->IsString()) {
+            auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
+            font.fontSize = result;
+        } else if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
             LOGW("Parse to dimension FP failed.");
         } else {
@@ -655,17 +658,26 @@ void JSTextField::JsWidth(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetWidth(value);
 }
 
+bool CheckIsIllegalString(const std::string& value)
+{
+    if (value.empty()) {
+        return true;
+    }
+    errno = 0;
+    char* pEnd = nullptr;
+    std::strtod(value.c_str(), &pEnd);
+    return (pEnd == value.c_str() || errno == ERANGE);
+}
+
 void JSTextField::JsPadding(const JSCallbackInfo& info)
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        if (info[0]->IsUndefined()) {
-            auto pipeline = PipelineBase::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-            CHECK_NULL_VOID_NOLOG(theme);
-            auto textFieldPadding = theme->GetPadding();
-            ViewAbstractModel::GetInstance()->SetPaddings(
-                textFieldPadding.Top(), textFieldPadding.Bottom(), textFieldPadding.Left(), textFieldPadding.Right());
+        if (info[0]->IsUndefined() || (info[0]->IsString() && CheckIsIllegalString(info[0]->ToString()))) {
+            return;
+        };
+        Dimension length;
+        ParseJsDimensionVp(info[0], length);
+        if (length.IsNegative()) {
             return;
         }
         JSViewAbstract::JsPadding(info);

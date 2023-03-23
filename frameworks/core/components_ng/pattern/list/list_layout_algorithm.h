@@ -32,7 +32,7 @@ class PipelineContext;
 
 enum class ScrollIndexAlignment {
     ALIGN_TOP = 0,
-    ALIGN_BUTTON = 1,
+    ALIGN_BOTTOM = 1,
 };
 
 struct ListItemInfo {

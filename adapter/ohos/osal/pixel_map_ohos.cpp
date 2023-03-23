@@ -17,9 +17,10 @@
 
 #include <sstream>
 
+#include "drawable_descriptor.h"
+
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
-#include "drawable_descriptor.h"
 
 namespace OHOS::Ace {
 
@@ -71,26 +72,26 @@ AlphaType PixelMapOhos::AlphaTypeConverter(Media::AlphaType alphaType)
 
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
-    auto pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
-    auto drawablePtr = reinterpret_cast<std::shared_ptr<Napi::LayeredDrawableDescriptor>*>(rawPtr);
-    if (pixmapPtr && *pixmapPtr) {
-        return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
-    }
-    if (drawablePtr && *drawablePtr) {
-        return  AceType::MakeRefPtr<PixelMapOhos>((*drawablePtr)->GetPixelMap());
-    }
-    return nullptr;
-}
-
-RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* uniquePtr)
-{
-    std::unique_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::unique_ptr<Media::PixelMap>*>(uniquePtr);
+    std::shared_ptr<Media::PixelMap>* pixmapPtr = reinterpret_cast<std::shared_ptr<Media::PixelMap>*>(rawPtr);
     if (pixmapPtr == nullptr || *pixmapPtr == nullptr) {
-        LOGW("pixmap pointer is nullptr when CreatePixelMapFromDataAbility.");
+        LOGW("pixmap pointer is nullptr when CreatePixelMap.");
         return nullptr;
     }
-    auto rawPtr = (*pixmapPtr).release();
-    return AceType::MakeRefPtr<PixelMapOhos>(std::shared_ptr<Media::PixelMap>(rawPtr));
+    return AceType::MakeRefPtr<PixelMapOhos>(*pixmapPtr);
+}
+
+RefPtr<PixelMap> PixelMap::GetFromDrawable(void* ptr)
+{
+    CHECK_NULL_RETURN(ptr, nullptr);
+    auto* drawable = reinterpret_cast<Napi::DrawableDescriptor*>(ptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(drawable->GetPixelMap());
+}
+
+RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* ptr)
+{
+    auto* pixmap = reinterpret_cast<Media::PixelMap*>(ptr);
+    CHECK_NULL_RETURN(pixmap, nullptr);
+    return AceType::MakeRefPtr<PixelMapOhos>(std::shared_ptr<Media::PixelMap>(pixmap));
 }
 
 int32_t PixelMapOhos::GetWidth() const

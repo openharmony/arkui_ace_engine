@@ -14,8 +14,6 @@
  */
 #include "core/components_ng/pattern/text_field/text_field_paint_method.h"
 
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/path.h"
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/rect.h"
@@ -39,10 +37,10 @@
 
 namespace OHOS::Ace::NG {
 TextFieldPaintMethod::TextFieldPaintMethod(const WeakPtr<Pattern>& pattern,
-                                           const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
-                                           const RefPtr<TextFieldContentModifier>& textFieldContentModifier)
+    const RefPtr<TextFieldOverlayModifier>& textFieldOverlayModifier,
+    const RefPtr<TextFieldContentModifier>& textFieldContentModifier)
     : pattern_(pattern), textFieldOverlayModifier_(textFieldOverlayModifier),
-    textFieldContentModifier_(textFieldContentModifier)
+      textFieldContentModifier_(textFieldContentModifier)
 {}
 
 RefPtr<Modifier> TextFieldPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)

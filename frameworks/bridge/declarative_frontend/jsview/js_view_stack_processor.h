@@ -76,6 +76,8 @@ public:
         return it->second;
     }
 
+    static bool JsUsesNewPipeline();
+
 private:
     static void JSVisualState(const JSCallbackInfo& info);
     static std::map<std::string, JSRef<JSObject>> viewMap_;

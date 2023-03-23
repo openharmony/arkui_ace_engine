@@ -259,6 +259,10 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
+    if (swiperLayoutProperty->GetCachedCount().value_or(1) == 0) {
+        LayoutOffScreen(layoutWrapper, axis);
+    }
+
     // Layout children.
     // Split item range by current index.
     std::set<int32_t, std::greater<>> preItems;
@@ -434,6 +438,25 @@ double SwiperLayoutAlgorithm::GetValidEdgeLength(float swiperLength, float indic
         edgeLength = 0.0;
     }
     return edgeLength;
+}
+
+void SwiperLayoutAlgorithm::LayoutOffScreen(LayoutWrapper* layoutWrapper, Axis axis) const
+{
+    std::set<int32_t> outItems;
+    set_difference(preItemRange_.begin(), preItemRange_.end(), itemRange_.begin(), itemRange_.end(),
+        inserter(outItems, outItems.begin()));
+
+    auto offset = (axis == Axis::HORIZONTAL ? OffsetF(-maxChildSize_.Width(), 0) : OffsetF(0, -maxChildSize_.Height()));
+    for (const auto& index : outItems) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!wrapper) {
+            continue;
+        }
+        auto geometryNode = wrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->SetMarginFrameOffset(offset);
+        wrapper->Layout();
+    }
 }
 
 } // namespace OHOS::Ace::NG

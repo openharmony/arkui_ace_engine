@@ -49,7 +49,7 @@ public:
 
     virtual int32_t FrameCount() const;
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) const;
+    virtual RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
@@ -309,6 +309,16 @@ public:
     }
 
     bool RemoveDisappearingChild(const RefPtr<UINode>& child);
+
+    // These two interfaces are only used for fast preview.
+    // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
+    // FastPreviewUpdateChildDone: the new created node performs some special operations.
+    virtual void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild)
+    {
+        RemoveChildAtIndex(slot);
+        newChild->MountToParent(AceType::Claim(this), slot, false);
+    }
+    virtual void FastPreviewUpdateChildDone() {}
 
 #ifdef PREVIEW
     void SetDebugLine(const std::string& line)

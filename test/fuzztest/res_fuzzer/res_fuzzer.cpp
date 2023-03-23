@@ -38,7 +38,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
 {
     bool result = false;
     auto r = JsonUtil::Create(true);
-    auto r1 = JsonUtil::Create(false);
     double point = 2.0;
     int64_t i64 = 0;
     size_t li = 0;
@@ -47,8 +46,6 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     vfi(s);
     JsonUtil::ParseJsonString(s);
     JsonUtil::ParseJsonString(s.c_str());
-    JsonUtil::CreateArray(true);
-    JsonUtil::CreateArray(false);
     r->Put(jack.c_str(), vol1);
     r->Replace(jack.c_str(), false);
     r->Replace(jack.c_str(), vol2);
@@ -62,7 +59,8 @@ bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     r->Delete(jack.c_str());
     r->GetObject(kal);
     r->GetBool(kal);
-    auto r2 = Ace::JsonValue(cJSON_CreateObject());
+    r->Replace(kal.c_str(), false);
+    r->Delete(kal.c_str());
     return result;
 }
 

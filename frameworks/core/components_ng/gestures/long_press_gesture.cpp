@@ -17,6 +17,10 @@
 
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "core/components_ng/event/gesture_event_hub.h"
+#endif
+
 namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> LongPressGesture::CreateRecognizer()

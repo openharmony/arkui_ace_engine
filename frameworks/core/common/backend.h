@@ -40,32 +40,10 @@ public:
 
     virtual void LoadEngine(const char* libName, int32_t instanceId) = 0;
 
-    virtual void MethodChannel(const std::string& methodName, std::string& jsonStr) = 0;
-
-    virtual void RunPa(const std::string &url) = 0;
-
-    virtual void OnCommand(const std::string& intent, int startId) = 0;
-
     virtual void SetAssetManager(const RefPtr<AssetManager> &assetManager) = 0;
-
-    virtual void SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher> &transfer) const = 0;
-
-    virtual void TransferJsResponseData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const = 0;
-
-    virtual void TransferJsPluginGetError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const = 0;
-
-    virtual void TransferJsEventData(int32_t callbackId, int32_t code, std::vector<uint8_t>&& data) const = 0;
-
-    virtual void LoadPluginJsCode(std::string&& jsCode) const = 0;
-
-    virtual void LoadPluginJsByteCode(std::vector<uint8_t>&& jsCode, std::vector<int32_t>&& jsCodeLen) const = 0;
-
-    virtual BackendType GetType() = 0;
 
     // inform the frontend that onCreate or onDestroy
     virtual void UpdateState(State) = 0;
-
-    virtual void DumpHeapSnapshot(bool isPrivate) = 0;
 };
 
 } // namespace OHOS::Ace

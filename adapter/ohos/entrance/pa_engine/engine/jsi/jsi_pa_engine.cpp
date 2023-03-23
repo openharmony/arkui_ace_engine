@@ -91,25 +91,6 @@ shared_ptr<JsValue> JsHandleCallback(const shared_ptr<JsRuntime>& runtime, const
     const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     LOGI("JsHandleCallback");
-    if (argc != 2) {
-        LOGE("the arg is error");
-        return runtime->NewUndefined();
-    }
-    std::string callbackId = argv[0]->ToString(runtime);
-    std::string result = argv[1]->ToString(runtime);
-
-    auto engineInstance = static_cast<JsiPaEngine*>(runtime->GetEmbedderData());
-    if (engineInstance == nullptr) {
-        LOGE("engineInstance is nullptr");
-        return runtime->NewUndefined();
-    }
-    auto delegate = engineInstance->GetDelegate();
-    if (delegate == nullptr) {
-        LOGE("delegate is nullptr");
-        return runtime->NewUndefined();
-    }
-    delegate->SetCallBackResult(std::string(callbackId), result);
-
     return runtime->NewUndefined();
 }
 
@@ -328,25 +309,6 @@ bool JsiPaEngine::InitJsEnv(bool debuggerMode, const std::unordered_map<std::str
     return true;
 }
 
-bool JsiPaEngine::FireJsEvent(const std::string& eventStr)
-{
-    shared_ptr<JsValue> global = runtime_->GetGlobal();
-    shared_ptr<JsValue> func = global->GetProperty(runtime_, "callJS");
-    if (!func->IsFunction(runtime_)) {
-        LOGE("\"callJS\" is not a function!");
-        return false;
-    }
-
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime_->ParseJson(eventStr) };
-    func->Call(runtime_, global, argv, argv.size());
-    return true;
-}
-
-RefPtr<BackendDelegate> JsiPaEngine::GetDelegate() const
-{
-    return backendDelegate_;
-}
-
 std::shared_ptr<JsRuntime> JsiPaEngine::GetJsRuntime() const
 {
     return runtime_;
@@ -366,14 +328,14 @@ inline panda::ecmascript::EcmaVM* JsiPaEngine::GetEcmaVm() const
 
 void JsiPaEngine::SetDebuggerPostTask()
 {
-    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(backendDelegate_));
-    auto&& postTask = [weakDelegate](std::function<void()>&& task) {
-        auto delegate = weakDelegate.Upgrade();
-        if (delegate == nullptr) {
-            LOGE("delegate is nullptr");
+    auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
+    auto&& postTask = [weak](std::function<void()>&& task) {
+        auto taskExecutor = weak.Upgrade();
+        if (taskExecutor == nullptr) {
+            LOGE("taskExecutor is nullptr");
             return;
         }
-        delegate->PostJsTask(std::move(task));
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::JS);
     };
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
@@ -384,8 +346,8 @@ void JsiPaEngine::SetDebuggerPostTask()
 JsiPaEngine::~JsiPaEngine()
 {
     UnloadLibrary();
-    if (backendDelegate_ != nullptr) {
-        backendDelegate_->RemoveTaskObserver();
+    if (taskExecutor_ != nullptr) {
+        taskExecutor_->RemoveTaskObserver();
     }
 
 #if !defined(PREVIEW)
@@ -448,30 +410,29 @@ void JsiPaEngine::RegisterAssetFunc()
 {
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_VOID(nativeEngine);
-    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(GetDelegate()));
-    auto&& assetFunc = [weakDelegate](const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
+    auto&& assetFunc = [weak = WeakPtr<JsBackendAssetManager>(jsBackendAssetManager_)](
+        const std::string& uri, std::vector<uint8_t>& content, std::string& ami) {
         LOGI("WorkerCore RegisterAssetFunc called");
-        auto delegate = weakDelegate.Upgrade();
-        if (delegate == nullptr) {
-            LOGE("delegate is nullptr");
-            return;
-        }
+        auto jsBackendAssetManager = weak.Upgrade();
+        CHECK_NULL_VOID(jsBackendAssetManager);
         size_t index = uri.find_last_of(".");
         if (index == std::string::npos) {
             LOGE("invalid uri");
         } else {
-            delegate->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
+            jsBackendAssetManager->GetResourceData(uri.substr(0, index) + ".abc", content, ami);
         }
     };
     nativeEngine->SetGetAssetFunc(assetFunc);
 }
 
-bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
+bool JsiPaEngine::Initialize(const RefPtr<TaskExecutor>& taskExecutor, BackendType type)
 {
     ACE_SCOPED_TRACE("JsiPaEngine::Initialize");
     LOGD("JsiPaEngine initialize");
     SetDebugMode(NeedDebugBreakPoint());
-    backendDelegate_ = delegate;
+    ACE_DCHECK(taskExecutor);
+    taskExecutor_ = taskExecutor;
+    type_ = type;
 
     AbilityRuntime::Runtime::Options options;
     InitJsRuntimeOptions(options);
@@ -488,21 +449,20 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
 
     LoadLibrary();
 
-    ACE_DCHECK(delegate);
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, false);
-    delegate->AddTaskObserver([nativeEngine, id = instanceId_]() {
+    taskExecutor->AddTaskObserver([nativeEngine, id = instanceId_]() {
         ContainerScope scope(id);
         nativeEngine->Loop(LOOP_NOWAIT);
     });
-    JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, delegate);
+    JsBackendTimerModule::GetInstance()->InitTimerModule(nativeEngine, taskExecutor);
     SetPostTask(nativeEngine);
 #if !defined(PREVIEW)
     nativeEngine->CheckUVLoop();
 #endif
-    if (delegate && delegate->GetAssetManager()) {
-        std::vector<std::string> packagePath = delegate->GetAssetManager()->GetLibPath();
-        auto appLibPathKey = delegate->GetAssetManager()->GetAppLibPathKey();
+    if (jsBackendAssetManager_) {
+        std::vector<std::string> packagePath = jsBackendAssetManager_->GetLibPath();
+        auto appLibPathKey = jsBackendAssetManager_->GetAppLibPathKey();
         if (!packagePath.empty()) {
             auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
             arkNativeEngine->SetPackagePath(appLibPathKey, packagePath);
@@ -512,23 +472,28 @@ bool JsiPaEngine::Initialize(const RefPtr<BackendDelegate>& delegate)
     return true;
 }
 
+void JsiPaEngine::SetAssetManager(const RefPtr<AssetManager>& assetManager)
+{
+    jsBackendAssetManager_ = Referenced::MakeRefPtr<JsBackendAssetManager>(assetManager);
+}
+
 void JsiPaEngine::SetPostTask(NativeEngine* nativeEngine)
 {
     LOGD("SetPostTask");
-    auto weakDelegate = AceType::WeakClaim(AceType::RawPtr(GetDelegate()));
-    auto&& postTask = [weakDelegate, nativeEngine, id = instanceId_](bool needSync) {
-        auto delegate = weakDelegate.Upgrade();
-        if (delegate == nullptr) {
-            LOGE("delegate is nullptr");
+    auto weak = AceType::WeakClaim(AceType::RawPtr(taskExecutor_));
+    auto&& postTask = [weak, nativeEngine, id = instanceId_](bool needSync) {
+        auto taskExecutor = weak.Upgrade();
+        if (taskExecutor == nullptr) {
+            LOGE("taskExecutor is nullptr");
             return;
         }
-        delegate->PostJsTask([nativeEngine, needSync, id]() {
-            ContainerScope scope(id);
-            if (nativeEngine == nullptr) {
-                return;
-            }
-            nativeEngine->Loop(LOOP_NOWAIT, needSync);
-        });
+        taskExecutor->PostTask([nativeEngine, needSync, id]() {
+                ContainerScope scope(id);
+                if (nativeEngine == nullptr) {
+                    return;
+                }
+                nativeEngine->Loop(LOOP_NOWAIT, needSync);
+            }, TaskExecutor::TaskType::JS);
     };
     nativeEngine->SetPostTask(postTask);
 }
@@ -539,7 +504,6 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     LOGI("JsiPaEngine LoadJs: %{private}s", url.c_str());
 
     auto runtime = GetJsRuntime();
-    auto delegate = GetDelegate();
 
     // js file to abc file and execute abc file
     const char js_ext[] = ".js";
@@ -549,11 +513,11 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
         std::string urlName = url.substr(0, pos) + bin_ext;
         LOGI("GetAssetContent: %{public}s", urlName.c_str());
         std::vector<uint8_t> content;
-        if (!delegate->GetAssetContent(urlName, content)) {
+        if (jsBackendAssetManager_ == nullptr || !jsBackendAssetManager_->GetAssetContent(urlName, content)) {
             LOGE("GetAssetContent \"%{public}s\" failed.", urlName.c_str());
             return;
         }
-        std::string abcPath = delegate->GetAssetPath(urlName).append(urlName);
+        std::string abcPath = jsBackendAssetManager_->GetAssetPath(urlName).append(urlName);
         if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
             LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.c_str());
             return;
@@ -574,12 +538,11 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
     }
 
     // call start pa func
-    BackendType type = delegate->GetType();
-    if (type == BackendType::SERVICE) {
+    if (type_ == BackendType::SERVICE) {
         StartService();
-    } else if (type == BackendType::DATA) {
+    } else if (type_ == BackendType::DATA) {
         StartData();
-    } else if (type == BackendType::FORM) {
+    } else if (type_ == BackendType::FORM) {
         LOGI("Form Ability LoadJS finish.");
     } else {
         LOGE("backend type not support");
@@ -857,61 +820,12 @@ void JsiPaEngine::StartData()
     CallFunc(func, argv);
 }
 
-RefPtr<GroupJsBridge> JsiPaEngine::GetGroupJsBridge()
-{
-    return nullptr;
-}
-
-void JsiPaEngine::SetJsMessageDispatcher(const RefPtr<JsMessageDispatcher>& dispatcher)
-{
-    return;
-}
-
-void JsiPaEngine::FireAsyncEvent(const std::string& eventId, const std::string& param)
-{
-    LOGD("JsiPaEngine FireAsyncEvent");
-    std::string callBuf = std::string("[{\"args\": [\"")
-                              .append(eventId)
-                              .append("\",")
-                              .append(param)
-                              .append("], \"method\":\"fireEvent\"}]");
-    LOGD("FireASyncEvent string: %{private}s", callBuf.c_str());
-
-    if (!FireJsEvent(callBuf.c_str())) {
-        LOGE("Js Engine FireSyncEvent FAILED!");
-    }
-}
-
-void JsiPaEngine::FireSyncEvent(const std::string& eventId, const std::string& param)
-{
-    LOGD("JsiPaEngine FireSyncEvent");
-    std::string callBuf = std::string("[{\"args\": [\"")
-                              .append(eventId)
-                              .append("\",")
-                              .append(param)
-                              .append("], \"method\":\"fireEventSync\"}]");
-    LOGD("FireSyncEvent string: %{private}s", callBuf.c_str());
-
-    if (!FireJsEvent(callBuf.c_str())) {
-        LOGE("Js Engine FireSyncEvent FAILED!");
-    }
-}
-
 void JsiPaEngine::DestroyApplication(const std::string& packageName)
 {
     LOGI("JsiPaEngine DestroyApplication");
     shared_ptr<JsRuntime> runtime = GetJsRuntime();
     const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(packageName) };
     auto func = GetPaFunc("onStop");
-    CallFunc(func, argv);
-}
-
-void JsiPaEngine::OnCommandApplication(const std::string& intent, int startId)
-{
-    LOGI("JsiPaEngine OnCommandApplication");
-    shared_ptr<JsRuntime> runtime = GetJsRuntime();
-    const std::vector<shared_ptr<JsValue>>& argv = { runtime->NewString(intent), runtime->NewInt32(startId) };
-    auto func = GetPaFunc("onCommand");
     CallFunc(func, argv);
 }
 
@@ -1542,12 +1456,5 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
 
     LOGD("JsiPaEngine OnShare, end");
     return true;
-}
-
-void JsiPaEngine::DumpHeapSnapshot(bool isPrivate)
-{
-    if (runtime_) {
-        runtime_->DumpHeapSnapshot(isPrivate);
-    }
 }
 } // namespace OHOS::Ace

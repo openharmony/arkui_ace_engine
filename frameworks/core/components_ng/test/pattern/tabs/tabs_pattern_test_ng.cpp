@@ -191,6 +191,7 @@ HWTEST_F(TabsPatternTestNg, TabsTest003, TestSize.Level1)
     EXPECT_EQ(tabContentFrameNode->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     EXPECT_FALSE(tabContentPattern == nullptr);
+    EXPECT_EQ(tabContentPattern->IsMeasureBoundary(), true);
     const auto& tabBarParam = tabContentPattern->GetTabBarParam();
     EXPECT_EQ(tabBarParam.GetText(), DEFAULT_TAB_BAR_NAME);
     EXPECT_EQ(tabBarParam.GetIcon(), "");

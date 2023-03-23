@@ -99,7 +99,7 @@ public:
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
+    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
     RefPtr<LayoutWrapper> UpdateLayoutWrapper(
         RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
@@ -267,6 +267,8 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
+    OffsetF GetPaintRectOffsetToPage() const;
+
     void AdjustGridOffset();
 
     void SetActive(bool active) override;
@@ -320,6 +322,12 @@ public:
     }
 
     bool OnRemoveFromParent() override;
+
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChildDone() override
+    {
+        OnMountToParentDone();
+    }
 
 private:
     void MarkNeedRender(bool isRenderBoundary);

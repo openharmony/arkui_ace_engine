@@ -53,7 +53,7 @@ public:
 private:
     AceEngine();
 
-    mutable std::shared_mutex mutex_;
+    mutable std::recursive_mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
 

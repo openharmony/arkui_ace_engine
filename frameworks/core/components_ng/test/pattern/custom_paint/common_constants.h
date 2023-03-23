@@ -40,6 +40,12 @@ extern const SizeF MIN_SIZE;
 extern const int32_t CANVAS_WIDTH;
 extern const int32_t CANVAS_HEIGHT;
 extern const int32_t DEFAULT_INSTANCE_ID;
+extern const int32_t DEFAULT_INSTANCE_ID1;
+extern const int32_t DEFAULT_INSTANCE_ID2;
+extern const int32_t IMAGEDATA_WIDTH;
+extern const int32_t IMAGEDATA_HEIGHT;
+extern const int32_t BLENDMODE_VALUE_BEGIN;
+extern const int32_t BLENDMODE_VALUE_END;
 
 extern const double DEFAULT_DOUBLE0;
 extern const double DEFAULT_DOUBLE1;

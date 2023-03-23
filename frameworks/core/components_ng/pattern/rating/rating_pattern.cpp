@@ -211,6 +211,17 @@ void RatingPattern::ConstrainsRatingScore()
         }
     }
 
+    // steps max is stars, if steps > stars, assign the value defined in theme.
+    if (ratingRenderProperty->HasStepSize()) {
+        if (GreatNotEqual(
+            ratingRenderProperty->GetStepSizeValue(
+                GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE)),
+            ratingLayoutProperty->GetStarsValue(
+                GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)))) {
+            ratingRenderProperty->UpdateStepSize(GetStepSizeFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STEP_SIZE));
+        }
+    }
+
     // Calculate drewScore based on the stepSize, and it is cannot be greater than starNum.
     const double ratingScore = ratingRenderProperty->GetRatingScore().value_or(GetRatingScoreFromTheme().value_or(0.0));
     const double stepSize = ratingRenderProperty->GetStepSize().value_or(

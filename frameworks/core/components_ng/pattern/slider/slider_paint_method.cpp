@@ -18,7 +18,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5f;
-}
+} // namespace
 
 void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {

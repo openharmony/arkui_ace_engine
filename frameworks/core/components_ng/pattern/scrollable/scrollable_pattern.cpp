@@ -189,7 +189,7 @@ void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)
 bool ScrollablePattern::HandleEdgeEffect(float offset, int32_t source, const SizeF& size)
 {
     // check edgeEffect is not springEffect
-    if (scrollEffect_ && scrollEffect_->IsFadeEffect()) {    // handle edge effect
+    if (scrollEffect_ && scrollEffect_->IsFadeEffect() && source != SCROLL_FROM_BAR) {    // handle edge effect
         if ((IsAtTop() && Positive(offset)) || (IsAtBottom() && Negative(offset))) {
             scrollEffect_->HandleOverScroll(GetAxis(), -offset, size);
         }
@@ -295,6 +295,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         Offset scrollOffset = { offset, offset }; // fit for w/h switched.
         Offset viewOffset = { paddingOffset.GetX(), paddingOffset.GetY() };
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
+        scrollBar_->OnScrollEnd();
         scrollBar_->MarkNeedRender();
     }
 

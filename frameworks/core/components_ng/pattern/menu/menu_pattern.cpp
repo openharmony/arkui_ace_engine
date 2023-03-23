@@ -21,6 +21,7 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -31,8 +32,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty,
-    RefPtr<MenuItemLayoutProperty>& itemProperty, RefPtr<MenuItemPattern>& itemPattern)
+void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
+    RefPtr<MenuItemPattern>& itemPattern)
 {
     auto contentNode = itemPattern->GetContentNode();
     CHECK_NULL_VOID(contentNode);
@@ -81,14 +82,12 @@ void UpdateMenuItemTextNode(RefPtr<MenuLayoutProperty>& menuProperty,
         label->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
-}
+} // namespace
 
 void MenuPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    if (!onClick_) {
-        RegisterOnClick();
-    }
+    RegisterOnTouch();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
@@ -121,58 +120,41 @@ void MenuPattern::OnModifyDone()
 }
 
 // close menu on touch up
-void MenuPattern::RegisterOnClick()
+void MenuPattern::RegisterOnTouch()
 {
-    auto event = [targetId = targetId_, isContextMenu = IsContextMenu(), weak = WeakClaim(this)](
-                     const TouchEventInfo& info) {
-        auto menuPattern = weak.Upgrade();
-        CHECK_NULL_VOID(menuPattern);
-        auto menuNode = menuPattern->GetHost();
-        CHECK_NULL_VOID(menuNode);
-        bool isCustomOption = false;
-        auto firstChild = menuNode->GetChildAtIndex(0);
-        if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
-            isCustomOption = true;
-            auto scrollChild = firstChild->GetChildAtIndex(0);
-            if ((scrollChild && scrollChild->GetTag() == V2::MENU_ETS_TAG)) {
-                isCustomOption = false;
-            }
-        }
-        if (!menuPattern->IsSubMenu() && !isCustomOption) {
-            // menu with options or menu items is closed by option or menuItem click event.
-            return;
-        }
-
-        auto touches = info.GetTouches();
-        if (touches.empty() || touches.front().GetTouchType() != TouchType::UP) {
-            return;
-        }
-
-        if (menuPattern->IsSubMenu()) {
-            auto menuItemParent = menuPattern->GetParentMenuItem();
-            auto menuItemPattern = menuItemParent->GetPattern<MenuItemPattern>();
-            menuItemPattern->CloseMenu();
-            return;
-        }
-
-        if (isContextMenu) {
-            SubwindowManager::GetInstance()->HideMenuNG(targetId);
-            return;
-        }
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->HideMenu(targetId);
-        LOGI("MenuPattern closing menu %{public}d", targetId);
-    };
-    onClick_ = MakeRefPtr<TouchEventImpl>(std::move(event));
-
+    CHECK_NULL_VOID_NOLOG(!onTouch_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->AddTouchEvent(onClick_);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(pattern);
+        pattern->OnTouchEvent(info);
+    };
+    onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gesture->AddTouchEvent(onTouch_);
+}
+
+void MenuPattern::OnTouchEvent(const TouchEventInfo& info)
+{
+    if (IsMultiMenuOutside() || IsMultiMenu()) {
+        // not click hide menu for multi menu
+        return;
+    }
+    if (!options_.empty()) {
+        // not click hide menu for select and bindMenu default option
+        return;
+    }
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        lastTouchOffset_ = info.GetTouches().front().GetLocalLocation();
+    } else if (touchType == TouchType::UP) {
+        if (lastTouchOffset_.has_value() && info.GetTouches().front().GetLocalLocation() == lastTouchOffset_) {
+            HideMenu();
+        }
+        lastTouchOffset_.reset();
+    }
 }
 
 void MenuPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -190,20 +172,16 @@ bool MenuPattern::OnKeyEvent(const KeyEvent& event) const
     if (event.action != KeyAction::DOWN || IsMultiMenu()) {
         return false;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, false);
     if (event.code == KeyCode::KEY_ESCAPE) {
-        if (IsContextMenu()) {
-            SubwindowManager::GetInstance()->HideMenuNG(targetId_);
-            return true;
-        }
-        overlayManager->HideMenu(targetId_);
+        HideMenu();
         return true;
     }
     if (event.code == KeyCode::KEY_DPAD_LEFT && IsSubMenu()) {
-        overlayManager->HideMenu(targetId_);
+        auto menuWrapper = GetMenuWrapper();
+        CHECK_NULL_RETURN(menuWrapper, true);
+        auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_RETURN(wrapperPattern, true);
+        wrapperPattern->HideSubMenu();
         return true;
     }
     return false;
@@ -258,7 +236,7 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
+    const auto& children = GetOptions();
     auto childCount = children.size();
     auto paramCount = params.size();
     size_t updateCount = std::min(paramCount, childCount);
@@ -284,14 +262,91 @@ void MenuPattern::UpdateSelectParam(const std::vector<SelectParam>& params)
             auto props = optionNode->GetPaintProperty<OptionPaintProperty>();
             props->UpdateNeedDivider(false);
         }
-        optionNode->MountToParent(host);
+        MountOption(optionNode);
         optionNode->MarkModifyDone();
         optionNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    for (size_t i = updateCount; i < childCount; i++) {
-        childIt = host->RemoveChild(*childIt);
+    for (size_t i = childCount; i > updateCount; i--) {
+        RemoveOption();
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuPattern::HideMenu() const
+{
+    if (IsContextMenu()) {
+        SubwindowManager::GetInstance()->HideMenuNG(targetId_);
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->HideMenu(targetId_);
+    LOGI("MenuPattern closing menu %{public}d", targetId_);
+}
+
+RefPtr<FrameNode> MenuPattern::GetMenuWrapper() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(parent);
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
+// judge children has component menu
+bool MenuPattern::IsMultiMenuOutside() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto child = host->GetChildAtIndex(0);
+    while (child) {
+        // is component menu
+        if (child->GetTag() == V2::MENU_ETS_TAG) {
+            return AceType::DynamicCast<FrameNode>(child);
+        }
+        child = child->GetChildAtIndex(0);
+    }
+    return false;
+}
+
+// mount option on menu
+void MenuPattern::MountOption(const RefPtr<FrameNode>& option)
+{
+    auto column = GetMenuColumn();
+    CHECK_NULL_VOID(column);
+    auto pattern = option->GetPattern<OptionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenu(WeakClaim(RawPtr(GetHost())));
+    AddOptionNode(option);
+    option->MountToParent(column);
+}
+
+// remove option from menu
+void MenuPattern::RemoveOption()
+{
+    auto column = GetMenuColumn();
+    CHECK_NULL_VOID(column);
+    auto endOption = column->GetChildren().back();
+    CHECK_NULL_VOID(endOption);
+    column->RemoveChild(endOption);
+    PopOptionNode();
+}
+
+RefPtr<FrameNode> MenuPattern::GetMenuColumn() const
+{
+    auto menu = GetHost();
+    CHECK_NULL_RETURN(menu, nullptr);
+    auto scroll = menu->GetChildren().front();
+    CHECK_NULL_RETURN(menu, nullptr);
+    auto column = scroll->GetChildren().front();
+    return DynamicCast<FrameNode>(column);
 }
 } // namespace OHOS::Ace::NG

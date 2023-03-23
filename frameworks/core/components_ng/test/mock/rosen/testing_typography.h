@@ -16,14 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H
 
-#include "core/components_ng/test/mock/rosen/testing_typography_properties.h"
+#include <vector>
+
+#include "testing_canvas.h"
+#include "testing_typography_properties.h"
 
 namespace OHOS::Ace::Testing {
-enum class WordBreakType {
-    WordBreakTypeNormal = 0,
-    WordBreakTypeBreakAll,
-    WordBreakTypeBreakWord
-};
+enum class WordBreakType { WordBreakTypeNormal = 0, WordBreakTypeBreakAll, WordBreakTypeBreakWord };
 
 enum class TextAlign {
     LEFT = 0,
@@ -37,17 +36,49 @@ enum class TextAlign {
 class TestingTypography {
 public:
     TestingTypography() = default;
-    ~TestingTypography() = default;
+    virtual ~TestingTypography() = default;
 
-    double GetMaxWidth();
-    double GetHeight();
-    double GetLongestLine();
-    double GetMinIntrinsicWidth();
-    double GetMaxIntrinsicWidth();
-    double GetAlphabeticBaseline();
-    double GetIdeographicBaseline();
-    bool DidExceedMaxLines();
-    void Layout(double width);
+    virtual double GetHeight()
+    {
+        return 1.0;
+    }
+
+    virtual void Layout(double width) {}
+
+    virtual double GetMaxIntrinsicWidth()
+    {
+        return 1.0;
+    }
+
+    virtual double GetMaxWidth()
+    {
+        return 1.0;
+    }
+
+    virtual double GetLongestLine()
+    {
+        return 1.0;
+    }
+
+    virtual double GetMinIntrinsicWidth()
+    {
+        return 1.0;
+    }
+
+    virtual void Paint(TestingCanvas* canvas, double x, double y) {}
+
+    virtual std::vector<TestingTypographyProperties::TextBox> GetRectsForRange(size_t /* start */, size_t /* end */,
+        TestingTypographyProperties::RectHeightStyle /* height */,
+        TestingTypographyProperties::RectWidthStyle /* width */)
+    {
+        return {};
+    }
+
+    virtual TestingTypographyProperties::PositionAndAffinity GetGlyphPositionAtCoordinateWithCluster(double x, double y)
+    {
+        TestingTypographyProperties::PositionAndAffinity res(1, TestingTypographyProperties::Affinity::UPSTREAM);
+        return res;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_TYPOGRAPHY_H

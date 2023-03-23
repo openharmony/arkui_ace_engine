@@ -68,13 +68,13 @@ public:
 
     bool IsRegister();
     void Register(bool state);
-    virtual bool SubscribeToastObserver();
-    virtual bool UnsubscribeToastObserver();
-    virtual bool SubscribeStateObserver(const int eventType);
-    virtual bool UnsubscribeStateObserver(const int eventType);
-    virtual int RegisterInteractionOperation(const int windowId);
-    virtual void DeregisterInteractionOperation();
-    virtual bool SendAccessibilitySyncEvent(
+    bool SubscribeToastObserver();
+    bool UnsubscribeToastObserver();
+    bool SubscribeStateObserver(int eventType);
+    bool UnsubscribeStateObserver(int eventType);
+    int RegisterInteractionOperation(int windowId);
+    void DeregisterInteractionOperation();
+    bool SendAccessibilitySyncEvent(
         const AccessibilityEvent& accessibilityEvent, Accessibility::AccessibilityEventInfo eventInfo);
 
     void SearchElementInfoByAccessibilityId(const int32_t elementId, const int32_t requestId,

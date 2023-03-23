@@ -46,14 +46,12 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/render/adapter/svg_canvas_image.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
-    "$ace_root/frameworks/core/image/image_source_info.cpp",
 
     # components_ng_syntax
     "$ace_root/frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/lazy_layout_wrapper_builder.cpp",
 
     # components_ng_pattern
-    "$ace_root/frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
@@ -77,6 +75,8 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/flex/mock_flex_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_bar_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scroll/mock_scroll_fade_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/pattern/scrollable/mock_scrollable_pattern.cpp",
@@ -97,6 +97,7 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/menu_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_view.cpp",

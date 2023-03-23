@@ -107,6 +107,8 @@ public:
 
     std::string GetDotIndicatorStyle() const
     {
+        auto swiperParameters = GetSwiperParameters();
+        CHECK_NULL_RETURN(swiperParameters, "");
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("left", swiperParameters_->dimLeft.value_or(0.0_vp).ToString().c_str());
         jsonValue->Put("top", swiperParameters_->dimTop.value_or(0.0_vp).ToString().c_str());
@@ -126,6 +128,8 @@ public:
 
     std::string GetDigitIndicatorStyle() const
     {
+        auto swiperParameters = GetSwiperDigitalParameters();
+        CHECK_NULL_RETURN(swiperParameters, "");
         auto jsonValue = JsonUtil::Create(true);
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, "");
@@ -174,6 +178,8 @@ public:
     {
         return turnPageRate_;
     }
+
+    float GetBorderAndPaddingWidth();
 
     RefPtr<Animator> GetController()
     {
@@ -247,8 +253,11 @@ public:
     }
 
     SwiperIndicatorType GetIndicatorType() const;
-    std::shared_ptr<SwiperParameters> GetSwiperParameters();
-    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters();
+    std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
+    std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
+
+    void OnWindowShow() override;
+    void OnWindowHide() override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -265,9 +274,6 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
-
-    // Init auto play, show next item in duration time when auto play.
-    void InitAutoPlay();
 
     // Init controller of swiper, controller support showNext, showPrevious and finishAnimation interface.
     void InitSwiperController();
@@ -293,8 +299,6 @@ private:
     void StopTranslateAnimation();
     void StopSpringAnimation();
 
-    // Timer tick callback, duration is in millisecond.
-    void Tick(uint64_t duration);
     void StopAutoPlay();
     void StartAutoPlay();
     bool IsOutOfBoundary(float mainOffset) const;
@@ -320,6 +324,11 @@ private:
     bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SaveDotIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
     void SaveDigitIndicatorProperty(const RefPtr<FrameNode> &indicatorNode);
+    void PostTranslateTask(uint32_t delayTime);
+    void RegisterVisibleAreaChange();
+    bool NeedAutoPlay() const;
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay);
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -353,18 +362,20 @@ private:
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
     bool isInit_ = true;
+    bool hasVisibleChangeRegistered_ = false;
+    bool isVisible_ = true;
 
     Axis direction_ = Axis::HORIZONTAL;
 
-    uint64_t elapsedTime_ = 0; // millisecond.
-
     ChangeEventPtr changeEvent_;
 
-    std::shared_ptr<SwiperParameters> swiperParameters_;
-    std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
+    mutable std::shared_ptr<SwiperParameters> swiperParameters_;
+    mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
     SizeF maxChildSize_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
+
+    CancelableCallback<void()> translateTask_;
 };
 } // namespace OHOS::Ace::NG
 

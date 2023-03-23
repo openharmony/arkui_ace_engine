@@ -138,15 +138,8 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto child = children.front();
     auto childSize_ = child->GetGeometryNode()->GetMarginFrameSize();
-    float blockOffset = 0;
-    if (axis == Axis::HORIZONTAL) {
-        blockOffset = childSize_.Width() * HALF;
-    } else {
-        blockOffset = childSize_.Height() * HALF;
-    }
-
     OffsetF circleCenter;
-    if (pattern->GetBlockCenter() == OffsetF()) {
+    if (pattern->GetAnimatableBlockCenter() == OffsetF()) {
         if (!reverse) {
             if (axis == Axis::HORIZONTAL) {
                 circleCenter.SetX(selectOffset);
@@ -165,7 +158,7 @@ void SliderLayoutAlgorithm::CalculateBlockOffset(
             }
         }
     } else {
-        circleCenter = pattern->GetBlockCenter();
+        circleCenter = pattern->GetAnimatableBlockCenter();
     }
 
     OffsetF imageNodeOffset(

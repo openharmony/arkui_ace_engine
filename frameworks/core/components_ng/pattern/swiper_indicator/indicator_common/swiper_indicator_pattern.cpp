@@ -283,25 +283,11 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     float itemWidthValue = static_cast<float>(paintProperty->GetItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
     float itemHeightValue = static_cast<float>(paintProperty->GetItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
     float selectedItemWidthValue = static_cast<float>(
-        paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx());
-    float selectedItemHeightValue = static_cast<float>(
-        paintProperty->GetSelectedItemHeightValue(swiperTheme->GetSize()).ConvertToPx());
-    if (NearEqual(itemWidthValue, selectedItemWidthValue) &&
-        NearEqual(itemHeightValue, selectedItemHeightValue) &&
-        NearEqual(itemWidthValue, itemHeightValue)) {
-        selectedItemWidthValue *= 2;
-    }
+        paintProperty->GetSelectedItemWidthValue(swiperTheme->GetSize()).ConvertToPx() * 2);
     // diameter calculation
     float itemWidth = itemWidthValue * INDICATOR_ZOOM_IN_SCALE;
     float itemHeight = itemHeightValue * INDICATOR_ZOOM_IN_SCALE;
     float selectedItemWidth = selectedItemWidthValue * INDICATOR_ZOOM_IN_SCALE;
-    float selectedItemHeight = selectedItemHeightValue * INDICATOR_ZOOM_IN_SCALE;
-
-    // float radius calculation
-    float itemHalfWidth = itemWidth * 0.5;
-    float itemHalfHeight = itemHeight * 0.5;
-    float selectedItemHalfWidth = selectedItemWidth * 0.5;
-    float selectedItemHalfHeight = selectedItemHeight * 0.5;
 
     float padding = static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx());
     float space = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx());
@@ -309,25 +295,20 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
     int32_t itemCount = swiperPattern->TotalCount();
     auto frameSize = host->GetGeometryNode()->GetFrameSize();
     auto axis = swiperPattern->GetDirection();
-    float centerX = 0.0f;
-    float centerY = (axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) * 0.5;
+    float centerX = padding;
+    float centerY = ((axis == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - itemHeight) * 0.5f;
     PointF hoverPoint = axis == Axis::HORIZONTAL ? hoverPoint_ : PointF(hoverPoint_.GetY(), hoverPoint_.GetX());
     for (int32_t i = 0; i < itemCount; ++i) {
-        float nowCenterX = 0;
         if (i != currentIndex) {
-            centerX = padding + itemHalfWidth;
-            nowCenterX = centerX;
-            centerX += space + itemWidth;
+            if (hoverPoint.GetX() >= centerX && hoverPoint.GetX() <= centerX + itemWidth &&
+                hoverPoint.GetY() >= centerY && hoverPoint.GetY() <= centerY + itemHeight) {
+                mouseClickIndex_ = i;
+                swiperPattern->SetIndicatorDoingAnimation(true);
+                break;
+            }
+            centerX += itemWidth + space;
         } else {
-            centerX = padding + selectedItemHalfWidth;
-            nowCenterX = centerX;
-            centerX += space + selectedItemWidth;
-        }
-        if (std::abs(hoverPoint.GetX() - nowCenterX) <= (i != currentIndex ? itemHalfWidth : selectedItemHalfWidth) &&
-            std::abs(hoverPoint.GetY() - centerY) <= (i != currentIndex ? itemHalfHeight : selectedItemHalfHeight)) {
-            mouseClickIndex_ = i;
-            swiperPattern->SetIndicatorDoingAnimation(true);
-            break;
+            centerX += selectedItemWidth + space;
         }
     }
 }

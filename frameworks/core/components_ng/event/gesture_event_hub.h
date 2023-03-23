@@ -326,6 +326,17 @@ public:
         touchable_ = touchable;
     }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetPixelMap(std::shared_ptr<Media::PixelMap> pixelMap)
+    {
+        pixelMap_ = pixelMap;
+    }
+
+    std::shared_ptr<Media::PixelMap> GetPixelMap()
+    {
+        return pixelMap_;
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
     void HandleOnDragUpdate(const GestureEvent& info);
@@ -372,6 +383,9 @@ private:
     bool isResponseRegion_ = false;
     std::vector<DimensionRect> responseRegion_;
     bool touchable_ = true;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    std::shared_ptr<Media::PixelMap> pixelMap_;
+#endif // ENABLE_DRAG_FRAMEWORK
 };
 
 } // namespace OHOS::Ace::NG

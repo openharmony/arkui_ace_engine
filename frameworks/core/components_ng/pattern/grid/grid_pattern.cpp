@@ -43,8 +43,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     StringUtils::StringSplitter(gridLayoutProperty->GetColumnsTemplate().value_or(""), ' ', cols);
     std::vector<std::string> rows;
     StringUtils::StringSplitter(gridLayoutProperty->GetRowsTemplate().value_or(""), ' ', rows);
-    auto crossCount = cols.empty() ? Infinity<int32_t>() : cols.size();
-    auto mainCount = rows.empty() ? Infinity<int32_t>() : rows.size();
+    auto crossCount = cols.empty() ? Infinity<int32_t>() : static_cast<int32_t>(cols.size());
+    auto mainCount = rows.empty() ? Infinity<int32_t>() : static_cast<int32_t>(rows.size());
     if (!gridLayoutProperty->IsVertical()) {
         std::swap(crossCount, mainCount);
     }
@@ -147,8 +147,7 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             ClearMultiSelect();
             mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
+            // do not select when click
         } else if (info.GetAction() == MouseAction::MOVE) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
@@ -739,12 +738,12 @@ void GridPattern::UpdateScrollBarOffset()
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
 
     float heightSum = 0;
-    size_t itemCount = 0;
+    int32_t itemCount = 0;
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
     for (const auto& item : info.lineHeightMap_) {
         auto line = info.gridMatrix_.find(item.first);
         if (line != info.gridMatrix_.end()) {
-            itemCount += line->second.size();
+            itemCount += static_cast<int32_t>(line->second.size());
         } else {
             itemCount += info.crossCount_;
         }
@@ -753,7 +752,7 @@ void GridPattern::UpdateScrollBarOffset()
 
     float estimatedHeight = 0.f;
     auto averageHeight_ = heightSum / itemCount;
-    if (itemCount >= static_cast<size_t>(info.childrenCount_ - 1)) {
+    if (itemCount >= (info.childrenCount_ - 1)) {
         estimatedHeight = heightSum - mainGap;
     } else {
         estimatedHeight = heightSum + (info.childrenCount_ - itemCount) * averageHeight_;
@@ -812,7 +811,7 @@ void GridPattern::UpdateRectOfDraggedInItem(int32_t insertIndex)
         CHECK_NULL_VOID(itemPattern);
         auto mainIndex = itemPattern->GetMainIndex();
         auto crossIndex = itemPattern->GetCrossIndex();
-        if (mainIndex * static_cast<int32_t>(gridLayoutInfo_.crossCount_) + crossIndex == insertIndex) {
+        if (mainIndex * gridLayoutInfo_.crossCount_ + crossIndex == insertIndex) {
             auto size = item->GetRenderContext()->GetPaintRectWithTransform();
             size.SetOffset(item->GetTransformRelativeOffset());
             gridLayoutInfo_.currentRect_ = size;

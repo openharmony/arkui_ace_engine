@@ -115,7 +115,19 @@ public:
     void FireOnAppear()
     {
         if (onAppear_) {
-            onAppear_();
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto taskScheduler = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(taskScheduler);
+            taskScheduler->PostTask(
+                [weak = WeakClaim(this)]() {
+                    auto eventHub = weak.Upgrade();
+                    CHECK_NULL_VOID(eventHub);
+                    if (eventHub->onAppear_) {
+                        eventHub->onAppear_();
+                    }
+                },
+                TaskExecutor::TaskType::UI);
         }
     }
 
@@ -126,7 +138,19 @@ public:
     void FireOnDisappear()
     {
         if (onDisappear_) {
-            onDisappear_();
+            auto pipeline = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto taskScheduler = pipeline->GetTaskExecutor();
+            CHECK_NULL_VOID(taskScheduler);
+            taskScheduler->PostTask(
+                [weak = WeakClaim(this)]() {
+                    auto eventHub = weak.Upgrade();
+                    CHECK_NULL_VOID(eventHub);
+                    if (eventHub->onDisappear_) {
+                        eventHub->onDisappear_();
+                    }
+                },
+                TaskExecutor::TaskType::UI);
         }
     }
 
@@ -257,6 +281,14 @@ public:
     UIState GetCurrentUIState() const
     {
         return stateStyleMgr_ ? stateStyleMgr_->GetCurrentUIState() : UI_STATE_NORMAL;
+    }
+
+    bool HasStateStyle(UIState state) const
+    {
+        if (stateStyleMgr_) {
+            return stateStyleMgr_->HasStateStyle(state);
+        }
+        return false;
     }
 
     void AddSupportedState(UIState state);

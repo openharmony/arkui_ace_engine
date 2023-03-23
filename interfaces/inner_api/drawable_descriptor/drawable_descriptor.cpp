@@ -18,20 +18,19 @@
 #include <cstddef>
 #include <memory>
 
+#include "SkBlendMode.h"
+#include "SkCanvas.h"
+#include "SkImage.h"
+#include "SkPaint.h"
+#include "SkRect.h"
 #include "cJSON.h"
+#include "image_source.h"
 
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/blend_mode.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/brush.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/draw/canvas.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/image/image.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/utils/rect.h"
-#include "foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include/utils/sampling_options.h"
-#include "platform/image_native/image_type.h"
 namespace OHOS::Ace::Napi {
 namespace {
 const char DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND[] = "background";
 const char DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND[] = "foreground";
-}
+} // namespace
 
 bool DrawableDescriptor::GetPixelMapFromBuffer()
 {
@@ -44,6 +43,7 @@ bool DrawableDescriptor::GetPixelMapFromBuffer()
         return false;
     }
     Media::DecodeOptions decodeOpts;
+    decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
     pixelMap_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
     if (errorCode != 0 || !pixelMap_) {
@@ -57,14 +57,12 @@ std::shared_ptr<Media::PixelMap> DrawableDescriptor::GetPixelMap()
 {
     if (pixelMap_.has_value()) {
         return pixelMap_.value();
-    } else {
-        if (GetPixelMapFromBuffer()) {
-            return pixelMap_.value();
-        } else {
-            HILOG_ERROR("Failed to GetPixelMap");
-            return nullptr;
-        }
     }
+    if (GetPixelMapFromBuffer()) {
+        return pixelMap_.value();
+    }
+    HILOG_ERROR("Failed to GetPixelMap!");
+    return nullptr;
 }
 
 std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource(const char* item, uint32_t& errorCode)
@@ -73,13 +71,13 @@ std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource
     std::string idStr = itemStr.substr(itemStr.find(':') + 1);
     size_t len = 0;
     std::unique_ptr<uint8_t[]> data;
-    
+
     auto state = resourceMgr_->GetMediaDataById(static_cast<uint32_t>(std::stoul(idStr)), len, data);
     if (state != Global::Resource::SUCCESS) {
         HILOG_ERROR("GetMediaDataById failed");
         return nullptr;
     }
-    
+
     Media::SourceOptions opts;
     return Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
 }
@@ -125,7 +123,7 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
             foreground_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
         }
     } else {
-        HILOG_ERROR("GetPixelMapFromJsonBuf from json buffer failed");
+        HILOG_ERROR("Get background from json buffer failed");
         return false;
     }
     return true;
@@ -142,6 +140,7 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
     std::unique_ptr<Media::ImageSource> imageSource =
         Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
     Media::DecodeOptions decodeOpts;
+    decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
     mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
     if (errorCode != 0 || !mask_) {
@@ -161,6 +160,7 @@ bool LayeredDrawableDescriptor::GetMaskByName(const std::string& name)
     std::unique_ptr<Media::ImageSource> imageSource =
         Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
     Media::DecodeOptions decodeOpts;
+    decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
     auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
     mask_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
     if (errorCode != 0 || !mask_) {
@@ -193,7 +193,6 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetBackground()
     if (GetPixelMapFromJsonBuf(true)) {
         return std::make_unique<DrawableDescriptor>(background_.value());
     }
-
     HILOG_ERROR("GetForeground failed");
     return nullptr;
 }
@@ -212,124 +211,62 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetMask()
     return nullptr;
 }
 
-Rosen::Drawing::ColorType LayeredDrawableDescriptor::PixelFormatToColorType(Media::PixelFormat pixelFormat)
-{
-    switch (pixelFormat) {
-        case Media::PixelFormat::RGB_565:
-            return Rosen::Drawing::ColorType::COLORTYPE_RGB_565;
-        case Media::PixelFormat::RGBA_8888:
-            return Rosen::Drawing::ColorType::COLORTYPE_RGBA_8888;
-        case Media::PixelFormat::BGRA_8888:
-            return Rosen::Drawing::ColorType::COLORTYPE_BGRA_8888;
-        case Media::PixelFormat::ALPHA_8:
-            return Rosen::Drawing::ColorType::COLORTYPE_ALPHA_8;
-        case Media::PixelFormat::ARGB_8888:
-        case Media::PixelFormat::RGB_888:
-        case Media::PixelFormat::RGBA_F16:
-        case Media::PixelFormat::NV21:
-        case Media::PixelFormat::NV12:
-        case Media::PixelFormat::CMYK:
-        case Media::PixelFormat::UNKNOWN:
-        default:
-            return Rosen::Drawing::ColorType::COLORTYPE_UNKNOWN;
-    }
-}
-
-Rosen::Drawing::AlphaType LayeredDrawableDescriptor::AlphaTypeToRSAlphaType(Media::AlphaType alphaType)
-{
-    switch (alphaType) {
-        case Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE:
-            return Rosen::Drawing::AlphaType::ALPHATYPE_OPAQUE;
-        case Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL:
-            return Rosen::Drawing::AlphaType::ALPHATYPE_PREMUL;
-        case Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL:
-            return Rosen::Drawing::AlphaType::ALPHATYPE_UNPREMUL;
-        case Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN:
-        default:
-            return Rosen::Drawing::AlphaType::ALPHATYPE_UNKNOWN;
-    }
-}
-
-std::shared_ptr<Rosen::Drawing::Bitmap> LayeredDrawableDescriptor::PixelMapToBitMap(
-    const std::shared_ptr<Media::PixelMap>& pixelMap)
-{
-    Rosen::Drawing::Bitmap bitmap;
-    Rosen::Drawing::ColorType colorType = LayeredDrawableDescriptor::PixelFormatToColorType(pixelMap->GetPixelFormat());
-    Rosen::Drawing::AlphaType rAlphaType = LayeredDrawableDescriptor::AlphaTypeToRSAlphaType(pixelMap->GetAlphaType());
-    Rosen::Drawing::BitmapFormat format { colorType, rAlphaType };
-    auto data = pixelMap->GetPixels();
-    bitmap.Build(pixelMap->GetWidth(), pixelMap->GetHeight(), format);
-    bitmap.SetPixels(const_cast<uint8_t*>(data));
-    return std::make_shared<Rosen::Drawing::Bitmap>(bitmap);
-}
-
-std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::BitMapToPixelMap(
-    const std::shared_ptr<Rosen::Drawing::Bitmap>& bitMap, Media::InitializationOptions& opts)
-{
-    auto data = bitMap->GetPixels();
-    opts.size.width = bitMap->GetWidth();
-    opts.size.height = bitMap->GetHeight();
-    pixelMap_ = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data), opts.size.width * opts.size.height, opts);
-    return pixelMap_.value();
-}
-
 bool LayeredDrawableDescriptor::CreatePixelMap()
 {
-    // get pixelMap
-    std::shared_ptr<Rosen::Drawing::Bitmap> foreground;
-    bool isBackground = false;
+    std::shared_ptr<SkBitmap> foreground;
     if (foreground_.has_value()) {
-        foreground = PixelMapToBitMap(foreground_.value());
-    } else if (GetPixelMapFromJsonBuf(isBackground)) {
-        foreground = PixelMapToBitMap(foreground_.value());
+        foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
+    } else if (GetPixelMapFromJsonBuf(false)) {
+        foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
     } else {
-        HILOG_ERROR("Get piexelmap of foreground faied.");
+        HILOG_INFO("Get pixelMap of foreground failed.");
         return false;
     }
-    
-    std::shared_ptr<Rosen::Drawing::Bitmap> background;
-    isBackground = true;
+
+    std::shared_ptr<SkBitmap> background;
     if (background_.has_value()) {
-        background = PixelMapToBitMap(background_.value());
-    } else if (GetPixelMapFromJsonBuf(isBackground)) {
-        background = PixelMapToBitMap(background_.value());
+        background = ImageConverter::PixelMapToBitmap(background_.value());
+    } else if (GetPixelMapFromJsonBuf(true)) {
+        background = ImageConverter::PixelMapToBitmap(background_.value());
     } else {
-        HILOG_ERROR("Get piexelmap of background faied.");
+        HILOG_ERROR("Get pixelMap of background failed.");
         return false;
     }
 
-    std::shared_ptr<Rosen::Drawing::Bitmap> mask;
+    std::shared_ptr<SkBitmap> mask;
     if (mask_.has_value()) {
-        mask = PixelMapToBitMap(mask_.value());
+        mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else if (GetDefaultMask()) {
-        mask = PixelMapToBitMap(mask_.value());
+        mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else {
-        HILOG_ERROR("Get piexelmap of mask faied.");
+        HILOG_ERROR("Get pixelMap of mask failed.");
         return false;
     }
 
-    Rosen::Drawing::Canvas canvas;
-    canvas.Bind(static_cast<const OHOS::Rosen::Drawing::Bitmap>(*(background.get())));
-    Rosen::Drawing::Brush brush;
-    brush.SetAntiAlias(true);
-    canvas.AttachBrush(brush);
-    Rosen::Drawing::Image image;
-    image.BuildFromBitmap(static_cast<const OHOS::Rosen::Drawing::Bitmap>(*(foreground.get())));
-    Rosen::Drawing::RectF dst = Rosen::Drawing::RectF(
-        0.0f, static_cast<float>(foreground->GetWidth()), 0.0f, static_cast<float>(foreground->GetHeight()));
-    Rosen::Drawing::SamplingOptions ops;
-    canvas.DrawImageRect(image, dst, ops);
+    SkPaint paint;
+    paint.setAntiAlias(true);
+    SkCanvas bitmapCanvas(*background);
+    auto rect1 = SkRect::MakeWH(static_cast<float>(mask->width()), static_cast<float>(mask->height()));
+    auto rect2 = SkRect::MakeXYWH(0, 0, static_cast<float>(background->width()),
+        static_cast<float>(background->height()));
+    paint.setBlendMode(SkBlendMode::kDstATop);
+    bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*mask), rect1, rect2, &paint);
 
-    brush.SetBlendMode(Rosen::Drawing::BlendMode::DST_IN);
-    canvas.AttachBrush(brush);
-    image.BuildFromBitmap(static_cast<const OHOS::Rosen::Drawing::Bitmap>(*(mask.get())));
-    canvas.DrawImageRect(image, dst, ops);
+    rect1 = SkRect::MakeWH(static_cast<float>(foreground->width()), static_cast<float>(foreground->height()));
+    auto x = static_cast<float>((background->width() - foreground->width()) / 2);
+    auto y = static_cast<float>((background->height() - foreground->height()) / 2);
+    rect2 = SkRect::MakeXYWH(x, y, static_cast<float>(foreground->width()), static_cast<float>(foreground->height()));
+    paint.setBlendMode(SkBlendMode::kSrcATop);
+    bitmapCanvas.drawImageRect(SkImage::MakeFromBitmap(*foreground), rect1, rect2, &paint);
+    SkBitmap result;
+    result.allocPixels(background->info());
+    bitmapCanvas.readPixels(result, 0, 0);
 
-    // convert bitMap back to pixelMap
+    // convert bitmap back to pixelMap
     Media::InitializationOptions opts;
     opts.alphaType = background_.value()->GetAlphaType();
-    opts.pixelFormat = background_.value()->GetPixelFormat();
-    pixelMap_ = BitMapToPixelMap(background, opts);
+    opts.pixelFormat = Media::PixelFormat::BGRA_8888;
+    pixelMap_ = ImageConverter::BitmapToPixelMap(std::make_shared<SkBitmap>(result), opts);
     return true;
 }
 

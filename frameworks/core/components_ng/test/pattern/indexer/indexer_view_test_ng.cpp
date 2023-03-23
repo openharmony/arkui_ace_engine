@@ -16,6 +16,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "base/geometry/dimension.h"
 
 #define protected public
 #define private public
@@ -70,8 +71,8 @@ struct TestProperty {
     std::optional<Dimension> itemSizeValue = std::nullopt;
     std::optional<AlignStyle> alignStyleValue = std::nullopt;
     std::optional<int32_t> selectedValue = std::nullopt;
-    std::optional<float> popupPositionXValue = std::nullopt;
-    std::optional<float> popupPositionYValue = std::nullopt;
+    std::optional<Dimension> popupPositionXValue = std::nullopt;
+    std::optional<Dimension> popupPositionYValue = std::nullopt;
     std::optional<Color> popupSelectedColorValue = std::nullopt;
     std::optional<Color> popupUnselectedColorValue = std::nullopt;
     std::optional<Color> popupItemBackgroundValue = std::nullopt;
@@ -190,8 +191,8 @@ HWTEST_F(IndexerViewTestNg, IndexerViewTest001, TestSize.Level1)
     testProperty.itemSizeValue = std::make_optional(ITEM_SIZE_VALUE);
     testProperty.alignStyleValue = std::make_optional(ALIGN_STYLE_VALUE);
     testProperty.selectedValue = std::make_optional(SELECTED_VALUE);
-    testProperty.popupPositionXValue = std::make_optional(POPUP_POSITIONX_VALUE);
-    testProperty.popupPositionYValue = std::make_optional(POPUP_POSITIONY_VALUE);
+    testProperty.popupPositionXValue = std::make_optional(Dimension(POPUP_POSITIONX_VALUE, DimensionUnit::VP));
+    testProperty.popupPositionYValue = std::make_optional(Dimension(POPUP_POSITIONY_VALUE, DimensionUnit::VP));
 
     /**
      * @tc.steps: step2. create indexer frameNode and get indexerLayoutProperty.
@@ -224,8 +225,8 @@ HWTEST_F(IndexerViewTestNg, IndexerViewTest001, TestSize.Level1)
     EXPECT_EQ(indexerLayoutProperty->GetItemSize().value(), ITEM_SIZE_VALUE);
     EXPECT_EQ(indexerLayoutProperty->GetAlignStyle().value(), ALIGN_STYLE_VALUE);
     EXPECT_EQ(indexerLayoutProperty->GetSelected().value(), SELECTED_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetPopupPositionX().value(), POPUP_POSITIONX_VALUE);
-    EXPECT_EQ(indexerLayoutProperty->GetPopupPositionY().value(), POPUP_POSITIONY_VALUE);
+    EXPECT_EQ(indexerLayoutProperty->GetPopupPositionX().value(), Dimension(POPUP_POSITIONX_VALUE, DimensionUnit::VP));
+    EXPECT_EQ(indexerLayoutProperty->GetPopupPositionY().value(), Dimension(POPUP_POSITIONY_VALUE, DimensionUnit::VP));
 }
 
 /**

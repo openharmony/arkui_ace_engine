@@ -66,6 +66,11 @@ void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t sl
     UINode::AddChild(child);
 }
 
+void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
+{
+    UINode::RemoveChildAtIndex(slot);
+}
+
 void NavRouterGroupNode::OnDetachFromMainTree()
 {
     FrameNode::OnDetachFromMainTree();
@@ -190,7 +195,6 @@ void NavRouterGroupNode::SetBackButtonEvent(const RefPtr<UINode>& parent)
                 layoutProperty->UpdateDestinationChange(true);
                 return;
             }
-
             navRouter->BackToNavBar(navigation);
             navRouter->SetOnStateChangeFalse(navDestination, navigation, true);
             layoutProperty->UpdateDestinationChange(false);
@@ -257,16 +261,16 @@ void NavRouterGroupNode::AddNavDestinationToNavigation(const RefPtr<UINode>& par
     if (navBarNode && layoutProperty->GetNavigationModeValue(NavigationMode::AUTO) == NavigationMode::SPLIT) {
         navigationContentNode->Clean();
         navigationContentNode->AddChild(navDestination);
-        navigationContentNode->MarkModifyDone();
-        navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        navigationNode->MarkModifyDone();
+        navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return;
     }
 
     SetBackButtonVisible(navDestination);
     navigationContentNode->Clean();
     navigationContentNode->AddChild(navDestination);
-    navigationContentNode->MarkModifyDone();
-    navigationContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    navigationNode->MarkModifyDone();
+    navigationNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void NavRouterGroupNode::SetOnStateChangeFalse(
@@ -284,9 +288,8 @@ void NavRouterGroupNode::SetOnStateChangeFalse(
         return;
     }
 
-    if (isBackButton) {
-        auto newDestiantion = AceType::DynamicCast<FrameNode>(navDestination->GetPreNode());
-        CHECK_NULL_VOID(newDestiantion);
+    auto newDestiantion = AceType::DynamicCast<FrameNode>(navDestination->GetPreNode());
+    if (isBackButton && newDestiantion) {
         auto newEventHub = newDestiantion->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(newEventHub);
         newEventHub->FireChangeEvent(true);

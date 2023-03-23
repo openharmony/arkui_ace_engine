@@ -30,6 +30,7 @@ public:
         std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     static void SetSelectedTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
+    static void SetDialogTitleDate(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerDate& value);
     static void SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime = false);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& dateNode,

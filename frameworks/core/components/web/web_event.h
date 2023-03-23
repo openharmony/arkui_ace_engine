@@ -519,6 +519,8 @@ public:
     virtual bool IsFrist() const = 0;
 
     virtual int32_t GetId() const = 0;
+
+    virtual int32_t GetParentNWebId() const = 0;
 };
 
 class ACE_EXPORT LoadWebPageStartEvent : public BaseEventInfo {

@@ -120,7 +120,7 @@ bool DectectAllDone(const RefPtr<NGGestureRecognizer> recognizer)
         }
     } else {
         auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
-        for (auto& item : group->GetGroupRecognizer()) {
+        for (const auto& item : group->GetGroupRecognizer()) {
             bool ret = DectectAllDone(item);
             if (!ret) {
                 return false;

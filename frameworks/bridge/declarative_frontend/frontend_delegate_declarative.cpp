@@ -71,6 +71,7 @@ const char I18N_FOLDER[] = "i18n/";
 const char RESOURCES_FOLDER[] = "resources/";
 const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
+const char MERGE_SOURCEMAPS_PATH[] = "sourceMaps.map";
 
 // helper function to run OverlayManager task
 // ensures that the task runs in subwindow instead of main Window
@@ -772,6 +773,23 @@ RefPtr<RevSourceMap> FrontendDelegateDeclarative::GetFaAppSourceMap()
     return appSourceMap_;
 }
 
+void FrontendDelegateDeclarative::GetStageSourceMap(
+    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMaps)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    std::string appMap;
+    if (GetAssetContent(MERGE_SOURCEMAPS_PATH, appMap)) {
+        AceType::MakeRefPtr<RevSourceMap>();
+        auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
+        SourceMap->StageModeSourceMapSplit(appMap, sourceMaps);
+    } else {
+        LOGW("app map load failed!");
+    }
+}
+
 void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
@@ -1358,7 +1376,10 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
-
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
         auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
             CHECK_NULL_VOID(overlayManager);
             LOGI("Begin to show dialog ");
@@ -1444,6 +1465,10 @@ void FrontendDelegateDeclarative::ShowActionMenuInner(DialogProperties& dialogPr
     if (Container::IsCurrentUseNewPipeline()) {
         LOGI("Dialog IsCurrentUseNewPipeline.");
         dialogProperties.onSuccess = std::move(callback);
+        dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
+            taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
+                TaskExecutor::TaskType::JS);
+        };
         auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
         auto overlayManager = context ? context->GetOverlayManager() : nullptr;
         taskExecutor_->PostTask(

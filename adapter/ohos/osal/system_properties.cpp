@@ -427,7 +427,7 @@ bool SystemProperties::GetAllowWindowOpenMethodEnabled()
     return system::GetBoolParameter("persist.web.allowWindowOpenMethod.enabled", false);
 }
 
-bool SystemProperties::GetIsUseMemoryMonitor()
+ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
     return isUseMemoryMonitor;

@@ -17,19 +17,38 @@
 
 #include <optional>
 
+#include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/geometry/size.h"
 #include "base/utils/utils.h"
+#include "core/common/window.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 
 void BoxLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto pipeline = OHOS::Ace::PipelineBase::GetCurrentContext();
+    if (pipeline && pipeline->GetIsAppWindow() && pipeline->GetIsLayoutFullScreen()) {
+        auto layoutProperty = layoutWrapper->GetLayoutProperty();
+        if (layoutProperty) {
+            auto safeArea = layoutProperty->GetSafeArea();
+            SizeF maxSize { layoutConstraint.maxSize.Width() - safeArea.leftRect_.Width() - safeArea.rightRect_.Width(),
+                layoutConstraint.maxSize.Height() - safeArea.topRect_.Height() - safeArea.bottomRect_.Height() };
+            SizeF percentReference {
+                layoutConstraint.percentReference.Width() - safeArea.leftRect_.Width() - safeArea.rightRect_.Width(),
+                layoutConstraint.percentReference.Height() - safeArea.topRect_.Height() - safeArea.bottomRect_.Height()
+            };
+            layoutConstraint.UpdateMaxSizeWithCheck(maxSize);
+            layoutConstraint.UpdatePercentReference(percentReference);
+        }
+    }
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
     }
@@ -107,7 +126,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             frameSize.UpdateIllegalSizeWithCheck(contentSize);
         } else {
             // use the max child size.
-            auto childFrame = SizeF(-1, -1);
+            auto childFrame = SizeF();
             float maxWidth = 0.0f;
             float maxHeight = 0.0f;
             for (const auto& child : childList) {
@@ -132,7 +151,16 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         }
         frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     } while (false);
-
+    auto pipeline = OHOS::Ace::PipelineBase::GetCurrentContext();
+    if (pipeline && pipeline->GetIsAppWindow() && pipeline->GetIsLayoutFullScreen()) {
+        auto layoutProperty = layoutWrapper->GetLayoutProperty();
+        if (layoutProperty) {
+            auto safeArea = layoutProperty->GetSafeArea();
+            frameSize.UpdateSizeWithCheck(
+                SizeF { frameSize.Width().value() - safeArea.leftRect_.Width() - safeArea.rightRect_.Width(),
+                    frameSize.Height().value() - safeArea.topRect_.Height() - safeArea.bottomRect_.Height() });
+        }
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }
 
@@ -157,9 +185,22 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.
+    auto pipeline = OHOS::Ace::PipelineBase::GetCurrentContext();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        auto translate =
-            Alignment::GetAlignPosition(size, child->GetGeometryNode()->GetMarginFrameSize(), align) + paddingOffset;
+        SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        auto layoutProperty = child->GetLayoutProperty();
+        SafeAreaEdgeInserts safeArea;
+        if (layoutProperty) {
+            safeArea = layoutProperty->GetSafeArea();
+        }
+        if (pipeline && pipeline->GetIsAppWindow() && pipeline->GetIsLayoutFullScreen()) {
+            childSize += SizeF { safeArea.leftRect_.Width() + safeArea.rightRect_.Width(),
+                safeArea.topRect_.Height() + safeArea.bottomRect_.Height() };
+        }
+        auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
+        if (pipeline && pipeline->GetIsAppWindow() && pipeline->GetIsLayoutFullScreen()) {
+            translate += OffsetF { safeArea.leftRect_.Width(), safeArea.topRect_.Height() };
+        }
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
     }
     // Update content position.

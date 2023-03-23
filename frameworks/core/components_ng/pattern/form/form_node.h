@@ -38,6 +38,8 @@ public:
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
     void DispatchPointerEvent(const TouchEvent& point) const;
+
+    void OnDetachFromMainTree() override;
 };
 
 } // namespace OHOS::Ace::NG

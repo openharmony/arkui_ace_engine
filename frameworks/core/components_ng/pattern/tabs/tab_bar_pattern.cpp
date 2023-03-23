@@ -458,7 +458,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         indicator = 0;
     }
     if (!isAnimating_) {
-        UpdateIndicator(indicator_);
+        UpdateIndicator(indicator);
     }
     UpdateGradientRegions();
     return false;
@@ -504,7 +504,6 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     } else {
         swiperController_->SwipeToWithoutAnimation(index);
     }
-    indicator_ = index;
     layoutProperty->UpdateIndicator(index);
 }
 
@@ -544,7 +543,6 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         PlayTranslateAnimation(originalPaintRect.GetX(), targetPaintRect.GetX(), targetOffset);
     }
     swiperController_->SwipeTo(index);
-    indicator_ = index;
     layoutProperty->UpdateIndicator(index);
 }
 
@@ -743,9 +741,7 @@ void TabBarPattern::UpdateGradientRegions()
     CHECK_NULL_VOID(geometryNode);
     auto frameRect = geometryNode->GetFrameRect();
 
-    for (auto gradientRegion : gradientRegions_) {
-        gradientRegion = false;
-    }
+    std::fill(gradientRegions_.begin(), gradientRegions_.end(), false);
     if (barMode == TabBarMode::SCROLLABLE) {
         if (axis == Axis::HORIZONTAL) {
             if (LessNotEqual(tabItemOffsets_.front().GetX(), 0.0f)) {
@@ -778,7 +774,6 @@ void TabBarPattern::UpdateTextColor(int32_t indicator)
     auto columnNode = DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(indicator));
     CHECK_NULL_VOID(columnNode);
     auto selectedColumnId = columnNode->GetId();
-    CHECK_NULL_VOID(tabBarNode);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
@@ -894,7 +889,8 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    controller_->SetDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
+    controller_->SetDuration(
+        static_cast<int32_t>(animationDuration_.value_or(tabTheme->GetTabContentAnimationDuration())));
     controller_->AddInterpolator(translate);
     controller_->AddInterpolator(tabBarTranslate);
     controller_->Play();
@@ -955,7 +951,8 @@ void TabBarPattern::PlayTabBarTranslateAnimation(int32_t targetIndex)
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
-    controller_->SetDuration(static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration()));
+    controller_->SetDuration(
+        static_cast<int32_t>(animationDuration_.value_or(tabTheme->GetTabContentAnimationDuration())));
     controller_->AddInterpolator(tabBarTranslate);
     controller_->Play();
 }
@@ -1032,7 +1029,7 @@ float TabBarPattern::CalculateBackChildrenMainSize(int32_t indicator)
     CHECK_NULL_RETURN(host, 0.0f);
     float backChildrenMainSize = 0.0f;
     auto childCount = host->GetChildren().size();
-    for (uint32_t index = indicator + 1; index < childCount; ++index) {
+    for (uint32_t index = static_cast<uint32_t>(indicator) + 1; index < childCount; ++index) {
         auto childFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
         CHECK_NULL_RETURN(childFrameNode, 0.0f);
         auto childGeometryNode = childFrameNode->GetGeometryNode();

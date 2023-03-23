@@ -181,6 +181,9 @@ void UITaskScheduler::FlushTask()
     if (NeedAdditionalLayout()) {
         FlushLayoutTask();
     }
+    if (!afterLayoutTasks_.empty()) {
+        FlushAfterLayoutTask();
+    }
     ElementRegister::GetInstance()->ClearPendingRemoveNodes();
     FlushRenderTask();
 }
@@ -212,6 +215,21 @@ bool UITaskScheduler::isEmpty()
         return true;
     }
     return false;
+}
+
+void UITaskScheduler::AddAfterLayoutTask(std::function<void()>&& task)
+{
+    afterLayoutTasks_.emplace_back(std::move(task));
+}
+
+void UITaskScheduler::FlushAfterLayoutTask()
+{
+    decltype(afterLayoutTasks_) tasks(std::move(afterLayoutTasks_));
+    for (const auto& task : tasks) {
+        if (task) {
+            task();
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

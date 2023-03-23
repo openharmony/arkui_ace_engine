@@ -54,7 +54,7 @@ private:
     bool pending_ = false;
 
     // NG
-    WeakPtr<NG::FrameNode> dialog_;
+    std::vector<WeakPtr<NG::FrameNode>> dialogs_;
 
     DialogProperties dialogProperties_;
     RefPtr<JsFunction> jsBuilderFunction_;

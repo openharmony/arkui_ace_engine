@@ -39,7 +39,6 @@ namespace OHOS {
 
 namespace OHOS::Ace {
 
-using DataAbilityThumbnailQueryImpl = std::function<std::unique_ptr<Media::PixelMap>(const std::string&)>;
 class DataAbilityHelperStandard : public DataAbilityHelper {
     DECLARE_ACE_TYPE(DataAbilityHelperStandard, DataAbilityHelper)
 
@@ -60,9 +59,6 @@ private:
     std::shared_ptr<AppExecFwk::DataAbilityHelper> dataAbilityHelper_;
     std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext_;
     std::weak_ptr<OHOS::AppExecFwk::Context> context_;
-    std::shared_ptr<OHOS::Uri> uri_;
-    DataAbilityThumbnailQueryImpl dataAbilityThumbnailQueryImpl_;
-    std::unique_ptr<Media::PixelMap> pixmap_;
 };
 
 } // namespace OHOS::Ace

@@ -118,7 +118,7 @@ void UpdateChildLayoutConstrainByFlexBasis(
                 selfIdealSize->Width()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
                 return;
             } else if (!IsHorizontal(direction) && selfIdealSize->Height().has_value() &&
-                    selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                       selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
                 return;
             }
         }
@@ -164,20 +164,16 @@ void FlexLayoutAlgorithm::CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutW
  */
 void FlexLayoutAlgorithm::CheckBaselineProperties(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    bool isChildBaselineAlign = false;
-    const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-    isChildBaselineAlign =
-        flexItemProperty ? flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) == FlexAlign::BASELINE : false;
-    if (crossAxisAlign_ == FlexAlign::BASELINE || isChildBaselineAlign) {
-        float distance = layoutWrapper->GetBaselineDistance();
-        baselineProperties_.maxBaselineDistance = std::max(baselineProperties_.maxBaselineDistance, distance);
-        baselineProperties_.maxDistanceAboveBaseline = std::max(baselineProperties_.maxDistanceAboveBaseline, distance);
-        baselineProperties_.maxDistanceBelowBaseline =
-            std::max(baselineProperties_.maxDistanceBelowBaseline, GetSelfCrossAxisSize(layoutWrapper) - distance);
-        if (crossAxisAlign_ == FlexAlign::BASELINE) {
-            crossAxisSize_ =
-                baselineProperties_.maxDistanceAboveBaseline + baselineProperties_.maxDistanceBelowBaseline;
-        }
+    if (crossAxisAlign_ != FlexAlign::BASELINE && !childrenHasAlignSelfBaseLine_) {
+        return;
+    }
+    float distance = layoutWrapper->GetBaselineDistance();
+    baselineProperties_.maxBaselineDistance = std::max(baselineProperties_.maxBaselineDistance, distance);
+    baselineProperties_.maxDistanceAboveBaseline = std::max(baselineProperties_.maxDistanceAboveBaseline, distance);
+    baselineProperties_.maxDistanceBelowBaseline =
+        std::max(baselineProperties_.maxDistanceBelowBaseline, GetSelfCrossAxisSize(layoutWrapper) - distance);
+    if (crossAxisAlign_ == FlexAlign::BASELINE) {
+        crossAxisSize_ = baselineProperties_.maxDistanceAboveBaseline + baselineProperties_.maxDistanceBelowBaseline;
     }
 }
 
@@ -233,6 +229,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
     outOfLayoutChildren_.clear();
     magicNodes_.clear();
     magicNodeWeights_.clear();
+    childrenHasAlignSelfBaseLine_ = false;
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
@@ -259,6 +256,10 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
         }
         if (childFlexItemProperty) {
             childDisplayPriority = childFlexItemProperty->GetDisplayIndex().value_or(1);
+            if (!childrenHasAlignSelfBaseLine_ &&
+                childFlexItemProperty->GetAlignSelf().value_or(FlexAlign::FLEX_START) == FlexAlign::BASELINE) {
+                childrenHasAlignSelfBaseLine_ = true;
+            }
         }
         if (!magicNodes_.count(childDisplayPriority)) {
             magicNodes_.insert(
@@ -830,7 +831,7 @@ void FlexLayoutAlgorithm::PlaceChildren(
     float childCrossPos = 0.0f;
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& child : children) {
-        if (child->IsOutOfLayout()) {
+        if (child->IsOutOfLayout() || !child->IsActive()) {
             // adjust by postion property.
             child->GetGeometryNode()->SetMarginFrameOffset({});
             child->Layout();
@@ -892,7 +893,11 @@ void FlexLayoutAlgorithm::PlaceChildren(
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-    return flexItemProperty ? flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) : crossAxisAlign_;
+    if (!flexItemProperty || !flexItemProperty->GetAlignSelf().has_value() ||
+        flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) == FlexAlign::AUTO) {
+        return crossAxisAlign_;
+    }
+    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_);
 }
 
 } // namespace OHOS::Ace::NG

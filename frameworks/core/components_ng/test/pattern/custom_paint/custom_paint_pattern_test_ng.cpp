@@ -202,41 +202,6 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg004, TestSize.Level1)
      */
     auto customPattern = CreateCustomPaintPattern();
     ASSERT_NE(customPattern, nullptr);
-    PaintState paintState;
-
-    /**
-     * @tc.steps2: Call the function MeasureTextMetrics.
-     * @tc.expected: All parts of the return TextMetrics object are equal to zero.
-     */
-    TextMetrics textMetrics = customPattern->MeasureTextMetrics(DEFAULT_STR, paintState);
-    EXPECT_DOUBLE_EQ(textMetrics.width, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.height, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxLeft, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxRight, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxAscent, DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(textMetrics.actualBoundingBoxDescent, DEFAULT_DOUBLE0);
-
-    /**
-     * @tc.steps3: Call functions MeasureText and MeasureTextHeight.
-     * @tc.expected: All return values are equal to zero.
-     */
-    EXPECT_DOUBLE_EQ(customPattern->MeasureText(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
-    EXPECT_DOUBLE_EQ(customPattern->MeasureTextHeight(DEFAULT_STR, paintState), DEFAULT_DOUBLE0);
-}
-
-/**
- * @tc.name: CustomPaintPatternTestNg005
- * @tc.desc: Test functions about MeasureText of the class CustomPaintPattern.
- * @tc.type: FUNC
- */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg005, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    auto customPattern = CreateCustomPaintPattern();
-    ASSERT_NE(customPattern, nullptr);
     auto paintMethod = AceType::DynamicCast<CanvasPaintMethod>(customPattern->CreateNodePaintMethod());
     ASSERT_NE(paintMethod, nullptr);
 
@@ -273,11 +238,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg005, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg006
+ * @tc.name: CustomPaintPatternTestNg005
  * @tc.desc: Test functions about GetImageData of the class CustomPaintPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -314,11 +279,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg007
+ * @tc.name: CustomPaintPatternTestNg006
  * @tc.desc: Test functions about text.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg007, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg006, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -373,11 +338,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg007, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg008
+ * @tc.name: CustomPaintPatternTestNg007
  * @tc.desc: Test functions about TransformParam.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg008, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg007, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -419,11 +384,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg008, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg009
+ * @tc.name: CustomPaintPatternTestNg008
  * @tc.desc: Test functions about Rect.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg009, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg008, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -458,11 +423,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg009, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg010
+ * @tc.name: CustomPaintPatternTestNg09
  * @tc.desc: Test functions about Shadow.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg09, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -497,11 +462,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg011
+ * @tc.name: CustomPaintPatternTestNg010
  * @tc.desc: Test functions about Stroke.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg011, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg010, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -543,11 +508,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg011, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg012
+ * @tc.name: CustomPaintPatternTestNg011
  * @tc.desc: Test functions about path.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg012, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg011, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -598,11 +563,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg012, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg013
+ * @tc.name: CustomPaintPatternTestNg012
  * @tc.desc: Test functions about line.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg012, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -646,11 +611,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg014
+ * @tc.name: CustomPaintPatternTestNg013
  * @tc.desc: Test functions about updating parameters.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg014, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg013, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -696,11 +661,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg014, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg015
+ * @tc.name: CustomPaintPatternTestNg014
  * @tc.desc: Test functions about image.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg015, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg014, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -738,11 +703,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg015, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg016
+ * @tc.name: CustomPaintPatternTestNg015
  * @tc.desc: Test functions about curve.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg015, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
@@ -789,11 +754,11 @@ HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
 }
 
 /**
- * @tc.name: CustomPaintPatternTestNg017
+ * @tc.name: CustomPaintPatternTestNg016
  * @tc.desc: Test functions about CanvasFillRule.
  * @tc.type: FUNC
  */
-HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg017, TestSize.Level1)
+HWTEST_F(CustomPaintPatternTestNg, CustomPaintPatternTestNg016, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.

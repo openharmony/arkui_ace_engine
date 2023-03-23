@@ -56,6 +56,13 @@ const float NEW_WIDTH = 500.0f;
 const float NEW_HEIGHT = 500.0f;
 const RectF NEW_RECT = RectF(NEW_X_VALUE, NEW_Y_VALUE, NEW_WIDTH, NEW_HEIGHT);
 const OffsetF NEW_ORIGIN = OffsetF(NEW_WIDTH, NEW_HEIGHT);
+
+const std::string STRINGCTER_A = "A";
+const std::string STRINGCTER_Q = "Q";
+const std::string STRINGCTER_E = "E";
+constexpr int32_t NUM_CTRL_VALUE = 1;
+constexpr int32_t NUM_SHIFT_VALUE = 2;
+constexpr int32_t NUM_ALT_VALUE = 4;
 } // namespace
 
 class EventHubTestNg : public testing::Test {
@@ -276,5 +283,40 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest004, TestSize.Level1)
     eventHub->FireOnDragMove(dragEvent, DRAG_DROP_EVENT_TYPE);
     EXPECT_TRUE(eventHub->HasOnDrop());
     EXPECT_EQ(dragEventType, DRAG_DROP_EVENT_TYPE);
+}
+
+/**
+ * @tc.name: EventHubCreateTest005
+ * @tc.desc: Create EventHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubDragEventsTest005, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    std::vector<KeyboardShortcut> keyboardShortcut;
+    eventHub->SetKeyboardShortcut(STRINGCTER_A, NUM_CTRL_VALUE, []() {});
+    keyboardShortcut = eventHub->GetKeyboardShortcut();
+    for (auto iter = keyboardShortcut.begin(); iter != keyboardShortcut.end(); iter++) {
+        EXPECT_EQ(STRINGCTER_A, (*iter).value);
+        EXPECT_EQ(NUM_CTRL_VALUE, (*iter).keys);
+    }
+    keyboardShortcut.clear();
+
+    eventHub->SetKeyboardShortcut(STRINGCTER_Q, NUM_SHIFT_VALUE, []() {});
+    eventHub->GetKeyboardShortcut();
+    for (auto iter = keyboardShortcut.begin(); iter != keyboardShortcut.end(); iter++) {
+        EXPECT_EQ(STRINGCTER_Q, (*iter).value);
+        EXPECT_EQ(NUM_SHIFT_VALUE, (*iter).keys);
+    }
+    keyboardShortcut.clear();
+
+    eventHub->SetKeyboardShortcut(STRINGCTER_E, NUM_ALT_VALUE, []() {});
+    eventHub->GetKeyboardShortcut();
+    for (auto iter = keyboardShortcut.begin(); iter != keyboardShortcut.end(); iter++) {
+        EXPECT_EQ(STRINGCTER_E, (*iter).value);
+        EXPECT_EQ(NUM_CTRL_VALUE, (*iter).keys);
+    }
+    keyboardShortcut.clear();
 }
 } // namespace OHOS::Ace::NG

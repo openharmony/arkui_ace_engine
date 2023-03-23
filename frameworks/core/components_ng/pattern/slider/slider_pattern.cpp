@@ -38,7 +38,8 @@ namespace {
 constexpr float HALF = 0.5;
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
-constexpr float MAX_STEPS = 100.0f;
+constexpr float SLIDER_MIN = .0f;
+constexpr float SLIDER_MAX = 100.0f;
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -62,7 +63,7 @@ void SliderPattern::OnModifyDone()
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
-    CancelExceptionValue(min, max);
+    CancelExceptionValue(min, max, step);
     valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
     UpdateBlock();
@@ -75,16 +76,23 @@ void SliderPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
 }
 
-void SliderPattern::CancelExceptionValue(float& min, float& max)
+void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
 {
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    if (NearEqual(min, max)) {
-        max = min + MAX_STEPS;
+    if (GreatOrEqual(min, max)) {
+        min = SLIDER_MIN;
+        max = SLIDER_MAX;
+        sliderPaintProperty->UpdateMin(min);
         sliderPaintProperty->UpdateMax(max);
+    }
+    if (LessOrEqual(step, 0.0) || step > max - min) {
+        step = 1;
+        sliderPaintProperty->UpdateStep(step);
     }
     if (value_ < min || value_ > max) {
         value_ = std::clamp(value_, min, max);
+        sliderPaintProperty->UpdateValue(value_);
         FireChangeEvent(SliderChangeMode::End);
     }
 }
@@ -422,7 +430,9 @@ void SliderPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 void SliderPattern::GetOutsetInnerFocusPaintRect(RoundRect& paintRect)
 {
     UpdateCircleCenterOffset();
-    auto contentOffset = GetHost()->GetGeometryNode()->GetContent()->GetRect().GetOffset();
+    const auto& content = GetHost()->GetGeometryNode()->GetContent();
+    CHECK_NULL_VOID(content);
+    auto contentOffset = content->GetRect().GetOffset();
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
     auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
     auto paintWidth = appTheme->GetFocusWidthVp();
@@ -466,8 +476,10 @@ void SliderPattern::GetInsetInnerFocusPaintRect(RoundRect& paintRect)
     auto frameSize = GetHostFrameSize();
     CHECK_NULL_VOID(frameSize);
     auto theme = PipelineBase::GetCurrentContext()->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(theme);
     auto focusSideDistance = theme->GetFocusSideDistance();
     auto appTheme = PipelineBase::GetCurrentContext()->GetTheme<AppTheme>();
+    CHECK_NULL_VOID(appTheme);
     auto paintWidth = appTheme->GetFocusWidthVp();
     auto focusDistance = paintWidth * HALF + focusSideDistance;
     float offsetX = 0;
@@ -783,5 +795,12 @@ void SliderPattern::UpdateBlock()
             imageFrameNode_ = nullptr;
         }
     }
+}
+
+void SliderPattern::LayoutImageNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 } // namespace OHOS::Ace::NG

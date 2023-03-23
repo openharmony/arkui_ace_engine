@@ -201,7 +201,7 @@ void ListPattern::DrivenRender(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto barDisplayMode = listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF);
     auto chainAnimation = listLayoutProperty->GetChainAnimation().value_or(false);
     bool drivenRender = !(axis != Axis::VERTICAL || barDisplayMode != DisplayMode::OFF ||
-        stickyStyle != V2::StickyStyle::NONE || chainAnimation || !scrollable_);
+                          stickyStyle != V2::StickyStyle::NONE || chainAnimation || !scrollable_);
 
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -537,37 +537,107 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
 
 bool ListPattern::HandleDirectionKey(const KeyEvent& event)
 {
-    if ((GetAxis() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP) ||
-        (GetAxis() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
-        (event.IsShiftWith(KeyCode::KEY_TAB))) {
-        auto nextIndex = std::clamp(scrollIndex_ - 1, 0, maxListItemIndex_);
-        if (nextIndex == scrollIndex_) {
-            return false;
-        }
-        if (scrollIndex_ == startIndex_) {
-            LOGD("Scroll to previous index: %{public}d", nextIndex);
-            // Need to update: current selection
-            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_TOP);
-        }
-        scrollIndex_ = nextIndex;
-        return false;
-    }
-    if ((GetAxis() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN) ||
-        (GetAxis() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
-        (event.code == KeyCode::KEY_TAB)) {
-        auto nextIndex = std::clamp(scrollIndex_ + 1, 0, maxListItemIndex_);
-        if (nextIndex == scrollIndex_) {
-            return false;
-        }
-        if (scrollIndex_ == endIndex_) {
-            LOGD("Scroll to next index: %{public}d", scrollIndex_);
-            // Need to update: current selection
-            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_BUTTON);
-        }
-        scrollIndex_ = nextIndex;
-        return false;
-    }
     return false;
+}
+
+WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    auto curFocus = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocus, nullptr);
+    auto curFrame = curFocus->GetFrameNode();
+    CHECK_NULL_RETURN(curFrame, nullptr);
+    auto curPattern = curFrame->GetPattern();
+    CHECK_NULL_RETURN(curPattern, nullptr);
+    auto curItemPattern = AceType::DynamicCast<ListItemPattern>(curPattern);
+    CHECK_NULL_RETURN(curItemPattern, nullptr);
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, nullptr);
+
+    auto isVertical = listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
+    auto curIndex = curItemPattern->GetIndexInList();
+    auto curIndexInGroup = curItemPattern->GetIndexInListItemGroup();
+    if (curIndex < 0 || curIndex > maxListItemIndex_) {
+        LOGE("can't find focused child.");
+        return nullptr;
+    }
+
+    auto moveStep = 0;
+    auto nextIndex = curIndex;
+    if ((isVertical && step == FocusStep::UP_END) || (!isVertical && step == FocusStep::LEFT_END)) {
+        moveStep = 1;
+        nextIndex = 0;
+    } else if ((isVertical && step == FocusStep::DOWN_END) || (!isVertical && step == FocusStep::RIGHT_END)) {
+        moveStep = -1;
+        nextIndex = maxListItemIndex_;
+    } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT)) {
+        moveStep = 1;
+        nextIndex = curIndex + moveStep;
+    } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
+        moveStep = -1;
+        nextIndex = curIndex + moveStep;
+    }
+
+    while (nextIndex >= 0 && nextIndex <= maxListItemIndex_) {
+        // Need update here. ListItemGroup.
+        if (nextIndex == curIndex) {
+            return nullptr;
+        }
+
+        if (nextIndex < curIndex && nextIndex < startIndex_) {
+            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_TOP);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline) {
+                pipeline->FlushUITasks();
+            }
+        } else if (nextIndex > curIndex && nextIndex > endIndex_) {
+            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_BOTTOM);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline) {
+                pipeline->FlushUITasks();
+            }
+        }
+
+        auto nextFocusNode = GetChildFocusNodeByIndex(nextIndex, curIndexInGroup);
+        if (nextFocusNode.Upgrade()) {
+            return nextFocusNode;
+        }
+        nextIndex += moveStep;
+    }
+    return nullptr;
+}
+
+WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex)
+{
+    LOGD("Get target item location is (%{public}d,%{public}d)", tarMainIndex, tarGroupIndex);
+    auto listFrame = GetHost();
+    CHECK_NULL_RETURN(listFrame, nullptr);
+    auto listFocus = listFrame->GetFocusHub();
+    CHECK_NULL_RETURN(listFocus, nullptr);
+    auto childFocusList = listFocus->GetChildren();
+    for (const auto& childFocus : childFocusList) {
+        if (!childFocus->IsFocusable()) {
+            continue;
+        }
+        auto childFrame = childFocus->GetFrameNode();
+        if (!childFrame) {
+            continue;
+        }
+        auto childPattern = childFrame->GetPattern();
+        if (!childPattern) {
+            continue;
+        }
+        auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
+        if (!childItemPattern) {
+            continue;
+        }
+        auto curIndex = childItemPattern->GetIndexInList();
+        auto curIndexInGroup = childItemPattern->GetIndexInListItemGroup();
+        if (curIndex == tarMainIndex && curIndexInGroup == tarGroupIndex) {
+            return AceType::WeakClaim(AceType::RawPtr(childFocus));
+        }
+    }
+    LOGD("The target item at location(%{public}d,%{public}d) can not found.", tarMainIndex, tarGroupIndex);
+    return nullptr;
 }
 
 void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
@@ -651,7 +721,7 @@ void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         ScrollToIndex(0, ScrollIndexAlignment::ALIGN_TOP);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, ScrollIndexAlignment::ALIGN_BUTTON);
+        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, ScrollIndexAlignment::ALIGN_BOTTOM);
     }
 }
 
@@ -675,9 +745,9 @@ void ListPattern::ScrollBy(float offset)
 Offset ListPattern::GetCurrentOffset() const
 {
     if (GetAxis() == Axis::HORIZONTAL) {
-        return {GetTotalOffset(), 0.0};
+        return { GetTotalOffset(), 0.0 };
     }
-    return {0.0, GetTotalOffset()};
+    return { 0.0, GetTotalOffset() };
 }
 
 void ListPattern::UpdateScrollBarOffset()
@@ -750,13 +820,13 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
 
 void ListPattern::ProcessDragStart(float startPosition)
 {
-    CHECK_NULL_VOID(chainAnimation_);
+    CHECK_NULL_VOID_NOLOG(chainAnimation_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto globalOffset = host->GetTransformRelativeOffset();
     int32_t index = -1;
     auto offset = startPosition - GetMainAxisOffset(globalOffset, GetAxis());
-    for (auto & pos : itemPosition_) {
+    for (const auto& pos : itemPosition_) {
         if (offset <= pos.second.endPos) {
             index = pos.first;
             break;
@@ -772,7 +842,7 @@ void ListPattern::ProcessDragStart(float startPosition)
 
 void ListPattern::ProcessDragUpdate(float dragOffset, int32_t source)
 {
-    CHECK_NULL_VOID(chainAnimation_);
+    CHECK_NULL_VOID_NOLOG(chainAnimation_);
     if (NearZero(dragOffset)) {
         return;
     }

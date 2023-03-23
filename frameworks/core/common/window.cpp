@@ -22,7 +22,6 @@
 #include "core/common/container_scope.h"
 
 namespace OHOS::Ace {
-
 Window::Window(std::unique_ptr<PlatformWindow> platformWindow) : platformWindow_(std::move(platformWindow))
 {
     CHECK_NULL_VOID(platformWindow_);
@@ -83,6 +82,4 @@ void Window::SetVsyncCallback(AceVsyncCallback&& callback)
         .containerId_ = Container::CurrentId(),
     });
 }
-
-
 } // namespace OHOS::Ace

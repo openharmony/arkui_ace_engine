@@ -128,8 +128,8 @@ bool SharedTransitionExchange::CreateAnimation()
 
 bool SharedTransitionExchange::CreateTranslateAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest)
 {
-    auto destOffset = dest->GetOffsetRelativeToWindow();
-    auto srcOffset = src->GetOffsetRelativeToWindow();
+    auto destOffset = dest->GetPaintRectOffsetToPage();
+    auto srcOffset = src->GetPaintRectOffsetToPage();
     LOGI("Get Offset, share id: %{public}s. src: %{public}s, dest: %{public}s", GetShareId().c_str(),
         srcOffset.ToString().c_str(), destOffset.ToString().c_str());
     if (NearEqual(destOffset, srcOffset)) {

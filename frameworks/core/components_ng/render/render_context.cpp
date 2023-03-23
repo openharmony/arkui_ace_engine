@@ -76,10 +76,10 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("sphericalEffect", propSphericalEffect_.value_or(0.0f));
     auto pixStretchEffectOption = propPixelStretchEffect_.value_or(PixStretchEffectOption());
     auto pixelJsonValue = JsonUtil::Create(true);
-    pixelJsonValue->Put("left", pixStretchEffectOption.left.ConvertToPx());
-    pixelJsonValue->Put("right", pixStretchEffectOption.right.ConvertToPx());
-    pixelJsonValue->Put("top", pixStretchEffectOption.top.ConvertToPx());
-    pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ConvertToPx());
+    pixelJsonValue->Put("left", pixStretchEffectOption.left.ToString().c_str());
+    pixelJsonValue->Put("right", pixStretchEffectOption.right.ToString().c_str());
+    pixelJsonValue->Put("top", pixStretchEffectOption.top.ToString().c_str());
+    pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
     json->Put("pixelStretchEffect", pixelJsonValue);
     static const char* STYLE[] = {"", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
         "BlurStyle.BackgroundThin", "BlurStyle.BackgroundRegular",

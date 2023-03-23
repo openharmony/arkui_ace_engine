@@ -63,7 +63,6 @@ using RSMaskFilter = Rosen::Drawing::MaskFilter;
 using RSBlurType = Rosen::Drawing::BlurType;
 using RSPathFillType = Rosen::Drawing::PathFillType;
 using RSSkPath = Rosen::Drawing::SkiaPath;
-
 using RSPathEffect = rosen::PathEffect;
 using RSPathDirection = rosen::PathDirection;
 using RSPathDashStyle = rosen::PathDashStyle;
@@ -81,6 +80,8 @@ using RSWordBreakType = rosen::WordBreakType;
 using RSTextStyle = rosen::TextStyle;
 using RSTextDecoration = rosen::TextDecoration;
 using RSFontWeight = rosen::FontWeight;
+using RSFontStyle = rosen::FontStyle;
+using RSTextBaseline = rosen::TextBaseline;
 } // namespace OHOS::Ace
 #else
 #include "core/components_ng/render/drawing_mock.h"

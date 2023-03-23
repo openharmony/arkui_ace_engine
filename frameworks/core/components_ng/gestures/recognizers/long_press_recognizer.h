@@ -21,6 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
+class GestureEventHub;
 class LongPressInfo : public TouchLocationInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LongPressInfo, TouchLocationInfo);
 
@@ -65,7 +66,9 @@ public:
     {
         duration_ = duration;
     }
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetGestureHub(WeakPtr<GestureEventHub> gestureHub);
+#endif // ENABLE_DRAG_FRAMEWORK
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override;
     void HandleTouchUpEvent(const TouchEvent& event) override;
@@ -79,7 +82,14 @@ private:
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat);
     void OnResetStatus() override;
     double ConvertPxToVp(double offset) const;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void ThumbnailTimer(int32_t time);
+    void GetThumbnailPixelMap();
 
+    WeakPtr<GestureEventHub> gestureHub_;
+    CancelableCallback<void()> thumbnailTimer_;
+    int32_t thumbnailDeadline = 150;
+#endif // ENABLE_DRAG_FRAMEWORK
     OnLongPress onLongPress_;
     CancelableCallback<void()> deadlineTimer_;
     CancelableCallback<void()> timer_;

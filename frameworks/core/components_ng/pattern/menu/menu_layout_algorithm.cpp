@@ -15,9 +15,11 @@
 
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 
+#include <optional>
 #include <vector>
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/memory/referenced.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
@@ -25,19 +27,42 @@
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-namespace {
-
-constexpr uint32_t MIN_GRID_COUNTS = 2;
-constexpr uint32_t MAX_GRID_COUNTS = 6;
-
-} // namespace
-
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr uint32_t MIN_GRID_COUNTS = 2;
+constexpr uint32_t GRID_COUNTS_4 = 4;
+constexpr uint32_t GRID_COUNTS_6 = 6;
+constexpr uint32_t GRID_COUNTS_8 = 8;
+constexpr uint32_t GRID_COUNTS_12 = 12;
+
+uint32_t GetMaxGridCounts(const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(columnInfo, GRID_COUNTS_8);
+    auto currentColumns = columnInfo->GetParent()->GetColumns();
+    auto maxGridCounts = GRID_COUNTS_8;
+    switch (currentColumns) {
+        case GRID_COUNTS_4:
+            maxGridCounts = GRID_COUNTS_4;
+            break;
+        case GRID_COUNTS_8:
+            maxGridCounts = GRID_COUNTS_6;
+            break;
+        case GRID_COUNTS_12:
+            maxGridCounts = GRID_COUNTS_8;
+            break;
+        default:
+            break;
+    }
+    return maxGridCounts;
+}
+} // namespace
 
 void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
 {
@@ -45,25 +70,36 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     // currently using click point as menu position
     auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(props);
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    auto targetSize = props->GetTargetSizeValue(SizeF());
     position_ = props->GetMenuOffset().value_or(OffsetF());
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
+    LOGD("menu position_ = %{public}s, targetSize = %{public}s", position_.ToString().c_str(),
+        targetSize.ToString().c_str());
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
 
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
-    screenSize_ = wrapperIdealSize;
+    wrapperSize_ = wrapperIdealSize;
+    topSpace_ = position_.GetY() - targetSize.Height() - margin_ * 2.0f;
+    bottomSpace_ = wrapperSize_.Height() - position_.GetY() - margin_ * 2.0f;
+    leftSpace_ = position_.GetX();
+    rightSpace_ = wrapperSize_.Width() - leftSpace_;
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    outPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
-
-    auto stageManager = pipeline->GetStageManager();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     auto page = stageManager->GetLastPage();
     CHECK_NULL_VOID(page);
     pageOffset_ = page->GetOffsetRelativeToWindow();
+    topSpace_ -= pageOffset_.GetY();
 }
 
 // Called to perform layout render node and child.
@@ -73,54 +109,38 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutWrapper);
     Initialize(layoutWrapper);
 
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    const auto& padding = props->CreatePaddingAndBorder();
-    LOGD("menu padding width = %{public}f", padding.Width());
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(menuLayoutProperty);
+    const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
+    if (!constraint) {
+        LOGE("fail to measure menu due to layoutConstraint is nullptr");
+        return;
+    }
+    auto idealSize = CreateIdealSize(
+        constraint.value(), Axis::VERTICAL, menuLayoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT), true);
+    const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, idealSize);
 
     // calculate menu main size
-    auto childConstraint = props->CreateChildConstraint();
-    RefPtr<GridColumnInfo> columnInfo;
-    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    columnInfo->GetParent()->BuildColumnWidth();
-    float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS)) - outPadding_ * 2;
-    childConstraint.minSize.SetWidth(minWidth);
-
-    // set max width
-    LOGD("Measure Menu Position = %{public}f %{public}f", position_.GetX(), position_.GetY());
-    auto leftSpace = position_.GetX();
-    auto rightSpace = screenSize_.Width() - leftSpace;
-    float maxWidth = std::min(std::max(leftSpace, rightSpace) - 2.0 * padding.Width() - 2.0 * outPadding_,
-        columnInfo->GetWidth(MAX_GRID_COUNTS));
-    childConstraint.maxSize.SetWidth(maxWidth);
-    childConstraint.percentReference.SetWidth(maxWidth);
-
-    // measure children (options/customNode)
-    float maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper->GetAllChildrenWithBuild(), childConstraint);
-    SizeF menuSize;
-    menuSize.SetWidth(maxChildrenWidth);
-    childConstraint.selfIdealSize.SetWidth(maxChildrenWidth);
+    auto childConstraint = CreateChildConstraint(layoutWrapper);
+    float idealHeight = 0.0f;
+    float idealWidth = 0.0f;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(childConstraint);
-        auto childSize = child->GetGeometryNode()->GetFrameSize();
-        LOGD("menu childSize = %{public}f, %{public}f", childSize.Width(), childSize.Height());
-        // set minimum size
-        childSize.SetWidth(maxChildrenWidth);
-        child->GetGeometryNode()->SetFrameSize(childSize);
-
-        menuSize.AddHeight(childSize.Height());
+        auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+        LOGD("child finish measure, child %{public}s size = %{public}s", child->GetHostTag().c_str(),
+            child->GetGeometryNode()->GetMarginFrameSize().ToString().c_str());
+        idealHeight += childSize.Height();
+        idealWidth = std::max(idealWidth, childSize.Width());
     }
-    // set menu size
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(frameNode);
-    auto menuPattern = frameNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    if (!menuPattern->IsMultiMenu()) {
-        menuSize.AddHeight(outPadding_ * 2);
-        menuSize.AddWidth(outPadding_ * 2);
-    }
+    idealSize.SetHeight(idealHeight);
+    idealSize.SetWidth(idealWidth);
+    AddPaddingToSize(padding, idealSize);
 
-    LOGD("finish measure, menu size = %{public}f x %{public}f", menuSize.Width(), menuSize.Height());
-    layoutWrapper->GetGeometryNode()->SetFrameSize(menuSize);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    LOGD("finish measure, menu size = %{public}f x %{public}f", idealSize.Width(), idealSize.Height());
+    geometryNode->SetFrameSize(idealSize);
 }
 
 void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -136,34 +156,25 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    float x = HorizontalLayout(size, position_.GetX()) + positionOffset_.GetX();
+    auto size = layoutWrapper->GetGeometryNode()->GetMarginFrameSize();
+    float x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
     float y = VerticalLayout(size, position_.GetY()) + positionOffset_.GetY();
     if (!menuPattern->IsContextMenu()) {
         x -= pageOffset_.GetX();
         y -= pageOffset_.GetY();
     }
-    x = std::clamp(x, 0.0f, screenSize_.Width() - size.Width() - outPadding_ * 2.0f);
-    y = std::clamp(y, 0.0f, screenSize_.Height() - size.Height() - outPadding_* 2.0f);
+    x = std::clamp(x, 0.0f, wrapperSize_.Width() - size.Width() - margin_ * 2.0f);
+    y = std::clamp(y, 0.0f, wrapperSize_.Height() - size.Height() - margin_ * 2.0f);
 
-    MarginPropertyF margin;
-    if (!menuPattern->IsMultiMenu()) {
-        margin.left = margin.top = margin.right = margin.bottom = outPadding_;
-    }
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    geometryNode->UpdateMargin(margin);
-    geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
+    geometryNode->SetFrameOffset(NG::OffsetF(x, y));
 
     // translate each option by the height of previous options
     OffsetF translate;
-    auto menuParent = menuNode->GetParent();
-    CHECK_NULL_VOID(menuParent);
-    if (!menuPattern->IsMultiMenu() || menuParent->GetTag() == V2::MENU_ETS_TAG) {
-        translate = OffsetF(outPadding_, outPadding_);
-    }
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        LOGD("layout child at offset: %{public}f, %{public}f", translate.GetX(), translate.GetY());
+        LOGD("layout child at offset: %{public}s, tag %{public}s", translate.ToString().c_str(),
+            child->GetHostTag().c_str());
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
         child->Layout();
         translate += OffsetF(0, child->GetGeometryNode()->GetFrameSize().Height());
@@ -178,11 +189,95 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
+void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+{
+    // set min width
+    RefPtr<GridColumnInfo> columnInfo;
+    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    columnInfo->GetParent()->BuildColumnWidth();
+    float minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    constraint.minSize.SetWidth(minWidth);
+
+    // set max width
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(menuLayoutProperty);
+    const auto& padding = menuLayoutProperty->CreatePaddingAndBorder();
+    auto maxHorizontalSpace = std::max(leftSpace_, rightSpace_) - 2.0f * padding.Width();
+    auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
+    auto maxWidth = std::min(maxHorizontalSpace, maxGridWidth);
+    constraint.maxSize.SetWidth(maxWidth);
+    constraint.percentReference.SetWidth(maxWidth);
+}
+
+void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+{
+    auto maxSpaceHeight = std::max(topSpace_, bottomSpace_);
+    constraint.maxSize.SetHeight(maxSpaceHeight);
+    constraint.percentReference.SetHeight(maxSpaceHeight);
+}
+
+LayoutConstraintF MenuLayoutAlgorithm::CreateChildConstraint(LayoutWrapper* layoutWrapper)
+{
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(menuLayoutProperty, LayoutConstraintF());
+
+    auto childConstraint = menuLayoutProperty->CreateChildConstraint();
+    UpdateConstraintWidth(layoutWrapper, childConstraint);
+    UpdateConstraintHeight(layoutWrapper, childConstraint);
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuLayoutProperty, childConstraint);
+    if (!menuPattern->IsMultiMenu()) {
+        UpdateConstraintBaseOnOptions(layoutWrapper, childConstraint);
+    } else {
+        UpdateConstraintBaseOnMenuItems(layoutWrapper, childConstraint);
+    }
+    return childConstraint;
+}
+
+void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+{
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
+    if (options.empty()) {
+        LOGD("options is empty, no need to update constraint.");
+        return;
+    }
+    auto maxChildrenWidth = constraint.minSize.Width();
+    for (const auto& option : options) {
+        auto optionWrapper = option->CreateLayoutWrapper();
+        optionWrapper->Measure(constraint);
+        auto childSize = optionWrapper->GetGeometryNode()->GetMarginFrameSize();
+        maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
+    }
+    UpdateOptionConstraint(options, maxChildrenWidth);
+    constraint.minSize.SetWidth(maxChildrenWidth);
+}
+
+void MenuLayoutAlgorithm::UpdateOptionConstraint(std::vector<RefPtr<FrameNode>>& options, float width)
+{
+    for (const auto& option : options) {
+        auto optionLayoutProps = option->GetLayoutProperty();
+        CHECK_NULL_VOID(optionLayoutProps);
+        optionLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+    }
+}
+
+void MenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
+{
+    // multiMenu children are menuItem or menuItemGroup, constrain width is minus padding
+    auto minWidth = constraint.minSize.Width() - margin_ * 2.0f;
+    constraint.minSize.SetWidth(minWidth);
+    auto maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper, constraint);
+    constraint.minSize.SetWidth(maxChildrenWidth);
+}
+
 void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
 {
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(props);
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(menuLayoutProperty);
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -205,83 +300,77 @@ void MenuLayoutAlgorithm::LayoutSubMenu(LayoutWrapper* layoutWrapper)
         parentPattern->AddHoverRegions(topLeftPoint, bottomRightPoint);
     }
 
-    OffsetF translate(outPadding_, outPadding_);
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
-    child->GetGeometryNode()->SetMarginFrameOffset(translate);
     child->Layout();
 }
 
 // return vertical offset
-float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float clickPosition)
+float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position)
 {
-    float screenHeight = screenSize_.Height();
-    float bottomSpace = screenHeight - clickPosition;
-    float topSpace = clickPosition - pageOffset_.GetY();
+    float wrapperHeight = wrapperSize_.Height();
     // can put menu below click point
-    if (bottomSpace >= size.Height()) {
-        return clickPosition;
+    if (bottomSpace_ >= size.Height()) {
+        return position + margin_;
     }
 
     // put menu above click point
-    if (topSpace >= size.Height()) {
-        return clickPosition - size.Height();
+    if (topSpace_ >= size.Height()) {
+        return topSpace_ - size.Height() + margin_ + pageOffset_.GetY();
     }
 
     // line up bottom of menu with bottom of the screen
-    if (size.Height() < screenHeight) {
-        return screenHeight - size.Height();
+    if (size.Height() < wrapperHeight) {
+        return wrapperHeight - size.Height();
     }
     // can't fit in screen, line up with top of the screen
-    return 0.0;
+    return 0.0f;
 }
 
 // returns horizontal offset
-float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float clickPosition)
+float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float position, bool isSelectMenu)
 {
-    float screenWidth = screenSize_.Width();
-    float rightSpace = screenWidth - clickPosition;
-    float leftSpace = clickPosition - pageOffset_.GetX();
-    // can fit menu on the right side of clickPosition
-    if (rightSpace >= size.Width()) {
-        return clickPosition;
+    float wrapperWidth = wrapperSize_.Width();
+    // can fit menu on the right side of position
+    if (rightSpace_ >= size.Width()) {
+        return position + margin_;
     }
 
     // fit menu on the left side
-    if (leftSpace >= size.Width()) {
-        return clickPosition - size.Width();
+    if (!isSelectMenu && leftSpace_ >= size.Width()) {
+        return position - size.Width();
     }
 
     // line up right side of menu with right boundary of the screen
-    if (size.Width() < screenWidth) {
-        return screenWidth - size.Width();
+    if (size.Width() < wrapperWidth) {
+        return wrapperWidth - size.Width();
     }
 
     // can't fit in screen, line up with left side of the screen
-    return 0.0;
+    return 0.0f;
 }
 
 // return vertical offset
 float MenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
 {
-    float screenHeight = screenSize_.Height();
-    float bottomSpace = screenHeight - position;
+    float wrapperHeight = wrapperSize_.Height();
+    float bottomSpace = wrapperHeight - position;
     // line up top of subMenu with top of the menuItem
     if (bottomSpace >= size.Height()) {
         return position;
     }
     // line up bottom of menu with bottom of the screen
-    if (size.Height() < screenHeight) {
-        return screenHeight - size.Height();
+    if (size.Height() < wrapperHeight) {
+        return wrapperHeight - size.Height();
     }
     // can't fit in screen, line up with top of the screen
-    return 0.0;
+    return 0.0f;
 }
 
 // returns submenu horizontal offset
 float MenuLayoutAlgorithm::HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
 {
-    float screenWidth = screenSize_.Width();
-    float rightSpace = screenWidth - position;
+    float wrapperWidth = wrapperSize_.Width();
+    float rightSpace = wrapperWidth - position;
     float leftSpace = position - pageOffset_.GetX() - menuItemSize.Width();
     // can fit subMenu on the right side of menuItem
     if (rightSpace >= size.Width()) {
@@ -292,24 +381,22 @@ float MenuLayoutAlgorithm::HorizontalLayoutSubMenu(const SizeF& size, float posi
         return position - size.Width() - menuItemSize.Width();
     }
     // line up right side of menu with right boundary of the screen
-    if (size.Width() < screenWidth) {
-        return screenWidth - size.Width();
+    if (size.Width() < wrapperWidth) {
+        return wrapperWidth - size.Width();
     }
     // can't fit in screen, line up with left side of the screen
-    return 0.0;
+    return 0.0f;
 }
 
-float MenuLayoutAlgorithm::GetChildrenMaxWidth(
-    const std::list<RefPtr<LayoutWrapper>>& children, const LayoutConstraintF& layoutConstraint)
+float MenuLayoutAlgorithm::GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
-    float width = layoutConstraint.minSize.Width();
-
-    for (const auto& child : children) {
+    float maxWidth = layoutConstraint.minSize.Width();
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->Measure(layoutConstraint);
         auto childSize = child->GetGeometryNode()->GetFrameSize();
-        width = std::max(width, childSize.Width());
+        maxWidth = std::max(maxWidth, childSize.Width());
     }
-    return width;
+    return maxWidth;
 }
 
 } // namespace OHOS::Ace::NG

@@ -250,8 +250,8 @@ void JSSwiper::GetFontContent(const JSRef<JSVal>& font, bool isSelected, SwiperD
         digitalParameters.fontSize = fontSize;
     }
     JSRef<JSVal> weight = obj->GetProperty("weight");
-    std::string weightValue;
     if (!weight->IsNull()) {
+        std::string weightValue;
         if (weight->IsNumber()) {
             weightValue = std::to_string(weight->ToNumber<int32_t>());
         } else {

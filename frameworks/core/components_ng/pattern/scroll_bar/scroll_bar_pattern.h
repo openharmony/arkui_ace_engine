@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_accessibility_property.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -46,6 +47,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<ScrollBarLayoutProperty>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<ScrollBarAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override

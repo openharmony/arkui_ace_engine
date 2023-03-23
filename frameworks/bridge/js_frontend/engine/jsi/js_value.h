@@ -70,6 +70,10 @@ public:
     virtual bool SetAccessorProperty(shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue> &name,
                                      const shared_ptr<JsValue> &getter, const shared_ptr<JsValue> &setter) = 0;
 
+    // Has object property by name, returns true if has the specified property.
+    virtual bool HasProperty(shared_ptr<JsRuntime> runtime, const std::string &name) = 0;
+    virtual bool HasProperty(shared_ptr<JsRuntime> runtime, const shared_ptr<JsValue> &name) = 0;
+
     // Get an array's length. Return -1 if fails.
     virtual int32_t GetArrayLength(shared_ptr<JsRuntime> runtime) = 0;
     // Get an array element by index, Return nullptr if fails.

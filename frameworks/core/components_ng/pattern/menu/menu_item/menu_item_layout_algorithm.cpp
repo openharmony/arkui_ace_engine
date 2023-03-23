@@ -37,6 +37,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutConstraint);
 
     float maxRowWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0;
+    float minRowWidth = layoutConstraint->minSize.Width();
 
     auto childConstraint = props->CreateChildConstraint();
     childConstraint.maxSize.SetWidth(maxRowWidth);
@@ -59,9 +60,9 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
         auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();
         auto childHeight = std::max(leftRowSize.Height(), rightRowSize.Height());
-        size = SizeF(leftRowSize.Width() + rightRowSize.Width() + horInterval_ * 2.0 +
-                         static_cast<float>(theme->GetIconContentPadding().ConvertToPx()),
-            std::max(childHeight, minItemHeight));
+        auto contentWidth = leftRowSize.Width() + rightRowSize.Width() + horInterval_ * 2 +
+                            static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
+        size = SizeF(std::max(contentWidth, minRowWidth), std::max(childHeight, minItemHeight));
     } else {
         auto leftRowSize = leftRow->GetGeometryNode()->GetFrameSize();
         auto rightRowSize = rightRow->GetGeometryNode()->GetFrameSize();

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_LAYOUT_PROPERTY_H
 
 #include <string>
+
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -47,6 +48,7 @@ public:
         auto value = MakeRefPtr<MenuLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propMenuOffset_ = CloneMenuOffset();
+        value->propTargetSize_ = CloneTargetSize();
         value->propPositionOffset_ = ClonePositionOffset();
         value->propMenuItemFontStyle_ = CloneMenuItemFontStyle();
         value->propTitle_ = CloneTitle();
@@ -57,6 +59,7 @@ public:
     {
         LayoutProperty::Reset();
         ResetMenuOffset();
+        ResetTargetSize();
         ResetPositionOffset();
         ResetMenuItemFontStyle();
         ResetTitle();
@@ -64,6 +67,8 @@ public:
 
     // target frameNode that this menu belongs to
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuOffset, NG::OffsetF, PROPERTY_UPDATE_MEASURE);
+    // target frameNode size, null for click show menu
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSize, NG::SizeF, PROPERTY_UPDATE_MEASURE);
 
     // offset to cursor
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PositionOffset, NG::OffsetF, PROPERTY_UPDATE_LAYOUT);
@@ -75,42 +80,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
-    {
-        LayoutProperty::ToJsonValue(json);
-        json->Put("title", GetTitle().value_or("").c_str());
-        json->Put("offset", GetPositionOffset().value_or(OffsetF()).ToString().c_str());
-        auto context = PipelineBase::GetCurrentContext();
-        auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
-        auto defaultFontSize = theme ? theme->GetMenuFontSize() : Dimension(0, DimensionUnit::FP);
-        json->Put("fontSize", GetFontSize().value_or(defaultFontSize).ToString().c_str());
-        auto defaultFontColor = theme ? theme->GetMenuFontColor() : Color::BLACK;
-        json->Put("fontColor", GetFontColor().value_or(defaultFontColor).ColorToString().c_str());
-        json->Put("fontWeight",
-            V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::REGULAR)).c_str());
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto options = host->GetChildren();
-        auto jsonDashArray = JsonUtil::CreateArray(true);
-        int index = 0;
-        // output format
-        // {
-        //     "bindMenu" : [
-        //         <index> : <value>,
-        //         ...
-        //     ]
-        // }
-        for (auto && option : options) {
-            auto pattern = DynamicCast<FrameNode>(option)->GetPattern<OptionPattern>();
-            CHECK_NULL_VOID(pattern);
-            auto jsonValue = JsonUtil::Create(true);
-
-            jsonValue->Put("value", pattern->GetText().c_str());
-            jsonValue->Put("icon", pattern->GetIcon().c_str());
-            jsonDashArray->Put(std::to_string(index++).c_str(), jsonValue);
-        }
-        json->Put("bindMenu", jsonDashArray);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutProperty);
 };

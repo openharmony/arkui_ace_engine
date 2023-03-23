@@ -75,6 +75,13 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId)
 {
+    // The mousetest has been merged into touchtest.
+    // FormComponent does not support some mouse event(eg. Hover, HoverAnimation..).
+    // Mouse event like LEFT_BUTTON, RELEASE use touchevent to dispatch, so they work well on FormComponent
+    if (touchRestrict.hitTestType == SourceType::MOUSE) {
+        return HitTestResult::OUT_OF_REGION;
+    }
+
     auto testResult = FrameNode::TouchTest(globalPoint, parentLocalPoint, touchRestrict, result, touchId);
     if (testResult == HitTestResult::OUT_OF_REGION) {
         return HitTestResult::OUT_OF_REGION;
@@ -139,4 +146,10 @@ RefPtr<FormNode> FormNode::GetOrCreateFormNode(
     return formNode;
 }
 
+void FormNode::OnDetachFromMainTree()
+{
+    auto eventHub = GetEventHub<FormEventHub>();
+    eventHub->FireOnCache();
+    FrameNode::OnDetachFromMainTree();
+}
 } // namespace OHOS::Ace::NG

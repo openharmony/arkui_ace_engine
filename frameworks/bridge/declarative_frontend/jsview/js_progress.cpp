@@ -142,7 +142,8 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
 {
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+        colorVal = theme->GetTrackSelectedColor();
     }
 
     ProgressModel::GetInstance()->SetColor(colorVal);
@@ -203,7 +204,8 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 
     Color colorVal;
     if (!ParseJsColor(info[0], colorVal)) {
-        return;
+        RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+        colorVal = theme->GetTrackBgColor();
     }
 
     ProgressModel::GetInstance()->SetBackgroundColor(colorVal);

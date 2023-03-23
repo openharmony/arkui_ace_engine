@@ -31,8 +31,8 @@ constexpr char DRAWABLE_LAYERED[] = "LayeredDrawableDescriptor";
 } // namespace
 
 namespace OHOS::Ace::Napi {
-thread_local napi_ref JsDrawableDescriptor::baseConstructor_ = nullptr;
-thread_local napi_ref JsDrawableDescriptor::layeredConstructor_ = nullptr;
+thread_local napi_ref JsDrawableDescriptor::baseConstructor_;
+thread_local napi_ref JsDrawableDescriptor::layeredConstructor_;
 
 napi_value JsDrawableDescriptor::Constructor(napi_env env, napi_callback_info info)
 {
@@ -82,12 +82,12 @@ napi_value JsDrawableDescriptor::InitLayeredDrawable(napi_env env)
     return cons;
 }
 
-napi_value JsDrawableDescriptor::ToNapi(napi_env env, DrawableDescriptor* drawable)
+napi_value JsDrawableDescriptor::ToNapi(napi_env env, DrawableDescriptor* drawable, DrawableType type)
 {
     if (!drawable) {
         return nullptr;
     }
-    if (!baseConstructor_) {
+    if (!baseConstructor_ || !layeredConstructor_) {
         // init js class constructor by importing module manually
         napi_value globalValue;
         napi_get_global(env, &globalValue);
@@ -103,12 +103,17 @@ napi_value JsDrawableDescriptor::ToNapi(napi_env env, DrawableDescriptor* drawab
     napi_value constructor = nullptr;
     napi_value result = nullptr;
     napi_status status;
-    if (static_cast<LayeredDrawableDescriptor*>(drawable)) {
-        status = napi_get_reference_value(env, layeredConstructor_, &constructor);
-    } else {
-        status = napi_get_reference_value(env, baseConstructor_, &constructor);
+    switch (type) {
+        case DrawableType::LAYERED:
+            status = napi_get_reference_value(env, layeredConstructor_, &constructor);
+            break;
+        case DrawableType::BASE:
+            status = napi_get_reference_value(env, baseConstructor_, &constructor);
+            break;
+        default:
+            status = napi_status::napi_invalid_arg;
+            break;
     }
-
     if (status == napi_status::napi_ok) {
         NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &result));
         NAPI_CALL(env, napi_wrap(env, result, drawable, Destructor, nullptr, nullptr));
@@ -150,7 +155,7 @@ napi_value JsDrawableDescriptor::GetForeground(napi_env env, napi_callback_info 
     }
 
     auto foreground = drawable->GetForeground();
-    napi_value result = ToNapi(env, foreground.release());
+    napi_value result = ToNapi(env, foreground.release(), DrawableType::BASE);
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;
@@ -168,9 +173,9 @@ napi_value JsDrawableDescriptor::GetBackground(napi_env env, napi_callback_info 
     if (!drawable) {
         return nullptr;
     }
-    
+
     auto background = drawable->GetBackground();
-    napi_value result = ToNapi(env, background.release());
+    napi_value result = ToNapi(env, background.release(), DrawableType::BASE);
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;
@@ -190,7 +195,7 @@ napi_value JsDrawableDescriptor::GetMask(napi_env env, napi_callback_info info)
     }
 
     auto mask = drawable->GetMask();
-    napi_value result = ToNapi(env, mask.release());
+    napi_value result = ToNapi(env, mask.release(), DrawableType::BASE);
     napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;

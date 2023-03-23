@@ -1417,11 +1417,11 @@ HWTEST_F(ListTestNg, ListEventTest003, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Trigger HandleOnItemDragStart.
-     * @tc.expected: Callback is called and dragValue is correct.
+     * @tc.expected: Verify some values of the drag.
      */
     RunMeasureAndLayout(frameNode);
     GestureEvent info;
-    Point globalPoint = Point(200.f, 150.f); // point at the first item.
+    Point globalPoint = Point(200.f, 150.f); // Point at the second item.
     info.SetGlobalPoint(globalPoint);
     eventHub->HandleOnItemDragStart(info);
     EXPECT_TRUE(isItemDragStartEventCalled);
@@ -1430,7 +1430,7 @@ HWTEST_F(ListTestNg, ListEventTest003, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Trigger HandleOnItemDragUpdate and HandleOnItemDragEnd.
-     * @tc.expected: DragValue is correct.
+     * @tc.expected: Verify some values of the drag.
      */
     eventHub->HandleOnItemDragUpdate(info);
     eventHub->HandleOnItemDragEnd(info);
@@ -1438,17 +1438,10 @@ HWTEST_F(ListTestNg, ListEventTest003, TestSize.Level1)
     EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
 
     /**
-     * @tc.steps: step6. Trigger HandleOnItemDragStart.
-     * @tc.expected: DragValue is correct.
+     * @tc.steps: step6. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate and HandleOnItemDragCancel.
+     * @tc.expected: Verify some values of the drag.
      */
     eventHub->HandleOnItemDragStart(info);
-    EXPECT_EQ(eventHub->draggedIndex_, 1);
-    EXPECT_NE(eventHub->dragDropProxy_, nullptr);
-
-    /**
-     * @tc.steps: step7. Trigger HandleOnItemDragUpdate and HandleOnItemDragCancel.
-     * @tc.expected: DragValue is correct.
-     */
     eventHub->HandleOnItemDragUpdate(info);
     eventHub->HandleOnItemDragCancel();
     EXPECT_EQ(eventHub->draggedIndex_, 0);

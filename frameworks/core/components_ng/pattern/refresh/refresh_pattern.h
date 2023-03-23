@@ -23,6 +23,7 @@
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
@@ -58,6 +59,16 @@ public:
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<RefreshEventHub>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<RefreshAccessibilityProperty>();
+    }
+
+    bool IsRefreshing() const
+    {
+        return isRefreshing_;
     }
 
     bool IsAtomicNode() const override
@@ -108,6 +119,7 @@ private:
     void OnExitAnimationFinish();
     void ResetLoadingProgressColor();
     float GetFollowRatio();
+    float GetFadeAwayRatio();
     float GetCustomBuilderOpacityRatio();
     float GetScrollOffset(float delta);
     bool ScrollComponentReactInMove();
@@ -120,6 +132,7 @@ private:
     void CustomBuilderRefreshingAnimation();
     void ScrollableNodeResetAnimation();
     void OnAppearAnimationFinish();
+    void UpdateLoadingMarginTop(float top);
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
     RefPtr<PanEvent> panEvent_;
     OffsetF scrollOffset_;

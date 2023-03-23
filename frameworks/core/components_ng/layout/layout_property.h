@@ -50,6 +50,7 @@ class ACE_EXPORT LayoutProperty : public Property {
     DECLARE_ACE_TYPE(LayoutProperty, Property);
 
 public:
+
     LayoutProperty() = default;
 
     ~LayoutProperty() override = default;
@@ -362,7 +363,9 @@ public:
 
     void SetHost(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsBindOverlay, bool, PROPERTY_UPDATE_MEASURE);
+#endif // ENABLE_DRAG_FRAMEWORK
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Visibility, VisibleType, PROPERTY_UPDATE_MEASURE);
     void OnVisibilityUpdate(VisibleType visible) const;
 
@@ -372,6 +375,16 @@ public:
         contentConstraint_ = layoutProperty->contentConstraint_;
         gridProperty_ =
             (layoutProperty->gridProperty_) ? std::make_unique<GridProperty>(*layoutProperty->gridProperty_) : nullptr;
+    }
+
+    SafeAreaEdgeInserts GetSafeArea() const
+    {
+        return safeArea_;
+    }
+
+    void SetSafeArea(SafeAreaEdgeInserts safeArea)
+    {
+        safeArea_ = safeArea;
     }
 
 protected:
@@ -405,6 +418,7 @@ private:
 
     WeakPtr<FrameNode> host_;
 
+    SafeAreaEdgeInserts safeArea_;
     ACE_DISALLOW_COPY_AND_MOVE(LayoutProperty);
 };
 } // namespace OHOS::Ace::NG

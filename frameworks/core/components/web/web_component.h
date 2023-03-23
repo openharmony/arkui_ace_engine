@@ -84,6 +84,11 @@ public:
         isPopup_ = popup;
     }
 
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
+    }
+
     void SetData(const std::string& data)
     {
         CHECK_NULL_VOID(declaration_);
@@ -979,6 +984,7 @@ private:
     bool isPinchSmoothModeEnabled_ = false;
     PreKeyEventCallback onPreKeyEvent_;
     bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
 };
 
 } // namespace OHOS::Ace

@@ -31,6 +31,8 @@ class EventHub;
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
+constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
+
 enum class FocusType : int32_t {
     DISABLE = 0,
     NODE = 1,
@@ -55,6 +57,7 @@ enum class FocusStep : int32_t {
     RIGHT_END = 0X13,
     DOWN_END = 0x14,
 };
+
 using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
 enum class FocusStyleType : int32_t {
@@ -135,7 +138,7 @@ class ACE_EXPORT FocusPattern : public virtual AceType {
     DECLARE_ACE_TYPE(FocusPattern, AceType)
 
 public:
-    explicit FocusPattern() = default;
+    FocusPattern() = default;
     FocusPattern(FocusType focusType, bool focusable) : focusType_(focusType), focusable_(focusable) {}
     FocusPattern(FocusType focusType, bool focusable, FocusStyleType styleType)
         : focusType_(focusType), focusable_(focusable), styleType_(styleType)
@@ -238,7 +241,7 @@ struct ScopeFocusAlgorithm final {
 class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
     DECLARE_ACE_TYPE(FocusCallbackEvents, AceType)
 public:
-    explicit FocusCallbackEvents() = default;
+    FocusCallbackEvents() = default;
     ~FocusCallbackEvents() override = default;
 
     void SetOnFocusCallback(OnFocusFunc&& onFocusCallback)
@@ -304,7 +307,7 @@ public:
         isDefaultGroupFocus_ = isDefaultGroupFocus;
     }
 
-    bool IsFocusOnTouch() const
+    std::optional<bool> IsFocusOnTouch() const
     {
         return isFocusOnTouch_;
     }
@@ -337,7 +340,7 @@ private:
     OnKeyCallbackFunc onKeyEventCallback_;
     GestureEventFunc onClickEventCallback_;
 
-    bool isFocusOnTouch_ { false };
+    std::optional<bool> isFocusOnTouch_;
     bool isDefaultFocus_ = { false };
     bool isDefaultHasFocused_ = { false };
     bool isDefaultGroupFocus_ = { false };
@@ -664,9 +667,9 @@ public:
         focusCallbackEvents_->SetIsDefaultGroupFocus(isDefaultGroupFocus);
     }
 
-    bool IsFocusOnTouch() const
+    std::optional<bool> IsFocusOnTouch() const
     {
-        return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : false;
+        return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : std::nullopt;
     }
     void SetIsFocusOnTouch(bool isFocusOnTouch);
 
@@ -716,13 +719,22 @@ public:
         return lastWeakFocusNode_;
     }
 
+    static inline bool IsFocusStepVertical(FocusStep step)
+    {
+        return (static_cast<int32_t>(step) & 0x1) == 0;
+    }
+    static inline bool IsFocusStepForward(FocusStep step)
+    {
+        return (static_cast<int32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+    }
+
 protected:
     bool OnKeyEvent(const KeyEvent& keyEvent);
     bool OnKeyEventNode(const KeyEvent& keyEvent);
     bool OnKeyEventScope(const KeyEvent& keyEvent);
 
     bool CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) const;
-    bool RequestNextFocus(bool vertical, bool reverse, const RectF& rect);
+    bool RequestNextFocus(FocusStep moveStep, const RectF& rect);
 
     void OnFocus();
     void OnFocusNode();
