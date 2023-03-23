@@ -58,6 +58,8 @@ public:
         ChildNodes_.push_back(std::move(childNode));
     }
 
+    void UpdateForeground(RefPtr<FrameNode> child);
+
 private:
     void ViewPortTransform();
     void OnAttachToFrameNode() override;

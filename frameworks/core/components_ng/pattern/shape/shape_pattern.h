@@ -59,6 +59,7 @@ protected:
             auto parentPaintProperty = parentFrameNode->GetPaintProperty<ShapePaintProperty>();
             if (parentPaintProperty) {
                 propertiesFromAncestor.UpdateShapeProperty(parentPaintProperty);
+                UpdateForeground(parentFrameNode, childNode);
                 auto pattern = AceType::DynamicCast<ShapeContainerPattern>(parentFrameNode->GetPattern());
                 if (pattern) {
                     pattern->AddChildShapeNode(WeakPtr<FrameNode>(childNode));
@@ -68,6 +69,23 @@ protected:
             parentFrameNode = AceType::DynamicCast<FrameNode>(curFrameNode->GetAncestorNodeOfFrame());
         }
         return DynamicCast<ShapePaintProperty>(propertiesFromAncestor.Clone());
+    }
+
+    void UpdateForeground(RefPtr<FrameNode> parentFrameNode, RefPtr<FrameNode> childFrameNode)
+    {
+        auto renderContext = parentFrameNode->GetRenderContext();
+        auto childRenderContext = childFrameNode->GetRenderContext();
+        if (childRenderContext) {
+            if (!childRenderContext->HasForegroundColor() && !childRenderContext->HasForegroundColorStrategy()) {
+                if (renderContext->HasForegroundColor()) {
+                    childRenderContext->UpdateForegroundColor(renderContext->GetForegroundColorValue());
+                    childRenderContext->ResetForegroundColorStrategy();
+                } else if (renderContext->HasForegroundColorStrategy()) {
+                    childRenderContext->UpdateForegroundColorStrategy(renderContext->GetForegroundColorStrategyValue());
+                    childRenderContext->ResetForegroundColor();
+                }
+            }
+        }
     }
 
 private:
