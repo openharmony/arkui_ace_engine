@@ -74,6 +74,7 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/animation/test/mock/mock_animator.cpp",
     "$ace_root/frameworks/core/animation/test/mock/mock_scheduler.cpp",
     "$ace_root/frameworks/core/components/test/unittest/mock/mock_icon_theme.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_long_press_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/base/mock_stage_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loading_context.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
@@ -89,6 +90,7 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
 
     # self
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_accessibility_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_view.cpp",
@@ -103,6 +105,8 @@ ohos_unittest("menu_layout_algorithm_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/navigation_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
+    "menu_item_accessibility_property_test_ng.cpp",
     "menu_item_layout_property_test_ng.cpp",
     "menu_item_pattern_test_ng.cpp",
     "menu_item_view_test_ng.cpp",
