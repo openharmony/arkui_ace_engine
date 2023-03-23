@@ -115,6 +115,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     if (timePickerProperty.find("selected") != timePickerProperty.end()) {
         auto selectedTime = timePickerProperty["selected"];
         SetSelectedTime(timePickerRowPattern, selectedTime);
+        SetDialogTitleDate(timePickerRowPattern, settingData.dialogTitleDate);
     }
     SetHour24(timePickerRowPattern, settingData.isUseMilitaryTime);
     SetTextProperties(pickerTheme, settingData.properties);
@@ -351,6 +352,12 @@ void TimePickerDialogView::SetSelectedTime(
     const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value)
 {
     timePickerRowPattern->SetSelectedTime(value);
+}
+
+void TimePickerDialogView::SetDialogTitleDate(
+    const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerDate& value)
+{
+    timePickerRowPattern->SetDialogTitleDate(value);
 }
 
 void TimePickerDialogView::SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime)
