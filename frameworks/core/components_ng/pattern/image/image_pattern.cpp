@@ -350,9 +350,6 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     LOGI("Receive Memory level notification, level: %{public}d", level);
-    // level = 0: MEMORY_LEVEL_MODERATE;
-    // level = 1: MEMORY_LEVEL_LOW;
-    // level = 2: MEMORY_LEVEL_CRITICAL;
     // TODO: do different data cleaning operation according to level
     // when image component is [onShow], do not clean image data
     // TODO: use [isActive_] to determine image data management
