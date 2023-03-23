@@ -410,8 +410,6 @@ private:
     void InitializeTask();
     void InitWindowCallback();
 
-    SafeAreaEdgeInserts SetViewSafeArea(sptr<OHOS::Rosen::Window> window);
-
     void AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width, int32_t height,
         int32_t windowId, UIEnvCallback callback = nullptr);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);

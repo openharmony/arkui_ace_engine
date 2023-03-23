@@ -146,7 +146,6 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
-    safeArea_ = layoutProperty->safeArea_;
 #ifdef ENABLE_DRAG_FRAMEWORK
     propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
 #endif // ENABLE_DRAG_FRAMEWORK
