@@ -147,7 +147,10 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     borderRadiusProperty.SetRadius(boardStyle.borderRadius);
     renderContext->UpdateBorderRadius(borderRadiusProperty);
 	
-    auto myIndex = tabContentNode->GetParent()->GetChildFlatIndex(tabContentId).second;
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto myIndex = swiperNode->GetChildFlatIndex(tabContentId).second;
+    
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle(), myIndex);
     auto tabBarStyle = tabContentPattern->GetTabBarStyle();
     if (tabBarStyle != TabBarStyle::SUBTABBATSTYLE) {
@@ -214,8 +217,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(textNode);
     CHECK_NULL_VOID(imageNode);
 
-    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
-    CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     int32_t indicator = swiperPattern->GetCurrentIndex();
@@ -227,7 +228,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if ((static_cast<int32_t>(tabBarNode->GetChildren().size()) - 1) == indicator) {
+    if (myIndex == indicator) {
         textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
     } else {
         textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
