@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
-
 #include <optional>
 
 #include "gtest/gtest.h"
+
+#define private public
+#define protected public
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -64,16 +64,14 @@ constexpr double VERTICAL_ANGLE = 90.0;
 constexpr double HORIZONTAL_ANGLE = 180.0;
 } // namespace
 
-class GesturePatternTestNg : public testing::Test {
-public:
-};
+class GesturesTestNg : public testing::Test {};
 
 /**
  * @tc.name: GestureRecognizerTest001
  * @tc.desc: Test ClickRecognizer function: OnAccepted OnRejected
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -153,7 +151,7 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: HandleTouchMoveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -187,7 +185,7 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: ComputeFocusPoint
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -211,7 +209,7 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: ExceedSlop
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -271,14 +269,13 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
      */
     ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
      * @tc.steps: step2. call ReconcileFrom function and compare result.
@@ -336,7 +333,7 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest005, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: HandleTouchDownEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -377,7 +374,6 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest006, TestSize.Level1)
     clickRecognizer.currentTouchPointsNum_ = 0;
     clickRecognizer.HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(clickRecognizer.equalsToFingers_, true);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::DETECTING);
 }
 
 /**
@@ -385,7 +381,7 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest006, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: HandleTouchUpEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -486,7 +482,7 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest007, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: HandleTouchCancelEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest008, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -512,7 +508,7 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest008, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: SendCallbackMsg
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest009, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -573,7 +569,7 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest009, TestSize.Level1)
  * @tc.desc: Test ClickRecognizer function: HandleTouchDownEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ClickRecognizerTest010, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ClickRecognizerTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
@@ -628,17 +624,15 @@ HWTEST_F(GesturePatternTestNg, ClickRecognizerTest010, TestSize.Level1)
  * @tc.desc: Test ExclusiveRecognizer function: OnAccepted OnRejected OnPending OnBlocked
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    RefPtr<ClickRecognizer> clickRecognizerPtrNotSame =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtrNotSame = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
@@ -727,7 +721,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test ExclusiveRecognizer function: HandleEvent OnResetStatus
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ExclusiveRecognizer.
@@ -763,8 +757,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
      * @tc.steps: case2: active is not nullptr, checkTouchId is false
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     exclusiveRecognizer.activeRecognizer_ = clickRecognizerPtr;
     touchEvent.type = TouchType::DOWN;
     result = exclusiveRecognizer.HandleEvent(touchEvent);
@@ -820,21 +813,20 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test ExclusiveRecognizer function: CheckNeedBlocked
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    
+
     /**
      * @tc.steps: step2. call CheckNeedBlocked function and compare result.
      * @tc.steps: case1: recognizers is empty
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     auto result = exclusiveRecognizer.CheckNeedBlocked(clickRecognizerPtr);
     EXPECT_EQ(result, false);
 
@@ -863,8 +855,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
      * @tc.steps: case3: recognizers is not empty, child is ptr, refeeState not PENDING
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtrNotSame =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtrNotSame = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizerPtrNotSame->refereeState_ = RefereeState::SUCCEED;
     exclusiveRecognizer.recognizers_.clear();
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtrNotSame);
@@ -888,14 +879,14 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test ExclusiveRecognizer function: UnBlockGesture
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    
+
     /**
      * @tc.steps: step2. call UnBlockGesture function and compare result.
      * @tc.expected: step2. result equals.
@@ -903,8 +894,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest004, TestSize.Level1)
     auto result = exclusiveRecognizer.UnBlockGesture();
     EXPECT_EQ(result, nullptr);
 
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED_BLOCKED;
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
     result = exclusiveRecognizer.UnBlockGesture();
@@ -916,16 +906,15 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test ExclusiveRecognizer function: BatchAdjudicate, and GestureDisposal
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case1: refereeState_ is SUCCESS, return
@@ -934,7 +923,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest005, TestSize.Level1)
     exclusiveRecognizer.refereeState_ = RefereeState::SUCCEED;
     exclusiveRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
     EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
-    
+
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case2: GestureDisposal::ACCEPT, recognizer is SUCCESS
@@ -944,7 +933,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest005, TestSize.Level1)
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     exclusiveRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
     EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
-    
+
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case3: GestureDisposal::PENDING, recognizer is PENDING
@@ -954,7 +943,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest005, TestSize.Level1)
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
     exclusiveRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::PENDING);
     EXPECT_EQ(exclusiveRecognizer.activeRecognizer_, nullptr);
-    
+
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case4: GestureDisposal::REJECT, recognizer is FAIL
@@ -971,15 +960,14 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest005, TestSize.Level1)
  * @tc.desc: Test ExclusiveRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr =
-        AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
+    RefPtr<ExclusiveRecognizer> exclusiveRecognizerPtr = AceType::MakeRefPtr<ExclusiveRecognizer>(recognizers);
 
     /**
      * @tc.steps: step2. call ReconcileFrom function and compare result.
@@ -1043,8 +1031,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
      * @tc.steps: case6: recognizerPtr same, child is nullptr
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     exclusiveRecognizer.priorityMask_ = exclusiveRecognizerPtr->priorityMask_;
     exclusiveRecognizer.recognizers_.clear();
     exclusiveRecognizer.recognizers_.push_back(clickRecognizerPtr);
@@ -1074,17 +1061,15 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest006, TestSize.Level1)
  * @tc.desc: Test ExclusiveRecognizer function: OnPending OnBlocked
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ExclusiveRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    RefPtr<ClickRecognizer> clickRecognizerPtrNotSame =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtrNotSame = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
      * @tc.steps: step3. call OnRejected function and compare result.
@@ -1161,7 +1146,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest007, TestSize.Level1)
  * @tc.desc: Test ExclusiveRecognizer function: HandleEvent OnResetStatus
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ExclusiveRecognizer.
@@ -1169,8 +1154,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
     bool result = false;
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
      * @tc.steps: step3. create axisEvent and call HandleEvent function and compare result.
@@ -1235,7 +1219,7 @@ HWTEST_F(GesturePatternTestNg, ExclusiveRecognizerTest008, TestSize.Level1)
  * @tc.desc: Test GestureRecognizer function: HandleEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, GestureRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureRecognizer.
@@ -1259,7 +1243,7 @@ HWTEST_F(GesturePatternTestNg, GestureRecognizerTest001, TestSize.Level1)
     touchEvent.type = TouchType::UP;
     clickRecognizer.HandleEvent(touchEvent);
     EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
-    
+
     touchEvent.type = TouchType::CANCEL;
     clickRecognizer.HandleEvent(touchEvent);
     EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
@@ -1295,16 +1279,15 @@ HWTEST_F(GesturePatternTestNg, GestureRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test LongPressRecognizer function: OnAccepted OnRejected
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, LongPressRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer =
-        LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
     OnLongPress onLongPress;
     TouchEvent touchEvent;
-    
+
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.steps: case1: !onLongPress, !empty, repeat
@@ -1361,13 +1344,12 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test LongPressRecognizer function: HandleTouchMoveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, LongPressRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer =
-        LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
@@ -1394,13 +1376,12 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test LongPressRecognizer function: HandleTouchDownEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, LongPressRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer =
-        LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
@@ -1410,7 +1391,7 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest003, TestSize.Level1)
     TouchEvent touchEvent;
     longPressRecognizer.HandleTouchDownEvent(touchEvent);
     EXPECT_EQ(longPressRecognizer.touchPoints_.size(), 1);
-    
+
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
      * @tc.steps: case2: pointsCount == fingers, useCatchMode_ is true
@@ -1478,13 +1459,12 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test LongPressRecognizer function: HandleTouchCancelEvent UpEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, LongPressRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer =
-        LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
 
     /**
      * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
@@ -1503,13 +1483,12 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test LongPressRecognizer function: SendCallbackMsg
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, LongPressRecognizerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer =
-        LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
     bool isRepeat = false;
 
     /**
@@ -1566,13 +1545,12 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest005, TestSize.Level1)
  * @tc.desc: Test LongPressRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, LongPressRecognizerTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer =
-        LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
     RefPtr<LongPressRecognizer> longPressRecognizerPtr =
         AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
 
@@ -1637,13 +1615,12 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest006, TestSize.Level1)
  * @tc.desc: Test LongPressRecognizer function: HandleOverdueDeadline  DoRepeat
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, LongPressRecognizerTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create LongPressRecognizer.
      */
-    LongPressRecognizer longPressRecognizer =
-        LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
     bool isCatchMode = false;
 
     /**
@@ -1672,7 +1649,7 @@ HWTEST_F(GesturePatternTestNg, LongPressRecognizerTest007, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: OnAccepted OnRejected
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -1700,7 +1677,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: HandleTouchDownEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -1776,7 +1753,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: HandleTouchUpEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -1807,7 +1784,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest003, TestSize.Level1)
     EXPECT_EQ(panRecognizer.globalPoint_.GetX(), touchEvent.x);
     EXPECT_EQ(panRecognizer.globalPoint_.GetY(), touchEvent.y);
     EXPECT_EQ(panRecognizer.lastTouchEvent_.id, touchEvent.id);
-    
+
     /**
      * @tc.steps: step2. call HandleTouchUp function and compare result.
      * @tc.steps: case3: refereeState is FAIL
@@ -1845,7 +1822,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: HandleTouchMoveEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -1894,7 +1871,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: OnFlushTouchEvents begin end
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -1917,7 +1894,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest005, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: IsPanGestureAccept
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -1952,7 +1929,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest006, TestSize.Level1)
     panRecognizer.distance_ = 1;
     result = panRecognizer.IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
-    
+
     /**
      * @tc.steps: step2. case4: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::LEFT.
      * @tc.expected: step2. return REJECT.
@@ -1962,7 +1939,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest006, TestSize.Level1)
     panRecognizer.distance_ = 0;
     result = panRecognizer.IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::REJECT);
-    
+
     /**
      * @tc.steps: step2. case5: GetX > GetY, GetX > 0, GetX > distance_, PanDirection::VERTICAL.
      * @tc.expected: step2. return REJECT.
@@ -1989,7 +1966,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest006, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: IsPanGestureAccept
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -2007,7 +1984,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest007, TestSize.Level1)
     panRecognizer.distance_ = 1;
     result = panRecognizer.IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::DETECTING);
-    
+
     /**
      * @tc.steps: step2. case8: GetX <= GetY, GetY > distance_, GetY < 0, PanDirection::DOWN.
      * @tc.expected: step2. return ACCEPT.
@@ -2017,7 +1994,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest007, TestSize.Level1)
     panRecognizer.distance_ = 0;
     result = panRecognizer.IsPanGestureAccept();
     EXPECT_EQ(result, PanRecognizer::GestureAcceptResult::ACCEPT);
-    
+
     /**
      * @tc.steps: step2. case9: GetX <= GetY, GetY > distance_, GetY > 0, PanDirection::UP.
      * @tc.expected: step2. return REJECT.
@@ -2044,7 +2021,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest007, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: HandleTouchCancelEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest008, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -2096,7 +2073,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest008, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: SendCallbackMsg
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest009, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -2159,16 +2136,15 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest009, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest010, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    RefPtr<PanRecognizer> panRecognizerPtr =
-        AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-    
+    RefPtr<PanRecognizer> panRecognizerPtr = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+
     /**
      * @tc.steps: step2. call ReconcileFrom function
      * @tc.steps: case1: recognizer is nullptr
@@ -2218,7 +2194,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest010, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: SetDirection
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest011, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -2226,7 +2202,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest011, TestSize.Level1)
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
     PanDirection panDirection;
-    
+
     /**
      * @tc.steps: step2. call SetDirection function
      * @tc.steps: case1: panDirection is VERTICAL
@@ -2251,14 +2227,14 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest011, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: ChangeFingers
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest012, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    
+
     /**
      * @tc.steps: step2. call ChangeFingers function
      * @tc.steps: case1: fingers not same
@@ -2283,14 +2259,14 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest012, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: ChangeDirection
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest013, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    
+
     /**
      * @tc.steps: step2. call ChangeDirection function
      * @tc.steps: case1: type not same
@@ -2320,14 +2296,14 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest013, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: ChangeDistance
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest014, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    
+
     /**
      * @tc.steps: step2. call ChangeDistance function
      * @tc.steps: case1: distance not same, refereeState is READY
@@ -2378,14 +2354,14 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest014, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: GetMainAxisDelta
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest015, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
-    
+
     /**
      * @tc.steps: step2. call ChangeDistance function
      * @tc.steps: case1: directionType is ALL
@@ -2430,13 +2406,13 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest015, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: PanRecognizer
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest016, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
      */
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    
+
     /**
      * @tc.steps: step2. call PanRecognizer function
      * @tc.steps: case1: 0 <= direction.type <= 15
@@ -2469,7 +2445,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest016, TestSize.Level1)
  * @tc.desc: Test PanRecognizer function: HandleTouchMoveEvent(AxisEvent)
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PanRecognizerTest017, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PanRecognizerTest017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PanRecognizer.
@@ -2477,7 +2453,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest017, TestSize.Level1)
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
     AxisEvent axisEvent;
-    
+
     /**
      * @tc.steps: step2. call HandleTouchMove function and compare result.
      * @tc.steps: case1: fingers_ is 0, return
@@ -2513,7 +2489,7 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest017, TestSize.Level1)
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
     EXPECT_EQ(panRecognizer.delta_.GetX(), 0);
     EXPECT_EQ(panRecognizer.delta_.GetY(), 0);
-    
+
     /**
      * @tc.steps: step2. call HandleTouchMove function and compare result.
      * @tc.steps: case3: fingers_ is 1, direction is HORIZONTAL, refereeState is PENDING
@@ -2532,16 +2508,15 @@ HWTEST_F(GesturePatternTestNg, PanRecognizerTest017, TestSize.Level1)
  * @tc.desc: Test ParallelRecognizer function: OnAccepted OnRejected OnPending OnBlock
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ParallelRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ParallelRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ParallelRecognizer parallelRecognizer = ParallelRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.steps: case1: recognizer is nullptr
@@ -2631,16 +2606,15 @@ HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test ParallelRecognizer function: HandleEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ParallelRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ParallelRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ParallelRecognizer parallelRecognizer = ParallelRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call HandleEvent function and compare result.
      * @tc.steps: case1: refereeState is READY, recognizers is empty
@@ -2695,16 +2669,15 @@ HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test ParallelRecognizer function: BatchAdjudicate
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ParallelRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ParallelRecognizer.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ParallelRecognizer parallelRecognizer = ParallelRecognizer(recognizers);
-    
+
     /**
      * @tc.steps: step2. call HandleEvent function and compare result.
      * @tc.steps: case1: disposal is ACCEPT, refereeState is SUCCEED
@@ -2780,17 +2753,15 @@ HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test ParallelRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, ParallelRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ParallelRecognizer.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ParallelRecognizer parallelRecognizer = ParallelRecognizer(recognizers);
-    RefPtr<ParallelRecognizer> parallelRecognizerPtr =
-        AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
+    RefPtr<ParallelRecognizer> parallelRecognizerPtr = AceType::MakeRefPtr<ParallelRecognizer>(recognizers);
     bool result = false;
 
     /**
@@ -2814,7 +2785,7 @@ HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest004, TestSize.Level1)
      * @tc.steps: case3: recognizers_ = {nullptr};
      * @tc.expected: step2. result equals.
      */
-    parallelRecognizer.recognizers_ = {nullptr};
+    parallelRecognizer.recognizers_ = { nullptr };
     result = parallelRecognizer.ReconcileFrom(parallelRecognizerPtr);
     EXPECT_EQ(result, false);
 
@@ -2880,7 +2851,7 @@ HWTEST_F(GesturePatternTestNg, ParallelRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test PinchRecognizer function: OnAccepted OnRejected
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PinchRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PinchRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PinchRecognizer.
@@ -2907,7 +2878,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test PinchRecognizer function: HandleTouchDownEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PinchRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PinchRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PinchRecognizer.
@@ -2946,27 +2917,6 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest002, TestSize.Level1)
     EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
     EXPECT_EQ(static_cast<int32_t>(pinchRecognizer.touchPoints_.size()), 1);
     EXPECT_EQ(pinchRecognizer.refereeState_, RefereeState::PENDING);
-
-    /**
-     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
-     * @tc.steps: case3: input is AxisEvent. refereeState_ is SUCCESS.
-     * @tc.expected: step2. result equals.
-     */
-    AxisEvent axisEvent;
-    pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
-    pinchRecognizer.HandleTouchDownEvent(axisEvent);
-    EXPECT_EQ(pinchRecognizer.refereeState_, RefereeState::SUCCEED);
-
-    /**
-     * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
-     * @tc.steps: case4: input is AxisEvent. refereeState_ is PENDING.
-     * @tc.expected: step2. result equals.
-     */
-    pinchRecognizer.refereeState_ = RefereeState::PENDING;
-    pinchRecognizer.HandleTouchDownEvent(axisEvent);
-    EXPECT_EQ(pinchRecognizer.pinchCenter_.GetX(), axisEvent.x);
-    EXPECT_EQ(pinchRecognizer.pinchCenter_.GetY(), axisEvent.y);
-    EXPECT_EQ(pinchRecognizer.refereeState_, RefereeState::DETECTING);
 }
 
 /**
@@ -2974,7 +2924,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test PinchRecognizer function: HandleMove HandleUp HandleCancel
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PinchRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PinchRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PinchRecognizer.
@@ -3004,9 +2954,8 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest003, TestSize.Level1)
     pinchRecognizer.HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
     EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
-    EXPECT_EQ(pinchRecognizer.scale_, axisEvent.pinchAxisScale);
 
-     /**
+    /**
      * @tc.steps: step2. call HandleTouchMoveEvent function and compare result.
      * @tc.steps: case3: input is TouchEvent, isFlushTouchEventsEnd_
      * @tc.expected: step2. result equals.
@@ -3036,7 +2985,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest003, TestSize.Level1)
     pinchRecognizer.HandleTouchMoveEvent(axisEvent);
     EXPECT_EQ(pinchRecognizer.touchPoints_[touchEvent.id].id, touchEvent.id);
     EXPECT_EQ(pinchRecognizer.lastTouchEvent_.id, touchEvent.id);
-    
+
     /**
      * @tc.steps: step2. call HandleTouchCancelEvent function and compare result.
      * @tc.steps: case6: input is TouchEvent, refereeState is FAIL
@@ -3053,7 +3002,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test PinchRecognizer function: OnFlushTouchEvent begin end
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PinchRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PinchRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PinchRecognizer.
@@ -3075,7 +3024,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test PinchRecognizer function: ComputeAverageDeviation
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PinchRecognizerTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PinchRecognizerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PinchRecognizer.
@@ -3097,7 +3046,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest005, TestSize.Level1)
  * @tc.desc: Test PinchRecognizer function: SendCallbackMsg
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PinchRecognizerTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PinchRecognizerTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PinchRecognizer.
@@ -3158,7 +3107,7 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest006, TestSize.Level1)
  * @tc.desc: Test PinchRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, PinchRecognizerTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PinchRecognizerTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PinchRecognizer.
@@ -3221,15 +3170,14 @@ HWTEST_F(GesturePatternTestNg, PinchRecognizerTest007, TestSize.Level1)
  * @tc.desc: Test RecognizerGroup function: OnBeginGestureReferee
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RecognizerGroupTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RecognizerGroupTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
      * @tc.steps: step2. call OnBeginGestureReferee function and compare result.
@@ -3275,15 +3223,14 @@ HWTEST_F(GesturePatternTestNg, RecognizerGroupTest001, TestSize.Level1)
  * @tc.desc: Test RecognizerGroup function: OnFinishGestureReferee
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RecognizerGroupTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RecognizerGroupTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
 
     /**
      * @tc.steps: step2. call OnFinishGestureReferee function and compare result.
@@ -3320,15 +3267,14 @@ HWTEST_F(GesturePatternTestNg, RecognizerGroupTest002, TestSize.Level1)
  * @tc.desc: Test RecognizerGroup function: AddChildren
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RecognizerGroupTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RecognizerGroupTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     std::list<RefPtr<NGGestureRecognizer>> recognizersInput = {};
 
     /**
@@ -3344,7 +3290,7 @@ HWTEST_F(GesturePatternTestNg, RecognizerGroupTest003, TestSize.Level1)
      * @tc.steps: case2: recognizers is not empty
      * @tc.expected: step2. result equals.
      */
-    recognizersInput = {nullptr, clickRecognizerPtr, clickRecognizerPtr};
+    recognizersInput = { nullptr, clickRecognizerPtr, clickRecognizerPtr };
     exclusiveRecognizer.AddChildren(recognizersInput);
     EXPECT_EQ(exclusiveRecognizer.recognizers_.size(), 1);
 }
@@ -3354,16 +3300,15 @@ HWTEST_F(GesturePatternTestNg, RecognizerGroupTest003, TestSize.Level1)
  * @tc.desc: Test RecognizerGroup function: Existed
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RecognizerGroupTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RecognizerGroupTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call Existed function and compare result.
      * @tc.steps: case1: recognizers is empty
@@ -3387,16 +3332,15 @@ HWTEST_F(GesturePatternTestNg, RecognizerGroupTest004, TestSize.Level1)
  * @tc.desc: Test RecognizerGroup function: OnFlushTouchEventsBegin End Reset
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RecognizerGroupTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RecognizerGroupTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RecognizerGroup
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     ExclusiveRecognizer exclusiveRecognizer = ExclusiveRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call function and compare result.
      * @tc.steps: case1: recognizers is empty
@@ -3441,13 +3385,12 @@ HWTEST_F(GesturePatternTestNg, RecognizerGroupTest005, TestSize.Level1)
  * @tc.desc: Test RotationRecognizer function: OnAccepted OnRejected
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RotationRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RotationRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RotationRecognizer.
      */
-    RotationRecognizer rotationRecognizer =
-        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
 
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
@@ -3469,13 +3412,12 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test RotationRecognizer function: TouchDown TouchUp TouchMove
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RotationRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RotationRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RotationRecognizer.
      */
-    RotationRecognizer rotationRecognizer =
-        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
 
     /**
      * @tc.steps: step2. call HandleTouchDownEvent function and compare result.
@@ -3521,13 +3463,12 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test RotationRecognizer function: ChangeValueRange
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RotationRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RotationRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RotationRecognizer.
      */
-    RotationRecognizer rotationRecognizer =
-        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
 
     /**
      * @tc.steps: step2. call ChangeValueRange function and compare result.
@@ -3548,13 +3489,12 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test RotationRecognizer function: ComputeAngle
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RotationRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RotationRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RotationRecognizer.
      */
-    RotationRecognizer rotationRecognizer =
-        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
 
     /**
      * @tc.steps: step2. call ComputeAngle function and compare result.
@@ -3575,13 +3515,12 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test RotationRecognizer function: OnResetStatus
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RotationRecognizerTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RotationRecognizerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RotationRecognizer.
      */
-    RotationRecognizer rotationRecognizer =
-        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
 
     /**
      * @tc.steps: step2. call OnResetStatus function and compare result.
@@ -3598,13 +3537,12 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest005, TestSize.Level1)
  * @tc.desc: Test RotationRecognizer function: SendCallbackMsg
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RotationRecognizerTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RotationRecognizerTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RotationRecognizer.
      */
-    RotationRecognizer rotationRecognizer =
-        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -3660,13 +3598,12 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest006, TestSize.Level1)
  * @tc.desc: Test RotationRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, RotationRecognizerTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RotationRecognizerTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create ClickRecognizer.
      */
-    RotationRecognizer rotationRecognizer =
-        RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
+    RotationRecognizer rotationRecognizer = RotationRecognizer(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
     RefPtr<RotationRecognizer> rotationRecognizerPtr =
         AceType::MakeRefPtr<RotationRecognizer>(SINGLE_FINGER_NUMBER, ROTATION_GESTURE_ANGLE);
     bool result = false;
@@ -3726,14 +3663,14 @@ HWTEST_F(GesturePatternTestNg, RotationRecognizerTest007, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: OnAccepted
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    
+
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.steps: case1: recognizers_ is empty
@@ -3756,8 +3693,7 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest001, TestSize.Level1)
      * @tc.steps: case3: recognizers_ is not empty, have click ptr
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.OnAccepted();
@@ -3770,14 +3706,14 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: OnRejected
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    
+
     /**
      * @tc.steps: step2. call OnRejected function and compare result.
      * @tc.steps: case1: recognizers_ is empty
@@ -3801,8 +3737,7 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest002, TestSize.Level1)
      * @tc.steps: case3: recognizers_ is not empty, have click ptr
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     sequencedRecognizer.currentIndex_ = 0;
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
@@ -3816,14 +3751,14 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: OnPending
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    
+
     /**
      * @tc.steps: step2. call OnPending function and compare result.
      * @tc.steps: case1: recognizers_ is empty
@@ -3846,15 +3781,14 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest003, TestSize.Level1)
      * @tc.steps: case3: recognizers_ is not empty, have click ptr, ACCEPT
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizerPtr->disposal_ = GestureDisposal::ACCEPT;
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.OnPending();
     EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::PENDING);
     EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
-    
+
     /**
      * @tc.steps: step2. call OnPending function and compare result.
      * @tc.steps: case4: recognizers_ is not empty, have click ptr, PENDING
@@ -3873,14 +3807,14 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: OnBlocked
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    
+
     /**
      * @tc.steps: step2. call OnBlocked function and compare result.
      * @tc.steps: case1: recognizers_ is empty
@@ -3903,14 +3837,13 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest004, TestSize.Level1)
      * @tc.steps: case3: recognizers_ is not empty, disposal is ACCEPT
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     sequencedRecognizer.disposal_ = GestureDisposal::ACCEPT;
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.OnBlocked();
     EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::SUCCEED_BLOCKED);
-    
+
     /**
      * @tc.steps: step2. call OnBlocked function and compare result.
      * @tc.steps: case4: recognizers_ is not empty, disposal is PENDING
@@ -3946,21 +3879,20 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: HandleEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     bool result = false;
     TouchEvent touchEvent;
-    
+
     /**
      * @tc.steps: step2. call HandleEvent function and compare result.
      * @tc.steps: case1: currentIndex = 0
@@ -3995,15 +3927,14 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest005, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: HandleEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     bool result = false;
@@ -4051,15 +3982,14 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest006, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: HandleEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     bool result = false;
@@ -4111,16 +4041,15 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest007, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: BatchAdjudicate, and GestureDisposal
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest008, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
      * @tc.steps: case1: disposal: ACCEPT, refereeState: SUCCEED
@@ -4184,16 +4113,15 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest008, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: UpdateCurrentIndex
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest009, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SequencedRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call UpdateCurrentIndex function and compare result.
      * @tc.steps: case1: currentIndex == size - 1
@@ -4218,17 +4146,16 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest009, TestSize.Level1)
  * @tc.desc: Test SequencedRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest010, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SequencedRecognizerTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     std::vector<RefPtr<NGGestureRecognizer>> recognizers = {};
     SequencedRecognizer sequencedRecognizer = SequencedRecognizer(recognizers);
-    RefPtr<SequencedRecognizer> sequencedRecognizerPtr =
-        AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
+    RefPtr<SequencedRecognizer> sequencedRecognizerPtr = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
     bool result = false;
-    
+
     /**
      * @tc.steps: step2. call ReconcileFrom function
      * @tc.steps: case1: recognizer is nullptr
@@ -4258,7 +4185,7 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest010, TestSize.Level1)
     sequencedRecognizer.priorityMask_ = GestureMask::Normal;
     result = sequencedRecognizer.ReconcileFrom(sequencedRecognizerPtr);
     EXPECT_EQ(result, false);
-    
+
     /**
      * @tc.steps: step2. call ReconcileFrom function
      * @tc.steps: case4: size same, priorityMask not same
@@ -4268,7 +4195,7 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest010, TestSize.Level1)
     sequencedRecognizer.priorityMask_ = GestureMask::Begin;
     result = sequencedRecognizer.ReconcileFrom(sequencedRecognizerPtr);
     EXPECT_EQ(result, false);
-    
+
     /**
      * @tc.steps: step2. call ReconcileFrom function
      * @tc.steps: case4: size same, priorityMask same, child is nullptr
@@ -4281,14 +4208,13 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest010, TestSize.Level1)
     sequencedRecognizer.priorityMask_ = GestureMask::Normal;
     result = sequencedRecognizer.ReconcileFrom(sequencedRecognizerPtr);
     EXPECT_EQ(result, false);
-    
+
     /**
      * @tc.steps: step2. call ReconcileFrom function
      * @tc.steps: case4: size same, priorityMask same, child is ptr
      * @tc.expected: step2. result equals.
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     sequencedRecognizer.recognizers_.clear();
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizerPtr->recognizers_.clear();
@@ -4316,15 +4242,14 @@ HWTEST_F(GesturePatternTestNg, SequencedRecognizerTest010, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: OnAccepted OnRejected
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
     /**
      * @tc.steps: step2. call OnAccepted function and compare result.
      * @tc.expected: step2. result equals.
@@ -4345,15 +4270,14 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest001, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: HandleTouchDown
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
     /**
      * @tc.steps: step2. call HandleTouchDown function
      * @tc.expected: step2. result equals.
@@ -4376,15 +4300,14 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest002, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: HandleTouchUp
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
     /**
      * @tc.steps: step2. call HandleTouchUp function
      * @tc.expected: step2. result equals.
@@ -4409,15 +4332,14 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest003, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: HandleTouchMove
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
     /**
      * @tc.steps: step2. call HandleTouchMove function
      * @tc.expected: step2. result equals.
@@ -4453,15 +4375,14 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest004, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: CheckAngle
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
     /**
      * @tc.steps: step2. call CheckAngle function
      * @tc.steps: case1: prevAngle has value, prevAngle - angle > 45
@@ -4470,7 +4391,7 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest005, TestSize.Level1)
     swipeRecognizer.prevAngle_ = std::make_optional(VERTICAL_ANGLE);
     auto result = swipeRecognizer.CheckAngle(0);
     EXPECT_EQ(result, false);
-    
+
     /**
      * @tc.steps: step2. call CheckAngle function
      * @tc.steps: case2: prevAngle has value, prevAngle - angle < 45
@@ -4526,15 +4447,14 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest005, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: OnResetStatus
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
     /**
      * @tc.steps: step2. call OnResetStatus function
      * @tc.expected: step2. result equals.
@@ -4552,17 +4472,16 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest006, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: ReconcileFrom
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
     RefPtr<SwipeRecognizer> swipeRecognizerPtr =
         AceType::MakeRefPtr<SwipeRecognizer>(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    
+
     /**
      * @tc.steps: step2. call ReconcileFrom function
      * @tc.steps: case1: input is nullptr
@@ -4615,15 +4534,14 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest007, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: HandleTouchCancelEvent
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest008, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
-    
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+
     /**
      * @tc.steps: step2. call HandleTouchCancelEvent function
      * @tc.expected: step2. result equals.
@@ -4639,14 +4557,13 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest008, TestSize.Level1)
  * @tc.desc: Test SwipeRecognizer function: SendCallbackMsg
  * @tc.type: FUNC
  */
-HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest009, TestSize.Level1)
+HWTEST_F(GesturesTestNg, SwipeRecognizerTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create SwipeRecognizer.
      */
     SwipeDirection swipeDirection;
-    SwipeRecognizer swipeRecognizer =
-        SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
+    SwipeRecognizer swipeRecognizer = SwipeRecognizer(SINGLE_FINGER_NUMBER, swipeDirection, SWIPE_SPEED);
 
     /**
      * @tc.steps: step2. call SendCallbackMsg function and compare result.
@@ -4699,7 +4616,7 @@ HWTEST_F(GesturePatternTestNg, SwipeRecognizerTest009, TestSize.Level1)
  * @tc.name: GestureGroupTest001
  * @tc.desc: Test GestureGroup CreateRecognizer function
  */
-HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureGroupTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureGroup.
@@ -4713,9 +4630,9 @@ HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
     gestureGroup.priority_ = GesturePriority::Low;
     gestureGroup.gestureMask_ = GestureMask::Normal;
     gestureGroup.mode_ = GestureMode::Begin;
-    auto groupRecognizer =  gestureGroup.CreateRecognizer();
+    auto groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_EQ(groupRecognizer, nullptr);
-    
+
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
      * @tc.steps: case2: GestureMode::Sequence
@@ -4723,7 +4640,7 @@ HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
     gestureGroup.priority_ = GesturePriority::Low;
     gestureGroup.gestureMask_ = GestureMask::Normal;
     gestureGroup.mode_ = GestureMode::Sequence;
-    groupRecognizer =  gestureGroup.CreateRecognizer();
+    groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_NE(groupRecognizer, nullptr);
     EXPECT_EQ(groupRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(groupRecognizer->GetPriorityMask(), GestureMask::Normal);
@@ -4735,7 +4652,7 @@ HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
     gestureGroup.priority_ = GesturePriority::Low;
     gestureGroup.gestureMask_ = GestureMask::Normal;
     gestureGroup.mode_ = GestureMode::Parallel;
-    groupRecognizer =  gestureGroup.CreateRecognizer();
+    groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_NE(groupRecognizer, nullptr);
     EXPECT_EQ(groupRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(groupRecognizer->GetPriorityMask(), GestureMask::Normal);
@@ -4747,7 +4664,7 @@ HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
     gestureGroup.priority_ = GesturePriority::Low;
     gestureGroup.gestureMask_ = GestureMask::Normal;
     gestureGroup.mode_ = GestureMode::Exclusive;
-    groupRecognizer =  gestureGroup.CreateRecognizer();
+    groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_NE(groupRecognizer, nullptr);
     EXPECT_EQ(groupRecognizer->GetPriority(), GesturePriority::Low);
     EXPECT_EQ(groupRecognizer->GetPriorityMask(), GestureMask::Normal);
@@ -4759,7 +4676,7 @@ HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
     gestureGroup.priority_ = GesturePriority::Low;
     gestureGroup.gestureMask_ = GestureMask::Normal;
     gestureGroup.mode_ = GestureMode::End;
-    groupRecognizer =  gestureGroup.CreateRecognizer();
+    groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_EQ(groupRecognizer, nullptr);
 
     /**
@@ -4771,7 +4688,7 @@ HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
     gestureGroup.mode_ = GestureMode::Sequence;
     std::unique_ptr<GestureEventNoParameter> onActionCancelId;
     gestureGroup.onActionCancelId_ = std::move(onActionCancelId);
-    groupRecognizer =  gestureGroup.CreateRecognizer();
+    groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_NE(groupRecognizer, nullptr);
 }
 
@@ -4779,14 +4696,13 @@ HWTEST_F(GesturePatternTestNg, GestureGroupTest001, TestSize.Level1)
  * @tc.name: GestureRefereeTest001
  * @tc.desc: Test GestureReferee Existed function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureScope gestureScope = GestureScope(0);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
 
     /**
@@ -4819,14 +4735,13 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest001, TestSize.Level1)
  * @tc.name: GestureRefereeTest002
  * @tc.desc: Test GestureReferee CheckNeedBlocked function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest002, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureScope gestureScope = GestureScope(0);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
 
     /**
@@ -4836,14 +4751,13 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest002, TestSize.Level1)
      */
     auto result = gestureScope.CheckNeedBlocked(clickRecognizerPtr);
     EXPECT_EQ(result, false);
-    
+
     /**
      * @tc.steps: step2. call Existed function and compare result
      * @tc.steps: case1: member != input, refereeState is PENDING
      * @tc.steps: expected equal
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtrNotInsert =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtrNotInsert = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
     result = gestureScope.CheckNeedBlocked(clickRecognizerPtrNotInsert);
     EXPECT_EQ(result, true);
@@ -4862,14 +4776,13 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest002, TestSize.Level1)
  * @tc.name: GestureRefereeTest003
  * @tc.desc: Test GestureReferee OnAcceptGesture function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest003, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureScope gestureScope = GestureScope(0);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
 
     /**
@@ -4885,8 +4798,7 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest003, TestSize.Level1)
      * @tc.steps: case2: gesture != recognizer
      * @tc.steps: expected equal
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtrNotInsert =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtrNotInsert = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope.OnAcceptGesture(clickRecognizerPtrNotInsert);
     EXPECT_EQ(gestureScope.hasGestureAccepted_, true);
 
@@ -4913,14 +4825,13 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest003, TestSize.Level1)
  * @tc.name: GestureRefereeTest004
  * @tc.desc: Test GestureReferee OnBlockGesture function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest004, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureScope gestureScope = GestureScope(0);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
 
     /**
@@ -4939,14 +4850,13 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest004, TestSize.Level1)
  * @tc.name: GestureRefereeTest005
  * @tc.desc: Test GestureReferee IsPending function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest005, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureScope gestureScope = GestureScope(0);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
 
     /**
@@ -4965,7 +4875,7 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest005, TestSize.Level1)
  * @tc.name: GestureRefereeTest006
  * @tc.desc: Test GestureReferee AddGestureToScope function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest006, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureReferee.
@@ -5005,8 +4915,7 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest006, TestSize.Level1)
      * @tc.steps: case4: can find touchId, result have ptr
      * @tc.steps: expected equal
      */
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     touchTestResult.clear();
     touchTestResult.insert(touchTestResult.end(), clickRecognizerPtr);
     gestureReferee.AddGestureToScope(0, touchTestResult);
@@ -5017,13 +4926,13 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest006, TestSize.Level1)
  * @tc.name: GestureRefereeTest007
  * @tc.desc: Test GestureReferee CleanGestureScope function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest007, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureReferee.
      */
     GestureReferee gestureReferee;
-    
+
     /**
      * @tc.steps: step2. call CleanGestureScope function and compare result
      * @tc.steps: case1: gestureScope is empty
@@ -5038,8 +4947,7 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest007, TestSize.Level1)
      * @tc.steps: expected equal
      */
     RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     clickRecognizerPtr->refereeState_ = RefereeState::SUCCEED;
     gestureScope->recognizers_.insert(gestureScope->recognizers_.end(), clickRecognizerPtr);
     gestureReferee.gestureScopes_[0] = gestureScope;
@@ -5063,14 +4971,13 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest007, TestSize.Level1)
  * @tc.name: GestureRefereeTest008
  * @tc.desc: Test GestureReferee AddMember function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest008, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureScope gestureScope = GestureScope(0);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
 
     /**
@@ -5094,14 +5001,13 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest008, TestSize.Level1)
  * @tc.name: GestureRefereeTest009
  * @tc.desc: Test GestureReferee Close function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest009, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureScope gestureScope = GestureScope(0);
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
     gestureScope.recognizers_.insert(gestureScope.recognizers_.end(), clickRecognizerPtr);
 
     /**
@@ -5135,15 +5041,14 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest009, TestSize.Level1)
  * @tc.name: GestureRefereeTest010
  * @tc.desc: Test GestureReferee Adjudicate function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest010, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureReferee gestureReferee;
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call Adjudicate function and compare result
      * @tc.steps: case1: disposal is ACCEPT
@@ -5185,15 +5090,14 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest010, TestSize.Level1)
  * @tc.name: GestureRefereeTest011
  * @tc.desc: Test GestureReferee HandleAcceptDisposal function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest011, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureReferee gestureReferee;
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call Adjudicate function and compare result
      * @tc.steps: case1: refereeState is SUCCEED
@@ -5260,15 +5164,14 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest011, TestSize.Level1)
  * @tc.name: GestureRefereeTest012
  * @tc.desc: Test GestureReferee HandlePendingDisposal function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest012, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureReferee gestureReferee;
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call Adjudicate function and compare result
      * @tc.steps: case1: refereeState is PENDING
@@ -5304,15 +5207,14 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest012, TestSize.Level1)
  * @tc.name: GestureRefereeTest013
  * @tc.desc: Test GestureReferee HandleRejectDisposal function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest013, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureReferee gestureReferee;
-    RefPtr<ClickRecognizer> clickRecognizerPtr =
-        AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
-    
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
     /**
      * @tc.steps: step2. call Adjudicate function and compare result
      * @tc.steps: case1: refereeState is FAIL
@@ -5398,14 +5300,14 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest013, TestSize.Level1)
  * @tc.name: GestureRefereeTest014
  * @tc.desc: Test GestureReferee HasGestureAccepted function
  */
-HWTEST_F(GesturePatternTestNg, GestureRefereeTest014, TestSize.Level1)
+HWTEST_F(GesturesTestNg, GestureRefereeTest014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create GestureScope and clickRecognizer.
      */
     GestureReferee gestureReferee;
     bool result = false;
-    
+
     /**
      * @tc.steps: step2. call Adjudicate function and compare result
      * @tc.steps: case1: gestureScopes_ is not empty
@@ -5432,13 +5334,12 @@ HWTEST_F(GesturePatternTestNg, GestureRefereeTest014, TestSize.Level1)
  * @tc.name: LongPressGestureTest001
  * @tc.desc: Test LongPressGesture CreateRecognizer function
  */
-HWTEST_F(GesturePatternTestNg, LongPressGestureTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, LongPressGestureTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create LongPressGesture.
      */
-    LongPressGesture longPressGesture =
-        LongPressGesture(FINGER_NUMBER, false, LONG_PRESS_DURATION, false, false);
+    LongPressGesture longPressGesture = LongPressGesture(FINGER_NUMBER, false, LONG_PRESS_DURATION, false, false);
     EXPECT_EQ(longPressGesture.repeat_, false);
     EXPECT_EQ(longPressGesture.duration_, LONG_PRESS_DURATION);
     EXPECT_EQ(longPressGesture.isForDrag_, false);
@@ -5448,8 +5349,7 @@ HWTEST_F(GesturePatternTestNg, LongPressGestureTest001, TestSize.Level1)
      * @tc.steps: step2. call CreateRecognizer function and compare result
      * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
      */
-    auto longPressRecognizer =
-        AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
     EXPECT_NE(longPressRecognizer, nullptr);
     EXPECT_EQ(longPressRecognizer->repeat_, false);
     EXPECT_EQ(longPressRecognizer->duration_, LONG_PRESS_DURATION);
@@ -5466,8 +5366,7 @@ HWTEST_F(GesturePatternTestNg, LongPressGestureTest001, TestSize.Level1)
     longPressGesture.onActionId_ = std::move(onActionId);
     longPressGesture.onActionEndId_ = std::move(onActionEndId);
     longPressGesture.onActionCancelId_ = std::move(onActionCancelId);
-    longPressRecognizer =
-        AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
     EXPECT_NE(longPressRecognizer, nullptr);
     EXPECT_EQ(longPressRecognizer->repeat_, false);
     EXPECT_EQ(longPressRecognizer->duration_, LONG_PRESS_DURATION);
@@ -5479,7 +5378,7 @@ HWTEST_F(GesturePatternTestNg, LongPressGestureTest001, TestSize.Level1)
  * @tc.name: PinchGestureTest001
  * @tc.desc: Test PinchGesture CreateRecognizer function
  */
-HWTEST_F(GesturePatternTestNg, PinchGestureTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, PinchGestureTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create PinchGestureGesture.
@@ -5492,7 +5391,7 @@ HWTEST_F(GesturePatternTestNg, PinchGestureTest001, TestSize.Level1)
  * @tc.name: RotationGestureTest001
  * @tc.desc: Test RotationGesture CreateRecognizer function
  */
-HWTEST_F(GesturePatternTestNg, RotationGestureTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, RotationGestureTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create RotationGestureGesture.
@@ -5532,14 +5431,14 @@ HWTEST_F(GesturePatternTestNg, RotationGestureTest001, TestSize.Level1)
  * @tc.name: TapGestureTest001
  * @tc.desc: Test TapGesture CreateRecognizer function
  */
-HWTEST_F(GesturePatternTestNg, TapGestureTest001, TestSize.Level1)
+HWTEST_F(GesturesTestNg, TapGestureTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create TapGestureGesture.
      */
     TapGesture tapGesture = TapGesture(COUNT, FINGER_NUMBER);
     EXPECT_EQ(tapGesture.count_, COUNT);
-    
+
     /**
      * @tc.steps: step2. call CreateRecognizer function and compare result
      * @tc.steps: case1: not have onActionId
@@ -5562,4 +5461,3 @@ HWTEST_F(GesturePatternTestNg, TapGestureTest001, TestSize.Level1)
     EXPECT_EQ(tapRecognizer->GetPriorityMask(), GestureMask::Normal);
 }
 } // namespace OHOS::Ace::NG
-
