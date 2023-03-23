@@ -85,6 +85,8 @@ void XComponentPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE) {
+        renderContext->SetClipToFrame(true);
+        renderContext->SetClipToBounds(true);
         renderSurface_ = RenderSurface::Create();
         renderContextForSurface_ = RenderContext::Create();
         renderContextForSurface_->InitContext(false, id_ + "Surface");
