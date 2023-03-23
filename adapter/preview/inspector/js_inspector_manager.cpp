@@ -207,22 +207,27 @@ void JsInspectorManager::AssembleDefaultJSONTree(std::string& jsonStr)
 bool JsInspectorManager::OperateComponent(const std::string& jsCode)
 {
     auto root = JsonUtil::ParseJsonString(jsCode);
-    auto operateType = root->GetString("type", "");
     auto parentID = root->GetInt("parentID", -1);
     auto slot = root->GetInt("slot", -1);
-
+    LOGD("parentID = %{public}d, slot = %{public}d", parentID, slot);
     if (Container::IsCurrentUseNewPipeline()) {
-        LOGD("parentID:%{public}d slot:%{public}d", parentID, slot);
-        auto newUINode = GetNewFrameNodeWithJsCode(root);
-        CHECK_NULL_RETURN(newUINode, false);
+        auto newChild = GetNewFrameNodeWithJsCode(root);
+        CHECK_NULL_RETURN(newChild, false);
         NG::Inspector::HideAllMenus();
-        if (parentID <= 0) {
-            return OperateRootUINode(newUINode);
-        } else {
-            return OperateGeneralUINode(parentID, slot, newUINode);
+        if (!root->Contains("id")) {
+            LOGD("Failed to get the nodeId!");
+            auto parent = (parentID <= 0) ? GetRootUINode() : ElementRegister::GetInstance()->GetUINodeById(parentID);
+            return OperateGeneralUINode(parent, slot, newChild);
         }
-
+        auto nodeId = root->GetInt("id");
+        auto oldChild = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+        CHECK_NULL_RETURN(oldChild, false);
+        auto parent = oldChild->GetParent();
+        CHECK_NULL_RETURN(parent, false);
+        slot = parent->GetChildIndex(oldChild);
+        return OperateGeneralUINode(parent, slot, newChild);
     } else {
+        auto operateType = root->GetString("type", "");
         auto newComponent = GetNewComponentWithJsCode(root);
         if (parentID <= 0) {
             return OperateRootComponent(newComponent);
@@ -271,42 +276,12 @@ bool JsInspectorManager::OperateGeneralComponent(
     return false;
 }
 
-bool JsInspectorManager::OperateRootUINode(RefPtr<NG::UINode> newUINode)
+bool JsInspectorManager::OperateGeneralUINode(RefPtr<NG::UINode> parent, int32_t slot, RefPtr<NG::UINode> newChild)
 {
-    auto rootNode = GetRootUINode();
-    CHECK_NULL_RETURN(rootNode, false);
-    rootNode->RemoveChildAtIndex(0); // rootNode is Entry View Node which only has one child,and use the default slot 0
-    newUINode->MountToParent(rootNode, 0, false);
-    auto newFrameNode = AceType::DynamicCast<NG::FrameNode>(newUINode);
-    if (newFrameNode) {
-        newFrameNode->OnMountToParentDone();
-    }
-    newUINode->FlushUpdateAndMarkDirty();
-    rootNode->FlushUpdateAndMarkDirty();
-    return true;
-}
-
-bool JsInspectorManager::OperateGeneralUINode(int32_t parentID, int32_t slot, RefPtr<NG::UINode> newUINode)
-{
-    auto parent = ElementRegister::GetInstance()->GetUINodeById(parentID);
     CHECK_NULL_RETURN(parent, false);
-    auto parentGroupNode = AceType::DynamicCast<NG::GroupNode>(parent);
-    if (parentGroupNode) {
-        LOGD("parentNode is GroupNode");
-        parentGroupNode->DeleteChildFromGroup(slot);
-        parentGroupNode->AddChildToGroup(newUINode, slot);
-    } else {
-        parent->RemoveChildAtIndex(slot);
-        newUINode->MountToParent(parent, slot, false);
-    }
-    auto newFrameNode = AceType::DynamicCast<NG::FrameNode>(newUINode);
-    auto newSpanNode = AceType::DynamicCast<NG::SpanNode>(newUINode);
-    if (newFrameNode) {
-        newFrameNode->OnMountToParentDone();
-    } else if (newSpanNode) {
-        newSpanNode->RequestTextFlushDirty();
-    }
-    newUINode->FlushUpdateAndMarkDirty();
+    parent->FastPreviewUpdateChild(slot, newChild);
+    newChild->FastPreviewUpdateChildDone();
+    newChild->FlushUpdateAndMarkDirty();
     parent->FlushUpdateAndMarkDirty();
     return true;
 }

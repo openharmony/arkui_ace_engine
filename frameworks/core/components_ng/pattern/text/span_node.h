@@ -141,6 +141,11 @@ public:
     }
 
     void RequestTextFlushDirty();
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChildDone() override
+    {
+        RequestTextFlushDirty();
+    }
 
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
