@@ -267,6 +267,8 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
+    OffsetF GetPaintRectOffsetToPage() const;
+
     void AdjustGridOffset();
 
     void SetActive(bool active) override;

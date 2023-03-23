@@ -372,7 +372,8 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
+    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
+        DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
 
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
@@ -1525,6 +1526,11 @@ void PipelineContext::Finish(bool /*autoFinish*/) const
     } else {
         LOGE("fail to finish current context due to handler is nullptr");
     }
+}
+
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+{
+    taskScheduler_.AddAfterLayoutTask(std::move(task));
 }
 
 } // namespace OHOS::Ace::NG

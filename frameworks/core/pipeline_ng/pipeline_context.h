@@ -180,6 +180,8 @@ public:
 
     void AddPredictTask(PredictTask&& task);
 
+    void AddAfterLayoutTask(std::function<void()>&& task);
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
