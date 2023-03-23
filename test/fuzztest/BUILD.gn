@@ -20,6 +20,9 @@ group("fuzztest") {
     "arkressched_fuzzer:ArkResschedFuzzTest",
 
     #"imageApi_fuzzer:ImageApiFuzzTest",
+    "arkuiformrendergroup_fuzzer:ArkuiFormRenderGroupFuzzTest",
+    "arkuiformrenderimpl_fuzzer:ArkuiFormRenderImplFuzzTest",
+    "arkuiformrenderproxy_fuzzer:ArkuiFormRenderProxyFuzzTest",
     "imageloader_fuzzer:ImageLoaderFuzzTest",
     "manifest_fuzzer:ManifestFuzzTest",
     "res2_fuzzer:Res2FuzzTest",

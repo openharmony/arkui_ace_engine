@@ -103,7 +103,7 @@ public:
         return calcValue_;
     }
 
-    Dimension GetDimension()
+    Dimension GetDimension() const
     {
         if (!IsValid()) {
             return Dimension();

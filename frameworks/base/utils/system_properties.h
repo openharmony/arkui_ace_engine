@@ -326,6 +326,11 @@ public:
         return astcPsnr_;
     }
 
+    static void SetExtSurfaceEnabled(bool extSurfaceEnabled)
+    {
+        extSurfaceEnabled_ = extSurfaceEnabled;
+    }
+
     static bool GetExtSurfaceEnabled()
     {
         return extSurfaceEnabled_;

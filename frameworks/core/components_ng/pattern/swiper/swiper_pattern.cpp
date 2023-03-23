@@ -77,9 +77,9 @@ void SwiperPattern::OnIndexChange() const
         return;
     }
 
-    auto currentIndex = (currentIndex_ + totalCount) % totalCount;
+    auto oldIndex = (oldIndex_ + totalCount) % totalCount;
     auto targetIndex = (CurrentIndex() + totalCount) % totalCount;
-    if (currentIndex != targetIndex) {
+    if (oldIndex != targetIndex) {
         auto swiperEventHub = GetEventHub<SwiperEventHub>();
         CHECK_NULL_VOID(swiperEventHub);
         swiperEventHub->FireChangeEvent(targetIndex);
@@ -97,9 +97,9 @@ void SwiperPattern::OnModifyDone()
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
-    OnIndexChange();
-
+    oldIndex_ = currentIndex_;
     InitSwiperIndicator();
+
     auto childrenSize = TotalCount();
     if (layoutProperty->GetIndex().has_value() && CurrentIndex() >= 0) {
         currentIndex_ = CurrentIndex();
@@ -234,6 +234,12 @@ WeakPtr<FocusHub> SwiperPattern::GetNextFocusNode(FocusStep step, const WeakPtr<
 
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (isInit_) {
+        isInit_ = false;
+    } else {
+        OnIndexChange();
+    }
+
     auto curChild = dirty->GetOrCreateChildByIndex(currentIndex_);
     CHECK_NULL_RETURN(curChild, false);
     auto curChildFrame = curChild->GetHostNode();
@@ -250,6 +256,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(swiperLayoutAlgorithm, false);
     preItemRange_ = swiperLayoutAlgorithm->GetItemRange();
     currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
+    oldIndex_ = currentIndex_;
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
@@ -326,6 +333,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     FireChangeEvent();
+    oldIndex_ = currentIndex_;
     CalculateCacheRange();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -357,6 +365,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::ShowNext()
 {
+    indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
@@ -377,6 +386,7 @@ void SwiperPattern::ShowNext()
 
 void SwiperPattern::ShowPrevious()
 {
+    indicatorDoingAnimation_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
@@ -733,14 +743,26 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
-    turnPageRate_ = currentOffset_ / MainSize();
+    float contentSize = MainSize() - GetBorderAndPaddingWidth();
+    turnPageRate_ = currentOffset_ / contentSize;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG) {
+    if (host->GetLastChild()->GetTag() == V2::SWIPER_INDICATOR_ETS_TAG && !indicatorDoingAnimation_) {
         auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
         indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+float SwiperPattern::GetBorderAndPaddingWidth()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, 0);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    return GetDirection() == Axis::HORIZONTAL ? padding.left.value_or(0.0f) + padding.right.value_or(0.0f)
+                                              : padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
 }
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -757,6 +779,7 @@ void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void SwiperPattern::HandleTouchDown()
 {
+    indicatorDoingAnimation_ = false;
     // Stop translate animation when touch down.
     if (controller_ && controller_->IsRunning()) {
         controller_->Pause();
@@ -960,6 +983,7 @@ void SwiperPattern::PlayTranslateAnimation(float startPos, float endPos, int32_t
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateIndexWithoutMeasure(nextIndex);
             swiper->FireChangeEvent();
+            swiper->oldIndex_ = nextIndex;
             swiper->CalculateCacheRange();
         }
         if (restartAutoPlay) {

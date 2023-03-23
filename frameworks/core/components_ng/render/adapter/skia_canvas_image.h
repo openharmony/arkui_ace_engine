@@ -136,7 +136,7 @@ public:
 
 private:
     void ClipRRect(RSCanvas& canvas, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
-    bool DrawCompressedImage(
+    bool DrawWithRecordingCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
     // TODO: should not deps on flutter.
 #ifndef NG_BUILD

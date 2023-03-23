@@ -33,7 +33,9 @@ public:
     static RefPtr<CounterNode> GetOrCreateCounterNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    void AddChildToGroup(const RefPtr<UINode>& child) override;
+    void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
+    
+    void DeleteChildFromGroup(int32_t slot = DEFAULT_NODE_SLOT) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(CounterNode);

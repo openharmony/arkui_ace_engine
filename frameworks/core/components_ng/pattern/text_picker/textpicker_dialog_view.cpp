@@ -82,9 +82,7 @@ RefPtr<FrameNode> TextPickerDialogView::Show(const DialogProperties& dialogPrope
     }
     SetRange(textPickerPattern, getRangeVector);
     SetSelected(textPickerPattern, selected);
-    if (height.Value() > 0) {
-        SetDefaultPickerItemHeight(height);
-    }
+    SetDefaultPickerItemHeight(height);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(textPickerNode, std::move(changeEvent));
     auto contentRow = CreateButtonNode(textPickerNode, dialogEvent, std::move(dialogCancelEvent));

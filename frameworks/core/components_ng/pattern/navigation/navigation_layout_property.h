@@ -26,6 +26,8 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 200.0_vp;
+
 class ACE_EXPORT NavigationLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(NavigationLayoutProperty, LayoutProperty);
 
@@ -62,6 +64,26 @@ public:
         ResetNoPixMap();
         ResetImageSource();
         ResetPixelMap();
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
+    {
+        LayoutProperty::ToJsonValue(json);
+        json->Put("navBarWidth", GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).ToString().c_str());
+        json->Put("navBarPosition", GetNavBarPosition().value_or(NavBarPosition::START) ==
+            NavBarPosition::START ? "NavBarPosition.Start" : "NavBarPosition.End");
+        static const std::array<std::string, 3> NAVIGATION_MODE_TO_STRING = {
+            "NavigationMode.STACK",
+            "NavigationMode.SPLIT",
+            "NavigationMode.AUTO",
+        };
+        json->Put("mode",
+            NAVIGATION_MODE_TO_STRING.at(static_cast<int32_t>(GetNavigationMode().value_or(NavigationMode::AUTO)))
+                .c_str());
+        json->Put("hideNavBar", GetHideNavBarValue(false));
+        if (HasImageSource()) {
+            json->Put("backButtonIcon", GetImageSourceValue().GetSrc().c_str());
+        }
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NavigationMode, NavigationMode, PROPERTY_UPDATE_MEASURE);

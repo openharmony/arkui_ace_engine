@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -373,6 +373,11 @@ template("ace_core_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
+    if (current_os == "mingw" || current_os == "mac") {
+      sources -= [ "common/watch_dog.cpp" ]
+      sources += [ "common/watch_dog_mingw.cpp" ]
+    }
+
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [
         "animation/native_curve_helper.cpp",
@@ -458,6 +463,11 @@ template("ace_core_source_set") {
       sources += [ "common/plugin_manager.cpp" ]
       deps += [ "//commonlibrary/c_utils/base:utils" ]
     }
+
+    if (defined(config.preview_support) && config.preview_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/preview_mock:ace_core_components_preview_mock_pattern_ng_$platform" ]
+    }
+
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
     include_dirs += uicast_configs.uicast_root_include
 
@@ -475,6 +485,21 @@ template("ace_core_source_set") {
     }
 
     deps += uicast_configs.uicast_root_deps
+
+    if ((current_os == "mingw" || current_os == "mac" ||
+         current_os == "linux") && defined(config.enable_rosen_backend) &&
+        config.enable_rosen_backend) {
+      sources -= [
+        "common/flutter/flutter_asset_manager.cpp",
+        "common/flutter/flutter_window.cpp",
+      ]
+      sources += [
+        # rs impl
+        "common/rosen/rosen_asset_manager.cpp",
+        "common/rosen/rosen_window.cpp",
+      ]
+      deps += [ "//third_party/libuv:uv" ]
+    }
 
     cflags_cc = []
     cflags_cc += invoker.cflags_cc

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,13 @@
 #ifndef FOUNDATION_ACE_ADAPTER_PREVIEW_INSPECTOR_JS_INSPECTOR_MANAGER_H
 #define FOUNDATION_ACE_ADAPTER_PREVIEW_INSPECTOR_JS_INSPECTOR_MANAGER_H
 
+#include <cstdint>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
+#include "core/components_ng/base/group_node.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_v2/inspector/inspector_composed_element.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
@@ -42,11 +45,15 @@ private:
     void AssembleDefaultJSONTree(std::string& jsonStr);
 
     bool OperateComponent(const std::string& attrsJson);
+    bool OperateRootComponent(RefPtr<Component> newComponent);
     bool OperateGeneralComponent(
         int32_t parentID, int32_t slot, std::string& operateType, RefPtr<Component> newComponent);
+    bool OperateGeneralUINode(RefPtr<NG::UINode> parent, int32_t slot, RefPtr<NG::UINode> newChild);
     RefPtr<Component> GetNewComponentWithJsCode(const std::unique_ptr<JsonValue>& root);
+    RefPtr<NG::UINode> GetNewFrameNodeWithJsCode(const std::unique_ptr<JsonValue>& root);
     RefPtr<V2::InspectorComposedElement> GetInspectorElementById(NodeId nodeId);
     const WeakPtr<Element>& GetRootElement();
+    const RefPtr<NG::UINode> GetRootUINode();
     void GetAttrsAndStyles(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
     void GetAttrsAndStylesV2(std::unique_ptr<JsonValue>& jsonNode, const RefPtr<AccessibilityNode>& node);
     std::string UpdateNodeRectStrInfo(const RefPtr<AccessibilityNode> node);

@@ -57,7 +57,7 @@ void GridContainerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) 
     auto info = GetContainerInfoValue();
     const std::string sizeTypeStrs[] { "SizeType.Auto", "SizeType.XS", "SizeType.SM", "SizeType.MD", "SizeType.LG",
         "SizeType.XL" };
-    auto constructor = JsonUtil::Create(false);
+    auto constructor = JsonUtil::Create(true);
     constructor->Put("columns", std::to_string(info.GetColumns()).c_str());
     constructor->Put("sizeType", sizeTypeStrs[static_cast<int32_t>(info.GetSizeType())].c_str());
     constructor->Put("gutter", info.GetGutterWidth().ToString().c_str());

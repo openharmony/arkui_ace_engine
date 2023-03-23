@@ -95,7 +95,7 @@ void ViewAbstract::ClearWidthOrHeight(bool isWidth)
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->ClearUserDefinedIdealSize(isWidth);
+    layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
 }
 
 void ViewAbstract::SetMinWidth(const CalcLength& width)
@@ -847,7 +847,10 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, cons
     LOGD("ViewAbstract::BindMenuWithCustomNode");
     CHECK_NULL_VOID(customNode);
     CHECK_NULL_VOID(targetNode);
-
+#ifdef PREVIEW
+    // unable to use the subWindow in the Previewer.
+    isContextMenu = false;
+#endif
     auto type = isContextMenu ? MenuType::CONTEXT_MENU : MenuType::MENU;
     auto menuNode = MenuView::Create(customNode, targetNode->GetId(), type);
     if (isContextMenu) {
@@ -944,6 +947,16 @@ void ViewAbstract::SetInspectorId(const std::string& inspectorId)
     if (uiNode) {
         uiNode->UpdateInspectorId(inspectorId);
     }
+}
+
+void ViewAbstract::SetDebugLine(const std::string& line)
+{
+#ifdef PREVIEW
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->SetDebugLine(line);
+    }
+#endif
 }
 
 void ViewAbstract::SetGrid(std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type)

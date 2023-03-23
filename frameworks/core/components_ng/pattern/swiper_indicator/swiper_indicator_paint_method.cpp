@@ -27,12 +27,13 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr float HALF = 0.5f;
+constexpr float DOUBLE = 2.0f;
 // for indicator
 constexpr Dimension INDICATOR_ITEM_SPACE = 8.0_vp;
 constexpr Dimension INDICATOR_PADDING_DEFAULT = 13.0_vp;
 constexpr Dimension INDICATOR_PADDING_HOVER = 12.0_vp;
 constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
-constexpr float INDICATOR_ZOOM_IN_SCALE_DEFAULT = 1.0f;
 
 constexpr float BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY = 0.4f;
 constexpr float LONG_POINT_LEFT_CENTER_BEZIER_CURVE_VELOCITY = 0.2f;
@@ -59,41 +60,148 @@ void SwiperIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrappe
     swiperIndicatorModifier_->SetAxis(axis_);
     swiperIndicatorModifier_->SetUnselectedColor(paintProperty->GetColorValue(swiperTheme->GetColor()));
     swiperIndicatorModifier_->SetSelectedColor(paintProperty->GetSelectedColorValue(swiperTheme->GetSelectedColor()));
-    swiperIndicatorModifier_->SetHoverPoint(hoverPoint_);
     swiperIndicatorModifier_->SetIndicatorMask(paintProperty->GetIndicatorMaskValue(false));
     swiperIndicatorModifier_->SetOffset(geometryNode->GetContentOffset());
-    // Update center coordinates
-    CalculatePointRadius(paintWrapper);
-    swiperIndicatorModifier_->UpdatePointRadius(pointRadius_);
-    swiperIndicatorModifier_->UpdateHoverPointRadius(pointRadius_, hoverPointRadius_);
-    CalculatePointCenterX(paintWrapper);
-    swiperIndicatorModifier_->UpdateVectorBlackPointCenterX(vectorBlackPointCenterX_);
-    swiperIndicatorModifier_->UpdateLongPointLeftCenterX(longPointLeftCenterX_, turnPageRate_ >= 1.0f);
-    swiperIndicatorModifier_->UpdateLongPointRightCenterX(longPointRightCenterX_, turnPageRate_ <= -1.0f);
-    CalculatePointCenterY(paintWrapper);
-    swiperIndicatorModifier_->UpdateCenterY(centerY_);
+    SizeF contentSize = geometryNode->GetFrameSize();
+    centerY_ = (axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width()) * HALF;
+    swiperIndicatorModifier_->SetCenterY(centerY_);
+
+    if (isPressed_) {
+        PaintPressIndicator(paintWrapper);
+        swiperIndicatorModifier_->SetIsPressed(true);
+    } else if (isHover_) {
+        PaintHoverIndicator(paintWrapper);
+        swiperIndicatorModifier_->SetIsHover(true);
+    } else {
+        PaintNormalIndicator(paintWrapper);
+        swiperIndicatorModifier_->SetIsHover(false);
+        swiperIndicatorModifier_->SetIsPressed(false);
+    }
 }
 
-void SwiperIndicatorPaintMethod::CalculatePointCenterX(const PaintWrapper* paintWrapper)
+void SwiperIndicatorPaintMethod::PaintNormalIndicator(const PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(paintWrapper);
-    auto indicatorPadding = static_cast<float>(
-        ((isHover_ || isPressed_) ? INDICATOR_PADDING_HOVER : INDICATOR_PADDING_DEFAULT).ConvertToPx());
-    float diameter = pointRadius_ * 2;
+    const auto& geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto paintProperty = DynamicCast<SwiperIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    SizeF frameSize = geometryNode->GetFrameSize();
+
+    float diameter = static_cast<float>(paintProperty->GetSizeValue(swiperTheme->GetSize()).ConvertToPx());
+    float radius = diameter * HALF;
+    CalculateNormalMargin(radius, frameSize);
+    CalculatePointCenterX(radius, normalMargin_.GetX(), static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()),
+        static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+
+    if (swiperIndicatorModifier_->GetIsHover()) {
+        swiperIndicatorModifier_->UpdateHoverToNormalPaintProperty(
+            normalMargin_, radius, vectorBlackPointCenterX_, longPointCenterX_);
+    } else if (swiperIndicatorModifier_->GetIsPressed()) {
+        swiperIndicatorModifier_->UpdatePressToNormalPaintProperty(
+            normalMargin_, radius, vectorBlackPointCenterX_, longPointCenterX_);
+    } else {
+        swiperIndicatorModifier_->UpdateNormalPaintProperty(
+            normalMargin_, radius, vectorBlackPointCenterX_, longPointCenterX_);
+    }
+}
+
+void SwiperIndicatorPaintMethod::PaintHoverIndicator(const PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<SwiperIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    float normalDiameter = static_cast<float>(paintProperty->GetSizeValue(swiperTheme->GetSize()).ConvertToPx());
+    float radius = normalDiameter * HALF * INDICATOR_ZOOM_IN_SCALE;
+    CalculatePointCenterX(radius, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+        static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+
+    if (swiperIndicatorModifier_->GetIsPressed()) {
+        swiperIndicatorModifier_->SetIsPressed(false);
+        swiperIndicatorModifier_->UpdateHoverAndPressConversionPaintProperty();
+    } else if (swiperIndicatorModifier_->GetIsHover()) {
+        swiperIndicatorModifier_->UpdateHoverPaintProperty(radius, vectorBlackPointCenterX_, longPointCenterX_);
+    } else {
+        swiperIndicatorModifier_->UpdateNormalToHoverPaintProperty(radius, vectorBlackPointCenterX_, longPointCenterX_);
+    }
+
+    CalculateHoverIndex(radius);
+    if (swiperIndicatorModifier_->GetNormalToHoverIndex() != hoverIndex_) {
+        swiperIndicatorModifier_->SetHoverToNormalIndex(swiperIndicatorModifier_->GetNormalToHoverIndex());
+        swiperIndicatorModifier_->UpdateHoverToNormalPointDilateRatio();
+        swiperIndicatorModifier_->SetNormalToHoverIndex(hoverIndex_);
+        swiperIndicatorModifier_->UpdateNormalToHoverPointDilateRatio();
+    }
+    if (mouseClickIndex_ && mouseClickIndex_ != currentIndex_) {
+        CalculatePointCenterX(radius, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+            static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), mouseClickIndex_.value());
+        swiperIndicatorModifier_->UpdateAllPointCenterXAnimation(
+            mouseClickIndex_ > currentIndex_, vectorBlackPointCenterX_, longPointCenterX_);
+        longPointIsHover_ = true;
+    }
+    if (swiperIndicatorModifier_->GetLongPointIsHover() != longPointIsHover_) {
+        swiperIndicatorModifier_->SetLongPointIsHover(longPointIsHover_);
+        swiperIndicatorModifier_->UpdateLongPointDilateRatio();
+    }
+}
+
+void SwiperIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<SwiperIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    auto swiperTheme = GetSwiperIndicatorTheme();
+    CHECK_NULL_VOID(swiperTheme);
+    float normalDiameter = static_cast<float>(paintProperty->GetSizeValue(swiperTheme->GetSize()).ConvertToPx());
+    float radius = normalDiameter * HALF * INDICATOR_ZOOM_IN_SCALE;
+    CalculatePointCenterX(radius, 0, static_cast<float>(INDICATOR_PADDING_HOVER.ConvertToPx()),
+        static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()), currentIndex_);
+    if (swiperIndicatorModifier_->GetIsPressed()) {
+        swiperIndicatorModifier_->UpdatePressPaintProperty(radius, vectorBlackPointCenterX_, longPointCenterX_);
+    } else if (swiperIndicatorModifier_->GetIsHover()) {
+        swiperIndicatorModifier_->SetIsPressed(true);
+        swiperIndicatorModifier_->UpdateHoverAndPressConversionPaintProperty();
+    } else {
+        swiperIndicatorModifier_->UpdateNormalToPressPaintProperty(radius, vectorBlackPointCenterX_, longPointCenterX_);
+    }
+}
+
+void SwiperIndicatorPaintMethod::CalculateNormalMargin(float radius, const SizeF& frameSize)
+{
+    float diameter = radius * DOUBLE;
+    float allPointDiameterSum = diameter * static_cast<float>(itemCount_ + 1);
+    auto allPointSpaceSum = static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx() * (itemCount_ - 1));
+    auto indicatorPadding = static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx());
+    float contentWidth = indicatorPadding + allPointDiameterSum + allPointSpaceSum + indicatorPadding;
+    float contentHeight = indicatorPadding + diameter + indicatorPadding;
+    float marginX = ((axis_ == Axis::HORIZONTAL ? frameSize.Width() : frameSize.Height()) - contentWidth) * HALF;
+    float marginY = ((axis_ == Axis::HORIZONTAL ? frameSize.Height() : frameSize.Width()) - contentHeight) * HALF;
+    normalMargin_.SetX(marginX);
+    normalMargin_.SetY(marginY);
+}
+
+void SwiperIndicatorPaintMethod::CalculatePointCenterX(
+    float radius, float margin, float padding, float space, int32_t index)
+{
+    float diameter = radius * DOUBLE;
     // Calculate the data required for the current pages
     LinearVector<float> startVectorBlackPointCenterX(itemCount_);
     float startLongPointLeftCenterX = 0.0f;
     float startLongPointRightCenterX = 0.0f;
-    float startCenterX = indicatorPadding + pointRadius_;
-    int32_t startCurrentIndex = currentIndex_;
+    float startCenterX = margin + padding + radius;
+    int32_t startCurrentIndex = index;
     // Calculate the data required for subsequent pages
     LinearVector<float> endVectorBlackPointCenterX(itemCount_);
     float endLongPointLeftCenterX = 0.0f;
     float endLongPointRightCenterX = 0.0f;
-    float endCenterX = indicatorPadding + pointRadius_;
+    float endCenterX = margin + padding + radius;
     int32_t endCurrentIndex = turnPageRate_ == 0.0f || turnPageRate_ <= -1.0f || turnPageRate_ >= 1.0f
-                                  ? endCurrentIndex = currentIndex_
-                                  : (turnPageRate_ < 0.0f ? currentIndex_ + 1 : currentIndex_ - 1);
+                                  ? endCurrentIndex = index
+                                  : (turnPageRate_ < 0.0f ? index + 1 : index - 1);
     if (endCurrentIndex == -1) {
         endCurrentIndex = itemCount_ - 1;
     } else if (endCurrentIndex == itemCount_) {
@@ -103,21 +211,21 @@ void SwiperIndicatorPaintMethod::CalculatePointCenterX(const PaintWrapper* paint
     for (int32_t i = 0; i < itemCount_; ++i) {
         if (i != startCurrentIndex) {
             startVectorBlackPointCenterX[i] = startCenterX;
-            startCenterX += static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) + diameter;
+            startCenterX += space + diameter;
         } else {
-            startVectorBlackPointCenterX[i] = startCenterX + pointRadius_;
+            startVectorBlackPointCenterX[i] = startCenterX + radius;
             startLongPointLeftCenterX = startCenterX;
             startLongPointRightCenterX = startCenterX + diameter;
-            startCenterX += static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) + diameter * 2;
+            startCenterX += space + diameter * DOUBLE;
         }
         if (i != endCurrentIndex) {
             endVectorBlackPointCenterX[i] = endCenterX;
-            endCenterX += static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) + diameter;
+            endCenterX += space + diameter;
         } else {
-            endVectorBlackPointCenterX[i] = endCenterX + pointRadius_;
+            endVectorBlackPointCenterX[i] = endCenterX + radius;
             endLongPointLeftCenterX = endCenterX;
             endLongPointRightCenterX = endCenterX + diameter;
-            endCenterX += static_cast<float>(INDICATOR_ITEM_SPACE.ConvertToPx()) + diameter * 2;
+            endCenterX += space + diameter * DOUBLE;
         }
     }
     float blackPointCenterMoveRate = CubicCurve(BLACK_POINT_CENTER_BEZIER_CURVE_VELOCITY, CENTER_BEZIER_CURVE_MASS,
@@ -137,35 +245,41 @@ void SwiperIndicatorPaintMethod::CalculatePointCenterX(const PaintWrapper* paint
             startVectorBlackPointCenterX[i] +
             (endVectorBlackPointCenterX[i] - startVectorBlackPointCenterX[i]) * blackPointCenterMoveRate;
     }
-    longPointLeftCenterX_ =
+    longPointCenterX_.first =
         startLongPointLeftCenterX + (endLongPointLeftCenterX - startLongPointLeftCenterX) * longPointLeftCenterMoveRate;
-    longPointRightCenterX_ = startLongPointRightCenterX +
-                             (endLongPointRightCenterX - startLongPointRightCenterX) * longPointRightCenterMoveRate;
+    longPointCenterX_.second = startLongPointRightCenterX +
+                               (endLongPointRightCenterX - startLongPointRightCenterX) * longPointRightCenterMoveRate;
 }
 
-void SwiperIndicatorPaintMethod::CalculatePointCenterY(const PaintWrapper* paintWrapper)
+void SwiperIndicatorPaintMethod::CalculateHoverIndex(float radius)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    const auto& geometryNode = paintWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    SizeF contentSize = geometryNode->GetFrameSize();
-    auto indicatorSize = axis_ == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width();
-    centerY_ = indicatorSize / 2;
+    if (!isHover_) {
+        hoverIndex_ = std::nullopt;
+        longPointIsHover_ = false;
+        return;
+    }
+    for (size_t i = 0; i < vectorBlackPointCenterX_.size(); ++i) {
+        OffsetF center = { vectorBlackPointCenterX_[i], centerY_ };
+        if (isHoverPoint(hoverPoint_, center, center, radius)) {
+            hoverIndex_ = i;
+            break;
+        }
+    }
+
+    OffsetF leftCenter = { longPointCenterX_.first, centerY_ };
+    OffsetF rightCenter = { longPointCenterX_.second, centerY_ };
+    longPointIsHover_ = isHoverPoint(hoverPoint_, leftCenter, rightCenter, radius);
 }
 
-void SwiperIndicatorPaintMethod::CalculatePointRadius(const PaintWrapper* paintWrapper)
+bool SwiperIndicatorPaintMethod::isHoverPoint(
+    const PointF& hoverPoint, const OffsetF& leftCenter, const OffsetF& rightCenter, float radius)
 {
-    CHECK_NULL_VOID(paintWrapper);
-    auto paintProperty = DynamicCast<SwiperIndicatorPaintProperty>(paintWrapper->GetPaintProperty());
-    CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
-    CHECK_NULL_VOID(swiperTheme);
-    float zoomInScale = (isHover_ || isPressed_) ? INDICATOR_ZOOM_IN_SCALE : INDICATOR_ZOOM_IN_SCALE_DEFAULT;
-    float diameter = static_cast<float>(paintProperty->GetSizeValue(swiperTheme->GetSize()).ConvertToPx());
-    pointRadius_ = diameter / 2 * zoomInScale;
-    hoverPointRadius_ = pointRadius_ * INDICATOR_ZOOM_IN_SCALE;
+    float tempLeftCenterX = axis_ == Axis::HORIZONTAL ? leftCenter.GetX() : leftCenter.GetY();
+    float tempLeftCenterY = axis_ == Axis::HORIZONTAL ? leftCenter.GetY() : leftCenter.GetX();
+    float tempRightCenterX = axis_ == Axis::HORIZONTAL ? rightCenter.GetX() : rightCenter.GetY();
+    float tempRightCenterY = axis_ == Axis::HORIZONTAL ? rightCenter.GetY() : rightCenter.GetX();
+    return hoverPoint.GetX() >= (tempLeftCenterX - radius) && hoverPoint.GetX() <= (tempRightCenterX + radius) &&
+           hoverPoint.GetY() >= (tempLeftCenterY - radius) && hoverPoint.GetY() <= (tempRightCenterY + radius);
 }
 
 } // namespace OHOS::Ace::NG

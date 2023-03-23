@@ -315,6 +315,12 @@ public:
         return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasAnchor();
     }
 
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChildDone() override
+    {
+        OnMountToParentDone();
+    }
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     bool IsNeedRequestParentMeasure() const;

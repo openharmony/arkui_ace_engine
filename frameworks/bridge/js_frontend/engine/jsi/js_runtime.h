@@ -57,6 +57,7 @@ public:
     // Get the global object.
     virtual shared_ptr<JsValue> GetGlobal() = 0;
     virtual void RunGC() = 0;
+    virtual void RunFullGC() {}
 
     virtual shared_ptr<JsValue> NewNumber(double d) = 0;
     virtual shared_ptr<JsValue> NewInt32(int32_t value) = 0;
@@ -75,6 +76,8 @@ public:
     virtual bool HasPendingException() = 0;
     virtual void ExecutePendingJob() = 0;
     virtual void DumpHeapSnapshot(bool isPrivate) {}
+    virtual void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 
     // Set c++ data to js environment.
     void SetEmbedderData(void *data)

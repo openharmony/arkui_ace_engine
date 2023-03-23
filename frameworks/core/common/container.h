@@ -28,6 +28,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/frontend.h"
+#include "core/common/page_url_checker.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/settings.h"
 #include "core/common/window.h"
@@ -258,6 +259,26 @@ public:
         return nullptr;
     }
 
+    void SetPageUrlChecker(const RefPtr<PageUrlChecker>& pageUrlChecker)
+    {
+        pageUrlChecker_ = pageUrlChecker;
+    }
+
+    const RefPtr<PageUrlChecker>& GetPageUrlChecker()
+    {
+        return pageUrlChecker_;
+    }
+
+    bool IsFRSCardContainer() const
+    {
+        return isFRSCardContainer_;
+    }
+
+    void SetIsFRSCardContainer(bool isFRSCardContainer)
+    {
+        isFRSCardContainer_ = isFRSCardContainer;
+    }
+
 protected:
     std::chrono::time_point<std::chrono::high_resolution_clock> createTime_;
     bool firstUpdateData_ = true;
@@ -265,6 +286,7 @@ protected:
     bool useNewPipeline_ = false;
     std::mutex stateMutex_;
     Frontend::State state_ = Frontend::State::UNDEFINED;
+    bool isFRSCardContainer_ = false;
 
 private:
     std::string moduleName_;
@@ -272,6 +294,7 @@ private:
     std::string filesDataPath_;
     bool usePartialUpdate_ = false;
     Settings settings_;
+    RefPtr<PageUrlChecker> pageUrlChecker_;
     ACE_DISALLOW_COPY_AND_MOVE(Container);
 };
 

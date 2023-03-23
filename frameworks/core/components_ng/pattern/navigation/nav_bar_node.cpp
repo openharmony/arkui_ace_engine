@@ -42,7 +42,7 @@ RefPtr<NavBarNode> NavBarNode::GetOrCreateNavBarNode(
     return navBarNode;
 }
 
-void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_VOID(pattern);
@@ -133,11 +133,13 @@ std::string NavBarNode::GetBarItemsString(bool isMenu) const
 
 void NavBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    FrameNode::ToJsonValue(json);
     json->Put("title", GetTitleString().c_str());
     json->Put("subtitle", GetSubtitleString().c_str());
     json->Put("menus", GetBarItemsString(true).c_str());
     json->Put("toolBar", GetBarItemsString(false).c_str());
+    auto layoutProperty = GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->ToJsonValue(json);
 }
 
 } // namespace OHOS::Ace::NG

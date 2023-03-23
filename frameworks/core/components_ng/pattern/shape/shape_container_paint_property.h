@@ -71,6 +71,21 @@ public:
             viewBoxJson->Put("height", propShapeViewBox_.value().Height().ToString().c_str());
         }
         json->Put("viewPort", viewBoxJson);
+
+        auto meshJson = JsonUtil::Create(true);
+        if (propImageMesh_.has_value()) {
+            auto jsonValueArray = JsonUtil::CreateArray(true);
+            std::vector<double> array = propImageMesh_->GetMesh();
+            for (size_t i = 0; i < array.size(); i++) {
+                auto index = std::to_string(i);
+                auto value = std::to_string(array[i]);
+                jsonValueArray->Put(index.c_str(), value.c_str());
+            }
+            meshJson->Put("value", jsonValueArray);
+            meshJson->Put("row", propImageMesh_->GetRow());
+            meshJson->Put("column", propImageMesh_->GetColumn());
+        }
+        json->Put("mesh", meshJson);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ImageMesh, ImageMesh, PROPERTY_UPDATE_RENDER);

@@ -36,6 +36,7 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
@@ -121,6 +122,11 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<TextFieldPaintProperty>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<TextFieldAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
@@ -473,6 +479,7 @@ public:
     void ProcessInnerPadding();
     void OnCursorMoveDone();
     bool IsDisabled();
+    bool AllowCopy();
 
     bool GetIsMousePressed() const
     {
@@ -502,6 +509,7 @@ public:
     std::string GetInputFilter() const;
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void ParseAppendValue(KeyCode keycode, std::string& appendElement);
 
 private:
     void HandleBlurEvent();
@@ -556,6 +564,7 @@ private:
     void HandleOnCut();
 
     void FireEventHubOnChange(const std::string& text);
+    void FireOnChangeIfNeeded();
 
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
@@ -587,8 +596,7 @@ private:
     bool OffsetInContentRegion(const Offset& offset);
     void SetDisabledStyle();
     void ResetBackgroundColor();
-    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-        int32_t duration, const RefPtr<Curve>& curve);
+    void AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange = false);
 
     void ProcessPasswordIcon();
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
@@ -684,6 +692,9 @@ private:
     bool imeAttached_ = false;
 #endif
     int32_t instanceId_ = -1;
+#if defined(PREVIEW)
+    std::vector<std::wstring> clipRecords_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 

@@ -45,11 +45,13 @@
 #include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/utils.h"
+#include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "base/geometry/rect.h"
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
+#include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -65,6 +67,7 @@ const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
+const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 
 } // namespace
 
@@ -113,6 +116,12 @@ extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateUIContent(void* context, void* 
 {
     LOGI("Ace lib loaded, CreateUIContent.");
     return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime);
+}
+
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateFormContent(void* context, void* runtime, bool isCard)
+{
+    LOGI("Ace lib loaded, CreateFormUIContent.");
+    return new UIContentImpl(reinterpret_cast<OHOS::AbilityRuntime::Context*>(context), runtime, isCard);
 }
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateSubWindowUIContent(void* ability)
@@ -229,6 +238,26 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
     LOGI("Create UIContentImpl successfully.");
 }
 
+UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
+                             void* runtime, bool isCard) : runtime_(runtime), isFormRender_(isCard)
+{
+    CHECK_NULL_VOID(context);
+    bundleName_ = context->GetBundleName();
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    moduleName_ = hapModuleInfo->name;
+    isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
+    const auto& obj = context->GetBindingObject();
+    CHECK_NULL_VOID(obj);
+    auto ref = obj->Get<NativeReference>();
+    CHECK_NULL_VOID(ref);
+    auto object = AbilityRuntime::ConvertNativeValueTo<NativeObject>(ref->Get());
+    CHECK_NULL_VOID(object);
+    auto weak = static_cast<std::weak_ptr<AbilityRuntime::Context>*>(object->GetNativePointer());
+    CHECK_NULL_VOID(weak);
+    context_ = *weak;
+    LOGI("Create form UIContentImpl successfully.");
+}
+
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
     CHECK_NULL_VOID(ability);
@@ -267,6 +296,13 @@ void UIContentImpl::Initialize(OHOS::Rosen::Window* window, const std::string& u
     if (window) {
         CommonInitialize(window, url, storage);
     }
+
+    // ArkTSCard need no window : 梳理所有需要window和不需要window的场景
+    if (isFormRender_ && !window) {
+        LOGI("CommonInitializeForm url = %{public}s", url.c_str());
+        CommonInitializeForm(window, url, storage);
+    }
+
     LOGI("Initialize startUrl = %{public}s", startUrl_.c_str());
     // run page.
     Platform::AceContainer::RunPage(
@@ -292,6 +328,462 @@ std::string UIContentImpl::GetContentInfo() const
     LOGI("UIContent GetContentInfo");
     return Platform::AceContainer::GetContentInfo(instanceId_);
 }
+
+// ArkTSCard start
+void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
+                                         const std::string& contentInfo, NativeValue* storage)
+{
+    LOGI("Initialize CommonInitializeForm start.");
+    ACE_FUNCTION_TRACE();
+    window_ = window;
+    startUrl_ = contentInfo;
+
+    if (window_) {
+        if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_TOAST_DIALOG_PREFIX)) {
+            InitializeSubWindow(window_, true);
+            return;
+        }
+        if (StringUtils::StartWith(window->GetWindowName(), SUBWINDOW_PREFIX)) {
+            InitializeSubWindow(window_);
+            return;
+        }
+    }
+
+    auto context = context_.lock();
+    static std::once_flag onceFlag;
+    if (!isFormRender_) {
+        std::call_once(onceFlag, [&context]() {
+            LOGI("Initialize for current process.");
+            SetHwIcuDirectory();
+            Container::UpdateCurrent(INSTANCE_ID_PLATFORM);
+            AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
+            AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
+            AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+            AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
+            AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
+            CapabilityRegistry::Register();
+            ImageCache::SetImageCacheFilePath(context->GetCacheDir());
+            ImageCache::SetCacheFileInfo();
+        });
+    }
+
+    bool useNewPipe = true;
+#ifdef ENABLE_ROSEN_BACKEND
+    if (isFormRender_ && !window && !useNewPipe) {
+        useNewPipe = true;
+    }
+
+    std::shared_ptr<OHOS::Rosen::RSUIDirector> rsUiDirector;
+    if (SystemProperties::GetRosenBackendEnabled() && !useNewPipe && isFormRender_) {
+        rsUiDirector = OHOS::Rosen::RSUIDirector::Create();
+        if (rsUiDirector) {
+            rsUiDirector->SetRSSurfaceNode(window->GetSurfaceNode());
+            rsUiDirector->SetCacheDir(context->GetCacheDir());
+            rsUiDirector->Init();
+        }
+    }
+#endif
+    int32_t deviceWidth = 0;
+    int32_t deviceHeight = 0;
+    float density = 1.0f;
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    if (defaultDisplay) {
+        density = defaultDisplay->GetVirtualPixelRatio();
+        deviceWidth = defaultDisplay->GetWidth();
+        deviceHeight = defaultDisplay->GetHeight();
+        LOGI("UIContent: deviceWidth: %{public}d, deviceHeight: %{public}d, default density: %{public}f", deviceWidth,
+            deviceHeight, density);
+    }
+    SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
+    SystemProperties::SetColorMode(ColorMode::LIGHT);
+
+    std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
+    if (context) {
+        auto resourceManager = context->GetResourceManager();
+        if (resourceManager != nullptr) {
+            resourceManager->GetResConfig(*resConfig);
+            auto localeInfo = resConfig->GetLocaleInfo();
+            Platform::AceApplicationInfoImpl::GetInstance().SetResourceManager(resourceManager);
+            if (localeInfo != nullptr) {
+                auto language = localeInfo->getLanguage();
+                auto region = localeInfo->getCountry();
+                auto script = localeInfo->getScript();
+                AceApplicationInfo::GetInstance().SetLocale((language == nullptr) ? "" : language,
+                    (region == nullptr) ? "" : region, (script == nullptr) ? "" : script, "");
+            }
+            if (resConfig->GetColorMode() == OHOS::Global::Resource::ColorMode::DARK) {
+                SystemProperties::SetColorMode(ColorMode::DARK);
+                LOGI("UIContent set dark mode");
+            } else {
+                SystemProperties::SetColorMode(ColorMode::LIGHT);
+                LOGI("UIContent set light mode");
+            }
+            SystemProperties::SetDeviceAccess(
+                resConfig->GetInputDevice() == Global::Resource::InputDevice::INPUTDEVICE_POINTINGDEVICE);
+        }
+    } else {
+        LOGI("Context is nullptr, set localeInfo to default");
+        AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
+    }
+
+    auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(context);
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> info;
+    if (abilityContext) {
+        info = abilityContext->GetAbilityInfo();
+    } else {
+        auto extensionContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::ExtensionContext>(context);
+        if (extensionContext) {
+            info = extensionContext->GetAbilityInfo();
+        } else {
+            LOGE("context is not AbilityContext or ExtensionContext.");
+        }
+    }
+    if (info) {
+        AceApplicationInfo::GetInstance().SetAbilityName(info->name);
+    }
+
+    RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
+    bool isModelJson = info != nullptr ? info->isModuleJson : false;
+    std::string moduleName = info != nullptr ? info->moduleName : "";
+    auto appInfo = context != nullptr ? context->GetApplicationInfo() : nullptr;
+    auto hapModuleInfo = context != nullptr ? context->GetHapModuleInfo() : nullptr;
+    auto bundleName = info != nullptr ? info->bundleName : "";
+    std::string moduleHapPath = info != nullptr ? info->hapPath : "";
+    std::string resPath;
+    std::string pageProfile;
+    LOGI("Initialize UIContent isModelJson:%{public}s", isModelJson ? "true" : "false");
+    if (isFormRender_) {
+        LOGI("Initialize UIContent form assetProvider");
+        std::vector<std::string> basePaths;
+        basePaths.emplace_back("assets/js/" + moduleName_ + "/");
+        basePaths.emplace_back("assets/js/share/");
+        basePaths.emplace_back("");
+        basePaths.emplace_back("js/");
+        basePaths.emplace_back("ets/");
+        auto assetProvider =
+            CreateAssetProvider("/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap", basePaths);
+        if (assetProvider) {
+            LOGE("push card asset provider to queue.");
+            flutterAssetManager->PushBack(std::move(assetProvider));
+        }
+    } else {
+        if (isModelJson) {
+            std::string hapPath = info != nullptr ? info->hapPath : "";
+            LOGI("hapPath:%{public}s", hapPath.c_str());
+            // first use hap provider
+            if (flutterAssetManager && !hapPath.empty()) {
+                auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
+                if (assetProvider->Initialize(hapPath, { "", "ets/", "resources/base/profile/" })) {
+                    LOGD("Push HapAssetProvider to queue.");
+                    flutterAssetManager->PushBack(std::move(assetProvider));
+                }
+            }
+
+            if (appInfo) {
+                std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+                for (const auto& module : moduleList) {
+                    if (module.moduleName == moduleName) {
+                        std::regex pattern(ABS_BUNDLE_CODE_PATH + bundleName + FILE_SEPARATOR);
+                        auto moduleSourceDir =
+                            std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
+                        resPath = moduleSourceDir + "/";
+                        break;
+                    }
+                }
+            }
+
+            // second use file provider, will remove later
+            LOGI("In stage mode, resPath:%{private}s", resPath.c_str());
+            auto assetBasePathStr = { std::string("ets/"), std::string("resources/base/profile/") };
+            if (flutterAssetManager && !resPath.empty()) {
+                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+                if (assetProvider->Initialize(resPath, assetBasePathStr)) {
+                    LOGD("Push AssetProvider to queue.");
+                    flutterAssetManager->PushBack(std::move(assetProvider));
+                }
+            }
+
+            if (hapModuleInfo) {
+                pageProfile = hapModuleInfo->pages;
+                const std::string profilePrefix = "$profile:";
+                if (pageProfile.compare(0, profilePrefix.size(), profilePrefix) == 0) {
+                    pageProfile = pageProfile.substr(profilePrefix.length()).append(".json");
+                }
+                LOGI("In stage mode, pageProfile:%{public}s", pageProfile.c_str());
+            } else {
+                LOGE("In stage mode, can't get hap info.");
+            }
+        } else {
+            auto packagePathStr = context->GetBundleCodeDir();
+            if (hapModuleInfo != nullptr) {
+                packagePathStr += "/" + hapModuleInfo->package + "/";
+            }
+            std::string srcPath = "";
+            if (info != nullptr && !info->srcPath.empty()) {
+                srcPath = info->srcPath;
+            }
+
+            auto assetBasePathStr = { "assets/js/" + (srcPath.empty() ? "default" : srcPath) + "/",
+                std::string("assets/js/share/") };
+
+            if (flutterAssetManager && !packagePathStr.empty()) {
+                auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
+                if (assetProvider->Initialize(packagePathStr, assetBasePathStr)) {
+                    LOGD("Push AssetProvider to queue.");
+                    flutterAssetManager->PushBack(std::move(assetProvider));
+                }
+            }
+
+            if (appInfo) {
+                std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
+                for (const auto& module : moduleList) {
+                    if (module.moduleName == moduleName) {
+                        std::regex pattern(ABS_BUNDLE_CODE_PATH + bundleName + FILE_SEPARATOR);
+                        auto moduleSourceDir =
+                            std::regex_replace(module.moduleSourceDir, pattern, LOCAL_BUNDLE_CODE_PATH);
+                        resPath = moduleSourceDir + "/assets/" + module.moduleName + "/";
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if (appInfo && flutterAssetManager && hapModuleInfo) {
+        /* Note: DO NOT modify the sequence of adding libPath  */
+        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
+        std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
+        std::vector<std::string> libPaths;
+        if (!quickFixLibraryPath.empty()) {
+            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), quickFixLibraryPath);
+            libPaths.push_back(libPath);
+            LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
+        }
+        if (!nativeLibraryPath.empty()) {
+            std::string libPath = GenerateFullPath(context->GetBundleCodeDir(), nativeLibraryPath);
+            libPaths.push_back(libPath);
+            LOGI("napi lib path = %{private}s", libPath.c_str());
+        }
+        auto isLibIsolated = hapModuleInfo->isLibIsolated;
+        if (!libPaths.empty()) {
+            if (!isLibIsolated) {
+                flutterAssetManager->SetLibPath("default", libPaths);
+            } else {
+                std::string appLibPathKey = hapModuleInfo->bundleName + "/" + hapModuleInfo->moduleName;
+                flutterAssetManager->SetLibPath(appLibPathKey, libPaths);
+            }
+        }
+    }
+    std::string hapPath; // hap path in sandbox
+    if (!moduleHapPath.empty()) {
+        if (moduleHapPath.find(ABS_BUNDLE_CODE_PATH) == std::string::npos) {
+            hapPath = moduleHapPath;
+        } else {
+            auto pos = moduleHapPath.find_last_of('/');
+            if (pos != std::string::npos) {
+                hapPath = LOCAL_BUNDLE_CODE_PATH + moduleHapPath.substr(pos + 1);
+                LOGI("In Stage mode, hapPath:%{private}s", hapPath.c_str());
+            }
+        }
+    }
+
+    auto pluginUtils = std::make_shared<PluginUtilsImpl>();
+    PluginManager::GetInstance().SetAceAbility(nullptr, pluginUtils);
+    // create container
+    if (runtime_) {
+        instanceId_ = gInstanceId.fetch_add(1, std::memory_order_relaxed);
+    } else {
+        instanceId_ = gSubWindowInstanceId.fetch_add(1, std::memory_order_relaxed);
+    }
+    auto formUtils = std::make_shared<FormUtilsImpl>();
+    FormManager::GetInstance().SetFormUtils(formUtils);
+    auto container =
+        AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, FrontendType::DECLARATIVE_JS, true, context_, info,
+            std::make_unique<ContentEventCallback>(
+                [context = context_] {
+                    auto sharedContext = context.lock();
+                    CHECK_NULL_VOID_NOLOG(sharedContext);
+                    auto abilityContext =
+                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+                    CHECK_NULL_VOID_NOLOG(abilityContext);
+                    abilityContext->CloseAbility();
+                },
+                [context = context_](const std::string& address) {
+                    auto sharedContext = context.lock();
+                    CHECK_NULL_VOID_NOLOG(sharedContext);
+                    auto abilityContext =
+                        OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+                    CHECK_NULL_VOID_NOLOG(abilityContext);
+                    LOGI("start ability with url = %{private}s", address.c_str());
+                    AAFwk::Want want;
+                    want.AddEntity(Want::ENTITY_BROWSER);
+                    want.SetUri(address);
+                    want.SetAction(ACTION_VIEWDATA);
+                    abilityContext->StartAbility(want, REQUEST_CODE);
+                }),
+            false, false, useNewPipe);
+
+    CHECK_NULL_VOID(container);
+    container->SetIsFormRender(isFormRender_);
+    container->SetIsFRSCardContainer(isFormRender_);
+    if (window_) {
+        container->SetWindowName(window_->GetWindowName());
+        container->SetWindowId(window_->GetWindowId());
+    }
+
+    if (context) {
+        auto token = context->GetToken();
+        container->SetToken(token);
+    }
+
+    // Mark the relationship between windowId and containerId, it is 1:1
+    if (window) {
+        SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
+    }
+    AceEngine::Get().AddContainer(instanceId_, container);
+    if (runtime_) {
+        container->GetSettings().SetUsingSharedRuntime(true);
+        container->SetSharedRuntime(runtime_);
+    } else {
+        container->GetSettings().SetUsingSharedRuntime(false);
+    }
+    container->SetPageProfile(pageProfile);
+    container->Initialize();
+    ContainerScope scope(instanceId_);
+    auto front = container->GetFrontend();
+    if (front) {
+        front->UpdateState(Frontend::State::ON_CREATE);
+        front->SetJsMessageDispatcher(container);
+    }
+    auto aceResCfg = container->GetResourceConfiguration();
+    aceResCfg.SetOrientation(SystemProperties::GetDeviceOrientation());
+    aceResCfg.SetDensity(SystemProperties::GetResolution());
+    aceResCfg.SetDeviceType(SystemProperties::GetDeviceType());
+    aceResCfg.SetColorMode(SystemProperties::GetColorMode());
+    aceResCfg.SetDeviceAccess(SystemProperties::GetDeviceAccess());
+    if (isFormRender_) {
+        resPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + "/";
+        hapPath = "/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap";
+    }
+    LOGI("CommonInitializeForm resPath = %{public}s hapPath = %{public}s", resPath.c_str(), hapPath.c_str());
+    container->SetResourceConfiguration(aceResCfg);
+    container->SetPackagePathStr(resPath);
+    container->SetHapPath(hapPath);
+    container->SetAssetManager(flutterAssetManager);
+    if (!isFormRender_) {
+        container->SetBundlePath(context->GetBundleCodeDir());
+        container->SetFilesDataPath(context->GetFilesDir());
+    }
+
+    if (window_) {
+        if (window_->IsDecorEnable()) {
+            LOGI("Container modal is enabled.");
+            container->SetWindowModal(WindowModal::CONTAINER_MODAL);
+        }
+
+        dragWindowListener_ = new DragWindowListener(instanceId_);
+        window_->RegisterDragListener(dragWindowListener_);
+        occupiedAreaChangeListener_ = new OccupiedAreaChangeListener(instanceId_);
+        window_->RegisterOccupiedAreaChangeListener(occupiedAreaChangeListener_);
+    }
+
+    // create ace_view
+    Platform::FlutterAceView* flutterAceView = nullptr;
+    if (isFormRender_) {
+        flutterAceView =
+            Platform::FlutterAceView::CreateView(instanceId_, true, container->GetSettings().usePlatformAsUIThread);
+        Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
+    } else {
+        flutterAceView =
+            Platform::FlutterAceView::CreateView(instanceId_, false, container->GetSettings().usePlatformAsUIThread);
+        Platform::FlutterAceView::SurfaceCreated(flutterAceView, window_);
+    }
+
+    if (!useNewPipe) {
+        Ace::Platform::UIEnvCallback callback = nullptr;
+#ifdef ENABLE_ROSEN_BACKEND
+        callback = [window, id = instanceId_, container, flutterAceView, rsUiDirector](
+                       const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context) {
+            if (rsUiDirector) {
+                ACE_SCOPED_TRACE("OHOS::Rosen::RSUIDirector::Create()");
+                rsUiDirector->SetUITaskRunner(
+                    [taskExecutor = container->GetTaskExecutor(), id](const std::function<void()>& task) {
+                        ContainerScope scope(id);
+                        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI);
+                    });
+                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+                if (context != nullptr) {
+                    context->SetRSUIDirector(rsUiDirector);
+                }
+                flutterAceView->InitIOManager(container->GetTaskExecutor());
+                LOGD("UIContent Init Rosen Backend");
+            }
+        };
+#endif
+        // set view
+        Platform::AceContainer::SetView(flutterAceView, density, 0, 0, window_, callback);
+    } else {
+        if (isFormRender_) {
+            LOGI("Platform::AceContainer::SetViewNew is card formWidth=%{public}f, formHeight=%{public}f",
+                formWidth_, formHeight_);
+            Platform::AceContainer::SetViewNew(flutterAceView, density, formWidth_, formHeight_, window_);
+            auto frontend = AceType::DynamicCast<FormFrontendDeclarative>(container->GetFrontend());
+            CHECK_NULL_VOID(frontend);
+            frontend->SetBundleName(bundleName_);
+            frontend->SetModuleName(moduleName_);
+            // arkTSCard only support "esModule" compile mode
+            frontend->SetIsBundle(false);
+        } else {
+            Platform::AceContainer::SetViewNew(flutterAceView, density, 0, 0, window_);
+        }
+    }
+
+    // after frontend initialize
+    if (window_ && window_->IsFocused()) {
+        LOGI("UIContentImpl: focus again");
+        Focus();
+    }
+
+    if (isFormRender_ && !isFormRenderInit_) {
+        container->UpdateFormSharedImage(formImageDataMap_);
+        container->UpdateFormData(formData_);
+        isFormRenderInit_ = true;
+    }
+
+    if (isFormRender_) {
+        Platform::FlutterAceView::SurfaceChanged(
+            flutterAceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
+    } else {
+        Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
+    }
+    // Set sdk version in module json mode
+    if (isModelJson) {
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline && appInfo) {
+            LOGI("SetMinPlatformVersion code is %{public}d", appInfo->minCompatibleVersionCode);
+            pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
+        }
+    }
+    if (runtime_ && !isFormRender_) { // ArkTSCard not support inherit local strorage from context
+        auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
+        if (!storage) {
+            container->SetLocalStorage(nullptr, context->GetBindingObject()->Get<NativeReference>());
+        } else {
+            LOGI("SetLocalStorage %{public}d", storage->TypeOf());
+            container->SetLocalStorage(
+                nativeEngine->CreateReference(storage, 1), context->GetBindingObject()->Get<NativeReference>());
+        }
+    }
+    LayoutInspector::SetCallback(instanceId_);
+}
+
+std::shared_ptr<Rosen::RSSurfaceNode> UIContentImpl::GetFormRootNode()
+{
+    return Platform::AceContainer::GetFormSurfaceNode(instanceId_);
+}
+// ArkTSCard end
 
 void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, NativeValue* storage)
 {
@@ -333,9 +825,12 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (hapModuleInfo) {
         metaData = hapModuleInfo->metadata;
     }
+    bool closeArkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
+        return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
+    });
     auto useNewPipe =
         AceNewPipeJudgement::QueryAceNewPipeEnabledStage(AceApplicationInfo::GetInstance().GetPackageName(),
-            apiCompatibleVersion, apiTargetVersion, apiReleaseType, metaData);
+            apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     LOGI("UIContent: apiCompatibleVersion: %{public}d, apiTargetVersion: %{public}d, and apiReleaseType: %{public}s, "
          "useNewPipe: %{public}d",
         apiCompatibleVersion, apiTargetVersion, apiReleaseType.c_str(), useNewPipe);
@@ -560,7 +1055,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
                     LOGI("start ability with url = %{private}s", address.c_str());
                     AAFwk::Want want;
                     want.AddEntity(Want::ENTITY_BROWSER);
-                    want.SetParam("address", address);
+                    want.SetUri(address);
+                    want.SetAction(ACTION_VIEWDATA);
                     abilityContext->StartAbility(want, REQUEST_CODE);
                 }),
             false, false, useNewPipe);
@@ -569,6 +1065,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetWindowId(window_->GetWindowId());
     auto token = context->GetToken();
     container->SetToken(token);
+    container->SetPageUrlChecker(AceType::MakeRefPtr<PageUrlCheckerOhos>(context));
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
@@ -599,22 +1096,21 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetBundlePath(context->GetBundleCodeDir());
     container->SetFilesDataPath(context->GetFilesDir());
     // for atomic service
-    container->SetInstallationFree(false);
+    container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
         container->SetSharePanelCallback(
-            [context = context_](const std::string& faBundleName, const std::string& faAbilityName,
-                const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-                const std::string& abilityName) {
+            [context = context_](const std::string& bundleName, const std::string& abilityName) {
                 auto sharedContext = context.lock();
                 CHECK_NULL_VOID_NOLOG(sharedContext);
                 auto abilityContext =
                     OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
                 CHECK_NULL_VOID_NOLOG(abilityContext);
+                auto abilityInfo = abilityContext->GetAbilityInfo();
                 AAFwk::Want want;
-                want.SetParam("bundleName", faBundleName);
-                want.SetParam("moduleName", faModuleName);
-                want.SetParam("abilityName", faAbilityName);
-                want.SetParam("hostPkgName", faHostPkgName);
+                want.SetParam("abilityName", abilityInfo->name);
+                want.SetParam("bundleName", abilityInfo->bundleName);
+                want.SetParam("moduleName", abilityInfo->moduleName);
+                want.SetParam("hostPkgName", abilityInfo->bundleName);
                 want.SetElementName(bundleName, abilityName);
                 abilityContext->StartAbility(want, REQUEST_CODE);
             });
@@ -707,6 +1203,14 @@ void UIContentImpl::Background()
 {
     LOGI("UIContentImpl: window background");
     Platform::AceContainer::OnHide(instanceId_);
+}
+
+void UIContentImpl::ReloadForm()
+{
+    LOGI("ReloadForm startUrl = %{public}s", startUrl_.c_str());
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    auto flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->GetAssetManager());
+    Platform::AceContainer::ClearEngineCache(instanceId_);
 }
 
 void UIContentImpl::Focus()
@@ -1007,5 +1511,61 @@ void UIContentImpl::SetAppWindowIcon(const std::shared_ptr<Media::PixelMap>& pix
     CHECK_NULL_VOID(pipelineContext);
     LOGI("set app icon");
     pipelineContext->SetAppIcon(AceType::MakeRefPtr<PixelMapOhos>(pixelMap));
+}
+
+void UIContentImpl::UpdateFormData(const std::string& data)
+{
+    if (isFormRenderInit_) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        container->UpdateFormData(data);
+    } else {
+        formData_ = data;
+    }
+}
+
+void UIContentImpl::UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap)
+{
+    if (isFormRenderInit_) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        container->UpdateFormSharedImage(imageDataMap);
+    } else {
+        formImageDataMap_ = imageDataMap;
+    }
+}
+
+void UIContentImpl::SetActionEventHandler(
+    std::function<void(const std::string& action)>&& actionCallback)
+{
+    CHECK_NULL_VOID(actionCallback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetActionEventHandler(std::move(actionCallback));
+}
+
+void UIContentImpl::SetErrorEventHandler(
+    std::function<void(const std::string&, const std::string&)>&& errorCallback)
+{
+    CHECK_NULL_VOID(errorCallback);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto front = container->GetFrontend();
+    CHECK_NULL_VOID(front);
+    return front->SetErrorEventHandler(std::move(errorCallback));
+}
+
+void UIContentImpl::OnFormSurfaceChange(float width, float height)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    ContainerScope scope(instanceId_);
+    auto density = pipelineContext->GetDensity();
+    pipelineContext->SetRootSize(density, width, height);
+    pipelineContext->OnSurfaceChanged(width, height);
 }
 } // namespace OHOS::Ace

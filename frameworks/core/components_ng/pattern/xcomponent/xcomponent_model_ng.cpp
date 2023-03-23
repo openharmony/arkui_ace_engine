@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,17 +70,4 @@ void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDestroy(std::move(onDestroy));
 }
-void XComponentModelNG::SetOnSurfaceDestroyEvent(DestroyEvent&& onSurfaceDestroyEvent)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
-        return;
-    }
-    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnSurfaceDestroyEvent(std::move(onSurfaceDestroyEvent));
-}
-
 } // namespace OHOS::Ace::NG

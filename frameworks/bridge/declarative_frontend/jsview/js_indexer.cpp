@@ -66,6 +66,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
 
         if (Container::IsCurrentUseNewPipeline()) {
             NG::IndexerView::Create(indexerArray, selectedVal);
+            return;
         }
 
         auto indexerComponent =

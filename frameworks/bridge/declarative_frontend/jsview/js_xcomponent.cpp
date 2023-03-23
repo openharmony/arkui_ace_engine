@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,11 +91,6 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
     XComponentModel::GetInstance()->Create(
         id->ToString(), type->ToString(), libraryname->ToString(), xcomponentController);
-    auto surfaceDestroyCallback = [xcId = id->ToString()]() {
-        XComponentClient::GetInstance().DeleteFromNativeXcomponentsMapById(xcId);
-        XComponentClient::GetInstance().DeleteControllerFromJSXComponentControllersMap(xcId);
-    };
-    XComponentModel::GetInstance()->SetOnSurfaceDestroyEvent(std::move(surfaceDestroyCallback));
 
     if (info.Length() > 1 && info[1]->IsString()) {
         auto soPath = info[1]->ToString();

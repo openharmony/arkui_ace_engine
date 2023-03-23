@@ -275,6 +275,7 @@ template("declarative_js_engine") {
       "jsview/models/grid_item_model_impl.cpp",
       "jsview/models/grid_model_impl.cpp",
       "jsview/models/grid_row_model_impl.cpp",
+      "jsview/models/hyperlink_model_impl.cpp",
       "jsview/models/if_else_model_impl.cpp",
       "jsview/models/image_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
@@ -332,11 +333,16 @@ template("declarative_js_engine") {
         "jsview/js_camera.cpp",
         "jsview/js_piece.cpp",
         "jsview/js_rating.cpp",
-        "jsview/js_video.cpp",
-        "jsview/js_video_controller.cpp",
         "jsview/models/rating_model_impl.cpp",
-        "jsview/models/video_model_impl.cpp",
       ]
+      if (defined(config.video_components_support) &&
+          config.video_components_support) {
+        sources += [
+          "jsview/js_video.cpp",
+          "jsview/js_video_controller.cpp",
+          "jsview/models/video_model_impl.cpp",
+        ]
+      }
     }
 
     if (defined(config.xcomponent_components_support) &&
@@ -501,6 +507,11 @@ template("declarative_js_engine_ng") {
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+
+    if (defined(config.video_components_support) &&
+        config.video_components_support) {
+      sources += [ "jsview/js_video.cpp" ]
+    }
 
     if (defined(config.use_build_in_js_engine) &&
         config.use_build_in_js_engine) {

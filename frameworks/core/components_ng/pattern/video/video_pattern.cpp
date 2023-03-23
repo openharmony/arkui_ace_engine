@@ -228,7 +228,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostSyncTask([&videoPattern, status] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID_NOLOG(video);
-            LOGD("OnPlayerStatus");
+            LOGI("OnPlayerStatus");
             video->OnPlayerStatus(status);
         });
     };
@@ -237,7 +237,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID_NOLOG(video);
-            LOGD("OnError");
+            LOGW("OnError");
             video->OnError("");
         });
     };
@@ -256,7 +256,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
 void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 {
     isInitialState_ = isInitialState_ ? currentPos == 0 : false;
-    if (currentPos == currentPos_) {
+    if (currentPos == currentPos_ || isStop_) {
         return;
     }
 
@@ -328,11 +328,7 @@ void VideoPattern::OnPlayerStatus(PlaybackStatus status)
 
 void VideoPattern::OnError(const std::string& errorId)
 {
-#if defined(PREVIEW)
-    std::string errorcode = "This component is not supported on PC Preview.";
-#else
     std::string errorcode = Localization::GetInstance()->GetErrorDescription(errorId);
-#endif
     auto json = JsonUtil::Create(true);
     json->Put("error", "");
     auto param = json->ToString();
@@ -570,18 +566,24 @@ void VideoPattern::AddPreviewNodeIfNeeded()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto children = host->GetChildren();
     bool isExist = false;
+    auto children = host->GetChildren();
+    auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
+    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
+
     for (const auto& child : children) {
         if (child->GetTag() == V2::IMAGE_ETS_TAG) {
             isExist = true;
+            auto image = AceType::DynamicCast<FrameNode>(child);
+            auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+            posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
+            posterLayoutProperty->UpdateImageFit(imageFit);
+            image->MarkModifyDone();
             break;
         }
     }
 
-    auto imageFit = layoutProperty->GetObjectFitValue(ImageFit::COVER);
     if (!isExist) {
-        auto posterSourceInfo = layoutProperty->GetPosterImageInfo().value();
         auto posterNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, -1, AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(posterNode);
         auto posterLayoutProperty = posterNode->GetLayoutProperty<ImageLayoutProperty>();

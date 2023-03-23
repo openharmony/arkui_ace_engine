@@ -89,7 +89,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(node && overlayManager);
             ContainerScope scope(id);
-            overlayManager->FocusDialog(node);
+            overlayManager->FocusOverlayNode(node);
 
             if (onFinish != nullptr) {
                 onFinish();
@@ -169,14 +169,8 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(menu && overlayManager);
         ContainerScope scope(id);
-        overlayManager->FocusDialog(menu);
+        overlayManager->FocusOverlayNode(menu);
     });
-
-    bool isSelectMenu = false;
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    if (menuWrapperPattern && menuWrapperPattern->IsSelectMenu()) {
-        isSelectMenu = true;
-    }
 
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
@@ -187,11 +181,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
-    if (isSelectMenu) {
-        context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
-    } else {
-        context->OnTransformTranslateUpdate({ 0.0f, menuAnimationOffset, 0.0f });
-    }
+    context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
 
     AnimationUtils::Animate(
         option,
@@ -231,16 +221,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
         menuPattern->RemoveParentHoverStyle();
     });
 
-    bool isSelectMenu = false;
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    if (menuWrapperPattern && menuWrapperPattern->IsSelectMenu()) {
-        isSelectMenu = true;
-    }
-
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateOpacity(1.0);
-    context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -248,13 +230,9 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
     auto menuAnimationOffset = static_cast<float>(theme->GetMenuAnimationOffset().ConvertToPx());
     AnimationUtils::Animate(
         option,
-        [context, isSelectMenu, menuAnimationOffset]() {
+        [context, menuAnimationOffset]() {
             context->UpdateOpacity(0.0);
-            if (isSelectMenu) {
-                context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
-            } else {
-                context->OnTransformTranslateUpdate({ 0.0f, menuAnimationOffset, 0.0f });
-            }
+            context->OnTransformTranslateUpdate({ 0.0f, -menuAnimationOffset, 0.0f });
         },
         option.GetOnFinishEvent());
 
@@ -419,39 +397,24 @@ void OverlayManager::ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& custo
     CHECK_NULL_VOID(customNode);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        rootNode->RemoveChild(customPopupMap_[targetId]);
-        customPopupMap_.erase(it);
+    if (!customPopupMap_[targetId] || customPopupMap_[targetId] != customNode) {
+        customPopupMap_[targetId] = customNode;
+        customNode->MountToParent(rootNode);
+        customNode->MarkModifyDone();
+        rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    customPopupMap_[targetId] = customNode;
-    auto popupNode = customPopupMap_[targetId];
-    customNode->MountToParent(rootNode);
-    customNode->MarkModifyDone();
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void OverlayManager::EraseIndexerPopup(int32_t targetId)
+void OverlayManager::RemoveIndexerPopup()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        rootNode->RemoveChild(customPopupMap_[targetId]);
-        customPopupMap_.erase(it);
+    for (const auto& popup : customPopupMap_) {
+        auto popupNode = popup.second;
+        rootNode->RemoveChild(popupNode);
     }
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-}
-
-RefPtr<FrameNode> OverlayManager::GetIndexerPopup(int32_t targetId)
-{
-    auto rootNode = rootNodeWeak_.Upgrade();
-    CHECK_NULL_RETURN(rootNode, nullptr);
-    auto it = customPopupMap_.find(targetId);
-    if (it != customPopupMap_.end()) {
-        return customPopupMap_[targetId];
-    }
-    return nullptr;
+    customPopupMap_.clear();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
@@ -596,7 +559,7 @@ void OverlayManager::HideMenuInSubWindow(int32_t targetId)
     auto node = menuMap_[targetId];
     CHECK_NULL_VOID(node);
     PopMenuAnimation(node);
-    BlurDialog();
+    BlurOverlayNode();
 }
 
 void OverlayManager::HideMenuInSubWindow()
@@ -624,7 +587,7 @@ void OverlayManager::HideMenu(int32_t targetId)
     if (onHideMenuCallback_) {
         onHideMenuCallback_();
     }
-    BlurDialog();
+    BlurOverlayNode();
 }
 
 void OverlayManager::HideAllMenus()
@@ -706,13 +669,14 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     LOGI("OverlayManager::CloseDialog");
     CloseDialogAnimation(dialogNode);
-    BlurDialog();
+    BlurOverlayNode();
 }
 
 bool OverlayManager::RemoveOverlay()
 {
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, true);
+    RemoveIndexerPopup();
     auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
         // stage node is at index 0, remove overlay at index 1
@@ -746,9 +710,9 @@ bool OverlayManager::RemoveOverlay()
     return false;
 }
 
-void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
+void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& dialogNode)
 {
-    LOGI("OverlayManager::FocusDialog when dialog show");
+    LOGI("OverlayManager::FocusOverlayNode when dialog show");
     CHECK_NULL_VOID(dialogNode);
     auto focusHub = dialogNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -761,12 +725,13 @@ void OverlayManager::FocusDialog(const RefPtr<FrameNode>& dialogNode)
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(false);
     pageFocusHub->LostFocus();
 }
 
-void OverlayManager::BlurDialog()
+void OverlayManager::BlurOverlayNode()
 {
-    LOGI("OverlayManager::BlurDialog");
+    LOGI("OverlayManager::BlurOverlayNode");
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
@@ -775,6 +740,7 @@ void OverlayManager::BlurDialog()
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(true);
     pageFocusHub->RequestFocus();
 }
 

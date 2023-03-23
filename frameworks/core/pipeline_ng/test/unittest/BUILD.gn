@@ -152,6 +152,7 @@ ohos_unittest("pipeline_ng_test") {
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/border.cpp",
     "$ace_root/frameworks/core/components/common/properties/border_edge.cpp",
+    "$ace_root/frameworks/core/components/common/properties/border_image.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
     "$ace_root/frameworks/core/components/common/properties/edge.cpp",

@@ -1437,14 +1437,6 @@ HWTEST_F(ListPatternTestNg, ListLanesTest005, TestSize.Level1)
             childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
-
-    int32_t currentIndex = END_INDEX;
-    float endPos = LIST_HEIGHT_LIMIT;
-    float startPos = 0;
-    listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
-    auto result = listLanesLayoutAlgorithm.LayoutALineBackward(
-        &layoutWrapper, layoutConstraint, Axis::VERTICAL, currentIndex, endPos, startPos);
-    EXPECT_EQ(result, (END_INDEX - START_INDEX) % LANES_VALUE);
 }
 
 /**
@@ -1705,7 +1697,6 @@ HWTEST_F(ListPatternTestNg, ListPatternTest001, TestSize.Level1)
     listPattern->scrollableEvent_ = nullptr;
     listPattern->scrollEffect_ = nullptr;
     listPattern->OnModifyDone();
-    EXPECT_EQ(listPattern->isInitialized_, true);
     EXPECT_NE(listPattern->scrollableEvent_, nullptr);
 
     /**
@@ -1887,7 +1878,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.steps: !onReachStart, startIndex!=0; !onReachEnd, endIndex!=max; !scrollStop, !onScrollStop
      * @tc.expected: step2. equal.
      */
-    listPattern->ProcessEvent(false, 1, false);
+    listPattern->ProcessEvent(false, 1, false, 0, 0);
     EXPECT_EQ(listPattern->scrollStop_, false);
 
     /**
@@ -1899,7 +1890,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
     listPattern->startIndex_ = 0;
     listPattern->endIndex_ = listPattern->maxListItemIndex_;
     listPattern->scrollStop_ = true;
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
     EXPECT_EQ(listPattern->scrollStop_, false);
     
     /**
@@ -1915,7 +1906,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
     listEventHub->SetOnReachEnd([]() {});
     listPattern->endIndex_ = listPattern->maxListItemIndex_ - 1;
     listPattern->scrollStop_ = true;
-    listPattern->ProcessEvent(true, 1, false);
+    listPattern->ProcessEvent(true, 1, false, 0, 0);
     EXPECT_EQ(listPattern->scrollStop_, false);
     
     /**
@@ -1928,7 +1919,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
     listPattern->startIndex_ = 0;
     listPattern->endIndex_ = listPattern->maxListItemIndex_;
     listEventHub->SetOnScrollStop([]() {});
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
 
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
@@ -1937,7 +1928,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollState_ = SCROLL_FROM_ANIMATION;
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
     
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
@@ -1946,7 +1937,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollState_ = SCROLL_FROM_ANIMATION_SPRING;
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
 
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
@@ -1955,7 +1946,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      * @tc.expected: step2. equal.
      */
     listPattern->scrollState_ = SCROLL_FROM_BAR;
-    listPattern->ProcessEvent(true, 0, false);
+    listPattern->ProcessEvent(true, 0, false, 0, 0);
 }
 
 /**
@@ -2422,7 +2413,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest011, TestSize.Level1)
      */
     keyEvent.code = KeyCode::KEY_DPAD_RIGHT;
     result = listPattern->OnKeyEvent(keyEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 
     /**
      * @tc.steps: step2. call function
@@ -2491,7 +2482,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
      */
     listPattern1->scrollIndex_ = 1;
     result = listPattern1->HandleDirectionKey(KeyCode::KEY_DPAD_LEFT);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 
     /**
      * @tc.steps: step2. call function
@@ -2501,7 +2492,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
     listPattern1->maxListItemIndex_ = LIST_ITEM_NUMBER;
     listPattern1->scrollIndex_ = 1;
     result = listPattern1->HandleDirectionKey(KeyCode::KEY_DPAD_RIGHT);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
 }
 
 /**

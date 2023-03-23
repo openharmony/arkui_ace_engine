@@ -32,6 +32,7 @@ const std::string ACE_NEW_PIPE_DISABLED_TAG = "DISABLED";
 const std::string ACE_NEW_PIPE_ENABLED_FOR_ALL_TAG = "ENABLED_FOR_ALL";
 const std::string NEW_PIPE_ENABLED_RELEASE_TYPE = "Beta4";
 const std::string NEW_PIPE_ENABLED_RELEASE_TYPE_NEW = "Beta5";
+const std::string NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE = "Release";
 constexpr int32_t NEW_PIPE_MIN_VERSION = 9;
 
 } // namespace
@@ -58,6 +59,7 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(const std::string& packagenam
 {
     if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
              (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE ||
                  SystemProperties::GetExtSurfaceEnabled())) ||
             apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
         apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {
@@ -76,17 +78,14 @@ bool AceNewPipeJudgement::QueryAceNewPipeEnabledFA(const std::string& packagenam
 }
 
 bool AceNewPipeJudgement::QueryAceNewPipeEnabledStage(const std::string& packagename, uint32_t apiCompatibleVersion,
-    uint32_t apiTargetVersion, const std::string& apiReleaseType,
-    const std::vector<OHOS::AppExecFwk::Metadata>& metaData)
+    uint32_t apiTargetVersion, const std::string& apiReleaseType, bool closeArkTSPartialUpdate)
 {
-    bool closeArkTSPartialUpdate = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "ArkTSPartialUpdate" && metaDataItem.value == "false";
-    });
     if (closeArkTSPartialUpdate) {
         return false;
     }
     if (((apiTargetVersion == NEW_PIPE_MIN_VERSION &&
              (apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE || apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_NEW ||
+                 apiReleaseType == NEW_PIPE_ENABLED_RELEASE_TYPE_RELEASE ||
                  SystemProperties::GetExtSurfaceEnabled())) ||
             apiTargetVersion > NEW_PIPE_MIN_VERSION) &&
         apiCompatibleVersion >= NEW_PIPE_MIN_VERSION) {

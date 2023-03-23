@@ -30,9 +30,9 @@ public:
     void SetIndicator(bool value) override;
     void SetStars(int32_t value) override;
     void SetStepSize(double value) override;
-    void SetForegroundSrc(const std::string& value) override;
-    void SetSecondarySrc(const std::string& value) override;
-    void SetBackgroundSrc(const std::string& value) override;
+    void SetForegroundSrc(const std::string& value, bool flag = false) override;
+    void SetSecondarySrc(const std::string& value, bool flag = false) override;
+    void SetBackgroundSrc(const std::string& value, bool flag = false) override;
     void SetOnChange(ChangeEvent&& onChange) override;
 };
 } // namespace OHOS::Ace::Framework

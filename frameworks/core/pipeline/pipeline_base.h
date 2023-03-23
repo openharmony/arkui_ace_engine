@@ -56,9 +56,7 @@ class Window;
 class FontManager;
 class ManagerInterface;
 enum class FrontendType;
-using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
-    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-    const std::string& abilityName)>;
+using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -368,6 +366,16 @@ public:
 
     RefPtr<ImageCache> GetImageCache() const;
 
+    const RefPtr<SharedImageManager>& GetSharedImageManager() const
+    {
+        return sharedImageManager_;
+    }
+
+    void SetSharedImageManager(const RefPtr<SharedImageManager>& sharedImageManager)
+    {
+        sharedImageManager_ = sharedImageManager;
+    }
+
     Window* GetWindow()
     {
         return window_.get();
@@ -398,12 +406,10 @@ public:
         sharePanelCallback_ = std::move(callback);
     }
 
-    void FireSharePanelCallback(const std::string& faBundleName, const std::string& faAbilityName,
-        const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-        const std::string& abilityName)
+    void FireSharePanelCallback(const std::string& bundleName, const std::string& abilityName)
     {
         if (sharePanelCallback_) {
-            sharePanelCallback_(faBundleName, faAbilityName, faModuleName, faHostPkgName, bundleName, abilityName);
+            sharePanelCallback_(bundleName, abilityName);
         }
     }
 
@@ -474,14 +480,14 @@ public:
         return isJsCard_;
     }
 
-    void SetIsEtsCard(bool isEtsCard)
+    void SetIsFormRender(bool isEtsCard)
     {
-        isEtsCard_ = isEtsCard;
+        isFormRender_ = isEtsCard;
     }
 
-    bool IsEtsCard() const
+    bool IsFormRender() const
     {
-        return isEtsCard_;
+        return isFormRender_;
     }
 
     // Get the dp scale which used to covert dp to logic px.
@@ -734,6 +740,11 @@ public:
         parentPipeline_ = pipeline;
     }
 
+    void AddEtsCardTouchEventCallback(const std::function<void(const TouchEvent&)>&& callback)
+    {
+        etsCardTouchEventCallback_ = std::move(callback);
+    }
+
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -761,7 +772,7 @@ protected:
 
     bool isRebuildFinished_ = false;
     bool isJsCard_ = false;
-    bool isEtsCard_ = false;
+    bool isFormRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
     bool installationFree_ = false;
@@ -794,6 +805,7 @@ protected:
     int32_t instanceId_ = 0;
     RefPtr<EventManager> eventManager_;
     RefPtr<ImageCache> imageCache_;
+    RefPtr<SharedImageManager> sharedImageManager_;
     mutable std::shared_mutex imageCacheMutex_;
     RefPtr<ThemeManager> themeManager_;
     RefPtr<DataProviderManagerInterface> dataProviderManager_;
@@ -812,6 +824,7 @@ protected:
     WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
+    std::function<void(const TouchEvent&)> etsCardTouchEventCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;

@@ -74,23 +74,14 @@ void ShapeContainerPattern::ViewPortTransform()
 
 void ShapeContainerPattern::OnModifyDone()
 {
-    MarkChildrenDirty(GetHost());
-}
-
-void ShapeContainerPattern::MarkChildrenDirty(RefPtr<FrameNode> curentFrameNode)
-{
-    CHECK_NULL_VOID_NOLOG(curentFrameNode);
-    if (curentFrameNode->GetChildren().empty()) {
-        return;
-    }
-    auto children = curentFrameNode->GetChildren();
-    for (const auto& child : children) {
-        auto childNode = AceType::DynamicCast<FrameNode>(child);
-        if (childNode) {
-            childNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-            MarkChildrenDirty(childNode);
+    for (auto childNode : childNodes_) {
+        auto child = childNode.Upgrade();
+        if (!child) {
+            continue;
         }
+        child->MarkNeedRenderOnly();
     }
+    childNodes_.clear();
 }
 
 void ShapeContainerPattern::OnAttachToFrameNode()

@@ -30,6 +30,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_page.h"
 #include "core/components/xcomponent/native_interface_xcomponent_impl.h"
+#include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_runtime.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
@@ -135,6 +136,11 @@ public:
         rootViewMap_.emplace(pageId, value);
     }
 
+    bool IsEngineInstanceInitialized()
+    {
+        return isEngineInstanceInitialized_;
+    }
+
     void RegisterFaPlugin(); // load ReatureAbility plugin
 
 #if defined(PREVIEW)
@@ -163,6 +169,11 @@ public:
         return true;
     }
 #endif
+
+// ArkTsCard start
+    static void PreloadAceModuleCard(void* runtime);
+// ArkTsCard end
+
 private:
     void InitGlobalObjectTemplate();
     void InitConsoleModule();  // add Console object to global
@@ -173,6 +184,7 @@ private:
     void InitJsContextModuleObject();
     void InitGroupJsBridge();
     static bool IsPlugin();
+    static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
 
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
     static std::unique_ptr<JsonValue> currentConfigResourceData_;
@@ -196,6 +208,7 @@ private:
     mutable std::mutex mutex_;
     bool isDebugMode_ = true;
     bool usingSharedRuntime_ = false;
+    bool isEngineInstanceInitialized_ = false;
     int32_t instanceId_ = 0;
     static bool isModulePreloaded_;
     static bool isModuleInitialized_;
@@ -283,6 +296,8 @@ public:
 
     void RunGarbageCollection() override;
 
+    void RunFullGarbageCollection() override;
+
     void DumpHeapSnapshot(bool isPrivate) override;
 
     std::string GetStacktraceMessage() override;
@@ -290,6 +305,9 @@ public:
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
     void SetContext(int32_t instanceId, NativeReference* context) override;
+
+    void SetErrorEventHandler(
+        std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
 
     RefPtr<GroupJsBridge> GetGroupJsBridge() override;
 
@@ -317,6 +335,8 @@ public:
         }
     }
 
+    void ClearCache() override;
+
     const shared_ptr<JsValue>& GetRenderContext() const
     {
         return renderContext_;
@@ -325,9 +345,10 @@ public:
 #if defined(PREVIEW)
     void ReplaceJSContent(const std::string& url, const std::string componentName) override;
     RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID) override;
+    bool ExecuteJsForFastPreview(const std::string& jsCode, const std::string& viewID) override;
 
     void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
-                                  const std::string assetPath, bool isBundle) override
+        const std::string assetPath, bool isBundle) override
     {
         bundleName_ = bundleName;
         moduleName_ = moduleName;

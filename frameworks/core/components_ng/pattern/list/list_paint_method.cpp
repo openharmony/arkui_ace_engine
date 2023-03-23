@@ -34,7 +34,8 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
 
     for (const auto& child : itemPosition) {
         if (!isFirstItem) {
-            float mainPos = child.second.startPos - dividerInfo.halfSpaceWidth + dividerInfo.mainPadding;
+            float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+            float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
                 crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
@@ -45,7 +46,7 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
             OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
             dividerPainter.DrawLine(canvas, offset);
         }
-        if (laneIdx == 0) {
+        if (laneIdx == 0 || child.second.isGroup) {
             lastLineIndex.clear();
         }
         lastLineIndex.emplace_back(child.first);
@@ -56,7 +57,8 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
     if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < dividerInfo.totalItemCount - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
-            float mainPos = itemPosition.at(index).endPos + dividerInfo.halfSpaceWidth + dividerInfo.mainPadding;
+            float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+            float mainPos = itemPosition.at(index).endPos + divOffset + dividerInfo.mainPadding;
             float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
             if (lanes > 1 && !itemPosition.at(index).isGroup) {
                 crossPos += laneIdx * dividerInfo.crossSize / dividerInfo.lanes;
@@ -73,19 +75,26 @@ void ListPaintMethod::PaintDivider(const DividerInfo& dividerInfo, const Positio
 
 void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
-    if (!divider_.strokeWidth.IsValid()) {
-        return;
-    }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
+    auto renderContext = paintWrapper->GetRenderContext();
+    if (!renderContext || renderContext->GetClipEdge().value_or(true)) {
+        auto clipRect = RSRect(paddingOffset.GetX(), paddingOffset.GetY(), frameSize.Width() + paddingOffset.GetX(),
+                    paddingOffset.GetY() + frameSize.Height());
+        canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
+    }
+
+    if (!divider_.strokeWidth.IsValid()) {
+        return;
+    }
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
     DividerInfo dividerInfo = {
         .constrainStrokeWidth = divider_.strokeWidth.ConvertToPx(),
         .crossSize = vertical_ ? frameSize.Height() : frameSize.Width(),
         .startMargin = divider_.startMargin.ConvertToPx(),
         .endMargin = divider_.endMargin.ConvertToPx(),
-        .halfSpaceWidth = (space_ + divider_.strokeWidth.ConvertToPx()) / 2.0f, /* 2.0f half */
+        .space = space_,
         .mainPadding = paddingOffset.GetMainOffset(axis),
         .crossPadding = paddingOffset.GetCrossOffset(axis),
         .isVertical = vertical_,
@@ -119,9 +128,18 @@ CanvasDrawFunction ListPaintMethod::GetForegroundDrawFunction(PaintWrapper* pain
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto painter = weak.Upgrade();
         CHECK_NULL_VOID(painter);
-        painter->PaintDivider(paintWrapper, canvas);
         painter->PaintScrollBar(canvas);
         painter->PaintEdgeEffect(paintWrapper, canvas);
+    };
+    return paintFunc;
+}
+
+CanvasDrawFunction ListPaintMethod::GetContentDrawFunction(PaintWrapper* paintWrapper)
+{
+    auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
+        auto painter = weak.Upgrade();
+        CHECK_NULL_VOID(painter);
+        painter->PaintDivider(paintWrapper, canvas);
     };
     return paintFunc;
 }

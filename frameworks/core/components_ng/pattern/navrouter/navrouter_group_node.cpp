@@ -48,7 +48,7 @@ RefPtr<NavRouterGroupNode> NavRouterGroupNode::GetOrCreateGroupNode(
     return navRouterGroupNode;
 }
 
-void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
+void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(child);
     if (navDestination) {
@@ -64,6 +64,11 @@ void NavRouterGroupNode::AddChildToGroup(const RefPtr<UINode>& child)
         return;
     }
     UINode::AddChild(child);
+}
+
+void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
+{
+    UINode::RemoveChildAtIndex(slot);
 }
 
 void NavRouterGroupNode::OnDetachFromMainTree()

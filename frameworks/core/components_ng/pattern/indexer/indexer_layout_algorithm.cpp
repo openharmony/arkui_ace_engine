@@ -59,33 +59,27 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto verticalPadding = (padding.top.value_or(0) + padding.bottom.value_or(0));
     auto horizontalPadding = padding.left.value_or(0.0f) + padding.right.value_or(0.0f);
-    if (LessOrEqual(itemCount_ * itemSize_ + verticalPadding, layoutConstraint.maxSize.Height())) {
-        itemSizeRender_ = itemSize_;
-    } else {
-        itemSizeRender_ = (layoutConstraint.maxSize.Height() - verticalPadding) / itemCount_;
-    }
-
+    auto contentWidth = itemSize_ + horizontalPadding;
+    auto contentHeight = itemCount_ * itemSize_ + verticalPadding;
+    auto selfIdealSize = layoutConstraint.selfIdealSize;
+    auto actualWidth = selfIdealSize.Width().has_value() ? selfIdealSize.Width().value() :
+        std::clamp(contentWidth, 0.0f, layoutConstraint.maxSize.Width());
+    auto actualHeight = selfIdealSize.Height().has_value() ? selfIdealSize.Height().value() :
+        std::clamp(contentHeight, 0.0f, layoutConstraint.maxSize.Height());
+    itemWidth_ = GreatOrEqual(actualWidth - horizontalPadding, 0.0f) ? actualWidth - horizontalPadding : 0.0f;
+    itemSizeRender_ =
+        GreatOrEqual(actualHeight - verticalPadding, 0.0f) ? (actualHeight - verticalPadding) / itemCount_ : 0.0f;
     auto childLayoutConstraint = indexerLayoutProperty->CreateChildConstraint();
     for (int32_t index = 0; index < itemCount_; index++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         CHECK_NULL_VOID(childWrapper);
         auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(childLayoutProperty);
-        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemSizeRender_, itemSizeRender_));
+        childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
         childLayoutProperty->UpdateAlignment(Alignment::CENTER);
         childWrapper->Measure(childLayoutConstraint);
     }
-
-    auto indexerWidth = itemSizeRender_ + horizontalPadding;
-    auto indexerHeight = itemSizeRender_ * itemCount_ + verticalPadding;
-    auto selfIdealSize = layoutConstraint.selfIdealSize;
-    if (selfIdealSize.Width().has_value() && selfIdealSize.Width().value() > indexerWidth) {
-        indexerWidth = selfIdealSize.Width().value();
-    }
-    if (selfIdealSize.Height().has_value() && selfIdealSize.Height().value() > indexerHeight) {
-        indexerHeight = selfIdealSize.Height().value();
-    }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(indexerWidth, indexerHeight));
+    layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight));
 }
 
 void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

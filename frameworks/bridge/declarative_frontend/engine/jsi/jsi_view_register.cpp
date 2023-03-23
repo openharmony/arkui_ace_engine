@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
+#include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_object_template.h"
@@ -158,8 +159,10 @@
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/bridge/declarative_frontend/jsview/js_piece.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rating.h"
+#ifdef VIDEO_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
+#endif
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
@@ -367,8 +370,7 @@ JSRef<JSVal> CreateJsObjectFromJsonValue(const EcmaVM* vm, const std::unique_ptr
     }
 }
 
-void RegisterCardUpdateCallback(
-    const RefPtr<CardFrontendDelegateDeclarative>& delegate, const panda::Local<panda::ObjectRef>& obj)
+void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::ObjectRef>& obj)
 {
     JSRef<JSObject> object = JSRef<JSObject>::Make(obj);
     JSRef<JSVal> storageValue = object->GetProperty("localStorage_");
@@ -378,7 +380,6 @@ void RegisterCardUpdateCallback(
     }
 
     JSRef<JSObject> storage = JSRef<JSObject>::Cast(storageValue);
-
     JSRef<JSVal> setOrCreateVal = storage->GetProperty("setOrCreate");
     if (!setOrCreateVal->IsFunction()) {
         LOGE("RegisterCardUpdateCallback: can not get property 'setOrCreate'!");
@@ -386,15 +387,13 @@ void RegisterCardUpdateCallback(
     }
 
     JSRef<JSFunc> setOrCreate = JSRef<JSFunc>::Cast(setOrCreateVal);
-
     auto id = ContainerScope::CurrentId();
-    delegate->SetUpdateCardDataCallback([storage, setOrCreate, id](const std::string& data) {
+    auto callback = [storage, setOrCreate, id](const std::string& data) {
         ContainerScope scope(id);
         const EcmaVM* vm = storage->GetEcmaVM();
         CHECK_NULL_VOID(vm);
         std::unique_ptr<JsonValue> jsonRoot = JsonUtil::ParseJsonString(data);
         CHECK_NULL_VOID(jsonRoot);
-
         auto child = jsonRoot->GetChild();
         if (!child || !child->IsValid()) {
             LOGE("update card data error");
@@ -410,8 +409,26 @@ void RegisterCardUpdateCallback(
             setOrCreate->Call(storage, FUNC_SET_CREATE_ARG_LEN, args);
             child = child->GetNext();
         }
-    });
-    delegate->UpdatePageDataImmediately();
+    };
+
+    auto container = Container::Current();
+    if (container->IsFRSCardContainer()) {
+        LOGI("RegisterCardUpdateCallback:Run Card In FRS");
+        auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_VOID(frontEnd);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_VOID(delegate);
+        delegate->SetUpdateCardDataCallback(callback);
+        delegate->UpdatePageDataImmediately();
+    } else {
+        LOGI("RegisterCardUpdateCallback:Run Card In Host");
+        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+        CHECK_NULL_VOID(frontEnd);
+        auto delegate = frontEnd->GetDelegate();
+        CHECK_NULL_VOID(delegate);
+        delegate->SetUpdateCardDataCallback(callback);
+        delegate->UpdatePageDataImmediately();
+    }
 }
 
 void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
@@ -424,19 +441,32 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
+        // Set Partial Update
+        Container::SetCurrentUsePartialUpdate(!view->isFullUpdate());
+
         auto cardId = CardScope::CurrentId();
         view->SetCardId(cardId);
 
-        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
-        CHECK_NULL_VOID(frontEnd);
+        RegisterCardUpdateCallback(cardId, obj);
 
-        auto delegate = frontEnd->GetDelegate();
-        CHECK_NULL_VOID(delegate);
-        RegisterCardUpdateCallback(delegate, obj);
+        RefPtr<NG::PageRouterManager> pageRouterManager;
 
-        auto pageRouterManager = delegate->GetPageRouterManager();
+        if (container->IsFRSCardContainer()) {
+            LOGI("Run Card In FRS");
+            auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+            CHECK_NULL_VOID(frontEnd);
+            auto delegate = frontEnd->GetDelegate();
+            CHECK_NULL_VOID(delegate);
+            pageRouterManager = delegate->GetPageRouterManager();
+        } else {
+            LOGI("Run Card In Host");
+            auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+            CHECK_NULL_VOID(frontEnd);
+            auto delegate = frontEnd->GetDelegate();
+            CHECK_NULL_VOID(delegate);
+            pageRouterManager = delegate->GetPageRouterManager();
+        }
         CHECK_NULL_VOID(pageRouterManager);
-
         auto pageNode = pageRouterManager->GetCurrentPageNode();
         CHECK_NULL_VOID(pageNode);
 
@@ -541,23 +571,28 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
 
     auto container = Container::Current();
     if (container && container->IsUseNewPipeline()) {
-        auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
-        if (!frontEnd) {
-            return panda::JSValueRef::Undefined(vm);
+        if (container->IsFRSCardContainer()) {
+            LOGE("Form PostCardAction in FRS");
+            auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+            CHECK_NULL_RETURN(frontEnd, panda::JSValueRef::Undefined(vm));
+            auto delegate = frontEnd->GetDelegate();
+            CHECK_NULL_RETURN(delegate, panda::JSValueRef::Undefined(vm));
+            delegate->FireCardAction(action);
+        } else {
+            LOGE("Form PostCardAction in HOST");
+            auto frontEnd = AceType::DynamicCast<CardFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
+            CHECK_NULL_RETURN(frontEnd, panda::JSValueRef::Undefined(vm));
+            auto delegate = frontEnd->GetDelegate();
+            CHECK_NULL_RETURN(delegate, panda::JSValueRef::Undefined(vm));
+            delegate->FireCardAction(action);
         }
-
-        auto delegate = frontEnd->GetDelegate();
-        if (!delegate) {
-            return panda::JSValueRef::Undefined(vm);
-        }
-        delegate->FireCardAction(action);
     }
     return panda::JSValueRef::Undefined(vm);
 }
 
 panda::Local<panda::JSValueRef> JsLoadEtsCard(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
-    LOGD("Load eTS Card start");
+    LOGI("Load eTS Card start");
     EcmaVM* vm = runtimeCallInfo->GetVM();
     int32_t argc = runtimeCallInfo->GetArgsNumber();
     if (argc > 2) {
@@ -1274,6 +1309,72 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     return panda::BooleanRef::New(vm, result);
 }
 
+static const std::unordered_map<std::string, std::function<void(BindingTarget)>> formBindFuncs = {
+    { "Flex", JSFlexImpl::JSBind },
+    { "Text", JSText::JSBind },
+    { "Animator", JSAnimator::JSBind },
+    { "SpringProp", JSAnimator::JSBind },
+    { "SpringMotion", JSAnimator::JSBind },
+    { "ScrollMotion", JSAnimator::JSBind },
+    { "Animator", JSAnimator::JSBind },
+    { "Span", JSSpan::JSBind },
+    { "Button", JSButton::JSBind },
+    { "Canvas", JSCanvas::JSBind },
+    { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
+    { "List", JSList::JSBind },
+    { "ListItem", JSListItem::JSBind },
+    { "LoadingProgress", JSLoadingProgress::JSBind },
+    { "Image", JSImage::JSBind },
+    { "Counter", JSCounter::JSBind },
+    { "Progress", JSProgress::JSBind },
+    { "Column", JSColumn::JSBind },
+    { "Row", JSRow::JSBind },
+    { "GridContainer", JSGridContainer::JSBind },
+    { "Slider", JSSlider::JSBind },
+    { "Stack", JSStack::JSBind },
+    { "ForEach", JSForEach::JSBind },
+    { "Divider", JSDivider::JSBind },
+    { "If", JSIfElse::JSBind },
+    { "Scroll", JSScroll::JSBind },
+    { "GridRow", JSGridRow::JSBind },
+    { "GridCol", JSGridCol::JSBind },
+    { "Toggle", JSToggle::JSBind },
+    { "Blank", JSBlank::JSBind },
+    { "Calendar", JSCalendar::JSBind },
+    { "Rect", JSRect::JSBind },
+    { "Shape", JSShape::JSBind },
+    { "Path", JSPath::JSBind },
+    { "Circle", JSCircle::JSBind },
+    { "Line", JSLine::JSBind },
+    { "Polygon", JSPolygon::JSBind },
+    { "Polyline", JSPolyline::JSBind },
+    { "Ellipse", JSEllipse::JSBind },
+    { "Radio", JSRadio::JSBind },
+    { "QRCode", JSQRCode::JSBind },
+    { "Piece", JSPiece::JSBind },
+    { "Rating", JSRating::JSBind },
+    { "DataPanel", JSDataPanel::JSBind },
+    { "Badge", JSBadge::JSBind },
+    { "Gauge", JSGauge::JSBind },
+    { "Marquee", JSMarquee::JSBind },
+    { "SwiperController", JSSwiperController::JSBind },
+    { "CalendarController", JSCalendarController::JSBind },
+    { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
+    { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
+    { "CanvasGradient", JSCanvasGradient::JSBind },
+    { "ImageBitmap", JSRenderImage::JSBind },
+    { "ImageData", JSCanvasImageData::JSBind },
+    { "Path2D", JSPath2D::JSBind },
+    { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
+    { "Sheet", JSSheet::JSBind },
+    { "TextTimer", JSTextTimer::JSBind },
+    { "TextTimerController", JSTextTimerController::JSBind },
+    { "Checkbox", JSCheckbox::JSBind },
+    { "CheckboxGroup", JSCheckboxGroup::JSBind },
+    { "RelativeContainer", JSRelativeContainer::JSBind },
+    { "__Common__", JSCommonView::JSBind }
+};
+
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "Text", JSText::JSBind },
@@ -1376,7 +1477,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Camera", JSCamera::JSBind },
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
+#ifdef VIDEO_SUPPORTED
     { "Video", JSVideo::JSBind },
+#endif
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
     { "XComponent", JSXComponent::JSBind },
@@ -1414,7 +1517,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ImageData", JSCanvasImageData::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
+#ifdef VIDEO_SUPPORTED
     { "VideoController", JSVideoController::JSBind },
+#endif
     { "Search", JSSearch::JSBind },
     { "Select", JSSelect::JSBind },
     { "SearchController", JSSearchController::JSBind },
@@ -1441,8 +1546,31 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
+    { "Video", JSVideo::JSBind },
+    { "VideoController", JSVideoController::JSBind },
+    { "PluginComponent", JSPlugin::JSBind },
 #endif
 };
+
+void RegisterAllFormModule(BindingTarget globalObj)
+{
+    JSColumn::JSBind(globalObj);
+    JSCommonView::JSBind(globalObj);
+    JSSwiperController::JSBind(globalObj);
+    JSScroller::JSBind(globalObj);
+    JSCalendarController::JSBind(globalObj);
+    JSRenderingContext::JSBind(globalObj);
+    JSOffscreenRenderingContext::JSBind(globalObj);
+    JSCanvasGradient::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj);
+    JSCanvasImageData::JSBind(globalObj);
+    JSPath2D::JSBind(globalObj);
+    JSRenderingContextSettings::JSBind(globalObj);
+    JSTextTimerController::JSBind(globalObj);
+    for (auto& iter : formBindFuncs) {
+        iter.second(globalObj);
+    }
+}
 
 void RegisterAllModule(BindingTarget globalObj)
 {
@@ -1462,7 +1590,9 @@ void RegisterAllModule(BindingTarget globalObj)
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponentController::JSBind(globalObj);
 #endif
+#ifdef VIDEO_SUPPORTED
     JSVideoController::JSBind(globalObj);
+#endif
     JSTextInputController::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
@@ -1494,7 +1624,9 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
         JSAbilityComponentController::JSBind(globalObj);
 #endif
     } else if ((*func).first == "Video") {
+#ifdef VIDEO_SUPPORTED
         JSVideoController::JSBind(globalObj);
+#endif
     } else if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);
     } else if ((*func).first == "TextTimer") {
@@ -1530,6 +1662,200 @@ void JsRegisterModules(BindingTarget globalObj, std::string modules)
     JSCanvasImageData::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
+}
+
+void JsRegisterFormViews(BindingTarget globalObj)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        LOGE("JsRegisterFormViews can't find runtime");
+        return;
+    }
+    auto vm = runtime->GetEcmaVm();
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadEtsCard"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadEtsCard));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "postCardAction"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JSPostCardAction));
+#if defined(PREVIEW)
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewComponent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsPreviewerComponent));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPreviewComponentFlag"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetPreviewComponentFlag));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "storePreviewComponents"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsStorePreviewComponents));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "GetRootView"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetRootView));
+#endif
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "dumpMemoryStats"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsDumpMemoryStats));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$s"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetI18nResource));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "$m"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetMediaResource));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodes"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodes));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorNodeById"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorNodeById));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorTree"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorTree));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getInspectorByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsGetInspectorByKey));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendEventByKey"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendEventByKey));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendTouchEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendTouchEvent));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendKeyEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendKeyEvent));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "sendMouseEvent"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsSendMouseEvent));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "vp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "px2vp"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Vp));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "fp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Fp2Px));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "px2fp"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Fp));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "lpx2px"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAppBgColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetAppBackgroundColor));
+
+    JSViewAbstract::JSBind();
+    JSContainerBase::JSBind();
+    JSShapeAbstract::JSBind();
+    JSView::JSBind(globalObj);
+    JSLocalStorage::JSBind(globalObj);
+    JSEnvironment::JSBind(globalObj);
+    JSViewContext::JSBind(globalObj);
+    JSViewStackProcessor::JSBind(globalObj);
+    JSTouchHandler::JSBind(globalObj);
+    JSPersistent::JSBind(globalObj);
+    JSDistributed::JSBind(globalObj);
+    JSScroller::JSBind(globalObj);
+    JSProfiler::JSBind(globalObj);
+
+    auto delegate = JsGetFrontendDelegate();
+    std::string jsModules;
+    if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
+        LOGI("JsRegisterFormViews register collection modules");
+        JsRegisterModules(globalObj, jsModules);
+    } else {
+        LOGI("JsRegisterFormViews register all modules");
+        RegisterAllFormModule(globalObj);
+    }
+
+    JSObjectTemplate toggleType;
+    toggleType.Constant("Checkbox", 0);
+    toggleType.Constant("Switch", 1);
+    toggleType.Constant("Button", 2); // 2 means index of constant
+
+    JSObjectTemplate refreshStatus;
+    refreshStatus.Constant("Inactive", 0);
+    refreshStatus.Constant("Drag", 1);
+    refreshStatus.Constant("OverDrag", 2);
+    refreshStatus.Constant("Refresh", 3); // 3 means index of constant
+    refreshStatus.Constant("Done", 4);    // 4 means index of constant
+
+    JSObjectTemplate mainAxisAlign;
+    mainAxisAlign.Constant("Start", 1);
+    mainAxisAlign.Constant("Center", 2);       // 2 means index of constant
+    mainAxisAlign.Constant("End", 3);          // 3 means index of constant
+    mainAxisAlign.Constant("SpaceBetween", 6); // 6 means index of constant
+    mainAxisAlign.Constant("SpaceAround", 7);  // 7 means index of constant
+
+    JSObjectTemplate crossAxisAlign;
+    crossAxisAlign.Constant("Start", 1);
+
+    crossAxisAlign.Constant("Center", 2);  // 2 means index of constant
+    crossAxisAlign.Constant("End", 3);     // 3 means index of constant
+    crossAxisAlign.Constant("Stretch", 4); // 4 means index of constant
+
+    JSObjectTemplate direction;
+    direction.Constant("Horizontal", 0);
+    direction.Constant("Vertical", 1);
+
+    JSObjectTemplate loadingProgressStyle;
+    loadingProgressStyle.Constant("Default", 1);
+    loadingProgressStyle.Constant("Circular", 2); // 2 means index of constant
+    loadingProgressStyle.Constant("Orbital", 3);  // 3 means index of constant
+
+    JSObjectTemplate progressStyle;
+    progressStyle.Constant("Linear", 0);
+    progressStyle.Constant("Ring", 1);      // 1 means index of constant
+    progressStyle.Constant("Eclipse", 2);   // 2 means index of constant
+    progressStyle.Constant("ScaleRing", 3); // 3 means index of constant
+    progressStyle.Constant("Capsule", 4);   // 4 means index of constant
+
+    JSObjectTemplate stackFit;
+    stackFit.Constant("Keep", 0);
+    stackFit.Constant("Stretch", 1);
+    stackFit.Constant("Inherit", 2);    // 2 means index of constant
+    stackFit.Constant("FirstChild", 3); // 3 means index of constant
+
+    JSObjectTemplate overflow;
+    overflow.Constant("Clip", 0);
+    overflow.Constant("Observable", 1);
+
+    JSObjectTemplate alignment;
+    alignment.Constant("TopLeft", 0);
+    alignment.Constant("TopCenter", 1);
+    alignment.Constant("TopRight", 2);     // 2 means index of constant
+    alignment.Constant("CenterLeft", 3);   // 3 means index of constant
+    alignment.Constant("Center", 4);       // 4 means index of constant
+    alignment.Constant("CenterRight", 5);  // 5 means index of constant
+    alignment.Constant("BottomLeft", 6);   // 6 means index of constant
+    alignment.Constant("BottomCenter", 7); // 7 means index of constant
+    alignment.Constant("BottomRight", 8);  // 8 means index of constant
+
+    JSObjectTemplate sliderStyle;
+    sliderStyle.Constant("OutSet", 0);
+    sliderStyle.Constant("InSet", 1);
+
+    JSObjectTemplate sliderChangeMode;
+    sliderChangeMode.Constant("Begin", 0);
+    sliderChangeMode.Constant("Moving", 1);
+    sliderChangeMode.Constant("End", 2); // 2 means index of constant
+
+    JSObjectTemplate pickerStyle;
+    pickerStyle.Constant("Inline", 0);
+    pickerStyle.Constant("Block", 1);
+    pickerStyle.Constant("Fade", 2); // 2 means index of constant
+
+    JSObjectTemplate buttonType;
+    buttonType.Constant("Normal", (int)ButtonType::NORMAL);
+    buttonType.Constant("Capsule", (int)ButtonType::CAPSULE);
+    buttonType.Constant("Circle", (int)ButtonType::CIRCLE);
+    buttonType.Constant("Arc", (int)ButtonType::ARC);
+
+    JSObjectTemplate iconPosition;
+    iconPosition.Constant("Start", 0);
+    iconPosition.Constant("End", 1);
+
+    JSObjectTemplate badgePosition;
+    badgePosition.Constant("RightTop", 0);
+    badgePosition.Constant("Right", 1);
+    badgePosition.Constant("Left", 2); // 2 means index of constant
+
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "MainAxisAlign"), *mainAxisAlign);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "CrossAxisAlign"), *crossAxisAlign);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Direction"), *direction);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "StackFit"), *stackFit);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Align"), *alignment);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "Overflow"), *overflow);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ButtonType"), *buttonType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "LoadingProgressStyle"), *loadingProgressStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ProgressStyle"), *progressStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "RefreshStatus"), *refreshStatus);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderStyle"), *sliderStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderChangeMode"), *sliderChangeMode);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
+    LOGD("View classes and jsCreateDocument, registerObservableObject functions registered.");
 }
 
 void JsRegisterViews(BindingTarget globalObj)

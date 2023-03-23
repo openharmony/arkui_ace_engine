@@ -50,6 +50,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t TOTAL_NUMBER = 1000;
+}
 void IndexerPattern::OnModifyDone()
 {
     auto host = GetHost();
@@ -61,11 +64,16 @@ void IndexerPattern::OnModifyDone()
         arrayValue_ = layoutProperty->GetArrayValue().value();
         itemCount_ = static_cast<int32_t>(arrayValue_.size());
     }
-
     auto propSelect = layoutProperty->GetSelected().value();
-    selected_ = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
-    ResetStatus();
-    ApplyIndexChanged(initialized_);
+    propSelect = (propSelect >= 0 && propSelect < itemCount_) ? propSelect : 0;
+    auto selectChanged = false;
+    if (propSelect != lastSelectProp_) {
+        selected_ = propSelect;
+        lastSelectProp_ = propSelect;
+        selectChanged = true;
+        ResetStatus();
+    }
+    ApplyIndexChanged(initialized_ && selectChanged);
     initialized_ = true;
 
     auto gesture = host->GetOrCreateGestureEventHub();
@@ -161,12 +169,7 @@ void IndexerPattern::OnHover(bool isHover)
 void IndexerPattern::OnChildHover(int32_t index, bool isHover)
 {
     childHoverIndex_ = isHover ? index : -1;
-    auto refreshBubble = false;
-    if (selected_ != childFocusIndex_) {
-        selected_ = childFocusIndex_;
-        refreshBubble = true;
-    }
-    ApplyIndexChanged(refreshBubble);
+    ApplyIndexChanged(childHoverIndex_ >= 0 && childHoverIndex_ < itemCount_);
 }
 
 void IndexerPattern::InitInputEvent()
@@ -224,11 +227,9 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     }
     auto nextSelectIndex = GetSelectChildIndex(info.GetTouches().front().GetLocalLocation());
     auto refreshBubble = false;
-    if (nextSelectIndex != selected_) {
-        selected_ = nextSelectIndex;
-        refreshBubble = true;
-        ResetStatus();
-    }
+    selected_ = nextSelectIndex;
+    refreshBubble = true;
+    ResetStatus();
     ApplyIndexChanged(refreshBubble, true);
     OnSelect(refreshBubble);
 }
@@ -247,17 +248,14 @@ void IndexerPattern::MoveIndexByOffset(const Offset& offset)
         return;
     }
     childPressIndex_ = nextSelectIndex;
+    selected_ = nextSelectIndex;
+    lastSelected_ = nextSelectIndex;
     if (isHover_ && childPressIndex_ >= 0) {
         IndexerPressInAnimation();
     }
-    auto refreshBubble = false;
-    if (selected_ != childPressIndex_) {
-        selected_ = childPressIndex_;
-        refreshBubble = true;
-    }
     childFocusIndex_ = -1;
     childHoverIndex_ = -1;
-    ApplyIndexChanged(refreshBubble);
+    ApplyIndexChanged(true);
 }
 
 int32_t IndexerPattern::GetSelectChildIndex(const Offset& offset)
@@ -283,10 +281,10 @@ bool IndexerPattern::KeyIndexByStep(int32_t step)
         return false;
     }
     childFocusIndex_ = nextSected;
-    auto refreshBubble = false;
-    if (nextSected >= 0) {
+    auto refreshBubble = nextSected >= 0 && nextSected < itemCount_;
+    if (refreshBubble) {
         selected_ = nextSected;
-        refreshBubble = true;
+        lastSelected_ = nextSected;
     }
     childPressIndex_ = -1;
     childHoverIndex_ = -1;
@@ -378,22 +376,18 @@ void IndexerPattern::OnSelect(bool changed)
     if (onSelected && (selected_ >= 0) && (selected_ < itemCount_)) {
         onSelected(selected_);
     }
-    if (changed) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        animateSelected_ = selected_;
-        if (animateSelected_ >= 0) {
-            auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
-            CHECK_NULL_VOID(selectedFrameNode);
-            ItemSelectedInAnimation(selectedFrameNode);
-        }
-        if (lastSelected_ >= 0) {
-            auto lastFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(lastSelected_));
-            CHECK_NULL_VOID(lastFrameNode);
-            ItemSelectedOutAnimation(lastFrameNode);
-        }
-        lastSelected_ = selected_;
+    animateSelected_ = selected_;
+    if (animateSelected_ >= 0) {
+        auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));
+        CHECK_NULL_VOID(selectedFrameNode);
+        ItemSelectedInAnimation(selectedFrameNode);
     }
+    if (lastSelected_ >= 0 && lastSelected_ != animateSelected_) {
+        auto lastFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(lastSelected_));
+        CHECK_NULL_VOID(lastFrameNode);
+        ItemSelectedOutAnimation(lastFrameNode);
+    }
+    lastSelected_ = selected_;
 }
 
 void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
@@ -439,7 +433,8 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
                 Dimension borderWidth;
                 nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
                 if (!fromTouchUp || animateSelected_ == lastSelected_) {
-                    childRenderContext->UpdateBackgroundColor(indexerTheme->GetSeclectedBackgroundColor());
+                    childRenderContext->UpdateBackgroundColor(paintProperty->GetSelectedBackgroundColor().value_or(
+                        indexerTheme->GetSeclectedBackgroundColor()));
                 }
                 childRenderContext->ResetBlendBorderColor();
             }
@@ -451,6 +446,8 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
             nodeLayoutProperty->UpdateFontSize(selectedFont.GetFontSize());
             auto fontWeight = selectedFont.GetFontWeight();
             nodeLayoutProperty->UpdateFontWeight(fontWeight);
+            nodeLayoutProperty->UpdateFontFamily(selectedFont.GetFontFamilies());
+            nodeLayoutProperty->UpdateItalicFontStyle(selectedFont.GetFontStyle());
             childRenderContext->SetClipToBounds(true);
             childNode->MarkModifyDone();
             index++;
@@ -465,15 +462,16 @@ void IndexerPattern::ApplyIndexChanged(bool selectChanged, bool fromTouchUp)
         Dimension borderWidth;
         nodeLayoutProperty->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
         childRenderContext->ResetBlendBorderColor();
-        nodeLayoutProperty->UpdateFontSize(
-            layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontSize());
-        nodeLayoutProperty->UpdateFontWeight(
-            layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle()).GetFontWeight());
+        auto defaultFont = layoutProperty->GetFont().value_or(indexerTheme->GetDefaultTextStyle());
+        nodeLayoutProperty->UpdateFontSize(defaultFont.GetFontSize());
+        nodeLayoutProperty->UpdateFontWeight(defaultFont.GetFontWeight());
+        nodeLayoutProperty->UpdateFontFamily(defaultFont.GetFontFamilies());
+        nodeLayoutProperty->UpdateItalicFontStyle(defaultFont.GetFontStyle());
         nodeLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
         childNode->MarkModifyDone();
         index++;
     }
-    if (selectChanged) {
+    if (selectChanged || NeedShowPopupView()) {
         ShowBubble();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -490,15 +488,14 @@ void IndexerPattern::ShowBubble()
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto customNode = InitBubbleView();
-    CHECK_NULL_VOID(customNode);
-    SetPositionOfPopupNode(customNode);
-    customNode->MarkModifyDone();
-    customNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    overlayManager->ShowIndexerPopup(host->GetId(), customNode);
-    removePopupNode_ = true;
-    AddPopupTouchListener(customNode);
-    StartBubbleAppearAnimation(customNode);
+    if (!popupNode_) {
+        popupNode_ = CreatePopupNode();
+        AddPopupTouchListener(popupNode_);
+        UpdatePopupOpacity(0.0f);
+        overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
+    }
+    UpdateBubbleView();
+    StartBubbleAppearAnimation();
 }
 
 void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
@@ -535,138 +532,211 @@ void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
     }
 }
 
-RefPtr<FrameNode> IndexerPattern::InitBubbleView()
+RefPtr<FrameNode> IndexerPattern::CreatePopupNode()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
-    CHECK_NULL_RETURN(indexerTheme, nullptr);
-    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    auto popupTextColor = layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor());
-    auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
-    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, nullptr);
-    auto popupBackground = paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor());
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
-
     auto letterNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(letterNode, nullptr);
+    columnNode->AddChild(letterNode);
+    auto listNode = FrameNode::CreateFrameNode(
+        V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
+    CHECK_NULL_RETURN(listNode, nullptr);
+    columnNode->AddChild(listNode);
+    return columnNode;
+}
+
+void IndexerPattern::UpdateBubbleView()
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto columnLayoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(columnLayoutProperty);
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto popListData = indexerEventHub->GetOnRequestPopupData();
+    auto currentListData =
+        popListData ? popListData(childPressIndex_ >= 0 ? childPressIndex_ : selected_) : std::vector<std::string>();
+    UpdateBubbleLetterView(!currentListData.empty());
+    UpdateBubbleListView(currentListData);
+    auto columnRenderContext = popupNode_->GetRenderContext();
+    CHECK_NULL_VOID(columnRenderContext);
+    auto radius = Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP);
+    columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    columnRenderContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
+    columnRenderContext->SetClipToBounds(true);
+    SetPositionOfPopupNode(popupNode_);
+    popupNode_->MarkModifyDone();
+    popupNode_->MarkDirtyNode();
+}
+
+void IndexerPattern::UpdateBubbleSize()
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto columnLayoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(columnLayoutProperty);
+    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
+    auto popListData = indexerEventHub->GetOnRequestPopupData();
+    auto currentListData =
+        popListData ? popListData(childPressIndex_ >= 0 ? childPressIndex_ : selected_) : std::vector<std::string>();
+    auto popupSize = currentListData.size();
+    auto listActualSize = popupSize < INDEXER_BUBBLE_MAXSIZE ? popupSize : INDEXER_BUBBLE_MAXSIZE;
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * (listActualSize + 1)));
+    columnLayoutProperty->UpdateUserDefinedIdealSize(columnCalcSize);
+    popupNode_->MarkDirtyNode();
+}
+
+void IndexerPattern::UpdateBubbleLetterView(bool showDivider)
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto letterNode = DynamicCast<FrameNode>(popupNode_->GetFirstChild());
+    CHECK_NULL_VOID(letterNode);
     auto letterLayoutProperty = letterNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(letterLayoutProperty, nullptr);
-    letterLayoutProperty->UpdateContent(arrayValue_[selected_]);
+    CHECK_NULL_VOID(letterLayoutProperty);
+    letterLayoutProperty->UpdateContent(arrayValue_[childPressIndex_ >= 0 ? childPressIndex_ : selected_]);
     auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
-    auto fontSize = popupTextFont.GetFontSize();
-    letterLayoutProperty->UpdateFontSize(fontSize);
-    auto fontWeight = popupTextFont.GetFontWeight();
-    letterLayoutProperty->UpdateFontWeight(fontWeight);
-    letterLayoutProperty->UpdateTextColor(popupTextColor);
+    auto popupTextFont = layoutProperty->GetPopupFont().value_or(indexerTheme->GetPopupTextStyle());
+    letterLayoutProperty->UpdateFontSize(popupTextFont.GetFontSize());
+    letterLayoutProperty->UpdateFontWeight(popupTextFont.GetFontWeight());
+    letterLayoutProperty->UpdateFontFamily(popupTextFont.GetFontFamilies());
+    letterLayoutProperty->UpdateItalicFontStyle(popupTextFont.GetFontStyle());
+    letterLayoutProperty->UpdateTextColor(layoutProperty->GetPopupColor().value_or(indexerTheme->GetPopupTextColor()));
     letterLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     auto textPadding = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdatePadding(
         { CalcLength(textPadding), CalcLength(textPadding), CalcLength(0), CalcLength(0) });
     auto letterNodeRenderContext = letterNode->GetRenderContext();
-    letterNodeRenderContext->UpdateBackgroundColor(popupBackground);
+    letterNodeRenderContext->UpdateBackgroundColor(
+        paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
     letterNodeRenderContext->SetClipToBounds(true);
-    columnNode->AddChild(letterNode);
-    letterNode->MarkModifyDone();
-
-    auto listNode = FrameNode::CreateFrameNode(
-        V2::LIST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListPattern>());
-    CHECK_NULL_RETURN(listNode, nullptr);
-    auto indexerEventHub = host->GetEventHub<IndexerEventHub>();
-    auto popListData = indexerEventHub->GetOnRequestPopupData();
-    auto currentListData = popListData ? popListData(selected_) : std::vector<std::string>();
-    auto popupSize = currentListData.size();
-    auto listActualSize = popupSize < INDEXER_BUBBLE_MAXSIZE ? popupSize : INDEXER_BUBBLE_MAXSIZE;
-    auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
-    CHECK_NULL_RETURN(listLayoutProperty, nullptr);
-    listLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * listActualSize)));
     auto borderWidthZero = Dimension();
-    if (!currentListData.empty()) {
+    if (showDivider) {
         letterLayoutProperty->UpdateBorderWidth(
             { borderWidthZero, borderWidthZero, borderWidthZero, Dimension(INDEXER_LIST_DIVIDER) });
         auto boderColor = BorderColorProperty();
         boderColor.bottomColor = indexerTheme->GetPopupSeparateColor();
         letterNodeRenderContext->UpdateBorderColor(boderColor);
-        InitBubbleList(currentListData, listNode, indexerTheme);
+    } else {
+        letterLayoutProperty->UpdateBorderWidth({ borderWidthZero, borderWidthZero, borderWidthZero, borderWidthZero });
+    }
+    letterNode->MarkModifyDone();
+    letterNode->MarkDirtyNode();
+}
+
+void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListData)
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild());
+    CHECK_NULL_VOID(listNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    currentPopupIndex_ = childPressIndex_ >= 0 ? childPressIndex_ : selected_;
+    if (lastPopupIndex_ != currentPopupIndex_) {
+        lastPopupIndex_ = currentPopupIndex_;
+        CreateBubbleListView(currentListData);
+    }
+    auto popupSize = currentListData.size();
+    auto listActualSize = popupSize < INDEXER_BUBBLE_MAXSIZE ? popupSize : INDEXER_BUBBLE_MAXSIZE;
+    auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    listLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * listActualSize)));
+    if (!currentListData.empty()) {
+        UpdateBubbleListItem(currentListData, listNode, indexerTheme);
+    } else {
+        listNode->Clean();
     }
     auto divider = V2::ItemDivider();
     divider.strokeWidth = Dimension(INDEXER_LIST_DIVIDER, DimensionUnit::VP);
     divider.color = indexerTheme->GetPopupSeparateColor();
     listLayoutProperty->UpdateDivider(divider);
     listLayoutProperty->UpdateListDirection(Axis::VERTICAL);
-    columnNode->AddChild(listNode);
+    auto listRenderContext = listNode->GetRenderContext();
+    CHECK_NULL_VOID(listRenderContext);
+    listRenderContext->SetClipToBounds(true);
     listNode->MarkModifyDone();
-    auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
-    auto columnCalcSize = CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize * (listActualSize + 1)));
-    columnLayoutProperty->UpdateUserDefinedIdealSize(columnCalcSize);
-    columnLayoutProperty->UpdateBorderWidth({ borderWidthZero, borderWidthZero, borderWidthZero, borderWidthZero });
-    auto columnRenderContext = columnNode->GetRenderContext();
-    columnRenderContext->UpdateBackgroundColor(indexerTheme->GetPopupBackgroundColor());
-    auto radius = Dimension(BUBBLE_BOX_RADIUS, DimensionUnit::VP);
-    columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-    columnRenderContext->UpdateBackShadow(ShadowConfig::DefaultShadowL);
-    columnRenderContext->SetClipToBounds(true);
-    return columnNode;
+    listNode->MarkDirtyNode();
 }
 
-void IndexerPattern::InitBubbleList(
-    std::vector<std::string>& currentListData, RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme)
+void IndexerPattern::CreateBubbleListView(std::vector<std::string>& currentListData)
 {
+    CHECK_NULL_VOID(popupNode_);
+    auto listNode = DynamicCast<FrameNode>(popupNode_->GetLastChild());
     CHECK_NULL_VOID(listNode);
-    CHECK_NULL_VOID(indexerTheme);
-    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    listNode->Clean();
     for (uint32_t i = 0; i < currentListData.size(); i++) {
         auto listItemNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ListItemPattern>(nullptr));
         auto textNode = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        listItemNode->AddChild(textNode);
+        listNode->AddChild(listItemNode);
+    }
+}
+
+void IndexerPattern::UpdateBubbleListItem(
+    std::vector<std::string>& currentListData, const RefPtr<FrameNode>& listNode, RefPtr<IndexerTheme>& indexerTheme)
+{
+    CHECK_NULL_VOID(listNode);
+    CHECK_NULL_VOID(indexerTheme);
+    auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+    for (uint32_t i = 0; i < currentListData.size(); i++) {
+        auto listItemNode = DynamicCast<FrameNode>(listNode->GetChildAtIndex(i));
+        CHECK_NULL_VOID(listItemNode);
+        auto textNode = DynamicCast<FrameNode>(listItemNode->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(currentListData.at(i));
-        textLayoutProperty->UpdateTextColor(indexerTheme->GetDefaultTextColor());
+        textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupDefaultColor());
         textLayoutProperty->UpdateFontSize(indexerTheme->GetPopupTextSize());
         textLayoutProperty->UpdateFontWeight(indexerTheme->GetPopupTextStyle().GetFontWeight());
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
-        listItemNode->AddChild(textNode);
         textNode->MarkModifyDone();
         auto listItemProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
         listItemProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(bubbleSize), CalcLength(bubbleSize)));
         listItemProperty->UpdateAlignment(Alignment::CENTER);
         AddListItemClickListener(listItemNode, i);
-        listNode->AddChild(listItemNode);
         listItemNode->MarkModifyDone();
     }
-    auto listRenderContext = listNode->GetRenderContext();
-    listRenderContext->SetClipToBounds(true);
 }
 
 void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(popupNode_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto popupNode = overlayManager->GetIndexerPopup(host->GetId());
-    CHECK_NULL_VOID(popupNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    auto listNode = popupNode->GetLastChild();
+    auto listNode = popupNode_->GetLastChild();
     auto currentIndex = 0;
     for (auto child : listNode->GetChildren()) {
         auto listItemNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(listItemNode);
         auto listItemProperty = listItemNode->GetLayoutProperty<ListItemLayoutProperty>();
         CHECK_NULL_VOID(listItemProperty);
         auto listItemContext = listItemNode->GetRenderContext();
@@ -679,10 +749,10 @@ void IndexerPattern::ChangeListItemsSelectedStyle(int32_t clickIndex)
             textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupTextColor());
             listItemContext->UpdateBackgroundColor(Color(POPUP_LISTITEM_CLICKED_BG));
         } else {
-            textLayoutProperty->UpdateTextColor(indexerTheme->GetDefaultTextColor());
+            textLayoutProperty->UpdateTextColor(indexerTheme->GetPopupDefaultColor());
             listItemContext->UpdateBackgroundColor(Color::TRANSPARENT);
         }
-        
+
         listItemNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         currentIndex++;
     }
@@ -708,12 +778,14 @@ void IndexerPattern::AddListItemClickListener(RefPtr<FrameNode>& listItemNode, i
     CHECK_NULL_VOID(listItemNode);
     auto gestureHub = listItemNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    auto clickEventFunc = [weak = WeakClaim(this), index](GestureEvent& gestureEvent) {
+    auto touchCallback = [weak = WeakClaim(this), index](const TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
-        indexerPattern->OnListItemClick(index);
+        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+            indexerPattern->OnListItemClick(index);
+        }
     };
-    gestureHub->SetUserOnClick(std::move(clickEventFunc));
+    gestureHub->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchCallback)));
 }
 
 void IndexerPattern::OnListItemClick(int32_t index)
@@ -731,16 +803,9 @@ void IndexerPattern::OnListItemClick(int32_t index)
 
 void IndexerPattern::OnPopupTouchDown(const TouchEventInfo& info)
 {
-    removePopupNode_ = false;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto popupNode = overlayManager->GetIndexerPopup(host->GetId());
-    CHECK_NULL_VOID(popupNode);
-    StartBubbleAppearAnimation(popupNode);
+    if (NeedShowPopupView()) {
+        StartBubbleAppearAnimation();
+    }
 }
 
 bool IndexerPattern::NeedShowBubble()
@@ -808,13 +873,20 @@ void IndexerPattern::ItemSelectedInAnimation(RefPtr<FrameNode>& itemNode)
     AnimationOption option;
     option.SetDuration(INDEXER_SELECT_DURATION);
     option.SetCurve(Curves::LINEAR);
-    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId()]() {
+    AnimationUtils::Animate(option, [rendercontext, id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
         CHECK_NULL_VOID(indexerTheme);
-        rendercontext->UpdateBackgroundColor(indexerTheme->GetSeclectedBackgroundColor());
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        rendercontext->UpdateBackgroundColor(
+            paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSeclectedBackgroundColor()));
     });
 }
 
@@ -915,72 +987,79 @@ void IndexerPattern::IndexerPressOutAnimation()
     });
 }
 
-void IndexerPattern::StartBubbleAppearAnimation(RefPtr<FrameNode> animationNode)
+void IndexerPattern::StartBubbleAppearAnimation()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto rendercontext = animationNode->GetRenderContext();
-    CHECK_NULL_VOID(rendercontext);
-    if (!bubbleAnimator_) {
-        bubbleAnimator_ = AceType::MakeRefPtr<Animator>(context);
-    }
-    if (!bubbleAnimator_->IsStopped()) {
-        bubbleAnimator_->Finish();
-    }
-    bubbleAnimator_->ClearInterpolators();
-    bubbleAnimator_->ClearAllListeners();
+    animationId_ = GenerateAnimationId();
+    UpdatePopupVisibility(VisibleType::VISIBLE);
+    AnimationOption option;
+    option.SetCurve(Curves::SHARP);
+    option.SetDuration(INDEXER_BUBBLE_APPEAR_DURATION);
     auto startTimeRatio = 1.0f * INDEXER_BUBBLE_ENTER_DURATION / INDEXER_BUBBLE_APPEAR_DURATION;
     auto middleTimeRatio =
         1.0f * (INDEXER_BUBBLE_WAIT_DURATION + INDEXER_BUBBLE_ENTER_DURATION) / INDEXER_BUBBLE_APPEAR_DURATION;
-    bubbleAnimator_->SetDuration(INDEXER_BUBBLE_APPEAR_DURATION);
-    auto originFrame = AceType::MakeRefPtr<Keyframe<float>>(0.0f, 0.0f);
-    originFrame->SetCurve(Curves::SHARP);
-    auto startFrame = AceType::MakeRefPtr<Keyframe<float>>(startTimeRatio, 1.0f);
-    startFrame->SetCurve(Curves::SHARP);
-    auto waitFrame = AceType::MakeRefPtr<Keyframe<float>>(middleTimeRatio, 1.0f);
-    waitFrame->SetCurve(Curves::LINEAR);
-    auto endFrame = AceType::MakeRefPtr<Keyframe<float>>(1.0f, 0.0f);
-    endFrame->SetCurve(Curves::SHARP);
-    auto animation = AceType::MakeRefPtr<KeyframeAnimation<float>>();
-    animation->AddKeyframe(originFrame);
-    animation->AddKeyframe(startFrame);
-    animation->AddKeyframe(waitFrame);
-    animation->AddKeyframe(endFrame);
-    animation->AddListener([targetId = host->GetId(), popnodeId = animationNode->GetId()](float opacity) {
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto overlayManager = context->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        auto popupNode = overlayManager->GetIndexerPopup(targetId);
-        CHECK_NULL_VOID(popupNode);
-        auto rendercontext = popupNode->GetRenderContext();
-        CHECK_NULL_VOID(rendercontext);
-        rendercontext->UpdateOpacity(opacity);
-    });
-    bubbleAnimator_->AddInterpolator(animation);
-    bubbleAnimator_->AddStopListener([targetId = host->GetId(), popnodeId = animationNode->GetId(),
-                                         id = Container::CurrentId(), weak = WeakClaim(this)] {
+    AnimationUtils::OpenImplicitAnimation(option, Curves::SHARP,
+        [id = Container::CurrentId(), weak = AceType::WeakClaim(this), animationId = animationId_]() {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->animationId_ == animationId) {
+                pattern->UpdatePopupVisibility(VisibleType::GONE);
+            }
+        });
+    AnimationUtils::AddKeyFrame(
+        startTimeRatio, Curves::SHARP, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdatePopupOpacity(1.0f);
+            pattern->UpdateBubbleSize();
+        });
+    AnimationUtils::AddKeyFrame(
+        middleTimeRatio, Curves::LINEAR, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdatePopupOpacity(1.0f);
+        });
+    AnimationUtils::AddKeyFrame(1.0f, Curves::SHARP, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
         ContainerScope scope(id);
-        auto indexerPattern = weak.Upgrade();
-        CHECK_NULL_VOID(indexerPattern);
-        indexerPattern->RemoveBubbleNode(popnodeId, targetId);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->UpdatePopupOpacity(0.0f);
     });
-    bubbleAnimator_->Play();
+    AnimationUtils::CloseImplicitAnimation();
 }
 
-void IndexerPattern::RemoveBubbleNode(int32_t popnodeId, int32_t targetId) const
+void IndexerPattern::UpdatePopupOpacity(float ratio)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto popupNode = overlayManager->GetIndexerPopup(targetId);
-    CHECK_NULL_VOID(popupNode);
-    if (!removePopupNode_ || popupNode->GetId() != popnodeId) {
-        return;
+    CHECK_NULL_VOID(popupNode_);
+    auto rendercontext = popupNode_->GetRenderContext();
+    CHECK_NULL_VOID(rendercontext);
+    rendercontext->UpdateOpacity(ratio);
+}
+
+void IndexerPattern::UpdatePopupVisibility(VisibleType visible)
+{
+    CHECK_NULL_VOID(popupNode_);
+    auto layoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto currentVisibility = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (currentVisibility != visible) {
+        layoutProperty->UpdateVisibility(visible);
+        popupNode_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
-    overlayManager->EraseIndexerPopup(targetId);
+}
+
+bool IndexerPattern::NeedShowPopupView()
+{
+    CHECK_NULL_RETURN(popupNode_, false);
+    auto layoutProperty = popupNode_->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
+}
+
+int32_t IndexerPattern::GenerateAnimationId()
+{
+    return (++animationId_) % TOTAL_NUMBER;
 }
 } // namespace OHOS::Ace::NG

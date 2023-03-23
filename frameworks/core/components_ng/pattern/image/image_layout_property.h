@@ -70,7 +70,7 @@ public:
     {
         LayoutProperty::ToJsonValue(json);
         static const char* OBJECTFITVALUE[] = { "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover",
-            "ImageFit.FitWidth", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
+            "ImageFit.Auto", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
         static const char* COPYOPTIONSVALUE[] = { "CopyOptions.None", "CopyOptions.InApp", "CopyOptions.Local",
             "CopyOptions.Distributed" };
         json->Put("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str());

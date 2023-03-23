@@ -43,7 +43,7 @@ public:
     void Initialize();
     void RunCard(int64_t formId, const std::string& path, const std::string& module, const std::string& data,
         const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap, const std::string& formSrc,
-        const FrontendType& cardType);
+        const FrontendType& cardType, const FrontendType& uiSyntax);
     void UpdateCard(
         const std::string& content, const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap);
     void Destroy();
@@ -120,6 +120,16 @@ public:
         return formPattern_.Upgrade();
     }
 
+    FrontendType GetCardType() const
+    {
+        return cardType_;
+    }
+
+    FrontendType GetUISyntaxType() const
+    {
+        return uiSyntax_;
+    }
+
     void SetNodeId(int32_t nodeId)
     {
         nodeId_ = static_cast<int64_t>(nodeId);
@@ -137,6 +147,7 @@ private:
     bool allowUpdate_ = true;
 
     FrontendType cardType_ = FrontendType::JS_CARD;
+    FrontendType uiSyntax_ = FrontendType::JS_CARD;
 
     RefPtr<Component> formComponent_;
     WeakPtr<Element> formElement_;

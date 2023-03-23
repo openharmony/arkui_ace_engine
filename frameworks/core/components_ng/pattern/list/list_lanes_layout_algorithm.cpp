@@ -100,6 +100,10 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
     int32_t cnt = 0;
     int32_t lanes = lanes_ > 1 ? lanes_ : 1;
     for (int32_t i = 0; i < lanes && currentIndex - 1 >= 0; i++) {
+        if (currentIndex > GetMaxListItemIndex() + 1) {
+            --currentIndex;
+            continue;
+        }
         auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
         if (!wrapper) {
             break;

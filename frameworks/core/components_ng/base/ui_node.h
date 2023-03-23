@@ -287,6 +287,36 @@ public:
     {
         return childrenUpdatedFrom_;
     }
+    // These two interfaces are only used for fast preview.
+    // FastPreviewUpdateChild: Replace the old child at the specified slot with the new created node.
+    // FastPreviewUpdateChildDone: the new created node performs some special operations.
+    virtual void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild)
+    {
+        RemoveChildAtIndex(slot);
+        newChild->MountToParent(AceType::Claim(this), slot, false);
+    }
+    virtual void FastPreviewUpdateChildDone() {}
+
+#ifdef PREVIEW
+    void SetDebugLine(const std::string& line)
+    {
+        debugLine_ = line;
+    }
+    std::string GetDebugLine() const
+    {
+        return debugLine_;
+    }
+
+    void SetViewId(const std::string& viewId)
+    {
+        viewId_ = viewId;
+    }
+
+    std::string GetViewId() const
+    {
+        return viewId_;
+    }
+#endif
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
@@ -336,6 +366,10 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;
 
+#ifdef PREVIEW
+    std::string debugLine_;
+    std::string viewId_;
+#endif
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };
 

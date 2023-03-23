@@ -99,7 +99,7 @@ public:
     }
 
     void TransferJsResponseDataPreview(int32_t callbackId, int32_t code, ResponseData responseData) const;
-
+    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID);
     void InitializeModuleSearcher(const std::string& bundleName, const std::string& moduleName,
                                   const std::string& assetPath, bool isBundle)
     {
@@ -144,7 +144,6 @@ public:
     void SetColorMode(ColorMode colorMode) override;
     void RebuildAllPages() override;
     void NotifyAppStorage(const std::string& key, const std::string& value) override;
-    RefPtr<Component> GetNewComponentWithJsCode(const std::string& jsCode, const std::string& viewID);
     RefPtr<AceEventHandler> GetEventHandler() override
     {
         return handler_;
@@ -229,11 +228,14 @@ public:
         return AceType::DynamicCast<Framework::FrontendDelegate>(delegate_);
     }
 
+protected:
+    bool isFormRender_ = false;
+    RefPtr<Framework::FrontendDelegateDeclarative> delegate_;
+
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 
     FrontendType type_ = FrontendType::DECLARATIVE_JS;
-    RefPtr<Framework::FrontendDelegateDeclarative> delegate_;
     RefPtr<AceEventHandler> handler_;
     RefPtr<Framework::JsEngine> jsEngine_;
     RefPtr<AccessibilityManager> accessibilityManager_;

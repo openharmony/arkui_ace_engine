@@ -64,7 +64,7 @@ public:
 
     void AddChildContent(int32_t index, const RefPtr<RenderNode>& child)
     {
-        LOGI("AddChildContent: %{public}d", index);
+        LOGD("AddChildContent: %{public}d", index);
         auto iter = contentMap_.begin();
         while (iter != contentMap_.end()) {
             if (iter->second == child) {
@@ -83,7 +83,7 @@ public:
 
     void RemoveChildContent(int32_t index)
     {
-        LOGI("RemoveChildContent: %{public}d", index);
+        LOGD("RemoveChildContent: %{public}d", index);
         if (contentMap_.find(index) != contentMap_.end()) {
             contentMap_.clear();
             forceUpdate_ = true;
@@ -92,7 +92,7 @@ public:
 
     void RemoveChildContent(const RefPtr<RenderNode>& child)
     {
-        LOGI("RemoveChildContent by content");
+        LOGD("RemoveChildContent by content");
         auto iter = contentMap_.begin();
         while (iter != contentMap_.end()) {
             if (iter->second == child) {
@@ -107,7 +107,7 @@ public:
 
     void RemoveChildContentUpdateMap(const RefPtr<RenderNode>& child)
     {
-        LOGI("RemoveChildContent by content, map update");
+        LOGD("RemoveChildContent by content, map update");
         int32_t idx = -1;
 
         for (const auto& item : contentMap_) {

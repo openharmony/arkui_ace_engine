@@ -75,7 +75,7 @@ void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
 void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
-    json->Put("blur", propFrontBlurRadius.value_or(0.0_vp).Value());
+    json->Put("blur", round(propFrontBlurRadius.value_or(0.0_vp).Value() * 100) / 100);
     json->Put("grayscale", propFrontGrayScale.has_value() ? propFrontGrayScale->Value() : 0.0);
     json->Put("brightness", propFrontBrightness.has_value() ? propFrontBrightness->Value() : 1.0);
     json->Put("saturate", propFrontSaturate.has_value() ? propFrontSaturate->Value() : 1.0);
@@ -114,6 +114,9 @@ void BackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonValue->Put("x", 0.0);
         jsonValue->Put("y", 0.0);
         json->Put("backgroundImagePosition", jsonValue);
+    }
+    if (propBlurRadius.has_value()) {
+        json->Put("backdropBlur", propBlurRadius->ToString().c_str());
     }
 }
 

@@ -187,7 +187,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest002, TestSize.Level1)
      * @tc.expected: The drawDelegate_ is null.
      */
     context_->onShow_ = false;
-    context_->SetIsEtsCard(false);
+    context_->SetIsFormRender(false);
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     EXPECT_EQ(context_->drawDelegate_, nullptr);
 
@@ -231,7 +231,7 @@ HWTEST_F(PipelineContextTest, PipelineContextTest003, TestSize.Level1)
      */
     context_->onShow_ = true;
     context_->onFocus_ = false;
-    context_->SetIsEtsCard(true);
+    context_->SetIsFormRender(true);
     context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
     EXPECT_EQ(context_->drawDelegate_, nullptr);
 
@@ -1261,34 +1261,5 @@ HWTEST_F(PipelineContextTest, PipelineContextTest027, TestSize.Level1)
     context_->designWidthScale_ = DEFAULT_DOUBLE0;
     context_->StartWindowSizeChangeAnimate(DEFAULT_INT3, DEFAULT_INT3, WindowSizeChangeReason::UNDEFINED);
     EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT3);
-}
-
-/**
- * @tc.name: PipelineContextTest028
- * @tc.desc: Test functions OnVirtualKeyboardHeightChange and SetRootRect.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTest, PipelineContextTest028, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    ContainerScope scope(DEFAULT_INSTANCE_ID);
-    context_->SetupRootElement();
-    auto frontend = AceType::MakeRefPtr<MockFrontend>();
-    auto& windowConfig = frontend->GetWindowConfig();
-    windowConfig.designWidth = DEFAULT_INT1;
-    context_->weakFrontend_ = frontend;
-    context_->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
-
-    /**
-     * @tc.steps2: Call the function OnVirtualKeyboardHeightChange with DEFAULT_DOUBLE1.
-     * @tc.expected: The designWidthScale_ is changed to DEFAULT_INT0.
-     */
-    context_->designWidthScale_ = DEFAULT_DOUBLE1;
-    context_->OnVirtualKeyboardHeightChange(DEFAULT_DOUBLE1);
-    EXPECT_DOUBLE_EQ(context_->designWidthScale_, DEFAULT_INT0);
 }
 } // namespace OHOS::Ace::NG

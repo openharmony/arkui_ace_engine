@@ -175,7 +175,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     FlushAnimation(GetTimeFromExternalTimer());
     FlushBuild();
-    if (isEtsCard_ && drawDelegate_) {
+    if (isFormRender_ && drawDelegate_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
         drawDelegate_ = nullptr;
@@ -193,7 +193,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         RequestFrame();
     }
     FlushMessages();
-    if (onShow_ && onFocus_) {
+    if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
     }
     HandleVisibleAreaChangeEvent();
@@ -261,7 +261,7 @@ void PipelineContext::FlushFocus()
         return;
     }
     if (!RequestDefaultFocus()) {
-        if (rootNode_ && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
+        if (rootNode_ && rootNode_->GetFocusHub() && !rootNode_->GetFocusHub()->IsCurrentFocus()) {
             rootNode_->GetFocusHub()->RequestFocusImmediately();
         }
     }
@@ -301,6 +301,23 @@ void PipelineContext::FlushBuildFinishCallbacks()
     }
 }
 
+void PipelineContext::RegisterRootEvent()
+{
+    if (!IsFormRender()) {
+        return;
+    }
+
+    // To avoid conflicts between longPress and click events on the card,
+    // use an empty longPress event placeholder in the EtsCard scenario
+    auto hub = rootNode_->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(hub);
+    auto event = [](const GestureEvent& info) mutable {
+        LOGD("Not Support LongPress");
+    };
+    auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
+    hub->SetLongPressEvent(longPress, false, true);
+}
+
 void PipelineContext::SetupRootElement()
 {
     CHECK_RUN_ON(UI);
@@ -308,6 +325,7 @@ void PipelineContext::SetupRootElement()
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<RootPattern>());
     rootNode_->SetHostRootId(GetInstanceId());
     rootNode_->SetHostPageId(-1);
+    RegisterRootEvent();
     CalcSize idealSize { CalcLength(rootWidth_), CalcLength(rootHeight_) };
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
@@ -328,7 +346,7 @@ void PipelineContext::SetupRootElement()
         rootNode_->AddChild(appBarNode ? appBarNode : stageNode);
     }
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!IsJsCard()) {
+    if (!IsJsCard() && !isFormRender_) {
         auto rsWindow = static_cast<RosenWindow*>(GetWindow());
         if (rsWindow) {
             auto rsUIDirector = rsWindow->GetRsUIDirector();
@@ -558,6 +576,8 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         layoutConstraint.selfIdealSize = idealSize;
         layoutConstraint.maxSize = idealSize;
         rootNode_->UpdateLayoutConstraint(layoutConstraint);
+        // reset parentLayoutConstraint to update itself when next measure task
+        rootNode_->GetGeometryNode()->ResetParentLayoutConstraint();
         rootNode_->MarkDirtyNode();
     }
     if (rootNode_->GetGeometryNode()->GetFrameOffset().GetY() != offset) {
@@ -715,6 +735,10 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
+    if (etsCardTouchEventCallback_) {
+        etsCardTouchEventCallback_(point);
+    }
+
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     LOGD("AceTouchEvent: x = %{public}f, y = %{public}f, type = %{public}zu", scalePoint.x, scalePoint.y,
         scalePoint.type);
@@ -730,6 +754,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         LOGD("receive touch down event, first use touch test to collect touch event target");
         TouchRestrict touchRestrict { TouchRestrict::NONE };
         touchRestrict.sourceType = point.sourceType;
+        touchRestrict.touchEvent = point;
         eventManager_->TouchTest(scalePoint, rootNode_, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
 
         for (const auto& weakContext : touchPluginPipelineContext_) {
@@ -777,6 +802,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
+        etsCardTouchEventCallback_ = nullptr;
     }
 
     hasIdleTasks_ = true;

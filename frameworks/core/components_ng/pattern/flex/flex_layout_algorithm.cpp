@@ -32,6 +32,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -95,6 +96,11 @@ OptionalSizeF GetCalcSizeHelper(float mainAxisSize, float crossAxisSize, FlexDir
     return size;
 }
 
+bool IsHorizontal(FlexDirection direction)
+{
+    return direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE;
+}
+
 void UpdateChildLayoutConstrainByFlexBasis(
     FlexDirection direction, const RefPtr<LayoutWrapper>& child, LayoutConstraintF& layoutConstraint)
 {
@@ -104,6 +110,18 @@ void UpdateChildLayoutConstrainByFlexBasis(
     CHECK_NULL_VOID_NOLOG(flexBasis);
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
+    }
+    if (child->GetLayoutProperty()->GetCalcLayoutConstraint()) {
+        auto selfIdealSize = child->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
+        if (child->GetHostTag() == V2::BLANK_ETS_TAG && selfIdealSize.has_value()) {
+            if (IsHorizontal(direction) && selfIdealSize->Width().has_value() &&
+                selfIdealSize->Width()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                return;
+            } else if (!IsHorizontal(direction) && selfIdealSize->Height().has_value() &&
+                    selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
+                return;
+            }
+        }
     }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
         layoutConstraint.selfIdealSize.SetWidth(flexBasis->ConvertToPx());
@@ -465,9 +483,8 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
             auto childList = iter->second;
             for (auto& child : childList) {
                 const auto& childLayoutWrapper = child.layoutWrapper;
-                auto childLayoutConstraint = child.layoutConstraint;
-                UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, childLayoutConstraint);
-                childLayoutWrapper->Measure(childLayoutConstraint);
+                UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
+                childLayoutWrapper->Measure(child.layoutConstraint);
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
                 const auto& childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
                 if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {

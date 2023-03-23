@@ -313,18 +313,15 @@ void TextFieldPattern::CreateSingleHandle()
 {
     RectF firstHandle;
     auto firstHandleMetrics = CalcCursorOffsetByPosition(textEditingValue_.caretPosition);
-    OffsetF firstHandleOffset(firstHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX(),
-        firstHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY());
+    auto emptyOffset = MakeEmptyOffset();
+    OffsetF firstHandleOffset(firstHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX() + emptyOffset.GetX(),
+        firstHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY() + emptyOffset.GetY());
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     firstHandle.SetOffset(firstHandleOffset);
     firstHandle.SetSize(handlePaintSize);
     ShowSelectOverlay(firstHandle, std::nullopt);
     selectionMode_ = SelectionMode::NONE;
     StopTwinkling();
-    auto renderContext = GetHost()->GetRenderContext();
-    if (renderContext) {
-        AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY, 0.0f, PRESS_DURATION, Curves::SHARP);
-    }
 }
 
 bool TextFieldPattern::UpdateCaretByPressOrLongPress()
@@ -1006,18 +1003,38 @@ bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
             }
         }
         if (keyEvent.code == KeyCode::KEY_DEL) {
+#if defined(PREVIEW)
+            DeleteBackward(1);
+#else
             DeleteForward(1);
+#endif
             return true;
         }
         if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
+#if defined(PREVIEW)
+            DeleteForward(1);
+#else
             DeleteBackward(1);
+#endif
             return true;
         }
+        ParseAppendValue(keyEvent.code, appendElement);
         if (!appendElement.empty()) {
             InsertValue(appendElement);
         }
     }
     return true;
+}
+
+void TextFieldPattern::ParseAppendValue(KeyCode keycode, std::string& appendElement)
+{
+    switch (keycode) {
+        case KeyCode::KEY_SPACE:
+            appendElement = " ";
+            break;
+        default:
+            break;
+    }
 }
 
 void TextFieldPattern::HandleOnUndoAction()
@@ -1089,6 +1106,7 @@ void TextFieldPattern::HandleOnCopy()
         LOGW("Nothing to select");
         return;
     }
+    LOGI("On copy, text selector %{public}s", textSelector_.ToString().c_str());
     auto value = GetEditingValue().GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd());
     if (value.empty()) {
         LOGW("Copy value is empty");
@@ -1096,7 +1114,14 @@ void TextFieldPattern::HandleOnCopy()
     }
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Copy value is %{private}s", value.c_str());
+#if defined(PREVIEW)
+        if (clipRecords_.size() >= RECORD_MAX_LENGTH) {
+            clipRecords_.erase(clipRecords_.begin());
+        }
+        clipRecords_.emplace_back(StringUtils::ToWstring(value));
+#else
         clipboard_->SetData(value, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
+#endif
     }
 
     textEditingValue_.caretPosition = textSelector_.GetEnd();
@@ -1121,7 +1146,6 @@ void TextFieldPattern::HandleOnCopy()
 void TextFieldPattern::HandleOnPaste()
 {
     LOGI("TextFieldPattern::HandleOnPaste");
-    CHECK_NULL_VOID(clipboard_);
     auto pasteCallback = [weak = WeakClaim(this), textSelector = textSelector_](const std::string& data) {
         if (data.empty()) {
             LOGW("Paste value is empty");
@@ -1131,10 +1155,6 @@ void TextFieldPattern::HandleOnPaste()
         CHECK_NULL_VOID_NOLOG(textfield);
         auto layoutProperty = textfield->GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) == CopyOptions::None) {
-            LOGW("Copy option not allowed");
-            return;
-        }
         auto value = textfield->GetEditingValue();
         auto valueLength = textfield->GetEditingValue().GetWideText().length();
         int32_t start = 0;
@@ -1182,13 +1202,20 @@ void TextFieldPattern::HandleOnPaste()
         host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                      : PROPERTY_UPDATE_MEASURE);
     };
+#if defined(PREVIEW)
+    pasteCallback(clipRecords_.empty() ? "" : StringUtils::ToString((*clipRecords_.rbegin())));
+#else
+    CHECK_NULL_VOID(clipboard_);
     clipboard_->GetData(pasteCallback);
+#endif
 }
 
 void TextFieldPattern::HandleOnCut()
 {
     LOGI("TextFieldPattern::HandleOnCut");
+#if !defined(PREVIEW)
     CHECK_NULL_VOID(clipboard_);
+#endif
     auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     caretUpdateType_ = CaretUpdateType::NONE;
@@ -1204,7 +1231,14 @@ void TextFieldPattern::HandleOnCut()
     auto selectedText = value.GetSelectedText(textSelector_.GetStart(), textSelector_.GetEnd());
     if (layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None) {
         LOGI("Cut value is %{private}s", selectedText.c_str());
+#if defined(PREVIEW)
+        if (clipRecords_.size() >= RECORD_MAX_LENGTH) {
+            clipRecords_.erase(clipRecords_.begin());
+        }
+        clipRecords_.emplace_back(StringUtils::ToWstring(selectedText));
+#else
         clipboard_->SetData(selectedText, layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed));
+#endif
     }
     textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textSelector_.GetStart()) +
                              textEditingValue_.GetValueAfterPosition(textSelector_.GetEnd());
@@ -1284,12 +1318,7 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto renderContext = GetHost()->GetRenderContext();
-        if (isOnHover_) {
-            AnimatePressAndHover(
-                renderContext, HOVER_ANIMATION_OPACITY, PRESS_ANIMATION_OPACITY, PRESS_DURATION, Curves::SHARP);
-        } else {
-            AnimatePressAndHover(renderContext, 0.0f, PRESS_ANIMATION_OPACITY, PRESS_DURATION, Curves::SHARP);
-        }
+        AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY);
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -1304,36 +1333,31 @@ void TextFieldPattern::HandleTouchUp()
     if (enableTouchAndHoverEffect_) {
         auto renderContext = GetHost()->GetRenderContext();
         if (isOnHover_) {
-            AnimatePressAndHover(
-                renderContext, PRESS_ANIMATION_OPACITY, HOVER_ANIMATION_OPACITY, PRESS_DURATION, Curves::SHARP);
+            AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY);
         } else {
-            AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY, 0.0f, PRESS_DURATION, Curves::SHARP);
+            AnimatePressAndHover(renderContext, 0.0f);
         }
     }
 }
 
 void TextFieldPattern::ResetBackgroundColor()
 {
-    auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(textfieldPaintProperty);
     auto renderContext = GetHost()->GetRenderContext();
-    renderContext->AnimateHoverEffectBoard(false);
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    AnimatePressAndHover(renderContext, 0.0f);
 }
 
-void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
-    int32_t duration, const RefPtr<Curve>& curve)
+void TextFieldPattern::AnimatePressAndHover(RefPtr<RenderContext>& renderContext, float endOpacity, bool isHoverChange)
 {
-    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
-    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
-    Color highlightStart = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorFrom);
-    Color highlightEnd = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT).BlendColor(touchColorTo);
-    renderContext->OnBackgroundColorUpdate(highlightStart);
     AnimationOption option = AnimationOption();
-    option.SetDuration(duration);
-    option.SetCurve(curve);
-    AnimationUtils::Animate(
-        option, [renderContext, highlightEnd]() { renderContext->OnBackgroundColorUpdate(highlightEnd); });
+    if (isHoverChange) {
+        option.SetDuration(HOVER_DURATION);
+        option.SetCurve(Curves::FRICTION);
+    } else {
+        option.SetDuration(PRESS_DURATION);
+        option.SetCurve(Curves::SHARP);
+    }
+    Color endBlendColor = Color::FromRGBO(0, 0, 0, endOpacity);
+    AnimationUtils::Animate(option, [renderContext, endBlendColor]() { renderContext->BlendBgColor(endBlendColor); });
 }
 
 void TextFieldPattern::InitTouchEvent()
@@ -1512,11 +1536,27 @@ void TextFieldPattern::OnModifyDone()
     auto maxLength = GetMaxLength();
     if (GreatOrEqual(textEditingValue_.GetWideText().length(), maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
+        textEditingValue_.caretPosition = std::clamp(
+            textEditingValue_.caretPosition, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
         SetEditingValueToProperty(textEditingValue_.text);
     }
+    FireOnChangeIfNeeded();
     caretUpdateType_ = CaretUpdateType::INPUT;
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
+}
+
+void TextFieldPattern::FireOnChangeIfNeeded()
+{
+    auto layoutProperty = GetHost()->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetNeedFireOnChangeWhenCreateValue(false)) {
+        return;
+    }
+    layoutProperty->UpdateNeedFireOnChangeWhenCreate(false);
+    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnChange(textEditingValue_.text);
 }
 
 bool TextFieldPattern::IsDisabled()
@@ -1580,7 +1620,7 @@ void TextFieldPattern::ProcessOverlay()
     StopTwinkling();
     auto renderContext = GetHost()->GetRenderContext();
     if (renderContext) {
-        AnimatePressAndHover(renderContext, PRESS_ANIMATION_OPACITY, 0.0f, PRESS_DURATION, Curves::SHARP);
+        AnimatePressAndHover(renderContext, 0.0f);
     }
     if (textEditingValue_.text.empty()) {
         CreateSingleHandle();
@@ -1651,7 +1691,7 @@ void TextFieldPattern::ShowSelectOverlay(
         selectInfo.isUsingMouse = pattern->IsUsingMouse();
         selectInfo.rightClickOffset = pattern->GetRightClickOffset();
         selectInfo.singleLineHeight = pattern->PreferredLineHeight();
-        selectInfo.menuInfo.showCopy = !pattern->GetEditingValue().text.empty();
+        selectInfo.menuInfo.showCopy = !pattern->GetEditingValue().text.empty() && pattern->AllowCopy();
         selectInfo.menuInfo.showCut = !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showCopyAll = !pattern->GetEditingValue().text.empty();
         selectInfo.menuInfo.showPaste = hasData;
@@ -1689,7 +1729,18 @@ void TextFieldPattern::ShowSelectOverlay(
 
         pattern->SetSelectOverlay(pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(selectInfo));
     };
+#if defined(PREVIEW)
+    hasDataCallback(!clipRecords_.empty());
+#else
     clipboard_->HasData(hasDataCallback);
+#endif
+}
+
+bool TextFieldPattern::AllowCopy()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetCopyOptionsValue(CopyOptions::Distributed) != CopyOptions::None;
 }
 
 void TextFieldPattern::OnDetachFromFrameNode(FrameNode* /*node*/)
@@ -1827,6 +1878,9 @@ void TextFieldPattern::InitEditingValueText(std::string content)
     textEditingValue_.text = std::move(content);
     textEditingValue_.caretPosition = textEditingValue_.GetWideText().length();
     SetEditingValueToProperty(textEditingValue_.text);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateNeedFireOnChangeWhenCreate(true);
 }
 
 void TextFieldPattern::InitCaretPosition(std::string content)
@@ -1875,14 +1929,16 @@ void TextFieldPattern::OnHover(bool isHover)
         if (isOnHover_) {
             pipeline->SetMouseStyleHoldNode(frameId);
             pipeline->ChangeMouseStyle(frameId, HasFocus() ? MouseFormat::TEXT_CURSOR : MouseFormat::HAND_POINTING);
-            renderContext->AnimateHoverEffectBoard(true);
+            AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY, true);
             GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
             return;
         }
         isOnHover_ = false;
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
-        renderContext->AnimateHoverEffectBoard(false);
+        if (!isMousePressed_) {
+            AnimatePressAndHover(renderContext, 0.0f, true);
+        }
         GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
@@ -2195,6 +2251,7 @@ void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
 void TextFieldPattern::InsertValue(const std::string& insertValue)
 {
+    LOGD("Insert value '%{public}s'", insertValue.c_str());
     auto originLength = static_cast<uint32_t>(textEditingValue_.GetWideText().length());
     if (originLength >= GetMaxLength()) {
         LOGW("Max length reached");

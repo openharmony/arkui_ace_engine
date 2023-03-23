@@ -64,6 +64,8 @@ public:
         const std::vector<shared_ptr<JsValue>>& argv, int32_t argc);
 
 private:
+    static std::string GenerateErrorMsg(
+        const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
     static std::string GenerateSummaryBody(
         const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime);
     static ErrorPos GetErrorPos(const std::string& rawStack);

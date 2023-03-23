@@ -223,6 +223,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto itemWidth = (axis == Axis::HORIZONTAL ? (size.Width() / displayCount) : (size.Height() / displayCount));
     auto itemSpace = SwiperUtils::GetItemSpace(swiperLayoutProperty);
     auto padding = swiperLayoutProperty->CreatePaddingAndBorder();
+    auto rightPadding = padding.right.value_or(0.0f);
+    auto bottomPadding = padding.bottom.value_or(0.0f);
     OffsetF paddingOffset = { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
 
     // Effect when difference between current index and target index is greater than 1.
@@ -273,11 +275,12 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         auto geometryNode = wrapper->GetGeometryNode();
-        auto frameSize = geometryNode->GetMarginFrameSize();
-        preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
+        preOffset -=
+            (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width(), 0) : OffsetF(0, maxChildSize_.Height()));
         geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
         wrapper->Layout();
         preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
+        preOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
     }
 
     // Layout items after current item.
@@ -290,9 +293,9 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto geometryNode = wrapper->GetGeometryNode();
         geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
         wrapper->Layout();
-        auto frameSize = geometryNode->GetMarginFrameSize();
-        nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width() + itemSpace, 0)
-                                                : OffsetF(0, frameSize.Height() + itemSpace));
+        nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width() + itemSpace, 0)
+                                                : OffsetF(0, maxChildSize_.Height() + itemSpace));
+        nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
     }
 
     // Layout swiper indicator
@@ -328,12 +331,12 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto lastWrapper = layoutWrapper->GetOrCreateChildByIndex(totalCount_ - index - 1);
             if (lastWrapper) {
                 auto geometryNode = lastWrapper->GetGeometryNode();
-                auto frameSize = geometryNode->GetMarginFrameSize();
                 preOffset -=
-                    (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width(), 0) : OffsetF(0, frameSize.Height()));
+                    (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width(), 0) : OffsetF(0, maxChildSize_.Height()));
                 geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
                 lastWrapper->Layout();
                 preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
+                preOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
             }
         }
     } else if (currentIndex_ >= (totalCount_ - displayCount_) && LessOrEqual(currentOffset_, 0.0)) {
@@ -344,11 +347,11 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             auto firstWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
             if (firstWrapper) {
                 auto geometryNode = firstWrapper->GetGeometryNode();
-                auto frameSize = geometryNode->GetMarginFrameSize();
                 geometryNode->SetMarginFrameOffset(nextOffset + paddingOffset);
                 firstWrapper->Layout();
-                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(frameSize.Width() + itemSpace, 0)
-                                                        : OffsetF(0, frameSize.Height() + itemSpace));
+                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width() + itemSpace, 0)
+                                                        : OffsetF(0, maxChildSize_.Height() + itemSpace));
+                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
             }
         }
     }

@@ -50,6 +50,10 @@ public:
         const RefPtr<CanvasImage>& secondaryImageCanvas, const RefPtr<CanvasImage>& backgroundImageCanvas,
         const ImagePaintConfig& singleStarImagePaintConfig)
     {
+        if (!JudgeCanvasImage(foregroundImageCanvas, secondaryImageCanvas, backgroundImageCanvas)) {
+            return;
+        }
+        SetNeedDraw(true);
         foregroundImageCanvas_ = foregroundImageCanvas;
         secondaryImageCanvas_ = secondaryImageCanvas;
         backgroundImageCanvas_ = backgroundImageCanvas;
@@ -58,11 +62,33 @@ public:
         backgroundImageCanvas_->SetPaintConfig(singleStarImagePaintConfig);
     }
 
-    void SetBoardColor(LinearColor color, int32_t times, const RefPtr<CubicCurve>& curve)
+    bool JudgeCanvasImage(const RefPtr<CanvasImage>& foreground, const RefPtr<CanvasImage>& secondary,
+        const RefPtr<CanvasImage>& background)
+    {
+        if (foreground != foregroundImageCanvas_) {
+            return true;
+        }
+        if (secondary != secondaryImageCanvas_) {
+            return true;
+        }
+        if (background != backgroundImageCanvas_) {
+            return true;
+        }
+        return false;
+    }
+
+    void SetNeedDraw(bool flag)
+    {
+        if (needDraw_) {
+            needDraw_->Set(flag);
+        }
+    }
+
+    void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
     {
         if (boardColor_) {
             AnimationOption option = AnimationOption();
-            option.SetDuration(times);
+            option.SetDuration(duratuion);
             option.SetCurve(curve);
             AnimationUtils::Animate(option, [&]() { boardColor_->Set(color); });
         }
@@ -91,6 +117,9 @@ public:
 
     void SetTouchStar(int32_t touchStar)
     {
+        if (touchStar < 0 || touchStar >= starNum_->Get() || touchStar_->Get() != touchStar) {
+            SetHoverState(RatingAnimationType::NONE);
+        }
         if (touchStar_) {
             touchStar_->Set(touchStar);
         }
@@ -105,6 +134,10 @@ public:
 
     void SetHoverState(const RatingAnimationType& state)
     {
+        if (state_ == state) {
+            return;
+        }
+        state_ = state;
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto ratingTheme = pipeline->GetTheme<RatingTheme>();
@@ -133,10 +166,13 @@ public:
     }
 
 private:
+    // others
+    RatingAnimationType state_ = RatingAnimationType::NONE;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
     // non-animatable property
+    RefPtr<PropertyBool> needDraw_;
     RefPtr<PropertyInt> starNum_;
     RefPtr<PropertyInt> touchStar_;
     RefPtr<PropertyFloat> drawScore_;

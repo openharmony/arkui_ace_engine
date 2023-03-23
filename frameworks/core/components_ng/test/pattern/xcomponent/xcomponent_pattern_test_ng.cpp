@@ -45,7 +45,6 @@ struct TestProperty {
     std::optional<std::string> soPath = std::nullopt;
     std::optional<LoadEvent> loadEvent = std::nullopt;
     std::optional<DestroyEvent> destroyEvent = std::nullopt;
-    std::optional<DestroyEvent> surfaceDestroyEvent = std::nullopt;
 };
 namespace {
 const std::string CHECK_KEY = "HI";
@@ -122,9 +121,6 @@ RefPtr<FrameNode> XComponentPropertyTestNg::CreateXComponentNode(TestProperty& t
     if (testProperty.destroyEvent.has_value()) {
         XComponentModelNG().SetOnDestroy(std::move(testProperty.destroyEvent.value()));
     }
-    if (testProperty.surfaceDestroyEvent.has_value()) {
-        XComponentModelNG().SetOnSurfaceDestroyEvent(std::move(testProperty.surfaceDestroyEvent.value()));
-    }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // pop
     return AceType::DynamicCast<FrameNode>(element);
@@ -189,7 +185,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentPropertyTest001, TestSize.Level1)
 
 /**
  * @tc.name: XComponentEventTest002
- * @tc.desc: Test XComponent onLoad, onDestroy and OnSurfaceDestroyEvent event.
+ * @tc.desc: Test XComponent onLoad and onDestroy event.
  * @tc.type: FUNC
  */
 HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
@@ -201,32 +197,26 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
      */
     std::string onLoadKey;
     std::string onDestroyKey;
-    std::string onSurfaceDestroyKey;
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
     auto onDestroy = [&onDestroyKey]() { onDestroyKey = CHECK_KEY; };
-    auto onSurfaceDestroy = [&onSurfaceDestroyKey]() { onSurfaceDestroyKey = CHECK_KEY; };
 
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE;
     testProperty.loadEvent = std::move(onLoad);
     testProperty.destroyEvent = std::move(onDestroy);
-    testProperty.surfaceDestroyEvent = std::move(onSurfaceDestroy);
-
     auto frameNode = CreateXComponentNode(testProperty);
     EXPECT_TRUE(frameNode);
     EXPECT_EQ(frameNode->GetTag(), V2::XCOMPONENT_ETS_TAG);
 
     /**
-     * @tc.steps: step2. call FireLoadEvent, FireDestroyEvent, FireSurfaceDestroy
+     * @tc.steps: step2. call FireLoadEvent, FireDestroyEvent
      * @tc.expected: step2. three checkKeys has changed
      */
     auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent();
-    xComponentEventHub->FireSurfaceDestroyEvent();
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
-    EXPECT_EQ(onSurfaceDestroyKey, CHECK_KEY);
 
     /**
      * @tc.steps: step3. reset the testProperty and rerun step1&2
@@ -236,11 +226,9 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
 
     auto onLoad2 = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
     auto onDestroy2 = [&onDestroyKey]() { onDestroyKey = ""; };
-    auto onSurfaceDestroy2 = [&onSurfaceDestroyKey]() { onSurfaceDestroyKey = ""; };
     testProperty.xcType = XCOMPONENT_COMPONENT_TYPE;
     testProperty.loadEvent = std::move(onLoad2);
     testProperty.destroyEvent = std::move(onDestroy2);
-    testProperty.surfaceDestroyEvent = std::move(onSurfaceDestroy2);
 
     auto frameNode2 = CreateXComponentNode(testProperty);
     EXPECT_TRUE(frameNode2);
@@ -248,10 +236,8 @@ HWTEST_F(XComponentPropertyTestNg, XComponentEventTest002, TestSize.Level1)
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
     xComponentEventHub->FireDestroyEvent();
-    xComponentEventHub->FireSurfaceDestroyEvent();
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
-    EXPECT_EQ(onSurfaceDestroyKey, CHECK_KEY);
 }
 
 /**
@@ -273,10 +259,11 @@ HWTEST_F(XComponentPropertyTestNg, XComponentNDKTest003, TestSize.Level1)
     EXPECT_FALSE(xComponentPattern == nullptr);
 
     auto pair = xComponentPattern->GetNativeXComponent();
-    auto* nativeXComponent = pair.second;
+    auto weakNativeXComponent = pair.second;
+    auto nativeXComponent = weakNativeXComponent.lock();
     auto nativeXComponentImpl = pair.first;
-    EXPECT_FALSE(nativeXComponent == nullptr);
-    EXPECT_FALSE(nativeXComponentImpl == nullptr);
+    EXPECT_TRUE(nativeXComponent);
+    EXPECT_TRUE(nativeXComponentImpl);
     nativeXComponentImpl->SetXComponentId(XCOMPONENT_ID);
 
     uint64_t size = XCOMPONENT_ID_LEN_MAX + 1;
@@ -467,8 +454,8 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     pattern->OnRebuildFrame(); // type="surface", IsSurfaceValid=false
     // goto other branch
     pattern->type_ = XCOMPONENT_COMPONENT_TYPE_VALUE;
-    pattern->XComponentSizeInit(0.0f, 0.0f); // IsSurfaceValid=false
-    pattern->OnRebuildFrame();               // type="component"
+    pattern->XComponentSizeInit(); // IsSurfaceValid=false
+    pattern->OnRebuildFrame();     // type="component"
 
     /**
      * @tc.steps: step3. call OnDirtyLayoutWrapperSwap adjust frameOffsetChanges, contentOffsetChanges and
@@ -621,14 +608,14 @@ HWTEST_F(XComponentPropertyTestNg, XComponentTouchEventTest008, TestSize.Level1)
     TouchLocationInfo locationInfo(0);
     locationInfo.SetTouchType(TouchType::DOWN);
     touchEventInfo.AddChangedTouchLocationInfo(std::move(locationInfo));
-    for (int i = 0; i < OH_MAX_TOUCH_POINTS_NUMBER + 1; i++) { // over the OH_MAX_TOUCH_POINTS_NUMBER
+    for (int i = 0; i < static_cast<int>(OH_MAX_TOUCH_POINTS_NUMBER) + 1; i++) { // over the OH_MAX_TOUCH_POINTS_NUMBER
         TouchLocationInfo pointInfo(i);
         pointInfo.SetSourceTool(sourceTools[i % sourceTools.size()]);
         touchEventInfo.AddTouchLocationInfo(std::move(pointInfo));
     }
     pattern->HandleTouchEvent(touchEventInfo);
     EXPECT_EQ(pattern->nativeXComponentTouchPoints_.size(), OH_MAX_TOUCH_POINTS_NUMBER);
-    for (int i = 0; i < OH_MAX_TOUCH_POINTS_NUMBER; i++) {
+    for (int i = 0; i < static_cast<int>(OH_MAX_TOUCH_POINTS_NUMBER); i++) {
         EXPECT_EQ(static_cast<int>(pattern->nativeXComponentTouchPoints_[i].sourceToolType),
             static_cast<int>(sourceTools[i % sourceTools.size()]));
     }

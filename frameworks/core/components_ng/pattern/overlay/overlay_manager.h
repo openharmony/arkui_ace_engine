@@ -53,8 +53,7 @@ public:
         popupMap_.clear();
     }
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
-    void EraseIndexerPopup(int32_t targetId);
-    RefPtr<FrameNode> GetIndexerPopup(int32_t targetId);
+    void RemoveIndexerPopup();
     void UpdatePopupNode(int32_t targetId, const PopupInfo& popupInfo);
     void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
     void ErasePopup(int32_t targetId);
@@ -114,8 +113,8 @@ private:
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
 
-    void FocusDialog(const RefPtr<FrameNode>& dialogNode);
-    void BlurDialog();
+    void FocusOverlayNode(const RefPtr<FrameNode>& dialogNode);
+    void BlurOverlayNode();
 
     void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);

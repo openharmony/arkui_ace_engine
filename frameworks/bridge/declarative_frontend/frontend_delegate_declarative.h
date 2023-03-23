@@ -287,6 +287,19 @@ public:
         return pageRouterManager_;
     }
 
+    const RefPtr<TaskExecutor>& GetTaskExecutor() const
+    {
+        return taskExecutor_;
+    }
+
+    const RefPtr<Framework::ManifestParser>& GetManifestParser() const
+    {
+        return manifestParser_;
+    }
+
+protected:
+    bool isCardDelegate_ = false;
+
 private:
     int32_t GenerateNextPageId();
     void RecyclePageId(int32_t pageId);

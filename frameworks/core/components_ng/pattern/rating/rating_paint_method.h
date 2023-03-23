@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,8 @@ public:
         auto ratingTheme = pipeline->GetTheme<RatingTheme>();
         CHECK_NULL_VOID(ratingTheme);
         auto paintProperty = DynamicCast<RatingRenderProperty>(paintWrapper->GetPaintProperty());
+        ratingModifier_->SetContentOffset(paintWrapper->GetContentOffset());
+        ratingModifier_->SetStartNum(starNum_);
         if (paintProperty) {
             constexpr double DEFAULT_RATING_TOUCH_STAR_NUMBER = -1;
             ratingModifier_->SetDrawScore(paintProperty->GetRatingScoreValue(0.f));
@@ -53,8 +55,6 @@ public:
             ratingModifier_->SetTouchStar(paintProperty->GetTouchStar().value_or(DEFAULT_RATING_TOUCH_STAR_NUMBER));
         }
         ratingModifier_->SetHoverState(state_);
-        ratingModifier_->SetContentOffset(paintWrapper->GetContentOffset());
-        ratingModifier_->SetStartNum(starNum_);
     }
 
 private:

@@ -36,9 +36,7 @@
 
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
-using SharePanelCallback = std::function<void(const std::string& faBundleName, const std::string& faAbilityName,
-    const std::string& faModuleName, const std::string& faHostPkgName, const std::string& bundleName,
-    const std::string& abilityName)>;
+using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
@@ -266,6 +264,11 @@ public:
         return isSubContainer_;
     }
 
+    bool IsFormRender() const
+    {
+        return isFormRender_;
+    }
+
     void* GetSharedRuntime() override
     {
         return sharedRuntime_;
@@ -318,6 +321,10 @@ public:
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
+    static void ClearEngineCache(int32_t instanceId);
+
+    // ArkTsCard
+    static std::shared_ptr<Rosen::RSSurfaceNode> GetFormSurfaceNode(int32_t instanceId);
 
     void SetWindowName(const std::string& name)
     {
@@ -346,6 +353,11 @@ public:
         isSubContainer_ = isSubContainer;
     }
 
+    void SetIsFormRender(bool isFormRender)
+    {
+        isFormRender_ = isFormRender;
+    }
+
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
@@ -369,6 +381,16 @@ public:
 
     void SetToken(sptr<IRemoteObject>& token);
     sptr<IRemoteObject> GetToken();
+
+    // ArkTSCard
+    void UpdateFormData(const std::string& data);
+    void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
+
+    void GetNamesOfSharedImage(std::vector<std::string>& picNameArray);
+    void UpdateSharedImage(std::vector<std::string>& picNameArray, std::vector<int32_t>& byteLenArray,
+        std::vector<int32_t>& fileDescriptorArray);
+    void GetImageDataFromAshmem(
+        const std::string& picName, Ashmem& ashmem, const RefPtr<PipelineBase>& pipelineContext, int len);
 
 private:
     void InitializeFrontend();
@@ -410,6 +432,7 @@ private:
     sptr<IRemoteObject> token_;
 
     bool isSubContainer_ = false;
+    bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
 

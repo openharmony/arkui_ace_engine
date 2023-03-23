@@ -26,6 +26,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -50,6 +51,23 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("letterSpacing", fontStyle->GetLetterSpacing().value_or(Dimension()).ToString().c_str());
         json->Put(
             "textCase", V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str());
+        json->Put("fontColor", fontStyle->GetForegroundColor()
+            .value_or(fontStyle->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
+        json->Put("fontStyle",
+            fontStyle->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
+                                ? "FontStyle.Normal" : "FontStyle.Italic");
+        json->Put("fontWeight",
+            V2::ConvertWrapFontWeightToStirng(fontStyle->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
+        std::vector<std::string> fontFamilyVector =
+            fontStyle->GetFontFamily().value_or<std::vector<std::string>>({ "HarmonyOS Sans" });
+        if (fontFamilyVector.empty()) {
+            fontFamilyVector = std::vector<std::string>({ "HarmonyOS Sans" });
+        }
+        std::string fontFamily = fontFamilyVector.at(0);
+        for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+            fontFamily += ',' + fontFamilyVector.at(i);
+        }
+        json->Put("fontFamily", fontFamily.c_str());
     }
 }
 

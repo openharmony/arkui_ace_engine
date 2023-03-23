@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_model.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
@@ -247,8 +248,16 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::Bind<>(globalObj);
 }
 
-void JSScroll::SetScrollBar(int displayMode)
+void JSScroll::SetScrollBar(const JSCallbackInfo& args)
 {
+    if (args.Length() < 1) {
+        LOGE("args is invalid");
+        return;
+    }
+    int32_t displayMode;
+    if (args[0]->IsNull() || args[0]->IsUndefined() || !ParseJsInt32(args[0], displayMode)) {
+        displayMode = static_cast<int32_t>(NG::DisplayMode::AUTO);
+    }
     ScrollModel::GetInstance()->SetDisplayMode(displayMode);
 }
 

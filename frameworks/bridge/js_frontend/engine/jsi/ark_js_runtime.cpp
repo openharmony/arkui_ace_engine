@@ -50,8 +50,8 @@ bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, 
     option.SetLongPauseTime(SystemProperties::GetLongPauseTime());
     option.SetEnableAsmInterpreter(SystemProperties::GetAsmInterpreterEnabled());
     option.SetAsmOpcodeDisableRange(SystemProperties::GetAsmOpcodeDisableRange());
-    LOGI("Initialize ark properties = %{public}d, bundlename = %{public}s",
-        SystemProperties::GetArkProperties(), SystemProperties::GetArkBundleName().c_str());
+    LOGI("Initialize ark properties = %{public}d, bundlename = %{public}s", SystemProperties::GetArkProperties(),
+        SystemProperties::GetArkBundleName().c_str());
 #endif
     const int64_t poolSize = 0x10000000; // 256M
     option.SetGcPoolSize(poolSize);
@@ -82,8 +82,8 @@ void ArkJSRuntime::Reset()
             JSNApi::StopDebugger(vm_);
 #endif
             JSNApi::DestroyJSVM(vm_);
+            vm_ = nullptr;
         }
-        vm_ = nullptr;
     }
     for (auto data : dataList_) {
         delete data;
@@ -117,12 +117,18 @@ bool ArkJSRuntime::StartDebugger()
     return ret;
 }
 
-#if defined(PREVIEW)
-bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t *data, int32_t size, const std::string &filename)
+bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const std::string& filename, bool needUpdate)
 {
-    return JSNApi::ExecuteModuleBuffer(vm_, data, size, filename);
-}
+#if defined(PREVIEW)
+    return JSNApi::ExecuteModuleBuffer(vm_, data, size, filename, needUpdate);
+#else
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    bool ret = JSNApi::ExecuteModuleBuffer(vm_, data, size, filename, needUpdate);
+    HandleUncaughtException();
+    return ret;
 #endif
+}
 
 shared_ptr<JsValue> ArkJSRuntime::EvaluateJsCode([[maybe_unused]] const std::string& src)
 {
@@ -158,6 +164,13 @@ void ArkJSRuntime::RunGC()
     JSExecutionScope executionScope(vm_);
     LocalScope scope(vm_);
     JSNApi::TriggerGC(vm_);
+}
+
+void ArkJSRuntime::RunFullGC()
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    JSNApi::TriggerGC(vm_, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewInt32(int32_t value)
@@ -253,10 +266,13 @@ bool ArkJSRuntime::HasPendingException()
 void ArkJSRuntime::HandleUncaughtException()
 {
     if (uncaughtErrorHandler_ == nullptr) {
+        LOGE("uncaughtErrorHandler is null.");
         return;
     }
+
     Local<ObjectRef> exception = JSNApi::GetAndClearUncaughtException(vm_);
     if (!exception.IsEmpty() && !exception->IsHole()) {
+        LOGI("HandleUncaughtException catch exception.");
         shared_ptr<JsValue> errorPtr =
             std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(shared_from_this(), exception));
         uncaughtErrorHandler_(errorPtr, shared_from_this());

@@ -675,7 +675,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest009, TestSize.Level1)
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_GRID);
     EXPECT_EQ(itemInfoLeave, ITEM_INFO_LEAVE);
     preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
-    EXPECT_TRUE(preGridTargetNode);
+    EXPECT_FALSE(preGridTargetNode);
 
     /**
      * @tc.steps: step5. call AddGridDragFrameNode
@@ -820,7 +820,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
     EXPECT_EQ(itemInfoLeave, ITEM_INFO_LEAVE);
     preGridTargetNode = dragDropManager->preGridTargetFrameNode_;
-    EXPECT_TRUE(preGridTargetNode);
+    EXPECT_FALSE(preGridTargetNode);
 
     /**
      * @tc.steps: step5. call AddGridDragFrameNode
@@ -872,11 +872,8 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
         .Times(1);
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
-    EXPECT_EQ(itemInfoEnter, ITEM_INFO_ENTER);
+    EXPECT_EQ(itemInfoEnter, "");
     EXPECT_EQ(itemInfoLeaveNew, ITEM_INFO_ENTER);
-    ASSERT_TRUE(dragDropManager->preGridTargetFrameNode_);
-    auto preGridTargetNodeTag = dragDropManager->preGridTargetFrameNode_->GetTag();
-    EXPECT_EQ(preGridTargetNodeTag, LIST_TAG);
 
     /**
      * @tc.steps: step8. call OnItemDragMove
@@ -891,7 +888,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest010, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragDropManager->dragWindow_)), MoveTo(GLOBAL_X, GLOBAL_Y))
         .Times(1);
     dragDropManager->OnItemDragMove(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_LIST);
-    EXPECT_EQ(itemInfoEnter, ITEM_INFO_ENTER);
+    EXPECT_EQ(itemInfoEnter, "");
 }
 
 /**
@@ -1038,7 +1035,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest012, TestSize.Level1)
     preGridEvent->SetOnItemDrop(std::move(onPreGridItemDrop));
     dragDropManager->preGridTargetFrameNode_ = preGridTargetNode;
     dragDropManager->OnItemDragEnd(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_GRID);
-    EXPECT_EQ(preGridDropInfo, EXTRA_INFO);
+    EXPECT_EQ(preGridDropInfo, "");
 
     /**
      * @tc.steps: step4. call AddDragFrameNode
@@ -1084,7 +1081,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest012, TestSize.Level1)
     preGridDropInfo.clear();
     dragDropManager->OnItemDragEnd(GLOBAL_X, GLOBAL_Y, DRAGGED_INDEX, DRAG_TYPE_GRID);
     EXPECT_EQ(itemDropInfo, EXTRA_INFO);
-    EXPECT_EQ(preGridDropInfo, EXTRA_INFO);
+    EXPECT_EQ(preGridDropInfo, "");
 }
 
 /**

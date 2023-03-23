@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace {
 int32_t FormUtilsImpl::RouterEvent(
-    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defualtbundleName)
+    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
 {
     ContainerScope scope(containerId);
     auto container = Container::Current();
@@ -44,7 +44,7 @@ int32_t FormUtilsImpl::RouterEvent(
         return -1;
     }
     if (bundle.empty()) {
-        bundle = defualtbundleName;
+        bundle = defaultBundleName;
     }
     want.SetElementName(bundle, ability);
     if (params->IsValid()) {
@@ -64,5 +64,47 @@ int32_t FormUtilsImpl::RouterEvent(
         }
     }
     return AppExecFwk::FormMgr::GetInstance().RouterEvent(formId, want, token_);
+}
+
+int32_t FormUtilsImpl::BackgroundEvent(
+    const int64_t formId, const std::string& action, const int32_t containerId, const std::string& defaultBundleName)
+{
+    ContainerScope scope(containerId);
+    auto container = Container::Current();
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_RETURN_NOLOG(aceContainer, -1);
+    auto token = aceContainer->GetToken();
+    CHECK_NULL_RETURN_NOLOG(token, -1);
+    AAFwk::Want want;
+    auto eventAction = JsonUtil::ParseJsonString(action);
+    auto bundleName = eventAction->GetValue("bundleName");
+    auto abilityName = eventAction->GetValue("abilityName");
+    auto params = eventAction->GetValue("params");
+    auto bundle = bundleName->GetString();
+    auto ability = abilityName->GetString();
+    if (ability.empty()) {
+        return -1;
+    }
+    if (bundle.empty()) {
+        bundle = defaultBundleName;
+    }
+    want.SetElementName(bundle, ability);
+    if (params->IsValid()) {
+        auto child = params->GetChild();
+        while (child->IsValid()) {
+            auto key = child->GetKey();
+            if (child->IsNull()) {
+                want.SetParam(key, std::string());
+            } else if (child->IsString()) {
+                want.SetParam(key, child->GetString());
+            } else if (child->IsNumber()) {
+                want.SetParam(key, child->GetInt());
+            } else {
+                want.SetParam(key, std::string());
+            }
+            child = child->GetNext();
+        }
+    }
+    return AppExecFwk::FormMgr::GetInstance().BackgroundEvent(formId, want, token);
 }
 } // namespace OHOS::Ace

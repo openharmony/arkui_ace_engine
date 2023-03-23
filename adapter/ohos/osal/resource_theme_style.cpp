@@ -22,12 +22,18 @@ namespace {
 constexpr char COLOR_VALUE_PREFIX[] = "$color:";
 constexpr char MEDIA_VALUE_PREFIX[] = "/";
 constexpr char REF_ATTR_VALUE_KEY_WORD[] = "?theme:";
-constexpr char RES_PATH_TAG[] = "file:///";
 constexpr char RES_TAG[] = "resource:///";
-// resource manager hap for system resource
-constexpr char RES_HAP_PREFIX[] = "ohos.global.systemres";
+#ifdef PREVIEW
+constexpr char RES_PATH_TAG[] = "file://";
+// resource manager hap absolute path, as resource manager api don't return
+constexpr char RES_HAP_PATH[] = "../resources/";
+#else
+constexpr char RES_PATH_TAG[] = "file:///";
 // resource manager hap absolute path, as resource manager api don't return
 constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/ohos.global.systemres/assets/";
+#endif
+// resource manager hap for system resource
+constexpr char RES_HAP_PREFIX[] = "ohos.global.systemres";
 
 double ParseDoubleUnit(const std::string& value, std::string& unit)
 {

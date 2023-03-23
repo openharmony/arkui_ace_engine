@@ -453,7 +453,7 @@ bool SliderPattern::MoveStep(int32_t stepCount)
     }
     nextValue = std::clamp(nextValue, min, max);
     nextValue = std::round(nextValue / step) * step;
-    if (nextValue == value_) {
+    if (NearEqual(nextValue, value_)) {
         return false;
     }
     value_ = nextValue;

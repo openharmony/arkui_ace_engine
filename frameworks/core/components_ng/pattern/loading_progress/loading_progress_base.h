@@ -20,11 +20,23 @@
 
 namespace OHOS::Ace::NG {
 enum class LoadingProgressBase : int32_t {
-    BASE16 = 16,
-    BASE24 = 24,
-    BASE40 = 40,
-    BASE48 = 48,
-    BASE76 = 76
+    BASE16 = 0,
+    BASE24 = 1,
+    BASE32 = 2,
+    BASE40 = 3,
+    BASE48 = 4,
+    BASE76 = 5
 }; // namespace OHOS::Ace::NG
-}
+struct CometParam {
+    float radius = 0.0f;
+    float alphaScale = 1.0f;
+    float sizeScale = 1.0f;
+    uint32_t pointCount = 0;
+};
+struct RingParam {
+    float radius = 1.0f;
+    float strokeWidth = 1.0f;
+    float movement = 0.0f;
+};
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LOADING_PROGRESS_LOADING_PROGRESS_BASE_H
