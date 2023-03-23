@@ -922,7 +922,7 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
 
 bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
 {
-    if (params[0] == "-basicinfo") {
+    if (!params.empty() && params[0] == "-basicinfo") {
         DumpLog::GetInstance().Print("BasicInfo: ");
         DumpLog::GetInstance().Print(1, "InstanceId: " + std::to_string(instanceId_));
         DumpLog::GetInstance().Print(1,
