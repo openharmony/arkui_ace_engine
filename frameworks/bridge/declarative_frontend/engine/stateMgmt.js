@@ -1193,6 +1193,7 @@ class PersistentStorage {
      */
     static ConfigureBackend(storage) {
         PersistentStorage.Storage_ = storage;
+        
     }
     /**
      * private, use static functions!
@@ -1353,6 +1354,13 @@ class PersistentStorage {
     propertyHasChanged(info) {
         
         this.write();
+    }
+    syncPeerHasChanged(eventSource) {
+        
+        this.write();
+    }
+    propertyHasBeenReadPU(eventSource) {
+        // not needed
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
