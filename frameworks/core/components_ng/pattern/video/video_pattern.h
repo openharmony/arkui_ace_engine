@@ -88,6 +88,11 @@ public:
         return loop_;
     }
 
+    bool IsFullScreen() const
+    {
+        return isFullScreen_;
+    }
+
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
