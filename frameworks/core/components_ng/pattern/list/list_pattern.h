@@ -194,7 +194,6 @@ private:
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
-    float GetMainContentSize() const;
     void ProcessEvent(bool indexChanged, float finalOffset, bool isJump, float prevStartOffset, float prevEndOffset);
     void CheckScrollable();
     bool IsOutOfBoundary(bool useCurrentDelta = true);
