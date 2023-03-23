@@ -64,6 +64,8 @@ private:
     void HandleEnabled();
     void InitClickEvent();
     void InitButtonAndText();
+    void InitOnKeyEvent();
+    bool OnKeyEvent(const KeyEvent& event);
 
     RefPtr<ClickEvent> clickListener_;
     std::optional<bool> isOn_;

@@ -97,8 +97,8 @@ class ButtonPatternTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    static void FontWeightTest(RefPtr<ButtonLayoutProperty> buttonLayoutProperty,
-        RefPtr<ButtonPattern> buttonPattern, RefPtr<TextLayoutProperty> textLayoutProp);
+    static void FontWeightTest(RefPtr<ButtonLayoutProperty> buttonLayoutProperty, RefPtr<ButtonPattern> buttonPattern,
+        RefPtr<TextLayoutProperty> textLayoutProp);
 
 protected:
     RefPtr<FrameNode> CreateLabelButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
@@ -530,6 +530,12 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest008, TestSize.Level1)
     auto minSize = std::min(BUTTON_WIDTH, BUTTON_HEIGHT);
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(minSize, minSize));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
+
+    auto layoutProperty = AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    layoutProperty->UpdateBorderRadius(BORDER_RADIUS);
+    buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(),
+        SizeF(BORDER_RADIUS.ConvertToPx(), BORDER_RADIUS.ConvertToPx()));
 }
 
 /**

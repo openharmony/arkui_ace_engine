@@ -212,4 +212,35 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest003, TestSize.Level1)
     paintProperty->UpdateIsOn(false);
     togglePattern->OnClick();
 }
+
+/**
+ * @tc.name: ToggleButtonPatternTest004
+ * @tc.desc: test toggleButton pattern OnKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    EXPECT_FALSE(frameNode == nullptr);
+    auto togglePattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    EXPECT_FALSE(togglePattern == nullptr);
+
+    /**
+     * @tc.steps: step2. call pattern OnKeyEvent.
+     * @tc.expected: step2. check whether the function is executed successfully.
+     */
+    auto event = KeyEvent();
+    event.action = KeyAction::UNKNOWN;
+    EXPECT_FALSE(togglePattern->OnKeyEvent(event));
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_BRIGHTNESS_DOWN;
+    EXPECT_FALSE(togglePattern->OnKeyEvent(event));
+    event.code = KeyCode::KEY_SPACE;
+    EXPECT_TRUE(togglePattern->OnKeyEvent(event));
+}
 } // namespace OHOS::Ace::NG

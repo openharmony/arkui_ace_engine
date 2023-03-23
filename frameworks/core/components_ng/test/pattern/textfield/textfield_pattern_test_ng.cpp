@@ -1532,6 +1532,32 @@ HWTEST_F(TextFieldPatternTestNg, UpdateScrollBarOffset002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SearchNodeTest001
+ * @tc.desc: Verify the parent search node branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SearchNodeTest001, TestSize.Level1)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = stack->ClaimNodeId();
+    auto searchNode = AceType::MakeRefPtr<FrameNode>(V2::SEARCH_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>(), false);
+    frameNode->MountToParent(searchNode);
+
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->HasFocus();
+    auto info = GestureEvent();
+    pattern->UpdateCaretInfoToController();
+    pattern->HandleClickEvent(info);
+    pattern->HandleLongPress(info);
+    auto mouseInfo = MouseInfo();
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_EQ(pattern->IsSearchParentNode(), true);
+}
+
+/**
  * @tc.name: onDraw001
  * @tc.desc: Verify that the onDraw interface calls normally and exits without exception.
  * @tc.type: FUNC
