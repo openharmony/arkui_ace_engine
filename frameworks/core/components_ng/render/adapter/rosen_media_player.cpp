@@ -341,21 +341,25 @@ bool RosenMediaPlayer::IsPlaying()
 
 int32_t RosenMediaPlayer::Play()
 {
+    LOGI("Media player start to play.");
     return mediaPlayer_->Play();
 }
 
 int32_t RosenMediaPlayer::Pause()
 {
+    LOGI("Media player start to pause.");
     return mediaPlayer_->Pause();
 }
 
 int32_t RosenMediaPlayer::Stop()
 {
+    LOGI("Media player start to stop.");
     return mediaPlayer_->Stop();
 }
 
 int32_t RosenMediaPlayer::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
 {
+    LOGI("Media player start to seek.");
     return mediaPlayer_->Seek(mSeconds, ConvertToMediaSeekMode(mode));
 }
 
