@@ -88,8 +88,9 @@ public:
         return index_;
     }
 
-private:
     void OnModifyDone() override;
+
+private:
     void OnAttachToFrameNode() override;
     int32_t TotalCount() const;
 
