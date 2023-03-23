@@ -660,6 +660,10 @@ void SwiperPattern::StartAutoPlay()
 
 void SwiperPattern::OnVisibleChange(bool isVisible)
 {
+    if (isInit_) {
+        return;
+    }
+
     if (isVisible) {
         isVisible_ = true;
         StartAutoPlay();
