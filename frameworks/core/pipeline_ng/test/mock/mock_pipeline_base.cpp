@@ -38,14 +38,20 @@ RefPtr<MockPipelineBase> MockPipelineBase::GetCurrent()
     return pipeline_;
 }
 
+void MockPipelineBase::SetRootSize(double rootWidth, double rootHeight)
+{
+    rootWidth_ = rootWidth;
+    rootHeight_ = rootHeight;
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
-    return 1.0f;
+    return static_cast<float>(MockPipelineBase::GetCurrent()->rootWidth_);
 }
 
 float PipelineContext::GetCurrentRootHeight()
 {
-    return 1.0f;
+    return static_cast<float>(MockPipelineBase::GetCurrent()->rootHeight_);
 }
 
 RefPtr<PipelineContext> PipelineContext::GetCurrentContext()

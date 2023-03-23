@@ -12,14 +12,10 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("radio_pattern_test_ng") {
-  module_out_path = "$test_output_path/radio"
-  include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
-  ]
+ohos_unittest("radio_test_ng") {
+  module_out_path = "$pattern_test_output_path/radio"
 
   sources = [
     # inner
@@ -114,8 +110,7 @@ ohos_unittest("radio_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/radio/radio_pattern.cpp",
     "mock_stage_manager.cpp",
-    "radio_accessibility_property_test_ng.cpp",
-    "radio_pattern_test_ng.cpp",
+    "radio_test_ng.cpp",
   ]
 
   deps = [
