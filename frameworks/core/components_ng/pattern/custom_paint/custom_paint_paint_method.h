@@ -187,6 +187,11 @@ public:
         smoothingEnabled_ = enabled;
     }
 
+    void SetSmoothingQuality(const std::string& quality)
+    {
+        smoothingQuality_ = quality;
+    }
+
     void SetFontSize(const Dimension& size)
     {
         fillState_.SetFontSize(size);
