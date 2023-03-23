@@ -14,7 +14,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "test/mock/interfaces/inner_api/ace/mock_uicontent.h"
+#include "test/mock/interfaces/mock_uicontent.h"
 #include "ui_content.h"
 
 #define private public

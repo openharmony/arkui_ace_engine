@@ -38,7 +38,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT PipelineContext final : public PipelineBase {
+class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:

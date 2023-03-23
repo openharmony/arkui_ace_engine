@@ -75,7 +75,7 @@ constexpr Dimension VERTICAL_PADDING = Dimension(4.0);
 constexpr Dimension SHADOW_WIDTH_FORUPDATE = Dimension(6.0);
 } // namespace
 
-class CheckBoxGroupPropertyTestNg : public testing::Test {
+class CheckBoxGroupTestNG : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
@@ -83,16 +83,16 @@ public:
     void TearDown() override;
 };
 
-void CheckBoxGroupPropertyTestNg::SetUpTestCase()
+void CheckBoxGroupTestNG::SetUpTestCase()
 {
     MockPipelineBase::SetUp();
 }
-void CheckBoxGroupPropertyTestNg::TearDownTestCase()
+void CheckBoxGroupTestNG::TearDownTestCase()
 {
     MockPipelineBase::TearDown();
 }
-void CheckBoxGroupPropertyTestNg::SetUp() {}
-void CheckBoxGroupPropertyTestNg::TearDown() {}
+void CheckBoxGroupTestNG::SetUp() {}
+void CheckBoxGroupTestNG::TearDown() {}
 CheckBoxGroupModifier::Parameters CheckBoxGroupCreateDefModifierParam()
 {
     CheckBoxGroupModifier::Parameters parameters = {BORDER_WIDTH, BORDER_RADIUS, CHECK_STROKE, CHECKMARK_PAINTSIZE,
@@ -108,7 +108,7 @@ CheckBoxGroupModifier::Parameters CheckBoxGroupCreateDefModifierParam()
  * @tc.desc: Set CheckBoxGroup value into CheckBoxGroupPaintProperty and get it.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintPropertyTest001, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -146,7 +146,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintPropertyTest001, TestSiz
  * @tc.desc: Test CheckBoxGroup onChange event.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupEventTest002, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupEventTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -187,7 +187,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupEventTest002, TestSize.Level1
  * @tc.desc: Test CheckBoxGroup onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest003, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -214,7 +214,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest003, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupMeasureTest004, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupMeasureTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -255,7 +255,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupMeasureTest004, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup pattern method OnTouchUp.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest005, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -285,7 +285,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest005, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup pattern method OnTouchDown.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest006, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -315,7 +315,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest006, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup pattern method OnClick.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest007, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -340,11 +340,11 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest007, TestSize.Leve
     checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
     pattern->OnClick();
     auto select1 = checkBoxPaintProperty->GetCheckBoxGroupSelect();
-    EXPECT_EQ(select1.has_value(), false);
+    EXPECT_TRUE(select1.has_value());
     checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
     pattern->OnClick();
     auto select2 = checkBoxPaintProperty->GetCheckBoxGroupSelect();
-    EXPECT_EQ(select2.has_value(), false);
+    EXPECT_TRUE(select2.has_value());
 }
 
 /**
@@ -352,7 +352,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest007, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup pattern method HandleMouseEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest008, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -384,7 +384,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest008, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup pattern Init methods.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest009, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -437,7 +437,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest009, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup pattern Update methods.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest010, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
@@ -483,7 +483,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest010, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest011, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest011, TestSize.Level1)
 {
     // create mock theme manager
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -509,7 +509,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest011, TestSize.Leve
  * @tc.desc: Test UpdateCheckBoxStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest012, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest012, TestSize.Level1)
 {
     CheckBoxModelNG checkBoxModelNG1;
     checkBoxModelNG1.Create(NAME, GROUP_NAME, TAG);
@@ -559,7 +559,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest012, TestSize.Leve
  * @tc.desc: Test UpdateRepeatedGroupStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest013, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest013, TestSize.Level1)
 {
     CheckBoxGroupModelNG checkBoxGroupModelNG;
     checkBoxGroupModelNG.Create(GROUP_NAME);
@@ -584,7 +584,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest013, TestSize.Leve
  * @tc.desc: Test GetInnerFocusPaintRect.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxPatternTest014, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxPatternTest014, TestSize.Level1)
 {
     CheckBoxGroupModelNG checkBoxModelNG;
     checkBoxModelNG.Create(GROUP_NAME);
@@ -604,7 +604,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxPatternTest014, TestSize.Level1)
  * @tc.desc: Test UpdateAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest015, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest015, TestSize.Level1)
 {
     CheckBoxGroupModelNG checkBoxModelNG;
     checkBoxModelNG.Create(GROUP_NAME);
@@ -627,7 +627,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest015, TestSize.Leve
  * @tc.desc: Test UpdateAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest016, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest016, TestSize.Level1)
 {
     CheckBoxGroupModelNG checkBoxModelNG;
     checkBoxModelNG.Create(GROUP_NAME);
@@ -648,7 +648,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPatternTest016, TestSize.Leve
  * @tc.desc: Test CheckBoxGroup Modifier DrawTouchBoard.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest001, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest001, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -679,7 +679,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest001, TestSize.
  * @tc.desc: Test CheckBoxGroup Modifier DrawHoverBoard.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest002, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest002, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -710,7 +710,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest002, TestSize.
  * @tc.desc: Test CheckBoxGroup Modifier DrawAnimationOffToOn.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest003, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest003, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -767,7 +767,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest003, TestSize.
  * @tc.desc: Test CheckBoxGroup Modifier paintCheckBox when enabled_ == false..
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest004, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest004, TestSize.Level1)
 {
     /**
      * @tc.case: case1. When uiStatus_ == UIStatus::OFF_TO_ON and enabled_ == false.
@@ -797,7 +797,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest004, TestSize.
  * @tc.desc: Test CheckBoxGroup Modifier will paintCheckBox when UIStatus is ON_TO_OFF.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest005, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest005, TestSize.Level1)
 {
     /**
      * @tc.case: case1. When uiStatus_ == UIStatus::ON_TO_OFF and enabled_ == true.
@@ -828,7 +828,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest005, TestSize.
  * @tc.desc: Test CheckBoxGroup  Modifier will paintCheckBox when UIStatus is UNSELECTED.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest006, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest006, TestSize.Level1)
 {
     /**
      * @tc.case: case1. When uiStatus_ == UIStatus::UNSELECTED and enabled_ == true.
@@ -858,7 +858,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest006, TestSize.
  * @tc.desc: Test CheckBoxGroup Modifier PaintCheckBox PaintCheckBoxGroupPartStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest007, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest007, TestSize.Level1)
 {
     /**
      * @tc.case: case1. When status == CheckBoxGroupPaintProperty::SelectStatus::PART and enabled_ == true.
@@ -889,7 +889,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest007, TestSize.
  * @tc.desc: Test CheckBoxGroup Modifier  paintCheckBox when UIStatus is PART_TO_OFF.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest008, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest008, TestSize.Level1)
 {
     /**
      * @tc.case: case1. When uiStatus_ == UIStatus::PART_TO_OFF and enabled_ == false.
@@ -918,7 +918,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest008, TestSize.
  * @tc.desc: Test checkBoxPaintMethod  UpdateContentModifier.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest009, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest009, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -956,7 +956,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest009, TestSize.
  * @tc.desc: Test CheckBoxGroupPattern UpdateModifierParam.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest010, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest010, TestSize.Level1)
 {
     const std::optional<std::string> groupName;
     CheckBoxGroupModelNG checkboxGroupModel;
@@ -988,7 +988,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest010, TestSize.
  * @tc.desc:  Test CheckBoxGroupModifier  paintCheckBox when enabled_ == false.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest011, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest011, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
@@ -1015,7 +1015,7 @@ HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest011, TestSize.
  * @tc.desc:  Test CheckBoxGroupModifier PaintCheckBox when enabled_ == false.
  * @tc.type: FUNC
  */
-HWTEST_F(CheckBoxGroupPropertyTestNg, CheckBoxGroupPaintMethodTest012, TestSize.Level1)
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest012, TestSize.Level1)
 {
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);

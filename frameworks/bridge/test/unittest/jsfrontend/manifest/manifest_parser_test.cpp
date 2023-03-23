@@ -176,9 +176,9 @@ HWTEST_F(ManifestParserTest, ManifestParserTest002, TestSize.Level1)
     std::string resourceName = "color";
     std::string str = "string";
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    auto pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
-    auto container = AceType::MakeRefPtr<MockContainer>(pipelineContext);
-    pipelineContext->SetThemeManager(themeManager);
+    auto pipeline = AceType::MakeRefPtr<NG::MockPipelineBase>();
+    auto container = AceType::MakeRefPtr<MockContainer>(pipeline);
+    pipeline->SetThemeManager(themeManager);
     AceEngine::Get().AddContainer(-1, container);
 
     auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapter>();
