@@ -137,6 +137,8 @@ int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()
 
 RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int32_t index)
 {
+    LOGD("OnGetOrCreateWrapperByIndex index: %{private}d startIndex: %{private}d endIndex: %{private}d", index,
+        startIndex_.value_or(-1), endIndex_.value_or(-1));
     auto totalCount = GetTotalCount();
     if ((index < 0) || (index >= totalCount)) {
         LOGE("index is illegal: %{public}d", index);
@@ -151,6 +153,7 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int3
 
 RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegacy(int32_t index)
 {
+    auto totalCount = GetTotalCount();
     // The first time get the item, do not do the range check, and the subsequent get the item
     // needs to check whether it is in the upper and lower bounds (-1, +1) of the existing index.
     if (!startIndex_) {
@@ -181,8 +184,13 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegac
         }
     }
     if (!uiNode) {
+        // convert index to real index.
+        int32_t realIndex = index;
+        if (lazySwiper_ && index >= totalCount) {
+            realIndex = index % totalCount;
+        }
         // create frame node.
-        auto itemInfo = builder_->CreateChildByIndex(index);
+        auto itemInfo = builder_->CreateChildByIndex(realIndex);
         id = itemInfo.first;
         uiNode = itemInfo.second;
     }
