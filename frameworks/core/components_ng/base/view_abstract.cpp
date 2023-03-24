@@ -787,11 +787,9 @@ void ViewAbstract::BindPopup(
     if (popupInfo.popupId == -1 || !popupNode) {
         if (!isUseCustom) {
             popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
-        } else if (isUseCustom) {
+        } else {
             CHECK_NULL_VOID(customNode);
             popupNode = BubbleView::CreateCustomBubbleNode(targetTag, targetId, customNode, param);
-        } else {
-            LOGE("useCustom is invalid");
         }
         if (popupNode) {
             popupId = popupNode->GetId();
