@@ -110,6 +110,7 @@ void ScrollBar::UpdateScrollBarRegion(
         }
         positionModeUpdate_ = false;
     }
+    OnScrollEnd();
 }
 
 void ScrollBar::UpdateActiveRectSize(double activeSize)
@@ -292,7 +293,6 @@ void ScrollBar::SetGestureEvent()
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayShrinkAnimation();
                 }
-                scrollBar->OnScrollEnd();
                 scrollBar->SetPressed(false);
                 scrollBar->MarkNeedRender();
             }
