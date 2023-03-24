@@ -4177,31 +4177,30 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeParam = paramObject->GetProperty("type");
-    if (!typeParam->IsNull()) {
-        if (typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
-            auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
-            JSRef<JSVal> jValue = paramObject->GetProperty("value");
-            auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
-            if (value < 0.0f) {
-                value = 0.0f;
-            }
-            progressMask->SetValue(value);
-            JSRef<JSVal> jTotal = paramObject->GetProperty("total");
-            auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
-            if (total < 0.0f) {
-                total = DEFAULT_PROGRESS_TOTAL;
-            }
-            progressMask->SetMaxValue(total);
-            JSRef<JSVal> jColor = paramObject->GetProperty("color");
-            Color colorVal;
-            if (ParseJsColor(jColor, colorVal)) {
-                progressMask->SetColor(colorVal);
-            } else {
-                RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-                progressMask->SetColor(theme->GetMaskColor());
-            }
-            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+    if (!typeParam->IsNull() && !typeParam->IsUndefined() &&
+        typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
+        auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+        JSRef<JSVal> jValue = paramObject->GetProperty("value");
+        auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+        if (value < 0.0f) {
+            value = 0.0f;
         }
+        progressMask->SetValue(value);
+        JSRef<JSVal> jTotal = paramObject->GetProperty("total");
+        auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+        if (total < 0.0f) {
+            total = DEFAULT_PROGRESS_TOTAL;
+        }
+        progressMask->SetMaxValue(total);
+        JSRef<JSVal> jColor = paramObject->GetProperty("color");
+        Color colorVal;
+        if (ParseJsColor(jColor, colorVal)) {
+            progressMask->SetColor(colorVal);
+        } else {
+            RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+            progressMask->SetColor(theme->GetMaskColor());
+        }
+        ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
     } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {
