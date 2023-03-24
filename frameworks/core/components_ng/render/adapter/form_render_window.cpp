@@ -51,7 +51,6 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 #ifdef ENABLE_ROSEN_BACKEND
     ContainerScope scope(id);
     auto container = Container::Current();
-    LOGI("FormRenderWindow::FormRenderWindow container = %{public}p", AceType::RawPtr(container));
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         receiver_ = rsClient.CreateVSyncReceiver("Form");

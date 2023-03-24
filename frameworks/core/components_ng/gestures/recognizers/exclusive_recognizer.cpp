@@ -32,7 +32,7 @@ namespace OHOS::Ace::NG {
 
 void ExclusiveRecognizer::OnAccepted()
 {
-    LOGD("the %{public}p exclusive gesture recognizer has been accepted, active recognizer: %{public}s", this,
+    LOGD("the exclusive gesture recognizer has been accepted, active recognizer: %{public}s",
         AceType::TypeName(activeRecognizer_));
     refereeState_ = RefereeState::SUCCEED;
     if (activeRecognizer_) {
@@ -57,7 +57,6 @@ void ExclusiveRecognizer::OnAccepted()
 
 void ExclusiveRecognizer::OnRejected()
 {
-    LOGD("the %{public}p exclusive gesture recognizer has been rejected!", this);
     refereeState_ = RefereeState::FAIL;
     for (const auto& recognizer : recognizers_) {
         if (!recognizer) {
@@ -77,7 +76,6 @@ void ExclusiveRecognizer::OnRejected()
 
 void ExclusiveRecognizer::OnPending()
 {
-    LOGD("the %{public}p exclusive gesture recognizer is pending!", this);
     refereeState_ = RefereeState::PENDING;
     if (activeRecognizer_) {
         activeRecognizer_->OnPending();

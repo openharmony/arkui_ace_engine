@@ -266,7 +266,6 @@ void GridEventHub::FireOnItemDragEnter(const ItemDragInfo& dragInfo)
 
 void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t itemIndex)
 {
-    LOGI("itemIndex:%{public}d, %{public}p", itemIndex, this);
     if (itemIndex == -1) {
         auto host = GetFrameNode();
         CHECK_NULL_VOID(host);
@@ -283,7 +282,7 @@ void GridEventHub::FireOnItemDragLeave(const ItemDragInfo& dragInfo, int32_t ite
 
 void GridEventHub::FireOnItemDrop(const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess)
 {
-    LOGI("itemIndex:%{public}d, insertIndex:%{public}d, %{public}p", itemIndex, insertIndex, this);
+    LOGI("itemIndex:%{public}d, insertIndex:%{public}d", itemIndex, insertIndex);
     auto host = GetFrameNode();
     CHECK_NULL_VOID(host);
     auto pattern = AceType::DynamicCast<GridPattern>(host->GetPattern());
