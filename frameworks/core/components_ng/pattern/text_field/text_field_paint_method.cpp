@@ -66,6 +66,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     textFieldContentModifier_->SetTextValue(text);
     textFieldContentModifier_->SetTextRectY(textFieldPattern->GetTextRect().GetY());
     textFieldContentModifier_->SetTextRectX(textFieldPattern->GetTextRect().GetX());
+    textFieldContentModifier_->SetTextAlign(textFieldPattern->GetTextAlign());
     auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();

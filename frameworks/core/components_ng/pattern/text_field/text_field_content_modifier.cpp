@@ -137,12 +137,14 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
     textRectY_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Top().ConvertToPx());
     textRectX_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Left().ConvertToPx());
+    textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
     AttachProperty(textRectY_);
     AttachProperty(textObscured_);
     AttachProperty(textRectX_);
+    AttachProperty(textAlign_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -255,6 +257,13 @@ void TextFieldContentModifier::SetTextRectX(const float value)
 {
     if (textRectX_->Get() != value) {
         textRectX_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetTextAlign(const TextAlign value)
+{
+    if (textAlign_->Get() != static_cast<int32_t>(value)) {
+        textAlign_->Set(static_cast<int32_t>(value));
     }
 }
 
