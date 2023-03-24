@@ -219,6 +219,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
 
 void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
 {
+    UpdateCommonParam(popupId, param);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
     auto popupProp = AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty());
@@ -226,29 +227,57 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     auto message = param->GetMessage();
     auto primaryButton = param->GetPrimaryButtonProperties();
     auto secondaryButton = param->GetSecondaryButtonProperties();
-
     // Update layout props
     popupProp->UpdateUseCustom(param->IsUseCustom());
     popupProp->UpdateEnableArrow(param->EnableArrow());
     popupProp->UpdatePlacement(param->GetPlacement());
-    popupProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     auto displayWindowOffset = GetDisplayWindowRectOffset();
     popupProp->UpdateDisplayWindowOffset(displayWindowOffset);
-    if (param->GetTargetSpace().has_value()) {
-        popupProp->UpdateTargetSpace(param->GetTargetSpace().value());
-    }
     // Update paint props
-    if (param->GetArrowOffset().has_value()) {
-        popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
-    }
-    if (param->IsMaskColorSetted()) {
-        popupPaintProp->UpdateMaskColor(param->GetMaskColor());
-    }
+    popupPaintProp->UpdatePlacement(param->GetPlacement());
+    popupPaintProp->UpdateUseCustom(param->IsUseCustom());
+}
+
+void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param)
+{
+    UpdateCommonParam(popupId, param);
+    auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
+    CHECK_NULL_VOID(popupNode);
+    auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(popupLayoutProp);
+    auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    popupLayoutProp->UpdatePlacement(param->GetPlacement());
+    popupPaintProp->UpdatePlacement(param->GetPlacement());
     if (param->IsBackgroundColorSetted()) {
         popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
     }
-    popupPaintProp->UpdatePlacement(param->GetPlacement());
-    popupPaintProp->UpdateUseCustom(param->IsUseCustom());
+    popupLayoutProp->UpdateEnableArrow(param->EnableArrow());
+    popupPaintProp->UpdateAutoCancel(!param->HasAction());
+}
+
+void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param)
+{
+    auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
+    CHECK_NULL_VOID(popupNode);
+    auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
+    if (bubbleHub) {
+        bubbleHub->SetOnStateChange(param->GetOnStateChange());
+    }
+    auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(popupLayoutProp);
+    auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    if (param->GetArrowOffset().has_value()) {
+        popupPaintProp->UpdateArrowOffset(param->GetArrowOffset().value());
+    }
+    popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
+    if (param->IsMaskColorSetted()) {
+        popupPaintProp->UpdateMaskColor(param->GetMaskColor());
+    }
+    if (param->GetTargetSpace().has_value()) {
+        popupLayoutProp->UpdateTargetSpace(param->GetTargetSpace().value());
+    }
 }
 
 RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsUseCustom)
