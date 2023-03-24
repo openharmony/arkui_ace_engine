@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cmath>
 #include <memory>
 #include <optional>
 
@@ -333,7 +334,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg006, TestSize
     gradient.SetType(Ace::GradientType::SWEEP);
     gradient.SetInnerRadius(DEFAULT_DOUBLE10);
     paintMethod->UpdatePaintShader(offset, paint, gradient);
-    EXPECT_EQ(gradient.GetInnerRadius(), DEFAULT_DOUBLE10);
+    EXPECT_DOUBLE_EQ(gradient.GetInnerRadius(), DEFAULT_DOUBLE10);
 }
 
 /**
@@ -427,7 +428,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg009, TestSize
     SkPaint paint;
     paintMethod->globalState_.SetAlpha(DEFAULT_DOUBLE1);
     paint = paintMethod->GetStrokePaint();
-    EXPECT_EQ(paint.getAlphaf(), DEFAULT_DOUBLE1);
+    EXPECT_DOUBLE_EQ(paint.getAlphaf(), DEFAULT_DOUBLE1);
 
     /**
      * @tc.steps3: Test the function GetStrokePaint with Alpha = DEFAULT_DOUBLE10.
@@ -729,5 +730,155 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg015, TestSize
     paintMethod->globalState_.SetType(CompositeOperation::SOURCE_IN);
     paintMethod->Path2DStroke(offset);
     EXPECT_EQ(static_cast<int>(paintMethod->cachePaint_.getBlendMode()), BLENDMODE_VALUE_END);
+}
+
+/**
+ * @tc.name: CustomPaintPaintMethodTestNg015
+ * @tc.desc: Test the functions Arc of CustomPaintPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateCanvasPaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    SizeF frameSize;
+    CreateBitmap(frameSize, paintMethod);
+
+    /**
+     * @tc.steps2: Test the function Arc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    PaintWrapper* paintWrapper;
+    ArcParam param;
+    param.startAngle = 1.5 * M_PI;    // start angle of the circle
+    param.endAngle = 3.5 * M_PI;
+    double sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    paintMethod->Arc(paintWrapper, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, FULL_CIRCLE_ANGLE);
+
+    /**
+     * @tc.steps3: Test the function Arc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.startAngle = 3.5 * M_PI;    // start angle of the circle
+    param.endAngle = 1.3 * M_PI;
+    sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    paintMethod->Arc(paintWrapper, param);
+    double results = std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE;
+    EXPECT_DOUBLE_EQ(results, SPECIAL_CIRCLE_ANGLE);
+
+    /**
+     * @tc.steps4: Test the function Arc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.startAngle = 1.0 * M_PI;    // start angle of the circle
+    param.endAngle = 3.5 * M_PI;
+    sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    double results2 = FULL_CIRCLE_ANGLE + 0.5 * HALF_CIRCLE_ANGLE;
+    paintMethod->Arc(paintWrapper, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, results2);
+
+    /**
+     * @tc.steps5: Test the function Arc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.anticlockwise = true;
+    param.startAngle = 3.5 * M_PI;    // start angle of the circle
+    param.endAngle = 0.5 * M_PI;
+    sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    paintMethod->Arc(paintWrapper, param);
+    results2 = - FULL_CIRCLE_ANGLE - HALF_CIRCLE_ANGLE;
+    EXPECT_DOUBLE_EQ(sweepAngle, results2);
+
+    /**
+     * @tc.steps6: Test the function Arc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.anticlockwise = true;
+    param.startAngle = 1.5 * M_PI;    // start angle of the circle
+    param.endAngle = 3.5 * M_PI;
+    sweepAngle = (param.endAngle - param.startAngle) * HALF_CIRCLE_ANGLE / M_PI;
+    paintMethod->Arc(paintWrapper, param);
+    results = std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE;
+    EXPECT_DOUBLE_EQ(results, -FULL_CIRCLE_ANGLE);
+}
+
+/**
+ * @tc.name: CustomPaintPaintMethodTestNg015
+ * @tc.desc: Test the functions Path2DArc of CustomPaintPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg017, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateCanvasPaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    SizeF frameSize;
+    CreateBitmap(frameSize, paintMethod);
+
+    /**
+     * @tc.steps2: Test the function Path2DArc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    OffsetF offset;
+    PathArgs param;
+    param.para4 = 1.5 * M_PI;    // start angle of the circle
+    param.para5 = 3.5 * M_PI;
+    double sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
+    paintMethod->Path2DArc(offset, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, FULL_CIRCLE_ANGLE);
+
+    /**
+     * @tc.steps3: Test the function Path2DArc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.para4 = 3.5 * M_PI;    // start angle of the circle
+    param.para5 = 1.3 * M_PI;
+    sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
+    paintMethod->Path2DArc(offset, param);
+    double results = std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) + FULL_CIRCLE_ANGLE;
+    EXPECT_DOUBLE_EQ(results, SPECIAL_CIRCLE_ANGLE);
+
+    /**
+     * @tc.steps4: Test the function Path2DArc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.para4 = 1.0 * M_PI;    // start angle of the circle
+    param.para5 = 3.5 * M_PI;
+    sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
+    paintMethod->Path2DArc(offset, param);
+    double results2 = FULL_CIRCLE_ANGLE + 0.5 * HALF_CIRCLE_ANGLE;
+    EXPECT_DOUBLE_EQ(sweepAngle, results2);
+
+    /**
+     * @tc.steps5: Test the function Path2DArc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.para6 = 1.0;
+    param.para4 = 3.5 * M_PI;    // start angle of the circle
+    param.para5 = 0.5 * M_PI;
+    sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
+    results2 = -HALF_CIRCLE_ANGLE - FULL_CIRCLE_ANGLE;
+    paintMethod->Path2DArc(offset, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, results2);
+
+    /**
+     * @tc.steps6: Test the function Path2DArc with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.para6 = 1.0;
+    param.para4 = 1.5 * M_PI;    // start angle of the circle
+    param.para5 = 3.5 * M_PI;
+    sweepAngle = (param.para5 - param.para4) * HALF_CIRCLE_ANGLE / M_PI;
+    paintMethod->Path2DArc(offset, param);
+    results = std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE;
+    EXPECT_DOUBLE_EQ(results, - FULL_CIRCLE_ANGLE);
 }
 } // namespace OHOS::Ace::NG
