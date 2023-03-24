@@ -323,7 +323,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
+    bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning();
     if (!skipSync && (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                          (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
         if (pattern_->NeedOverridePaintRect()) {
