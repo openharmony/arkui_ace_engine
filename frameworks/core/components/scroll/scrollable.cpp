@@ -369,6 +369,13 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
             scrollEndCallback_();
         }
         currentVelocity_ = 0.0;
+#ifdef OHOS_PLATFORM
+        LOGI("springController stop increase cpu frequency");
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndListFling();
+        }
+#endif
         return;
     }
     if (outBoundaryCallback_ && outBoundaryCallback_() && scrollOverCallback_) {
