@@ -106,6 +106,7 @@ template("ace_ohos_standard_source_set") {
       "eventhandler:libeventhandler",
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
+      "i18n:intl_util",
       "input:libmmi-client",
       "ipc:ipc_core",
       "ipc:ipc_napi_common",
