@@ -32,7 +32,8 @@ public:
     ~GeometryTransition() override = default;
 
     bool IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const;
-    bool IsRunning(const WeakPtr<FrameNode>& frameNode) const;
+    bool IsRunning() const;
+    bool IsInvalid() const;
     std::string ToString() const;
     void Build(const WeakPtr<FrameNode>& frameNode, bool isNodeIn);
     bool Update(const WeakPtr<FrameNode>& which, const WeakPtr<FrameNode>& value);

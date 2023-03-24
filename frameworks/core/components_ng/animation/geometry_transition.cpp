@@ -29,9 +29,14 @@ namespace OHOS::Ace::NG {
 // single view move from its old position to its new position, thus visual focus guidance is completed.
 GeometryTransition::GeometryTransition(const WeakPtr<FrameNode>& frameNode) : inNode_(frameNode) {}
 
-bool GeometryTransition::IsRunning(const WeakPtr<FrameNode>& frameNode) const
+bool GeometryTransition::IsRunning() const
 {
     return hasInAnim_ || hasOutAnim_;
+}
+
+bool GeometryTransition::IsInvalid() const
+{
+    return !inNode_.Upgrade() && !outNode_.Upgrade();
 }
 
 bool GeometryTransition::IsNodeInAndActive(const WeakPtr<FrameNode>& frameNode) const
