@@ -72,7 +72,8 @@ namespace {
 RefPtr<PixelMap> g_pixelMap {};
 std::mutex g_mutex;
 std::condition_variable thumbnailGet;
-float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
+} // namespace
+float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
         return static_cast<float>(dimension.Value());
@@ -80,7 +81,6 @@ float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
     const float defaultPivot = 0.5f;
     return size > 0.0f ? static_cast<float>(dimension.ConvertToPx() / size) : defaultPivot;
 }
-} // namespace
 
 RosenRenderContext::~RosenRenderContext()
 {
@@ -2125,8 +2125,14 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
         frameNode->GetId(), isTransitionIn);
 
     RSNode::ExecuteWithoutAnimation([this, &frameNode]() {
-        const auto& size = frameNode->GetGeometryNode()->GetFrameSize();
-        transitionEffect_->UpdateFrameSize(size);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
+        auto offset = frameNode->GetPaintRectOffset();
+        auto rect = GetPaintRectWithoutTransform();
+        rect.SetOffset(offset);
+
+        transitionEffect_->UpdateSelfAndViewSize(rect, rootSize);
     });
 
     if (isTransitionIn) {

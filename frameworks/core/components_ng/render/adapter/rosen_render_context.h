@@ -165,6 +165,8 @@ public:
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
         const TransitionOptions& options, const SizeF& frameSize = SizeF());
 
+    static float ConvertDimensionToScaleBySize(const Dimension& dimension, float size);
+
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
 
@@ -372,6 +374,8 @@ private:
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectImpl;
+    friend class RosenRotationTransitionEffect;
+    friend class RosenScaleTransitionEffect;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

@@ -20,7 +20,7 @@
 #include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
-void RosenTransitionEffect::OnAttach(RefPtr<RosenRenderContext> context, bool activeTransition)
+void RosenTransitionEffect::OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition)
 {
     CHECK_NULL_VOID(context);
     if (chainedEffect_) {
@@ -28,7 +28,7 @@ void RosenTransitionEffect::OnAttach(RefPtr<RosenRenderContext> context, bool ac
     }
 }
 
-void RosenTransitionEffect::OnDetach(RefPtr<RosenRenderContext> context)
+void RosenTransitionEffect::OnDetach(const RefPtr<RosenRenderContext>& context)
 {
     CHECK_NULL_VOID(context);
     if (chainedEffect_) {
@@ -36,10 +36,10 @@ void RosenTransitionEffect::OnDetach(RefPtr<RosenRenderContext> context)
     }
 }
 
-void RosenTransitionEffect::UpdateFrameSize(const SizeF& size)
+void RosenTransitionEffect::UpdateSelfAndViewSize(const RectF& selfRect, const SizeF& viewSize)
 {
     if (chainedEffect_) {
-        chainedEffect_->UpdateFrameSize(size);
+        chainedEffect_->UpdateSelfAndViewSize(selfRect, viewSize);
     }
 }
 
@@ -91,44 +91,45 @@ void RosenTransitionEffect::ApplyAnimationOption(const std::function<void()>& fu
 RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEffect(
     const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
-    if (!effect) {
-        return nullptr;
-    }
     RefPtr<RosenTransitionEffect> res;
     RefPtr<RosenTransitionEffect> tailEffect;
     RefPtr<ChainedTransitionEffect> nowEffect = effect;
     while (nowEffect) {
         RefPtr<RosenTransitionEffect> nowRSEffect;
         switch (nowEffect->GetType()) {
+            case ChainedTransitionEffectType::IDENTITY: {
+                nowRSEffect = AceType::MakeRefPtr<RosenIdentityTransitionEffect>();
+                break;
+            }
             case ChainedTransitionEffectType::OPACITY: {
                 auto opacityEffect = AceType::DynamicCast<ChainedOpacityEffect>(nowEffect);
                 auto opacity = opacityEffect->GetEffect();
                 nowRSEffect = AceType::MakeRefPtr<RosenOpacityTransitionEffect>(1.0f, opacity);
                 break;
             }
+            case ChainedTransitionEffectType::MOVE: {
+                auto moveEffect = AceType::DynamicCast<ChainedMoveEffect>(nowEffect);
+                const auto& edge = moveEffect->GetEffect();
+                nowRSEffect = AceType::MakeRefPtr<RosenMoveTransitionEffect>(edge);
+                break;
+            }
             case ChainedTransitionEffectType::ROTATE: {
                 auto rotateEffect = AceType::DynamicCast<ChainedRotateEffect>(nowEffect);
-                // only z rotate is effective, no pivot
                 const auto& rotateOption = rotateEffect->GetEffect();
-                nowRSEffect = AceType::MakeRefPtr<RosenRotationTransitionEffect>(0.0f, rotateOption.angle);
+                nowRSEffect = AceType::MakeRefPtr<RosenRotationTransitionEffect>(rotateOption);
                 break;
             }
             case ChainedTransitionEffectType::SCALE: {
                 auto scaleEffect = AceType::DynamicCast<ChainedScaleEffect>(nowEffect);
                 const auto& scaleOption = scaleEffect->GetEffect();
                 // scale z is not considered
-                nowRSEffect = AceType::MakeRefPtr<RosenScaleTransitionEffect>(
-                    Rosen::Vector2f(1.0f, 1.0f), Rosen::Vector2f(scaleOption.xScale, scaleOption.yScale));
+                nowRSEffect = AceType::MakeRefPtr<RosenScaleTransitionEffect>(scaleOption);
                 break;
             }
             case ChainedTransitionEffectType::TRANSLATE: {
                 auto translateEffect = AceType::DynamicCast<ChainedTranslateEffect>(nowEffect);
                 const auto& translateOption = translateEffect->GetEffect();
-                // not support percent
-                auto xTranslate = static_cast<float>(translateOption.x.ConvertToPx());
-                auto yTranslate = static_cast<float>(translateOption.y.ConvertToPx());
-                nowRSEffect = AceType::MakeRefPtr<RosenTranslateTransitionEffect>(
-                    Rosen::Vector2f(0.0f, 0.0f), Rosen::Vector2f(xTranslate, yTranslate));
+                nowRSEffect = AceType::MakeRefPtr<RosenTranslateTransitionEffect>(translateOption);
                 break;
             }
             case ChainedTransitionEffectType::ASYMMETRIC: {
@@ -140,7 +141,7 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
                 break;
             }
             default: {
-                LOGW("now support effect type: %{public}d", static_cast<int>(nowEffect->GetType()));
+                LOGW("not support effect type: %{public}d", static_cast<int>(nowEffect->GetType()));
                 return res;
             }
         }
@@ -158,7 +159,7 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
 
 template<typename Modifier, typename PropertyType>
 void PropertyTransitionEffectImpl<Modifier, PropertyType>::OnAttach(
-    RefPtr<RosenRenderContext> context, bool activeTransition)
+    const RefPtr<RosenRenderContext>& context, bool activeTransition)
 {
     CHECK_NULL_VOID(context);
     if (modifier_ != nullptr) {
@@ -179,7 +180,7 @@ void PropertyTransitionEffectImpl<Modifier, PropertyType>::OnAttach(
 }
 
 template<typename Modifier, typename PropertyType>
-void PropertyTransitionEffectImpl<Modifier, PropertyType>::OnDetach(RefPtr<RosenRenderContext> context)
+void PropertyTransitionEffectImpl<Modifier, PropertyType>::OnDetach(const RefPtr<RosenRenderContext>& context)
 {
     CHECK_NULL_VOID(context);
     // remove the modifier
@@ -188,6 +189,162 @@ void PropertyTransitionEffectImpl<Modifier, PropertyType>::OnDetach(RefPtr<Rosen
     modifier_.reset();
 
     RosenTransitionEffect::OnDetach(context);
+}
+
+RosenRotationTransitionEffect::RosenRotationTransitionEffect(const RotateOptions& rotate)
+    : rotateX_(0.0f, 0.0f), rotateY_(0.0f, 0.0f), rotateZ_(0.0f, 0.0f)
+{
+    SetActiveValue(rotate);
+}
+
+void RosenRotationTransitionEffect::OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition)
+{
+    renderContext_ = context;
+    rotateX_.OnAttach(context, activeTransition);
+    rotateY_.OnAttach(context, activeTransition);
+    rotateZ_.OnAttach(context, activeTransition);
+    RosenTransitionEffect::OnAttach(context, activeTransition);
+}
+
+void RosenRotationTransitionEffect::OnDetach(const RefPtr<RosenRenderContext>& context)
+{
+    rotateX_.OnDetach(context);
+    rotateY_.OnDetach(context);
+    rotateZ_.OnDetach(context);
+    RosenTransitionEffect::OnDetach(context);
+}
+
+void RosenRotationTransitionEffect::UpdateSelfAndViewSize(const RectF& selfRect, const SizeF& viewSize)
+{
+    RosenTransitionEffect::UpdateSelfAndViewSize(selfRect, viewSize);
+    auto context = renderContext_.Upgrade();
+    CHECK_NULL_VOID(context);
+    float xPivot = RosenRenderContext::ConvertDimensionToScaleBySize(centerX_, selfRect.Width());
+    float yPivot = RosenRenderContext::ConvertDimensionToScaleBySize(centerY_, selfRect.Height());
+    context->SetPivot(xPivot, yPivot);
+}
+
+void RosenRotationTransitionEffect::SetActiveValue(const RotateOptions& activeValue)
+{
+    float norm =
+        static_cast<float>(std::sqrt(std::pow(activeValue.xDirection, 2) + std::pow(activeValue.yDirection, 2) +
+                                     std::pow(activeValue.zDirection, 2)));
+    if (NearZero(norm)) {
+        norm = 1.0f;
+    }
+    // for rosen backend, the rotation angles in the x and y directions should be set to opposite angles
+    rotateX_.SetActiveValue(-activeValue.angle * activeValue.xDirection / norm);
+    rotateY_.SetActiveValue(-activeValue.angle * activeValue.yDirection / norm);
+    rotateZ_.SetActiveValue(activeValue.angle * activeValue.zDirection / norm);
+    centerX_ = activeValue.centerX;
+    centerY_ = activeValue.centerY;
+}
+
+void RosenRotationTransitionEffect::OnAppear()
+{
+    RosenTransitionEffect::OnAppear();
+    // rotateX, rotateY, rotateZ has no animation param, call OnAppear directly
+    rotateX_.OnAppear();
+    rotateY_.OnAppear();
+    rotateZ_.OnAppear();
+}
+
+void RosenRotationTransitionEffect::OnDisappear(bool activeTransition)
+{
+    RosenTransitionEffect::OnDisappear(activeTransition);
+    // rotateX, rotateY, rotateZ has no animation param, call OnDisappear directly
+    rotateX_.OnDisappear(activeTransition);
+    rotateY_.OnDisappear(activeTransition);
+    rotateZ_.OnDisappear(activeTransition);
+}
+
+void RosenScaleTransitionEffect::OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition)
+{
+    renderContext_ = context;
+    scale_.OnAttach(context, activeTransition);
+    RosenTransitionEffect::OnAttach(context, activeTransition);
+}
+
+void RosenScaleTransitionEffect::OnDetach(const RefPtr<RosenRenderContext>& context)
+{
+    scale_.OnDetach(context);
+    RosenTransitionEffect::OnDetach(context);
+}
+
+void RosenScaleTransitionEffect::UpdateSelfAndViewSize(const RectF& selfRect, const SizeF& viewSize)
+{
+    RosenTransitionEffect::UpdateSelfAndViewSize(selfRect, viewSize);
+    auto context = renderContext_.Upgrade();
+    CHECK_NULL_VOID(context);
+    float xPivot = RosenRenderContext::ConvertDimensionToScaleBySize(centerX_, selfRect.Width());
+    float yPivot = RosenRenderContext::ConvertDimensionToScaleBySize(centerY_, selfRect.Height());
+    context->SetPivot(xPivot, yPivot);
+}
+
+void RosenScaleTransitionEffect::SetActiveValue(const ScaleOptions& activeValue)
+{
+    scale_.SetActiveValue({ activeValue.xScale, activeValue.yScale });
+    centerX_ = activeValue.centerX;
+    centerY_ = activeValue.centerY;
+}
+
+void RosenScaleTransitionEffect::OnAppear()
+{
+    RosenTransitionEffect::OnAppear();
+    scale_.OnAppear();
+}
+
+void RosenScaleTransitionEffect::OnDisappear(bool activeTransition)
+{
+    RosenTransitionEffect::OnDisappear(activeTransition);
+    scale_.OnDisappear(activeTransition);
+}
+
+RosenTranslateTransitionEffect::RosenTranslateTransitionEffect(const TranslateOptions& option)
+    : translate_({ 0.0f, 0.0f }, { 0.0f, 0.0f }), translateValue_(option)
+{
+    auto translateX = static_cast<float>(option.x.ConvertToPx());
+    auto translateY = static_cast<float>(option.y.ConvertToPx());
+    translate_.SetActiveValue({ translateX, translateY });
+}
+
+void RosenTranslateTransitionEffect::OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition)
+{
+    translate_.OnAttach(context, activeTransition);
+    RosenTransitionEffect::OnAttach(context, activeTransition);
+}
+
+void RosenTranslateTransitionEffect::OnDetach(const RefPtr<RosenRenderContext>& context)
+{
+    translate_.OnDetach(context);
+    RosenTransitionEffect::OnDetach(context);
+}
+
+void RosenTranslateTransitionEffect::UpdateSelfAndViewSize(const RectF& selfRect, const SizeF& viewSize)
+{
+    if (translateValue_.x.Unit() != DimensionUnit::PERCENT && translateValue_.y.Unit() != DimensionUnit::PERCENT) {
+        return;
+    }
+    float translateX = translateValue_.x.ConvertToPxWithSize(selfRect.Width());
+    float translateY = translateValue_.y.ConvertToPxWithSize(selfRect.Height());
+    translate_.SetActiveValue({ translateX, translateY });
+}
+
+void RosenTranslateTransitionEffect::SetActiveValue(const TranslateOptions& activeValue)
+{
+    translateValue_ = activeValue;
+}
+
+void RosenTranslateTransitionEffect::OnAppear()
+{
+    RosenTransitionEffect::OnAppear();
+    translate_.OnAppear();
+}
+
+void RosenTranslateTransitionEffect::OnDisappear(bool activeTransition)
+{
+    RosenTransitionEffect::OnDisappear(activeTransition);
+    translate_.OnDisappear(activeTransition);
 }
 
 void RosenAsymmetricTransitionEffect::SetTransitionInEffect(const RefPtr<RosenTransitionEffect>& transitionIn)
@@ -200,7 +357,7 @@ void RosenAsymmetricTransitionEffect::SetTransitionOutEffect(const RefPtr<RosenT
     transitionOut_ = transitionOut;
 }
 
-void RosenAsymmetricTransitionEffect::OnAttach(RefPtr<RosenRenderContext> context, bool activeTransition)
+void RosenAsymmetricTransitionEffect::OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition)
 {
     CHECK_NULL_VOID(context);
     // upon attach, we should only active the transitionIn_ branch if activeTransition is true.
@@ -213,7 +370,7 @@ void RosenAsymmetricTransitionEffect::OnAttach(RefPtr<RosenRenderContext> contex
     RosenTransitionEffect::OnAttach(context, activeTransition);
 }
 
-void RosenAsymmetricTransitionEffect::OnDetach(RefPtr<RosenRenderContext> context)
+void RosenAsymmetricTransitionEffect::OnDetach(const RefPtr<RosenRenderContext>& context)
 {
     CHECK_NULL_VOID(context);
     if (transitionIn_) {
@@ -249,46 +406,78 @@ void RosenAsymmetricTransitionEffect::OnDisappear(bool activeTransition)
     }
 }
 
-// update the frame size of the transition effect, currently only used for slide transition
-void RosenAsymmetricTransitionEffect::UpdateFrameSize(const SizeF& size)
+// update the frame rect of the transition node and size of view
+void RosenAsymmetricTransitionEffect::UpdateSelfAndViewSize(const RectF& selfRect, const SizeF& viewSize)
 {
-    RosenTransitionEffect::UpdateFrameSize(size);
+    RosenTransitionEffect::UpdateSelfAndViewSize(selfRect, viewSize);
     if (transitionIn_) {
-        transitionIn_->UpdateFrameSize(size);
+        transitionIn_->UpdateSelfAndViewSize(selfRect, viewSize);
     }
     if (transitionOut_) {
-        transitionOut_->UpdateFrameSize(size);
+        transitionOut_->UpdateSelfAndViewSize(selfRect, viewSize);
     }
 }
 
-// convert the transition edge to the corresponding translate value
-Rosen::Vector2f RosenSlideTransitionEffect::GetTranslateValue(TransitionEdge edge, const SizeF& size)
+void RosenMoveTransitionEffect::OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition)
 {
-    switch (edge) {
-        case TransitionEdge::START:
-            return { -size.Width(), 0.0f };
-        case TransitionEdge::END:
-            return { size.Width(), 0.0f };
-        case TransitionEdge::TOP:
-            return { 0.0f, -size.Height() };
-        case TransitionEdge::BOTTOM:
-            return { 0.0f, size.Height() };
-        default:
-            return { 0.0f, 0.0f };
-    }
+    translate_.OnAttach(context, activeTransition);
+    RosenTransitionEffect::OnAttach(context, activeTransition);
 }
 
-void RosenSlideTransitionEffect::UpdateFrameSize(const SizeF& size)
+void RosenMoveTransitionEffect::OnDetach(const RefPtr<RosenRenderContext>& context)
 {
-    DynamicCast<RosenTranslateTransitionEffect>(transitionIn_)
-        ->SetActiveValue(GetTranslateValue(transitionInEdge_, size));
-    DynamicCast<RosenTranslateTransitionEffect>(transitionOut_)
-        ->SetActiveValue(GetTranslateValue(transitionOutEdge_, size));
+    translate_.OnDetach(context);
+    RosenTransitionEffect::OnDetach(context);
+}
+
+void RosenMoveTransitionEffect::SetActiveValue(TransitionEdge activeValue)
+{
+    edge_ = activeValue;
+}
+
+void RosenMoveTransitionEffect::OnAppear()
+{
+    RosenTransitionEffect::OnAppear();
+    translate_.OnAppear();
+}
+
+void RosenMoveTransitionEffect::OnDisappear(bool activeTransition)
+{
+    RosenTransitionEffect::OnDisappear(activeTransition);
+    translate_.OnDisappear(activeTransition);
+}
+
+void RosenMoveTransitionEffect::UpdateSelfAndViewSize(const RectF& selfRect, const SizeF& viewSize)
+{
+    Rosen::Vector2f value { 0.0f, 0.0f };
+    switch (edge_) {
+        case TransitionEdge::TOP: {
+            value[1] = -selfRect.Bottom();
+            break;
+        }
+        case TransitionEdge::BOTTOM: {
+            value[1] = viewSize.Height() - selfRect.Top();
+            break;
+        }
+        case TransitionEdge::START: {
+            value[0] = -selfRect.Right();
+            break;
+        }
+        case TransitionEdge::END: {
+            value[0] = viewSize.Width() - selfRect.Left();
+            break;
+        }
+        default: {
+            LOGW("invalid Edge");
+        }
+    }
+    translate_.SetActiveValue(value);
+    RosenTransitionEffect::UpdateSelfAndViewSize(selfRect, viewSize);
 }
 
 // Identity animation option, with duration 0 and delay 0.
 static const auto identityOption = std::make_shared<AnimationOption>();
-RosenIdentityTransition::RosenIdentityTransition() : RosenTransitionEffect()
+RosenIdentityTransitionEffect::RosenIdentityTransitionEffect() : RosenTransitionEffect()
 {
     // Set animation option. And disable other options by overriding SetAnimationOption().
     RosenTransitionEffect::SetAnimationOption(identityOption);
