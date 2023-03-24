@@ -70,8 +70,8 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
         return;
     }
 
-    constraint.selfIdealSize = OptionalSizeF(static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()),
-        static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()));
+    constraint.selfIdealSize = OptionalSizeF(
+        static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()), static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()));
     backButtonWrapper->Measure(constraint);
 }
 
@@ -105,24 +105,21 @@ void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, cons
     // navBar title bar
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
         auto occupiedWidth = maxPaddingStart_ + maxPaddingEnd_ + HORIZONTAL_MARGIN;
-        constraint.maxSize.SetWidth(titleBarSize.Width() -
-            static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+        constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
         subtitleWrapper->Measure(constraint);
         return;
     }
 
     if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         auto occupiedWidth = maxPaddingStart_ + maxPaddingEnd_ + HORIZONTAL_MARGIN;
-        constraint.maxSize.SetWidth(titleBarSize.Width() -
-            static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+        constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
         subtitleWrapper->Measure(constraint);
         return;
     }
 
-    auto occupiedWidth = maxPaddingStart_ + BACK_BUTTON_ICON_SIZE +
-        HORIZONTAL_MARGIN_M + HORIZONTAL_MARGIN + maxPaddingEnd_;
-    constraint.maxSize.SetWidth(titleBarSize.Width() -
-        static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+    auto occupiedWidth =
+        maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN_M + HORIZONTAL_MARGIN + maxPaddingEnd_;
+    constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
     subtitleWrapper->Measure(constraint);
 }
 
@@ -138,8 +135,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     constraint.maxSize.SetHeight(titleBarSize.Height());
 
     if (titleBarLayoutProperty->HasTitleHeight()) {
-        constraint.maxSize.SetHeight(
-            static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
+        constraint.maxSize.SetHeight(static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
     }
 
     // navDestination title bar
@@ -161,23 +157,20 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     // navBar title bar
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
         auto occupiedWidth = maxPaddingStart_ + defaultPaddingStart_ + HORIZONTAL_MARGIN;
-        constraint.maxSize.SetWidth(titleBarSize.Width() -
-            static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+        constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
         titleWrapper->Measure(constraint);
         return;
     }
 
     if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         auto occupiedWidth = maxPaddingStart_ + defaultPaddingStart_ + HORIZONTAL_MARGIN;
-        constraint.maxSize.SetWidth(titleBarSize.Width() -
-            static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+        constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
         titleWrapper->Measure(constraint);
         return;
     }
 
     auto occupiedWidth = defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN * 2 + defaultPaddingStart_;
-    constraint.maxSize.SetWidth(titleBarSize.Width() -
-        static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+    constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
     titleWrapper->Measure(constraint);
 }
 

@@ -31,22 +31,21 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
-class ContainerModalPatternTestNg : public testing::Test {
+class ContainerModelTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
 
-void ContainerModalPatternTestNg::SetUpTestCase()
+void ContainerModelTestNg::SetUpTestSuite()
 {
     const std::string tag = "test";
     const auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
-    frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);
     MockPipelineBase::SetUp();
 }
 
-void ContainerModalPatternTestNg::TearDownTestCase()
+void ContainerModelTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }
@@ -56,7 +55,7 @@ void ContainerModalPatternTestNg::TearDownTestCase()
  * @tc.desc: Test IsMeasureBoundary and IsAtomicNode.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest001, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest001, TestSize.Level1)
 {
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     EXPECT_TRUE(containerModalPattern->IsMeasureBoundary());
@@ -68,18 +67,18 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest001, TestSize.Lev
  * @tc.desc: Test OnWindowFocused and OnWindowUnfocused.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest002, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest002, TestSize.Level1)
 {
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
     frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
     frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_NE(frameNodeChild, nullptr);
+    ASSERT_NE(frameNodeChild, nullptr);
     frameNode->AddChild(frameNodeChild);
     containerModalPattern->OnWindowFocused();
     containerModalPattern->OnWindowUnfocused();
@@ -90,17 +89,17 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest002, TestSize.Lev
  * @tc.desc: Test InitContainerEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest003, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest003, TestSize.Level1)
 {
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
     frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
     frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_NE(frameNodeChild, nullptr);
+    ASSERT_NE(frameNodeChild, nullptr);
     frameNode->AddChild(frameNodeChild);
 
     ContainerModalPattern containerModalPattern;
@@ -113,26 +112,26 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest003, TestSize.Lev
  * @tc.desc: Test ShowTitle is true.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest004, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest004, TestSize.Level1)
 {
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
     frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
     frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_NE(frameNodeChild, nullptr);
+    ASSERT_NE(frameNodeChild, nullptr);
 
     auto frameNodeChildTwo = AceType::MakeRefPtr<FrameNode>(tag, 2, AceType::MakeRefPtr<Pattern>());
     frameNodeChildTwo->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_NE(frameNodeChildTwo, nullptr);
+    ASSERT_NE(frameNodeChildTwo, nullptr);
 
     frameNode->AddChild(frameNodeChild);
     frameNode->AddChild(frameNodeChildTwo);
     auto containerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_NE(containerNode, nullptr);
+    ASSERT_NE(containerNode, nullptr);
     EXPECT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
 
     ContainerModalPattern containerModalPattern;
@@ -145,27 +144,27 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest004, TestSize.Lev
  * @tc.desc: Test ShowTitle is false.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest005, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest005, TestSize.Level1)
 {
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
     frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
     frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_NE(frameNodeChild, nullptr);
+    ASSERT_NE(frameNodeChild, nullptr);
 
     auto frameNodeChildTwo = AceType::MakeRefPtr<FrameNode>(tag, 2, AceType::MakeRefPtr<Pattern>());
     frameNodeChildTwo->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_NE(frameNodeChildTwo, nullptr);
+    ASSERT_NE(frameNodeChildTwo, nullptr);
 
     frameNode->AddChild(frameNodeChild);
     frameNode->AddChild(frameNodeChildTwo);
     auto containerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_NE(containerNode, nullptr);
-    EXPECT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
+    ASSERT_NE(containerNode, nullptr);
+    ASSERT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
 
     ContainerModalPattern containerModalPattern;
     containerModalPattern.AttachToFrameNode(frameNode);
@@ -177,7 +176,7 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest005, TestSize.Lev
  * @tc.desc: Test ShowTitle CHECK_NULL_VOID.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest006, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest006, TestSize.Level1)
 {
     ContainerModalPattern containerModalPattern;
     containerModalPattern.ShowTitle(false);
@@ -186,23 +185,23 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest006, TestSize.Lev
     frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     containerModalPattern.AttachToFrameNode(frameNode);
     containerModalPattern.ShowTitle(false);
 
     auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
     frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_NE(frameNodeChild, nullptr);
+    ASSERT_NE(frameNodeChild, nullptr);
 
     auto frameNodeChildTwo = AceType::MakeRefPtr<FrameNode>(tag, 2, AceType::MakeRefPtr<Pattern>());
     frameNodeChildTwo->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
-    EXPECT_NE(frameNodeChildTwo, nullptr);
+    ASSERT_NE(frameNodeChildTwo, nullptr);
 
     frameNode->AddChild(frameNodeChild);
     frameNode->AddChild(frameNodeChildTwo);
     auto containerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_NE(containerNode, nullptr);
-    EXPECT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
+    ASSERT_NE(containerNode, nullptr);
+    ASSERT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
 
     containerModalPattern.AttachToFrameNode(frameNode);
     containerModalPattern.ShowTitle(false);
@@ -213,28 +212,28 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest006, TestSize.Lev
  * @tc.desc: Test SetAppIcon.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest007, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest007, TestSize.Level1)
 {
     std::string tag = "test";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
     frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto frameNodeChild = AceType::MakeRefPtr<FrameNode>(tag, 1, AceType::MakeRefPtr<Pattern>());
     frameNodeChild->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNodeChild);
-    EXPECT_NE(frameNodeChild, nullptr);
+    ASSERT_NE(frameNodeChild, nullptr);
 
     auto frameNodeChildTwo = AceType::MakeRefPtr<FrameNode>(tag, 2, AceType::MakeRefPtr<Pattern>());
     frameNodeChildTwo->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNodeChildTwo);
-    EXPECT_NE(frameNodeChildTwo, nullptr);
+    ASSERT_NE(frameNodeChildTwo, nullptr);
 
     frameNode->AddChild(frameNodeChild);
     frameNodeChild->AddChild(frameNodeChildTwo);
     auto containerNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    EXPECT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
+    ASSERT_NE(AceType::DynamicCast<FrameNode>(frameNode->GetChildren().back()), nullptr);
 
     ContainerModalPattern containerModalPattern;
     containerModalPattern.AttachToFrameNode(frameNode);
@@ -244,26 +243,11 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest007, TestSize.Lev
 }
 
 /**
- * @tc.name: ContainerModalPatternTest008
- * @tc.desc: Test OnModifyDone.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest008, TestSize.Level1)
-{
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
-    auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
-    containerModalPattern->OnModifyDone();
-}
-
-/**
  * @tc.name: ContainerModalPatternTest009
  * @tc.desc: Test ChangeFloatingTitle.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest009, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest008, TestSize.Level1)
 {
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
 
@@ -278,13 +262,13 @@ HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest009, TestSize.Lev
  * @tc.desc: Test ChangeTitleButtonIcon.
  * @tc.type: FUNC
  */
-HWTEST_F(ContainerModalPatternTestNg, ContainerModalPatternTest010, TestSize.Level1)
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest009, TestSize.Level1)
 {
     std::string tag = "Button";
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, 0, AceType::MakeRefPtr<Pattern>());
     frameNode->renderContext_ = AceType::MakeRefPtr<MockRenderContext>();
     ViewStackProcessor::GetInstance()->Push(frameNode);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     containerModalPattern->ChangeTitleButtonIcon(
