@@ -20,6 +20,7 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
 #include "core/components/slider/render_slider.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
@@ -52,6 +53,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<MenuItemLayoutProperty>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<MenuItemAccessibilityProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
