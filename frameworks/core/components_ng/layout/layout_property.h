@@ -195,9 +195,18 @@ public:
             geometryTransition_->Build(host_, true);
         }
 
-        for (const auto& [id, geometryTransition] : ElementRegister::GetInstance()->GetGeometryTransitionMap()) {
-            LOGD("GeometryTransition map item: id: %{public}s, %{public}s",
-                id.c_str(), geometryTransition ? geometryTransition->ToString().c_str() : "null");
+        const auto& geometryTransitionMap = ElementRegister::GetInstance()->GetGeometryTransitionMap();
+        auto iter = geometryTransitionMap.begin();
+        while (iter != geometryTransitionMap.end()) {
+            auto id = iter->first;
+            const auto& geometryTransition = iter->second;
+            if (!geometryTransition || geometryTransition->IsInvalid()) {
+                iter = geometryTransitionMap.erase(iter);
+            } else {
+                LOGD("GeometryTransition map item: id: %{public}s, %{public}s",
+                    id.c_str(), geometryTransition->ToString().c_str());
+                iter++;
+            }
         }
     }
 
