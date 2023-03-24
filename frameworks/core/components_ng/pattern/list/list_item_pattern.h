@@ -134,7 +134,7 @@ protected:
     void OnModifyDone() override;
 
 private:
-    void InitSwiperAction();
+    void InitSwiperAction(bool axisChanged);
     float GetFriction();
     void StartSpringMotion(float start, float end, float velocity);
 
