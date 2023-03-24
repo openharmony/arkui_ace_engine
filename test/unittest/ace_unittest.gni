@@ -27,6 +27,7 @@ syntax_test_output_path = "ace_engine/NewFrameworkSyntaxNodes"
 image_test_output_path = "ace_engine/NewFrameworkImageResourceLoading"
 basic_test_output_path = "ace_engine/FrameworkBasicAbility"
 interface_test_output_path = "ace_engine/FrameworkInterfaces"
+accessibility_test_output_path = "ace_engine/FrameworkAccessibility"
 
 # ======================== common template =================================================================
 test_pattern_sources = [
