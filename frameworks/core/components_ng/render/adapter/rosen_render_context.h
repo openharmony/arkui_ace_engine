@@ -373,9 +373,8 @@ private:
     std::shared_ptr<ColorBlendModifier> colorBlendModifier_;
 
     template<typename Modifier, typename PropertyType>
-    friend class PropertyTransitionEffectImpl;
-    friend class RosenRotationTransitionEffect;
-    friend class RosenScaleTransitionEffect;
+    friend class PropertyTransitionEffectTemplate;
+    friend class RosenPivotTransitionEffect;
 
     ACE_DISALLOW_COPY_AND_MOVE(RosenRenderContext);
 };

@@ -15,9 +15,6 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 
-#include <memory>
-#include <string>
-
 #include "include/utils/SkParsePath.h"
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
@@ -2100,7 +2097,7 @@ void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
 void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     if (transitionEffect_) {
-        transitionEffect_->OnDetach(Claim(this));
+        transitionEffect_->Detach(Claim(this));
     }
     // [[PLANNING]]: if the struct of effect not changed, we can change the params in effect directly
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
@@ -2109,9 +2106,17 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
     CHECK_NULL_VOID(frameNode);
     bool isOnTheTree = frameNode->IsOnMainTree();
     // transition effects should be initialized without animation.
-    RSNode::ExecuteWithoutAnimation([this, isOnTheTree]() {
+    RSNode::ExecuteWithoutAnimation([this, isOnTheTree, &frameNode]() {
         // transitionIn effects should be initialized as active if currently not on the tree.
-        transitionEffect_->OnAttach(Claim(this), !isOnTheTree);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
+        auto offset = frameNode->GetPaintRectOffset();
+        auto rect = GetPaintRectWithoutTransform();
+        rect.SetOffset(offset);
+        // transitionIn effects should be initialized as active if currently not on the tree.
+        transitionEffect_->Attach(Claim(this), !isOnTheTree);
+        transitionEffect_->UpdateTransitionContext(Claim(this), rect, rootSize);
     });
 }
 
@@ -2132,7 +2137,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
         auto rect = GetPaintRectWithoutTransform();
         rect.SetOffset(offset);
 
-        transitionEffect_->UpdateSelfAndViewSize(rect, rootSize);
+        transitionEffect_->UpdateTransitionContext(Claim(this), rect, rootSize);
     });
 
     if (isTransitionIn) {
