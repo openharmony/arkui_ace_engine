@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SHAPE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SHAPE_H
 
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components/shape/shape_container_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
@@ -45,6 +46,7 @@ public:
     static void SetAntiAlias(bool antiAlias);
     static void SetStrokeDashArray(const JSCallbackInfo& info);
     static void SetBitmapMesh(const JSCallbackInfo& info);
+    static void SetForegroundColor(const JSCallbackInfo& info);
 
 private:
     static void InitBox(const JSCallbackInfo& info);

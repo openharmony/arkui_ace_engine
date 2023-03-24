@@ -326,6 +326,26 @@ void JSShape::SetBitmapMesh(const JSCallbackInfo& info)
     ShapeModel::GetInstance()->SetBitmapMesh(mesh, static_cast<int32_t>(column), static_cast<int32_t>(row));
 }
 
+void JSShape::SetForegroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        LOGE("The argv is wrong, it is supposed to have at least 1 argument");
+        return;
+    }
+    Color foregroundColor;
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(info[0], strategy)) {
+        ShapeModel::GetInstance()->SetFill(Color::FOREGROUND);
+        ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
+        return;
+    }
+    if (!ParseJsColor(info[0], foregroundColor)) {
+        return;
+    }
+    ShapeModel::GetInstance()->SetFill(foregroundColor);
+    ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
+}
+
 void JSShape::JSBind(BindingTarget globalObj)
 {
     JSClass<JSShape>::Declare("Shape");
@@ -348,6 +368,7 @@ void JSShape::JSBind(BindingTarget globalObj)
     JSClass<JSShape>::StaticMethod("strokeWidth", &JSShape::SetStrokeWidth);
     JSClass<JSShape>::StaticMethod("antiAlias", &JSShape::SetAntiAlias);
     JSClass<JSShape>::StaticMethod("mesh", &JSShape::SetBitmapMesh);
+    JSClass<JSShape>::StaticMethod("foregroundColor", &JSShape::SetForegroundColor);
 
     JSClass<JSShape>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSShape>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
