@@ -57,6 +57,20 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    // This function is now for fast previews
+    void OnMountToParentDone() override
+    {
+        auto hostNode = DynamicCast<FrameNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        auto swiperNode = DynamicCast<FrameNode>(hostNode->GetParent());
+        CHECK_NULL_VOID(swiperNode);
+        auto stepperNode = DynamicCast<StepperNode>(swiperNode->GetParent());
+        CHECK_NULL_VOID(stepperNode);
+        auto stepperPattern = stepperNode->GetPattern<StepperPattern>();
+        CHECK_NULL_VOID(stepperPattern);
+        stepperPattern->OnModifyDone();
+    }
+
 private:
     bool isFirstCreate = true;
     ACE_DISALLOW_COPY_AND_MOVE(StepperItemPattern);
