@@ -56,6 +56,7 @@ public:
         auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
         auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
         if (renderContext->HasForegroundColor()) {
             if (renderContext->GetForegroundColorValue().GetValue() !=
                 paintProperty->GetColor().value_or(Color::FOREGROUND).GetValue()) {

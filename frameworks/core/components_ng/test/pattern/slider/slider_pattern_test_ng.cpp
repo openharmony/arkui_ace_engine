@@ -14,7 +14,9 @@
  */
 
 #include "gtest/gtest.h"
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/slider/slider_model.h"
 #define private public
 #define protected public
 #include "core/components/theme/app_theme.h"
@@ -541,6 +543,44 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTestNg008, TestSize.Level1)
     paintProperty->UpdateStep(-1);
     sliderPattern->OnModifyDone();
     EXPECT_EQ(paintProperty->GetStep().value(), STEP);
+}
+
+/**
+ * @tc.name: SliderPatternTestNg009
+ * @tc.desc: Test Slider ThackThickness error value
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTestNg009, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->outsetTrackThickness_ = SLIDER_OUTSET_TRACK_THICKNRESS;
+    sliderTheme->insetTrackThickness_ = SLIDER_INSET_TRACK_THICKNRESS;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create slider and get frameNode.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    sliderModelNG.SetThickness(Dimension(-1));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    /**
+     * @tc.cases: case1. slider mode = OUTSET, TrackThickness = OutsetTrackThickness.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    EXPECT_NE(layoutProperty->GetThickness(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_OUTSET_TRACK_THICKNRESS);
+    /**
+     * @tc.cases: case2. slider mode = INSET, TrackThickness = InsetTrackThickness.
+     */
+    sliderModelNG.SetSliderMode(SliderModel::SliderMode::INSET);
+    sliderModelNG.SetThickness(Dimension(0));
+    EXPECT_NE(layoutProperty->GetThickness(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), SLIDER_INSET_TRACK_THICKNRESS);
 }
 
 /**

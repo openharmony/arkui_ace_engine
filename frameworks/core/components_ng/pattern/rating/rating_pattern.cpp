@@ -107,17 +107,21 @@ void RatingPattern::OnImageLoadSuccess(int32_t imageFlag)
     CHECK_NULL_VOID(host);
     if (imageFlag == 0b001) {
         foregroundImageCanvas_ = foregroundImageLoadingCtx_->MoveCanvasImage();
-        singleStarRect_ = foregroundImageLoadingCtx_->GetSrcRect();
-        singleStarDstRect_ = foregroundImageLoadingCtx_->GetDstRect();
+        foregroundConfig_.srcRect_ = foregroundImageLoadingCtx_->GetSrcRect();
+        foregroundConfig_.dstRect_ = foregroundImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
     if (imageFlag == 0b010) {
         secondaryImageCanvas_ = secondaryImageLoadingCtx_->MoveCanvasImage();
+        secondaryConfig_.srcRect_ = secondaryImageLoadingCtx_->GetSrcRect();
+        secondaryConfig_.dstRect_ = secondaryImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
 
     if (imageFlag == 0b100) {
         backgroundImageCanvas_ = backgroundImageLoadingCtx_->MoveCanvasImage();
+        backgroundConfig_.srcRect_ = backgroundImageLoadingCtx_->GetSrcRect();
+        backgroundConfig_.dstRect_ = backgroundImageLoadingCtx_->GetDstRect();
         imageSuccessStateCode_ = imageFlag | imageSuccessStateCode_;
     }
     // only when foreground, secondary and background image are all loaded successfully, mark dirty to update rendering.
@@ -145,16 +149,30 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(foregroundImageCanvas_, nullptr);
     CHECK_NULL_RETURN(secondaryImageCanvas_, nullptr);
     CHECK_NULL_RETURN(backgroundImageCanvas_, nullptr);
-    auto starNum = GetLayoutProperty<RatingLayoutProperty>()->GetStars().value_or(
-        GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
-    singleStarImagePaintConfig_.srcRect_ = singleStarRect_;
-    singleStarImagePaintConfig_.dstRect_ = singleStarDstRect_;
-    singleStarImagePaintConfig_.imageFit_ = ImageFit::TOP_LEFT;
+    auto layoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto starNum =
+        layoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM));
+    foregroundConfig_.imageFit_ = ImageFit::TOP_LEFT;
+    secondaryConfig_.imageFit_ = ImageFit::TOP_LEFT;
+    backgroundConfig_.imageFit_ = ImageFit::TOP_LEFT;
     if (!ratingModifier_) {
         ratingModifier_ = AceType::MakeRefPtr<RatingModifier>();
     }
-    ratingModifier_->UpdateCanvasImage(
-        foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_, singleStarImagePaintConfig_);
+    // when frameNode mark dirty to update rendering, only when 3 images are all loaded successfully and JudgeImageUri
+    // is true, pattern will update ratingModifier's CanvasImage.
+    if (ratingModifier_->JudgeImageUri(
+        layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
+        layoutProperty->GetSecondaryImageSourceInfo()->GetSrc(),
+        layoutProperty->GetBackgroundImageSourceInfo()->GetSrc(), foregroundConfig_.dstRect_) &&
+        imageSuccessStateCode_ == RATING_IMAGE_SUCCESS_CODE) {
+        ratingModifier_->UpdateImageUri(
+            layoutProperty->GetForegroundImageSourceInfo()->GetSrc(),
+            layoutProperty->GetSecondaryImageSourceInfo()->GetSrc(),
+            layoutProperty->GetBackgroundImageSourceInfo()->GetSrc());
+        ratingModifier_->UpdateCanvasImage(foregroundImageCanvas_, secondaryImageCanvas_, backgroundImageCanvas_,
+            foregroundConfig_, secondaryConfig_, backgroundConfig_);
+    }
     return MakeRefPtr<RatingPaintMethod>(ratingModifier_, starNum, state_);
 }
 
@@ -250,7 +268,7 @@ void RatingPattern::RecalculatedRatingScoreBasedOnEventPoint(double eventPointX,
 
     // step1: calculate the number of star which the touch point falls on.
     double wholeStarNum = 0.0;
-    const float singleWidth = singleStarDstRect_.Width();
+    const float singleWidth = foregroundConfig_.dstRect_.Width();
     wholeStarNum = floor(eventPointX / singleWidth);
 
     // step2: calculate relative position where the touch point falls on the wholeStarNum star.
@@ -286,7 +304,7 @@ bool RatingPattern::IsIndicator()
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_RETURN(ratingLayoutProperty, true);
     // Do not handle event when rating is set as indicator or single star size is invalid.
-    return ratingLayoutProperty->GetIndicator().value_or(false) || !singleStarDstRect_.IsValid();
+    return ratingLayoutProperty->GetIndicator().value_or(false) || !foregroundConfig_.dstRect_.IsValid();
 }
 
 void RatingPattern::HandleDragUpdate(const GestureEvent& info)
@@ -382,7 +400,7 @@ void RatingPattern::HandleTouchDown(const Offset& localPosition)
     auto ratingRenderProperty = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(ratingRenderProperty);
     // calculate the number of star the touch point falls on and trigger render update.
-    const int32_t touchStar = floor(localPosition.GetX() / singleStarDstRect_.Width());
+    const int32_t touchStar = floor(localPosition.GetX() / foregroundConfig_.dstRect_.Width());
     ratingRenderProperty->UpdateTouchStar(touchStar);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -445,7 +463,7 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto property = GetPaintProperty<RatingRenderProperty>();
     CHECK_NULL_VOID(property);
     auto ratingScore = property->GetRatingScoreValue();
-    auto singleStarWith = singleStarDstRect_.Width();
+    auto singleStarWith = foregroundConfig_.dstRect_.Width();
     auto wholeStarNum = fmax(ceil(ratingScore) - 1, 0.0);
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -454,8 +472,8 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
 
-    paintRect.SetRect(
-        RectF(static_cast<float>(wholeStarNum) * singleStarWith, 0.0f, singleStarWith, singleStarDstRect_.Height()));
+    paintRect.SetRect(RectF(
+        static_cast<float>(wholeStarNum) * singleStarWith, 0.0f, singleStarWith, foregroundConfig_.dstRect_.Height()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
@@ -571,7 +589,7 @@ void RatingPattern::HandleMouseEvent(MouseInfo& info)
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(ratingLayoutProperty);
     // calculate the number of star the mouse moved on and trigger render update.
-    auto touchStar = static_cast<int32_t>(floor(info.GetLocalLocation().GetX() / singleStarDstRect_.Width()));
+    auto touchStar = static_cast<int32_t>(floor(info.GetLocalLocation().GetX() / foregroundConfig_.dstRect_.Width()));
     touchStar = std::clamp(touchStar, DEFAULT_RATING_TOUCH_STAR_NUMBER,
         ratingLayoutProperty->GetStars().value_or(GetStarNumFromTheme().value_or(OHOS::Ace::DEFAULT_RATING_STAR_NUM)) -
             1);
@@ -581,27 +599,26 @@ void RatingPattern::HandleMouseEvent(MouseInfo& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void RatingPattern::OnModifyDone()
+void RatingPattern::LoadForeground()
 {
-    Pattern::OnModifyDone();
-    // Reset image state code.
-    imageReadyStateCode_ = 0;
-    imageSuccessStateCode_ = 0;
-    singleStarImagePaintConfig_.isSvg_ = false;
-    // Constrains ratingScore and starNum in case of the illegal input.
-    ConstrainsRatingScore();
-
     auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(ratingLayoutProperty);
-
+    foregroundConfig_.isSvg_ = false;
+    /*
+     * tips : foregroundUri loaded the default star the first time, the ForegroundImageSourceInfo will not nullopt when
+     * rating create again. such as the ratingScore partical update.
+     * secondaryUri, backgroundUri is the same.
+     */
     if (!ratingLayoutProperty->HasForegroundImageSourceInfo()) {
         isForegroundImageInfoFromTheme_ = true;
         ratingLayoutProperty->UpdateForegroundImageSourceInfo(GetImageSourceInfoFromTheme(0b001));
-        singleStarImagePaintConfig_.isSvg_ = true;
     }
     ImageSourceInfo foregroundImageSourceInfo =
         ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b001));
     UpdateInternalResource(foregroundImageSourceInfo, 0b001);
+    if (foregroundImageSourceInfo.IsSvg()) {
+        foregroundConfig_.isSvg_ = true;
+    }
     // Recreate ImageLoadingContext only when image source info has changed.
     if (!foregroundImageLoadingCtx_ || (foregroundImageLoadingCtx_->GetSourceInfo() != foregroundImageSourceInfo)) {
         // Construct the ImageLoadingContext and register the image life cycle callback.
@@ -611,6 +628,13 @@ void RatingPattern::OnModifyDone()
             AceType::MakeRefPtr<ImageLoadingContext>(foregroundImageSourceInfo, std::move(loadNotifierForegroundImage));
         foregroundImageLoadingCtx_->LoadImageData();
     }
+}
+
+void RatingPattern::LoadSecondary()
+{
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(ratingLayoutProperty);
+    secondaryConfig_.isSvg_ = false;
     if (!ratingLayoutProperty->HasSecondaryImageSourceInfo()) {
         isSecondaryImageInfoFromTheme_ = true;
         ratingLayoutProperty->UpdateSecondaryImageSourceInfo(GetImageSourceInfoFromTheme(0b010));
@@ -618,6 +642,9 @@ void RatingPattern::OnModifyDone()
     ImageSourceInfo secondaryImageSourceInfo =
         ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b010));
     UpdateInternalResource(secondaryImageSourceInfo, 0b010);
+    if (secondaryImageSourceInfo.IsSvg()) {
+        secondaryConfig_.isSvg_ = true;
+    }
     if (!secondaryImageLoadingCtx_ || secondaryImageLoadingCtx_->GetSourceInfo() != secondaryImageSourceInfo) {
         LoadNotifier loadNotifierSecondaryImage(
             CreateDataReadyCallback(0b010), CreateLoadSuccessCallback(0b010), CreateLoadFailCallback(0b010));
@@ -625,7 +652,13 @@ void RatingPattern::OnModifyDone()
             AceType::MakeRefPtr<ImageLoadingContext>(secondaryImageSourceInfo, std::move(loadNotifierSecondaryImage));
         secondaryImageLoadingCtx_->LoadImageData();
     }
+}
 
+void RatingPattern::LoadBackground()
+{
+    auto ratingLayoutProperty = GetLayoutProperty<RatingLayoutProperty>();
+    CHECK_NULL_VOID(ratingLayoutProperty);
+    backgroundConfig_.isSvg_ = false;
     if (!ratingLayoutProperty->HasBackgroundImageSourceInfo()) {
         isBackgroundImageInfoFromTheme_ = true;
         ratingLayoutProperty->UpdateBackgroundImageSourceInfo(GetImageSourceInfoFromTheme(0b100));
@@ -633,6 +666,9 @@ void RatingPattern::OnModifyDone()
     ImageSourceInfo backgroundImageSourceInfo =
         ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(GetImageSourceInfoFromTheme(0b100));
     UpdateInternalResource(backgroundImageSourceInfo, 0b100);
+    if (backgroundImageSourceInfo.IsSvg()) {
+        backgroundConfig_.isSvg_ = true;
+    }
     if (!backgroundImageLoadingCtx_ || backgroundImageLoadingCtx_->GetSourceInfo() != backgroundImageSourceInfo) {
         LoadNotifier loadNotifierBackgroundImage(
             CreateDataReadyCallback(0b100), CreateLoadSuccessCallback(0b100), CreateLoadFailCallback(0b100));
@@ -640,7 +676,20 @@ void RatingPattern::OnModifyDone()
             AceType::MakeRefPtr<ImageLoadingContext>(backgroundImageSourceInfo, std::move(loadNotifierBackgroundImage));
         backgroundImageLoadingCtx_->LoadImageData();
     }
+}
 
+void RatingPattern::OnModifyDone()
+{
+    Pattern::OnModifyDone();
+    // Reset image state code.
+    imageReadyStateCode_ = 0;
+    imageSuccessStateCode_ = 0;
+    // Constrains ratingScore and starNum in case of the illegal input.
+    ConstrainsRatingScore();
+
+    LoadForeground();
+    LoadSecondary();
+    LoadBackground();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<EventHub>();
