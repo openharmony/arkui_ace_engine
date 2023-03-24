@@ -113,6 +113,41 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBoxPaintPropertyTest002
+ * @tc.desc: Verify ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    /**
+     * @tc.steps: step2. Set parameters to CheckBox property
+     */
+    checkBoxModelNG.SetSelect(SELECTED);
+    checkBoxModelNG.SetSelectedColor(SELECTED_COLOR);
+    checkBoxModelNG.SetWidth(WIDTH);
+    checkBoxModelNG.SetHeight(HEIGHT);
+    checkBoxModelNG.SetPadding(PADDING);
+
+    /**
+     * @tc.steps: step3. Get paint property
+     * @tc.expected: step3. Check the CheckBox property value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    auto json = JsonUtil::Create(true);
+    checkBoxPaintProperty->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("isOn"), "true");
+}
+
+/**
  * @tc.name: CheckBoxEventHubPropertyTest002
  * @tc.desc: Set CheckBox value into CheckBoxEventHub and get it.
  * @tc.type: FUNC
@@ -722,6 +757,46 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest023, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBoxMeasureTest024
+ * @tc.desc: Test CheckBox MeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set checkBoxLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+    auto checkBoxLayoutAlgorithm = checkBoxPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(checkBoxLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(checkBoxLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. Test CheckBox Measure method
+     * @tc.expected: step3. Check the CheckBox frame size and frame offset value
+     */
+    LayoutConstraintF layoutConstraintSize;
+    layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    auto size = checkBoxLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
+    // Test the size set by codes.
+    EXPECT_EQ(size, SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+}
+
+/**
  * @tc.name: CheckBoxPaintMethodTest001
  * @tc.desc: Test CheckBox PaintMethod PaintCheckBox.
  * @tc.type: FUNC
@@ -818,6 +893,34 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest003, TestSize.Level1)
     CheckBoxPaintMethod checkBoxPaintMethod(checkboxModifier);
     checkBoxPaintMethod.UpdateContentModifier(&paintWrapper);
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CONTENT_SIZE.Width()));
+}
+
+/**
+ * @tc.name: CheckBoxPaintMethodTest004
+ * @tc.desc: Test CheckBox PaintMethod PaintCheckBox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest004, TestSize.Level1)
+{
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto checkBoxPaintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    /**
+     * @tc.case: case. CheckBoxPaintMethod's PaintCheckBox will be called.
+     */
+    auto checkBoxModifier =
+        AceType::MakeRefPtr<CheckBoxModifier>(false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR);
+    checkBoxModifier->SetStrokeSize(10);
+    CheckBoxPaintMethod checkBoxPaintMethod(checkBoxModifier);
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(3);
+    checkBoxPaintMethod.checkboxModifier_->PaintCheckBox(canvas, CONTENT_OFFSET, CONTENT_SIZE);
 }
 
 /**
