@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,24 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/test.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-group("unittest") {
-  testonly = true
-  deps = []
-  if (!is_asan) {
-    deps = [
-      "accessibility:accessibility_unittest",
-      "base:base_unittest",
-      "event:event_unittest",
-      "image_provider:image_provider_unittest",
-      "layout:layout_unittest",
-      "manager:manager_unittest",
-      "pattern:pattern_unittest",
-      "property:property_unittest",
-      "render:render_unittest",
-      "svg:svg_unittest",
-      "syntax:syntax_unittest",
-    ]
-  }
+ohos_unittest("accessibility_utils_test_ng") {
+  module_out_path = "$accessibility_test_output_path/accessibility"
+
+  sources = test_pattern_sources
+  sources += [
+    "$ace_root/frameworks/core/accessibility/accessibility_node.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_utils.cpp",
+    "accessibility_utils_test_ng.cpp",
+  ]
+  deps = test_pattern_deps
+  configs = test_configs
 }

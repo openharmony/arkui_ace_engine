@@ -29,6 +29,7 @@ basic_test_output_path = "ace_engine/FrameworkBasicAbility"
 manager_test_output_path = "ace_engine/NewFrameworkManager"
 gestures_test_out_path = "ace_engine/NewFrameworkGestures"
 interface_test_output_path = "ace_engine/FrameworkInterfaces"
+accessibility_test_output_path = "ace_engine/FrameworkAccessibility"
 
 # ======================== common template =================================================================
 test_pattern_sources = [
