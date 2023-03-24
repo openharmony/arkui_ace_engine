@@ -195,7 +195,7 @@ public:
             geometryTransition_->Build(host_, true);
         }
 
-        const auto& geometryTransitionMap = ElementRegister::GetInstance()->GetGeometryTransitionMap();
+        auto geometryTransitionMap = ElementRegister::GetInstance()->GetGeometryTransitionMap();
         auto iter = geometryTransitionMap.begin();
         while (iter != geometryTransitionMap.end()) {
             auto id = iter->first;
