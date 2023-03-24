@@ -3930,8 +3930,16 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         if (idGenFunc === undefined) {
             
-            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
             idGenFuncUsesIndex = true;
+            // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
+            idGenFunc = (item, index) => {
+                try {
+                    return `${index}__${JSON.stringify(item)}`;
+                }
+                catch (e) {
+                    throw new Error(`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`);
+                }
+            };
         }
         let diffIndexArray = []; // New indexes compared to old one.
         let newIdArray = [];
