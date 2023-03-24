@@ -137,11 +137,20 @@ int32_t LazyLayoutWrapperBuilder::OnGetTotalCount()
 
 RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndex(int32_t index)
 {
-    if ((index < 0) || (index >= GetTotalCount())) {
+    auto totalCount = GetTotalCount();
+    if ((index < 0) || (index >= totalCount)) {
         LOGE("index is illegal: %{public}d", index);
         return nullptr;
     }
+    // check if the index needs to be converted to virtual index.
+    if (lazySwiper_ && startIndex_ && index < startIndex_.value()) {
+        index += totalCount;
+    }
+    return OnGetOrCreateWrapperByIndexLegacy(index);
+}
 
+RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegacy(int32_t index)
+{
     // The first time get the item, do not do the range check, and the subsequent get the item
     // needs to check whether it is in the upper and lower bounds (-1, +1) of the existing index.
     if (!startIndex_) {
