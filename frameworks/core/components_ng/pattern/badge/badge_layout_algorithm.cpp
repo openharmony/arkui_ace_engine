@@ -93,9 +93,7 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
     auto textLayoutConstraint = textFirstLayoutConstraint;
     textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);
-    if (textSize.Height() > badgeCircleDiameter) {
-        textLayoutProperty->UpdateFontSize(0.0_vp);
-    }
+
     textWrapper->Measure(textLayoutConstraint);
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
