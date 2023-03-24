@@ -134,6 +134,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyRenderNode(dirty);
+    ForceRenderForImplicitAnimation();
     hasIdleTasks_ = true;
     RequestFrame();
 }
