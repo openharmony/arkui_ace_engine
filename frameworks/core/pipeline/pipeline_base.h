@@ -98,6 +98,8 @@ public:
 
     void ForceLayoutForImplicitAnimation();
 
+    void ForceRenderForImplicitAnimation();
+
     // add schedule task and return the unique mark id.
     virtual uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) = 0;
 
@@ -839,6 +841,7 @@ protected:
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
+    std::stack<bool> pendingImplicitRender_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;
