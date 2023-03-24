@@ -201,7 +201,9 @@ void LayoutWrapper::Measure(const std::optional<LayoutConstraintF>& parentConstr
     if (parentConstraint) {
         if (hasAspectRatio) {
             auto useConstraint = parentConstraint.value();
-            useConstraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue());
+            useConstraint.ApplyAspectRatio(magicItemProperty->GetAspectRatioValue(),
+                layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize
+                                                           : std::nullopt);
             geometryNode_->SetParentLayoutConstraint(useConstraint);
             layoutProperty_->UpdateLayoutConstraint(useConstraint);
         } else {
