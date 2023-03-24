@@ -687,6 +687,7 @@ private:
     OHOS::NWeb::BlurReason blurReason_ = OHOS::NWeb::BlurReason::FOCUS_SWITCH;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
+    bool needResizeAtFirst_ = false;
 #endif
 };
 
