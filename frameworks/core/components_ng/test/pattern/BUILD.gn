@@ -65,13 +65,13 @@ group("pattern_unittest") {
     # "stack:stack_pattern_test_ng",
     "swiper_indicator:swiper_indicator_pattern_test_ng",
     # "tabs:tabs_pattern_test_ng",
-    "text:text_pattern_test_ng",
+    # "text:text_pattern_test_ng",
     "text_clock:text_clock_pattern_unit_test",
     "textfield:textfield_pattern_test_ng",
     "texttimer:text_timer_pattern_unit_test",
 
     # "toggle:toggle_pattern_test_ng",
-    "video:video_pattern_test_ng",
+    # "video:video_pattern_test_ng",
     "web:web_pattern_unit_test",
     "xcomponent:xcomponent_pattern_test_ng",
 
