@@ -205,6 +205,11 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     auto textRectNotNeedToChange = UpdateCaretPosition();
     UpdateCaretInfoToController();
+    if (needToRefreshSelectOverlay_) {
+        ProcessOverlay();
+        StopTwinkling();
+        needToRefreshSelectOverlay_ = false;
+    }
     if (setSelectionFlag_) {
         SetTextSelection(selectionStart_, selectionEnd_);
         setSelectionFlag_ = false;
@@ -286,7 +291,7 @@ bool TextFieldPattern::UpdateCaretPosition()
     } else if (caretUpdateType_ == CaretUpdateType::EVENT || caretUpdateType_ == CaretUpdateType::DEL ||
                caretUpdateType_ == CaretUpdateType::ICON_PRESSED) {
         UpdateCaretOffsetByEvent();
-        if (!NeedShowPasswordIcon()) {
+        if (!NeedShowPasswordIcon() && !needToRefreshSelectOverlay_) {
             StartTwinkling();
         }
     } else if (caretUpdateType_ == CaretUpdateType::NONE) {
@@ -1554,7 +1559,17 @@ void TextFieldPattern::OnModifyDone()
     if (renderContext->HasBackgroundColor()) {
         paintProperty->UpdateBackgroundColor(renderContext->GetBackgroundColorValue());
     }
-    CloseSelectOverlay();
+    auto textWidth = static_cast<int32_t>(textEditingValue_.GetWideText().length());
+    if (SelectOverlayIsOn()) {
+        needToRefreshSelectOverlay_ = true;
+        CloseSelectOverlay();
+        UpdateSelection(
+            std::clamp(textSelector_.GetStart(), 0, textWidth), std::clamp(textSelector_.GetEnd(), 0, textWidth));
+        textEditingValue_.caretPosition = textSelector_.GetEnd();
+        if (!textSelector_.StartEqualToDest()) {
+            selectionMode_ = SelectionMode::SELECT;
+        }
+    }
     if (layoutProperty->GetTypeChangedValue(false)) {
         ClearEditingValue();
         layoutProperty->ResetTypeChanged();
@@ -1562,14 +1577,14 @@ void TextFieldPattern::OnModifyDone()
         redoOperationRecords_.clear();
     }
     auto maxLength = GetMaxLength();
-    if (GreatOrEqual(textEditingValue_.GetWideText().length(), maxLength)) {
+    if (GreatOrEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
-        textEditingValue_.caretPosition = std::clamp(
-            textEditingValue_.caretPosition, 0, static_cast<int32_t>(textEditingValue_.GetWideText().length()));
+        textEditingValue_.caretPosition =
+            std::clamp(textEditingValue_.caretPosition, 0, textWidth);
         SetEditingValueToProperty(textEditingValue_.text);
     }
     FireOnChangeIfNeeded();
-    caretUpdateType_ = CaretUpdateType::INPUT;
+    caretUpdateType_ = CaretUpdateType::EVENT;
     if (IsTextArea()) {
         SetAxis(Axis::VERTICAL);
         if (!GetScrollableEvent()) {
@@ -1643,7 +1658,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     isUsingMouse_ = false;
     LOGI("TextField %{public}d handle long press", GetHost()->GetId());
     auto focusHub = GetHost()->GetOrCreateFocusHub();
-
+    CloseSelectOverlay();
     if (IsSearchParentNode()) {
         auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
         focusHub = parentFrameNode->GetOrCreateFocusHub();
@@ -1680,6 +1695,11 @@ void TextFieldPattern::ProcessOverlay()
             UpdateSelection(textEditingValue_.caretPosition, textEditingValue_.caretPosition + 1);
         }
     }
+    CreateHandles();
+}
+
+void TextFieldPattern::CreateHandles()
+{
     std::vector<RSTypographyProperties::TextBox> tmp;
     GetTextRectsInRange(textSelector_.GetStart(), textSelector_.GetEnd(), tmp);
     auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart());

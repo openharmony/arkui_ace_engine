@@ -626,6 +626,7 @@ private:
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
+    void CreateHandles();
 
     void FireEventHubOnChange(const std::string& text);
     void FireOnChangeIfNeeded();
@@ -722,6 +723,7 @@ private:
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;
+    bool needToRefreshSelectOverlay_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
