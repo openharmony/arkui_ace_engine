@@ -816,13 +816,12 @@ void ListPattern::ProcessDragStart(float startPosition)
     auto globalOffset = host->GetTransformRelativeOffset();
     int32_t index = -1;
     auto offset = startPosition - GetMainAxisOffset(globalOffset, GetAxis());
-    for (const auto& pos : itemPosition_) {
-        if (offset <= pos.second.endPos) {
-            index = pos.first;
-            break;
-        }
-    }
-    if (index == -1 && !itemPosition_.empty()) {
+    auto it = std::find_if(itemPosition_.begin(), itemPosition_.end(), [offset](auto pos) {
+        return offset <= pos.second.endPos;
+    });
+    if (it != itemPosition_.end()) {
+        index = it->first;
+    } else if (!itemPosition_.empty()) {
         index = itemPosition_.rbegin()->first + 1;
     }
     dragFromSpring_ = false;
