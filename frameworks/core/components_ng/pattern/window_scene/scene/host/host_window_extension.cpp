@@ -42,7 +42,6 @@ HostWindowExtension::HostWindowExtension(const std::string& bundleName, const st
         .callerToken_ = callerToken,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
-    RegisterLifecycleListener();
     RequestExtensionSessionActivation();
 }
 

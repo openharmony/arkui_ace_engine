@@ -25,47 +25,13 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-class LifecycleListener : public Rosen::ILifecycleListener {
-public:
-    explicit LifecycleListener(const WeakPtr<HostWindowPattern>& hostWindowPattern)
-        : hostWindowPattern_(hostWindowPattern) {}
-    virtual ~LifecycleListener() = default;
-
-    void OnForeground() override
-    {
-        auto hostWindowPattern = hostWindowPattern_.Upgrade();
-        CHECK_NULL_VOID(hostWindowPattern);
-        hostWindowPattern->OnForeground();
-    }
-
-    void OnBackground() override
-    {
-        auto hostWindowPattern = hostWindowPattern_.Upgrade();
-        CHECK_NULL_VOID(hostWindowPattern);
-        hostWindowPattern->OnBackground();
-    }
-
-private:
-    WeakPtr<HostWindowPattern> hostWindowPattern_;
-};
-
 HostWindowPattern::HostWindowPattern()
 {
     instanceId_ = Container::CurrentId();
 }
 
-void HostWindowPattern::RegisterLifecycleListener()
-{
-    CHECK_NULL_VOID(session_);
-    auto lifecycleListener = std::make_shared<LifecycleListener>(WeakClaim(this));
-    session_->RegisterLifecycleListener(lifecycleListener);
-}
-
 void HostWindowPattern::InitContent()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
     contentNode_ = FrameNode::CreateFrameNode(
         V2::WINDOW_SCENE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     contentNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -79,35 +45,58 @@ void HostWindowPattern::InitContent()
     context->SetRSNode(surfaceNode);
 
     if (session_->GetSessionState() == Rosen::SessionState::STATE_BACKGROUND) {
-        // auto snapShot = session_->GetSnapShot();
-        startingNode_ = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        // auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
-        // if (imageLayoutProperty) {
-        //     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(snapShot));
-        // }
-        startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        startingNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
-        host->AddChild(startingNode_);
-        return;
+        CreateSnapshotNode();
+    } else {
+        CreateStartingNode();
     }
+}
+
+void HostWindowPattern::CreateStartingNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
 
     if (!HasStartingPage()) {
         host->AddChild(contentNode_);
-    } else {
-        startingNode_ = FrameNode::CreateFrameNode(
-            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        startingNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
-        host->AddChild(startingNode_);
-
-        surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
-            LOGI("RSSurfaceNode buffer available callback");
-            auto hostWindowPattern = weak.Upgrade();
-            CHECK_NULL_VOID(hostWindowPattern);
-            hostWindowPattern->BufferAvailableCallback();
-        });
+        return;
     }
+
+    startingNode_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    startingNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+    host->AddChild(startingNode_);
+
+    CHECK_NULL_VOID(session_);
+    auto surfaceNode = session_->GetSurfaceNode();
+    surfaceNode->SetBufferAvailableCallback([weak = WeakClaim(this)]() {
+        LOGI("RSSurfaceNode buffer available callback");
+        auto hostWindowPattern = weak.Upgrade();
+        CHECK_NULL_VOID(hostWindowPattern);
+        hostWindowPattern->BufferAvailableCallback();
+    });
+}
+
+void HostWindowPattern::CreateSnapshotNode()
+{
+    snapshotNode_ = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageLayoutProperty = snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+    imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddChild(snapshotNode_);
+
+    CHECK_NULL_VOID(session_);
+    auto snapshot = session_->GetSnapshot();
+    auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
+
+    CHECK_NULL_VOID(pixelMap);
+    imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+    snapshotNode_->MarkModifyDone();
 }
 
 void HostWindowPattern::BufferAvailableCallback()
@@ -132,6 +121,18 @@ void HostWindowPattern::BufferAvailableCallback()
     pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
+void HostWindowPattern::OnAttachToFrameNode()
+{
+    InitContent();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
+    renderContext->SetClipToBounds(true);
+}
+
 bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (!config.frameSizeChange) {
@@ -151,18 +152,6 @@ bool HostWindowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(session_, false);
     session_->UpdateRect(rect, Rosen::SizeChangeReason::SHOW);
     return false;
-}
-
-void HostWindowPattern::OnAttachToFrameNode()
-{
-    InitContent();
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-
-    auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
-    renderContext->SetClipToBounds(true);
 }
 
 void HostWindowPattern::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)

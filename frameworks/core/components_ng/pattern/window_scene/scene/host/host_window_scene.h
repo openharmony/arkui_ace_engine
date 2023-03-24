@@ -26,14 +26,21 @@ public:
     HostWindowScene(const sptr<Rosen::Session>& session);
     ~HostWindowScene() override;
 
-protected:
+private:
     bool HasStartingPage() override
     {
         return false;
     }
 
-    void OnForeground() override;
-    void OnBackground() override;
+    void RegisterLifecycleListener();
+    void UnregisterLifecycleListener();
+
+    void OnForeground();
+    void OnBackground();
+
+    std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
+
+    friend class LifecycleListener;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowScene);
 };

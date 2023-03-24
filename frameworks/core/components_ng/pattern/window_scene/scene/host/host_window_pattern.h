@@ -16,14 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H
 
-#include "pointer_event.h"
 #include "session/host/include/session.h"
 
-#include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
 class HostWindowPattern : public Pattern {
     DECLARE_ACE_TYPE(HostWindowPattern, Pattern);
 
@@ -43,26 +40,21 @@ protected:
 
     virtual bool HasStartingPage() = 0;
 
-    void RegisterLifecycleListener();
-
-    virtual void OnForeground() {}
-    virtual void OnBackground() {}
-
     int32_t instanceId_ = -1;
 
     RefPtr<FrameNode> startingNode_;
     RefPtr<FrameNode> contentNode_;
+    RefPtr<FrameNode> snapshotNode_;
 
     sptr<Rosen::Session> session_;
 
 private:
+    void CreateSnapshotNode();
+    void CreateStartingNode();
     void BufferAvailableCallback();
-
-    friend class LifecycleListener;
 
     ACE_DISALLOW_COPY_AND_MOVE(HostWindowPattern);
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_HOST_WINDOW_PATTERN_H

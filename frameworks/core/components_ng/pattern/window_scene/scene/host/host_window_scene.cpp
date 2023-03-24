@@ -19,6 +19,29 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+class LifecycleListener : public Rosen::ILifecycleListener {
+public:
+    explicit LifecycleListener(const WeakPtr<HostWindowScene>& hostWindowScene)
+        : hostWindowScene_(hostWindowScene) {}
+    virtual ~LifecycleListener() = default;
+
+    void OnForeground() override
+    {
+        auto hostWindowScene = hostWindowScene_.Upgrade();
+        CHECK_NULL_VOID(hostWindowScene);
+        hostWindowScene->OnForeground();
+    }
+
+    void OnBackground() override
+    {
+        auto hostWindowScene = hostWindowScene_.Upgrade();
+        CHECK_NULL_VOID(hostWindowScene);
+        hostWindowScene->OnBackground();
+    }
+
+private:
+    WeakPtr<HostWindowScene> hostWindowScene_;
+};
 
 HostWindowScene::HostWindowScene(const sptr<Rosen::Session>& session)
 {
@@ -28,56 +51,77 @@ HostWindowScene::HostWindowScene(const sptr<Rosen::Session>& session)
 
 HostWindowScene::~HostWindowScene()
 {
-    // UnregisterLifecycleListener
+    UnregisterLifecycleListener();
+}
+
+void HostWindowScene::RegisterLifecycleListener()
+{
+    CHECK_NULL_VOID(session_);
+    lifecycleListener_ = std::make_shared<LifecycleListener>(WeakClaim(this));
+    session_->RegisterLifecycleListener(lifecycleListener_);
+}
+
+void HostWindowScene::UnregisterLifecycleListener()
+{
+    CHECK_NULL_VOID(session_);
+    session_->UnregisterLifecycleListener(lifecycleListener_);
 }
 
 void HostWindowScene::OnForeground()
 {
-    auto uiTask = [this]() {
-        auto host = GetHost();
+    CHECK_NULL_VOID(snapshotNode_);
+
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto hostWindowScene = weakThis.Upgrade();
+        CHECK_NULL_VOID(hostWindowScene);
+
+        auto host = hostWindowScene->GetHost();
         CHECK_NULL_VOID(host);
 
-        host->RemoveChild(startingNode_);
-        startingNode_.Reset();
+        host->RemoveChild(hostWindowScene->snapshotNode_);
+        hostWindowScene->snapshotNode_.Reset();
 
-        host->AddChild(contentNode_);
+        host->AddChild(hostWindowScene->contentNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
 
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostSyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
 
 void HostWindowScene::OnBackground()
 {
-    // CHECK_NULL_VOID(session_);
-    // auto snapShot = session_->GetSnapShot();
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto hostWindowScene = weakThis.Upgrade();
+        CHECK_NULL_VOID(hostWindowScene);
 
-    auto uiTask = [this]() {
-        auto host = GetHost();
+        hostWindowScene->snapshotNode_ = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        auto imageLayoutProperty = hostWindowScene->snapshotNode_->GetLayoutProperty<ImageLayoutProperty>();
+        imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        hostWindowScene->snapshotNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
+
+        auto host = hostWindowScene->GetHost();
         CHECK_NULL_VOID(host);
-
-        host->RemoveChild(contentNode_);
-
-        startingNode_ = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        // auto imageLayoutProperty = startingNode_->GetLayoutProperty<ImageLayoutProperty>();
-        // if (imageLayoutProperty) {
-        //     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(snapShot));
-        // }
-        startingNode_->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        startingNode_->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
-
-        host->AddChild(startingNode_);
+        host->RemoveChild(hostWindowScene->contentNode_);
+        host->AddChild(hostWindowScene->snapshotNode_);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+        CHECK_NULL_VOID(hostWindowScene->session_);
+        auto snapshot = hostWindowScene->session_->GetSnapshot();
+        auto pixelMap = PixelMap::CreatePixelMap(&snapshot);
+
+        CHECK_NULL_VOID(pixelMap);
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+        imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
+        hostWindowScene->snapshotNode_->MarkModifyDone();
     };
 
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostSyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
+    pipelineContext->PostAsyncEvent(std::move(uiTask), TaskExecutor::TaskType::UI);
 }
-
 } // namespace OHOS::Ace::NG
