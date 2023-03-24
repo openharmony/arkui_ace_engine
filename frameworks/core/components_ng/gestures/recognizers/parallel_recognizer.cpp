@@ -27,7 +27,6 @@ namespace OHOS::Ace::NG {
 
 void ParallelRecognizer::OnAccepted()
 {
-    LOGD("%{public}p parallel gesture recognizer has been accepted", this);
     refereeState_ = RefereeState::SUCCEED;
     if (currentBatchRecognizer_) {
         currentBatchRecognizer_->OnAccepted();
@@ -37,7 +36,6 @@ void ParallelRecognizer::OnAccepted()
 
 void ParallelRecognizer::OnRejected()
 {
-    LOGD("%{public}p the parallel gesture recognizer has been rejected!", this);
     refereeState_ = RefereeState::FAIL;
 }
 

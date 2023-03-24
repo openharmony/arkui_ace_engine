@@ -205,9 +205,9 @@ inline RefPtr<Element> Element::DoUpdateChildWithNewComponent(
 RefPtr<Element> Element::UpdateChildWithSlot(
     const RefPtr<Element>& child, const RefPtr<Component>& newComponent, int32_t slot, int32_t renderSlot)
 {
-    LOGD("%{public}p->%{public}s(elmtId: %{public}d)::UpdateChildWithSlot(child: %{public}s(elmtId: %{public}d), "
+    LOGD("%{public}s(elmtId: %{public}d)::UpdateChildWithSlot(child: %{public}s(elmtId: %{public}d), "
     "component: %{public}s(elmtId: %{public}d), slot: %{public}d, renderSlot: %{public}d)",
-        this, AceType::TypeName(this), GetElementId(), (child ? AceType::TypeName(child) : "no child Element (yet)"),
+        AceType::TypeName(this), GetElementId(), (child ? AceType::TypeName(child) : "no child Element (yet)"),
         (child ? child->GetElementId() : -1), newComponent ? AceType::TypeName(newComponent) : "no Component",
         newComponent ? newComponent->GetElementId() : -1, slot, renderSlot);
     // Considering 4 cases:

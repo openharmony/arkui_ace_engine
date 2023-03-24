@@ -114,7 +114,6 @@ void RosenRenderContext::OnNodeDisappear()
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    LOGD("rsNode disappear transition, rsNode:%{public}p", rsNode_.get());
     auto rect = GetPaintRectWithoutTransform();
     NotifyTransitionInner(rect.GetSize(), false);
 }
