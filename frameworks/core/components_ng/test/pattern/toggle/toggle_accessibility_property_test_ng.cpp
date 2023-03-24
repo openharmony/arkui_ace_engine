@@ -61,15 +61,15 @@ HWTEST_F(ToggleAccessibilityPropertyTestNg, ToggleAccessibilityPropertyTestNg001
     ToggleModelNG toggleModelNG;
     toggleModelNG.Create(ToggleType::BUTTON, true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto accessibility = frameNode->GetAccessibilityProperty<ToggleButtonAccessibilityProperty>();
-    EXPECT_NE(accessibility, nullptr);
+    ASSERT_NE(accessibility, nullptr);
     EXPECT_TRUE(accessibility->IsCheckable());
     EXPECT_TRUE(accessibility->IsChecked());
 
     auto paintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
-    EXPECT_NE(paintProperty, nullptr);
+    ASSERT_NE(paintProperty, nullptr);
     paintProperty->UpdateIsOn(false);
     EXPECT_FALSE(accessibility->IsChecked());
 }
@@ -84,14 +84,14 @@ HWTEST_F(ToggleAccessibilityPropertyTestNg, ToggleAccessibilityPropertyTestNg002
     ToggleModelNG toggleModelNG;
     toggleModelNG.Create(ToggleType::SWITCH, true);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto accessibility = frameNode->GetAccessibilityProperty<SwitchAccessibilityProperty>();
-    EXPECT_NE(accessibility, nullptr);
+    ASSERT_NE(accessibility, nullptr);
     EXPECT_TRUE(accessibility->IsCheckable());
 
     auto pattern = AceType::DynamicCast<SwitchPattern>(frameNode->GetPattern());
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     pattern->isOn_ = false;
     EXPECT_FALSE(accessibility->IsChecked());
 
