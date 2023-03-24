@@ -245,7 +245,11 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
     auto hapModuleInfo = context->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
+    auto applicationInfo = context->GetApplicationInfo();
+    CHECK_NULL_VOID(applicationInfo);
+    minCompatibleVersionCode_ = applicationInfo->minCompatibleVersionCode;
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     const auto& obj = context->GetBindingObject();
     CHECK_NULL_VOID(obj);
@@ -758,6 +762,11 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
     if (isFormRender_) {
         Platform::FlutterAceView::SurfaceChanged(
             flutterAceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
+        // Set sdk version in module json mode for form
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline) {
+            pipeline->SetMinPlatformVersion(minCompatibleVersionCode_);
+        }
     } else {
         Platform::FlutterAceView::SurfaceChanged(flutterAceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     }
