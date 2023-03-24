@@ -65,13 +65,15 @@ void SwiperIndicatorPattern::OnModifyDone()
     }
 
     auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
 
     swiperEventHub->SetIndicatorOnChange(
         [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
             auto indicator = weak.Upgrade();
+            CHECK_NULL_VOID(indicator);
             auto textContext = context.Upgrade();
+            CHECK_NULL_VOID(textContext);
             if (textContext->swiperIndicatorType_ == SwiperIndicatorType::DIGIT) {
-                CHECK_NULL_VOID(indicator);
                 RefPtr<FrameNode> firstTextNode;
                 RefPtr<FrameNode> lastTextNode;
                 auto layoutProperty = indicator->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
@@ -316,6 +318,7 @@ void SwiperIndicatorPattern::GetMouseClickIndex()
 void SwiperIndicatorPattern::UpdateTextContent(const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
     const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode)
 {
+    CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(firstTextNode);
     CHECK_NULL_VOID(lastTextNode);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -344,6 +347,9 @@ void SwiperIndicatorPattern::UpdateTextContentSub(
     const RefPtr<SwiperIndicatorLayoutProperty>& layoutProperty,
     const RefPtr<FrameNode>& firstTextNode, const RefPtr<FrameNode>& lastTextNode)
 {
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(firstTextNode);
+    CHECK_NULL_VOID(lastTextNode);
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto pipeline = PipelineBase::GetCurrentContext();
