@@ -19,6 +19,9 @@
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
 #include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#ifdef SUPPORT_JSSTACK
+#include "xpower_event_jsvm.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -101,6 +104,9 @@ void JSVideo::JsMuted(const JSCallbackInfo& info)
     bool muted = false;
     if (info[0]->IsBoolean()) {
         muted = info[0]->ToBoolean();
+#ifdef SUPPORT_JSSTACK
+        HiviewDFX::ReportXPowerJsStackSysEvent(info.GetVm(), "VOLUME_CHANGE", "SRC=Video");
+#endif
     }
     VideoModel::GetInstance()->SetMuted(muted);
 }
@@ -110,6 +116,9 @@ void JSVideo::JsAutoPlay(const JSCallbackInfo& info)
     bool autoPlay = false;
     if (info[0]->IsBoolean()) {
         autoPlay = info[0]->ToBoolean();
+#ifdef SUPPORT_JSSTACK
+        HiviewDFX::ReportXPowerJsStackSysEvent(info.GetVm(), "STREAM_CHANGE", "SRC=Video");
+#endif
     }
     VideoModel::GetInstance()->SetAutoPlay(autoPlay);
 }

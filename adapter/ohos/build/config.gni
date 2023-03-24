@@ -73,6 +73,7 @@ build_container_scope_lib = true
 multiple_window_support = true
 enable_ability_component = true
 video_components_support = true
+video_support_jsstack = true
 image_components_support = true
 preview_support = false
 if (defined(global_parts_info.distributeddatamgr_pasteboard)) {
@@ -94,6 +95,10 @@ if (defined(image_components_support) && image_components_support) {
 
 if (defined(video_components_support) && video_components_support) {
   defines += [ "VIDEO_SUPPORTED" ]
+}
+
+if (defined(video_support_jsstack) && video_support_jsstack) {
+  defines += [ "SUPPORT_JSSTACK" ]
 }
 
 if (defined(is_experiment_build) && is_experiment_build) {
