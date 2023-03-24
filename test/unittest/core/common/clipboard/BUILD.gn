@@ -14,21 +14,13 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-module_output_path = "ace_engine/backenduicomponent/environment"
-
-ohos_unittest("EnvironmentTest") {
-  module_out_path = module_output_path
-  defines = [ "JS_JDWP_CONNECT" ]
+ohos_unittest("clip_board_test") {
+  module_out_path = "$basic_test_output_path/common"
 
   sources = [
-    #test main
-    "environment_test.cpp",
-
-    #test object
-    "$ace_root/frameworks/core/common/environment/environment_proxy.cpp",
-
-    #mock
+    "$ace_root/frameworks/core/common/clipboard/clipboard_proxy.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "clipboard_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -38,10 +30,4 @@ ohos_unittest("EnvironmentTest") {
     "$ace_root/frameworks/base:ace_base_ohos",
     "//third_party/googletest:gmock_main",
   ]
-}
-
-group("unittest") {
-  testonly = true
-
-  deps = [ ":EnvironmentTest" ]
 }

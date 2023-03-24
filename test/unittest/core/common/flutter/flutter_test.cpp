@@ -235,7 +235,7 @@ HWTEST_F(FlutterTest, CastToFlutterTest005, TestSize.Level1)
     EXPECT_EQ(object.taskTypeTable_.size(), 1);
     EXPECT_EQ(object.taskTypeTable_.bucket_count(), 2);
     FlutterTaskExecutor::ThreadInfo info = object.taskTypeTable_[TaskExecutor::TaskType::UI];
-    EXPECT_EQ(info.threadName, "FlutterTest");
+    EXPECT_EQ(info.threadName, "flutter_test");
 }
 
 /**

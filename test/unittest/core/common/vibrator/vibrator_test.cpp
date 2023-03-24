@@ -12,17 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
 #include "base/utils/utils.h"
 #define protected public
 #define private public
-#include "core/common/vibrator/vibrator_proxy.h"
-#include "core/common/vibrator/vibrator_interface.h"
 #include "core/common/vibrator/vibrator.h"
+#include "core/common/vibrator/vibrator_interface.h"
+#include "core/common/vibrator/vibrator_proxy.h"
 #undef private
 #undef protected
-#include "core/common/test/unittest/vibrator/mock_vibrator.h"
+#include "mock_vibrator.h"
 
 using namespace testing;
 using namespace testing::ext;

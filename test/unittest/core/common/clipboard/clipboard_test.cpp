@@ -14,23 +14,18 @@
  */
 
 #include "gtest/gtest.h"
-#include "core/common/clipboard/clipboard_proxy.h"
-#include "core/common/clipboard/clipboard_interface.h"
-#include "core/common/clipboard/clipboard.h"
+#include "mock_clip_board.h"
+
 #include "base/utils/utils.h"
-#include "core/common/test/unittest/clipboard/mock_clip_board.h"
+#include "core/common/clipboard/clipboard.h"
+#include "core/common/clipboard/clipboard_interface.h"
+#include "core/common/clipboard/clipboard_proxy.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
-class ClipboardTest : public testing::Test {
-public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
-};
+class ClipboardTest : public testing::Test {};
 
 /**
  * @tc.name: CastToClipboardTestTest001
@@ -39,19 +34,19 @@ public:
  */
 HWTEST_F(ClipboardTest, CastToClipboardTestTest001, TestSize.Level1)
 {
-     /**
+    /**
      * @tc.steps: step1. call GetInstance first.
      * @tc.expected: step1. The return value is not null.
      */
-    ClipboardProxy * fristTestGetInstance = ClipboardProxy::GetInstance();
-    EXPECT_NE(fristTestGetInstance, nullptr);
+    ClipboardProxy* firstTestGetInstance = ClipboardProxy::GetInstance();
+    ASSERT_NE(firstTestGetInstance, nullptr);
 
     /**
      * @tc.steps: step2. call GetInstance second.
-     * @tc.expected: step2. The return value is same with fristTestGetInstance.
+     * @tc.expected: step2. The return value is same with firstTestGetInstance.
      */
-    ClipboardProxy * secondTestGetInstance = ClipboardProxy::GetInstance();
-    EXPECT_EQ(fristTestGetInstance, secondTestGetInstance);
+    ClipboardProxy* secondTestGetInstance = ClipboardProxy::GetInstance();
+    EXPECT_EQ(firstTestGetInstance, secondTestGetInstance);
 }
 
 /**
@@ -92,8 +87,8 @@ HWTEST_F(ClipboardTest, CastToClipboardTestTest003, TestSize.Level1)
     ClipboardProxy::GetInstance()->SetDelegate(std::make_unique<MockClipboardProxyImpl>());
     RefPtr<TaskExecutor> taskExecutor;
     RefPtr<Clipboard> clipboard = ClipboardProxy::GetInstance()->GetClipboard(taskExecutor);
-    EXPECT_NE(clipboard, nullptr);
-    
+    ASSERT_NE(clipboard, nullptr);
+
     clipboard->GetData(ClipboardcallBack);
     EXPECT_EQ(g_data, TEST);
 }

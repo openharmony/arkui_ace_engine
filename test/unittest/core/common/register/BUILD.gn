@@ -14,21 +14,15 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-module_output_path = "ace_engine/backenduicomponent/sharedata"
-
-ohos_unittest("ShareDataTest") {
-  module_out_path = module_output_path
+ohos_unittest("register_test") {
+  module_out_path = "$basic_test_output_path/common"
   defines = [ "JS_JDWP_CONNECT" ]
 
   sources = [
-    #test main
-    "sharedata_test.cpp",
-
-    #test object
-    "$ace_root/frameworks/core/common/sharedata/share_data.cpp",
-
-    #mock
+    "$ace_root/frameworks/core/common/register/hdc_connect.cpp",
+    "$ace_root/frameworks/core/common/register/hdc_jdwp.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
+    "register_test.cpp",
   ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
@@ -37,13 +31,6 @@ ohos_unittest("ShareDataTest") {
     "$ace_root/adapter/ohos/osal:ace_osal_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
     "//third_party/googletest:gmock_main",
+    "//third_party/libuv:uv",
   ]
-
-  part_name = ace_engine_part
-}
-
-group("unittest") {
-  testonly = true
-
-  deps = [ ":ShareDataTest" ]
 }

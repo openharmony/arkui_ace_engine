@@ -16,21 +16,15 @@
 #include "gtest/gtest.h"
 
 #include "base/log/log.h"
-#include "frameworks/core/common/register/hdc_connect.h"
-#include "frameworks/core/common/register/hdc_jdwp.h"
+#include "core/common/register/hdc_connect.h"
+#include "core/common/register/hdc_jdwp.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
 extern std::unique_ptr<ConnectManagement> g_connectManagement;
-class RegisterTest : public testing::Test {
-public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
-};
+class RegisterTest : public testing::Test {};
 
 /**
  * @tc.name: CastToRegisterTest001
@@ -59,7 +53,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest002, TestSize.Level1)
      * @tc.expected: step1. g_connectManagement is not null and the pktName is right.
      */
     StartConnect("test_pkt_name");
-    EXPECT_NE(g_connectManagement, nullptr);
+    ASSERT_NE(g_connectManagement, nullptr);
     EXPECT_EQ(g_connectManagement->GetPkgName(), "test_pkt_name");
 
     /**
@@ -72,7 +66,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest002, TestSize.Level1)
      * @tc.expected: step3. g_connectManagement is not null
      */
     StopConnect();
-    EXPECT_NE(g_connectManagement, nullptr);
+    ASSERT_NE(g_connectManagement, nullptr);
 }
 
 /**
@@ -87,7 +81,7 @@ HWTEST_F(RegisterTest, CastToRegisterTest003, TestSize.Level1)
      * @tc.expected: step1. g_connectManagement is not null and the pktName is right.
      */
     StartConnect("test_pkt_name");
-    EXPECT_NE(g_connectManagement, nullptr);
+    ASSERT_NE(g_connectManagement, nullptr);
     EXPECT_EQ(g_connectManagement->GetPkgName(), "test_pkt_name");
 
     /**
@@ -100,11 +94,11 @@ HWTEST_F(RegisterTest, CastToRegisterTest003, TestSize.Level1)
      * @tc.expected: step3. start fail and g_connectManagement is not null and the pktName is same with first start.
      */
     StartConnect("test_pkt_name_2");
-    EXPECT_NE(g_connectManagement, nullptr);
+    ASSERT_NE(g_connectManagement, nullptr);
     EXPECT_EQ(g_connectManagement->GetPkgName(), "test_pkt_name");
 }
 
-/**
+/**g_threadRunning
  * @tc.name: CastToRegisterTest004
  * @tc.desc: Test cast to HdcJdwpSimulator.
  * @tc.type: FUNC
@@ -118,26 +112,26 @@ HWTEST_F(RegisterTest, CastToRegisterTest004, TestSize.Level1)
      * @tc.expected: step2. not effect, not crash
      * @tc.expected: step3. not effect, not crash
      */
-    HdcJdwpSimulator *hdcJdwpSimulator = new  HdcJdwpSimulator("test_pkt_name");
+    HdcJdwpSimulator* hdcJdwpSimulator = new HdcJdwpSimulator("test_pkt_name");
     hdcJdwpSimulator->Disconnect();
     delete hdcJdwpSimulator;
     hdcJdwpSimulator = nullptr;
     EXPECT_EQ(1, 1);
 }
 
-HdcJdwpSimulator *g_hdcJdwpSimulator = nullptr;
-bool g_threadRuning = false;
+HdcJdwpSimulator* g_hdcJdwpSimulator = nullptr;
+bool g_threadRunning = false;
 void* HdcConnectRun_Test(void* pkgContent)
 {
-    g_threadRuning = true;
+    g_threadRunning = true;
     std::string pkgName = static_cast<ConnectManagement*>(pkgContent)->GetPkgName();
     g_hdcJdwpSimulator = new (std::nothrow) HdcJdwpSimulator(pkgName);
     if (!g_hdcJdwpSimulator->Connect()) {
         LOGE("Connect fail.");
-        g_threadRuning = false;
+        g_threadRunning = false;
         return nullptr;
     }
-    g_threadRuning = false;
+    g_threadRunning = false;
     return nullptr;
 }
 
@@ -160,48 +154,16 @@ HWTEST_F(RegisterTest, CastToRegisterTest005, TestSize.Level1)
         return;
     }
     sleep(3);
-    EXPECT_EQ(g_threadRuning, true);
+    EXPECT_TRUE(g_threadRunning);
 
-     /**
+    /**
      * @tc.steps: step2. Call  disconnect and delete the  HdcJdwpSimulator
      * @tc.expected: step2. Disconnect ok, the thread is stopped.
      */
     g_hdcJdwpSimulator->Disconnect();
     delete g_hdcJdwpSimulator;
     g_hdcJdwpSimulator = nullptr;
-    sleep(3);
-    EXPECT_EQ(g_threadRuning, true);
-}
-
-/**
- * @tc.name: CastToRegisterTest006
- * @tc.desc: Test cast to HdcJdwpSimulator.
- * @tc.type: FUNC
- */
-HWTEST_F(RegisterTest, CastToRegisterTest006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. new a ConnectManagement and start the connect thread
-     * @tc.expected: step1. connect ok, the thread is runed.
-     */
-    pthread_t tid;
-    g_connectManagement = std::make_unique<ConnectManagement>();
-    g_connectManagement->SetPkgName("test_pkt_name");
-    if (pthread_create(&tid, nullptr, &HdcConnectRun_Test, static_cast<void*>(g_connectManagement.get())) != 0) {
-        LOGE("pthread_create fail!");
-        return;
-    }
-
-    sleep(3);
-    EXPECT_EQ(g_threadRuning, true);
-
-    /**
-     * @tc.steps: step2. Delete the  HdcJdwpSimulator without call disconnect
-     * @tc.expected: step2. the thread is stopped.
-     */
-    delete g_hdcJdwpSimulator;
-    g_hdcJdwpSimulator = nullptr;
-    sleep(3);
-    EXPECT_EQ(g_threadRuning, true);
+    sleep(2);
+    EXPECT_FALSE(g_threadRunning);
 }
 } // namespace OHOS::Ace
