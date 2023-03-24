@@ -203,7 +203,6 @@ private:
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     void HandleScrollEffect(float offset);
     void FireOnScrollStart();
-    void FireOnScrollStop();
     void CheckRestartSpring();
     void StopAnimate();
 
