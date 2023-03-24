@@ -28,7 +28,7 @@ void TextFieldPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
     json->Put("placeholderColor", propCursorColor_.value_or(Color()).ColorToString().c_str());
     auto jsonValue = JsonUtil::Create(true);
-    jsonValue->Put("caretWidth", propCursorWidth_.value_or(textFieldTheme->GetCursorWidth()).ToString().c_str());
+    jsonValue->Put("width", propCursorWidth_.value_or(textFieldTheme->GetCursorWidth()).ToString().c_str());
     json->Put("caretStyle", jsonValue->ToString().c_str());
     json->Put("selectedBackgroundColor",
         propSelectedBackgroundColor_.value_or(textFieldTheme->GetSelectedColor()).ColorToString().c_str());

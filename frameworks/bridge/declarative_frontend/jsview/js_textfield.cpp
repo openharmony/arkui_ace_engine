@@ -367,7 +367,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     }
     CaretStyle caretStyle;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto caretWidth = paramObject->GetProperty("caretWidth");
+    auto caretWidth = paramObject->GetProperty("width");
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
