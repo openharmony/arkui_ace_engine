@@ -17,6 +17,7 @@
 #define private public
 #include "base/geometry/dimension.h"
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/toggle_button_event_hub.h"
 #include "core/components_ng/pattern/button/toggle_button_paint_property.h"
@@ -564,6 +565,76 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0010, TestSize.Level1)
     switchPattern->controller_ = AccessibilityManager::MakeRefPtr<Animator>();
     switchPattern->controller_->status_ = Animator::Status::RUNNING;
     switchPattern->OnClick();
+}
+
+/**
+ * @tc.name: TogglePaintTest0011
+ * @tc.desc: Test toggle SetSelectedColor(undefined).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    std::optional<Color> selectedColor = std::optional<Color>();
+
+    /**
+     * @tc.steps: step1. test checkbox
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    toggleModelNG.SetSelectedColor(selectedColor);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(frameNode->GetPattern());
+    EXPECT_NE(checkboxPattern, nullptr);
+    auto checkboxPaintProperty = checkboxPattern->GetPaintProperty<CheckBoxPaintProperty>();
+    EXPECT_NE(checkboxPaintProperty, nullptr);
+    EXPECT_EQ(checkboxPaintProperty->GetCheckBoxSelectedColor(), checkboxTheme->GetActiveColor());
+
+    /**
+     * @tc.steps: step2. test button
+     */
+    themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto toggleButtonTheme = AceType::MakeRefPtr<ToggleTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(toggleButtonTheme));
+
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    toggleModelNG.SetSelectedColor(selectedColor);
+
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto buttonPaintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    EXPECT_NE(buttonPaintProperty, nullptr);
+    EXPECT_EQ(buttonPaintProperty->GetSelectedColor(), toggleButtonTheme->GetCheckedColor());
+
+    /**
+     * @tc.steps: step3. test switch
+     */
+    themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    toggleModelNG.SetSelectedColor(selectedColor);
+
+    frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto switchPattern = AceType::DynamicCast<SwitchPattern>(frameNode->GetPattern());
+    EXPECT_NE(switchPattern, nullptr);
+    auto switchPaintProperty = switchPattern->GetPaintProperty<SwitchPaintProperty>();
+    EXPECT_NE(switchPaintProperty, nullptr);
+    EXPECT_EQ(switchPaintProperty->GetSelectedColor(), switchTheme->GetActiveColor());
 }
 
 /**
