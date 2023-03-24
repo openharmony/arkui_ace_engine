@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_Pattern_XCOMPONENT_XCOMPONENT_EXT_SURFACE_CALLBACK_CLIENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_Pattern_XCOMPONENT_XCOMPONENT_EXT_SURFACE_CALLBACK_CLIENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_EXT_SURFACE_CALLBACK_CLIENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_EXT_SURFACE_CALLBACK_CLIENT_H
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
@@ -32,11 +32,11 @@ public:
 
     void ProcessSurfaceChange(int32_t width, int32_t height) override;
 
-    void ProcessSurfaceDestroy() override {};
+    void ProcessSurfaceDestroy() override {}
 
 private:
     WeakPtr<XComponentPattern> weakXComponentPattern_;
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_Pattern_XCOMPONENT_XCOMPONENT_EXT_SURFACE_CALLBACK_CLIENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_EXT_SURFACE_CALLBACK_CLIENT_H
