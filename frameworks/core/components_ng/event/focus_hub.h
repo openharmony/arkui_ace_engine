@@ -721,11 +721,11 @@ public:
 
     static inline bool IsFocusStepVertical(FocusStep step)
     {
-        return (static_cast<int32_t>(step) & 0x1) == 0;
+        return (static_cast<uint32_t>(step) & 0x1) == 0;
     }
     static inline bool IsFocusStepForward(FocusStep step)
     {
-        return (static_cast<int32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+        return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
     }
 
 protected:
