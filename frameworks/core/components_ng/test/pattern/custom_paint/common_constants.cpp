@@ -43,6 +43,10 @@ const double DEFAULT_DOUBLE1 = 1.0;
 const double DEFAULT_DOUBLE2 = 2.0;
 const double DEFAULT_DOUBLE10 = 10.0;
 
+const double HALF_CIRCLE_ANGLE = 180.0;
+const double FULL_CIRCLE_ANGLE = 360.0;
+const double SPECIAL_CIRCLE_ANGLE = 324.0;
+
 const std::string URL_PREFIX = "data:";
 const std::string IMAGE_PNG = "image/png";
 const std::string IMAGE_JPEG = "image/jpeg";

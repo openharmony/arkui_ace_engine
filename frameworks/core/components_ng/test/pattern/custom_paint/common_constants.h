@@ -51,6 +51,9 @@ extern const double DEFAULT_DOUBLE0;
 extern const double DEFAULT_DOUBLE1;
 extern const double DEFAULT_DOUBLE2;
 extern const double DEFAULT_DOUBLE10;
+extern const double HALF_CIRCLE_ANGLE;
+extern const double FULL_CIRCLE_ANGLE;
+extern const double SPECIAL_CIRCLE_ANGLE;
 
 extern const std::string URL_PREFIX;
 extern const std::string IMAGE_PNG;
