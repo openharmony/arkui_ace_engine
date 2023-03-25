@@ -62,7 +62,7 @@ LayoutConstraintF GridLayoutAlgorithm::CreateChildConstraint(const SizeF& idealS
     colLen += (colSpan - 1) * columnsGap_;
 
     layoutConstraint.maxSize = SizeF(colLen, rowLen);
-    layoutConstraint.percentReference.UpdateIllegalSizeWithCheck(SizeF(colLen, rowLen));
+    layoutConstraint.percentReference = SizeF(colLen, rowLen);
     if (!childLayoutProperty->GetCalcLayoutConstraint()) {
         layoutConstraint.selfIdealSize.UpdateIllegalSizeWithCheck(layoutConstraint.maxSize);
     }
