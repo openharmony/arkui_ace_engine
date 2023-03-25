@@ -69,6 +69,16 @@ void HyperlinkPattern::InitInputEvent(const RefPtr<InputEventHub>& inputHub)
         onHoverEvent_ = MakeRefPtr<InputEvent>(onHoverTask);
         inputHub->AddOnHoverEvent(onHoverEvent_);
     }
+    if (!onMouseEvent_) {
+        auto onMouseTask = [wp = WeakClaim(this)](MouseInfo& info) {
+            auto pattern = wp.Upgrade();
+            if (pattern) {
+                pattern->OnMouseEvent(info);
+            }
+        };
+        onMouseEvent_ = MakeRefPtr<InputEvent>(onMouseTask);
+        inputHub->AddOnMouseEvent(onMouseEvent_);
+    }
 }
 
 void HyperlinkPattern::OnHoverEvent(bool isHovered)
@@ -87,6 +97,19 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
         pipeline->FreeMouseStyleHoldNode(frameId);
     }
+}
+
+void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
+{
+    LOGD("Hyperlink OnMouseEvent in. Button: %{public}d, Action: %{public}d", info.GetButton(), info.GetAction());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frame = GetHost();
+    CHECK_NULL_VOID(frame);
+    auto frameId = frame->GetId();
+
+    pipeline->SetMouseStyleHoldNode(frameId);
+    pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_POINTING);
 }
 
 void HyperlinkPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
