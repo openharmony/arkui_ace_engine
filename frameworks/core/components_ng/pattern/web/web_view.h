@@ -32,7 +32,8 @@ class ACE_EXPORT WebView {
 public:
     static void Create(const std::string& webData);
     static void Create(const std::string& src, const RefPtr<WebController>& webController);
-    static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback);
+    static void Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
+        int32_t parentWebId = -1, bool popup = false);
     static void SetOnCommonDialogImpl(OnWebSyncFunc&& onCommonDialogImpl, DialogEventType dialogEventType);
     static void SetOnPageStart(OnWebAsyncFunc&& onPageStart);
     static void SetOnPageFinish(OnWebAsyncFunc&& onPageEnd);
@@ -108,6 +109,7 @@ public:
     static void SetForceDarkAccess(bool access);
     static void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled);
     static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
+    static void NotifyPopupWindowResult(int32_t webId, bool result);
 
 private:
     static void RegisterPipelineCallback(int32_t nodeId);

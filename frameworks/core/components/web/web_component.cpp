@@ -42,6 +42,8 @@ RefPtr<RenderNode> WebComponent::CreateRenderNode()
     delegate_ = AceType::MakeRefPtr<WebDelegate>(renderNode->GetContext(),
                                                  std::move(errorCallback_), type_);
     delegate_->SetComponent(AceType::Claim(this));
+    delegate_->SetPopup(isPopup_);
+    delegate_->SetParentNWebId(parentNWebId_);
     if (createdCallback_ != nullptr) {
         delegate_->AddCreatedCallback(createdCallback_);
     }

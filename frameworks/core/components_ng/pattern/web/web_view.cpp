@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "nweb_helper.h"
 
 namespace OHOS::Ace::NG {
 void WebView::Create(const std::string& webData)
@@ -54,7 +55,8 @@ void WebView::Create(const std::string& src, const RefPtr<WebController>& webCon
     RegisterPipelineCallback(nodeId);
 }
 
-void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback)
+void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback,
+    int32_t parentWebId, bool popup)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -64,7 +66,9 @@ void WebView::Create(const std::string& src, SetWebIdCallback&& setWebIdCallback
     auto webPattern = frameNode->GetPattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->SetWebSrc(src);
+    webPattern->SetPopup(popup);
     webPattern->SetSetWebIdCallback(std::move(setWebIdCallback));
+    webPattern->SetParentNWebId(parentWebId);
     RegisterPipelineCallback(nodeId);
 }
 
@@ -592,5 +596,16 @@ void WebView::SetForceDarkAccess(bool access)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateForceDarkAccess(access);
+}
+
+void WebView::NotifyPopupWindowResult(int32_t webId, bool result)
+{
+    if (webId != -1) {
+        std::weak_ptr<OHOS::NWeb::NWeb> nwebWeak = OHOS::NWeb::NWebHelper::Instance().GetNWeb(webId);
+        auto nwebSptr = nwebWeak.lock();
+        if (nwebSptr) {
+            nwebSptr->NotifyPopupWindowResult(result);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

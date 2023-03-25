@@ -113,6 +113,16 @@ public:
         return webSrc_;
     }
 
+    void SetPopup(bool popup)
+    {
+        isPopup_ = popup;
+    }
+
+    void SetParentNWebId(int32_t parentNWebId)
+    {
+        parentNWebId_ = parentNWebId;
+    }
+
     void SetWebData(const std::string& webData)
     {
         if (webData_ != webData) {
@@ -366,6 +376,7 @@ private:
     };
     static bool ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos);
     void InitEnhanceSurfaceFlag();
+    void UpdateBackgroundColorRightNow(int32_t color);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -402,6 +413,8 @@ private:
     SelectMenuInfo selectMenuInfo_;
     bool selectOverlayDragging_ = false;
     bool selectPopupMenuShowing_ = false;
+    bool isPopup_ = false;
+    int32_t parentNWebId_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
