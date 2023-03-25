@@ -345,10 +345,9 @@ void GridPattern::FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo)
         return;
     }
     auto childFocusList = gridFocus->GetChildren();
-    for (const auto& childFocus : childFocusList) {
-        if (childFocus->IsCurrentFocus()) {
-            return;
-        }
+    if (std::any_of(childFocusList.begin(), childFocusList.end(),
+            [](const RefPtr<FocusHub>& childFocus) { return childFocus->IsCurrentFocus(); })) {
+        return;
     }
     int32_t curMainIndex = gridLayoutInfo.startMainLineIndex_;
     if (gridLayoutInfo.gridMatrix_.find(curMainIndex) == gridLayoutInfo.gridMatrix_.end()) {

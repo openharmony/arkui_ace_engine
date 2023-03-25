@@ -208,8 +208,11 @@ void FocusHub::LostSelfFocus()
 void FocusHub::RemoveSelf()
 {
     auto parent = GetParentFocusHub();
-    CHECK_NULL_VOID_NOLOG(parent);
-    parent->RemoveChild(AceType::Claim(this));
+    if (parent) {
+        parent->RemoveChild(AceType::Claim(this));
+    } else {
+        LostFocus(BlurReason::FRAME_DESTROY);
+    }
 }
 
 void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
@@ -226,6 +229,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
         // Try to goto next focus, otherwise goto previous focus.
         if (!GoToNextFocusLinear(true) && !GoToNextFocusLinear(false)) {
             lastWeakFocusNode_ = nullptr;
+            RemoveSelf();
         }
         focusNode->LostFocus(BlurReason::FRAME_DESTROY);
     } else {
