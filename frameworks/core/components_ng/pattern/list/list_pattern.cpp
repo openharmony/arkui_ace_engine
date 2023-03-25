@@ -83,6 +83,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         return false;
     }
     bool isJump = false;
+    float jumpDistance = 0.0f;
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -90,6 +91,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     if (jumpIndex_) {
+        jumpDistance = listLayoutAlgorithm->GetEstimateOffset() - estimateOffset_;
         estimateOffset_ = listLayoutAlgorithm->GetEstimateOffset();
         if (!itemPosition_.empty()) {
             currentOffset_ = itemPosition_.begin()->second.startPos;
@@ -120,7 +122,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         (startIndex_ != listLayoutAlgorithm->GetStartIndex()) || (endIndex_ != listLayoutAlgorithm->GetEndIndex());
     startIndex_ = listLayoutAlgorithm->GetStartIndex();
     endIndex_ = listLayoutAlgorithm->GetEndIndex();
-    ProcessEvent(indexChanged, finalOffset, isJump, prevStartOffset, prevEndOffset);
+    ProcessEvent(indexChanged, finalOffset + jumpDistance, isJump, prevStartOffset, prevEndOffset);
     UpdateScrollBarOffset();
     CheckRestartSpring();
 
@@ -142,7 +144,7 @@ void ListPattern::ProcessEvent(
     isFramePaintStateValid_ = true;
 
     auto onScroll = listEventHub->GetOnScroll();
-    if (onScroll && !NearZero(finalOffset) && !isJump) {
+    if (onScroll && !NearZero(finalOffset)) {
         auto source = GetScrollState();
         auto offsetPX = Dimension(finalOffset);
         auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
@@ -657,6 +659,7 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
         auto list = weak.Upgrade();
         CHECK_NULL_VOID_NOLOG(list);
         list->scrollStop_ = true;
+        list->MarkDirtyNodeSelf();
     });
     animator_->AddInterpolator(animation);
     animator_->SetDuration(static_cast<int32_t>(duration));
