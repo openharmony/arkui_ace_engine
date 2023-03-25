@@ -115,7 +115,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     }
     Dimension offset;
     if (ParseJsDimensionVp(jsOffset, offset)) {
-        if (LessOrEqual(offset.Value(), 0.0)) {
+        if (LessNotEqual(offset.Value(), 0.0) || offset.Unit() == DimensionUnit::PERCENT) {
             RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
         } else {
             RefreshModel::GetInstance()->SetUseOffset(true);
