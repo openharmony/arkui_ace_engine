@@ -194,20 +194,6 @@ public:
             CHECK_NULL_VOID(geometryTransition_);
             geometryTransition_->Build(host_, true);
         }
-
-        auto geometryTransitionMap = ElementRegister::GetInstance()->GetGeometryTransitionMap();
-        auto iter = geometryTransitionMap.begin();
-        while (iter != geometryTransitionMap.end()) {
-            auto id = iter->first;
-            const auto& geometryTransition = iter->second;
-            if (!geometryTransition || geometryTransition->IsInvalid()) {
-                iter = geometryTransitionMap.erase(iter);
-            } else {
-                LOGD("GeometryTransition map item: id: %{public}s, %{public}s",
-                    id.c_str(), geometryTransition->ToString().c_str());
-                iter++;
-            }
-        }
     }
 
     void UpdateAspectRatio(float ratio)
