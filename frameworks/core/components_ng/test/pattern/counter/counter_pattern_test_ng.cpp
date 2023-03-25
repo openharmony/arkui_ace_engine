@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension WIDTH = 10.0_vp;
 constexpr Dimension HEIGHT = 10.0_vp;
+const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
 const Color COLOR = Color::BLUE;
 } // namespace
 
@@ -151,5 +152,47 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest004, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     auto renderContext = frameNode->GetRenderContext();
     EXPECT_EQ(renderContext->GetBackgroundColor(), COLOR);
+}
+
+/**
+ * @tc.name: CounterPatternTest005
+ * @tc.desc: Test CounterNode AddChildToGroup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterPatternTestNg, CounterPatternTest005, TestSize.Level1)
+{
+    CounterModelNG counterModelNG;
+    counterModelNG.Create();
+    auto counterNode = AceType::DynamicCast<CounterNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(counterNode, nullptr);
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    int32_t contentId = counterNode->GetPattern<CounterPattern>()->GetContentId();
+    auto contentChildNode = counterNode->GetChildAtIndex(counterNode->GetChildIndexById(contentId));
+    counterNode->AddChildToGroup(frameNode);
+    EXPECT_EQ(contentChildNode->children_.size(), 1);
+}
+
+/**
+ * @tc.name: CounterPatternTest006
+ * @tc.desc: Test CounterNode DeleteChildFromGroup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterPatternTestNg, CounterPatternTest006, TestSize.Level1)
+{
+    CounterModelNG counterModelNG;
+    counterModelNG.Create();
+    auto counterNode = AceType::DynamicCast<CounterNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(counterNode, nullptr);
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
+    int32_t contentId = counterNode->GetPattern<CounterPattern>()->GetContentId();
+    auto contentChildNode = counterNode->GetChildAtIndex(counterNode->GetChildIndexById(contentId));
+    counterNode->AddChildToGroup(frameNode);
+    EXPECT_EQ(contentChildNode->children_.size(), 1);
+    counterNode->DeleteChildFromGroup();
+    EXPECT_EQ(contentChildNode->children_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

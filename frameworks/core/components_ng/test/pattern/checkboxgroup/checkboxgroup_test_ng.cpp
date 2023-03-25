@@ -142,6 +142,52 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest001, TestSize.Level1
 }
 
 /**
+ * @tc.name: CheckBoxGroupPaintPropertyTest002
+ * @tc.desc: Verify ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintPropertyTest002, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+
+    /**
+     * @tc.steps: step2. Set parameters to CheckBoxGroup property
+     */
+    checkBoxGroupModelNG.SetSelectAll(SELECTED);
+    checkBoxGroupModelNG.SetSelectedColor(SELECTED_COLOR);
+    checkBoxGroupModelNG.SetWidth(WIDTH);
+    checkBoxGroupModelNG.SetHeight(HEIGHT);
+    checkBoxGroupModelNG.SetPadding(PADDING);
+
+    /**
+     * @tc.steps: step3. Get paint property and get CheckBoxGroup property
+     * @tc.expected: step3. Check the CheckBoxGroup property value
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetGroupName(GROUP_NAME);
+    EXPECT_EQ(eventHub->GetGroupName(), GROUP_NAME);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelect(), SELECTED);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupSelectedColor(), SELECTED_COLOR);
+    auto json = JsonUtil::Create(true);
+    checkBoxPaintProperty->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("selectAll"), "true");
+}
+
+/**
  * @tc.name: CheckBoxGroupEventTest002
  * @tc.desc: Test CheckBoxGroup onChange event.
  * @tc.type: FUNC
