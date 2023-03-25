@@ -182,6 +182,7 @@ private:
     void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
     void FireOnScrollStart();
+    void FireOnScrollStop();
 
     RefPtr<Animator> animator_;
     RefPtr<ScrollPositionController> positionController_;
@@ -192,6 +193,8 @@ private:
     SizeF viewPort_;
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
+    bool scrollStop_ = false;
+    bool scrollAbort_ = false;
 };
 
 } // namespace OHOS::Ace::NG
