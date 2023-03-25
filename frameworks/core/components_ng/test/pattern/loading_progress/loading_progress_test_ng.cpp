@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -156,36 +156,39 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     /**
      * @tc.steps: step2. test create PaintWrapper and ProgressTheme.
      */
-    PaintWrapper paintWrapper(nullptr, nullptr, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    PaintWrapper paintWrapper(renderContext, nullptr, nullptr);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
     progressTheme->loadingColor_ = COLOR_DEFAULT;
     /**
-     * @tc.steps: step3. test UpdateContentModifier function.
-     * @tc.cases: case1. PaintWrapper has no loadingProgressPaintProperty and modifier will use default Color.
+     * @tc.cases: case1. LoadingProgressPaintProperty has no Color property and modifier will use Theme Color.
      */
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
-    paintMethod->UpdateContentModifier(&paintWrapper);
-    EXPECT_EQ(paintMethod->color_, Color::BLUE);
-    /**
-     * @tc.cases: case2. LoadingProgressPaintProperty has no Color property and modifier will use Theme Color.
-     */
-    auto renderContext = frameNode->GetRenderContext();
     auto loadingProgressPaintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
-    ASSERT_NE(loadingProgressPaintProperty, nullptr);
+    EXPECT_TRUE(loadingProgressPaintProperty != nullptr);
+    PaintWrapper paintWrapper1(renderContext, nullptr, loadingProgressPaintProperty);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
+    paintMethod->UpdateContentModifier(&paintWrapper1);
+    EXPECT_EQ(paintMethod->color_, COLOR_DEFAULT);
+    /**
+     * @tc.cases: case2. renderContext has foreground color and modifier will foreground color flag
+     */
+    renderContext->UpdateForegroundColor(Color::BLUE);
     PaintWrapper paintWrapper2(renderContext, nullptr, loadingProgressPaintProperty);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper2);
-    EXPECT_EQ(paintMethod->color_, COLOR_DEFAULT);
-
+    EXPECT_EQ(paintMethod->color_, Color::FOREGROUND);
     /**
-     * @tc.cases: case3. renderContext has foreground color and modifier will foreground color flag
+     * @tc.cases: case3. renderContext has not foreground color and modifier will foreground color flag
      */
-    ASSERT_NE(renderContext, nullptr);
+    renderContext->ResetForegroundColor();
+    renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy());
     PaintWrapper paintWrapper3(renderContext, nullptr, loadingProgressPaintProperty);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);
+    EXPECT_EQ(paintMethod->color_, Color::FOREGROUND);
 }
 
 /**

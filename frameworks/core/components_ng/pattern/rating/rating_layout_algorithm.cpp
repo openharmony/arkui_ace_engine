@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,9 +52,7 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::Layout(layoutWrapper);
     // if layout size has not decided yet, resize target can not be calculated
-    if (!layoutWrapper->GetGeometryNode()->GetContent()) {
-        return;
-    }
+    CHECK_NULL_VOID(layoutWrapper->GetGeometryNode()->GetContent());
     const auto& ratingSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto ratingLayoutProperty = DynamicCast<RatingLayoutProperty>(layoutWrapper->GetLayoutProperty());
 
