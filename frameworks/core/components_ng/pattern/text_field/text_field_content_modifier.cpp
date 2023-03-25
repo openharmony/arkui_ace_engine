@@ -17,10 +17,10 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -49,8 +49,7 @@ inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 }
 } // namespace
 
-TextFieldContentModifier::TextFieldContentModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern)
-    : pattern_(pattern)
+TextFieldContentModifier::TextFieldContentModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern) : pattern_(pattern)
 {
     SetDefaultAnimatablePropertyValue();
     SetDefaultPropertyValue();
@@ -62,20 +61,19 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto offset = contentOffset_->Get();
-    auto passwordIconCanvasImage = textObscured_->Get()
-                                       ? textFieldPattern->GetHidePasswordIconCanvasImage()
-                                       : textFieldPattern->GetShowPasswordIconCanvasImage();
+    auto passwordIconCanvasImage = textObscured_->Get() ? textFieldPattern->GetHidePasswordIconCanvasImage()
+                                                        : textFieldPattern->GetShowPasswordIconCanvasImage();
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
     auto contentSize = contentSize_->Get();
     auto contentOffset = contentOffset_->Get();
     auto iconRect = textFieldPattern->GetImageRect();
-    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(),
-        contentSize.Width() + contentOffset.GetX(), contentOffset.GetY() + contentSize.Height());
+    RSRect clipInnerRect = RSRect(offset.GetX(), contentOffset.GetY(), contentSize.Width() + contentOffset.GetX(),
+        contentOffset.GetY() + contentSize.Height());
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
-        paragraph->Paint(&canvas, textRectX_->Get(),
-            textFieldPattern->IsTextArea() ? textRectY_->Get() : contentOffset.GetY());
+        paragraph->Paint(
+            &canvas, textRectX_->Get(), textFieldPattern->IsTextArea() ? textRectY_->Get() : contentOffset.GetY());
     }
     canvas.Restore();
     if (!textFieldPattern->NeedShowPasswordIcon()) {
@@ -112,9 +110,9 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     theme = pipelineContext->GetTheme<TextTheme>();
-        textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    TextStyle textStyle = CreateTextStyleUsingTheme(textFieldLayoutProperty->GetFontStyle(),
-        textFieldLayoutProperty->GetTextLineStyle(), theme);
+    textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme);
     SetDefaultFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
@@ -139,12 +137,14 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
     textRectY_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Top().ConvertToPx());
     textRectX_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Left().ConvertToPx());
+    textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
     AttachProperty(textRectY_);
     AttachProperty(textObscured_);
     AttachProperty(textRectX_);
+    AttachProperty(textAlign_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -166,8 +166,8 @@ void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 
 void TextFieldContentModifier::SetDefaultFontWeight(const TextStyle& textStyle)
 {
-    fontWeightFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(
-        static_cast<float>(ConvertFontWeight(textStyle.GetFontWeight())));
+    fontWeightFloat_ =
+        AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<float>(ConvertFontWeight(textStyle.GetFontWeight())));
     AttachProperty(fontWeightFloat_);
 }
 
@@ -257,6 +257,13 @@ void TextFieldContentModifier::SetTextRectX(const float value)
 {
     if (textRectX_->Get() != value) {
         textRectX_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetTextAlign(const TextAlign value)
+{
+    if (textAlign_->Get() != static_cast<int32_t>(value)) {
+        textAlign_->Set(static_cast<int32_t>(value));
     }
 }
 

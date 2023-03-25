@@ -19,6 +19,7 @@ ohos_unittest("geometry_test") {
 
   sources = [
     # deps
+
     "$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
     "$ace_root/frameworks/base/utils/base_id.cpp",
     "$ace_root/frameworks/core/animation/animator.cpp",
@@ -29,7 +30,6 @@ ohos_unittest("geometry_test") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
     "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
-    "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
     "$ace_root/test/mock/base/mock_ace_trace.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
 

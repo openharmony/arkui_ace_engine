@@ -17,16 +17,15 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar_painter.h"
 
 namespace OHOS::Ace::NG {
 TextFieldOverlayModifier::TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
-                                                   WeakPtr<ScrollBar>&& scrollBar,
-                                                   WeakPtr<ScrollEdgeEffect>&& edgeEffect)
+    WeakPtr<ScrollBar>&& scrollBar, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
     : pattern_(pattern), scrollBar_(scrollBar), edgeEffect_(edgeEffect)
 {
     cursorColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color()));
@@ -82,17 +81,16 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
     auto textRect = textFieldPattern->GetTextRect();
     bool isTextArea = textFieldPattern->IsTextArea();
     if (inputStyle_ == InputStyle::DEFAULT) {
-        RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(),
-            paintOffset.GetX() + contentSize_->Get().Width(),
+        RSRect clipInnerRect(paintOffset.GetX(), paintOffset.GetY(), paintOffset.GetX() + contentSize_->Get().Width(),
             paintOffset.GetY() + contentSize_->Get().Height());
         canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         // for default style, selection height is equal to the content height
         for (const auto& textBox : textBoxes) {
-            canvas.DrawRect(RSRect(
-                textBox.rect_.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-                textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()),
-                textBox.rect_.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
-                textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY())));
+            canvas.DrawRect(
+                RSRect(textBox.rect_.GetLeft() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+                    textBox.rect_.GetTop() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY()),
+                    textBox.rect_.GetRight() + (isTextArea ? contentOffset_->Get().GetX() : textRect.GetX()),
+                    textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY())));
         }
     } else {
         auto theOnlyBox = *textBoxes.begin();
@@ -135,7 +133,7 @@ void TextFieldOverlayModifier::PaintScrollBar(RSCanvas& canvas)
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto scrollBar = scrollBar_.Upgrade();
-    CHECK_NULL_VOID(scrollBar);
+    CHECK_NULL_VOID_NOLOG(scrollBar);
     textFieldPattern->CheckScrollable();
     if (scrollBar->NeedPaint() && textFieldPattern->IsScrollable()) {
         ScrollBarPainter::PaintRectBar(canvas, scrollBar);

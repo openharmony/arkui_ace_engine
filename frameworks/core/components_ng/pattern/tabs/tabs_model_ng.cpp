@@ -93,7 +93,15 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
     SetTabBarPosition(barPosition);
-    SetIndex(index);
+    if (!hasTabBarNode) {
+        SetIndex(index);
+        return;
+    }
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    auto preIndex = tabsLayoutProperty->GetIndexValue(0);
+    if (index != preIndex) {
+        SetIndex(index);
+    }
 }
 
 void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
@@ -182,6 +190,10 @@ void TabsModelNG::SetIndex(int32_t index)
     tabBarLayoutProperty->UpdateIndicator(index);
     tabBarPattern->UpdateTextColor(index);
     swiperLayoutProperty->UpdateIndex(index);
+    auto tabsFrameNode = AceType::DynamicCast<FrameNode>(tabsNode);
+    CHECK_NULL_VOID(tabsFrameNode);
+    auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
+    tabsLayoutProperty->UpdateIndex(index);
 }
 
 void TabsModelNG::SetScrollable(bool scrollable)

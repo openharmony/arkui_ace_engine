@@ -1647,7 +1647,6 @@ void WebDelegate::GLContextInit(void* window)
         LOGE("unable to get EGL window.");
         return;
     }
-    LOGD("GLContextInit window = %{public}p", window);
     mEglWindow = static_cast<EGLNativeWindowType>(window);
 
     // 1. create sharedcontext

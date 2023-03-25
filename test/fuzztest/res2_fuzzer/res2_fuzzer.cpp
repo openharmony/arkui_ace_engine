@@ -12,8 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-//#define ENABLE_ROSEN_BACKEND 
+ 
 
 #include "res2_fuzzer.h"
 

@@ -23,9 +23,14 @@
 namespace OHOS::Ace::Napi {
 class JsDrawableDescriptor {
 public:
+    enum class DrawableType {
+        BASE,
+        LAYERED,
+    };
+
     static ACE_EXPORT napi_value Export(napi_env env, napi_value exports);
 
-    static ACE_EXPORT napi_value ToNapi(napi_env env, DrawableDescriptor*);
+    static ACE_EXPORT napi_value ToNapi(napi_env, DrawableDescriptor*, DrawableType type = DrawableType::LAYERED);
 
     static ACE_EXPORT constexpr char MODULE_NAME[] = "arkui.drawableDescriptor";
 

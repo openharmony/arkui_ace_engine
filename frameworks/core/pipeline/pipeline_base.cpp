@@ -418,6 +418,13 @@ void PipelineBase::ForceLayoutForImplicitAnimation()
     }
 }
 
+void PipelineBase::ForceRenderForImplicitAnimation()
+{
+    if (!pendingImplicitRender_.empty()) {
+        pendingImplicitRender_.top() = true;
+    }
+}
+
 bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& propertyCallback, const std::function<void()>& finishCallback)
 {
@@ -434,13 +441,11 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 void PipelineBase::PrepareOpenImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled");
-        return;
-    }
-
-    // initialize false for implicit animation layout pending flag
+    // initialize false for implicit animation layout and render pending flag
     pendingImplicitLayout_.push(false);
+    pendingImplicitRender_.push(false);
+
+    // flush ui tasks before open implict animation
     FlushUITasks();
 #endif
 }
@@ -448,22 +453,21 @@ void PipelineBase::PrepareOpenImplicitAnimation()
 void PipelineBase::PrepareCloseImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (!SystemProperties::GetRosenBackendEnabled()) {
-        LOGE("rosen backend is disabled!");
-        return;
-    }
-
-    if (pendingImplicitLayout_.empty()) {
+    if (pendingImplicitLayout_.empty() && pendingImplicitRender_.empty()) {
         LOGE("close implicit animation failed, need to open implicit animation first!");
         return;
     }
 
-    // layout the views immediately to animate all related views, if layout updates are pending in the animation closure
-    if (pendingImplicitLayout_.top()) {
+    // layout or render the views immediately to animate all related views, if layout or render updates are pending in
+    // the animation closure
+    if (pendingImplicitLayout_.top() || pendingImplicitRender_.top()) {
         FlushUITasks();
     }
     if (!pendingImplicitLayout_.empty()) {
         pendingImplicitLayout_.pop();
+    }
+    if (!pendingImplicitRender_.empty()) {
+        pendingImplicitRender_.pop();
     }
 #endif
 }

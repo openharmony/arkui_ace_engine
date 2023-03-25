@@ -283,6 +283,14 @@ public:
         return stateStyleMgr_ ? stateStyleMgr_->GetCurrentUIState() : UI_STATE_NORMAL;
     }
 
+    bool HasStateStyle(UIState state) const
+    {
+        if (stateStyleMgr_) {
+            return stateStyleMgr_->HasStateStyle(state);
+        }
+        return false;
+    }
+
     void AddSupportedState(UIState state);
 
     void SetSupportedStates(UIState state);

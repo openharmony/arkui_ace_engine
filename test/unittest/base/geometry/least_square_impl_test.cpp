@@ -28,35 +28,9 @@ const int32_t PARAMS_NUM1 = 1;
 const int32_t PARAMS_NUM2 = 2;
 const int32_t PARAMS_NUM3 = 3;
 const int32_t PARAMS_NUM4 = 4;
-}
+} // namespace
 
-class LeastSquareImplTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void LeastSquareImplTest::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "LeastSquareImplTest SetUpTestCase";
-}
-
-void LeastSquareImplTest::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "LeastSquareImplTest TearDownTestCase";
-}
-
-void LeastSquareImplTest::SetUp()
-{
-    GTEST_LOG_(INFO) << "LeastSquareImplTest SetUp";
-}
-
-void LeastSquareImplTest::TearDown()
-{
-    GTEST_LOG_(INFO) << "LeastSquareImplTest TearDown";
-}
+class LeastSquareImplTest : public testing::Test {};
 
 /**
  * @tc.name: LeastSquareImplTest001
@@ -69,13 +43,13 @@ HWTEST_F(LeastSquareImplTest, LeastSquareImplTest001, TestSize.Level1)
     std::vector<double> params;
     EXPECT_FALSE(leastSquareImpl1.GetLeastSquareParams(params));
     EXPECT_TRUE(params.empty());
-    
+
     params.clear();
     LeastSquareImpl leastSquareImpl2(PARAMS_NUM2);
     leastSquareImpl2.UpdatePoint(NUM_D1, NUM_D2);
     leastSquareImpl2.UpdatePoint(NUM_D1, NUM_D2);
     EXPECT_FALSE(leastSquareImpl2.GetLeastSquareParams(params));
-    
+
     params.clear();
     LeastSquareImpl leastSquareImpl3(PARAMS_NUM3);
     leastSquareImpl3.UpdatePoint(NUM_D1, NUM_D2);

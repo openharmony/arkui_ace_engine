@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+
 #include "base/memory/referenced.h"
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -28,35 +29,9 @@ namespace {
 const double DEFAULT_DOUBLE1 = 1.0;
 constexpr double DEFAULT_DOUBLE2 = 2.0;
 const std::string DEFAULT_STR("2.0");
-}
+} // namespace
 
-class AnimatableDimensionTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void AnimatableDimensionTest::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "AnimatableDimensionTest SetUpTestCase";
-}
-
-void AnimatableDimensionTest::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "AnimatableDimensionTest TearDownTestCase";
-}
-
-void AnimatableDimensionTest::SetUp()
-{
-    GTEST_LOG_(INFO) << "AnimatableDimensionTest SetUp";
-}
-
-void AnimatableDimensionTest::TearDown()
-{
-    GTEST_LOG_(INFO) << "AnimatableDimensionTest TearDown";
-}
+class AnimatableDimensionTest : public testing::Test {};
 
 /**
  * @tc.name: AnimatableDimensionTest001
@@ -141,7 +116,7 @@ HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest002, TestSize.Level1)
     animatableDimensionObj1.AnimateTo(DEFAULT_DOUBLE2);
     EXPECT_DOUBLE_EQ(animatableDimensionObj1.Value(), DEFAULT_DOUBLE2);
     EXPECT_EQ(animatableDimensionObj1.animationController_, nullptr);
-    
+
     /**
      * @tc.steps4: Test the function AnimateTo thirdly, the function will run until the end of it.
      * @tc.expected: The value of animationController_ is set to non-null.
@@ -197,7 +172,7 @@ HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest004, TestSize.Level1)
     /**
      * @tc.steps3: Set the animationCallback_ as the function which changes the value of flagCbk.
      */
-    animatableDimensionObj1.SetContextAndCallback(nullptr, [&flagCbk] () { flagCbk = true; });
+    animatableDimensionObj1.SetContextAndCallback(nullptr, [&flagCbk]() { flagCbk = true; });
 
     /**
      * @tc.steps4: Call the function OnAnimationCallback again.

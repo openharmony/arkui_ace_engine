@@ -22,6 +22,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 template<typename T>
@@ -33,33 +34,60 @@ struct LayoutConstraintT {
     OptionalSize<T> parentIdealSize;
     OptionalSize<T> selfIdealSize;
 
-    void ApplyAspectRatio(float ratio)
+    void ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize)
     {
         if (!Positive(ratio)) {
             // just in case ratio is illegal value
             LOGD("Aspect ratio value is not positive");
             return;
         }
-        if (selfIdealSize.Width()) {
-            selfIdealSize.SetHeight(selfIdealSize.Width().value() / ratio);
-            minSize.SetHeight(minSize.Width() / ratio);
-            maxSize.SetHeight(maxSize.Width() / ratio);
-            ApplyAspectRatioToParentIdealSize(true, ratio);
-            return;
+        std::optional<bool> useDefinedWidth;
+        if (calcSize) {
+            if (calcSize.value().Width()) {
+                useDefinedWidth = true;
+            } else if (calcSize.value().Height()) {
+                useDefinedWidth = false;
+            }
         }
-        if (selfIdealSize.Height()) {
-            selfIdealSize.SetWidth(selfIdealSize.Height().value() * ratio);
+        if (useDefinedWidth) {
+            if (useDefinedWidth.value_or(false)) {
+                if (selfIdealSize.Width()) {
+                    selfIdealSize.SetHeight(selfIdealSize.Width().value() / ratio);
+                }
+                minSize.SetHeight(minSize.Width() / ratio);
+                maxSize.SetHeight(maxSize.Width() / ratio);
+                ApplyAspectRatioToParentIdealSize(true, ratio);
+                return;
+            }
+            if (selfIdealSize.Height()) {
+                selfIdealSize.SetWidth(selfIdealSize.Height().value() * ratio);
+            }
             minSize.SetWidth(minSize.Height() * ratio);
             maxSize.SetWidth(maxSize.Height() * ratio);
             ApplyAspectRatioToParentIdealSize(false, ratio);
             return;
+        } else {
+            if (selfIdealSize.Width()) {
+                selfIdealSize.SetHeight(selfIdealSize.Width().value() / ratio);
+                minSize.SetHeight(minSize.Width() / ratio);
+                maxSize.SetHeight(maxSize.Width() / ratio);
+                ApplyAspectRatioToParentIdealSize(true, ratio);
+                return;
+            }
+            if (selfIdealSize.Height()) {
+                selfIdealSize.SetWidth(selfIdealSize.Height().value() * ratio);
+                minSize.SetWidth(minSize.Height() * ratio);
+                maxSize.SetWidth(maxSize.Height() * ratio);
+                ApplyAspectRatioToParentIdealSize(false, ratio);
+                return;
+            }
         }
         // after previous conditions, ideal size does not exist, we use max size to rule aspect ratio
         // but nothing can be done if both width and height are inf
         if (NearEqual(maxSize.Width(), Infinity<T>()) && NearEqual(maxSize.Height(), Infinity<T>())) {
             return;
         }
-        ApplyAspectRatioByMaxSize(ratio);
+        ApplyAspectRatioByMaxSize(ratio, useDefinedWidth);
     }
 
     void ApplyAspectRatioToParentIdealSize(bool useWidth, float ratio)
@@ -77,7 +105,37 @@ struct LayoutConstraintT {
         parentIdealSize.SetWidth(parentIdealSize.Height().value() * ratio);
     }
 
-    void ApplyAspectRatioByMaxSize(float ratio)
+    void ApplyAspectRatioByMaxSize(float ratio, std::optional<bool> useDefinedWidth)
+    {
+        if (!Positive(ratio)) {
+            return;
+        }
+        if (useDefinedWidth) {
+            ApplyAspectRatioWithCalcSize(ratio, useDefinedWidth.value());
+            return;
+        }
+        ApplyAspectRatioWithoutCalcSize(ratio);
+    }
+
+    void ApplyAspectRatioWithCalcSize(float ratio, bool useDefinedWidth)
+    {
+        if (!Positive(ratio)) {
+            return;
+        }
+        if (useDefinedWidth) {
+            minSize.SetHeight(minSize.Width() / ratio);
+            maxSize.SetHeight(maxSize.Width() / ratio);
+            percentReference.SetHeight(percentReference.Width() / ratio);
+            ApplyAspectRatioToParentIdealSize(true, ratio);
+            return;
+        }
+        minSize.SetWidth(minSize.Height() * ratio);
+        maxSize.SetWidth(maxSize.Height() * ratio);
+        percentReference.SetWidth(percentReference.Height() / ratio);
+        ApplyAspectRatioToParentIdealSize(false, ratio);
+    }
+
+    void ApplyAspectRatioWithoutCalcSize(float ratio)
     {
         if (!Positive(ratio)) {
             return;

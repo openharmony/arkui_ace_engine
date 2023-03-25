@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include <cmath>
+
 #include "gtest/gtest.h"
 
-#include <cmath>
 #include "base/geometry/matrix4.h"
 
 using namespace testing;
@@ -50,35 +51,9 @@ const int32_t INVALID_COL_POS = 6;
 
 const uint32_t ROW_NUM = 5;
 const uint32_t COLUMN_NUM = 5;
-}
+} // namespace
 
-class Matrix4Test : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void Matrix4Test::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "Matrix4Test SetUpTestCase";
-}
-
-void Matrix4Test::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "Matrix4Test TearDownTestCase";
-}
-
-void Matrix4Test::SetUp()
-{
-    GTEST_LOG_(INFO) << "Matrix4Test SetUp";
-}
-
-void Matrix4Test::TearDown()
-{
-    GTEST_LOG_(INFO) << "Matrix4Test TearDown";
-}
+class Matrix4Test : public testing::Test {};
 
 /**
  * @tc.name: Matrix4Test001
@@ -339,7 +314,7 @@ HWTEST_F(Matrix4Test, Matrix4Test006, TestSize.Level1)
     /**
      * @tc.steps: Test the function MapScalars with given the vector srcVec whose size is invalid.
      */
-    std::vector<double> srcVec = { DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1};
+    std::vector<double> srcVec = { DEFAULT_DOUBLE1, DEFAULT_DOUBLE1, DEFAULT_DOUBLE1 };
     std::vector<double> dstVec = matrixN4Obj1.MapScalars(srcVec);
     EXPECT_EQ(dstVec.size(), ROW_NUM);
     EXPECT_DOUBLE_EQ(dstVec[VALID_ROW0], DEFAULT_DOUBLE0);

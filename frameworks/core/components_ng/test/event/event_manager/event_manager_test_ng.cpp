@@ -28,12 +28,12 @@ const std::string SHIFT = "shift";
 const std::string ALT = "alt";
 const std::string CTRLSHIFT = "Ctrl + shift";
 
-const char CHARACTER_C = 'c';
-const char CHARACTER_A = 'a';
-const char CHARACTER_V = 'v';
-const char CHARACTER_Z = 'z';
-const char CHARACTER_EIGHT = '8';
-const char CHARACTER_X = 'x';
+const std::string CHARACTER_C = "C";
+const std::string CHARACTER_A = "A";
+const std::string CHARACTER_V = "V";
+const std::string CHARACTER_Z = "Z";
+const std::string CHARACTER_EIGHT = "8";
+const std::string CHARACTER_X = "X";
 
 constexpr int32_t NUM_CTRL_VALUE = 1;
 constexpr int32_t NUM_SHIFT_VALUE = 2;
@@ -129,7 +129,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest002, TestSize.Level1)
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeShift));
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeAlt));
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeCtrlShift));
-    eventHubCtrl->SetKeyboardShortcut(CHARACTER_C, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE + NUM_ALT_VALUE));
+    eventHubCtrl->SetKeyboardShortcut(CHARACTER_C, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE + NUM_ALT_VALUE), []() {});
     event.code = KeyCode::KEY_C;
     event.action = KeyAction::DOWN;
     event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
@@ -138,7 +138,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest002, TestSize.Level1)
     event.pressedCodes.emplace_back(KeyCode::KEY_C);
     eventManager->DispatchKeyboardShortcut(event);
     EXPECT_EQ(event.action, KeyAction::DOWN);
-    eventHubShift->SetKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE));
+    eventHubShift->SetKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE), []() {});
     event.code = KeyCode::KEY_A;
     event.action = KeyAction::DOWN;
     event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
@@ -146,7 +146,7 @@ HWTEST_F(EventManagerTestNg, EventManagerTest002, TestSize.Level1)
     event.pressedCodes.emplace_back(KeyCode::KEY_A);
     eventManager->DispatchKeyboardShortcut(event);
     EXPECT_EQ(event.action, KeyAction::DOWN);
-    eventHubAlt->SetKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_ALT_VALUE));
+    eventHubAlt->SetKeyboardShortcut(CHARACTER_A, (NUM_CTRL_VALUE + NUM_ALT_VALUE), []() {});
     event.code = KeyCode::KEY_V;
     event.action = KeyAction::DOWN;
     event.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
@@ -180,10 +180,10 @@ HWTEST_F(EventManagerTestNg, EventManagerTest003, TestSize.Level1)
     auto eventHubAlt = frameNodeAlt->GetEventHub<NG::EventHub>();
     auto eventHubCtrlShift = frameNodeCtrlShift->GetEventHub<NG::EventHub>();
 
-    eventHubCtrl->SetKeyboardShortcut(CHARACTER_C, NUM_CTRL_VALUE);
-    eventHubShift->SetKeyboardShortcut(CHARACTER_A, NUM_SHIFT_VALUE);
-    eventHubAlt->SetKeyboardShortcut(CHARACTER_V, NUM_ALT_VALUE);
-    eventHubCtrlShift->SetKeyboardShortcut(CHARACTER_Z, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE));
+    eventHubCtrl->SetKeyboardShortcut(CHARACTER_C, NUM_CTRL_VALUE, []() {});
+    eventHubShift->SetKeyboardShortcut(CHARACTER_A, NUM_SHIFT_VALUE, []() {});
+    eventHubAlt->SetKeyboardShortcut(CHARACTER_V, NUM_ALT_VALUE, []() {});
+    eventHubCtrlShift->SetKeyboardShortcut(CHARACTER_Z, (NUM_CTRL_VALUE + NUM_SHIFT_VALUE), []() {});
 
     bool isShortcutNodeCtrlC = eventManager->IsSameKeyboardShortcutNode(CHARACTER_C, NUM_CTRL_VALUE);
     EXPECT_TRUE(isShortcutNodeCtrlC);

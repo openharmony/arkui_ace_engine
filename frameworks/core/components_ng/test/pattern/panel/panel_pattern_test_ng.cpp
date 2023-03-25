@@ -158,6 +158,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest001, TestSize.Level1)
     slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
     slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
     slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
     slidingPanelModelNG.Pop();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
@@ -387,6 +388,20 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest005, TestSize.Level1)
     panelPattern->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     bool flag = panelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(flag == true);
+    panelPattern->isShow_ = true;
+    flag = panelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    /**
+     * @tc.steps: step5. frameNode HeightDynamicUpdate.
+     */
+    panelPattern->isDrag_ = false;
+    panelPattern->isAnimating_ = false;
+    panelPattern->previousMode_ = PanelMode::HALF;
+    panelPattern->HeightDynamicUpdate();
+    panelPattern->previousMode_ = PanelMode::FULL;
+    panelPattern->HeightDynamicUpdate();
+    panelPattern->previousMode_ = PanelMode::MINI;
+    panelPattern->HeightDynamicUpdate();
+    EXPECT_TRUE(flag);
 }
 
 /**
@@ -777,6 +792,19 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0014, TestSize.Level1)
     EXPECT_TRUE(slidingPanelPattern->isAnimating_ == false);
     slidingPanelPattern->UpdateCurrentOffset(CURRENT_OFFSET);
     slidingPanelPattern->UpdateCurrentOffsetOnAnimate(CURRENT_OFFSET);
+}
+
+/**
+ * @tc.name: PanelPatternTest0015
+ * @tc.desc: Test panel pattern GetLinearLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelPatternTestNg, PanelPatternTest0015, TestSize.Level1)
+{
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    auto columnLayoutProperty = slidingPanelModelNG.GetLinearLayoutProperty();
+    EXPECT_NE(columnLayoutProperty, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_PATTERN_H
 
+#include <optional>
+
+#include "base/geometry/ng/offset_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -116,23 +119,58 @@ public:
         return isSelectMenu_;
     }
 
+    void AddOptionNode(const RefPtr<FrameNode>& option)
+    {
+        CHECK_NULL_VOID(option);
+        options_.emplace_back(option);
+    }
+
+    void PopOptionNode()
+    {
+        if (options_.empty()) {
+            LOGW("options is empty.");
+            return;
+        }
+        options_.pop_back();
+    }
+
+    const std::vector<RefPtr<FrameNode>>& GetOptions() const
+    {
+        return options_;
+    }
+
     void RemoveParentHoverStyle();
 
     void UpdateSelectParam(const std::vector<SelectParam>& params);
 
+    void HideMenu() const;
+
+    void MountOption(const RefPtr<FrameNode>& option);
+
+    void RemoveOption();
+
+    RefPtr<FrameNode> GetMenuColumn() const;
+
 private:
     void OnModifyDone() override;
-    void RegisterOnClick();
+    void RegisterOnTouch();
+    void OnTouchEvent(const TouchEventInfo& info);
+    bool IsMultiMenuOutside() const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event) const;
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
 
-    RefPtr<TouchEventImpl> onClick_;
+    RefPtr<FrameNode> GetMenuWrapper() const;
+
+    RefPtr<ClickEvent> onClick_;
+    RefPtr<TouchEventImpl> onTouch_;
+    std::optional<Offset> lastTouchOffset_;
     int32_t targetId_ = -1;
     MenuType type_ = MenuType::MENU;
 
     RefPtr<FrameNode> parentMenuItem_;
+    std::vector<RefPtr<FrameNode>> options_;
 
     bool isSelectMenu_ = false;
 

@@ -98,6 +98,8 @@ public:
 
     void ForceLayoutForImplicitAnimation();
 
+    void ForceRenderForImplicitAnimation();
+
     // add schedule task and return the unique mark id.
     virtual uint32_t AddScheduleTask(const RefPtr<ScheduleTask>& task) = 0;
 
@@ -690,10 +692,6 @@ public:
 
     Rect GetCurrentWindowRect() const;
 
-    virtual void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) = 0;
-
-    virtual SafeAreaEdgeInserts GetCurrentViewSafeArea() const = 0;
-
     void SetPluginOffset(const Offset& offset)
     {
         pluginOffset_ = offset;
@@ -788,26 +786,6 @@ public:
 
     void RemoveFormVsyncCallback(int32_t formWindowId);
 
-    void SetIsLayoutFullScreen(bool isLayoutFullScreen)
-    {
-        isLayoutFullScreen_ = isLayoutFullScreen;
-    }
-
-    bool GetIsLayoutFullScreen() const
-    {
-        return isLayoutFullScreen_;
-    }
-
-    void SetIsAppWindow(bool isAppWindow)
-    {
-        isAppWindow_ = isAppWindow;
-    }
-
-    bool GetIsAppWindow() const
-    {
-        return isAppWindow_;
-    }
-
 protected:
     void TryCallNextFrameLayoutCallback()
     {
@@ -838,8 +816,6 @@ protected:
     bool isFormRender_ = false;
     bool isRightToLeft_ = false;
     bool isFullWindow_ = false;
-    bool isLayoutFullScreen_ = false;
-    bool isAppWindow_ = true;
     bool installationFree_ = false;
     bool isSubPipeline_ = false;
 
@@ -865,6 +841,7 @@ protected:
 
     std::unique_ptr<DrawDelegate> drawDelegate_;
     std::stack<bool> pendingImplicitLayout_;
+    std::stack<bool> pendingImplicitRender_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;

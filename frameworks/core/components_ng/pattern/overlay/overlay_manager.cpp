@@ -245,12 +245,6 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu)
         }
         root->RemoveChild(menu);
         root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-
-        auto menuPattern = menu->GetPattern<MenuPattern>();
-        if (!menuPattern || !menuPattern->IsSubMenu()) {
-            return;
-        }
-        menuPattern->RemoveParentHoverStyle();
     });
 
     auto context = menu->GetRenderContext();
@@ -414,6 +408,10 @@ void OverlayManager::UpdatePopupNode(int32_t targetId, const PopupInfo& popupInf
         LOGI("OverlayManager: popup begin pop");
         popupInfo.popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
         rootNode->RemoveChild(popupMap_[targetId].popupNode);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        RemovePixelMap();
+        RemoveFilter();
+#endif // ENABLE_DRAG_FRAMEWORK
     } else {
         // Push popup
         CHECK_NULL_VOID_NOLOG(!popupInfo.isCurrentOnShow);
@@ -547,7 +545,7 @@ bool OverlayManager::ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, c
     auto props = menuFrameNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, false);
     props->UpdateMenuOffset(offset);
-    menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    menuFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     return true;
 }
 
@@ -914,5 +912,60 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         modalStack_.pop();
     }
 }
+#ifdef ENABLE_DRAG_FRAMEWORK
+void OverlayManager::MountToRootNode(const RefPtr<FrameNode>& columnNode)
+{
+    if (hasPixelMap) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto parent = rootNode->GetParent();
+    while (parent) {
+        rootNode = AceType::DynamicCast<FrameNode>(parent);
+        parent = parent->GetParent();
+    }
+    columnNode->MountToParent(rootNode);
+    columnNode->OnMountToParentDone();
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    columnNodeWeak_ = columnNode;
+    hasPixelMap = true;
+}
 
+void OverlayManager::RemovePixelMap()
+{
+    if (!hasPixelMap) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto parent = rootNode->GetParent();
+    while (parent) {
+        rootNode = AceType::DynamicCast<FrameNode>(parent);
+        parent = parent->GetParent();
+    }
+    rootNode->RemoveChild(columnNodeWeak_.Upgrade());
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    hasPixelMap = false;
+}
+
+void OverlayManager::RemoveFilter()
+{
+    if (!hasFilter) {
+        return;
+    }
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto childNode = AceType::DynamicCast<NG::FrameNode>(rootNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto children = childNode->GetChildren();
+    rootNode->RemoveChild(childNode);
+    for (auto& child: children) {
+        childNode->RemoveChild(child);
+        child->MountToParent(rootNode);
+    }
+    rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    hasFilter = false;
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

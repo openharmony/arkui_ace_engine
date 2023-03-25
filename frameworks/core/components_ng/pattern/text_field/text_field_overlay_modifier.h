@@ -20,12 +20,12 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
-#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 
 namespace OHOS::Ace::NG {
 class TextFieldOverlayModifier : public OverlayModifier {
@@ -33,7 +33,7 @@ class TextFieldOverlayModifier : public OverlayModifier {
 
 public:
     TextFieldOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern, WeakPtr<ScrollBar>&& scrollBar,
-                            WeakPtr<ScrollEdgeEffect>&& edgeEffect);
+        WeakPtr<ScrollEdgeEffect>&& edgeEffect);
     ~TextFieldOverlayModifier() override = default;
 
     void onDraw(DrawingContext& context) override;
@@ -56,7 +56,6 @@ private:
     void PaintScrollBar(RSCanvas& canvas);
     void PaintEdgeEffect(const SizeF& frameSize, RSCanvas& canvas);
 
-private:
     WeakPtr<Pattern> pattern_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

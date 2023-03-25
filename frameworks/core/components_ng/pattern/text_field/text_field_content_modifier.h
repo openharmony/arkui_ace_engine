@@ -46,6 +46,7 @@ public:
     void SetTextRectY(const float value);
     void SetTextObscured(bool value);
     void SetTextRectX(const float value);
+    void SetTextAlign(const TextAlign value);
     bool NeedMeasureUpdate(PropertyChangeFlag& flag);
 
 private:
@@ -72,6 +73,7 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     RefPtr<PropertyString> textValue_;
     RefPtr<PropertyBool> textObscured_;
+    RefPtr<PropertyInt> textAlign_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

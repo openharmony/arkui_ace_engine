@@ -84,6 +84,11 @@ TextAlign TextFieldPattern::GetTextAlign() const
     return TextAlign::START;
 }
 
+std::string TextFieldPattern::GetPlaceHolder() const
+{
+    return "string";
+}
+
 std::string TextFieldPattern::GetPlaceholderColor() const
 {
     return "string";

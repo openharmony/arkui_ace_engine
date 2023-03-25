@@ -42,6 +42,14 @@
           "HarmonyOS-Sans-Condensed": 0
         }
       ]
+    },
+    {
+      "family": "HarmonyOS Sans Digit",
+      "alias": [
+        {
+          "HarmonyOS-Sans-Digit": 0
+        }
+      ]
     }
   ],
   "fallback": [

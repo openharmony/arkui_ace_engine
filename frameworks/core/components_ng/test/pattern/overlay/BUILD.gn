@@ -42,6 +42,7 @@ ohos_unittest("overlay_manager_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/custom/custom_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.cpp",

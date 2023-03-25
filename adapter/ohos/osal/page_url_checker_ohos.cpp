@@ -203,10 +203,11 @@ void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function
     if (appInfo) {
         std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
         bool isInstalled = false;
-        for (const auto& module : moduleList) {
-            if (module.moduleName == moduleName) {
-                isInstalled = true;
-            }
+        auto res = std::any_of(moduleList.begin(), moduleList.end(), [moduleName](const auto &module) {
+            return module.moduleName == moduleName;
+        });
+        if (res) {
+            isInstalled = true;
         }
 
         if (!isInstalled) {

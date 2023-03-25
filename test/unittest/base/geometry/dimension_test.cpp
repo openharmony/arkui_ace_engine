@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include "gtest/gtest.h"
 
-#include <memory>
 #include "base/geometry/dimension.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
@@ -41,35 +42,9 @@ const std::string DIMENSION_FP_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE)
 const std::string DIMENSION_LPX_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE).append("lpx");
 const std::string DIMENSION_PCT_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE * 100).append("%");
 const std::string DIMENSION_AUTO_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE).append("auto");
-}
+} // namespace
 
-class DimensionTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void DimensionTest::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "DimensionTest SetUpTestCase";
-}
-
-void DimensionTest::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "DimensionTest TearDownTestCase";
-}
-
-void DimensionTest::SetUp()
-{
-    GTEST_LOG_(INFO) << "DimensionTest SetUp";
-}
-
-void DimensionTest::TearDown()
-{
-    GTEST_LOG_(INFO) << "DimensionTest TearDown";
-}
+class DimensionTest : public testing::Test {};
 
 /**
  * @tc.name: DimensionTest001
@@ -81,7 +56,7 @@ HWTEST_F(DimensionTest, DimensionTest001, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
-    MockPipelineBase::SetUp();
+    NG::MockPipelineBase::SetUp();
 
     /**
      * @tc.steps2: Test the function ConvertToVp of the class Dimension.
@@ -106,7 +81,7 @@ HWTEST_F(DimensionTest, DimensionTest002, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters.
      */
-    MockPipelineBase::SetUp();
+    NG::MockPipelineBase::SetUp();
 
     /**
      * @tc.steps2: Test the function ConvertToPx of the class Dimension.
@@ -152,8 +127,7 @@ HWTEST_F(DimensionTest, DimensionTest004, TestSize.Level1)
      * @tc.expected: The return values are equal to DEFAULT_DOUBLE.
      */
     double result = 0;
-    EXPECT_TRUE(DIMENSION_PX.NormalizeToPx(
-        -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
+    EXPECT_TRUE(DIMENSION_PX.NormalizeToPx(-DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
     EXPECT_DOUBLE_EQ(result, DEFAULT_DOUBLE);
 
     /**
@@ -161,8 +135,8 @@ HWTEST_F(DimensionTest, DimensionTest004, TestSize.Level1)
      * @tc.expected: The return values are equal to ZERO_DOUBLE.
      */
     result = 0;
-    EXPECT_FALSE(DIMENSION_VP.NormalizeToPx(
-        -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
+    EXPECT_FALSE(
+        DIMENSION_VP.NormalizeToPx(-DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
     EXPECT_DOUBLE_EQ(result, ZERO_DOUBLE);
 
     /**
@@ -170,8 +144,8 @@ HWTEST_F(DimensionTest, DimensionTest004, TestSize.Level1)
      * @tc.expected: The return values are equal to ZERO_DOUBLE.
      */
     result = 0;
-    EXPECT_FALSE(DIMENSION_FP.NormalizeToPx(
-        -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
+    EXPECT_FALSE(
+        DIMENSION_FP.NormalizeToPx(-DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
     EXPECT_DOUBLE_EQ(result, ZERO_DOUBLE);
 
     /**
@@ -179,8 +153,8 @@ HWTEST_F(DimensionTest, DimensionTest004, TestSize.Level1)
      * @tc.expected: The return values are equal to ZERO_DOUBLE.
      */
     result = 0;
-    EXPECT_FALSE(DIMENSION_LPX.NormalizeToPx(
-        -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
+    EXPECT_FALSE(
+        DIMENSION_LPX.NormalizeToPx(-DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
     EXPECT_DOUBLE_EQ(result, ZERO_DOUBLE);
 
     /**
@@ -188,8 +162,8 @@ HWTEST_F(DimensionTest, DimensionTest004, TestSize.Level1)
      * @tc.expected: The return values are equal to ZERO_DOUBLE.
      */
     result = 0;
-    EXPECT_FALSE(DIMENSION_PCT.NormalizeToPx(
-        -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
+    EXPECT_FALSE(
+        DIMENSION_PCT.NormalizeToPx(-DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
     EXPECT_DOUBLE_EQ(result, ZERO_DOUBLE);
 
     /**
@@ -197,8 +171,8 @@ HWTEST_F(DimensionTest, DimensionTest004, TestSize.Level1)
      * @tc.expected: The return values are equal to ZERO_DOUBLE.
      */
     result = 0;
-    EXPECT_FALSE(DIMENSION_AUTO.NormalizeToPx(
-        -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
+    EXPECT_FALSE(
+        DIMENSION_AUTO.NormalizeToPx(-DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
     EXPECT_DOUBLE_EQ(result, ZERO_DOUBLE);
 
     /**
@@ -206,8 +180,8 @@ HWTEST_F(DimensionTest, DimensionTest004, TestSize.Level1)
      * @tc.expected: The return values are equal to ZERO_DOUBLE.
      */
     result = 0;
-    EXPECT_FALSE(DIMENSION_CALC.NormalizeToPx(
-        -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
+    EXPECT_FALSE(
+        DIMENSION_CALC.NormalizeToPx(-DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, -DEFAULT_DOUBLE, result));
     EXPECT_DOUBLE_EQ(result, ZERO_DOUBLE);
 }
 

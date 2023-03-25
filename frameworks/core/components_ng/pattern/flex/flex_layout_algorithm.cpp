@@ -831,7 +831,7 @@ void FlexLayoutAlgorithm::PlaceChildren(
     float childCrossPos = 0.0f;
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     for (const auto& child : children) {
-        if (child->IsOutOfLayout()) {
+        if (child->IsOutOfLayout() || !child->IsActive()) {
             // adjust by postion property.
             child->GetGeometryNode()->SetMarginFrameOffset({});
             child->Layout();
@@ -893,7 +893,11 @@ void FlexLayoutAlgorithm::PlaceChildren(
 FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
     const auto& flexItemProperty = layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-    return flexItemProperty ? flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) : crossAxisAlign_;
+    if (!flexItemProperty || !flexItemProperty->GetAlignSelf().has_value() ||
+        flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_) == FlexAlign::AUTO) {
+        return crossAxisAlign_;
+    }
+    return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign_);
 }
 
 } // namespace OHOS::Ace::NG

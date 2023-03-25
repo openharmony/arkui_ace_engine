@@ -1108,7 +1108,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs");
-    LOGI("JsiDeclarativeEngine %{private}p LoadJs page:%{public}d", RawPtr(engineInstance_), page->GetPageId());
+    LOGI("LoadJs page:%{public}d", page->GetPageId());
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
     if (isMainPage) {
@@ -1984,7 +1984,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 
     globalRuntime_ = nullptr;
     cardRuntime_ = runtime;
-    JSNApi::TriggerGC(vm);
+    JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework

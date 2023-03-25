@@ -21,6 +21,8 @@
 #include "core/components_ng/test/mock/rosen/testing_camera.h"
 #include "core/components_ng/test/mock/rosen/testing_canvas.h"
 #include "core/components_ng/test/mock/rosen/testing_color.h"
+#include "core/components_ng/test/mock/rosen/testing_color_filter.h"
+#include "core/components_ng/test/mock/rosen/testing_color_matrix.h"
 #include "core/components_ng/test/mock/rosen/testing_filter.h"
 #include "core/components_ng/test/mock/rosen/testing_font_collection.h"
 #include "core/components_ng/test/mock/rosen/testing_mask_filter.h"
@@ -75,5 +77,12 @@ using RSTypographyProperties = Testing::TestingTypographyProperties;
 using RSParagraphStyle = Testing::TestingTypographyStyle;
 using RSParagraphBuilder = Testing::TestingTypographyCreate;
 using RSFontCollection = Testing::TestingFontCollection;
+using RSFontWeight = Testing::TestingFontWeight;
+using RSTextDecoration = Testing::TestingTextDecoration;
+using RSTextDecorationStyle = Testing::TestingTextDecorationStyle;
+using RSFontStyle = Testing::TestingFontStyle;
+using RSTextBaseline = Testing::TestingTextBaseline;
+using RSColorFilter = Testing::TestingColorFilter;
+using RSColorMatrix = Testing::TestingColorMatrix;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H

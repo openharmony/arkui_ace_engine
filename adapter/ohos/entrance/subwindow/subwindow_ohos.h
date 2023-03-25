@@ -125,6 +125,10 @@ private:
     void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void HideFilter();
+    void HidePixelMap();
+#endif // ENABLE_DRAG_FRAMEWORK
     static int32_t id_;
     int32_t windowId_ = 0;
     int32_t parentContainerId_ = -1;

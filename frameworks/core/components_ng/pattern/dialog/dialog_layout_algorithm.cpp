@@ -75,14 +75,15 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
     auto maxSize = innerLayout.maxSize;
     // Set different layout param for different devices
     // TODO: need to use theme json to replace this function.
-    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
+    // get grid size type based on the screen where the dialog locate
+    auto gridSizeType = ScreenSystemManager::GetInstance().GetSize(maxSize.Width());
     RefPtr<GridColumnInfo> columnInfo;
     if (SystemProperties::GetDeviceType() == DeviceType::CAR) {
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
     } else {
         columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::DIALOG);
     }
-    columnInfo->GetParent()->BuildColumnWidth();
+    columnInfo->GetParent()->BuildColumnWidth(maxSize.Width());
     auto width = GetMaxWidthBasedOnGridType(columnInfo, gridSizeType, SystemProperties::GetDeviceType());
     if (SystemProperties::GetDeviceType() == DeviceType::WATCH) {
         innerLayout.minSize = SizeF(width, 0.0);
@@ -110,7 +111,7 @@ double DialogLayoutAlgorithm::GetMaxWidthBasedOnGridType(
     const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType)
 {
     if (gridCount_ >= 0) {
-        return info->GetWidth(std::min(gridCount_, GridSystemManager::GetInstance().GetCurrentGridInfo().maxColumns));
+        return info->GetWidth(std::min(gridCount_, info->GetParent()->GetColumns()));
     }
 
     if (deviceType == DeviceType::WATCH) {

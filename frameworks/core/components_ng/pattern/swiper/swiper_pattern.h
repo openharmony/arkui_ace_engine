@@ -255,6 +255,9 @@ public:
     SwiperIndicatorType GetIndicatorType() const;
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
+
+    void OnWindowShow() override;
+    void OnWindowHide() override;
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

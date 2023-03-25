@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
@@ -485,6 +486,9 @@ bool JSCustomDialogController::ParseAnimation(
     auto delay = animationArgs->GetInt("delay", 0);
     auto iterations = animationArgs->GetInt("iterations", 1);
     auto tempo = static_cast<float>(animationArgs->GetDouble("tempo", 1.0));
+    if (NonPositive(tempo)) {
+        tempo = 1.0f;
+    }
     auto direction = StringToAnimationDirection(animationArgs->GetString("playMode", "normal"));
     RefPtr<Curve> curve;
     auto curveArgs = animationArgs->GetValue("curve");

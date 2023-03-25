@@ -85,8 +85,6 @@ bool ReplaceFrameNode(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& ne
 
 void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSrc, const RefPtr<FrameNode>& pageDest)
 {
-    LOGD("start shared transition: src:%{public}p, dest:%{public}p", AceType::RawPtr(pageSrc),
-        AceType::RawPtr(pageDest));
     CHECK_NULL_VOID(pageSrc);
     CHECK_NULL_VOID(pageDest);
     auto patternSrc = pageSrc->GetPattern<PagePattern>();
@@ -236,8 +234,9 @@ bool SharedOverlayManager::CheckIn(const RefPtr<SharedTransitionEffect>& effect)
 void SharedOverlayManager::PassengerAboard(
     const RefPtr<SharedTransitionEffect>& effect, const RefPtr<FrameNode>& passenger)
 {
-    auto ticket = passenger->GetOffsetRelativeToWindow();
+    auto ticket = passenger->GetPaintRectOffsetToPage();
     auto initialPosition = passenger->GetRenderContext()->GetPosition();
+    // save initialFrameOffset for static type sharedTransition
     auto initialFrameOffset = passenger->GetGeometryNode()->GetFrameOffset();
     auto initialEventEnabled = passenger->GetEventHub<EventHub>()->IsEnabled();
     auto zIndex = passenger->GetRenderContext()->GetZIndex();
@@ -309,6 +308,7 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
             passenger->GetRenderContext()->ResetZIndex();
             passenger->GetRenderContext()->OnZIndexUpdate(0);
         }
+        // restore initialFrameOffset for static type sharedTransition, because it may not layout again
         passenger->GetGeometryNode()->SetFrameOffset(effect->GetPassengerInitFrameOffset());
         passenger->GetEventHub<EventHub>()->SetEnabled(effect->GetPassengerInitEventEnabled());
         ReplaceFrameNode(passengerHolder, passenger);

@@ -39,24 +39,25 @@ void SelectView::Create(const std::vector<SelectParam>& params)
     pattern->BuildChild();
     // create menu node
     if (!pattern->GetMenuNode()) {
-        auto menu = MenuView::Create(params, nodeId);
-        pattern->SetMenuNode(menu);
+        auto menuWrapper = MenuView::Create(params, nodeId);
+        pattern->SetMenuNode(menuWrapper);
         pattern->InitSelected();
     } else {
-        auto menuNode = AceType::DynamicCast<FrameNode>(pattern->GetMenuNode()->GetChildAtIndex(0));
+        auto menuNode = pattern->GetMenuNode();
         CHECK_NULL_VOID(menuNode);
         auto menuPattern = menuNode->GetPattern<MenuPattern>();
         CHECK_NULL_VOID(menuPattern);
         menuPattern->UpdateSelectParam(params);
     }
     // store option pointers in select
-    auto menuContainer = pattern->GetMenuNode()->GetChildAtIndex(0);
+    auto menuContainer = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuContainer);
     pattern->ClearOptions();
-    auto options = menuContainer->GetChildren();
+    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
     for (auto&& option : options) {
-        auto optionNode = AceType::DynamicCast<FrameNode>(option);
-        pattern->AddOptionNode(optionNode);
+        pattern->AddOptionNode(option);
     }
 
     // delete menu when select node is deleted

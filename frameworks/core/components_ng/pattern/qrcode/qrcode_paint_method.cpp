@@ -46,7 +46,11 @@ void QRCodePaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper) cons
     }
     auto value = paintProperty->GetValueValue();
     auto renderContext = paintWrapper->GetRenderContext();
-    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+    if (renderContext->HasForegroundColor()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != paintProperty->GetColorValue().GetValue()) {
+            paintProperty->UpdateColor(Color::FOREGROUND);
+        }
+    } else if (renderContext->HasForegroundColorStrategy()) {
         paintProperty->UpdateColor(Color::FOREGROUND);
     }
     auto color = paintProperty->GetColorValue();

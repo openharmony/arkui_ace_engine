@@ -119,7 +119,7 @@ void ListItemGroupElement::ApplyRenderChild(const RefPtr<RenderElement>& renderC
 
 bool ListItemGroupElement::RequestNextFocus(bool vertical, bool reverse, const Rect& rect)
 {
-    LOGD("[ListItemGroupFocus]RequestNextFocus, this:%{public}p, Dep:%{public}d.", this, GetDepth());
+    LOGD("[ListItemGroupFocus]RequestNextFocus, Dep:%{public}d.", GetDepth());
     bool ret = false;
     if (!renderItemGroup_->GetExpand()) {
         AddItemGroupFocusIndex(0);
@@ -196,7 +196,7 @@ void ListItemGroupElement::MoveItemToViewPort(const RefPtr<Element>& listItem, b
 
 bool ListItemGroupElement::OnKeyEvent(const KeyEvent& keyEvent)
 {
-    LOGD("[ListItemGroupFocus]OnKeyEvent, this:%{public}p, Dep:%{public}d.", this, GetDepth());
+    LOGD("[ListItemGroupFocus]OnKeyEvent, Dep:%{public}d.", GetDepth());
     if (keyEvent.action == KeyAction::CLICK && keyEvent.code == KeyCode::TV_CONTROL_ENTER
         && GetItemGroupFocusIndex() == 0) {
         renderItemGroup_->HandleClicked();
@@ -213,7 +213,7 @@ bool ListItemGroupElement::OnKeyEvent(const KeyEvent& keyEvent)
 
 void ListItemGroupElement::HandleOnFocus()
 {
-    LOGD("[ListItemGroupFocus]HandleOnFocus, this:%{public}p, Dep:%{public}d.", this, GetDepth());
+    LOGD("[ListItemGroupFocus]HandleOnFocus, Dep:%{public}d.", GetDepth());
     // Find the parent until parent is not listItemElement.
     RefPtr<FocusGroup> parentElement = FocusGroup::GetParent().Upgrade();
     RefPtr<ListElement> listElement = AceType::DynamicCast<ListElement>(parentElement);

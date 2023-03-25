@@ -18,7 +18,8 @@
 
 #include <vector>
 
-#include "core/components_ng/test/mock/rosen/testing_typography_properties.h"
+#include "testing_canvas.h"
+#include "testing_typography_properties.h"
 
 namespace OHOS::Ace::Testing {
 enum class WordBreakType { WordBreakTypeNormal = 0, WordBreakTypeBreakAll, WordBreakTypeBreakWord };
@@ -43,6 +44,28 @@ public:
     }
 
     virtual void Layout(double width) {}
+
+    virtual double GetMaxIntrinsicWidth()
+    {
+        return 1.0;
+    }
+
+    virtual double GetMaxWidth()
+    {
+        return 1.0;
+    }
+
+    virtual double GetLongestLine()
+    {
+        return 1.0;
+    }
+
+    virtual double GetMinIntrinsicWidth()
+    {
+        return 1.0;
+    }
+
+    virtual void Paint(TestingCanvas* canvas, double x, double y) {}
 
     virtual std::vector<TestingTypographyProperties::TextBox> GetRectsForRange(size_t /* start */, size_t /* end */,
         TestingTypographyProperties::RectHeightStyle /* height */,

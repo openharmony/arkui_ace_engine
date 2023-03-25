@@ -237,7 +237,7 @@ void CheckBoxPattern::UpdateState()
                 checkbox->CheckBoxGroupIsTrue();
             }
         };
-        PipelineContext::GetCurrentContext()->AddBuildFinishCallBack(callback);
+        pipelineContext->AddBuildFinishCallBack(callback);
         if (paintProperty->HasCheckBoxSelect()) {
             auto isSelected = paintProperty->GetCheckBoxSelectValue();
             SetLastSelect(isSelected);

@@ -30,6 +30,7 @@ constexpr float KEY_TIME_END = 1.0f;
 constexpr int32_t BAR_EXPAND_DURATION = 150; // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250; // 250ms, scroll bar width shrinks from 8dp to 4dp
 constexpr int32_t BAR_ADAPT_DURATION = 400;  // 400ms, scroll bar adapts to the size changes of components
+constexpr double BAR_ADAPT_EPSLION = 1.0;
 } // namespace
 
 ScrollBar::ScrollBar()
@@ -91,6 +92,11 @@ void ScrollBar::FlushBarWidth()
 void ScrollBar::UpdateScrollBarRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
+    // return if nothing changes to avoid changing opacity
+    if (paintOffset_ == offset && viewPortSize_ == size && lastOffset_ == lastOffset &&
+        NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
+        return;
+    }
     if (!NearZero(estimatedHeight)) {
         paintOffset_ = offset;
         viewPortSize_ = size;
@@ -105,6 +111,7 @@ void ScrollBar::UpdateScrollBarRegion(
         }
         positionModeUpdate_ = false;
     }
+    OnScrollEnd();
 }
 
 void ScrollBar::UpdateActiveRectSize(double activeSize)
@@ -121,9 +128,11 @@ void ScrollBar::UpdateActiveRectSize(double activeSize)
 void ScrollBar::UpdateActiveRectOffset(double activeMainOffset)
 {
     if (positionMode_ == PositionMode::LEFT || positionMode_ == PositionMode::RIGHT) {
+        activeMainOffset = std::min(activeMainOffset, barRegionSize_ - activeRect_.Height());
         activeRect_.SetTop(activeMainOffset);
         touchRegion_.SetTop(activeMainOffset);
     } else if (positionMode_ == PositionMode::BOTTOM) {
+        activeMainOffset = std::min(activeMainOffset, barRegionSize_ - activeRect_.Width());
         activeRect_.SetLeft(activeMainOffset);
         touchRegion_.SetLeft(activeMainOffset);
     }
@@ -152,8 +161,11 @@ void ScrollBar::SetRectTrickRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-    double barRegionSize = std::max(mainSize - NormalizeToPx(reservedHeight_), 0.0);
-    double activeSize = barRegionSize * mainSize / estimatedHeight - outBoundary_;
+    barRegionSize_ = std::max(mainSize - NormalizeToPx(reservedHeight_), 0.0);
+    if (LessOrEqual(estimatedHeight, 0.0)) {
+        return;
+    }
+    double activeSize = barRegionSize_ * mainSize / estimatedHeight - outBoundary_;
     if (!NearEqual(mainSize, estimatedHeight)) {
         if (!NearZero(outBoundary_)) {
             activeSize = std::max(
@@ -167,25 +179,32 @@ void ScrollBar::SetRectTrickRegion(
         }
         double lastMainOffset =
             std::max(positionMode_ == PositionMode::BOTTOM ? lastOffset.GetX() : lastOffset.GetY(), 0.0);
-        offsetScale_ = (barRegionSize - activeSize) / (estimatedHeight - mainSize);
+        offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
         double activeMainOffset = offsetScale_ * lastMainOffset;
         bool canUseAnimation = !inSpring && !positionModeUpdate_;
-        activeMainOffset = std::min(activeMainOffset, barRegionSize - activeSize);
+        activeMainOffset = std::min(activeMainOffset, barRegionSize_ - activeSize);
+        double inactiveSize = 0.0;
+        double inactiveMainOffset = 0.0;
+        scrollableOffset_ = activeMainOffset;
         if (positionMode_ == PositionMode::LEFT) {
-            // If the scrollBar length changes, start the adaptation animation
-            if (!NearZero(activeRect_.Height()) && activeSize != activeRect_.Height() && canUseAnimation) {
-                PlayAdaptAnimation(activeSize, activeMainOffset);
-                return;
+            inactiveSize = activeRect_.Height();
+            inactiveMainOffset = activeRect_.Top();
+            if (adaptAnimator_ && adaptAnimator_->IsRunning()) {
+                activeRect_ =
+                    Rect(-NormalizeToPx(position_), activeRect_.Top(), normalWidth, activeRect_.Height()) + offset;
+            } else {
+                activeRect_ = Rect(-NormalizeToPx(position_), activeMainOffset, normalWidth, activeSize) + offset;
             }
-            activeRect_ = Rect(-NormalizeToPx(position_), activeMainOffset, normalWidth, activeSize) + offset;
             touchRegion_ = activeRect_ + Size(NormalizeToPx(touchWidth_), 0);
         } else if (positionMode_ == PositionMode::RIGHT) {
-            if (!NearZero(activeRect_.Height()) && activeSize != activeRect_.Height() && canUseAnimation) {
-                PlayAdaptAnimation(activeSize, activeMainOffset);
-                return;
-            }
+            inactiveSize = activeRect_.Height();
+            inactiveMainOffset = activeRect_.Top();
             double x = size.Width() - normalWidth - NormalizeToPx(padding_.Right()) + NormalizeToPx(position_);
-            activeRect_ = Rect(x, activeMainOffset, normalWidth, activeSize) + offset;
+            if (adaptAnimator_ && adaptAnimator_->IsRunning()) {
+                activeRect_ = Rect(x, activeRect_.Top(), normalWidth, activeRect_.Height()) + offset;
+            } else {
+                activeRect_ = Rect(x, activeMainOffset, normalWidth, activeSize) + offset;
+            }
             // Update the hot region
             touchRegion_ =
                 activeRect_ -
@@ -193,16 +212,22 @@ void ScrollBar::SetRectTrickRegion(
                     NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Right()), 0.0) +
                 Size(NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_), 0);
         } else if (positionMode_ == PositionMode::BOTTOM) {
-            if (!NearZero(activeRect_.Width()) && activeSize != activeRect_.Width() && canUseAnimation) {
-                PlayAdaptAnimation(activeSize, activeMainOffset);
-                return;
-            }
+            inactiveSize = activeRect_.Width();
+            inactiveMainOffset = activeRect_.Left();
             auto positionY = size.Height() - normalWidth - NormalizeToPx(padding_.Bottom()) + NormalizeToPx(position_);
-            activeRect_ = Rect(activeMainOffset, positionY, activeSize, normalWidth) + offset;
+            if (adaptAnimator_ && adaptAnimator_->IsRunning()) {
+                activeRect_ = Rect(activeRect_.Left(), positionY, activeRect_.Width(), normalWidth) + offset;
+            } else {
+                activeRect_ = Rect(activeMainOffset, positionY, activeSize, normalWidth) + offset;
+            }
             auto hotRegionOffset = Offset(
                 0.0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_) - NormalizeToPx(padding_.Bottom()));
             auto hotRegionSize = Size(0, NormalizeToPx(touchWidth_) - NormalizeToPx(normalWidth_));
             touchRegion_ = activeRect_ - hotRegionOffset + hotRegionSize;
+        }
+        // If the scrollBar length changes, start the adaptation animation
+        if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation) {
+            PlayAdaptAnimation(activeSize, activeMainOffset, inactiveSize, inactiveMainOffset);
         }
     }
 }
@@ -287,7 +312,6 @@ void ScrollBar::SetGestureEvent()
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayShrinkAnimation();
                 }
-                scrollBar->OnScrollEnd();
                 scrollBar->SetPressed(false);
                 scrollBar->MarkNeedRender();
             }
@@ -331,7 +355,8 @@ void ScrollBar::SetMouseEvent()
     });
 }
 
-void ScrollBar::PlayAdaptAnimation(double activeSize, double activeMainOffset)
+void ScrollBar::PlayAdaptAnimation(
+    double activeSize, double activeMainOffset, double inactiveSize, double inactiveMainOffset)
 {
     if (adaptAnimator_ && adaptAnimator_->IsRunning()) {
         return;
@@ -340,15 +365,6 @@ void ScrollBar::PlayAdaptAnimation(double activeSize, double activeMainOffset)
         adaptAnimator_ = AceType::MakeRefPtr<Animator>(PipelineContext::GetCurrentContext());
     }
     adaptAnimator_->ClearInterpolators();
-    double inactiveSize;
-    double inactiveMainOffset;
-    if (positionMode_ == PositionMode::LEFT || positionMode_ == PositionMode::RIGHT) {
-        inactiveSize = activeRect_.Height();
-        inactiveMainOffset = activeRect_.Top();
-    } else {
-        inactiveSize = activeRect_.Width();
-        inactiveMainOffset = activeRect_.Left();
-    }
     // Animate the mainSize of the ScrollBar
     auto sizeAnimation = AceType::MakeRefPtr<CurveAnimation<double>>(inactiveSize, activeSize, Curves::FRICTION);
     sizeAnimation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
@@ -361,16 +377,27 @@ void ScrollBar::PlayAdaptAnimation(double activeSize, double activeMainOffset)
     // Animate the mainOffset of the ScrollBar
     auto offsetAnimation =
         AceType::MakeRefPtr<CurveAnimation<double>>(inactiveMainOffset, activeMainOffset, Curves::FRICTION);
-    offsetAnimation->AddListener([weakBar = AceType::WeakClaim(this)](double value) {
-        auto scrollBar = weakBar.Upgrade();
-        if (scrollBar) {
-            scrollBar->UpdateActiveRectOffset(value);
-            scrollBar->MarkNeedRender();
-        }
-    });
+    offsetAnimation->AddListener(
+        [weakBar = AceType::WeakClaim(this), inactiveMainOffset, activeMainOffset](double value) {
+            auto scrollBar = weakBar.Upgrade();
+            if (scrollBar) {
+                auto top = scrollBar->GetPositionMode() == PositionMode::BOTTOM ? scrollBar->activeRect_.Left() :
+                    scrollBar->activeRect_.Top();
+                if (NearEqual(top, activeMainOffset, 0.000001f) || NearEqual(top, inactiveMainOffset, 0.000001f)) {
+                    scrollBar->UpdateActiveRectOffset(value);
+                } else {
+                    scrollBar->UpdateActiveRectOffset(value + scrollBar->scrollableOffset_ - activeMainOffset);
+                }
+                scrollBar->MarkNeedRender();
+            }
+        });
     adaptAnimator_->AddInterpolator(sizeAnimation);
     adaptAnimator_->AddInterpolator(offsetAnimation);
     adaptAnimator_->SetDuration(BAR_ADAPT_DURATION);
+
+    UpdateActiveRectSize(inactiveSize);
+    UpdateActiveRectOffset(inactiveMainOffset);
+
     adaptAnimator_->Play();
 }
 

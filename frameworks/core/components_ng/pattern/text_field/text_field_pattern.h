@@ -590,6 +590,7 @@ private:
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
+    bool HasStateStyle(UIState state) const;
 
     void AddScrollEvent();
     void OnTextAreaScroll(float offset);
@@ -625,6 +626,7 @@ private:
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
+    void CreateHandles();
 
     void FireEventHubOnChange(const std::string& text);
     void FireOnChangeIfNeeded();
@@ -635,7 +637,6 @@ private:
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
-    int32_t GetLineNumber(float offsetY);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -722,6 +723,7 @@ private:
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;
+    bool needToRefreshSelectOverlay_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

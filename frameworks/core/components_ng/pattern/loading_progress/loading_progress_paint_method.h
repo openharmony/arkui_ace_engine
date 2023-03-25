@@ -55,6 +55,15 @@ public:
         CHECK_NULL_VOID(progressTheme);
         auto paintProperty = DynamicCast<LoadingProgressPaintProperty>(paintWrapper->GetPaintProperty());
         CHECK_NULL_VOID(paintProperty);
+        auto renderContext = paintWrapper->GetRenderContext();
+        if (renderContext->HasForegroundColor()) {
+            if (renderContext->GetForegroundColorValue().GetValue() !=
+                paintProperty->GetColor().value_or(Color::FOREGROUND).GetValue()) {
+                paintProperty->UpdateColor(Color::FOREGROUND);
+            }
+        } else if (renderContext->HasForegroundColorStrategy()) {
+            paintProperty->UpdateColor(Color::FOREGROUND);
+        }
         color_ = paintProperty->GetColor().value_or(progressTheme->GetLoadingColor());
         loadingProgressModifier_->SetColor(LinearColor(color_));
         if (loadingProgressModifier_->GetOwner() == LoadingProgressOwner::SELF) {

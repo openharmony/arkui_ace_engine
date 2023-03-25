@@ -74,7 +74,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
 
     // Parse the rate, if it is invalid, set it as 1.0.
     double currentProgressRate = 1.0;
-    if (ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
+    if (!ParseJsDouble(currentProgressRateValue, currentProgressRate)) {
         LOGW("Video parse currentProgressRate failed.");
     }
     VideoModel::GetInstance()->SetProgressRate(currentProgressRate);

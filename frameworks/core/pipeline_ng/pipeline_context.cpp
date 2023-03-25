@@ -27,7 +27,6 @@
 #endif
 
 #include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
@@ -135,6 +134,7 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     taskScheduler_.AddDirtyRenderNode(dirty);
+    ForceRenderForImplicitAnimation();
     hasIdleTasks_ = true;
     RequestFrame();
 }
@@ -372,7 +372,8 @@ void PipelineContext::SetupRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
-    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
+    sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
+        DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
 
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
@@ -610,21 +611,6 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
         rootContext->SyncGeometryProperties(RawPtr(rootNode_->GetGeometryNode()));
         RequestFrame();
     }
-}
-
-void PipelineContext::SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback)
-{
-    if (window_) {
-        window_->SetGetViewSafeAreaImpl(std::move(callback));
-    }
-}
-
-SafeAreaEdgeInserts PipelineContext::GetCurrentViewSafeArea() const
-{
-    if (window_) {
-        return window_->GetCurrentViewSafeArea();
-    }
-    return {};
 }
 
 void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight)
@@ -1525,6 +1511,11 @@ void PipelineContext::Finish(bool /*autoFinish*/) const
     } else {
         LOGE("fail to finish current context due to handler is nullptr");
     }
+}
+
+void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task)
+{
+    taskScheduler_.AddAfterLayoutTask(std::move(task));
 }
 
 } // namespace OHOS::Ace::NG

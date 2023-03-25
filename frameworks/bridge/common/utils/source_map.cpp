@@ -257,6 +257,11 @@ void RevSourceMap::MergeInit(const std::string& sourceMap,
         }
     }
 
+    if (curMapData->mappings_.empty()) {
+        LOGE("MergeInit decode sourcemap fail, mapping: %{public}s", sourceMap.c_str());
+        return;
+    }
+
     // transform to vector for mapping easily
     curMapData->mappings_ = HandleMappings(curMapData->mappings_[0]);
 
@@ -406,11 +411,20 @@ void RevSourceMap::StageModeSourceMapSplit(const std::string& sourceMap,
     std::string key;
     while ((leftBracket = sourceMap.find(": {", rightBracket)) != std::string::npos) {
         rightBracket = sourceMap.find("},", leftBracket);
+        if (rightBracket == std::string::npos) {
+            return;
+        }
         uint32_t subLeftBracket = leftBracket;
         uint32_t subRightBracket = rightBracket;
         value = sourceMap.substr(subLeftBracket + SOURCES_VAL, subRightBracket - subLeftBracket + BEFORE_ROW);
-        uint32_t sources = value.find("\"sources\": [");
-        uint32_t names = value.find("],");
+        std::size_t  sources = value.find("\"sources\": [");
+        if (sources == std::string::npos) {
+            continue;
+        }
+        std::size_t  names = value.find("],");
+        if (names == std::string::npos) {
+            continue;
+        }
         // Intercept the sourcemap file path as the key
         key = value.substr(sources + P0S_SPACE_LENGTH, names - sources - SPACE_LEN);
         RefPtr<RevSourceMap> curMapData = MakeRefPtr<RevSourceMap>();

@@ -660,6 +660,10 @@ void SwiperPattern::StartAutoPlay()
 
 void SwiperPattern::OnVisibleChange(bool isVisible)
 {
+    if (isInit_) {
+        return;
+    }
+
     if (isVisible) {
         isVisible_ = true;
         StartAutoPlay();
@@ -835,13 +839,15 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     int32_t nextIndex = currentIndex_;
     float start = currentOffset_;
     float end = 0.0f;
-    if (std::abs(dragVelocity) > MIN_TURN_PAGE_VELOCITY.ConvertToPx() &&
-        std::abs(currentOffset_) > MIN_DRAG_DISTANCE.ConvertToPx()) {
-        if (GreatNotEqual(dragVelocity * currentOffset_, 0.0)) {
-            auto intervalSize = static_cast<int32_t>(std::floor(std::abs(currentOffset_) / mainSize)) + 1;
-            end = GreatNotEqual(dragVelocity, 0.0) ? mainSize * intervalSize : -mainSize * intervalSize;
-            nextIndex = GreatNotEqual(dragVelocity, 0.0) ? (nextIndex - intervalSize) : (nextIndex + intervalSize);
-        }
+    if ((std::abs(dragVelocity) > MIN_TURN_PAGE_VELOCITY.ConvertToPx() &&
+            std::abs(currentOffset_) > MIN_DRAG_DISTANCE.ConvertToPx() &&
+            GreatNotEqual(dragVelocity * currentOffset_, 0.0)) ||
+        (std::abs(currentOffset_) > mainSize / 2 && std::abs(dragVelocity) <= MIN_TURN_PAGE_VELOCITY.ConvertToPx())) {
+        auto intervalSize = static_cast<int32_t>(std::floor(std::abs(currentOffset_) / mainSize)) + 1;
+        auto direction = GreatNotEqual(
+            std::abs(dragVelocity) > MIN_TURN_PAGE_VELOCITY.ConvertToPx() ? dragVelocity : currentOffset_, 0.0);
+        end = direction ? mainSize * intervalSize : -mainSize * intervalSize;
+        nextIndex = direction ? (nextIndex - intervalSize) : (nextIndex + intervalSize);
     }
 
     // Adjust next item index when loop and index is out of range.
@@ -1315,6 +1321,8 @@ void SwiperPattern::RegisterVisibleAreaChange()
     CHECK_NULL_VOID(host);
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+
+    pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }
 
@@ -1354,5 +1362,17 @@ void SwiperPattern::OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay)
     if (NeedAutoPlay()) {
         PostTranslateTask(delayTime);
     }
+}
+
+void SwiperPattern::OnWindowShow()
+{
+    isVisible_ = true;
+    StartAutoPlay();
+}
+
+void SwiperPattern::OnWindowHide()
+{
+    isVisible_ = false;
+    StopAutoPlay();
 }
 } // namespace OHOS::Ace::NG

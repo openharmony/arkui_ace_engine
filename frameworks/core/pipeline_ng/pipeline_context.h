@@ -21,7 +21,6 @@
 #include <list>
 #include <utility>
 
-#include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
 #include "base/memory/referenced.h"
 #include "core/common/frontend.h"
@@ -38,7 +37,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT PipelineContext final : public PipelineBase {
+class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
@@ -180,13 +179,11 @@ public:
 
     void AddPredictTask(PredictTask&& task);
 
+    void AddAfterLayoutTask(std::function<void()>&& task);
+
     void FlushDirtyNodeUpdate();
 
     void SetRootRect(double width, double height, double offset) override;
-
-    void SetGetViewSafeAreaImpl(std::function<SafeAreaEdgeInserts()>&& callback) override;
-
-    SafeAreaEdgeInserts GetCurrentViewSafeArea() const override;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 

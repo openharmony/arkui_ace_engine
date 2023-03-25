@@ -96,4 +96,10 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bo
         }));
 }
 
+RefPtr<LayoutWrapper> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
+{
+    Build();
+    return UINode::CreateLayoutWrapper(forceMeasure, forceLayout);
+}
+
 } // namespace OHOS::Ace::NG

@@ -289,7 +289,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
         wrapper->Layout();
         preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
-        preOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
+        preOffset +=
+            (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_ == 0 ? rightPadding : 0, 0) : OffsetF(0, bottomPadding));
     }
 
     // Layout items after current item.
@@ -304,7 +305,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         wrapper->Layout();
         nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width() + itemSpace, 0)
                                                 : OffsetF(0, maxChildSize_.Height() + itemSpace));
-        nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
+        nextOffset +=
+            (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_ == 0 ? rightPadding : 0, 0) : OffsetF(0, bottomPadding));
     }
 
     // Layout swiper indicator
@@ -348,7 +350,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 geometryNode->SetMarginFrameOffset(preOffset + paddingOffset);
                 lastWrapper->Layout();
                 preOffset -= (axis == Axis::HORIZONTAL ? OffsetF(itemSpace, 0) : OffsetF(0, itemSpace));
-                preOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
+                preOffset += (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_ == 0 ? rightPadding : 0, 0)
+                                                       : OffsetF(0, bottomPadding));
             }
         }
     } else if (currentIndex_ >= (totalCount_ - displayCount_) && LessOrEqual(currentOffset_, 0.0)) {
@@ -363,7 +366,8 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 firstWrapper->Layout();
                 nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width() + itemSpace, 0)
                                                         : OffsetF(0, maxChildSize_.Height() + itemSpace));
-                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(rightPadding, 0) : OffsetF(0, bottomPadding));
+                nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_ == 0 ? rightPadding : 0, 0)
+                                                        : OffsetF(0, bottomPadding));
             }
         }
     }
@@ -424,7 +428,7 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
             position.SetY((swiperHeight - indicatorHeight) * 0.5);
         }
     }
-    auto currentOffset = OffsetF{ static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
+    auto currentOffset = OffsetF { static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
     indicatorGeometryNode->SetMarginFrameOffset(currentOffset);
 }
 

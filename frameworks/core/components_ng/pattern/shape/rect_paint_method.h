@@ -37,10 +37,18 @@ public:
             return nullptr;
         }
         if (propertiesFromAncestor_) {
+            if (!rectPaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {
+                auto renderContext = paintWrapper->GetRenderContext();
+                renderContext->UpdateForegroundColor(propertiesFromAncestor_->GetFillValue());
+                renderContext->ResetForegroundColorStrategy();
+            }
             rectPaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
         }
         if (paintWrapper->HasForegroundColor()) {
+            rectPaintProperty->UpdateFill(paintWrapper->GetForegroundColor());
+        } else if (paintWrapper->HasForegroundColorStrategy()) {
             rectPaintProperty->UpdateFill(Color::FOREGROUND);
+            rectPaintProperty->ResetFillOpacity();
         }
         rect_.SetSize(paintWrapper->GetContentSize());
         rect_.SetOffset(paintWrapper->GetContentOffset());
