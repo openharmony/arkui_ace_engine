@@ -436,10 +436,16 @@ void RosenRenderContext::OnPixelStretchEffectUpdate(const PixStretchEffectOption
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f pixStretchVector;
-    pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
-        static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
-        static_cast<float>(option.bottom.ConvertToPx()));
-    rsNode_->SetPixelStretch(pixStretchVector);
+    if (option.IsPercentOption()) {
+        pixStretchVector.SetValues(static_cast<float>(option.left.Value()), static_cast<float>(option.top.Value()),
+            static_cast<float>(option.right.Value()), static_cast<float>(option.bottom.Value()));
+        rsNode_->SetPixelStretchPercent(pixStretchVector);
+    } else {
+        pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
+            static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
+            static_cast<float>(option.bottom.ConvertToPx()));
+        rsNode_->SetPixelStretch(pixStretchVector);
+    }
     RequestNextFrame();
 }
 
