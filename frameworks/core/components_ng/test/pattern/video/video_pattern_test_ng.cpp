@@ -84,6 +84,15 @@ constexpr float MAX_HEIGHT = 400.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 constexpr float VIDEO_WIDTH = 300.0f;
 constexpr float VIDEO_HEIGHT = 300.0f;
+constexpr float SCREEN_WIDTH_SMALL = 500.0f;
+constexpr float SCREEN_HEIGHT_SMALL = 1000.0f;
+constexpr float SCREEN_WIDTH_MEDIUM = 1000.0f;
+constexpr float SCREEN_HEIGHT_MEDIUM = 2000.0f;
+constexpr float SCREEN_WIDTH_LARGE = 1500.0f;
+constexpr float SCREEN_HEIGHT_LARGE = 2500.0f;
+const SizeF SCREEN_SIZE_SMALL(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
+const SizeF SCREEN_SIZE_MEDIUM(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
+const SizeF SCREEN_SIZE_LARGE(SCREEN_WIDTH_LARGE, SCREEN_HEIGHT_LARGE);
 const SizeF VIDEO_SIZE(VIDEO_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_GREATER_THAN_1(MAX_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
@@ -1207,5 +1216,86 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest015, TestSize.Level1)
     pattern->OnVisibleChange(false); // case: isPlaying_=true, hidden=true, mediaPlayer is null
     pattern->OnVisibleChange(true);  // case: isPlaying_=true, hidden=false, mediaPlayer is null
     EXPECT_FALSE(pattern->pastPlayingStatus_);
+}
+
+/**
+ * @tc.name: VideoFullScreenTest016
+ * @tc.desc: Create Video, and invoke its MeasureContent function to calculate the content size when it is fullscreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+
+    auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNodeTemp);
+    auto videoPatternTemp = AceType::DynamicCast<VideoPattern>(frameNodeTemp->GetPattern());
+    CHECK_NULL_VOID(videoPatternTemp);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
+    auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    EXPECT_FALSE(videoLayoutProperty == nullptr);
+
+    // Create LayoutWrapper and set videoLayoutAlgorithm.
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto videoPattern = frameNode->GetPattern<VideoPattern>();
+    EXPECT_FALSE(videoPattern == nullptr);
+    auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(videoLayoutAlgorithm == nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm));
+
+    videoPattern->FullScreen(); // will called onFullScreenChange(true)
+    EXPECT_TRUE(videoPattern->isFullScreen_);
+
+    // Test MeasureContent when it is fullScreen.
+    /**
+    //     corresponding ets code:
+    //         Video({ src: this.videoSrc, previewUri: this.previewUri, controller: this.controller })
+    //             .height(400).width(400)
+    */
+
+    // Set layout size.
+    LayoutConstraintF layoutConstraint;
+    videoLayoutProperty->UpdateVideoSize(VIDEO_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(VIDEO_SIZE);
+
+    /**
+     * @tc.steps: step2. change to full screen, check size.
+     * @tc.expected: step2. Video size is same to rootsize.
+     */
+    auto videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SCREEN_SIZE_MEDIUM);
+
+    // Change the root size to small
+    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SCREEN_SIZE_SMALL);
+
+    // Change the root size to large
+    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_LARGE, SCREEN_HEIGHT_LARGE);
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SCREEN_SIZE_LARGE);
+
+    /**
+     * @tc.steps: step3. change from full screen to normal size, check size.
+     * @tc.expected: step2. Video size is same to origional size.
+     */
+    videoPattern->ExitFullScreen(); // will called onFullScreenChange(true)
+    EXPECT_FALSE(videoPattern->isFullScreen_);
+
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SizeF(VIDEO_WIDTH, VIDEO_HEIGHT));
 }
 } // namespace OHOS::Ace::NG
