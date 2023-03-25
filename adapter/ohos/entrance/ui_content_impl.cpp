@@ -59,6 +59,7 @@
 #include "core/common/form_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
+#include "locale_config.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -440,7 +441,9 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         }
     } else {
         LOGI("Context is nullptr, set localeInfo to default");
-        AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+        AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         SystemProperties::SetColorMode(ColorMode::LIGHT);
     }
 

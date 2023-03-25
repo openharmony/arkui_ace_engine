@@ -32,6 +32,7 @@ class Want;
 
 namespace AppExecFwk {
 struct FormJsInfo;
+class Configuration;
 }
 
 namespace Ace {
@@ -62,6 +63,7 @@ public:
     void DeleteForm(const std::string& compId);
     void ReloadForm();
     bool IsEmpty();
+    void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
 private:
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;

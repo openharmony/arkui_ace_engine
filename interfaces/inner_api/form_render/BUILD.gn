@@ -48,6 +48,7 @@ ohos_shared_library("ace_form_render") {
   deps = [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:ability_manager",
