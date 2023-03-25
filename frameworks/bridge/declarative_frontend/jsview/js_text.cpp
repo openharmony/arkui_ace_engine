@@ -31,6 +31,7 @@
 #include "bridge/declarative_frontend/jsview/models/text_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/container.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -89,6 +90,14 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     }
     Dimension fontSize;
     if (!ParseJsDimensionFp(info[0], fontSize)) {
+        return;
+    }
+    if (fontSize.IsNegative() || fontSize.Unit() == DimensionUnit::PERCENT) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID_NOLOG(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID_NOLOG(theme);
+        TextModel::GetInstance()->SetFontSize(theme->GetTextStyle().GetFontSize());
         return;
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
