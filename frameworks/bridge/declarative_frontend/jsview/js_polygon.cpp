@@ -60,6 +60,11 @@ void JSPolygon::JSBind(BindingTarget globalObj)
     JSClass<JSPolygon>::StaticMethod("height", &JSShapeAbstract::JsHeight);
     JSClass<JSPolygon>::StaticMethod("points", &JSPolygon::JsPoints);
 
+    JSClass<JSPolygon>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSPolygon>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
+    JSClass<JSPolygon>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
+    JSClass<JSPolygon>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+
     JSClass<JSPolygon>::Inherit<JSShapeAbstract>();
     JSClass<JSPolygon>::Bind(globalObj);
 }
