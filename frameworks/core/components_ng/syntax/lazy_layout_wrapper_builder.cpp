@@ -187,7 +187,7 @@ RefPtr<LayoutWrapper> LazyLayoutWrapperBuilder::OnGetOrCreateWrapperByIndexLegac
         // convert index to real index.
         int32_t realIndex = index;
         if (lazySwiper_ && index >= totalCount) {
-            realIndex = index % totalCount;
+            realIndex -= totalCount;
         }
         // create frame node.
         auto itemInfo = builder_->CreateChildByIndex(realIndex);
