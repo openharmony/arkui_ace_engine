@@ -29,7 +29,6 @@ enable_standard_input = false
 video_components_support = false
 web_components_support = false
 preview_support = true
-use_external_icu = "shared"
 defines = []
 
 if (defined(web_components_support) && web_components_support) {
