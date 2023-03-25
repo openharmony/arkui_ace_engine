@@ -1118,6 +1118,14 @@ void TextFieldPattern::HandleOnCopy()
         LOGW("Copy option not allowed");
         return;
     }
+    if (layoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD) {
+        LOGW("Cannot copy in password mode");
+        selectionMode_ = SelectionMode::NONE;
+        textEditingValue_.caretPosition = textSelector_.GetEnd();
+        UpdateSelection(textEditingValue_.caretPosition);
+        StartTwinkling();
+        return;
+    }
     if (!InSelectMode() || (textSelector_.IsValid() && textSelector_.GetStart() == textSelector_.GetEnd())) {
         LOGW("Nothing to select");
         return;
