@@ -4185,6 +4185,7 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
+        ViewPU.aceTraceBegin("ViewPU.viewPropertyHasChanged", `${this.constructor.name}`, `${varName}`, `${dependentElmtIds.size}`);
         
         this.syncInstanceId();
         if (dependentElmtIds.size && !this.isFirstRender()) {
@@ -4204,6 +4205,7 @@ class ViewPU extends NativeViewPartialUpdate {
             cb.call(this, varName);
         }
         this.restoreInstanceId();
+        ViewPU.aceTraceEnd();
     }
     /**
      * Function to be called from the constructor of the sub component

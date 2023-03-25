@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <list>
+#include <memory>
 #include <string>
 
 #include "base/log/ace_scoring_log.h"
@@ -313,6 +314,9 @@ public:
     static void ConstructorCallback(const JSCallbackInfo& args);
     static void DestructorCallback(JSViewPartialUpdate* instance);
 
+    static void JSAceTraceBegin(const JSCallbackInfo& info);
+    static void JSAceTraceEnd(const JSCallbackInfo& info);
+
     // public functions added by partial update added below ==================
 
     /**
@@ -399,6 +403,8 @@ private:
     JSRef<JSObject> jsViewObject_;
 
     std::string jsViewName;
+
+    static std::unique_ptr<AceScopedTrace> aceScopedTrace_;
 };
 
 } // namespace OHOS::Ace::Framework

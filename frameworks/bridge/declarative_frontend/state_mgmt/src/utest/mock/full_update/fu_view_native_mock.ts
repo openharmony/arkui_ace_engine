@@ -48,4 +48,12 @@ abstract class NativeViewFullUpdate {
     console.warn("NativeView(Mock).getCardId() -  unimplemented!");
     return -1;
   }
+
+  static aceTraceBegin(...args:string[]): void {
+    console.log("NativeView(Mock).aceTraceBegin() -  unimplemented!");
+  }
+
+  static aceTraceEnd(): void {
+    console.log("NativeView(Mock).aceTraceEnd() -  unimplemented!");
+  }
 }

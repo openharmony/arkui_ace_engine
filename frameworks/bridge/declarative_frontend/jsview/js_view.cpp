@@ -530,6 +530,7 @@ void JSViewFullUpdate::ChildAccessedById(const std::string& viewId)
 // =================================================================
 
 std::map<std::string, JSRef<JSObject>> JSViewStackProcessor::viewMap_;
+std::unique_ptr<AceScopedTrace> JSViewPartialUpdate::aceScopedTrace_ = nullptr;
 
 JSViewPartialUpdate::JSViewPartialUpdate(JSRef<JSObject> jsViewObject)
 {
@@ -753,6 +754,8 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("isFirstRender", &JSViewPartialUpdate::IsFirstRender);
     JSClass<JSViewPartialUpdate>::CustomMethod(
         "findChildByIdForPreview", &JSViewPartialUpdate::FindChildByIdForPreview);
+    JSClass<JSViewPartialUpdate>::StaticMethod("aceTraceBegin", &JSViewPartialUpdate::JSAceTraceBegin);
+    JSClass<JSViewPartialUpdate>::StaticMethod("aceTraceEnd", &JSViewPartialUpdate::JSAceTraceEnd);
     JSClass<JSViewPartialUpdate>::Inherit<JSViewAbstract>();
     JSClass<JSViewPartialUpdate>::Bind(object, ConstructorCallback, DestructorCallback);
 }
@@ -868,6 +871,33 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     JSRef<JSObject> targetView = Framework::JSViewStackProcessor::GetViewById(viewId);
     info.SetReturnValue(targetView);
     return;
+}
+
+void JSViewPartialUpdate::JSAceTraceBegin(const JSCallbackInfo& info)
+{
+    if (!SystemProperties::GetDebugEnabled()) {
+        return;
+    }
+    std::string traceName;
+    auto length = info.Length();
+    for (int32_t i = 0; i < length; i++) {
+        if (!info[i]->IsString()) {
+            continue;
+        }
+        traceName += info[i]->ToString();
+        if (i != length - 1) {
+            traceName += " ";
+        }
+    }
+    aceScopedTrace_ = std::make_unique<AceScopedTrace>(traceName.c_str());
+}
+
+void JSViewPartialUpdate::JSAceTraceEnd(const JSCallbackInfo& info)
+{
+    if (!SystemProperties::GetDebugEnabled()) {
+        return;
+    }
+    aceScopedTrace_.reset();
 }
 
 } // namespace OHOS::Ace::Framework

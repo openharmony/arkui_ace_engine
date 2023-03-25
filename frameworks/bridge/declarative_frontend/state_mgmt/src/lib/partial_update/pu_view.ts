@@ -323,6 +323,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
+    ViewPU.aceTraceBegin("ViewPU.viewPropertyHasChanged", `${this.constructor.name}`, `${varName}`, `${dependentElmtIds.size}`);
     stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
     this.syncInstanceId();
 
@@ -345,6 +346,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     this.restoreInstanceId();
+    ViewPU.aceTraceEnd();
   }
 
   /**
