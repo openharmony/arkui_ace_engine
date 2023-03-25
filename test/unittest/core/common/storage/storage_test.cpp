@@ -14,10 +14,10 @@
  */
 
 #include "gtest/gtest.h"
+#include "mock_storage.h"
 
 #include "base/utils/utils.h"
 #include "core/common/storage/storage_proxy.h"
-#include "core/common/test/unittest/storage/mock_storage.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -55,11 +55,11 @@ HWTEST_F(StorageTest, CastToStorageTest001, TestSize.Level1)
     EXPECT_EQ(secondTestGetInstance, firstTestGetInstance);
 }
 
-    /**
-     * @tc.name: CastToStorageTest002
-     * @tc.desc: Test cast to storage.
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: CastToStorageTest002
+ * @tc.desc: Test cast to storage.
+ * @tc.type: FUNC
+ */
 HWTEST_F(StorageTest, CastToStorageTest002, TestSize.Level1)
 {
     /**
@@ -75,11 +75,11 @@ HWTEST_F(StorageTest, CastToStorageTest002, TestSize.Level1)
     EXPECT_EQ(stroage, nullptr);
 }
 
-    /**
-     * @tc.name: CastToStorageTest003
-     * @tc.desc: Test cast to storage.
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: CastToStorageTest003
+ * @tc.desc: Test cast to storage.
+ * @tc.type: FUNC
+ */
 HWTEST_F(StorageTest, CastToStorageTest003, TestSize.Level1)
 {
     /**
@@ -89,22 +89,19 @@ HWTEST_F(StorageTest, CastToStorageTest003, TestSize.Level1)
      */
     StorageProxy::GetInstance()->SetDistributedDelegate(nullptr);
 
-    auto notifier = [](const std::string& onlineStatus) {
-        return;
-    };
+    auto notifier = [](const std::string& onlineStatus) { return; };
     RefPtr<TaskExecutor> taskExecutor;
     std::string testSessionId = "testGetStorage";
-    RefPtr<Storage> distributedStorage =
-        StorageProxy::GetInstance()->GetStorage(testSessionId, notifier, taskExecutor);
+    RefPtr<Storage> distributedStorage = StorageProxy::GetInstance()->GetStorage(testSessionId, notifier, taskExecutor);
 
     EXPECT_EQ(distributedStorage, nullptr);
 }
 
-    /**
-     * @tc.name: CastToStorageTest004
-     * @tc.desc: Test cast to storage.
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: CastToStorageTest004
+ * @tc.desc: Test cast to storage.
+ * @tc.type: FUNC
+ */
 HWTEST_F(StorageTest, CastToStorageTest004, TestSize.Level1)
 {
     /**
@@ -117,16 +114,16 @@ HWTEST_F(StorageTest, CastToStorageTest004, TestSize.Level1)
     RefPtr<TaskExecutor> taskExecutor;
     RefPtr<Storage> stroage = StorageProxy::GetInstance()->GetStorage(taskExecutor);
     EXPECT_NE(stroage, nullptr);
-    
+
     std::string testString = stroage->GetString("test");
     EXPECT_EQ(testString, FALSE_TEST);
 }
 
-    /**
-     * @tc.name: CastToStorageTest005
-     * @tc.desc: Test cast to storage.
-     * @tc.type: FUNC
-     */
+/**
+ * @tc.name: CastToStorageTest005
+ * @tc.desc: Test cast to storage.
+ * @tc.type: FUNC
+ */
 HWTEST_F(StorageTest, CastToStorageTest005, TestSize.Level1)
 {
     /**
@@ -135,15 +132,13 @@ HWTEST_F(StorageTest, CastToStorageTest005, TestSize.Level1)
      * @tc.expected: step2. the return storage is not null, and the GetString function is ok.
      */
     StorageProxy::GetInstance()->SetDistributedDelegate(std::make_unique<MockDistributedStorageProxyImpl>());
-    
-    auto notifier = [](const std::string& onlineStatus) {
-        return;
-    };
+
+    auto notifier = [](const std::string& onlineStatus) { return; };
     RefPtr<TaskExecutor> taskExecutor;
     std::string testSessionId = "testGetStorage";
     RefPtr<Storage> distributedStorage = StorageProxy::GetInstance()->GetStorage(testSessionId, notifier, taskExecutor);
     EXPECT_NE(distributedStorage, nullptr);
-    
+
     std::string testString = distributedStorage->GetString("test");
     EXPECT_EQ(testString, FALSE_TEST);
 }

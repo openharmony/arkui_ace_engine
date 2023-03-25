@@ -14,11 +14,11 @@
  */
 
 #include "gtest/gtest.h"
+#include "mock_environment.h"
 
 #include "core/common/environment/environment.h"
 #include "core/common/environment/environment_interface.h"
 #include "core/common/environment/environment_proxy.h"
-#include "core/common/test/unittest/environment/mock_environment.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -44,13 +44,13 @@ HWTEST_F(EnvironmentTest, CastToEnvironmentTest001, TestSize.Level1)
      * @tc.steps: step1. Call GetInstance first.
      * @tc.expected: step1. The return value is not null.
      */
-    EnvironmentProxy * firstResult = EnvironmentProxy::GetInstance();
+    EnvironmentProxy* firstResult = EnvironmentProxy::GetInstance();
     EXPECT_NE(firstResult, nullptr);
     /**
      * @tc.steps: step2. Call GetInstance second.
      * @tc.expected: step2. The return value is same with first.
      */
-    EnvironmentProxy * secondResult = EnvironmentProxy::GetInstance();
+    EnvironmentProxy* secondResult = EnvironmentProxy::GetInstance();
     EXPECT_EQ(secondResult, firstResult);
 }
 

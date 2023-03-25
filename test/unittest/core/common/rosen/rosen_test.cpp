@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #define private public
 #define protected public
 #include "core/common/rosen/rosen_asset_manager.h"
@@ -23,23 +23,23 @@
 #include "core/common/rosen/rosen_window.h"
 #undef private
 #undef protected
+#include "mock_rosen.h"
 #include "test/mock/core/common/mock_container.h"
 
 #include "core/components/plugin/file_asset_provider.h"
 #include "core/pipeline/base/render_node.h"
-#include "core/common/test/unittest/rosen/mock_rosen.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-    const std::string RET_TEST = "error";
-    const std::string HAPPATTH = "/system/app/com.ohos.photos/Photos.hap";
-    const std::string ASSETBASEPATHS = "/resources/base/profile/";
-    uint64_t nanoTimestamp_ = 0;
-    uint32_t frameCount_ = 0;
-    AceVsyncCallback callback_;
+const std::string RET_TEST = "error";
+const std::string HAPPATTH = "/system/app/com.ohos.photos/Photos.hap";
+const std::string ASSETBASEPATHS = "/resources/base/profile/";
+uint64_t nanoTimestamp_ = 0;
+uint32_t frameCount_ = 0;
+AceVsyncCallback callback_;
 } // namespace
 
 class RosenTest : public testing::Test {
@@ -267,7 +267,7 @@ HWTEST_F(RosenTest, CastToRosenTest005, TestSize.Level1)
  * @tc.desc: Test cast to rosen.
  * @tc.type: FUNC
  */
-    HWTEST_F(RosenTest, CastToRosenTest006, TestSize.Level1)
+HWTEST_F(RosenTest, CastToRosenTest006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. callback GetRosenBlurStyleValue.The blurStyleOption parameter is new value.
@@ -363,12 +363,8 @@ HWTEST_F(RosenTest, CastToRosenTest008, TestSize.Level1)
      */
     std::string hapPath = "test";
     auto assetProvider = AceType::MakeRefPtr<MockAssetProvider>();
-    EXPECT_CALL(*assetProvider, IsValid())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*assetProvider, GetAssetPath(hapPath, true))
-        .Times(1)
-        .WillOnce(Return("test"));
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*assetProvider, GetAssetPath(hapPath, true)).Times(1).WillOnce(Return("test"));
     object.PushBack(std::move(assetProvider));
     std::string result = object.GetAssetPath(hapPath, true);
     EXPECT_EQ(result, "test");
@@ -390,11 +386,8 @@ HWTEST_F(RosenTest, CastToRosenTest009, TestSize.Level1)
     std::string path = RET_TEST;
     std::vector<std::string> assetList;
     auto assetProvider = AceType::MakeRefPtr<MockAssetProvider>();
-    EXPECT_CALL(*assetProvider, IsValid())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*assetProvider, GetAssetList(path, assetList))
-        .WillOnce(Return());
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*assetProvider, GetAssetList(path, assetList)).WillOnce(Return());
     object.PushBack(std::move(assetProvider));
     object.GetAssetList(path, assetList);
     EXPECT_TRUE(assetList.empty());
@@ -414,11 +407,7 @@ HWTEST_F(RosenTest, CastToRosenTest0010, TestSize.Level1)
      */
     RSAssetManager object;
     std::string hapPath = "test";
-    MediaFileInfo fileInfo = { .fileName = hapPath,
-        .offset = 1,
-        .length = 1,
-        .lastModTime = 1,
-        .lastModDate = 1 };
+    MediaFileInfo fileInfo = { .fileName = hapPath, .offset = 1, .length = 1, .lastModTime = 1, .lastModDate = 1 };
     auto assetProvider = AceType::MakeRefPtr<Plugin::FileAssetProvider>();
     std::vector<std::string> assetBasePaths;
     assetBasePaths.push_back("resources/base/profile/");
@@ -469,15 +458,11 @@ HWTEST_F(RosenTest, CastToRosenTest0012, TestSize.Level1)
     RSAssetManager object;
     std::string hapPath = "core/common/test/unittest/rosen/BUILD.gn";
     auto assetProvider = AceType::MakeRefPtr<MockAssetProvider>();
-    EXPECT_CALL(*assetProvider, IsValid())
-        .Times(1)
-        .WillOnce(Return(true));
-    EXPECT_CALL(*assetProvider, GetAsset(hapPath))
-        .Times(1)
-        .WillOnce(Return(nullptr));
+    EXPECT_CALL(*assetProvider, IsValid()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*assetProvider, GetAsset(hapPath)).Times(1).WillOnce(Return(nullptr));
     assetProvider->GetAsset(hapPath);
     object.PushBack(std::move(assetProvider));
     auto ret = object.GetAsset(hapPath);
     EXPECT_EQ(ret, nullptr);
 }
-}
+} // namespace OHOS::Ace

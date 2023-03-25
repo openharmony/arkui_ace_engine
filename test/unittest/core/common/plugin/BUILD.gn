@@ -1,4 +1,4 @@
-# Copyright (c) 2023 iSoftStone Information Technology (Group) Co.,Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,34 +14,32 @@
 import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-module_output_path = "ace_engine/backenduicomponent/storage"
+ohos_unittest("plugin_manager_test") {
+  module_out_path = "$basic_test_output_path/common"
 
-ohos_unittest("StorageTest") {
-  module_out_path = module_output_path
-  defines = [ "JS_JDWP_CONNECT" ]
-
-  sources = [
-    #test main
-    "storage_test.cpp",
-
-    #test object
-    "$ace_root/frameworks/core/common/storage/storage_proxy.cpp",
-
-    #mock
-    "$ace_root/test/mock/core/common/mock_container.cpp",
+  include_dirs = [
+    "//foundation/window/window_manager/interfaces/innerkits",
+    "//third_party/flutter/engine/",
   ]
+
+  sources = [ "plugin_manager_test.cpp" ]
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 
   deps = [
-    "$ace_root/adapter/ohos/osal:ace_osal_ohos",
-    "$ace_root/frameworks/base:ace_base_ohos",
+    "$ability_runtime_path/frameworks/native/ability/native:abilitykit_native",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+    "$ace_root/build:ace_ohos_unittest_base",
     "//third_party/googletest:gmock_main",
   ]
-}
 
-group("unittest") {
-  testonly = true
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "eventhandler:libeventhandler",
+  ]
 
-  deps = [ ":StorageTest" ]
+  part_name = ace_engine_part
 }
