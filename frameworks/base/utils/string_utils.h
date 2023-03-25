@@ -213,27 +213,33 @@ inline float StringToFloat(const std::string& value)
     }
 }
 
-inline Dimension StringToDimensionWithUnit(const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX)
+inline Dimension StringToDimensionWithUnit(
+    const std::string& value, DimensionUnit defaultUnit = DimensionUnit::PX, float defaultValue = 0.0f)
 {
     errno = 0;
     if (std::strcmp(value.c_str(), "auto") == 0) {
-        return Dimension(0, DimensionUnit::AUTO);
+        return Dimension(defaultValue, DimensionUnit::AUTO);
     }
     char* pEnd = nullptr;
     double result = std::strtod(value.c_str(), &pEnd);
     if (pEnd == value.c_str() || errno == ERANGE) {
-        return Dimension(0.0, defaultUnit);
-    } else if (pEnd != nullptr) {
+        return Dimension(defaultValue, defaultUnit);
+    }
+    if (pEnd != nullptr) {
         if (std::strcmp(pEnd, "%") == 0) {
             // Parse percent, transfer from [0, 100] to [0, 1]
             return Dimension(result / 100.0, DimensionUnit::PERCENT);
-        } else if (std::strcmp(pEnd, "px") == 0) {
+        }
+        if (std::strcmp(pEnd, "px") == 0) {
             return Dimension(result, DimensionUnit::PX);
-        } else if (std::strcmp(pEnd, "vp") == 0) {
+        }
+        if (std::strcmp(pEnd, "vp") == 0) {
             return Dimension(result, DimensionUnit::VP);
-        } else if (std::strcmp(pEnd, "fp") == 0) {
+        }
+        if (std::strcmp(pEnd, "fp") == 0) {
             return Dimension(result, DimensionUnit::FP);
-        } else if ((pEnd) && (std::strcmp(pEnd, "lpx") == 0)) {
+        }
+        if ((pEnd) && (std::strcmp(pEnd, "lpx") == 0)) {
             return Dimension(result, DimensionUnit::LPX);
         }
     }

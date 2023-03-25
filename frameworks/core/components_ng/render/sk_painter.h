@@ -31,7 +31,7 @@ public:
     SkPainter() = default;
     ~SkPainter() = default;
     static void DrawPath(RSCanvas& canvas, const std::string& commands, const ShapePaintProperty& shapePaintProperty);
-    static void SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty);
+    static bool SetPen(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty);
     static void SetBrush(SkPaint& skPaint, const ShapePaintProperty& shapePaintProperty);
 };
 
