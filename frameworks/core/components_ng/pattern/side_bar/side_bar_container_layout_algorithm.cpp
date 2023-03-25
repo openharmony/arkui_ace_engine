@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 4;
+constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 32.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_LEFT = 16.0_vp;
@@ -36,13 +36,16 @@ constexpr Dimension DEFAULT_MAX_SIDE_BAR_WIDTH = 280.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
+constexpr static int INDEX_CONTRON_BUTTON = 1;
+constexpr static int INDEX_DIVIDER = 2;
+constexpr static int INDEX_SIDE_BAR = 3;
 } // namespace
 
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 4.");
+        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
         return;
     }
 
@@ -59,18 +62,31 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         InitRealSideBarWidth(layoutWrapper, parentWidth);
     }
 
-    auto begin = children.begin();
-    auto sideBarLayoutWrapper = *(++begin);
-    MeasureSideBar(layoutProperty, sideBarLayoutWrapper);
+    /*
+     * child inverted order is: controlbutton, divider, sidebar, contentxxx, ..., content2, content1
+     * content only display the first one, use itor from end
+     */
+    int index = 0;
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        index++;
+        if (index == INDEX_CONTRON_BUTTON) {
+            auto imgLayoutWrapper = (*it);
+            MeasureControlButton(layoutProperty, imgLayoutWrapper, parentWidth);
+        } else if (index == INDEX_DIVIDER) {
+            auto dividerLayoutWrapper = (*it);
+            MeasureDivider(layoutProperty, dividerLayoutWrapper, parentWidth);
+        } else if (index == INDEX_SIDE_BAR) {
+            auto sideBarLayoutWrapper = (*it);
+            MeasureSideBar(layoutProperty, sideBarLayoutWrapper);
+        } else { // other break
+            break;
+        }
+    }
 
-    auto dividerLayoutWrapper = *(++begin);
-    MeasureDivider(layoutProperty, dividerLayoutWrapper, parentWidth);
-
-    auto contentLayoutWrapper = children.front();
-    MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
-
-    auto imgLayoutWrapper = children.back();
-    MeasureControlButton(layoutProperty, imgLayoutWrapper, parentWidth);
+    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
+        auto contentLayoutWrapper = children.front();
+        MeasureSideBarContent(layoutProperty, contentLayoutWrapper, parentWidth);
+    }
 }
 
 void SideBarContainerLayoutAlgorithm::InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth)
@@ -191,20 +207,31 @@ void SideBarContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
-        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 4.");
+        LOGE("SideBarContainerLayoutAlgorithm::Measure, children is less than 3.");
         return;
     }
 
-    auto controlButtonLayoutWrapper = children.back();
-    auto begin = children.begin();
-    auto sideBarLayoutWrapper = *(++begin);
-    auto dividerLayoutWrapper = *(++begin);
-    auto contentLayoutWrapper = children.front();
+    int index = 0;
+    for (auto it = children.rbegin(); it != children.rend(); ++it) {
+        index++;
+        if (index == INDEX_CONTRON_BUTTON) {
+            auto controlButtonLayoutWrapper = (*it);
+            LayoutControlButton(layoutWrapper, controlButtonLayoutWrapper);
+        } else if (index == INDEX_DIVIDER) {
+            auto dividerLayoutWrapper = (*it);
+            LayoutDivider(layoutWrapper, dividerLayoutWrapper);
+        } else if (index == INDEX_SIDE_BAR) {
+            auto sideBarLayoutWrapper = (*it);
+            LayoutSideBar(layoutWrapper, sideBarLayoutWrapper);
+        } else { // other break
+            break;
+        }
+    }
 
-    LayoutControlButton(layoutWrapper, controlButtonLayoutWrapper);
-    LayoutSideBar(layoutWrapper, sideBarLayoutWrapper);
-    LayoutDivider(layoutWrapper, dividerLayoutWrapper);
-    LayoutSideBarContent(layoutWrapper, contentLayoutWrapper);
+    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE) { // when sidebar only add one component, content is not display
+        auto contentLayoutWrapper = children.front();
+        LayoutSideBarContent(layoutWrapper, contentLayoutWrapper);
+    }
 }
 
 void SideBarContainerLayoutAlgorithm::LayoutControlButton(
