@@ -13,5 +13,8 @@
 
 group("accessibility_unittest") {
   testonly = true
-  deps = [ "accessibilityutils:accessibility_utils_test_ng" ]
+  deps = [
+    "accessibilitynode:accessibility_node_test_ng",
+    "accessibilityutils:accessibility_utils_test_ng",
+  ]
 }
