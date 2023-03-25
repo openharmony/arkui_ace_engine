@@ -32,7 +32,7 @@ var Color;
 
 var ColoringStrategy;
 (function (ColoringStrategy){
-  ColoringStrategy["Invert"] = "Invert";
+  ColoringStrategy["INVERT"] = "Invert";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;
