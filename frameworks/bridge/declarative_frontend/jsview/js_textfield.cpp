@@ -470,6 +470,11 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
 }
 
+void JSTextField::RequestKeyboardOnFocus(bool needToRequest)
+{
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
+}
+
 void JSTextField::SetFontWeight(const std::string& value)
 {
     TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));

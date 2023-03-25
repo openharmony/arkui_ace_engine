@@ -203,6 +203,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     textRect_ = textFieldLayoutAlgorithm->GetTextRect();
     imageRect_ = textFieldLayoutAlgorithm->GetImageRect();
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
+    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     auto textRectNotNeedToChange = UpdateCaretPosition();
     UpdateCaretInfoToController();
     if (needToRefreshSelectOverlay_) {
@@ -826,6 +827,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     if (caretUpdateType_ != CaretUpdateType::PRESSED) {
+        needToRequestKeyboardInner_ = true;
         caretUpdateType_ = CaretUpdateType::EVENT;
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
@@ -1579,8 +1581,7 @@ void TextFieldPattern::OnModifyDone()
     auto maxLength = GetMaxLength();
     if (GreatOrEqual(textWidth, maxLength)) {
         textEditingValue_.text = StringUtils::ToString(textEditingValue_.GetWideText().substr(0, maxLength));
-        textEditingValue_.caretPosition =
-            std::clamp(textEditingValue_.caretPosition, 0, textWidth);
+        textEditingValue_.caretPosition = std::clamp(textEditingValue_.caretPosition, 0, textWidth);
         SetEditingValueToProperty(textEditingValue_.text);
     }
     FireOnChangeIfNeeded();
@@ -2686,7 +2687,6 @@ void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSel
 
 void TextFieldPattern::OnAreaChangedInner()
 {
-    CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -2694,17 +2694,37 @@ void TextFieldPattern::OnAreaChangedInner()
     auto parentGlobalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
+        UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+        CHECK_NULL_VOID_NOLOG(SelectOverlayIsOn());
         textSelector_.selectionBaseOffset.SetX(CalcCursorOffsetByPosition(textSelector_.GetStart()).offset.GetX());
         textSelector_.selectionDestinationOffset.SetX(CalcCursorOffsetByPosition(textSelector_.GetEnd()).offset.GetX());
         UpdateSelection(textSelector_.GetStart(), textSelector_.GetEnd());
         if (isSingleHandle_) {
             CloseSelectOverlay();
             CreateSingleHandle();
+            RequestKeyboardOnFocus();
             return;
         }
         ProcessOverlay();
         selectionMode_ = SelectionMode::SELECT;
     }
+    RequestKeyboardOnFocus();
+}
+
+void TextFieldPattern::RequestKeyboardOnFocus()
+{
+    if (!needToRequestKeyboardOnFocus_ || !needToRequestKeyboardInner_) {
+        return;
+    }
+    LOGI("RequestKeyboardOnFocus");
+    if (!RequestKeyboard(false, true, true)) {
+        return;
+    }
+    LOGI("RequestKeyboardOnFocus ok, reset flag");
+    auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnEditChanged(true);
+    needToRequestKeyboardInner_ = false;
 }
 
 void TextFieldPattern::OnVisibleChange(bool isVisible)

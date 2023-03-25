@@ -128,6 +128,14 @@ void TextFieldModelNG::SetWidthAuto(bool isAuto)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, isAuto);
 }
 
+void TextFieldModelNG::RequestKeyboardOnFocus(bool needToRequest)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
+}
+
 void TextFieldModelNG::SetType(TextInputType value)
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
