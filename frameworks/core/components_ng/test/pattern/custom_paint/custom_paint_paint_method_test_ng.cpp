@@ -733,7 +733,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg015, TestSize
 }
 
 /**
- * @tc.name: CustomPaintPaintMethodTestNg015
+ * @tc.name: CustomPaintPaintMethodTestNg016
  * @tc.desc: Test the functions Arc of CustomPaintPaintMethod.
  * @tc.type: FUNC
  */
@@ -808,7 +808,7 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg016, TestSize
 }
 
 /**
- * @tc.name: CustomPaintPaintMethodTestNg015
+ * @tc.name: CustomPaintPaintMethodTestNg017
  * @tc.desc: Test the functions Path2DArc of CustomPaintPaintMethod.
  * @tc.type: FUNC
  */
@@ -880,5 +880,171 @@ HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg017, TestSize
     paintMethod->Path2DArc(offset, param);
     results = std::fmod(sweepAngle, FULL_CIRCLE_ANGLE) - FULL_CIRCLE_ANGLE;
     EXPECT_DOUBLE_EQ(results, - FULL_CIRCLE_ANGLE);
+}
+
+/**
+ * @tc.name: CustomPaintPaintMethodTestNg018
+ * @tc.desc: Test the functions Ellipse of CustomPaintPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg018, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateCanvasPaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    SizeF frameSize;
+    CreateBitmap(frameSize, paintMethod);
+
+    /**
+     * @tc.steps2: Test the function Ellipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    PaintWrapper* paintWrapper;
+    EllipseParam param;
+    param.startAngle = 1.5 * M_PI;    // start angle of the Ellipse
+    param.endAngle = 3.5 * M_PI;
+    double startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    double endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    double sweepAngle = endAngle - startAngle;
+    paintMethod->Ellipse(paintWrapper, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, DEFAULT_DOUBLE0);
+
+    /**
+     * @tc.steps3: Test the function Ellipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.startAngle = 3.5 * M_PI;    // start angle of the Ellipse
+    param.endAngle = 1.3 * M_PI;
+    startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    sweepAngle = endAngle - startAngle;
+    paintMethod->Ellipse(paintWrapper, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, SPECIAL2_CIRCLE_ANGLE);
+
+    /**
+     * @tc.steps4: Test the function Ellipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.anticlockwise = true;
+    param.startAngle = -1.5 * M_PI;    // start angle of the Ellipse
+    param.endAngle = -3.5 * M_PI;
+    startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    sweepAngle = endAngle - startAngle;
+    paintMethod->Ellipse(paintWrapper, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, DEFAULT_DOUBLE0);
+
+    /**
+     * @tc.steps5: Test the function Ellipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.anticlockwise = true;
+    param.rotation = 1.0;
+    param.startAngle = -5.5 * M_PI;    // start angle of the Ellipse
+    param.endAngle = -2.5 * M_PI;
+    startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    sweepAngle = endAngle - startAngle;
+    paintMethod->Ellipse(paintWrapper, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, HALF_CIRCLE_ANGLE);
+
+    /**
+     * @tc.steps6: Test the function Ellipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    param.anticlockwise = true;
+    param.startAngle = 1.5 * M_PI;    // start angle of the Ellipse
+    param.endAngle = 1.5 * M_PI;
+    startAngle = std::fmod(param.startAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = std::fmod(param.endAngle, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    sweepAngle = endAngle - startAngle;
+    paintMethod->Ellipse(paintWrapper, param);
+    EXPECT_DOUBLE_EQ(sweepAngle, DEFAULT_DOUBLE0);
+}
+
+/**
+ * @tc.name: CustomPaintPaintMethodTestNg019
+ * @tc.desc: Test the functions Path2DEllipse of CustomPaintPaintMethod.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomPaintPaintMethodTestNg, CustomPaintPaintMethodTestNg019, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    auto paintMethod = CreateCanvasPaintMethod();
+    ASSERT_NE(paintMethod, nullptr);
+    SizeF frameSize;
+    CreateBitmap(frameSize, paintMethod);
+
+    /**
+     * @tc.steps2: Test the function Path2DEllipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    OffsetF offset;
+    PathArgs args;
+    args.para6 = 1.5 * M_PI;    // start angle of the Ellipse
+    args.para7 = 3.5 * M_PI;
+    double startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    double endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    double sweepAngle = endAngle - startAngle;
+    paintMethod->Path2DEllipse(offset, args);
+    EXPECT_DOUBLE_EQ(sweepAngle, DEFAULT_DOUBLE0);
+
+    /**
+     * @tc.steps3: Test the function Path2DEllipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    args.para6 = 3.5 * M_PI;    // start angle of the Ellipse
+    args.para7 = 1.3 * M_PI;
+    startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    sweepAngle = endAngle - startAngle;
+    paintMethod->Path2DEllipse(offset, args);
+    EXPECT_DOUBLE_EQ(sweepAngle, SPECIAL2_CIRCLE_ANGLE);
+
+    /**
+     * @tc.steps4: Test the function Path2DEllipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    args.para8 = true;
+    args.para6 = -1.5 * M_PI;    // start angle of the Ellipse
+    args.para7 = -3.5 * M_PI;
+    startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    sweepAngle = endAngle - startAngle;
+    paintMethod->Path2DEllipse(offset, args);
+    EXPECT_DOUBLE_EQ(sweepAngle, DEFAULT_DOUBLE0);
+
+    /**
+     * @tc.steps5: Test the function Path2DEllipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    args.para8 = true;
+    args.para5 = 1.0;
+    args.para6 = -5.5 * M_PI;    // start angle of the Ellipse
+    args.para7 = -2.5 * M_PI;
+    startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    sweepAngle = endAngle - startAngle;
+    paintMethod->Path2DEllipse(offset, args);
+    EXPECT_DOUBLE_EQ(sweepAngle, HALF_CIRCLE_ANGLE);
+
+    /**
+     * @tc.steps6: Test the function Path2DEllipse with angle.
+     * @tc.expected: The value of angle is true.
+     */
+    args.para8 = true;
+    args.para6 = 1.5 * M_PI;    // start angle of the Ellipse
+    args.para7 = 1.5 * M_PI;
+    startAngle = std::fmod(args.para6, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    endAngle = std::fmod(args.para7, M_PI * 2.0) * HALF_CIRCLE_ANGLE / M_PI;
+    sweepAngle = endAngle - startAngle;
+    paintMethod->Path2DEllipse(offset, args);
+    EXPECT_DOUBLE_EQ(sweepAngle, DEFAULT_DOUBLE0);
 }
 } // namespace OHOS::Ace::NG
