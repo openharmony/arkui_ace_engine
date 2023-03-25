@@ -142,6 +142,48 @@ void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
     InitInActiveItems(translateLength);
 }
 
+void SwiperLayoutAlgorithm::LoopMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
+    Axis axis, float& crossSize, float& mainSize)
+{
+    auto loopIndex = currentIndex_ - 1;
+    std::list<int32_t> preItems;
+    while (loopIndex >= 0 && itemRange_.find(loopIndex) != itemRange_.end()) {
+        preItems.emplace_back(loopIndex);
+        loopIndex--;
+    }
+
+    std::list<int32_t> nextItems;
+    loopIndex = currentIndex_;
+    while (itemRange_.find(loopIndex) != itemRange_.end()) {
+        nextItems.emplace_back(loopIndex);
+        loopIndex = (loopIndex + 1) % totalCount_;
+    }
+
+    if (targetIndex_.has_value()) {
+        nextItems.emplace_back(targetIndex_.value());
+    }
+
+    for (const auto& index : preItems) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!wrapper) {
+            break;
+        }
+        wrapper->Measure(layoutConstraint);
+        crossSize = std::max(crossSize, GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+        mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+    }
+
+    for (const auto& index : nextItems) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!wrapper) {
+            break;
+        }
+        wrapper->Measure(layoutConstraint);
+        crossSize = std::max(crossSize, GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+        mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+    }
+}
+
 void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -172,14 +214,20 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, idealSize);
     auto crossSize = 0.0f;
     auto mainSize = 0.0f;
-    for (const auto& index : itemRange_) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!wrapper) {
-            break;
+
+    auto itemCount = static_cast<int32_t>(itemRange_.size());
+    if (isLoop_ && itemCount < totalCount_) {
+        LoopMeasure(layoutWrapper, layoutConstraint, axis, crossSize, mainSize);
+    } else {
+        for (const auto& index : itemRange_) {
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!wrapper) {
+                break;
+            }
+            wrapper->Measure(layoutConstraint);
+            crossSize = std::max(crossSize, GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+            mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
         }
-        wrapper->Measure(layoutConstraint);
-        crossSize = std::max(crossSize, GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
-        mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
     }
 
     maxChildSize_ = axis == Axis::HORIZONTAL ? SizeF(mainSize, crossSize) : SizeF(crossSize, mainSize);
