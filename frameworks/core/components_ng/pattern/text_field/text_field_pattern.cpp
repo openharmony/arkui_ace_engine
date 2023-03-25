@@ -714,7 +714,7 @@ bool TextFieldPattern::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetr
     const int32_t graphemeClusterLength = 1;
     const int32_t next = extent + graphemeClusterLength;
     auto textBoxes = paragraph_->GetRectsForRange(
-        next, extent, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
+        extent, next, RSTypographyProperties::RectHeightStyle::MAX, RSTypographyProperties::RectWidthStyle::TIGHT);
 
     if (textBoxes.empty()) {
         LOGD("Box empty");
@@ -766,7 +766,9 @@ bool TextFieldPattern::ComputeOffsetForCaretUpstream(int32_t extent, CaretMetric
     }
 
     const auto& textBox = *boxes.begin();
-    auto lastStringBeforeCursor = wideText.substr(textEditingValue_.caretPosition - 1, 1);
+    auto caretPosition = textEditingValue_.caretPosition;
+    auto maxPos = static_cast<int32_t>(wideText.length()) - 1;
+    auto lastStringBeforeCursor = wideText.substr(std::clamp(caretPosition - 1, 0, maxPos), 1);
     // Caret is within width of the downstream glyphs.
     if (lastStringBeforeCursor == WIDE_NEWLINE &&
         (caretUpdateType_ == CaretUpdateType::INPUT || caretUpdateType_ == CaretUpdateType::DEL)) {
