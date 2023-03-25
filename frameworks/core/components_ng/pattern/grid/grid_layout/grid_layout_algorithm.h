@@ -42,19 +42,15 @@ private:
     void InitGridCeils(LayoutWrapper* layoutWrapper, const SizeF& idealSize);
     bool CheckGridPlaced(int32_t index, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan);
     void GetNextGrid(int32_t& curRow, int32_t& curCol) const;
-    OffsetF ComputeItemPosition(LayoutWrapper* layoutWrapper, int32_t row, int32_t col, int32_t& rowSpan,
-        int32_t& colSpan, const RefPtr<LayoutProperty>& childLayoutProperty) const;
+    OffsetF ComputeItemPosition(
+        LayoutWrapper* layoutWrapper, int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan) const;
     LayoutConstraintF CreateChildConstraint(const SizeF& idealSize, const RefPtr<GridLayoutProperty>& layoutProperty,
-        int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan,
-        const RefPtr<LayoutProperty>& childLayoutProperty) const;
+        int32_t row, int32_t col, int32_t& rowSpan, int32_t& colSpan) const;
 
     int32_t crossCount_ = 0;
     int32_t mainCount_ = 0;
     bool isVertical_ = true;
     bool rightToLeft_ = false;
-
-    float rowsGap_ = 0;
-    float columnsGap_ = 0;
 
     // Map structure: [rowIndex, [columnIndex - (width, height)]].
     std::map<int32_t, std::map<int32_t, SizeF>> gridCells_;
