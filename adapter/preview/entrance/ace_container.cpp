@@ -771,9 +771,6 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
             context->RefreshRootBgColor();
         },
         TaskExecutor::TaskType::UI);
-    if (frontend_) {
-        frontend_->RebuildAllPages();
-    }
 }
 
 #ifndef ENABLE_ROSEN_BACKEND

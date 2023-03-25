@@ -85,7 +85,17 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
     CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_RETURN(themeConstants, nullptr);
-
+#ifdef PREVIEW
+    auto label = themeConstants->GetString(pipeline->GetAppLabelId());
+    if (label.empty()) {
+        label = "label";
+        LOGW("[Engine Log] Unable to get label for shared library in the Previewer. Perform this operation on the "
+             "emulator or a real device instead.");
+    }
+    textLayoutProperty->UpdateContent(label);
+#else
+    textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
+#endif
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
     textLayoutProperty->UpdateMaxLines(2);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
