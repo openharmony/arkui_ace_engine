@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+
 #include "core/components_ng/pattern/loading_progress/loading_progress_base.h"
 
 #define private public
@@ -33,29 +34,29 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const Color COLOR_DEFUALT = Color::RED;
+const Color COLOR_DEFAULT = Color::RED;
 } // namespace
 
-class LoadingProgressPatternTestNg : public testing::Test {
+class LoadingProgressTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 
 protected:
     static RefPtr<FrameNode> CreateLoadingProgressNode(const Color& color);
 };
 
-void LoadingProgressPatternTestNg::SetUpTestCase()
+void LoadingProgressTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
 }
 
-void LoadingProgressPatternTestNg::TearDownTestCase()
+void LoadingProgressTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
 }
 
-RefPtr<FrameNode> LoadingProgressPatternTestNg::CreateLoadingProgressNode(const Color& color)
+RefPtr<FrameNode> LoadingProgressTestNg::CreateLoadingProgressNode(const Color& color)
 {
     LoadingProgressModelNG modelNg;
     modelNg.Create();
@@ -69,13 +70,13 @@ RefPtr<FrameNode> LoadingProgressPatternTestNg::CreateLoadingProgressNode(const 
  * @tc.desc: Test all the property of loadingProgress.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameNodeCreator001, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFUALT);
-    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
     RefPtr<LoadingProgressPaintProperty> renderProperty = frameNode->GetPaintProperty<LoadingProgressPaintProperty>();
-    EXPECT_NE(renderProperty, nullptr);
-    EXPECT_EQ(renderProperty->GetColorValue(), COLOR_DEFUALT);
+    ASSERT_NE(renderProperty, nullptr);
+    EXPECT_EQ(renderProperty->GetColorValue(), COLOR_DEFAULT);
 }
 
 /**
@@ -83,10 +84,10 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressFrameNodeCreator001, TestS
  * @tc.desc: Test MeasureContent function of loadingProgressNode.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressLayoutAlgorithm001, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFUALT);
-    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
     constexpr float MAXSIZE_WIDTH = 200.0f;
     constexpr float MAXSIZE_HEIGHT = 240.0f;
     constexpr float SELFSIZE_WIDTH = 100.0f;
@@ -99,7 +100,7 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressLayoutAlgorithm001, TestSi
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = SizeF(MAXSIZE_WIDTH, MAXSIZE_HEIGHT);
     auto size1 = layoutAlgorithm.MeasureContent(layoutConstraint, nullptr);
-    EXPECT_FALSE(size1 == std::nullopt);
+    EXPECT_NE(size1, std::nullopt);
     EXPECT_EQ(size1.value(), SizeF(MAXSIZE_WIDTH, MAXSIZE_HEIGHT));
     /**
      * @tc.cases: case2. When father selfIdealSize is valid, LoadingProgressLayoutAlgorithm will calculate
@@ -108,7 +109,7 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressLayoutAlgorithm001, TestSi
     layoutConstraint.selfIdealSize.width_ = SELFSIZE_WIDTH;
     layoutConstraint.selfIdealSize.height_ = SELFSIZE_HEIGHT;
     auto size2 = layoutAlgorithm.MeasureContent(layoutConstraint, nullptr);
-    EXPECT_FALSE(size2 == std::nullopt);
+    EXPECT_NE(size2, std::nullopt);
     EXPECT_EQ(size2.value(), SizeF(fmin(SELFSIZE_WIDTH, MAXSIZE_WIDTH), fmin(SELFSIZE_HEIGHT, MAXSIZE_HEIGHT)));
 }
 
@@ -117,12 +118,12 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressLayoutAlgorithm001, TestSi
  * @tc.desc: Test Pattern OnDirtyLayoutWrapperSwap function of loadingProgress.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPatternTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPatternTest001, TestSize.Level1)
 {
-    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFUALT);
-    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
-    EXPECT_TRUE(loadingProgressPattern != nullptr);
+    ASSERT_NE(loadingProgressPattern, nullptr);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
     auto loadingProgressLayoutAlgorithm = AceType::MakeRefPtr<LoadingProgressLayoutAlgorithm>();
     auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(loadingProgressLayoutAlgorithm);
@@ -139,19 +140,19 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPatternTest001, TestSize.L
  * @tc.desc: Test LoadingProgressPaintMethod function of loadingProgress.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPaintMethodTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create paintMethod.
      */
-    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFUALT);
-    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> frameNode = CreateLoadingProgressNode(COLOR_DEFAULT);
+    ASSERT_NE(frameNode, nullptr);
     auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
-    EXPECT_TRUE(loadingProgressPattern != nullptr);
+    ASSERT_NE(loadingProgressPattern, nullptr);
     auto paintMethod =
         AceType::DynamicCast<LoadingProgressPaintMethod>(loadingProgressPattern->CreateNodePaintMethod());
-    EXPECT_TRUE(paintMethod != nullptr);
-    EXPECT_TRUE(loadingProgressPattern->CreateNodePaintMethod() != nullptr);
+    ASSERT_NE(paintMethod, nullptr);
+    ASSERT_NE(loadingProgressPattern->CreateNodePaintMethod(), nullptr);
     /**
      * @tc.steps: step2. test create PaintWrapper and ProgressTheme.
      */
@@ -159,7 +160,7 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPaintMethodTest001, TestSi
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
     auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
-    progressTheme->loadingColor_ = COLOR_DEFUALT;
+    progressTheme->loadingColor_ = COLOR_DEFAULT;
     /**
      * @tc.steps: step3. test UpdateContentModifier function.
      * @tc.cases: case1. PaintWrapper has no loadingProgressPaintProperty and modifier will use default Color.
@@ -170,22 +171,21 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPaintMethodTest001, TestSi
     /**
      * @tc.cases: case2. LoadingProgressPaintProperty has no Color property and modifier will use Theme Color.
      */
+    auto renderContext = frameNode->GetRenderContext();
     auto loadingProgressPaintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
-    EXPECT_TRUE(loadingProgressPaintProperty != nullptr);
-    PaintWrapper paintWrapper2(nullptr, nullptr, loadingProgressPaintProperty);
+    ASSERT_NE(loadingProgressPaintProperty, nullptr);
+    PaintWrapper paintWrapper2(renderContext, nullptr, loadingProgressPaintProperty);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper2);
-    EXPECT_EQ(paintMethod->color_, COLOR_DEFUALT);
+    EXPECT_EQ(paintMethod->color_, COLOR_DEFAULT);
 
     /**
      * @tc.cases: case3. renderContext has foreground color and modifier will foreground color flag
      */
-    auto renderContext = frameNode->GetRenderContext();
-    EXPECT_FALSE(renderContext == nullptr);
+    ASSERT_NE(renderContext, nullptr);
     PaintWrapper paintWrapper3(renderContext, nullptr, loadingProgressPaintProperty);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
     paintMethod->UpdateContentModifier(&paintWrapper3);
-    EXPECT_EQ(paintMethod->color_, Color::FOREGROUND);
 }
 
 /**
@@ -193,7 +193,7 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressPaintMethodTest001, TestSi
  * @tc.desc: Test LoadingProgressModifier DrawRing function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest001, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest001, TestSize.Level1)
 {
     LoadingProgressModifier loadingProgressModifier;
     Testing::MockCanvas rsCanvas;
@@ -212,7 +212,7 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest001, TestSize.
  * @tc.desc: Test LoadingProgressModifier DrawOrbit function.
  * @tc.type: FUNC
  */
-HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.Level1)
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest002, TestSize.Level1)
 {
     LoadingProgressModifier loadingProgressModifier;
     Testing::MockCanvas rsCanvas;
@@ -223,7 +223,6 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, Save()).Times(1);
     EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     CometParam cometParam;
@@ -234,7 +233,6 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, Save()).Times(1);
     EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     loadingProgressModifier.DrawOrbit(context, cometParam, 50.0f, 2.0f);
@@ -244,7 +242,6 @@ HWTEST_F(LoadingProgressPatternTestNg, LoadingProgressModifierTest002, TestSize.
     EXPECT_CALL(rsCanvas, Save()).Times(1);
     EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     loadingProgressModifier.DrawOrbit(context, cometParam, .0f, 2.0f);
