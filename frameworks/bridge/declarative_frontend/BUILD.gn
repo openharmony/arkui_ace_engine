@@ -338,6 +338,8 @@ template("declarative_js_engine") {
       sources += [ "jsview/models/model_view_impl.cpp" ]
     }
 
+    external_deps = []
+
     # rich components needed by phone and TV. wearable like watch do not need them
     if (defined(config.rich_components_support) &&
         config.rich_components_support) {
@@ -354,6 +356,10 @@ template("declarative_js_engine") {
           "jsview/js_video_controller.cpp",
           "jsview/models/video_model_impl.cpp",
         ]
+      }
+      if (defined(config.video_support_jsstack) &&
+          config.video_support_jsstack) {
+        external_deps += [ "hiview:libxpower_event_js" ]
       }
     }
 
@@ -442,8 +448,6 @@ template("declarative_js_engine") {
 
     include_dirs = [ "//foundation/window/window_manager/interfaces/innerkits" ]
     include_dirs += uicast_configs.uicast_root_include
-
-    external_deps = []
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {

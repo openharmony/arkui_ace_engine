@@ -41,7 +41,8 @@
                 "resmgr",
                 "graphic",
                 "bytrace",
-                "startup_l2"
+                "startup_l2",
+                "hiview"
             ],
             "third_party": [
                 "json",
