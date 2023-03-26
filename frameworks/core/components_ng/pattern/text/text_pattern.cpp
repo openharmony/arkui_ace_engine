@@ -394,6 +394,9 @@ void TextPattern::InitMouseEvent()
 
 void TextPattern::HandleMouseEvent(const MouseInfo& info)
 {
+    if (copyOption_ == CopyOptions::None) {
+        return;
+    }
     if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::PRESS) {
         auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
@@ -608,10 +611,9 @@ void TextPattern::BeforeCreateLayoutWrapper()
 
     if (!nodes.empty()) {
         textForDisplay_.clear();
-        auto gestureEventHub = host->GetOrCreateGestureEventHub();
-        InitClickEvent(gestureEventHub);
     }
 
+    bool isSpanHasClick = false;
     while (!nodes.empty()) {
         auto current = nodes.top();
         nodes.pop();
@@ -624,11 +626,18 @@ void TextPattern::BeforeCreateLayoutWrapper()
             spanNode->CleanSpanItemChildren();
             spanNode->MountToParagraph();
             textForDisplay_.append(spanNode->GetSpanItem()->content);
+            if (spanNode->GetSpanItem()->onClick) {
+                isSpanHasClick = true;
+            }
         }
         const auto& nextChildren = current->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push(*iter);
         }
+    }
+    if (isSpanHasClick) {
+        auto gestureEventHub = host->GetOrCreateGestureEventHub();
+        InitClickEvent(gestureEventHub);
     }
 }
 
