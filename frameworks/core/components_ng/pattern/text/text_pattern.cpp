@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "base/window/drag_window.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
@@ -30,7 +31,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/render_context.h"
-#include "frameworks/base/window/drag_window.h"
 
 namespace OHOS::Ace::NG {
 

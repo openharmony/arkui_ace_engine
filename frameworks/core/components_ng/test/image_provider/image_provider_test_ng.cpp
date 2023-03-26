@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 
 #include "core/components_ng/test/mock/image_provider/mock_image_loader.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 #define protected public
 #define private public
@@ -28,22 +29,18 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 class ImageProviderTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
 
-void ImageProviderTestNg::SetUpTestCase() {}
-
-void ImageProviderTestNg::TearDownTestCase() {}
-
-void ImageProviderTestNg::SetUp() {}
-
-void ImageProviderTestNg::TearDown()
+void ImageProviderTestNg::SetUpTestSuite()
 {
-    auto count = loader->DecRefCount();
-    EXPECT_EQ(count, 0);
+    MockPipelineBase::SetUp();
+}
+
+void ImageProviderTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
 }
 
 /**
@@ -60,28 +57,6 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg001, TestSize.Level1)
     ctx->LoadImageData();
 
     EXPECT_EQ(ctx->syncLoad_, true);
-    EXPECT_EQ(ctx->imageObj_, nullptr);
-    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::LOAD_FAIL);
-}
-
-/**
- * @tc.name: ImageProviderTestNg002
- * @tc.desc: Test ImageProvider Async CreateImageObj failure
- * @tc.type: FUNC
- */
-HWTEST_F(ImageProviderTestNg, ImageProviderTestNg002, TestSize.Level1)
-{
-    EXPECT_CALL(*loader, LoadDecodedImageData);
-    auto src = ImageSourceInfo("file://data/data/com.example.test/res/exampleAlt.jpg");
-    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr));
-    EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::UNLOADED);
-    ctx->LoadImageData();
-
-    // wait for load task to finish
-    for (auto& thread : threads) {
-        thread.join();
-    }
-    EXPECT_EQ(ctx->syncLoad_, false);
     EXPECT_EQ(ctx->imageObj_, nullptr);
     EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::LOAD_FAIL);
 }

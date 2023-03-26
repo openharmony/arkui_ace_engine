@@ -313,8 +313,8 @@ void TextFieldModelNG::SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOp
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto textFielePattern = frameNode->GetPattern<TextFieldPattern>();
-    textFielePattern->SetMenuOptionItems(std::move(menuOptionsItems));
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    textFieldPattern->SetMenuOptionItems(std::move(menuOptionsItems));
 }
 
 void TextFieldModelNG::AddDragFrameNodeToManager() const
@@ -325,7 +325,6 @@ void TextFieldModelNG::AddDragFrameNodeToManager() const
     CHECK_NULL_VOID(dragDropManager);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-
     dragDropManager->AddTextFieldDragFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 

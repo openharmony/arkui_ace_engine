@@ -45,8 +45,8 @@ constexpr double TOSS_DELTA = 20.0;
 } // namespace
 class TimePickerPatternTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
 
 class TestNode : public UINode {
@@ -68,19 +68,16 @@ public:
     ~TestNode() override = default;
 };
 
-void TimePickerPatternTestNg::SetUpTestCase()
+void TimePickerPatternTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
-    // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockPickerThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
 }
 
-void TimePickerPatternTestNg::TearDownTestCase()
+void TimePickerPatternTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
-    PipelineContext::GetCurrentContext()->SetThemeManager(nullptr);
 }
 
 /**
@@ -91,12 +88,9 @@ void TimePickerPatternTestNg::TearDownTestCase()
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGCreateTimePicker001, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
-
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     auto timePickerPattern = AceType::MakeRefPtr<TimePickerRowPattern>();
     timePickerPattern->AttachToFrameNode(frameNode);
     timePickerPattern->OnAttachToFrameNode();
@@ -112,13 +106,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGCreateTimePicker001, TestSize
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle001, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
@@ -134,7 +126,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle001, Tes
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle002, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(10);
@@ -143,7 +134,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle002, Tes
     TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_EQ(Color::RED, pickerProperty->GetDisappearColor().value());
@@ -159,14 +149,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle002, Tes
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(0);
     TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasDisappearFontSize());
@@ -180,13 +168,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle003, Tes
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle001, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_TRUE(pickerProperty->HasFontSize());
@@ -202,7 +188,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle001, TestSi
 HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle002, TestSize.Level1)
 {
     auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
-
     TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
     PickerTextStyle data;
     data.fontSize = Dimension(10);
@@ -211,7 +196,6 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetNormalTextStyle002, TestSi
     TimePickerModelNG::GetInstance()->SetNormalTextStyle(theme, data);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-
     auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
     ASSERT_NE(pickerProperty, nullptr);
     EXPECT_EQ(Color::RED, pickerProperty->GetColor().value());
