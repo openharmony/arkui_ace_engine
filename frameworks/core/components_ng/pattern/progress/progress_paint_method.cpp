@@ -55,6 +55,7 @@ void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
         case ProgressType::RING:
         case ProgressType::SCALE:
             if (strokeWidth_ >= length * HALF) {
+                LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
                 strokeWidth_ = length * HALF * HALF;
             }
             break;

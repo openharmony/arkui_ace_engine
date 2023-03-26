@@ -50,13 +50,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto theme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     auto jsonValue = JsonUtil::Create(true);
-    auto progressStyle = layoutProperty->GetTypeValue(ProgressType::LINEAR);
-    jsonValue->Put("strokeWidth",
-        layoutProperty->GetStrokeWidthValue(
-            progressStyle == ProgressType::LINEAR ?
-                theme->GetTrackThickness() :
-                theme->GetScaleLength())
-        .ToString().c_str());
+    jsonValue->Put("strokeWidth", layoutProperty->GetStrokeWidthValue(theme->GetTrackThickness()).ToString().c_str());
     jsonValue->Put("scaleCount", std::to_string(paintProperty->GetScaleCountValue(theme->GetScaleNumber())).c_str());
     jsonValue->Put("scaleWidth", paintProperty->GetScaleWidthValue(theme->GetScaleWidth()).ToString().c_str());
     json->Put("style", jsonValue->ToString().c_str());

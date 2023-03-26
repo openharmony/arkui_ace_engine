@@ -671,6 +671,48 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderLayoutAlgorithm003
+ * @tc.desc: Test SliderLayoutAlgorithm MeasureContent when trackThickness is greater than slider width or height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithm003, TestSize.Level1)
+{
+    // create mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->outsetTrackThickness_ = SLIDER_OUTSET_TRACK_THICKNRESS;
+    sliderTheme->insetTrackThickness_ = SLIDER_INSET_TRACK_THICKNRESS;
+    sliderTheme->outsetBlockSize_ = SLIDER_OUTSET_BLOCK_SIZE;
+    sliderTheme->insetBlockSize_ = SLIDER_INSET_BLOCK_SIZE;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create layoutWrapper and sliderLayoutAlgorithm.
+     */
+    auto sliderLayoutProperty = AceType::MakeRefPtr<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    sliderLayoutProperty->UpdateThickness(Dimension(40.0));
+    LayoutWrapper layoutWrapper = LayoutWrapper(nullptr, nullptr, sliderLayoutProperty);
+    auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
+    ASSERT_NE(sliderLayoutAlgorithm, nullptr);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize.SetSize(SizeF(WIDTH.ConvertToPx(), HEIGHT.ConvertToPx()));
+    /**
+     * @tc.steps: step2. start SliderLayoutAlgorithm MeasureContent func.
+     * @tc.cases: case1. when sliderPaintProperty's direction is HORIZONTAL.
+     */
+    sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(sliderLayoutAlgorithm->GetTrackThickness(), SLIDER_OUTSET_TRACK_THICKNRESS.ConvertToPx());
+    /**
+     * @tc.cases: case2. when sliderPaintProperty's direction is VERTICAL.
+     */
+    sliderLayoutProperty->UpdateThickness(Dimension(40.0));
+    sliderLayoutProperty->UpdateDirection(Axis::VERTICAL);
+    sliderLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    EXPECT_NE(sliderLayoutAlgorithm->GetTrackThickness(), SLIDER_INSET_TRACK_THICKNRESS.ConvertToPx());
+}
+
+/**
  * @tc.name: SliderModelNgTest001
  * @tc.desc: TEST slider_model_ng.cpp
  * @tc.type: FUNC

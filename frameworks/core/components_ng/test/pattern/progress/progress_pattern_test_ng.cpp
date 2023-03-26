@@ -357,6 +357,37 @@ HWTEST_F(ProgressPatternTestNg, ProgressLayoutAlgorithm001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ProgressLayoutAlgorithm002
+ * @tc.desc: Test ProgressLayoutAlgorithm strokeWidth and RingDiameter with theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressPatternTestNg, ProgressLayoutAlgorithm002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create progress layout property and ProgressLayoutAlgorithm.
+     */
+    auto progressLayoutProperty = AceType::MakeRefPtr<ProgressLayoutProperty>();
+    ASSERT_NE(progressLayoutProperty, nullptr);
+    progressLayoutProperty->UpdateType(PROGRESS_TYPE_SCALE);
+    auto progressLayoutAlgorithm = AceType::MakeRefPtr<ProgressLayoutAlgorithm>();
+    ASSERT_NE(progressLayoutProperty, nullptr);
+    LayoutWrapper layoutWrapper(nullptr, nullptr, progressLayoutProperty);
+    /**
+     * @tc.steps: step2. get strokeWidth from theme, and return width and height according to RingDiameter.
+     */
+    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    progressTheme->trackThickness_ = TEST_PROGRESS_STROKE_WIDTH;
+    progressTheme->ringDiameter_ = DEFALT_RING_DIAMETER;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    auto size = progressLayoutAlgorithm->MeasureContent(LayoutConstraintF(), &layoutWrapper);
+    ASSERT_NE(size, std::nullopt);
+    EXPECT_EQ(progressLayoutAlgorithm->GetType(), PROGRESS_TYPE_SCALE);
+    EXPECT_EQ(progressLayoutAlgorithm->GetStrokeWidth(), TEST_PROGRESS_STROKE_WIDTH.ConvertToPx());
+    EXPECT_EQ(size->Height(), DEFALT_RING_DIAMETER.ConvertToPx());
+    EXPECT_EQ(size->Width(), DEFALT_RING_DIAMETER.ConvertToPx());
+}
+
+/**
  * @tc.name: LinearProgressCreator001
  * @tc.desc: Test all the properties of linear progress.
  * @tc.type: FUNC

@@ -135,11 +135,11 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
     borderBlank_ = std::max(trackThickness_, blockLength + hotBlockShadowWidth_ / HALF);
+    // slider track length
     sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
     borderBlank_ = (length - sliderLength_) * HALF;
-
     auto children = dirty->GetAllChildrenWithBuild();
-    if (children.size() != 0) {
+    if (!children.empty()) {
         CHECK_NULL_RETURN(imageFrameNode_, true);
         auto child = children.front();
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();

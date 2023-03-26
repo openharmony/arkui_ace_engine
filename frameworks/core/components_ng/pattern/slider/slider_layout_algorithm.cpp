@@ -24,6 +24,13 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF = 0.5f;
+bool JudgeTrackness(Axis direction, float blockDiameter, float trackThickness, float width, float height)
+{
+    if (direction == Axis::HORIZONTAL) {
+        return blockDiameter > height || trackThickness > height;
+    }
+    return blockDiameter > width || trackThickness > width;
+}
 } // namespace
 
 std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
@@ -48,27 +55,28 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     if (direction == Axis::VERTICAL && GreaterOrEqualToInfinity(height)) {
         height = static_cast<float>(theme->GetLayoutMaxLength().ConvertToPx());
     }
-    Dimension themeTrackThickness = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                                            SliderModel::SliderMode::OUTSET
-                                        ? theme->GetOutsetTrackThickness()
-                                        : theme->GetInsetTrackThickness();
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    Dimension themeTrackThickness = sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetTrackThickness()
+                                                                                  : theme->GetInsetTrackThickness();
     trackThickness_ =
         static_cast<float>(sliderLayoutProperty->GetThickness().value_or(themeTrackThickness).ConvertToPx());
+    // this scaleValue ensure that the size ratio of the block and trackThickness is consistent
     float scaleValue = trackThickness_ / static_cast<float>(themeTrackThickness.ConvertToPx());
-    Dimension themeBlockSize = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                                       SliderModel::SliderMode::OUTSET
-                                   ? theme->GetOutsetBlockSize()
-                                   : theme->GetInsetBlockSize();
+    Dimension themeBlockSize =
+        sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetBlockSize() : theme->GetInsetBlockSize();
     auto blockDiameter = scaleValue * static_cast<float>(themeBlockSize.ConvertToPx());
+    // trackThickness and blockDiameter will get from theme when they are greater than slider component height or width
+    if (JudgeTrackness(direction, blockDiameter, trackThickness_, width, height)) {
+        trackThickness_ = static_cast<float>(themeTrackThickness.ConvertToPx());
+        scaleValue = 1.0;
+        blockDiameter = static_cast<float>(themeBlockSize.ConvertToPx());
+    }
     blockSize_ = sliderLayoutProperty->GetBlockSizeValue(SizeF(blockDiameter, blockDiameter));
-    Dimension themeBlockHotSize = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                                          SliderModel::SliderMode::OUTSET
-                                      ? theme->GetOutsetBlockHotSize()
-                                      : theme->GetInsetBlockHotSize();
-    Dimension hotBlockShadowWidth = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                                            SliderModel::SliderMode::OUTSET
-                                        ? theme->GetOutsetHotBlockShadowWidth()
-                                        : theme->GetInsetHotBlockShadowWidth();
+    Dimension themeBlockHotSize =
+        sliderMode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetBlockHotSize() : theme->GetInsetBlockHotSize();
+    Dimension hotBlockShadowWidth = sliderMode == SliderModel::SliderMode::OUTSET ?
+                                        theme->GetOutsetHotBlockShadowWidth() :
+                                        theme->GetInsetHotBlockShadowWidth();
     blockHotSize_ = scaleValue * static_cast<float>(themeBlockHotSize.ConvertToPx());
     auto blockWidth = direction == Axis::HORIZONTAL ? blockSize_.Height() : blockSize_.Width();
     auto sliderWidth = static_cast<float>(theme->GetMeasureContentDefaultWidth().ConvertToPx());

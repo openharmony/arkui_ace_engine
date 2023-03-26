@@ -229,10 +229,6 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double lengthOfScale = strokeWidth_->Get();
-    if (lengthOfScale > radius) {
-        LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
-        lengthOfScale = radius / INT32_TWO;
-    }
     double pathDistance = FLOAT_TWO_ZERO * M_PI * radius / scaleCount_->Get();
     if (scaleWidth_->Get() > pathDistance) {
         LOGI("scaleWidth is lager than pathDistance,  auto changeto paint ring");
@@ -254,6 +250,7 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
         ANGLE_270, totalDegree);
+    // start to draw cur value progress
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
     double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
@@ -268,6 +265,7 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     RSBrush brush;
+    brush.SetAntiAlias(true);
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
     double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
