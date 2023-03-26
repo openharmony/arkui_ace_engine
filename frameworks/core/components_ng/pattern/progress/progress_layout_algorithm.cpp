@@ -43,9 +43,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     strokeWidth_ = progressLayoutProperty->GetStrokeWidth()
-                       .value_or(progressTheme ? (type_ == ProgressType::SCALE ? progressTheme->GetScaleLength()
-                                                                               : progressTheme->GetTrackThickness())
-                                               : Dimension(strokeWidth_))
+                       .value_or(progressTheme ? progressTheme->GetTrackThickness() : Dimension(strokeWidth_))
                        .ConvertToPx();
     float diameter =
         progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
