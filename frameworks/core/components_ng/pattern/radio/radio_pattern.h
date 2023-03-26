@@ -168,7 +168,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
     bool isGroupChanged_ = false;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 

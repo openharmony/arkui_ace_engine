@@ -27,9 +27,20 @@ namespace OHOS::Ace::NG {
 
 void ButtonLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
+    const auto& selfLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    isNeedToSetDefaultHeight_ = buttonLayoutProperty->HasLabel() && selfLayoutConstraint &&
+                                !selfLayoutConstraint->selfIdealSize.Height().has_value();
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    if (isNeedToSetDefaultHeight_) {
+        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto defaultHeight = buttonTheme->GetHeight().ConvertToPx();
+        auto maxHeight = selfLayoutConstraint->maxSize.Height();
+        layoutConstraint.maxSize.SetHeight(maxHeight > defaultHeight ? defaultHeight : maxHeight);
+        layoutConstraint.percentReference.SetHeight(maxHeight > defaultHeight ? defaultHeight : maxHeight);
+    }
     // If the ButtonType is CIRCLE, then omit text by the smaller edge.
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         auto minLength = std::min(layoutConstraint.maxSize.Width(), layoutConstraint.maxSize.Height());
@@ -78,6 +89,16 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    if (isNeedToSetDefaultHeight_) {
+        auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto defaultHeight = buttonTheme->GetHeight().ConvertToPx();
+        auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
+        CHECK_NULL_VOID(layoutContraint);
+        auto maxHeight = layoutContraint->maxSize.Height();
+        frameSize.SetHeight(maxHeight > defaultHeight ? defaultHeight : maxHeight);
+        layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
+    }
     // Determine if the button needs to fit the font size.
     if (buttonLayoutProperty->HasFontSize()) {
         if (GreatOrEqual(childSize_.Height(), frameSize.Height())) {
@@ -108,8 +129,6 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    CHECK_NULL_VOID(layoutConstraint);
     const auto& radius = frameNode->GetRenderContext()->GetBorderRadius();
     SizeF frameSize = { -1, -1 };
 
@@ -123,5 +142,4 @@ void ButtonLayoutAlgorithm::MeasureCircleButton(LayoutWrapper* layoutWrapper)
     frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
 }
-
 } // namespace OHOS::Ace::NG

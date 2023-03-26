@@ -85,13 +85,6 @@ public:
         auto geometryNode = dirty->GetGeometryNode();
         offset_ = geometryNode->GetContentOffset();
         size_ = geometryNode->GetContentSize();
-        if (isFirstAddhotZoneRect_) {
-            AddHotZoneRect();
-            isFirstAddhotZoneRect_ = false;
-        } else {
-            RemoveLastHotZoneRect();
-            AddHotZoneRect();
-        }
         return true;
     }
 
@@ -189,7 +182,6 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
 
     RefPtr<CheckBoxModifier> checkboxModifier_;
 
