@@ -26,6 +26,7 @@
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/property/transition_property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
@@ -128,7 +129,7 @@ struct BorderProperty {
 struct TransformProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformCenter, DimensionOffset);
-    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, Vector3F);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformTranslate, TranslateOptions);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TransformRotate, Vector4F);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
