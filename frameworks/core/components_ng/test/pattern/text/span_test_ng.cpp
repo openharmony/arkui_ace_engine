@@ -47,22 +47,11 @@ const Ace::TextDecoration TEXT_DECORATION_VALUE = Ace::TextDecoration::INHERIT;
 const Color TEXT_DECORATION_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::TextCase TEXT_CASE_VALUE = Ace::TextCase::LOWERCASE;
 const Dimension LETTER_SPACING = Dimension(10, DimensionUnit::PX);
-void onclickFunc(const BaseEventInfo* info) {};
+void onClickFunc(const BaseEventInfo* info) {};
 const std::string FONT_SIZE = "fontSize";
 } // namespace
 
-class SpanPatternTestNg : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
-};
-
-void SpanPatternTestNg::SetUpTestCase() {}
-void SpanPatternTestNg::TearDownTestCase() {}
-void SpanPatternTestNg::SetUp() {}
-void SpanPatternTestNg::TearDown() {}
+class SpanTestNg : public testing::Test {};
 
 class TestNode : public UINode {
     DECLARE_ACE_TYPE(TestNode, UINode);
@@ -88,7 +77,7 @@ public:
  * @tc.desc: Test all the properties of text.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanFrameNodeCreator001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanFrameNodeCreator001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -112,20 +101,20 @@ HWTEST_F(SpanPatternTestNg, SpanFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(spanNode->GetLetterSpacing(), LETTER_SPACING);
 
     spanModelNG.SetFontWeight(FontWeight::LIGHTER);
-    EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W100);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::LIGHTER);
     spanModelNG.SetFontWeight(FontWeight::REGULAR);
-    EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W400);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::REGULAR);
     spanModelNG.SetFontWeight(FontWeight::NORMAL);
-    EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W400);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::NORMAL);
     spanModelNG.SetFontWeight(FontWeight::MEDIUM);
-    EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W500);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::MEDIUM);
     spanModelNG.SetFontWeight(FontWeight::BOLD);
-    EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W700);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLD);
     spanModelNG.SetFontWeight(FontWeight::BOLDER);
-    EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W900);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLDER);
     spanModelNG.SetFontWeight(FontWeight::W100);
-    EXPECT_EQ(spanNode->GetFontWeight(), FontWeight::W100);
-    spanModelNG.SetOnClick(onclickFunc);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W100);
+    spanModelNG.SetOnClick(onClickFunc);
 }
 
 /**
@@ -133,7 +122,7 @@ HWTEST_F(SpanPatternTestNg, SpanFrameNodeCreator001, TestSize.Level1)
  * @tc.desc: Test SpanItem ToJsonValue when fontStyle is nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanItemToJsonValue001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanItemToJsonValue001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -152,7 +141,7 @@ HWTEST_F(SpanPatternTestNg, SpanItemToJsonValue001, TestSize.Level1)
  * @tc.desc: Test SpanItem ToJsonValue when fontStyle is not nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanItemToJsonValue002, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanItemToJsonValue002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -163,7 +152,7 @@ HWTEST_F(SpanPatternTestNg, SpanItemToJsonValue002, TestSize.Level1)
     spanNode->spanItem_->ToJsonValue(json);
     bool ret = json->Contains(FONT_SIZE);
     EXPECT_EQ(ret, false);
-    EXPECT_NE(spanNode->spanItem_->fontStyle, nullptr);
+    ASSERT_NE(spanNode->spanItem_->fontStyle, nullptr);
 }
 
 /**
@@ -171,13 +160,13 @@ HWTEST_F(SpanPatternTestNg, SpanItemToJsonValue002, TestSize.Level1)
  * @tc.desc: Test SpanNode GetOrCreateSpanNode when span node is nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeGetOrCreateSpanNode001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = spanNode->GetOrCreateSpanNode(-1);
-    EXPECT_NE(node, nullptr);
+    ASSERT_NE(node, nullptr);
 }
 
 /**
@@ -185,15 +174,15 @@ HWTEST_F(SpanPatternTestNg, SpanNodeGetOrCreateSpanNode001, TestSize.Level1)
  * @tc.desc: Test SpanNode GetOrCreateSpanNode when span node is nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeGetOrCreateSpanNode002, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
     auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
     auto node = spanNode->GetOrCreateSpanNode(1);
-    EXPECT_NE(node, nullptr);
+    ASSERT_NE(node, nullptr);
     node = spanNode->GetOrCreateSpanNode(1);
-    EXPECT_NE(node, nullptr);
+    ASSERT_NE(node, nullptr);
 }
 
 /**
@@ -201,7 +190,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeGetOrCreateSpanNode002, TestSize.Level1)
  * @tc.desc: Test SpanNode GetOrCreateSpanNode when spannode is not nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeGetOrCreateSpanNode003, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeGetOrCreateSpanNode003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -209,7 +198,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeGetOrCreateSpanNode003, TestSize.Level1)
     auto node = AceType::MakeRefPtr<SpanNode>(1);
     ElementRegister::GetInstance()->AddUINode(node);
     node = spanNode->GetOrCreateSpanNode(1);
-    EXPECT_NE(node, nullptr);
+    ASSERT_NE(node, nullptr);
 }
 
 /**
@@ -217,7 +206,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeGetOrCreateSpanNode003, TestSize.Level1)
  * @tc.desc: Test SpanNode MountToParagraph when parent is nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeMountToParagraph001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -232,7 +221,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph001, TestSize.Level1)
  * @tc.desc: Test SpanNode MountToParagraph when parent is valid.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph002, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeMountToParagraph002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -240,7 +229,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph002, TestSize.Level1)
     auto node = AceType::MakeRefPtr<SpanNode>(1);
     spanNode->SetParent(node);
     spanNode->MountToParagraph();
-    EXPECT_NE(spanNode->GetParent(), nullptr);
+    ASSERT_NE(spanNode->GetParent(), nullptr);
 }
 
 /**
@@ -248,7 +237,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph002, TestSize.Level1)
  * @tc.desc: Test SpanNode MountToParagraph when parent is FrameNode.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph003, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeMountToParagraph003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -257,7 +246,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph003, TestSize.Level1)
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
     spanNode->SetParent(node);
     spanNode->MountToParagraph();
-    EXPECT_NE(spanNode->GetParent(), nullptr);
+    ASSERT_NE(spanNode->GetParent(), nullptr);
 }
 
 /**
@@ -265,7 +254,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph003, TestSize.Level1)
  * @tc.desc: Test SpanNode MountToParagraph when textPattern is not nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph004, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeMountToParagraph004, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -274,7 +263,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph004, TestSize.Level1)
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
     spanNode->SetParent(node);
     spanNode->MountToParagraph();
-    EXPECT_NE(spanNode->GetParent(), nullptr);
+    ASSERT_NE(spanNode->GetParent(), nullptr);
 }
 
 /**
@@ -282,7 +271,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph004, TestSize.Level1)
  * @tc.desc: Test SpanNode MountToParagraph when parent is CustomNode.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph005, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeMountToParagraph005, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -290,7 +279,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph005, TestSize.Level1)
     auto node = TestNode::CreateTestNode(1);
     spanNode->SetParent(node);
     spanNode->MountToParagraph();
-    EXPECT_NE(spanNode->GetParent(), nullptr);
+    ASSERT_NE(spanNode->GetParent(), nullptr);
 }
 
 /**
@@ -298,7 +287,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeMountToParagraph005, TestSize.Level1)
  * @tc.desc: Test SpanNode RequestTextFlushDirty when parent is nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -313,7 +302,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty001, TestSize.Level1)
  * @tc.desc: Test SpanNode RequestTextFlushDirty when parent is invalid.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty002, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -321,7 +310,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty002, TestSize.Level1)
     auto node = AceType::MakeRefPtr<SpanNode>(1);
     spanNode->SetParent(node);
     spanNode->RequestTextFlushDirty();
-    EXPECT_NE(spanNode->GetParent(), nullptr);
+    ASSERT_NE(spanNode->GetParent(), nullptr);
 }
 
 /**
@@ -329,7 +318,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty002, TestSize.Level1)
  * @tc.desc: Test SpanNode RequestTextFlushDirty when parent is FrameNode.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty003, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -338,7 +327,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty003, TestSize.Level1)
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
     spanNode->SetParent(node);
     spanNode->RequestTextFlushDirty();
-    EXPECT_NE(spanNode->GetParent(), nullptr);
+    ASSERT_NE(spanNode->GetParent(), nullptr);
 }
 
 /**
@@ -346,7 +335,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty003, TestSize.Level1)
  * @tc.desc: Test SpanNode RequestTextFlushDirty when TextPattern is not nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty004, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty004, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -355,7 +344,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty004, TestSize.Level1)
     auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
     spanNode->SetParent(node);
     spanNode->RequestTextFlushDirty();
-    EXPECT_NE(spanNode->GetParent(), nullptr);
+    ASSERT_NE(spanNode->GetParent(), nullptr);
 }
 
 /**
@@ -363,7 +352,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty004, TestSize.Level1)
  * @tc.desc: Test SpanNode RequestTextFlushDirty when parent is CustomNode.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty005, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanNodeRequestTextFlushDirty005, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -371,7 +360,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty005, TestSize.Level1)
     auto node = TestNode::CreateTestNode(1);
     spanNode->SetParent(node);
     spanNode->RequestTextFlushDirty();
-    EXPECT_NE(spanNode->GetParent(), nullptr);
+    ASSERT_NE(spanNode->GetParent(), nullptr);
 }
 
 /**
@@ -379,7 +368,7 @@ HWTEST_F(SpanPatternTestNg, SpanNodeRequestTextFlushDirty005, TestSize.Level1)
  * @tc.desc: Test SpanItem UpdateParagraph when fontStyle is not nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -396,7 +385,7 @@ HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     spanNode->spanItem_->UpdateParagraph(paragraph);
-    EXPECT_NE(spanNode->spanItem_->fontStyle, nullptr);
+    ASSERT_NE(spanNode->spanItem_->fontStyle, nullptr);
 }
 
 /**
@@ -404,7 +393,7 @@ HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph001, TestSize.Level1)
  * @tc.desc: Test SpanItem UpdateParagraph when fontStyle is nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph002, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanItemUpdateParagraph002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -429,7 +418,7 @@ HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph002, TestSize.Level1)
  * @tc.desc: Test SpanItem UpdateParagraph when Paragraph is nullptr.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph003, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanItemUpdateParagraph003, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -446,7 +435,7 @@ HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph003, TestSize.Level1)
  * @tc.desc: Test SpanItem UpdateParagraph when children is not empty.
  * @tc.type: FUNC
  */
-HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
+HWTEST_F(SpanTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE);
@@ -465,23 +454,6 @@ HWTEST_F(SpanPatternTestNg, SpanItemUpdateParagraph004, TestSize.Level1)
         .textOverflow = textStyle.GetTextOverflow() };
     auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
     spanNode->spanItem_->UpdateParagraph(paragraph);
-    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
-}
-
-/**
- * @tc.name: SpanNodeUpdateParagraph001
- * @tc.desc: Test SpanNode UpdateContent when content is not empty.
- * @tc.type: FUNC
- */
-HWTEST_F(SpanPatternTestNg, SpanNodeUpdateParagraph001, TestSize.Level1)
-{
-    SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    auto json = std::make_unique<JsonValue>();
-    spanNode->spanItem_->content = "test";
-    spanNode->spanItem_->fontStyle = nullptr;
-    spanNode->UpdateContent("test");
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
 }
 } // namespace OHOS::Ace::NG

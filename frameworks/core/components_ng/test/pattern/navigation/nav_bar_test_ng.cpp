@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,14 +19,15 @@
 #define private public
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_view.h"
-#include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
+
 namespace OHOS::Ace::NG {
 namespace {
 const std::string BAR_ITEM_ETS_TAG = "BarItem";
@@ -37,23 +38,14 @@ const std::string EMPTY_STRING = "";
 const int32_t RET_OK = 0;
 } // namespace
 
-class NavBarNodeTestNg : public testing::Test {
-public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
-    void SetUp() override;
-    void TearDown() override;
-};
-
-void NavBarNodeTestNg::SetUp() {}
-void NavBarNodeTestNg::TearDown() {}
+class NavBarTestNg : public testing::Test {};
 
 /**
  * @tc.name: GetOrCreateNavBarNode001
  * @tc.desc: Test create nav bar node.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetOrCreateNavBarNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetOrCreateNavBarNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -69,7 +61,7 @@ HWTEST_F(NavBarNodeTestNg, GetOrCreateNavBarNode001, TestSize.Level1)
  * @tc.desc: Test get nav bar node.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetOrCreateNavBarNode002, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetOrCreateNavBarNode002, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -87,7 +79,7 @@ HWTEST_F(NavBarNodeTestNg, GetOrCreateNavBarNode002, TestSize.Level1)
  * @tc.desc: Test add nav bar content node child to group.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, AddChildToGroup001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, AddChildToGroup001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     std::string frameTag = FRAME_ITEM_ETS_TAG;
@@ -95,7 +87,7 @@ HWTEST_F(NavBarNodeTestNg, AddChildToGroup001, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(frameTag, nodeId, AceType::MakeRefPtr<Pattern>());
     auto navBarNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<Pattern>());
     auto contentNode = FrameNode::GetOrCreateFrameNode(
-            NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     navBarNode->SetNavBarContentNode(contentNode);
     navBarNode->AddChildToGroup(frameNode);
     auto group = navBarNode->GetNavBarContentNode();
@@ -107,7 +99,7 @@ HWTEST_F(NavBarNodeTestNg, AddChildToGroup001, TestSize.Level1)
  * @tc.desc: Test add new content node child to group.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, AddChildToGroup002, TestSize.Level1)
+HWTEST_F(NavBarTestNg, AddChildToGroup002, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     std::string frameTag = FRAME_ITEM_ETS_TAG;
@@ -115,7 +107,7 @@ HWTEST_F(NavBarNodeTestNg, AddChildToGroup002, TestSize.Level1)
     auto frameNode = AceType::MakeRefPtr<FrameNode>(frameTag, nodeId, AceType::MakeRefPtr<Pattern>());
     auto navBarNode = AceType::MakeRefPtr<NavBarNode>(barTag, nodeId, AceType::MakeRefPtr<NavBarPattern>());
     auto contentNode = FrameNode::GetOrCreateFrameNode(
-            NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
     navBarNode->AddChildToGroup(frameNode);
     auto group = navBarNode->GetNavBarContentNode();
     EXPECT_EQ(group, nullptr);
@@ -126,7 +118,7 @@ HWTEST_F(NavBarNodeTestNg, AddChildToGroup002, TestSize.Level1)
  * @tc.desc: Test get title string with error tag.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetTitleString001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetTitleString001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     std::string frameTag = FRAME_ITEM_ETS_TAG;
@@ -143,7 +135,7 @@ HWTEST_F(NavBarNodeTestNg, GetTitleString001, TestSize.Level1)
  * @tc.desc: Test get title string with right tag.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetTitleString002, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetTitleString002, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     std::string textTag = TEXT_ETS_TAG;
@@ -160,7 +152,7 @@ HWTEST_F(NavBarNodeTestNg, GetTitleString002, TestSize.Level1)
  * @tc.desc: Test get sub title string with error tag.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetSubtitleString001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetSubtitleString001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     std::string frameTag = FRAME_ITEM_ETS_TAG;
@@ -177,7 +169,7 @@ HWTEST_F(NavBarNodeTestNg, GetSubtitleString001, TestSize.Level1)
  * @tc.desc: Test get sub title string with right tag.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetSubtitleString002, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetSubtitleString002, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     std::string textTag = TEXT_ETS_TAG;
@@ -194,7 +186,7 @@ HWTEST_F(NavBarNodeTestNg, GetSubtitleString002, TestSize.Level1)
  * @tc.desc: Test get bar items string without menu.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetBarItemsString001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetBarItemsString001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -208,7 +200,7 @@ HWTEST_F(NavBarNodeTestNg, GetBarItemsString001, TestSize.Level1)
  * @tc.desc: Test to json value.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, ToJsonValue001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, ToJsonValue001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -226,7 +218,7 @@ HWTEST_F(NavBarNodeTestNg, ToJsonValue001, TestSize.Level1)
  * @tc.desc: Test IsAtomicNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, IsAtomicNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, IsAtomicNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -240,7 +232,7 @@ HWTEST_F(NavBarNodeTestNg, IsAtomicNode001, TestSize.Level1)
  * @tc.desc: Test SetBackButton interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, SetBackButton001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, SetBackButton001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -254,7 +246,7 @@ HWTEST_F(NavBarNodeTestNg, SetBackButton001, TestSize.Level1)
  * @tc.desc: Test GetBackButton interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetBackButton001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetBackButton001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -268,7 +260,7 @@ HWTEST_F(NavBarNodeTestNg, GetBackButton001, TestSize.Level1)
  * @tc.desc: Test SetTitle interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, SetTitle001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, SetTitle001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -282,7 +274,7 @@ HWTEST_F(NavBarNodeTestNg, SetTitle001, TestSize.Level1)
  * @tc.desc: Test GetTitle interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetTitle001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetTitle001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -296,7 +288,7 @@ HWTEST_F(NavBarNodeTestNg, GetTitle001, TestSize.Level1)
  * @tc.desc: Test SetSubtitle interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, SetSubtitle001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, SetSubtitle001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -310,7 +302,7 @@ HWTEST_F(NavBarNodeTestNg, SetSubtitle001, TestSize.Level1)
  * @tc.desc: Test GetSubtitle interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetSubtitle001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetSubtitle001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -324,7 +316,7 @@ HWTEST_F(NavBarNodeTestNg, GetSubtitle001, TestSize.Level1)
  * @tc.desc: Test SetMenu interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, SetMenu001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, SetMenu001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -338,7 +330,7 @@ HWTEST_F(NavBarNodeTestNg, SetMenu001, TestSize.Level1)
  * @tc.desc: Test GetMenu interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetMenu001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetMenu001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -352,7 +344,7 @@ HWTEST_F(NavBarNodeTestNg, GetMenu001, TestSize.Level1)
  * @tc.desc: Test SetTitleBarNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, SetTitleBarNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, SetTitleBarNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -366,7 +358,7 @@ HWTEST_F(NavBarNodeTestNg, SetTitleBarNode001, TestSize.Level1)
  * @tc.desc: Test GetTitleBarNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetTitleBarNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetTitleBarNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -380,7 +372,7 @@ HWTEST_F(NavBarNodeTestNg, GetTitleBarNode001, TestSize.Level1)
  * @tc.desc: Test SetNavBarContentNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, SetNavBarContentNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, SetNavBarContentNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -394,7 +386,7 @@ HWTEST_F(NavBarNodeTestNg, SetNavBarContentNode001, TestSize.Level1)
  * @tc.desc: Test GetNavBarContentNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetNavBarContentNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetNavBarContentNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -408,7 +400,7 @@ HWTEST_F(NavBarNodeTestNg, GetNavBarContentNode001, TestSize.Level1)
  * @tc.desc: Test SetToolBarNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, SetToolBarNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, SetToolBarNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -422,7 +414,7 @@ HWTEST_F(NavBarNodeTestNg, SetToolBarNode001, TestSize.Level1)
  * @tc.desc: Test GetToolBarNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetToolBarNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetToolBarNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -436,7 +428,7 @@ HWTEST_F(NavBarNodeTestNg, GetToolBarNode001, TestSize.Level1)
  * @tc.desc: Test SetPreToolBarNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, SetPreToolBarNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, SetPreToolBarNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -450,7 +442,7 @@ HWTEST_F(NavBarNodeTestNg, SetPreToolBarNode001, TestSize.Level1)
  * @tc.desc: Test GetPreToolBarNode interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, GetPreToolBarNode001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, GetPreToolBarNode001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -464,7 +456,7 @@ HWTEST_F(NavBarNodeTestNg, GetPreToolBarNode001, TestSize.Level1)
  * @tc.desc: Test OnPrevTitleIsCustomUpdate interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, OnPrevTitleIsCustomUpdate001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, OnPrevTitleIsCustomUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -479,7 +471,7 @@ HWTEST_F(NavBarNodeTestNg, OnPrevTitleIsCustomUpdate001, TestSize.Level1)
  * @tc.desc: Test OnPrevMenuIsCustomUpdate interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, OnPrevMenuIsCustomUpdate001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, OnPrevMenuIsCustomUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -494,7 +486,7 @@ HWTEST_F(NavBarNodeTestNg, OnPrevMenuIsCustomUpdate001, TestSize.Level1)
  * @tc.desc: Test OnPrevToolBarIsCustomUpdate interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, OnPrevToolBarIsCustomUpdate001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, OnPrevToolBarIsCustomUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -509,7 +501,7 @@ HWTEST_F(NavBarNodeTestNg, OnPrevToolBarIsCustomUpdate001, TestSize.Level1)
  * @tc.desc: Test OnBackButtonNodeOperationUpdate interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, OnBackButtonNodeOperationUpdate001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, OnBackButtonNodeOperationUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -525,7 +517,7 @@ HWTEST_F(NavBarNodeTestNg, OnBackButtonNodeOperationUpdate001, TestSize.Level1)
  * @tc.desc: Test OnTitleNodeOperationUpdate interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, OnTitleNodeOperationUpdate001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, OnTitleNodeOperationUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -541,7 +533,7 @@ HWTEST_F(NavBarNodeTestNg, OnTitleNodeOperationUpdate001, TestSize.Level1)
  * @tc.desc: Test OnSubtitleNodeOperationUpdate interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, OnSubtitleNodeOperationUpdate001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, OnSubtitleNodeOperationUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -557,7 +549,7 @@ HWTEST_F(NavBarNodeTestNg, OnSubtitleNodeOperationUpdate001, TestSize.Level1)
  * @tc.desc: Test OnMenuNodeOperationUpdate interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, OnMenuNodeOperationUpdate001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, OnMenuNodeOperationUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -573,7 +565,7 @@ HWTEST_F(NavBarNodeTestNg, OnMenuNodeOperationUpdate001, TestSize.Level1)
  * @tc.desc: Test OnToolBarNodeOperationUpdate interface.
  * @tc.type: FUNC
  */
-HWTEST_F(NavBarNodeTestNg, OnToolBarNodeOperationUpdate001, TestSize.Level1)
+HWTEST_F(NavBarTestNg, OnToolBarNodeOperationUpdate001, TestSize.Level1)
 {
     std::string barTag = BAR_ITEM_ETS_TAG;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();

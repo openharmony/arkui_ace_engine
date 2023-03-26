@@ -87,17 +87,6 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     passwordIconImagePainter.DrawImage(canvas, iconRect.GetOffset(), iconRect.GetSize());
 }
 
-RefPtr<OHOS::Ace::NG::PipelineContext> TextFieldContentModifier::GetPipelineContext()
-{
-    RefPtr<PipelineContext> pipelineContext;
-    auto textPartten = pattern_.Upgrade();
-    CHECK_NULL_RETURN(textPartten, nullptr);
-    auto frameNode = textPartten->GetHost();
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    pipelineContext = frameNode->GetContext();
-    return pipelineContext;
-}
-
 void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
 {
     RefPtr<TextTheme> theme;
@@ -122,9 +111,9 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
 {
     RefPtr<TextFieldTheme> theme;
     RefPtr<PipelineContext> pipelineContext;
-    auto textPartten = pattern_.Upgrade();
-    CHECK_NULL_VOID(textPartten);
-    auto frameNode = textPartten->GetHost();
+    auto textPattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(textPattern);
+    auto frameNode = textPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -150,7 +139,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue;
-    auto pipelineContext = GetPipelineContext();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     if (pipelineContext) {
         fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() || textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
@@ -192,16 +181,10 @@ void TextFieldContentModifier::ModifyTextStyle(TextStyle& textStyle)
 
 void TextFieldContentModifier::SetFontSize(const Dimension& value)
 {
-    float fontSizeValue;
-    auto pipelineContext = GetPipelineContext();
-    if (pipelineContext) {
-        fontSizeValue = pipelineContext->NormalizeToPx(value);
-    } else {
-        fontSizeValue = value.ConvertToPx();
-    }
-    fontSize_ = Dimension(fontSizeValue);
+    auto valPx = static_cast<float>(value.ConvertToPx());
+    fontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(fontSizeFloat_);
-    fontSizeFloat_->Set(fontSizeValue);
+    fontSizeFloat_->Set(valPx);
 }
 
 void TextFieldContentModifier::SetFontWeight(const FontWeight& value)

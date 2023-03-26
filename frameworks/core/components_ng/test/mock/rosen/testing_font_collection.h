@@ -30,15 +30,8 @@ public:
 
     static std::shared_ptr<TestingFontCollection> GetInstance(bool createWithICU = true)
     {
-        if (instance) {
-            return instance;
-        }
-        instance = std::make_shared<TestingFontCollection>();
-        return instance;
+        return std::make_shared<TestingFontCollection>();
     }
-
-private:
-    static std::shared_ptr<TestingFontCollection> instance;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_FONT_COLLECTION_H

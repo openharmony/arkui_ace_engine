@@ -518,30 +518,37 @@ public:
 
     void UpdateEditingValueToRecord();
     void UpdateScrollBarOffset() override;
+    
     bool UpdateCurrentOffset(float offset, int32_t source) override
     {
         return true;
     }
+
     bool IsAtTop() const override
     {
         return true;
     }
+
     bool IsAtBottom() const override
     {
         return true;
     }
+
     bool IsScrollable() const override
     {
         return scrollable_;
     }
+
     bool IsAtomicNode() const override
     {
         return true;
     }
+
     float GetCurrentOffset() const
     {
         return currentOffset_;
     }
+
     RefPtr<TextFieldContentModifier> GetContentModifier()
     {
         return textFieldContentModifier_;
