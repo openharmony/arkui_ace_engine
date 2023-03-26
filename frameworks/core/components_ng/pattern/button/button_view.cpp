@@ -54,9 +54,6 @@ void ButtonView::CreateWithLabel(const std::string& label)
     PaddingProperty defaultPadding({ CalcLength(padding.Left()), CalcLength(padding.Right()), CalcLength(padding.Top()),
         CalcLength(padding.Bottom()) });
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
-    auto layoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(buttonTheme->GetHeight())));
 }
 
 void ButtonView::Create(const std::string& tagName)

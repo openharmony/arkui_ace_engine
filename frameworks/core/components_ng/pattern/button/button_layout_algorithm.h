@@ -30,7 +30,6 @@ public:
     ~ButtonLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
-
     void OnReset() override {}
 
 private:
@@ -39,6 +38,7 @@ private:
     void MeasureCircleButton(LayoutWrapper* layoutWrapper);
 
     SizeF childSize_;
+    bool isNeedToSetDefaultHeight_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ButtonLayoutAlgorithm);
 };
