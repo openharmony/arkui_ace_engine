@@ -280,12 +280,14 @@ sk_sp<SkData> FileImageLoader::LoadImageData(
             strerror(errno), src.c_str());
         return nullptr;
     }
-    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-    if (!file) {
-        LOGE("open file failed, filePath: %{private}s, fail reason: %{public}s", filePath.c_str(), strerror(errno));
-        return nullptr;
-    }
-    return SkData::MakeFromFILE(file.get());
+    auto result = SkData::MakeFromFileName(realPath);
+#ifdef PREVIEW
+    // on Windows previewer, SkData::MakeFromFile keeps the file open during SkData's lifetime
+    // return a copy to release the file handle
+    return SkData::MakeWithCopy(result->data(), result->size());
+#else
+    return result;
+#endif
 }
 
 sk_sp<SkData> DataProviderImageLoader::LoadImageData(
