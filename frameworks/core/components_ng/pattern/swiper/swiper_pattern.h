@@ -179,8 +179,6 @@ public:
         return turnPageRate_;
     }
 
-    float GetBorderAndPaddingWidth();
-
     RefPtr<Animator> GetController()
     {
         return controller_;
