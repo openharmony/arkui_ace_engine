@@ -201,10 +201,11 @@ class SubscribableArrayHandler extends SubscribableHandler {
       if (this.arrFunctions.includes(property.toString()) &&
           typeof ret === "function" && target["length"] > 0) {
         const self = this;
+        const prop = property.toString();
         return function() {
             // execute original function with given arguments
             ret.apply(this, arguments);
-            self.notifyObjectPropertyHasChanged(property.toString(), this[0]);
+            self.notifyObjectPropertyHasChanged(prop, this);
         }.bind(target) // bind "this" to target inside the function
       }
   

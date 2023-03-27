@@ -378,6 +378,7 @@ class LocalStorage extends NativeLocalStorage {
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
+        this.storage_.clear();
         
         return true;
     }
@@ -1193,6 +1194,7 @@ class PersistentStorage {
      */
     static ConfigureBackend(storage) {
         PersistentStorage.Storage_ = storage;
+        
     }
     /**
      * private, use static functions!
@@ -1353,6 +1355,13 @@ class PersistentStorage {
     propertyHasChanged(info) {
         
         this.write();
+    }
+    syncPeerHasChanged(eventSource) {
+        
+        this.write();
+    }
+    propertyHasBeenReadPU(eventSource) {
+        // not needed
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
@@ -1864,10 +1873,11 @@ class SubscribableArrayHandler extends SubscribableHandler {
         if (this.arrFunctions.includes(property.toString()) &&
             typeof ret === "function" && target["length"] > 0) {
             const self = this;
+            const prop = property.toString();
             return function () {
                 // execute original function with given arguments
                 ret.apply(this, arguments);
-                self.notifyObjectPropertyHasChanged(property.toString(), this[0]);
+                self.notifyObjectPropertyHasChanged(prop, this);
             }.bind(target); // bind "this" to target inside the function
         }
         return ret;

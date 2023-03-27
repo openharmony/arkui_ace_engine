@@ -21,7 +21,8 @@
  * since 9
  */
 
-class PersistentStorage implements IMultiPropertiesChangeSubscriber {
+class PersistentStorage implements IMultiPropertiesChangeSubscriber, 
+                                   PropertyEventsReceiverPU<any> {
   private static Storage_: IStorage;
   private static Instance_: PersistentStorage = undefined;
 
@@ -38,6 +39,7 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
    */
   public static ConfigureBackend(storage: IStorage): void {
     PersistentStorage.Storage_ = storage;
+    stateMgmtConsole.debug(`PersistentStorage backend configured`);
   }
 
   /**
@@ -235,6 +237,15 @@ class PersistentStorage implements IMultiPropertiesChangeSubscriber {
   public propertyHasChanged(info?: PropertyInfo): void {
     stateMgmtConsole.debug("PersistentStorage: property changed");
     this.write();
+  }
+
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<any>) {
+      stateMgmtConsole.debug(`PersistentStorage: sync peer ${eventSource.info()} has changed`);
+      this.write();
+  }
+
+  public propertyHasBeenReadPU(eventSource: ObservedPropertyAbstractPU<any>) {
+      // not needed
   }
 
   // public required by the interface, use the static method instead!
