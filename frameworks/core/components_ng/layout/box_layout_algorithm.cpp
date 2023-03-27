@@ -107,7 +107,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             frameSize.UpdateIllegalSizeWithCheck(contentSize);
         } else {
             // use the max child size.
-            auto childFrame = SizeF();
+            auto childFrame = SizeF(-1, -1);
             float maxWidth = 0.0f;
             float maxHeight = 0.0f;
             for (const auto& child : childList) {
