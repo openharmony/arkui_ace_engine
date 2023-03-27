@@ -2097,9 +2097,14 @@ void RosenRenderContext::MarkDrivenRenderFramePaintState(bool flag)
 void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect)
 {
     if (transitionEffect_) {
+        // use effect to update rosenTransitionEffect activeValue
+        auto result = RosenTransitionEffect::UpdateRosenTransitionEffect(transitionEffect_, effect);
+        if (result) {
+            return;
+        }
+        LOGW("transition effect struct changed");
         transitionEffect_->Detach(Claim(this));
     }
-    // [[PLANNING]]: if the struct of effect not changed, we can change the params in effect directly
     transitionEffect_ = RosenTransitionEffect::ConvertToRosenTransitionEffect(effect);
     CHECK_NULL_VOID(transitionEffect_);
     auto frameNode = GetHost();
@@ -2108,15 +2113,7 @@ void RosenRenderContext::UpdateChainedTransition(const RefPtr<NG::ChainedTransit
     // transition effects should be initialized without animation.
     RSNode::ExecuteWithoutAnimation([this, isOnTheTree, &frameNode]() {
         // transitionIn effects should be initialized as active if currently not on the tree.
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
-        auto offset = frameNode->GetPaintRectOffset();
-        auto rect = GetPaintRectWithoutTransform();
-        rect.SetOffset(offset);
-        // transitionIn effects should be initialized as active if currently not on the tree.
         transitionEffect_->Attach(Claim(this), !isOnTheTree);
-        transitionEffect_->UpdateTransitionContext(Claim(this), rect, rootSize);
     });
 }
 
@@ -2133,9 +2130,10 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         SizeF rootSize(pipeline->GetRootWidth(), pipeline->GetRootHeight());
-        auto offset = frameNode->GetPaintRectOffset();
+        auto parentOffset = frameNode->GetPaintRectOffset(true);
         auto rect = GetPaintRectWithoutTransform();
-        rect.SetOffset(offset);
+        // Do not consider the position after its own transform, as the transition modifier also affects the transform
+        rect.SetOffset(parentOffset + rect.GetOffset());
 
         transitionEffect_->UpdateTransitionContext(Claim(this), rect, rootSize);
     });

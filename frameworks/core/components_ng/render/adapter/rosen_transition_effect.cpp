@@ -158,6 +158,112 @@ RefPtr<RosenTransitionEffect> RosenTransitionEffect::ConvertToRosenTransitionEff
     return res;
 }
 
+bool RosenTransitionEffect::UpdateRosenTransitionEffect(
+    const RefPtr<RosenTransitionEffect>& rosenEffect, const RefPtr<ChainedTransitionEffect>& chainedEffect)
+{
+    if (!chainedEffect && !rosenEffect) {
+        return true;
+    }
+    auto nowEffect = chainedEffect;
+    auto nowRSEffect = rosenEffect;
+    while (nowEffect) {
+        CHECK_NULL_RETURN(nowRSEffect, false);
+        switch (nowEffect->GetType()) {
+            case ChainedTransitionEffectType::IDENTITY: {
+                if (!AceType::InstanceOf<RosenIdentityTransitionEffect>(nowRSEffect)) {
+                    LOGW("type not matched, need IDENTITY type, actual type is %{public}s",
+                        AceType::TypeName(nowRSEffect));
+                    return false;
+                }
+                break;
+            }
+            case ChainedTransitionEffectType::OPACITY: {
+                auto rosenOpacityEffect = AceType::DynamicCast<RosenOpacityTransitionEffect>(nowRSEffect);
+                if (!rosenOpacityEffect) {
+                    LOGW("type not matched, need OPACITY type, actual type is %{public}s",
+                        AceType::TypeName(nowRSEffect));
+                    return false;
+                }
+                auto opacityEffect = AceType::DynamicCast<ChainedOpacityEffect>(nowEffect);
+                rosenOpacityEffect->SetActiveValue(opacityEffect->GetEffect());
+                break;
+            }
+            case ChainedTransitionEffectType::MOVE: {
+                auto rosenMoveEffect = AceType::DynamicCast<RosenMoveTransitionEffect>(nowRSEffect);
+                if (!rosenMoveEffect) {
+                    LOGW("type not matched, need MOVE type, actual type is %{public}s", AceType::TypeName(nowRSEffect));
+                    return false;
+                }
+                auto moveEffect = AceType::DynamicCast<ChainedMoveEffect>(nowEffect);
+                rosenMoveEffect->SetMoveEffect(moveEffect->GetEffect());
+                break;
+            }
+            case ChainedTransitionEffectType::ROTATE: {
+                auto rosenRotateEffect = AceType::DynamicCast<RosenRotation3DTransitionEffect>(nowRSEffect);
+                if (!rosenRotateEffect) {
+                    LOGW("type not matched, need ROTATE type, actual type is %{public}s",
+                        AceType::TypeName(nowRSEffect));
+                    return false;
+                }
+                auto rotateEffect = AceType::DynamicCast<ChainedRotateEffect>(nowEffect);
+                rosenRotateEffect->SetRotateEffect(rotateEffect->GetEffect());
+                break;
+            }
+            case ChainedTransitionEffectType::SCALE: {
+                auto rosenScaleEffect = AceType::DynamicCast<RosenScaleTransitionEffect>(nowRSEffect);
+                if (!rosenScaleEffect) {
+                    LOGW(
+                        "type not matched, need SCALE type, actual type is %{public}s", AceType::TypeName(nowRSEffect));
+                    return false;
+                }
+                auto scaleEffect = AceType::DynamicCast<ChainedScaleEffect>(nowEffect);
+                rosenScaleEffect->SetScaleEffect(scaleEffect->GetEffect());
+                break;
+            }
+            case ChainedTransitionEffectType::TRANSLATE: {
+                auto rosenTranslateEffect = AceType::DynamicCast<RosenTranslateTransitionEffect>(nowRSEffect);
+                if (!rosenTranslateEffect) {
+                    LOGW("type not matched, need TRANSLATE type, actual type is %{public}s",
+                        AceType::TypeName(nowRSEffect));
+                    return false;
+                }
+                auto translateEffect = AceType::DynamicCast<ChainedTranslateEffect>(nowEffect);
+                rosenTranslateEffect->SetTranslateEffect(translateEffect->GetEffect());
+                break;
+            }
+            case ChainedTransitionEffectType::ASYMMETRIC: {
+                auto rosenAsymmetricEffect = AceType::DynamicCast<RosenAsymmetricTransitionEffect>(nowRSEffect);
+                if (!rosenAsymmetricEffect) {
+                    LOGW("type not matched, need ASYMMETRIC type, actual type is %{public}s",
+                        AceType::TypeName(nowRSEffect));
+                    return false;
+                }
+                auto asymmetricEffect = AceType::DynamicCast<ChainedAsymmetricEffect>(nowEffect);
+                if (!UpdateRosenTransitionEffect(
+                        rosenAsymmetricEffect->GetTransitionInEffect(), asymmetricEffect->GetAppearEffect())) {
+                    LOGW("asymmetricEffect update transitionIn failed");
+                    return false;
+                }
+                if (!UpdateRosenTransitionEffect(
+                        rosenAsymmetricEffect->GetTransitionOutEffect(), asymmetricEffect->GetDisappearEffect())) {
+                    LOGW("asymmetricEffect update transitionOut failed");
+                    return false;
+                }
+                break;
+            }
+            default: {
+                LOGW("not support effect type: %{public}d", static_cast<int>(nowEffect->GetType()));
+                return false;
+            }
+        }
+        nowRSEffect->SetAnimationOption(nowEffect->GetAnimationOption());
+        nowRSEffect = nowRSEffect->GetNext();
+        nowEffect = nowEffect->GetNext();
+    }
+    // All effects are updated correctly
+    return nowRSEffect == nullptr;
+}
+
 // Identity animation option, with duration 0 and delay 0.
 static const auto identityOption = std::make_shared<AnimationOption>();
 RosenIdentityTransitionEffect::RosenIdentityTransitionEffect() : RosenTransitionEffect()
@@ -309,6 +415,11 @@ void RosenTranslateTransitionEffect::OnUpdateTransitionContext(
     SetActiveValue({ translateX, translateY });
 }
 
+void RosenTranslateTransitionEffect::SetTranslateEffect(const TranslateOptions& option)
+{
+    translateValue_ = option;
+}
+
 void RosenMoveTransitionEffect::OnUpdateTransitionContext(
     const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize)
 {
@@ -336,6 +447,11 @@ void RosenMoveTransitionEffect::OnUpdateTransitionContext(
         }
     }
     SetActiveValue(value);
+}
+
+void RosenMoveTransitionEffect::SetMoveEffect(TransitionEdge edge)
+{
+    edge_ = edge;
 }
 
 RosenAsyncMoveTransitionEffect ::RosenAsyncMoveTransitionEffect(TransitionEdge inEdge, TransitionEdge outEdge)
@@ -375,6 +491,11 @@ Rosen::Vector2f RosenSlideTransitionEffect::GetTranslateValue(TransitionEdge edg
 RosenRotation3DTransitionEffect::RosenRotation3DTransitionEffect(const RotateOptions& options)
     : RosenCompositeTransitionEffect()
 {
+    SetRotateEffect(options);
+}
+
+void RosenRotation3DTransitionEffect::SetRotateEffect(const RotateOptions& options)
+{
     auto norm = static_cast<float>(
         std::sqrt(std::pow(options.xDirection, 2) + std::pow(options.yDirection, 2) + std::pow(options.zDirection, 2)));
     if (NearZero(norm)) {
@@ -389,7 +510,36 @@ RosenRotation3DTransitionEffect::RosenRotation3DTransitionEffect(const RotateOpt
 
 RosenScaleTransitionEffect::RosenScaleTransitionEffect(const ScaleOptions& options)
 {
+    SetScaleEffect(options);
+}
+
+void RosenScaleTransitionEffect::SetScaleEffect(const ScaleOptions& options)
+{
     std::get<InternalScaleEffect>(effects_).SetActiveValue({ options.xScale, options.yScale });
     std::get<RosenPivotTransitionEffect>(effects_).SetPivot(options.centerX, options.centerY);
 }
+
+template<>
+RosenOpacityTransitionEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f), activeValue_(1.0f)
+{}
+
+template<>
+InternalRotationXEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0f), activeValue_(0.0f)
+{}
+
+template<>
+InternalRotationYEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0f), activeValue_(0.0f)
+{}
+
+template<>
+InternalRotationZEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0f), activeValue_(0.0f)
+{}
+
+template<>
+InternalTranslateEffect::PropertyTransitionEffectTemplate() : identityValue_(0.0f, 0.0f), activeValue_(0.0f, 0.0f)
+{}
+
+template<>
+InternalScaleEffect::PropertyTransitionEffectTemplate() : identityValue_(1.0f, 1.0f), activeValue_(1.0f, 1.0f)
+{}
 } // namespace OHOS::Ace::NG

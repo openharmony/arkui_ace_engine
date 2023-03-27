@@ -44,8 +44,14 @@ public:
     // Chain with another transition effect, the chained effect will be applied after this effect.
     void CombineWith(const RefPtr<RosenTransitionEffect>& effect);
     virtual void SetAnimationOption(const std::shared_ptr<AnimationOption>& option);
+    const RefPtr<RosenTransitionEffect>& GetNext()
+    {
+        return chainedEffect_;
+    }
 
     static RefPtr<RosenTransitionEffect> ConvertToRosenTransitionEffect(const RefPtr<ChainedTransitionEffect>& effect);
+    static bool UpdateRosenTransitionEffect(
+        const RefPtr<RosenTransitionEffect>& rosenEffect, const RefPtr<ChainedTransitionEffect>& chainedEffect);
 
 protected:
     virtual void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) {}

@@ -73,11 +73,13 @@ private:
     DECLARE_ACE_TYPE(PropertyTransitionEffectTemplate, RosenTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(PropertyTransitionEffectTemplate);
 };
+
 using RosenOpacityTransitionEffect = PropertyTransitionEffectTemplate<Rosen::RSAlphaModifier, float>;
+template<>
+RosenOpacityTransitionEffect::PropertyTransitionEffectTemplate();
 
 // Set pivot during transition effect.
-class RosenPivotTransitionEffect final
-    : public PropertyTransitionEffectTemplate<Rosen::RSPivotModifier, Rosen::Vector2f> {
+class RosenPivotTransitionEffect final : public RosenTransitionEffect {
 public:
     RosenPivotTransitionEffect() = default;
     RosenPivotTransitionEffect(const Dimension& centerX, const Dimension& centerY);
@@ -88,9 +90,9 @@ private:
     void OnUpdateTransitionContext(
         const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
 
-    Dimension centerX_;
-    Dimension centerY_;
-    DECLARE_ACE_TYPE(RosenPivotTransitionEffect, PropertyTransitionEffectTemplate);
+    Dimension centerX_ { 0.5_pct };
+    Dimension centerY_ { 0.5_pct };
+    DECLARE_ACE_TYPE(RosenPivotTransitionEffect, RosenTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenPivotTransitionEffect);
 };
 
@@ -104,6 +106,14 @@ public:
 
     void SetTransitionInEffect(const RefPtr<RosenTransitionEffect>& transitionIn);
     void SetTransitionOutEffect(const RefPtr<RosenTransitionEffect>& transitionOut);
+    RefPtr<RosenTransitionEffect> GetTransitionInEffect()
+    {
+        return transitionIn_;
+    }
+    RefPtr<RosenTransitionEffect> GetTransitionOutEffect()
+    {
+        return transitionOut_;
+    }
 
 protected:
     void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) override;
@@ -122,12 +132,15 @@ private:
 };
 
 using InternalTranslateEffect = PropertyTransitionEffectTemplate<Rosen::RSTranslateModifier, Rosen::Vector2f>;
+template<>
+InternalTranslateEffect::PropertyTransitionEffectTemplate();
 // Translate effect that accepts Dimension.
 class RosenTranslateTransitionEffect final : public InternalTranslateEffect {
 public:
-    RosenTranslateTransitionEffect(const TranslateOptions& option) : translateValue_(option) {}
+    explicit RosenTranslateTransitionEffect(const TranslateOptions& option) : translateValue_(option) {}
     ~RosenTranslateTransitionEffect() override = default;
 
+    void SetTranslateEffect(const TranslateOptions& option);
 private:
     void OnUpdateTransitionContext(
         const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
@@ -139,9 +152,10 @@ private:
 // Move in and out to (same) screen edge.
 class RosenMoveTransitionEffect final : public InternalTranslateEffect {
 public:
-    RosenMoveTransitionEffect(TransitionEdge transitionEdge) : edge_(transitionEdge) {}
+    explicit RosenMoveTransitionEffect(TransitionEdge transitionEdge) : edge_(transitionEdge) {}
     ~RosenMoveTransitionEffect() override = default;
 
+    void SetMoveEffect(TransitionEdge edge);
 private:
     void OnUpdateTransitionContext(
         const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize) override;
@@ -219,26 +233,36 @@ private:
 using InternalRotationXEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationXModifier, float>;
 using InternalRotationYEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationYModifier, float>;
 using InternalRotationZEffect = PropertyTransitionEffectTemplate<Rosen::RSRotationModifier, float>;
+template<>
+InternalRotationXEffect::PropertyTransitionEffectTemplate();
+template<>
+InternalRotationYEffect::PropertyTransitionEffectTemplate();
+template<>
+InternalRotationZEffect::PropertyTransitionEffectTemplate();
 class RosenRotation3DTransitionEffect final
     : public RosenCompositeTransitionEffect<InternalRotationXEffect, InternalRotationYEffect, InternalRotationZEffect,
           RosenPivotTransitionEffect> {
 public:
-    RosenRotation3DTransitionEffect(const RotateOptions& options);
+    explicit RosenRotation3DTransitionEffect(const RotateOptions& options);
     ~RosenRotation3DTransitionEffect() override = default;
 
+    void SetRotateEffect(const RotateOptions& options);
 private:
     DECLARE_ACE_TYPE(RosenRotation3DTransitionEffect, RosenCompositeTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenRotation3DTransitionEffect);
 };
 
 using InternalScaleEffect = PropertyTransitionEffectTemplate<Rosen::RSScaleModifier, Rosen::Vector2f>;
+template<>
+InternalScaleEffect::PropertyTransitionEffectTemplate();
 // 2D scale composite effect with pivot.
 class RosenScaleTransitionEffect final
     : public RosenCompositeTransitionEffect<InternalScaleEffect, RosenPivotTransitionEffect> {
 public:
-    RosenScaleTransitionEffect(const ScaleOptions& options);
+    explicit RosenScaleTransitionEffect(const ScaleOptions& options);
     ~RosenScaleTransitionEffect() override = default;
 
+    void SetScaleEffect(const ScaleOptions& options);
 private:
     DECLARE_ACE_TYPE(RosenScaleTransitionEffect, RosenCompositeTransitionEffect);
     ACE_DISALLOW_COPY_AND_MOVE(RosenScaleTransitionEffect);
