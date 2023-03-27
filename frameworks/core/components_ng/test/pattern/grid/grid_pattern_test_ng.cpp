@@ -275,16 +275,21 @@ HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
      */
     KeyEvent event;
     auto ret = pattern->OnKeyEvent(event);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_PAGE_DOWN;
     ret = pattern->OnKeyEvent(event);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     event.code = KeyCode::KEY_PAGE_UP;
     ret = pattern->OnKeyEvent(event);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     ret = pattern->HandleDirectionKey(event.code);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
+    ret = pattern->HandleDirectionKey(KeyCode::KEY_DPAD_UP);
+    EXPECT_TRUE(ret);
+    ret = false;
+    ret = pattern->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -379,8 +384,18 @@ HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
     EXPECT_EQ(ret, true);
 
     /**
-     * @tc.steps: step9. When offsetEnd_ and reachStart_ are true, call OnScrollCallback functions.
-     * @tc.expected: step9. Check whether the return value is correct.
+     * @tc.steps: step9. Call AnimateTo functions again.
+     * @tc.expected: step9. Check the return value and related parameters.
+     */
+    ret = false;
+    pattern->animator_->status_ = Animator::Status::STOPPED;
+    ret = pattern->AnimateTo(GRID_POSITION, GRID_DURATION, Curves::LINEAR);
+    EXPECT_NE(pattern->animator_, nullptr);
+    EXPECT_EQ(ret, true);
+
+    /**
+     * @tc.steps: step10. When offsetEnd_ and reachStart_ are true, call OnScrollCallback functions.
+     * @tc.expected: step10. Check whether the return value is correct.
      */
     pattern->gridLayoutInfo_.offsetEnd_ = true;
     pattern->gridLayoutInfo_.reachStart_ = true;
@@ -1206,7 +1221,7 @@ HWTEST_F(GridPatternTestNg, GridTest022, TestSize.Level1)
 
 /**
  * @tc.name: GridTest023
- * @tc.desc: Test GetFrameNodeChildSize func
+ * @tc.desc: Test positionController func
  * @tc.type: FUNC
  */
 HWTEST_F(GridPatternTestNg, GridTest023, TestSize.Level1)
@@ -1233,6 +1248,10 @@ HWTEST_F(GridPatternTestNg, GridTest023, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     RunMeasureAndLayout(frameNode);
 
+    /**
+     * @tc.steps: step2. Test positionController_ func.
+     * @tc.expected: Verify return value.
+     */
     auto controller = pattern->positionController_;
     controller->JumpTo(1, 0);
     auto layoutInfo = pattern->GetGridLayoutInfo();
@@ -1242,6 +1261,50 @@ HWTEST_F(GridPatternTestNg, GridTest023, TestSize.Level1)
     MockPipelineBase::SetUp();
     Offset currentOffset = controller->GetCurrentOffset();
     EXPECT_EQ(currentOffset, Offset(0, 0));
+    layoutInfo.axis_ = Axis::HORIZONTAL;
+    currentOffset = controller->GetCurrentOffset();
+    EXPECT_EQ(currentOffset, Offset(0, 0));
+}
+
+/**
+ * @tc.name: GridTest024
+ * @tc.desc: Test GetInsertPosition func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridTest024, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(itemCount);
+
+    /**
+     * @tc.steps: step2. Get something and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step2. Test GetInsertPosition func.
+     * @tc.expected: Verify return value.
+     */
+    pattern->gridLayoutInfo_.currentRect_= RectF(0, 0, 100, 100);
+    pattern->gridLayoutInfo_.currentMovingItemPosition_ = 1;
+    int32_t insertPosition = pattern->GetInsertPosition(50.f, 50.f);
+    EXPECT_EQ(insertPosition, 1);
+    insertPosition = pattern->GetInsertPosition(200.f, 200.f);
+    EXPECT_EQ(insertPosition, -1);
 }
 
 /**
@@ -1678,6 +1741,72 @@ HWTEST_F(GridPatternTestNg, GridSelectTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridSelectTest005
+ * @tc.desc: Test select in other condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridSelectTest005, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetMultiSelectable(true);
+    CreateGridItem(itemCount);
+
+    /**
+     * @tc.steps: step2. Get something and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+
+    /**
+     * @tc.steps: step5. Select (225, 50) - (315, 150) zone with RIGHT_BUTTON.
+     * @tc.expected: The item is not selected.
+     */
+    MouseInfo info;
+    info.SetButton(MouseButton::RIGHT_BUTTON); // Use RIGHT_BUTTON to select.
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(225.f, 50.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(315.f, 150.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<GridItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_FALSE(secondItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step6. Select (225, 50) - (315, 150) zone and trigger other MouseAction.
+     * @tc.expected: The item is still selected when trigger other MouseAction.
+     */
+    info.SetButton(MouseButton::LEFT_BUTTON); // Use RIGHT_BUTTON to select.
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(225.f, 50.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(315.f, 150.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    info.SetAction(MouseAction::HOVER); // Trigger other MouseAction.
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+}
+
+/**
  * @tc.name: GridDragTest001
  * @tc.desc: Verify drag func
  * @tc.type: FUNC
@@ -1812,15 +1941,33 @@ HWTEST_F(GridPatternTestNg, GridDragTest002, TestSize.Level1)
     EXPECT_EQ(pattern->GetOriginalIndex(), itemCount);
 
     /**
-     * @tc.steps: step3. Run FireOnItemDragEnter, FireOnItemDragMove, FireOnItemDrop.
+     * @tc.steps: step4. MoveItemsForward.
      * @tc.expected: Verify GetOriginalIndex.
      */
     eventHub->FireOnItemDragEnter(dragInfo);
     eventHub->FireOnItemDragMove(dragInfo, 1, 5);
     EXPECT_EQ(pattern->GetOriginalIndex(), 5);
+    eventHub->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_EQ(pattern->GetOriginalIndex(), -1);
+
+    /**
+     * @tc.steps: step5. MoveItemsBack.
+     * @tc.expected: Verify GetOriginalIndex.
+     */
+    eventHub->FireOnItemDragEnter(dragInfo);
     eventHub->FireOnItemDragMove(dragInfo, 5, 2);
     EXPECT_EQ(pattern->GetOriginalIndex(), 2);
     eventHub->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_EQ(pattern->GetOriginalIndex(), -1);
+
+    /**
+     * @tc.steps: step6. Move something to Grid.
+     * @tc.expected: Verify GetOriginalIndex.
+     */
+    eventHub->FireOnItemDragEnter(dragInfo);
+    eventHub->FireOnItemDragMove(dragInfo, -1, 2);
+    EXPECT_EQ(pattern->GetOriginalIndex(), 2);
+    eventHub->FireOnItemDrop(dragInfo, -1, 1, true);
     EXPECT_EQ(pattern->GetOriginalIndex(), -1);
 }
 
@@ -1847,6 +1994,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest003, TestSize.Level1)
     gridModel.SetOnItemDragLeave([](const ItemDragInfo&, int32_t) {});
     gridModel.SetOnItemDrop([](const ItemDragInfo&, int32_t, int32_t, bool) {});
     CreateGridItem(itemCount);
+
     /**
      * @tc.steps: step2. Get frameNode, pattern and eventHub and RunMeasureAndLayout.
      */
@@ -1872,7 +2020,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest003, TestSize.Level1)
     pattern->ClearDragState();
 
     /**
-     * @tc.steps: step3. MoveItemsForward.
+     * @tc.steps: step4. MoveItemsForward.
      * @tc.expected: Verify GetOriginalIndex.
      */
     eventHub->FireOnItemDragEnter(dragInfo);
@@ -1882,7 +2030,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest003, TestSize.Level1)
     EXPECT_EQ(pattern->GetOriginalIndex(), -1);
 
     /**
-     * @tc.steps: step3. MoveItemsBack.
+     * @tc.steps: step5. MoveItemsBack.
      * @tc.expected: Verify GetOriginalIndex.
      */
     eventHub->FireOnItemDragEnter(dragInfo);
