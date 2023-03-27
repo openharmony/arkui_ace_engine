@@ -211,20 +211,25 @@ bool JsInspectorManager::OperateComponent(const std::string& jsCode)
     auto slot = root->GetInt("slot", -1);
     LOGD("parentID = %{public}d, slot = %{public}d", parentID, slot);
     if (Container::IsCurrentUseNewPipeline()) {
+        static RefPtr<NG::UINode> parent = nullptr;
+        static int32_t preSlot = -1;
         auto newChild = GetNewFrameNodeWithJsCode(root);
         CHECK_NULL_RETURN(newChild, false);
         NG::Inspector::HideAllMenus();
         if (!root->Contains("id")) {
             LOGD("Failed to get the nodeId!");
-            auto parent = (parentID <= 0) ? GetRootUINode() : ElementRegister::GetInstance()->GetUINodeById(parentID);
+            parent = (parentID <= 0) ? GetRootUINode() : ElementRegister::GetInstance()->GetUINodeById(parentID);
             return OperateGeneralUINode(parent, slot, newChild);
         }
         auto nodeId = root->GetInt("id");
         auto oldChild = ElementRegister::GetInstance()->GetUINodeById(nodeId);
-        CHECK_NULL_RETURN(oldChild, false);
-        auto parent = oldChild->GetParent();
+        if (!oldChild) {
+            return OperateGeneralUINode(parent, preSlot, newChild);
+        }
+        parent = oldChild->GetParent();
         CHECK_NULL_RETURN(parent, false);
         slot = parent->GetChildIndex(oldChild);
+        preSlot = slot;
         return OperateGeneralUINode(parent, slot, newChild);
     } else {
         auto operateType = root->GetString("type", "");
