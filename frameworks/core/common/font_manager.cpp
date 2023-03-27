@@ -49,15 +49,18 @@ void FontManager::RegisterFont(
     });
 }
 
-void FontManager::RegisterCallback(
+bool FontManager::RegisterCallback(
     const WeakPtr<RenderNode>& node, const std::string& familyName, const std::function<void()>& callback)
 {
-    CHECK_NULL_VOID_NOLOG(callback);
+    CHECK_NULL_RETURN(callback, false);
+    bool isCustomFont = false;
     for (auto& fontLoader : fontLoaders_) {
         if (fontLoader->GetFamilyName() == familyName) {
             fontLoader->SetOnLoaded(node, callback);
+            isCustomFont = true;
         }
     }
+    return isCustomFont;
 }
 
 const std::vector<std::string>& FontManager::GetFontNames() const
