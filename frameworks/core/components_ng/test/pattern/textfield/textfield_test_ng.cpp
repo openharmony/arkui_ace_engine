@@ -18,7 +18,6 @@
 #define private public
 #define protected public
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
@@ -72,7 +71,6 @@ public:
     RefPtr<TextFieldPattern> GetPattern();
     RefPtr<TextFieldPaintProperty> GetPaintProperty();
     RefPtr<TextFieldLayoutProperty> GetLayoutProperty();
-    std::shared_ptr<OnTextChangedListenerImpl> CreatOnTextChangedListenerImplInstance();
     RefPtr<FrameNode> CreatTextFieldNode(const std::optional<std::string>& placeholder = PLACEHOLDER,
         const std::optional<std::string>& value = EMPTY_TEXT_VALUE, bool isTextArea = false);
 };
@@ -94,14 +92,6 @@ RefPtr<FrameNode> TextFieldPatternTestNg::CreatTextFieldNode(
     textFieldModelNG.CreateNode(placeholder, value, isTextArea);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     return frameNode;
-}
-
-std::shared_ptr<OnTextChangedListenerImpl> TextFieldPatternTestNg::CreatOnTextChangedListenerImplInstance()
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    WeakPtr<TextFieldPattern> textFieldPattern(pattern);
-    return std::make_shared<OnTextChangedListenerImpl>(textFieldPattern);
 }
 
 RefPtr<TextFieldLayoutProperty> TextFieldPatternTestNg::GetLayoutProperty()
@@ -1230,82 +1220,5 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelSetOnEditChanged, TestSize.Level1
     EXPECT_TRUE(eventHub);
     eventHub->FireOnEditChanged(true);
     EXPECT_TRUE(callback);
-}
-
-/**
- * @tc.name: OnTextChangeInsertText
- * @tc.desc: Test insert Text Field
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, OnTextChangeInsertText, TestSize.Level1)
-{
-    auto textChangedListenerImpl = CreatOnTextChangedListenerImplInstance();
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-    textChangedListenerImpl->InsertText(to_utf16(""));
-    textChangedListenerImpl->InsertText(to_utf16("Testing insertText function."));
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-}
-
-/**
- * @tc.name: OnTextChangeDeleteForwardAndDeleteBackward
- * @tc.desc: Test to delete the text field with illegal/legal length forward/backward
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, OnTextChangeDeleteForwardAndDeleteBackward, TestSize.Level2)
-{
-    auto textChangedListenerImpl = CreatOnTextChangedListenerImplInstance();
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-    int nums[2] = { 8, -1 };
-    for (int i = 0; i < 2; ++i) {
-        textChangedListenerImpl->DeleteForward(static_cast<int32_t>(nums[i]));
-        textChangedListenerImpl->DeleteBackward(static_cast<int32_t>(nums[i]));
-    }
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-}
-
-/**
- * @tc.name: OnTextChangeSetKeyboardStatus
- * @tc.desc: test set KeyboardStatus
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, OnTextChangeSetKeyboardStatus, TestSize.Level1)
-{
-    auto textChangedListenerImpl = CreatOnTextChangedListenerImplInstance();
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-    textChangedListenerImpl->SetKeyboardStatus(true);
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-}
-
-/**
- * @tc.name: OnTextChangeSendKeyboardInfo
- * @tc.desc: Test the valid/invalid FunctionKey parameter of send
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, OnTextChangeSendKeyboardInfo, TestSize.Level1)
-{
-    auto textChangedListenerImpl = CreatOnTextChangedListenerImplInstance();
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-    MiscServices::KeyboardInfo info;
-    int32_t index = 1;
-    info.SetFunctionKey(index);
-    textChangedListenerImpl->SendKeyboardInfo(info);
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-}
-
-/**
- * @tc.name: OnTextChangeMoveCursor
- * @tc.desc: Test moving the cursor up/down/left/right
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestNg, OnTextChangeMoveCursor, TestSize.Level1)
-{
-    auto textChangedListenerImpl = CreatOnTextChangedListenerImplInstance();
-    ASSERT_NE(textChangedListenerImpl, nullptr);
-    MiscServices::Direction types[4] = { MiscServices::Direction::UP, MiscServices::Direction::DOWN,
-        MiscServices::Direction::LEFT, MiscServices::Direction::RIGHT };
-    for (int i = 0; i < 4; ++i) {
-        textChangedListenerImpl->MoveCursor(types[i]);
-    }
-    ASSERT_NE(textChangedListenerImpl, nullptr);
 }
 } // namespace OHOS::Ace::NG
