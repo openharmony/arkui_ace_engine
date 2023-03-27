@@ -284,6 +284,7 @@ sk_sp<SkData> FileImageLoader::LoadImageData(
 #ifdef PREVIEW
     // on Windows previewer, SkData::MakeFromFile keeps the file open during SkData's lifetime
     // return a copy to release the file handle
+    CHECK_NULL_RETURN(result, nullptr);
     return SkData::MakeWithCopy(result->data(), result->size());
 #else
     return result;
