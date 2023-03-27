@@ -365,11 +365,11 @@ public:
 
     void SetJSViewName(const std::string& name)
     {
-        jsViewName = name;
+        jsViewName_ = name;
     }
     const std::string& GetJSViewName()
     {
-        return jsViewName;
+        return jsViewName_;
     }
 
     void ExecuteInitiallyProvidedValue(const std::string& jsonData) override
@@ -398,7 +398,7 @@ private:
     // GC -> JS View Object -> JSView C++ Object
     JSRef<JSObject> jsViewObject_;
 
-    std::string jsViewName;
+    std::string jsViewName_;
 };
 
 } // namespace OHOS::Ace::Framework
