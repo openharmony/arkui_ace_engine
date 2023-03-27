@@ -21,6 +21,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -46,6 +47,9 @@ void LazyForEachNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& paren
 {
     CHECK_NULL_VOID(builder_);
     auto lazyLayoutWrapperBuilder = MakeRefPtr<LazyLayoutWrapperBuilder>(builder_, WeakClaim(this));
+    if (parent->GetHostTag() == V2::SWIPER_ETS_TAG) {
+        lazyLayoutWrapperBuilder->SetLazySwiper();
+    }
     lazyLayoutWrapperBuilder->UpdateIndexRange(startIndex_, endIndex_, ids_);
     lazyLayoutWrapperBuilder->UpdateForceFlag(forceMeasure, forceLayout);
     parent->SetLayoutWrapperBuilder(lazyLayoutWrapperBuilder);

@@ -36,7 +36,7 @@ public:
 
     void AdjustGridOffset() override;
 
-        void UpdateIndexRange(int32_t startIndex, int32_t endIndex, const std::list<std::optional<std::string>>& ids)
+    void UpdateIndexRange(int32_t startIndex, int32_t endIndex, const std::list<std::optional<std::string>>& ids)
     {
         auto size = static_cast<int32_t>(ids.size());
         if ((size != 0) && (size != (endIndex - startIndex + 1))) {
@@ -58,6 +58,11 @@ public:
 
     const std::list<RefPtr<LayoutWrapper>>& GetCachedChildLayoutWrapper() override;
 
+    void SetLazySwiper(bool flag = true)
+    {
+        lazySwiper_ = flag;
+    }
+
 protected:
     int32_t OnGetTotalCount() override;
     RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndex(int32_t index) override;
@@ -76,11 +81,13 @@ private:
     std::list<std::optional<std::string>> nodeIds_;
 
     std::optional<std::string> GetKeyByIndexFromPreNodes(int32_t index);
+    RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndexLegacy(int32_t index);
 
     std::list<RefPtr<LayoutWrapper>> childWrappers_;
 
     bool forceMeasure_ = false;
     bool forceLayout_ = false;
+    bool lazySwiper_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyLayoutWrapperBuilder);
 };
