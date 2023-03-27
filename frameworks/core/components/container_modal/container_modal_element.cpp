@@ -33,7 +33,6 @@ namespace {
 constexpr uint32_t COLUMN_CHILD_NUM = 2;
 constexpr uint32_t TITLE_POSITION = 1;
 constexpr uint32_t SPLIT_BUTTON_POSITION = 2;
-constexpr uint32_t BLUR_WINDOW_RADIUS = 100;
 constexpr uint32_t TITLE_POPUP_TIME = 200;        // 200ms
 constexpr double MOUSE_MOVE_POPUP_DISTANCE = 5.0; // 5.0px
 constexpr double MOVE_POPUP_DISTANCE_X = 10.0;    // 10.0px
@@ -483,27 +482,6 @@ void ContainerModalElement::ChangeTitleIcon(bool isFocus)
         FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, isFocus));
     titleChildrenRow->SetUpdateType(UpdateType::REBUILD);
     rowElement->SetUpdateComponent(titleChildrenRow);
-}
-
-void ContainerModalElement::BlurWindow(bool isBlur)
-{
-    auto containerBox = AceType::DynamicCast<BoxElement>(GetFirstChild());
-    if (!containerBox) {
-        LOGE("ContainerModalElement BlurWindow failed, container box element is null!");
-        return;
-    }
-    auto containerRenderBox = AceType::DynamicCast<RenderBox>(containerBox->GetRenderNode());
-    if (!containerRenderBox) {
-        LOGE("ContainerModalElement BlurWindow failed, container box render is null!");
-        return;
-    }
-    if (isBlur) {
-        auto frontDecoration = AceType::MakeRefPtr<Decoration>();
-        frontDecoration->SetBlurRadius(Dimension(BLUR_WINDOW_RADIUS));
-        containerRenderBox->SetFrontDecoration(frontDecoration);
-    } else {
-        containerRenderBox->SetFrontDecoration(nullptr);
-    }
 }
 
 void ContainerModalElement::WindowFocus(bool isFocus)
