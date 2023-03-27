@@ -128,11 +128,18 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             GetScrollBar()->OnScrollEnd();
         }
     }
+    if (scrollStop_) {
+        FireOnScrollStop();
+        scrollStop_ = false;
+    }
     return false;
 }
 
 void ScrollPattern::FireOnScrollStart()
 {
+    if (scrollAbort_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollEventHub>();
@@ -140,6 +147,21 @@ void ScrollPattern::FireOnScrollStart()
     auto onScrollStart = hub->GetScrollStartEvent();
     CHECK_NULL_VOID_NOLOG(onScrollStart);
     onScrollStart();
+}
+
+void ScrollPattern::FireOnScrollStop()
+{
+    if (scrollAbort_) {
+        scrollAbort_ = false;
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto hub = host->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID_NOLOG(hub);
+    auto onScrollStop = hub->GetScrollStopEvent();
+    CHECK_NULL_VOID_NOLOG(onScrollStop);
+    onScrollStop();
 }
 
 bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
@@ -157,6 +179,10 @@ bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
         AdjustOffset(adjustOffset, source);
         return UpdateCurrentOffset(adjustOffset, source);
     } else {
+        if (animator_ && !animator_->IsStopped()) {
+            scrollAbort_ = true;
+            animator_->Stop();
+        }
         FireOnScrollStart();
     }
     return true;
@@ -172,10 +198,8 @@ void ScrollPattern::OnScrollEndCallback()
     if (scrollEndEvent) {
         scrollEndEvent();
     }
-    auto scrollStopEvent = eventHub->GetScrollStopEvent();
-    if (scrollStopEvent) {
-        scrollStopEvent();
-    }
+    scrollStop_ = true;
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void ScrollPattern::ResetPosition()
@@ -368,6 +392,7 @@ void ScrollPattern::CreateOrStopAnimator()
         return;
     }
     if (!animator_->IsStopped()) {
+        scrollAbort_ = true;
         animator_->Stop();
     }
     animator_->ClearInterpolators();
@@ -377,6 +402,10 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
     const std::function<void()>& onFinish)
 {
     LOGD("scroll pattern, from %{public}f to %{public}f", currentOffset_, position);
+    if (!IsScrollableStopped()) {
+        scrollAbort_ = true;
+        StopScrollable();
+    }
     CreateOrStopAnimator();
     // TODO: no accessibility event
     auto animation = AceType::MakeRefPtr<CurveAnimation<float>>(currentOffset_, position, curve);
@@ -390,10 +419,17 @@ void ScrollPattern::AnimateTo(float position, float duration, const RefPtr<Curve
     animator_->ClearStopListeners();
     animator_->Play();
     // TODO: expand stop listener
-    animator_->AddStopListener([onFinish]() {
+    animator_->AddStopListener([onFinish, weak = AceType::WeakClaim(this)]() {
+        auto scroll = weak.Upgrade();
+        CHECK_NULL_VOID_NOLOG(scroll);
+        scroll->scrollStop_ = true;
+        auto host = scroll->GetHost();
+        CHECK_NULL_VOID_NOLOG(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         CHECK_NULL_VOID_NOLOG(onFinish);
         onFinish();
     });
+    FireOnScrollStart();
 }
 
 void ScrollPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)

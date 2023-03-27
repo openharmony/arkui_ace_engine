@@ -531,11 +531,6 @@ void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
         return;
     }
 
-    if (scrollBar_) {
-        // Clear the old data.
-        scrollBar_->Reset(scrollBar);
-        return;
-    }
     scrollBar_ = scrollBar;
     if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
@@ -720,13 +715,12 @@ bool RenderScroll::ScrollPage(bool reverse, bool smooth, const std::function<voi
 void RenderScroll::JumpToPosition(double position, int32_t source)
 {
     // If an animation is playing, stop it.
-    if (!animator_) {
-        return;
+    if (animator_) {
+        if (!animator_->IsStopped()) {
+            animator_->Stop();
+        }
+        animator_->ClearInterpolators();
     }
-    if (!animator_->IsStopped()) {
-        animator_->Stop();
-    }
-    animator_->ClearInterpolators();
     DoJump(position, source);
     HandleScrollBarEnd();
 }
@@ -751,7 +745,10 @@ void RenderScroll::AnimateTo(double position, float duration, const RefPtr<Curve
 {
     LOGD("animate from position %{public}lf to %{public}lf, duration: %{public}f", GetCurrentPosition(), position,
         duration);
-    CHECK_NULL_VOID_NOLOG(animator_);
+    if (!animator_) {
+        animator_ = AceType::MakeRefPtr<Animator>(GetContext());
+        CHECK_NULL_VOID(animator_);
+    }
     if (!animator_->IsStopped()) {
         animator_->Stop();
     }
