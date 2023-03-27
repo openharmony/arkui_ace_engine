@@ -41,7 +41,7 @@ public:
 
     void RegisterFont(
         const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineBase>& context);
-    void RegisterCallback(
+    bool RegisterCallback(
         const WeakPtr<RenderNode>& node, const std::string& familyName, const std::function<void()>& callback);
     void UnRegisterCallback(const WeakPtr<RenderNode>& node);
     const std::vector<std::string>& GetFontNames() const;
