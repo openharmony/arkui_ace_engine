@@ -776,4 +776,20 @@ void WebClientImpl::OnFirstContentfulPaint(long navigationStartTick, long firstC
     CHECK_NULL_VOID(delegate);
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
 }
+
+void WebClientImpl::OnCompleteSwapWithNewSize()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnCompleteSwapWithNewSize();
+}
+
+void WebClientImpl::OnResizeNotWork()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnResizeNotWork();
+}
 } // namespace OHOS::Ace

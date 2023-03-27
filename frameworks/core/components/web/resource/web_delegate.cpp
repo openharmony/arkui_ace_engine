@@ -3243,6 +3243,25 @@ void WebDelegate::OnActive()
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), should]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetShouldFrameSubmissionBeforeDraw(should);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::Zoom(float factor)
 {
     auto context = context_.Upgrade();
@@ -4724,5 +4743,19 @@ void WebDelegate::UnregisterSurfacePositionChangedCallback()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UnregisterSurfacePositionChangedCallback(callbackId_);
     callbackId_ = 0;
+}
+
+void WebDelegate::OnCompleteSwapWithNewSize()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnCompleteSwapWithNewSize();
+}
+
+void WebDelegate::OnResizeNotWork()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnResizeNotWork();
 }
 } // namespace OHOS::Ace
