@@ -565,6 +565,13 @@ void WebView::SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEn
     webPattern->UpdateVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
 }
 
+void WebView::SetScrollBarColor(const std::string& colorValue)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateScrollBarColor(colorValue);
+}
+
 void WebView::SetPageVisibleId(OnWebAsyncFunc&& pageVisibleId)
 {
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();

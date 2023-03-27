@@ -1535,6 +1535,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
+    JSClass<JSWeb>::StaticMethod("scrollBarColor", &JSWeb::ScrollBarColor);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -4218,6 +4219,14 @@ void JSWeb::VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         NG::WebView::SetVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
+    }
+}
+
+void JSWeb::ScrollBarColor(const std::string& colorValue)
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        NG::WebView::SetScrollBarColor(colorValue);
+        return;
     }
 }
 

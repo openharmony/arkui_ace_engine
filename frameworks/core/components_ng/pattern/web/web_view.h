@@ -114,7 +114,7 @@ public:
     static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
     static void SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged);
     static void NotifyPopupWindowResult(int32_t webId, bool result);
-
+    static void SetScrollBarColor(const std::string& colorValue);
 private:
     static void RegisterPipelineCallback(int32_t nodeId);
 };

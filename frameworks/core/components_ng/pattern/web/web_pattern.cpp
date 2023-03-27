@@ -865,6 +865,13 @@ void WebPattern::OnVerticalScrollBarAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnScrollBarColorUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateScrollBarColor(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -949,6 +956,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
+        delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }
