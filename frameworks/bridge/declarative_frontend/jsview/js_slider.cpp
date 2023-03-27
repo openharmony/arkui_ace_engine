@@ -188,9 +188,6 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
     }
-    if (LessNotEqual(value.Value(), 0.0)) {
-        return;
-    }
     SliderModel::GetInstance()->SetThickness(value);
 }
 
