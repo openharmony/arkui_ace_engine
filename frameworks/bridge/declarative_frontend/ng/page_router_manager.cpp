@@ -480,9 +480,6 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target, const std::stri
     std::string url = target.url;
     std::string pagePath = url + ".js";
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-    if (errorCallback != nullptr) {
-        errorCallback("", Framework::ERROR_CODE_NO_ERROR);
-    }
 
     if (mode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(url);
@@ -495,7 +492,7 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target, const std::stri
 
     RouterPageInfo info { url };
     info.path = pagePath;
-    LoadPage(GenerateNextPageId(), info, params);
+    LoadPage(GenerateNextPageId(), info, params, false, true, true, errorCallback);
 }
 
 void PageRouterManager::StartPush(const RouterPageInfo& target, const std::string& params, RouterMode mode,
@@ -589,9 +586,6 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target, const std::s
     std::string url = target.url;
     std::string pagePath = url + ".js";
     LOGD("router.Push pagePath = %{private}s", pagePath.c_str());
-    if (errorCallback != nullptr) {
-        errorCallback("", Framework::ERROR_CODE_NO_ERROR);
-    }
 
     PopPage("", false, false);
 
@@ -772,7 +766,8 @@ void PageRouterManager::BackCheckAlert(const RouterPageInfo& target, const std::
 }
 
 void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, const std::string& params,
-    bool /*isRestore*/, bool needHideLast, bool needTransition)
+    bool /*isRestore*/, bool needHideLast, bool needTransition,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     // TODO: isRestore function.
     CHECK_RUN_ON(JS);
@@ -785,7 +780,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, c
         FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     pageNode->SetHostPageId(pageId);
     pageRouterStack_.emplace_back(pageNode);
-    auto result = loadJs_(target.path);
+    auto result = loadJs_(target.path, errorCallback);
     if (!result) {
         LOGE("fail to load page file");
         pageRouterStack_.pop_back();
