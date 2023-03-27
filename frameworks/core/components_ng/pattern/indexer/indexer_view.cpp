@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/indexer/indexer_view.h"
 
+#include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/indexer/indexer_theme.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -119,12 +120,12 @@ void IndexerView::SetSelected(int32_t selected)
     }
 }
 
-void IndexerView::SetPopupPositionX(float popupPositionX)
+void IndexerView::SetPopupPositionX(const Dimension& popupPositionX)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionX, popupPositionX);
 }
 
-void IndexerView::SetPopupPositionY(float popupPositionY)
+void IndexerView::SetPopupPositionY(const Dimension& popupPositionY)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupPositionY, popupPositionY);
 }
