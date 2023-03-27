@@ -190,6 +190,9 @@ protected:
     RefPtr<NG::OffscreenCanvasPattern> offscreenCanvasPattern_;
 
 private:
+    void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
+    std::unique_ptr<ImageData> GetImageDataFromCanvas(
+        const double& left, const double& top, const double& width, const double& height);
     PaintState paintState_;
     TextStyle style_;
     static std::unordered_map<int32_t, Pattern> pattern_;
