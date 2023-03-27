@@ -24,25 +24,12 @@
 namespace OHOS::Ace::NG {
 void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    std::optional<float> mainSize;
-    std::list<RefPtr<LayoutWrapper>> childList;
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
-    if (child) {
-        child->Measure(layoutConstraint);
-        mainSize = child->GetGeometryNode()->GetMarginFrameSize().MainSize(axis_);
-        childList.push_back(child);
-    }
     layoutWrapper->RemoveAllChildInRenderTree();
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
         auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(startNodeSize_) && curOffset_ > startNodeSize_) {
             layoutConstraint.maxSize.SetCrossSize(curOffset_, axis_);
             layoutConstraint.minSize.SetCrossSize(curOffset_, axis_);
-        }
-        if (mainSize.has_value()) {
-            layoutConstraint.maxSize.SetMainSize(mainSize.value(), axis_);
-            layoutConstraint.percentReference.SetMainSize(mainSize.value(), axis_);
         }
         auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
         CHECK_NULL_VOID(child);
@@ -56,16 +43,19 @@ void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraint.maxSize.SetCrossSize(-curOffset_, axis_);
             layoutConstraint.minSize.SetCrossSize(-curOffset_, axis_);
         }
-        if (mainSize.has_value()) {
-            layoutConstraint.maxSize.SetMainSize(mainSize.value(), axis_);
-            layoutConstraint.percentReference.SetMainSize(mainSize.value(), axis_);
-        }
         auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
         CHECK_NULL_VOID(child);
         child->Measure(layoutConstraint);
         if (NearZero(endNodeSize_)) {
             endNodeSize_ = child->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
         }
+    }
+    std::list<RefPtr<LayoutWrapper>> childList;
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
+    if (child) {
+        child->Measure(layoutConstraint);
+        childList.push_back(child);
     }
     PerformMeasureSelfWithChildList(layoutWrapper, childList);
 }

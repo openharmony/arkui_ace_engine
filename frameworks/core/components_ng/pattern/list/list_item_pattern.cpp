@@ -358,7 +358,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && (curOffset_ > width * threshold || reachRightSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_START;
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START &&
-            (curOffset_ < width * (1 - threshold) || (reachLeftSpeed && curOffset_ < width))) {
+            (curOffset_ < width * (1 - threshold) || reachLeftSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END) {
             swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
@@ -369,7 +369,7 @@ void ListItemPattern::HandleDragEnd(const GestureEvent& info)
         if (swiperIndex_ == ListItemSwipeIndex::ITEM_CHILD && (width * threshold < -curOffset_ || reachLeftSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::SWIPER_END;
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_END &&
-            (-curOffset_ < width * (1 - threshold) || (reachRightSpeed && -curOffset_ < width))) {
+            (-curOffset_ < width * (1 - threshold) || reachRightSpeed)) {
             swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
         } else if (swiperIndex_ == ListItemSwipeIndex::SWIPER_START) {
             swiperIndex_ = ListItemSwipeIndex::ITEM_CHILD;
