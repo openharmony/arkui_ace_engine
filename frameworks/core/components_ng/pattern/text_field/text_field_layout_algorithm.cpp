@@ -117,7 +117,9 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::MeasureContent(
     }
     auto isPasswordType =
         textFieldLayoutProperty->GetTextInputTypeValue(TextInputType::UNSPECIFIED) == TextInputType::VISIBLE_PASSWORD;
-    CreateParagraph(textStyle, textContent, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder);
+    auto disableTextAlign = !pattern->IsTextArea() && textFieldLayoutProperty->GetWidthAutoValue(false);
+    CreateParagraph(textStyle, textContent,
+        isPasswordType && pattern->GetTextObscured() && !showPlaceHolder, disableTextAlign);
     if (textStyle.GetMaxLines() == 1 && !showPlaceHolder) {
         // for text input case, need to measure in one line without constraint.
         paragraph_->Layout(std::numeric_limits<double>::infinity());
@@ -333,11 +335,14 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<TextField
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
 }
 
-void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, bool needObscureText)
+void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content,
+    bool needObscureText, bool disableTextAlign)
 {
     RSParagraphStyle paraStyle;
     paraStyle.textDirection_ = ToRSTextDirection(GetTextDirection(content));
-    paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
+    if (!disableTextAlign) {
+        paraStyle.textAlign_ = ToRSTextAlign(textStyle.GetTextAlign());
+    }
     paraStyle.maxLines_ = textStyle.GetMaxLines();
     paraStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     paraStyle.wordBreakType_ = ToRSWordBreakType(textStyle.GetWordBreak());
