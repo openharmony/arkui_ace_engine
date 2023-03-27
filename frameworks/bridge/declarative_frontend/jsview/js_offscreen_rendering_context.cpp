@@ -133,48 +133,51 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
     jsRenderContext->IncRefCount();
     args.SetReturnValue(Referenced::RawPtr(jsRenderContext));
 
-    if (args.Length() >= 3) {
-        if (args[0]->IsNumber() && args[1]->IsNumber()) {
-            double fWidth = 0.0;
-            double fHeight = 0.0;
-            int width = 0;
-            int height = 0;
-            JSViewAbstract::ParseJsDouble(args[0], fWidth);
-            JSViewAbstract::ParseJsDouble(args[1], fHeight);
+    if (args.Length() < 3) {
+        LOGE("The arg is wrong, it is supposed to have atleast 3 arguments");
+        return;
+    }
+    if (args[0]->IsNumber() && args[1]->IsNumber()) {
+        double fWidth = 0.0;
+        double fHeight = 0.0;
+        int width = 0;
+        int height = 0;
+        JSViewAbstract::ParseJsDouble(args[0], fWidth);
+        JSViewAbstract::ParseJsDouble(args[1], fHeight);
 
-            fWidth = SystemProperties::Vp2Px(fWidth);
-            fHeight = SystemProperties::Vp2Px(fHeight);
-            width = round(fWidth);
-            height = round(fHeight);
+        fWidth = SystemProperties::Vp2Px(fWidth);
+        fHeight = SystemProperties::Vp2Px(fHeight);
+        width = round(fWidth);
+        height = round(fHeight);
 
-            auto container = Container::Current();
-            if (container) {
-                if (Container::IsCurrentUseNewPipeline()) {
-                    auto offscreenCanvasPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(width, height);
-                    jsRenderContext->SetOffscreenCanvasPattern(offscreenCanvasPattern);
-                    std::lock_guard<std::mutex> lock(mutex_);
-                    offscreenCanvasPatternMap_[offscreenCanvasPatternCount_++] = offscreenCanvasPattern;
-                }
-                auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
-                if (context) {
-                    auto offscreenCanvas = context->CreateOffscreenCanvas(width, height);
-                    jsRenderContext->SetOffscreenCanvas(offscreenCanvas);
-                    std::lock_guard<std::mutex> lock(mutex_);
-                    offscreenCanvasMap_[offscreenCanvasCount_++] = offscreenCanvas;
-                }
-            }
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (Container::IsCurrentUseNewPipeline()) {
+            auto offscreenCanvasPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(width, height);
+            jsRenderContext->SetOffscreenCanvasPattern(offscreenCanvasPattern);
+            LOGI("SetOffscreenCanvasPattern successfully");
+            std::lock_guard<std::mutex> lock(mutex_);
+            offscreenCanvasPatternMap_[offscreenCanvasPatternCount_++] = offscreenCanvasPattern;
+        } else {
+            auto context = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(context);
+            auto offscreenCanvas = context->CreateOffscreenCanvas(width, height);
+            jsRenderContext->SetOffscreenCanvas(offscreenCanvas);
+            LOGI("SetOffscreenCanvas successfully");
+            std::lock_guard<std::mutex> lock(mutex_);
+            offscreenCanvasMap_[offscreenCanvasCount_++] = offscreenCanvas;
         }
-        if (args[2]->IsObject()) {
-            JSRenderingContextSettings* jsContextSetting
-                = JSRef<JSObject>::Cast(args[2])->Unwrap<JSRenderingContextSettings>();
-            if (jsContextSetting == nullptr) {
-                LOGE("jsContextSetting is null");
-                return;
-            }
-            bool anti = jsContextSetting->GetAntialias();
-            jsRenderContext->SetAnti(anti);
-            jsRenderContext->SetAntiAlias();
+    }
+    if (args[2]->IsObject()) {
+        JSRenderingContextSettings* jsContextSetting
+            = JSRef<JSObject>::Cast(args[2])->Unwrap<JSRenderingContextSettings>();
+        if (jsContextSetting == nullptr) {
+            LOGE("jsContextSetting is null");
+            return;
         }
+        bool anti = jsContextSetting->GetAntialias();
+        jsRenderContext->SetAnti(anti);
+        jsRenderContext->SetAntiAlias();
     }
 }
 
