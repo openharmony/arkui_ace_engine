@@ -127,7 +127,6 @@ public:
     static void ForceDarkAccess(bool access);
     static void HorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     static void VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
-    static void ScrollBarColor(const std::string& colorValue);
     static void OnAudioStateChanged(const JSCallbackInfo& args);
     static void OnFirstContentfulPaint(const JSCallbackInfo& args);
 
