@@ -114,6 +114,21 @@ struct BlurStyleOption {
     {
         return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor;
     }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        static const char* STYLE[] = { "", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
+            "BlurStyle.BackgroundThin", "BlurStyle.BackgroundRegular", "BlurStyle.BackgroundThick",
+            "BlurStyle.BackgroundUltraThick" };
+        static const char* COLOR_MODE[] = { "ThemeColorMode.System", "ThemeColorMode.Light", "ThemeColorMode.Dark" };
+        static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
+        auto jsonBlurStyle = JsonUtil::Create(true);
+        jsonBlurStyle->Put("value", STYLE[static_cast<int>(blurStyle)]);
+        auto jsonBlurStyleOption = JsonUtil::Create(true);
+        jsonBlurStyleOption->Put("colorMode", COLOR_MODE[static_cast<int>(colorMode)]);
+        jsonBlurStyleOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int>(adaptiveColor)]);
+        jsonBlurStyle->Put("options", jsonBlurStyleOption);
+        json->Put("backgroundBlurStyle", jsonBlurStyle);
+    }
 };
 
 struct PixStretchEffectOption {
