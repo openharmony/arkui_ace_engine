@@ -82,6 +82,8 @@ private:
     static std::string GetSourceInfo(const std::string& line, const std::string& column,
         const RefPtr<RevSourceMap>& pageMap, const RefPtr<RevSourceMap>& appMap, bool isAppPage, const AceType* data);
     static std::string GetRelativePath(const std::string& sources, std::string splitStr = "/\\");
+    static void GetStageSourceMap(const AceType* data,
+        std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps);
 };
 } // namespace OHOS::Ace::Framework
 
