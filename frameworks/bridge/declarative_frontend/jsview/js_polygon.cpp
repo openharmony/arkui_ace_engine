@@ -78,8 +78,8 @@ void JSPolygon::JsPoints(const JSCallbackInfo& info)
     ShapePoint shapePoint;
     ShapePoints shapePoints;
     JSRef<JSArray> pointsArray = JSRef<JSArray>::Cast(info[0]);
-    if (pointsArray->Length() < 3) {
-        LOGE("Less than three parameters");
+    if (pointsArray->Length() < 2) {
+        LOGE("Less than two parameters");
         return;
     } else {
         for (size_t i = 0; i < pointsArray->Length(); i++) {
