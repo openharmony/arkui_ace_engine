@@ -80,35 +80,32 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
 
 void JSTextPicker::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("TextPicker create error, info is non-valid");
-        return;
-    }
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        std::vector<NG::RangeContent> rangeResult;
+        uint32_t selected = 0;
+        uint32_t kind = 0;
+        std::string value = "";
+        if (!JSTextPickerParser::ParseTextArray(paramObject, rangeResult, kind, selected, value)) {
+            if (!JSTextPickerParser::ParseIconTextArray(paramObject, rangeResult, kind, selected)) {
+                LOGE("parse range error.");
+                return;
+            }
+        }
 
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    std::vector<NG::RangeContent> rangeResult;
-    uint32_t selected = 0;
-    uint32_t kind = 0;
-    std::string value = "";
-    if (!JSTextPickerParser::ParseTextArray(paramObject, rangeResult, kind, selected, value)) {
-        if (!JSTextPickerParser::ParseIconTextArray(paramObject, rangeResult, kind, selected)) {
-            LOGE("parse range error.");
+        auto theme = GetTheme<PickerTheme>();
+        if (!theme) {
+            LOGE("PickerText Theme is null");
             return;
         }
+        TextPickerModel::GetInstance()->Create(theme, kind);
+        TextPickerModel::GetInstance()->SetRange(rangeResult);
+        TextPickerModel::GetInstance()->SetSelected(selected);
+        TextPickerModel::GetInstance()->SetValue(value);
+        TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
+        JSInteractableView::SetFocusable(false);
+        JSInteractableView::SetFocusNode(true);
     }
-
-    auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("PickerText Theme is null");
-        return;
-    }
-    TextPickerModel::GetInstance()->Create(theme, kind);
-    TextPickerModel::GetInstance()->SetRange(rangeResult);
-    TextPickerModel::GetInstance()->SetSelected(selected);
-    TextPickerModel::GetInstance()->SetValue(value);
-    TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
-    JSInteractableView::SetFocusable(false);
-    JSInteractableView::SetFocusNode(true);
 }
 
 bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject,
@@ -118,6 +115,9 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject,
     auto getValue = paramObject->GetProperty("value");
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
+    if (getRange->Length() == 0) {
+        return false;
+    }
     if (!ParseJsStrArray(getRange, getRangeVector)) {
         LOGE("parse str array error.");
         return false;
