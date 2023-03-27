@@ -26,6 +26,7 @@ public:
     static void Create();
 
     static void SetColor(const JSCallbackInfo& info);
+    static void SetForegroundColor(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

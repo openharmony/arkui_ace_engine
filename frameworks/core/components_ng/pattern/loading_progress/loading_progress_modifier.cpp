@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/dom/dom_type.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/progress/progress_theme.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
@@ -118,7 +119,18 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     canvas.Save();
     RSPen pen;
     auto ringColor = color_->Get();
-    pen.SetColor(ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(), ringColor.GetBlue())));
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(progressTheme);
+    auto defaultColor = progressTheme->GetLoadingColor();
+    if (ringColor.GetValue() == defaultColor.GetValue()) {
+        pen.SetColor(ToRSColor(Color::FromARGB(RING_ALPHA, ringColor.GetRed(), ringColor.GetGreen(),
+            ringColor.GetBlue())));
+    } else {
+        pen.SetColor(ToRSColor(Color::FromARGB(ringColor.GetAlpha(), ringColor.GetRed(), ringColor.GetGreen(),
+            ringColor.GetBlue())));
+    }
     pen.SetWidth(ringParam.strokeWidth);
     pen.SetAntiAlias(true);
     canvas.AttachPen(pen);
@@ -164,12 +176,16 @@ void LoadingProgressModifier::DrawOrbit(
     auto baseAlpha = colorAlpha * cometParam.alphaScale;
     for (uint32_t i = 0; i < distPoints.size(); i++) {
         RSPoint pointCenter = distPoints[i];
-        float setAlpha = GetCurentCometOpacity(baseAlpha, distPoints.size() - i, distPoints.size());
-        if (NearZero(setAlpha)) {
-            continue;
+        if (cometColor.GetValue() == Color::FOREGROUND.GetValue()) {
+            brush.SetColor(ToRSColor(cometColor));
+        } else {
+            float setAlpha = GetCurentCometOpacity(baseAlpha, distPoints.size() - i, distPoints.size());
+            if (NearZero(setAlpha)) {
+                continue;
+            }
+            brush.SetColor(
+                ToRSColor(Color::FromRGBO(cometColor.GetRed(), cometColor.GetGreen(), cometColor.GetBlue(), setAlpha)));
         }
-        brush.SetColor(
-            ToRSColor(Color::FromRGBO(cometColor.GetRed(), cometColor.GetGreen(), cometColor.GetBlue(), setAlpha)));
         canvas.AttachBrush(brush);
         canvas.DrawCircle(pointCenter, cometParam.radius * cometParam.sizeScale);
     }
