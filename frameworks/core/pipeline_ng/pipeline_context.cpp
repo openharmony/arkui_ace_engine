@@ -763,10 +763,7 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
-    if (etsCardTouchEventCallback_) {
-        etsCardTouchEventCallback_(point);
-    }
-
+    HandleEtsCardTouchEvent(point);
     if (uiExtensionCallback_) {
         uiExtensionCallback_(point);
     }
@@ -834,7 +831,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
-        etsCardTouchEventCallback_ = nullptr;
+        RemoveEtsCardTouchEventCallback(point.id);
         uiExtensionCallback_ = nullptr;
     }
 

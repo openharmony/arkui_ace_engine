@@ -316,6 +316,9 @@ bool PipelineBase::Animate(const AnimationOption& option, const RefPtr<Curve>& c
 
 void PipelineBase::Destroy() {}
 
+void PipelineBase::AddEtsCardTouchEventCallback(
+    int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
+
 double PipelineBase::ConvertPxToVp(const Dimension& /* dimension */) const
 {
     return 1.0f;
