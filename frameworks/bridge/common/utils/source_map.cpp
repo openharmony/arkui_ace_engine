@@ -65,6 +65,11 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
             left = mid + 1;
         }
     }
+    int32_t sourcesSize = static_cast<int32_t>(sources_.size());
+    if (afterPos_[res].sourcesVal < 0 || afterPos_[res].sourcesVal >= sourcesSize) {
+        LOGE("sourcesVal invalid");
+        return MappingInfo {};
+    }
     std::string sources = sources_[afterPos_[res].sourcesVal];
     auto pos = sources.find(WEBPACK);
     if (pos != std::string::npos) {
@@ -388,9 +393,9 @@ bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans
         if (continuation) {
             shift += VLQ_BASE_SHIFT;
         } else {
-            bool isNegate = result & 1;
+            bool isOdd = result & 1;
             result >>= 1;
-            ans.push_back(isNegate ? -result : result);
+            ans.push_back(isOdd ? -result : result);
             result = 0;
             shift = 0;
         }
