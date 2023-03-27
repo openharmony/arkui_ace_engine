@@ -15,6 +15,7 @@
 
 #include "form_renderer_group.h"
 
+#include "configuration.h"
 #include "form_js_info.h"
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
@@ -109,6 +110,20 @@ void FormRendererGroup::DeleteForm()
 bool FormRendererGroup::IsEmpty()
 {
     return rendererMap_.empty();
+}
+
+void FormRendererGroup::UpdateConfiguration(
+    const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (!config) {
+        HILOG_ERROR("UpdateConfiguration config is null");
+        return;
+    }
+
+    HILOG_INFO("UpdateConfiguration all compIds, size: %{public}zu", rendererMap_.size());
+    for (const auto& iter : rendererMap_) {
+        iter.second->UpdateConfiguration(config);
+    }
 }
 }  // namespace Ace
 }  // namespace OHOS
