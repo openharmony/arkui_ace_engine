@@ -26,6 +26,9 @@
 #include "form_renderer_dispatcher_impl.h"
 
 namespace OHOS {
+namespace AppExecFwk {
+class Configuration;
+}
 namespace Ace {
 /**
  * @class FormRenderer
@@ -48,6 +51,7 @@ public:
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
     void OnSurfaceChange(float width, float height);
+    void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
 private:
     void InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);

@@ -15,6 +15,7 @@
 
 #include "form_renderer.h"
 
+#include "configuration.h"
 #include "form_constants.h"
 #include "form_renderer_hilog.h"
 #include "refbase.h"
@@ -236,6 +237,17 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject> &remoteObj)
 void FormRenderer::ResetRenderDelegate()
 {
     formRendererDelegate_ = nullptr;
+}
+
+void FormRenderer::UpdateConfiguration(
+    const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    if (!uiContent_) {
+        HILOG_ERROR("uiContent_ is null");
+        return;
+    }
+
+    uiContent_->UpdateConfiguration(config);
 }
 
 void FormRenderDelegateRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
