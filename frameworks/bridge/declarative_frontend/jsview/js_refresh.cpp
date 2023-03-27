@@ -24,6 +24,10 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int32_t DEFAULT_FRICTION = 62;
+constexpr int32_t MAX_FRICTION = 100;
+} // namespace
 std::unique_ptr<RefreshModel> RefreshModel::instance_ = nullptr;
 
 RefreshModel* RefreshModel::GetInstance()
@@ -123,7 +127,11 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         }
     }
     if (friction->IsNumber()) {
-        RefreshModel::GetInstance()->SetFriction(friction->ToNumber<int32_t>());
+        auto frictionNumber = friction->ToNumber<int32_t>();
+        if (frictionNumber < 0 || frictionNumber > MAX_FRICTION) {
+            frictionNumber = DEFAULT_FRICTION;
+        }
+        RefreshModel::GetInstance()->SetFriction(frictionNumber);
         if (friction->ToNumber<int32_t>() <= 0) {
             RefreshModel::GetInstance()->IsRefresh(true);
         }

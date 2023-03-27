@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_VIEW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDEXER_INDEXER_VIEW_H
 
+#include "base/geometry/dimension.h"
 #include "core/components_v2/indexer/indexer_component.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
@@ -38,8 +39,8 @@ public:
     static void SetItemSize(const Dimension& itemSize);
     static void SetAlignStyle(NG::AlignStyle alignStyle);
     static void SetSelected(int32_t selected);
-    static void SetPopupPositionX(float popupPositionX);
-    static void SetPopupPositionY(float popupPositionY);
+    static void SetPopupPositionX(const Dimension& popupPositionX);
+    static void SetPopupPositionY(const Dimension& popupPositionY);
     static void SetOnSelected(OnSelectedEvent&& onSelected);
     static void SetOnRequestPopupData(OnRequestPopupDataEvent&& onRequestPopupData);
     static void SetOnPopupSelected(OnPopupSelectedEvent&& onPopupSelectedEvent);

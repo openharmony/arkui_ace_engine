@@ -26,16 +26,6 @@ namespace OHOS::Ace::NG {
 
 RefreshLayoutAlgorithm::RefreshLayoutAlgorithm() = default;
 
-std::optional<SizeF> RefreshLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* /*layoutWrapper*/)
-{
-    if (contentConstraint.selfIdealSize.IsValid()) {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
-    }
-
-    return contentConstraint.maxSize;
-}
-
 void RefreshLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     PerformLayout(layoutWrapper);
