@@ -422,7 +422,7 @@ void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
             }
         }
     } else {
-        for (size_t i = animationProperties_.size() - 1; i >= 0; i--) {
+        for (size_t i = animationProperties_.size() - 1;; i--) {
             if (i == 0) {
                 animationProperties_[i].upFontSize = Dimension();
                 animationProperties_[i].downFontSize = animationProperties_[i].fontSize;

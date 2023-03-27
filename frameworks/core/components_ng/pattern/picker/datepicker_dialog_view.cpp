@@ -159,10 +159,11 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
 
     // build dialog accept and cancel button
     auto changeEvent = dialogEvent["changeId"];
-    SetDialogChange(dateNode, std::move(changeEvent));
     if (settingData.showTime) {
-        SetDialogChange(acceptNode, std::move(changeEvent));
+        auto changeEventSame = changeEvent;
+        SetDialogChange(acceptNode, std::move(changeEventSame));
     }
+    SetDialogChange(dateNode, std::move(changeEvent));
     auto contentRow = CreateButtonNode(acceptNode, dialogEvent, std::move(dialogCancelEvent));
     CHECK_NULL_RETURN(contentRow, nullptr);
     auto event = [dialogNode](const GestureEvent& /* info */) {
