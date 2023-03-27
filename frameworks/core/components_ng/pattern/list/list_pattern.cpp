@@ -128,6 +128,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     DrivenRender(dirty);
 
+    SetScrollState(SCROLL_FROM_NONE);
     isInitialized_ = true;
     return true;
 }
@@ -177,7 +178,7 @@ void ListPattern::ProcessEvent(
         float endOffset = endMainPos_ - contentMainSize_;
         bool scrollUpToEnd = (Positive(prevEndOffset) || !isInitialized_) && NonPositive(endOffset);
         bool scrollDownToEnd = Negative(prevEndOffset) && NonNegative(endOffset);
-        if (scrollUpToEnd || scrollDownToEnd) {
+        if (scrollUpToEnd || (scrollDownToEnd && GetScrollState() != SCROLL_FROM_NONE)) {
             onReachEnd();
         }
     }
@@ -320,11 +321,11 @@ bool ListPattern::OutBoundaryCallback()
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
-    SetScrollState(source);
     // check edgeEffect is not springEffect
     if (!HandleEdgeEffect(offset, source, GetContentSize())) {
         return false;
     }
+    SetScrollState(source);
     currentDelta_ = currentDelta_ - offset;
     MarkDirtyNodeSelf();
     if (!IsOutOfBoundary() || !scrollable_) {
@@ -652,7 +653,6 @@ void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>&
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto list = weakScroll.Upgrade();
         CHECK_NULL_VOID_NOLOG(list);
-        list->SetScrollState(SCROLL_FROM_JUMP);
         list->UpdateCurrentOffset(list->GetTotalOffset() - value, SCROLL_FROM_JUMP);
     });
     animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
@@ -681,7 +681,6 @@ void ListPattern::ScrollTo(float position)
 {
     LOGI("ScrollTo:%{public}f", position);
     StopAnimate();
-    SetScrollState(SCROLL_FROM_JUMP);
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
 }
 
@@ -723,7 +722,6 @@ bool ListPattern::ScrollPage(bool reverse)
     LOGI("ScrollPage:%{public}d", reverse);
     StopAnimate();
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
-    SetScrollState(SCROLL_FROM_JUMP);
     UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
     return true;
 }
@@ -731,7 +729,6 @@ bool ListPattern::ScrollPage(bool reverse)
 void ListPattern::ScrollBy(float offset)
 {
     StopAnimate();
-    SetScrollState(SCROLL_FROM_JUMP);
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
