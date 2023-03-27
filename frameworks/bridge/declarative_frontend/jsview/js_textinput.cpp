@@ -78,6 +78,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("onCut", &JSTextField::SetOnCut);
     JSClass<JSTextInput>::StaticMethod("onPaste", &JSTextField::SetOnPaste);
     JSClass<JSTextInput>::StaticMethod("onClick", &JSTextField::SetOnClick);
+    JSClass<JSTextInput>::StaticMethod("requestKeyboardOnFocus", &JSTextField::RequestKeyboardOnFocus);
     JSClass<JSTextInput>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSTextInput>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSTextInput>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);

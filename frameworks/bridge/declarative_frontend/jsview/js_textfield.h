@@ -41,6 +41,7 @@ public:
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
+    static void RequestKeyboardOnFocus(bool needToRequest);
     static void SetFontWeight(const std::string& value);
     static void SetTextColor(const JSCallbackInfo& info);
     static void SetFontStyle(int32_t value);

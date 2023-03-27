@@ -581,6 +581,10 @@ public:
     void HandleFocusEvent();
     bool OnBackPressed();
     void CheckScrollable();
+    void SetNeedToRequestKeyboardOnFocus(bool needToRequest)
+    {
+        needToRequestKeyboardOnFocus_ = needToRequest;
+    }
 
 private:
     bool HasFocus() const;
@@ -682,6 +686,8 @@ private:
     void OnImageLoadFail(bool checkHidePasswordIcon);
 
     bool IsSearchParentNode() const;
+    void RequestKeyboardOnFocus();
+    void SetNeedToRequestKeyboardOnFocus();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -733,6 +739,8 @@ private:
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;
     bool needToRefreshSelectOverlay_ = false;
+    bool needToRequestKeyboardInner_ = false;
+    bool needToRequestKeyboardOnFocus_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 
