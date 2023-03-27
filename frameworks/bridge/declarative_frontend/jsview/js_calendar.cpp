@@ -371,6 +371,10 @@ RefPtr<CalendarComponentV2> JSCalendar::GetComponent()
 
 void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         auto selectedChangeFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto selectedChange = [execCtx = info.GetExecutionContext(), func = std::move(selectedChangeFuc)](
@@ -399,6 +403,10 @@ void JSCalendar::JsOnSelectedChange(const JSCallbackInfo& info)
 
 void JSCalendar::JsOnRequestData(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         auto requestDataFuc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto requestData = [execCtx = info.GetExecutionContext(), func = std::move(requestDataFuc)](
