@@ -509,6 +509,7 @@ public:
         OHOS::NWeb::ImageAlphaType alphaType);
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
+    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();
@@ -664,6 +665,7 @@ private:
     EventCallbackV2 onPageVisibleV2_;
     EventCallbackV2 onTouchIconUrlV2_;
     EventCallbackV2 onAudioStateChangedV2_;
+    EventCallbackV2 onFirstContentfulPaintV2_;
 
     std::string bundlePath_;
     std::string bundleDataPath_;

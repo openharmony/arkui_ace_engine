@@ -1535,6 +1535,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
+    JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -4249,6 +4250,40 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         };
         NG::WebView::SetAudioStateChangedId(std::move(uiCallback));
+    }
+}
+
+JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("navigationStartTick", eventInfo.GetNavigationStartTick());
+    obj->SetProperty("firstContentfulPaintMs", eventInfo.GetFirstContentfulPaintMs());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        LOGE("Param is invalid, it is not a function");
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<FirstContentfulPaintEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), FirstContentfulPaintEventToJSValue);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto instanceId = Container::CurrentId();
+        auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                              const std::shared_ptr<BaseEventInfo>& info) {
+            ContainerScope scope(instanceId);
+            auto context = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->PostAsyncEvent([execCtx, func = func, info]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                auto* eventInfo = TypeInfoHelper::DynamicCast<FirstContentfulPaintEvent>(info.get());
+                func->Execute(*eventInfo);
+            });
+        };
+        NG::WebView::SetFirstContentfulPaintId(std::move(uiCallback));
+        return;
     }
 }
 } // namespace OHOS::Ace::Framework
