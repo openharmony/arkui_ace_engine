@@ -27,7 +27,7 @@ namespace {
 const std::unordered_map<SourceType, int32_t> SOURCE_TYPE_MAP = {
     { SourceType::TOUCH, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN },
     { SourceType::TOUCH_PAD, MMI::PointerEvent::SOURCE_TYPE_TOUCHPAD },
-    { SourceType::MOUSE, MMI::PointerEvent::SOURCE_TYPE_MOUSE },
+    { SourceType::MOUSE, MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN },
 };
 
 const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
