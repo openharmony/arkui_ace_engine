@@ -1131,6 +1131,10 @@ void JSCanvasRenderer::JsGetPixelMap(const JSCallbackInfo& info)
 
     final_height = static_cast<uint32_t>(canvasData->dirtyHeight);
     final_width = static_cast<uint32_t>(canvasData->dirtyWidth);
+    if (final_height > 0 && final_width > (UINT32_MAX / final_height)) {
+        LOGE("Integer Overflow!!!the product of final_height and final_width is too big.");
+        return;
+    }
     uint32_t length = final_height * final_width;
     uint32_t* data = new uint32_t[length];
     for (uint32_t i = 0; i < final_height; i++) {

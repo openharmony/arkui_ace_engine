@@ -71,7 +71,7 @@ void JSPolygon::JSBind(BindingTarget globalObj)
 
 void JSPolygon::JsPoints(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
         return;
     }

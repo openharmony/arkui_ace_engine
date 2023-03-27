@@ -448,7 +448,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
         LOGE("Parse inputFilter failed");
         return;
     }
-    if (info[1]->IsFunction()) {
+    if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

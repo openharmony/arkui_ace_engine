@@ -186,6 +186,10 @@ void JSForm::SetModuleName(const JSCallbackInfo& info)
 
 void JSForm::JsOnAcquired(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onAcquired = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& param) {
