@@ -63,11 +63,13 @@ SubwindowOhos::SubwindowOhos(int32_t instanceId) : windowId_(id_), parentContain
 void SubwindowOhos::InitContainer()
 {
     LOGI("Subwindow start initialize container");
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
     if (!window_) {
         LOGI("Window is null, need create a new window");
         OHOS::sptr<OHOS::Rosen::WindowOption> windowOption = new OHOS::Rosen::WindowOption();
-        auto parentWindowName = Platform::AceContainer::GetContainer(parentContainerId_)->GetWindowName();
-        auto parentWindowId = Platform::AceContainer::GetContainer(parentContainerId_)->GetWindowId();
+        auto parentWindowName = parentContainer->GetWindowName();
+        auto parentWindowId = parentContainer->GetWindowId();
         auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
         sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
         CHECK_NULL_VOID_NOLOG(parentWindow);
@@ -94,8 +96,6 @@ void SubwindowOhos::InitContainer()
     window_->SetUIContent(url, nullptr, nullptr, false);
     childContainerId_ = SubwindowManager::GetInstance()->GetContainerId(window_->GetWindowId());
     SubwindowManager::GetInstance()->AddParentContainerId(childContainerId_, parentContainerId_);
-    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    CHECK_NULL_VOID(parentContainer);
 
     auto container = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(container);
