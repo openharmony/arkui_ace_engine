@@ -318,6 +318,11 @@ void OffscreenCanvasPattern::SetSmoothingEnabled(bool enabled)
     offscreenPaintMethod_->SetSmoothingEnabled(enabled);
 }
 
+void OffscreenCanvasPattern::SetSmoothingQuality(const std::string& quality)
+{
+    offscreenPaintMethod_->SetSmoothingQuality(quality);
+}
+
 void OffscreenCanvasPattern::SetLineDashOffset(double offset)
 {
     offscreenPaintMethod_->SetLineDashOffset(offset);

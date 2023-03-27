@@ -1502,9 +1502,21 @@ void JSCanvasRenderer::JsSetImageSmoothingQuality(const JSCallbackInfo& info)
         if (QUALITY_TYPE.find(quality) == QUALITY_TYPE.end()) {
             return;
         }
-        if (isOffscreen_) {
+        if (Container::IsCurrentUseNewPipeline()) {
+            if (isOffscreen_ && offscreenCanvasPattern_) {
+                offscreenCanvasPattern_->SetSmoothingQuality(quality);
+                return;
+            }
+            if (!isOffscreen_ && customPaintPattern_) {
+                customPaintPattern_->UpdateSmoothingQuality(quality);
+            }
+            return;
+        }
+        if (isOffscreen_ && offscreenCanvas_) {
             offscreenCanvas_->SetSmoothingQuality(quality);
-        } else {
+            return;
+        }
+        if (!isOffscreen_ && pool_) {
             pool_->UpdateSmoothingQuality(quality);
         }
     }

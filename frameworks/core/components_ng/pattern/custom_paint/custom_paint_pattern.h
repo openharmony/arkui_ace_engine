@@ -108,6 +108,7 @@ public:
     void UpdateGlobalAlpha(double alpha);
     void UpdateCompositeOperation(CompositeOperation type);
     void UpdateSmoothingEnabled(bool enabled);
+    void UpdateSmoothingQuality(const std::string& quality);
     void UpdateLineCap(LineCapStyle cap);
     void UpdateLineDashOffset(double dash);
     void UpdateLineWidth(double width);
