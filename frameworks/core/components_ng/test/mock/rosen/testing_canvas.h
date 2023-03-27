@@ -82,7 +82,7 @@ public:
     virtual void DrawBackground(const TestingBrush& brush) {}
     virtual void ClipRect(const TestingRect& rect, ClipOp op) {}
     virtual void Scale(float sx, float sy) {}
-    virtual void ClipPath(const TestingPath& path, ClipOp op) {}
+    virtual void ClipPath(const TestingPath& path, ClipOp op, bool doAntiAlias) {}
     virtual void DrawOval(const TestingRect& oval) {}
 };
 } // namespace OHOS::Ace::Testing

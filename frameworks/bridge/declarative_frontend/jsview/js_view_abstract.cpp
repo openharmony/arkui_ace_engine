@@ -803,6 +803,12 @@ void ParseCustomPopupParam(
         }
     }
 
+    auto maskColorValue = popupObj->GetProperty("maskColor");
+    Color maskColor;
+    if (JSViewAbstract::ParseJsColor(maskColorValue, maskColor)) {
+        popupParam->SetMaskColor(maskColor);
+    }
+
     auto maskValue = popupObj->GetProperty("mask");
     if (maskValue->IsBoolean()) {
         popupParam->SetBlockEvent(maskValue->ToBoolean());
@@ -4177,8 +4183,8 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeParam = paramObject->GetProperty("type");
-    if (!typeParam->IsNull() && !typeParam->IsUndefined() &&
-        typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
+    if (!typeParam->IsNull() && !typeParam->IsUndefined() && typeParam->IsString() &&
+        typeParam->ToString() == "ProgressMask") {
         auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
         JSRef<JSVal> jValue = paramObject->GetProperty("value");
         auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
