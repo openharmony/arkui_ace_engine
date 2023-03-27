@@ -531,11 +531,6 @@ void RenderScroll::InitScrollBar(const RefPtr<ScrollBar>& scrollBar)
         return;
     }
 
-    if (scrollBar_) {
-        // Clear the old data.
-        scrollBar_->Reset(scrollBar);
-        return;
-    }
     scrollBar_ = scrollBar;
     if (!scrollBar_) {
         scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::OFF);
