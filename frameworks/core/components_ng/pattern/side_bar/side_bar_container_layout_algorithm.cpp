@@ -231,6 +231,26 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);
 
+    /*
+     * Control buttion left position need to special handle:
+     *   1. when sideBarPosition set to END and controlButtonLeft do not set in ButtonStyle
+     *   control button need to move follow the sidebar to the right
+     *   2. when sideBarPosition set to START or controlButtonLeft has set by user
+     *   control button keep before handle
+     *   3. if the controlButtonLeft has set, whether sideBarPosition set to START or END
+     *   control button offset the left, if value invalid set to default 16vp
+     */
+    auto sideBarPosition = layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START);
+    auto controlButtonWidth = layoutProperty->GetControlButtonWidth().value_or(DEFAULT_CONTROL_BUTTON_WIDTH);
+
+    if ((sideBarPosition == SideBarPosition::END) && // sideBarPosition is End, other pass
+        (!layoutProperty->GetControlButtonLeft().has_value())) { // origin value has not set
+        auto defaultControlButtonLeftPx = ConvertToPx(DEFAULT_CONTROL_BUTTON_LEFT,
+            scaleProperty, parentWidth).value_or(0);
+        auto controlButtonWidthPx = ConvertToPx(controlButtonWidth, scaleProperty, parentWidth).value_or(0);
+        controlButtonLeftPx = parentWidth - defaultControlButtonLeftPx - controlButtonWidthPx;
+    }
+
     auto imgOffset = OffsetF(controlButtonLeftPx, controlButtonTopPx);
     buttonLayoutWrapper->GetGeometryNode()->SetMarginFrameOffset(imgOffset);
     buttonLayoutWrapper->Layout();
