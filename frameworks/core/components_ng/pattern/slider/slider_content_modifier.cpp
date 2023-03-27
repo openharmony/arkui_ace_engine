@@ -129,7 +129,6 @@ void SliderContentModifier::onDraw(DrawingContext& context)
     DrawBlock(context);
     DrawShadow(context);
     DrawHoverOrPress(context);
-    SetAnimated();
 }
 
 void SliderContentModifier::DrawBackground(DrawingContext& context)

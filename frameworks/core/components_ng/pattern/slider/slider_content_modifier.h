@@ -273,7 +273,7 @@ private:
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
     bool reverse_ = false;
-    bool needAnimate_ = true;
+    bool needAnimate_ = false; // Translate Animation on-off
     float hotCircleShadowWidth_ = 0.0f;
     Color blockOuterEdgeColor_;
     RefPtr<BasicShape> shape_;
