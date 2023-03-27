@@ -1527,6 +1527,14 @@ class stateMgmtConsole {
         aceConsole.error(...args);
     }
 }
+class stateMgmtTrace {
+    static scopedTrace(codeBlock, ...args) {
+        aceTrace.begin(...args);
+        let result = codeBlock();
+        aceTrace.end();
+        return result;
+    }
+}
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4185,27 +4193,27 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
-        ViewPU.aceTraceBegin("ViewPU.viewPropertyHasChanged", `${this.constructor.name}`, `${varName}`, `${dependentElmtIds.size}`);
-        
-        this.syncInstanceId();
-        if (dependentElmtIds.size && !this.isFirstRender()) {
-            if (!this.dirtDescendantElementIds_.size) {
-                // mark Composedelement dirty when first elmtIds are added
-                // do not need to do this every time
-                this.markNeedUpdate();
+        stateMgmtTrace.scopedTrace(() => {
+            
+            this.syncInstanceId();
+            if (dependentElmtIds.size && !this.isFirstRender()) {
+                if (!this.dirtDescendantElementIds_.size) {
+                    // mark Composedelement dirty when first elmtIds are added
+                    // do not need to do this every time
+                    this.markNeedUpdate();
+                }
+                
+                const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+                this.dirtDescendantElementIds_ = union;
+                
             }
-            
-            const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-            this.dirtDescendantElementIds_ = union;
-            
-        }
-        let cb = this.watchedProps.get(varName);
-        if (cb) {
-            
-            cb.call(this, varName);
-        }
-        this.restoreInstanceId();
-        ViewPU.aceTraceEnd();
+            let cb = this.watchedProps.get(varName);
+            if (cb) {
+                
+                cb.call(this, varName);
+            }
+            this.restoreInstanceId();
+        }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
     }
     /**
      * Function to be called from the constructor of the sub component
