@@ -277,7 +277,7 @@ void MenuItemPattern::RegisterOnHover()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent);
-    inputHub->SetHoverAnimation(HoverEffectType::BOARD);
+    inputHub->SetHoverEffect(HoverEffectType::BOARD);
 }
 
 void MenuItemPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)

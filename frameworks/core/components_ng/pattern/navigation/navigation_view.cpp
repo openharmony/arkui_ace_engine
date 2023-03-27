@@ -552,7 +552,7 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
 
             auto eventHub = menuItemNode->GetOrCreateInputEventHub();
             CHECK_NULL_VOID(eventHub);
-            eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+            eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
             PaddingProperty padding;
             padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -604,7 +604,7 @@ void NavigationView::SetMenuItems(std::vector<BarItem>&& menuItems)
 
         auto eventHub = menuItemNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
-        eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+        eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
@@ -702,7 +702,7 @@ void NavigationView::SetTitleMode(NavigationTitleMode mode)
 
         auto eventHub = backButtonNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(eventHub);
-        eventHub->SetHoverAnimation(HoverEffectType::BOARD);
+        eventHub->SetHoverEffect(HoverEffectType::BOARD);
 
         PaddingProperty padding;
         padding.left = CalcLength(BUTTON_PADDING.ConvertToPx());
