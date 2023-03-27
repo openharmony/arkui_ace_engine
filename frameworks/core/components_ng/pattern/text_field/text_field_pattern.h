@@ -52,12 +52,14 @@
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
 
+#if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
 } // namespace OHOS::MiscServices
+#endif
 #endif
 
 namespace OHOS::Ace::NG {

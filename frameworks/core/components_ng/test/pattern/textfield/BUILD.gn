@@ -101,7 +101,6 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # self
-    "$ace_root/frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_controller.cpp",
@@ -122,12 +121,6 @@ ohos_unittest("textfield_test_ng") {
     "$ace_flutter_engine_root/skia:ace_skia_ohos",
     "//third_party/icu/icu4c:shared_icui18n",
     "//third_party/icu/icu4c:shared_icuuc",
-  ]
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-    "imf:inputmethod_client",
-    "input:libmmi-client",
   ]
   configs = test_configs
 }
