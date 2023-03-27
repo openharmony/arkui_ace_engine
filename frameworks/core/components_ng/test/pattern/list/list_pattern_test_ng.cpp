@@ -3125,6 +3125,11 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest005, TestSize.Level1)
      * @tc.steps: step3. GetCurrentOffset.
      * @tc.expected: Check offset is correct.
      */
+
+    positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
+    positionController->JumpTo(1, 0);
+    EXPECT_EQ(listPattern->jumpIndex_, 1);
+    EXPECT_EQ(positionController->GetScrollDirection(), Axis::VERTICAL);
     Offset offset = positionController->GetCurrentOffset();
     EXPECT_EQ(offset.GetX(), 0.f);
     EXPECT_EQ(offset.GetY(), 0.f);
