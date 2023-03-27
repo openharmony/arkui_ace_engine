@@ -112,6 +112,9 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         // touch event
         LOGD("ProcessTouchEvent");
         view->ProcessTouchEvent(pointerEvent);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        view->ProcessDragEvent(pointerEvent);
+#endif // ENABLE_DRAG_FRAMEWORK
     }
 }
 
@@ -185,6 +188,41 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         LOGW("Unknown event.");
     }
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    MMI::PointerEvent::PointerItem pointerItem;
+    pointerEvent->GetPointerItem(pointerEvent->GetPointerId(), pointerItem);
+    DragEventAction action;
+    int32_t orgAction = pointerEvent->GetPointerAction();
+    switch (orgAction) {
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE: {
+            action = DragEventAction::DRAG_EVENT_MOVE;
+            ProcessDragEvent(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), action);
+            break;
+        }
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP: {
+            action = DragEventAction::DRAG_EVENT_END;
+            ProcessDragEvent(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), action);
+            break;
+        }
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_IN_WINDOW: {
+            action = DragEventAction::DRAG_EVENT_START;
+            ProcessDragEvent(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), action);
+            break;
+        }
+        case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW: {
+            action = DragEventAction::DRAG_EVENT_OUT;
+            ProcessDragEvent(pointerItem.GetDisplayX(), pointerItem.GetDisplayY(), action);
+            break;
+        }
+        default:
+            LOGW("unknown type");
+            break;
+    }
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 
 void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
