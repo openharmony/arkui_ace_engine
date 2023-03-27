@@ -112,6 +112,8 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         UpdateListItemConstraint(axis, contentIdealSize, childLayoutConstraint);
         MeasureList(layoutWrapper, childLayoutConstraint, axis);
     } else {
+        itemPosition_.clear();
+        layoutWrapper->RemoveAllChildInRenderTree();
         LOGI("child size is empty");
     }
 
