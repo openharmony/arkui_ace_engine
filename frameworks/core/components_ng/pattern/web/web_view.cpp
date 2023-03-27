@@ -628,6 +628,13 @@ void WebView::SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged)
     webEventHub->SetOnAudioStateChangedEvent(std::move(audioStateChanged));
 }
 
+void WebView::SetFirstContentfulPaintId(OnWebAsyncFunc&& firstContentfulPaintId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstContentfulPaintEvent(std::move(firstContentfulPaintId));
+}
+
 void WebView::NotifyPopupWindowResult(int32_t webId, bool result)
 {
     if (webId != -1) {

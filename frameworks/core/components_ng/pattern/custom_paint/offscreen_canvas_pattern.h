@@ -79,6 +79,7 @@ public:
     void SetShadowOffsetX(double x);
     void SetShadowOffsetY(double y);
     void SetSmoothingEnabled(bool enabled);
+    void SetSmoothingQuality(const std::string& quality);
     void SetLineDashOffset(double offset);
     void SetShadowColor(const Color& color);
     void SetStrokePattern(const Ace::Pattern& pattern);

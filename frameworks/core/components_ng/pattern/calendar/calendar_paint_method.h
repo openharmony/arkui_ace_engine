@@ -48,6 +48,7 @@ private:
     void DrawTodayArea(RSCanvas& canvas, const Offset& offset, double x, double y) const;
     void DrawFocusedArea(RSCanvas& canvas, const Offset& offset, double x, double y) const;
     void InitTextStyle(rosen::TextStyle& dateTextStyle, rosen::TextStyle& lunarTextStyle);
+    void SetDayTextStyle(rosen::TextStyle& dateTextStyle, rosen::TextStyle& lunarTextStyle, const CalendarDay& day);
     void PaintDay(RSCanvas& canvas, const Offset& offset, const CalendarDay& day, rosen::TextStyle& textStyle) const;
     void PaintLunarDay(
         RSCanvas& canvas, const Offset& offset, const CalendarDay& day, const rosen::TextStyle& textStyle) const;

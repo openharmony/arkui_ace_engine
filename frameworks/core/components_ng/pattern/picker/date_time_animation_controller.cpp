@@ -70,9 +70,9 @@ void DateTimeAnimationController::PlayMovingInAnimation()
     animationOption.SetDuration(MOVE_DURATION);
     animationOption.SetCurve(Curves::FRICTION);
 
-    yearRenderContext->UpdateTransformTranslate(Vector3F(yearStart_, 0, 0));
-    monthRenderContext->UpdateTransformTranslate(Vector3F(monthStart_, 0, 0));
-    dayRenderContext->UpdateTransformTranslate(Vector3F(dayStart_, 0, 0));
+    yearRenderContext->UpdateTransformTranslate({ yearStart_, 0.0f, 0.0f });
+    monthRenderContext->UpdateTransformTranslate({ monthStart_, 0.0f, 0.0f });
+    dayRenderContext->UpdateTransformTranslate({ dayStart_, 0.0f, 0.0f });
     AnimationUtils::Animate(animationOption,
         [yearRenderContext, monthRenderContext, dayRenderContext, weak = AceType::WeakClaim(this)]() {
             auto ref = weak.Upgrade();
@@ -80,9 +80,9 @@ void DateTimeAnimationController::PlayMovingInAnimation()
             CHECK_NULL_VOID_NOLOG(yearRenderContext);
             CHECK_NULL_VOID_NOLOG(monthRenderContext);
             CHECK_NULL_VOID_NOLOG(dayRenderContext);
-            yearRenderContext->UpdateTransformTranslate(Vector3F(ref->yearEnd_, 0, 0));
-            monthRenderContext->UpdateTransformTranslate(Vector3F(ref->monthEnd_, 0, 0));
-            dayRenderContext->UpdateTransformTranslate(Vector3F(ref->dayEnd_, 0, 0));
+            yearRenderContext->UpdateTransformTranslate({ ref->yearEnd_, 0.0f, 0.0f });
+            monthRenderContext->UpdateTransformTranslate({ ref->monthEnd_, 0.0f, 0.0f });
+            dayRenderContext->UpdateTransformTranslate({ ref->dayEnd_, 0.0f, 0.0f });
         });
 }
 
@@ -98,9 +98,9 @@ void DateTimeAnimationController::PlayMovingOutAnimation()
     animationOption.SetDuration(MOVE_DURATION);
     animationOption.SetCurve(Curves::FRICTION);
 
-    yearRenderContext->UpdateTransformTranslate(Vector3F(yearEnd_, 0, 0));
-    monthRenderContext->UpdateTransformTranslate(Vector3F(monthEnd_, 0, 0));
-    dayRenderContext->UpdateTransformTranslate(Vector3F(dayEnd_, 0, 0));
+    yearRenderContext->UpdateTransformTranslate({ yearEnd_, 0.0f, 0.0f });
+    monthRenderContext->UpdateTransformTranslate({ monthEnd_, 0.0f, 0.0f });
+    dayRenderContext->UpdateTransformTranslate({ dayEnd_, 0.0f, 0.0f });
     AnimationUtils::Animate(animationOption,
         [yearRenderContext, monthRenderContext, dayRenderContext, weak = AceType::WeakClaim(this)]() {
             auto ref = weak.Upgrade();
@@ -108,9 +108,9 @@ void DateTimeAnimationController::PlayMovingOutAnimation()
             CHECK_NULL_VOID_NOLOG(yearRenderContext);
             CHECK_NULL_VOID_NOLOG(monthRenderContext);
             CHECK_NULL_VOID_NOLOG(dayRenderContext);
-            yearRenderContext->UpdateTransformTranslate(Vector3F(ref->yearStart_, 0, 0));
-            monthRenderContext->UpdateTransformTranslate(Vector3F(ref->monthStart_, 0, 0));
-            dayRenderContext->UpdateTransformTranslate(Vector3F(ref->dayStart_, 0, 0));
+            yearRenderContext->UpdateTransformTranslate({ ref->yearStart_, 0.0f, 0.0f });
+            monthRenderContext->UpdateTransformTranslate({ ref->monthStart_, 0.0f, 0.0f });
+            dayRenderContext->UpdateTransformTranslate({ ref->dayStart_, 0.0f, 0.0f });
         });
 }
 

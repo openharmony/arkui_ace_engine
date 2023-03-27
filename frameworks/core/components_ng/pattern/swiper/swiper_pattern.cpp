@@ -675,8 +675,11 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
     currentOffset_ = currentOffset_ + offset;
-    float contentSize = MainSize() - GetBorderAndPaddingWidth();
-    turnPageRate_ = currentOffset_ / contentSize;
+    if (NearEqual(GetTranslateLength(), 0.0f)) {
+        turnPageRate_ = 0.0f;
+    } else {
+        turnPageRate_ = currentOffset_ / GetTranslateLength();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -684,17 +687,6 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         auto indicatorNode = DynamicCast<FrameNode>(host->GetLastChild());
         indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
-}
-
-float SwiperPattern::GetBorderAndPaddingWidth()
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0);
-    auto layoutProperty = host->GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProperty, 0);
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    return GetDirection() == Axis::HORIZONTAL ? padding.left.value_or(0.0f) + padding.right.value_or(0.0f)
-                                              : padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
 }
 
 void SwiperPattern::HandleTouchEvent(const TouchEventInfo& info)

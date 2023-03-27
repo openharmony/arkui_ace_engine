@@ -249,4 +249,121 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
     loadingProgressModifier.DrawOrbit(context, cometParam, .0f, 2.0f);
 }
+
+/**
+ * @tc.name: LoadingProgressModifierTest003
+ * @tc.desc: Test LoadingProgressModifier onDraw function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest003, TestSize.Level1)
+{
+    LoadingProgressModifier loadingProgressModifier;
+    LinearColor color;
+    loadingProgressModifier.SetColor(color);
+    EXPECT_EQ(loadingProgressModifier.color_->Get(), color);
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 100.0f, 100.0f };
+    /**
+     * @tc.cases: case1. date > COUNT.
+     */
+    loadingProgressModifier.date_->Set(80.0f);
+
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.onDraw(context);
+    /**
+     * @tc.cases: case1. date < COUNT.
+     */
+    loadingProgressModifier.date_->Set(0.0f);
+
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.onDraw(context);
+    /**
+     * @tc.cases: case1. date == COUNT.
+     */
+    loadingProgressModifier.date_->Set(50.0f);
+
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.onDraw(context);
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest004
+ * @tc.desc: Test LoadingProgressModifier onDraw function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest004, TestSize.Level1)
+{
+    LoadingProgressModifier loadingProgressModifier;
+    LinearColor color;
+    loadingProgressModifier.SetColor(color);
+    EXPECT_EQ(loadingProgressModifier.color_->Get(), color);
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 100.0f, 100.0f };
+    
+    loadingProgressModifier.date_->Set(20.0f);
+    loadingProgressModifier.cometTailLen_->Set(60.0f);
+
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.onDraw(context);
+}
+
+/**
+ * @tc.name: LoadingProgressModifierTest005
+ * @tc.desc: Test LoadingProgressModifier StartTransToRecycleAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest005, TestSize.Level1)
+{
+    LoadingProgressModifier loadingProgressModifier;
+    LinearColor color;
+    loadingProgressModifier.SetColor(color);
+    EXPECT_EQ(loadingProgressModifier.color_->Get(), color);
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, 100.0f, 100.0f };
+    
+    loadingProgressModifier.date_->Set(20.0f);
+    loadingProgressModifier.cometTailLen_->Set(60.0f);
+
+    EXPECT_CALL(rsCanvas, Save()).Times(2);
+    EXPECT_CALL(rsCanvas, Translate(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(2);
+    loadingProgressModifier.onDraw(context);
+    loadingProgressModifier.StartTransToRecycleAnimation();
+    EXPECT_EQ(loadingProgressModifier.date_->Get(), 100.0f);
+    EXPECT_EQ(loadingProgressModifier.cometSizeScale_->Get(), 0.825f);
+    EXPECT_EQ(loadingProgressModifier.cometOpacity_->Get(), 0.7f);
+}
 } // namespace OHOS::Ace::NG

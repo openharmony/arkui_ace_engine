@@ -135,6 +135,7 @@ private:
     std::string bundleName_;
     std::string moduleName_;
     bool isBundle_ = false;
+    int32_t minCompatibleVersionCode_ = 0;
     float formWidth_ = 0.0;
     float formHeight_ = 0.0;
     std::string formData_;

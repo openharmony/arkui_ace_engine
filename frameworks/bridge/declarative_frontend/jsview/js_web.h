@@ -129,6 +129,7 @@ public:
     static void VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     static void ScrollBarColor(const std::string& colorValue);
     static void OnAudioStateChanged(const JSCallbackInfo& args);
+    static void OnFirstContentfulPaint(const JSCallbackInfo& args);
 
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;

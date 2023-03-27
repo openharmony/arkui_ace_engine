@@ -111,12 +111,12 @@ public:
 
     void SetJSViewName(std::string&& name)
     {
-        jsViewName = name;
+        jsViewName_ = name;
     }
 
     const std::string& GetJSViewName()
     {
-        return jsViewName;
+        return jsViewName_;
     }
 
 private:
@@ -128,7 +128,7 @@ private:
     std::function<void(int32_t)> forceNodeUpdateFunc_;
     bool needRebuild_ = false;
 
-    std::string jsViewName;
+    std::string jsViewName_;
 };
 } // namespace OHOS::Ace::NG
 

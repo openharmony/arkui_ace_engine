@@ -408,6 +408,17 @@ void CustomPaintPattern::UpdateSmoothingEnabled(bool enabled)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::UpdateSmoothingQuality(const std::string& quality)
+{
+    auto task = [quality](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.SetSmoothingQuality(quality);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::UpdateLineCap(LineCapStyle cap)
 {
     auto task = [cap](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {

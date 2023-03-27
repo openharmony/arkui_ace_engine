@@ -328,6 +328,18 @@ bool PageRouterManager::StartPop()
         // the last page.
         return false;
     }
+
+    auto currentPage = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_RETURN(currentPage, false);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_RETURN(pageInfo, false);
+    if (pageInfo->GetAlertCallback()) {
+        BackCheckAlert(NG::RouterPageInfo(), "");
+        return true;
+    }
+
     auto topNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
     if (!OnPopPage(true, true)) {
