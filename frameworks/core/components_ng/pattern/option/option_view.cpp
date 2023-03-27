@@ -111,7 +111,7 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
     margin.right = CalcLength(theme->GetIconContentPadding());
     props->UpdateMargin(margin);
 
-    iconNode->MountToParent(parent);
+    iconNode->MountToParent(parent, 0);
     iconNode->MarkModifyDone();
     return iconNode;
 }
