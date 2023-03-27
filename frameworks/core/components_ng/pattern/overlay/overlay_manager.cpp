@@ -729,8 +729,8 @@ bool OverlayManager::RemoveOverlay()
     RemoveIndexerPopup();
     auto childrenSize = rootNode->GetChildren().size();
     if (rootNode->GetChildren().size() > 1) {
-        // stage node is at index 0, remove overlay at index 1
-        auto overlay = DynamicCast<FrameNode>(rootNode->GetChildAtIndex(1));
+        // stage node is at index 0, remove overlay at last
+        auto overlay = DynamicCast<FrameNode>(rootNode->GetLastChild());
         CHECK_NULL_RETURN(overlay, false);
         // close dialog with animation
         auto pattern = overlay->GetPattern();
@@ -772,7 +772,7 @@ bool OverlayManager::RemoveOverlay()
             modalStack_.pop();
             return true;
         }
-        rootNode->RemoveChildAtIndex(1);
+        rootNode->RemoveChild(overlay);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         LOGI("overlay removed successfully");
         return true;

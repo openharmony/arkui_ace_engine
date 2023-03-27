@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -445,7 +446,16 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
             LOGW("dialogs are empty");
             return;
         }
-        auto dialog = dialogs_.back().Upgrade();
+        RefPtr<NG::FrameNode> dialog;
+        while (!dialogs_.empty()) {
+            dialog = dialogs_.back().Upgrade();
+            if (dialog && !dialog->IsRemoving()) {
+                // get the dialog not removed currently
+                break;
+            }
+            dialogs_.pop_back();
+        }
+
         if (!dialog) {
             LOGW("dialog is null");
             return;
