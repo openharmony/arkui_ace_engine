@@ -73,6 +73,7 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
     ViewStackProcessor::GetInstance()->Push(frameNode);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     pattern->SetSearchController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->UpdateChangeEvent(value.value_or(""));
     return pattern->GetSearchController();
 }
 
