@@ -31,10 +31,18 @@ public:
     ~SwiperPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+
+    void SetNeedPaintFade(bool needPaintFade)
+    {
+        needPaintFade_ = needPaintFade;
+    }
 
 private:
     void PaintFade(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
+    void ClipPadding(PaintWrapper* paintWrapper, RSCanvas& canvas) const;
 
+    bool needPaintFade_;
     Axis axis_;
     float mainDelta_ = 0.0f;
 };
