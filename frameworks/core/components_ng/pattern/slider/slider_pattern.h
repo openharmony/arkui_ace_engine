@@ -134,6 +134,8 @@ private:
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
 
+    void OpenTranslateAnimation();
+    void CloseTranslateAnimation();
     SliderContentModifier::Parameters UpdateContentParameters();
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);

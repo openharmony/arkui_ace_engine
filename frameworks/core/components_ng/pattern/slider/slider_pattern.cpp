@@ -180,12 +180,14 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
         mousePressedFlag_ = true;
         FireChangeEvent(SliderChangeMode::Begin);
+        OpenTranslateAnimation();
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
         if (bubbleFlag_) {
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
+        CloseTranslateAnimation();
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -372,6 +374,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Moving);
+        pattern->CloseTranslateAnimation();
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
@@ -802,5 +805,17 @@ void SliderPattern::LayoutImageNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void SliderPattern::OpenTranslateAnimation()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetAnimated();
+}
+
+void SliderPattern::CloseTranslateAnimation()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetNotAnimated();
 }
 } // namespace OHOS::Ace::NG
