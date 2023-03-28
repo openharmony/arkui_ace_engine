@@ -67,6 +67,7 @@ public:
         auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
         CHECK_NULL_VOID(textFieldTheme);
         json->Put("caretPosition", std::to_string(propCaretPosition_.value_or(0)).c_str());
+        json->Put("showPasswordIcon", propShowPasswordIcon_.value_or(true));
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
