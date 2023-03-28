@@ -41,7 +41,7 @@ public:
 
     bool IsMeasureBoundary() const override
     {
-        return true;
+        return false;
     }
 
     bool UsResRegion() override
