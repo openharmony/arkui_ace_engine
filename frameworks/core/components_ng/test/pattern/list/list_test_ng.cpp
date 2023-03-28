@@ -1488,6 +1488,8 @@ HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     info.SetLocalLocation(Offset(0.f, 0.f));
     pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
     RefPtr<ListItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
     EXPECT_TRUE(firstItemPattern->IsSelected());
     info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
@@ -1502,6 +1504,8 @@ HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     info.SetLocalLocation(Offset(240.f, 350.f));
     pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
     RefPtr<ListItemPattern> fourthItemPattern = GetItemPattern(frameNode, 3);
     EXPECT_TRUE(fourthItemPattern->IsSelected());
     info.SetAction(MouseAction::RELEASE);
@@ -1514,6 +1518,8 @@ HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
      */
     info.SetAction(MouseAction::PRESS);
     info.SetLocalLocation(Offset(240.f, 400.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
     pattern->HandleMouseEventWithoutKeyboard(info);
     fourthItemPattern = GetItemPattern(frameNode, 3);
     EXPECT_TRUE(fourthItemPattern->IsSelected());
