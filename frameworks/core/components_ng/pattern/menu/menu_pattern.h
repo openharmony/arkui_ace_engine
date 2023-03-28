@@ -161,6 +161,8 @@ private:
     bool OnKeyEvent(const KeyEvent& event) const;
     void UpdateMenuItemChildren(RefPtr<FrameNode>& host);
 
+    void DisableTabInMenu();
+
     RefPtr<FrameNode> GetMenuWrapper() const;
 
     RefPtr<ClickEvent> onClick_;

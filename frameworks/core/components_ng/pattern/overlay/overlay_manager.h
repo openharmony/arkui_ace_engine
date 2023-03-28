@@ -147,10 +147,10 @@ private:
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
 
-    void FocusOverlayNode(const RefPtr<FrameNode>& dialogNode);
-    void BlurOverlayNode();
+    void FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow = false);
+    void BlurOverlayNode(bool isInSubWindow = false);
 
-    void ShowMenuAnimation(const RefPtr<FrameNode>& menu);
+    void ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow = false);
     void PopMenuAnimation(const RefPtr<FrameNode>& menu);
 
     void OpenDialogAnimation(const RefPtr<FrameNode>& node);

@@ -93,6 +93,7 @@ void MenuPattern::OnModifyDone()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     RegisterOnKeyEvent(focusHub);
+    DisableTabInMenu();
     UpdateMenuItemChildren(host);
 
     if (IsMultiMenu()) {
@@ -345,8 +346,29 @@ RefPtr<FrameNode> MenuPattern::GetMenuColumn() const
     auto menu = GetHost();
     CHECK_NULL_RETURN(menu, nullptr);
     auto scroll = menu->GetChildren().front();
-    CHECK_NULL_RETURN(menu, nullptr);
+    CHECK_NULL_RETURN(scroll, nullptr);
     auto column = scroll->GetChildren().front();
     return DynamicCast<FrameNode>(column);
+}
+
+void MenuPattern::DisableTabInMenu()
+{
+    if (IsMultiMenu()) {
+        // multi menu not has scroll and column
+        return;
+    }
+    // disable tab in menu
+    auto column = GetMenuColumn();
+    CHECK_NULL_VOID(column);
+    auto columnFocusHub = column->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(columnFocusHub);
+
+    auto onKeyEvent = [](const KeyEvent& event) -> bool {
+        if (event.action != KeyAction::DOWN) {
+            return false;
+        }
+        return event.code == KeyCode::KEY_TAB;
+    };
+    columnFocusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 } // namespace OHOS::Ace::NG

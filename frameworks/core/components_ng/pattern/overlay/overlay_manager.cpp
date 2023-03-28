@@ -190,19 +190,20 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     pipeline->RequestFrame();
 }
 
-void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
+void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu, bool isInSubWindow)
 {
     AnimationOption option;
     option.SetCurve(Curves::FAST_OUT_SLOW_IN);
     option.SetDuration(MENU_ANIMATION_DURATION);
     option.SetFillMode(FillMode::FORWARDS);
-    option.SetOnFinishEvent([weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId()] {
-        auto menu = menuWK.Upgrade();
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID_NOLOG(menu && overlayManager);
-        ContainerScope scope(id);
-        overlayManager->FocusOverlayNode(menu);
-    });
+    option.SetOnFinishEvent(
+        [weak = WeakClaim(this), menuWK = WeakClaim(RawPtr(menu)), id = Container::CurrentId(), isInSubWindow] {
+            auto menu = menuWK.Upgrade();
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID_NOLOG(menu && overlayManager);
+            ContainerScope scope(id);
+            overlayManager->FocusOverlayNode(menu, isInSubWindow);
+        });
 
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(context);
@@ -583,7 +584,7 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     CHECK_NULL_VOID(rootNode);
     rootNode->Clean();
     menu->MountToParent(rootNode);
-    ShowMenuAnimation(menu);
+    ShowMenuAnimation(menu, true);
     menu->MarkModifyDone();
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     LOGI("menuNode mounted in subwindow");
@@ -599,7 +600,7 @@ void OverlayManager::HideMenuInSubWindow(int32_t targetId)
     auto node = menuMap_[targetId];
     CHECK_NULL_VOID(node);
     PopMenuAnimation(node);
-    BlurOverlayNode();
+    BlurOverlayNode(true);
 }
 
 void OverlayManager::HideMenuInSubWindow()
@@ -642,6 +643,7 @@ void OverlayManager::HideAllMenus()
         auto node = DynamicCast<FrameNode>(child);
         if (node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
             PopMenuAnimation(node);
+            BlurOverlayNode();
         }
     }
 }
@@ -830,13 +832,19 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     return true;
 }
 
-void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& dialogNode)
+void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& overlayNode, bool isInSubWindow)
 {
-    LOGI("OverlayManager::FocusOverlayNode when dialog show");
-    CHECK_NULL_VOID(dialogNode);
-    auto focusHub = dialogNode->GetOrCreateFocusHub();
+    LOGI("OverlayManager::FocusOverlayNode when overlay node show");
+    CHECK_NULL_VOID(overlayNode);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
+
+    if (isInSubWindow) {
+        // no need to set page lost focus in sub window.
+        return;
+    }
+
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
@@ -845,12 +853,17 @@ void OverlayManager::FocusOverlayNode(const RefPtr<FrameNode>& dialogNode)
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(false);
     pageFocusHub->LostFocus();
 }
 
-void OverlayManager::BlurOverlayNode()
+void OverlayManager::BlurOverlayNode(bool isInSubWindow)
 {
     LOGI("OverlayManager::BlurOverlayNode");
+    if (isInSubWindow) {
+        // no need to set page request focus in sub window.
+        return;
+    }
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
@@ -859,6 +872,7 @@ void OverlayManager::BlurOverlayNode()
     CHECK_NULL_VOID(pageNode);
     auto pageFocusHub = pageNode->GetFocusHub();
     CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(true);
     pageFocusHub->RequestFocus();
 }
 
