@@ -96,7 +96,6 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
 #else
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
 #endif
-    textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
     textLayoutProperty->UpdateMaxLines(2);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(appBarTheme->GetFontSize());
