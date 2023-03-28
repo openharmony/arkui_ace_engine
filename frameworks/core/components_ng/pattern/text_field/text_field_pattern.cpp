@@ -3008,7 +3008,7 @@ std::string TextFieldPattern::TextInputActionToString() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    switch (GetTextInputActionValue(TextInputAction::GO)) {
+    switch (GetTextInputActionValue(TextInputAction::DONE)) {
         case TextInputAction::GO:
             return "EnterKeyType.Go";
         case TextInputAction::SEARCH:
@@ -3305,7 +3305,6 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("maxLength", GreatOrEqual(maxLength, Infinity<uint32_t>()) ? "INF" : std::to_string(maxLength).c_str());
     json->Put("inputFilter", GetInputFilter().c_str());
     json->Put("copyOption", GetCopyOptionString().c_str());
-    json->Put("showPasswordIcon", GetCopyOptionString().c_str());
     json->Put("style", GetInputStyleString().c_str());
 }
 
