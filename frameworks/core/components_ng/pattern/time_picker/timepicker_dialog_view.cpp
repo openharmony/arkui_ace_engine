@@ -127,6 +127,11 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
     ViewStackProcessor::GetInstance()->Finish();
 
+    auto timePickerLayoutProperty = timePickerNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(timePickerLayoutProperty, nullptr);
+    timePickerLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(Dimension(1.0,
+        DimensionUnit::PERCENT)), std::nullopt));
+
     buttonTitleNode->MountToParent(contentColumn);
     timePickerNode->MountToParent(contentColumn);
 
