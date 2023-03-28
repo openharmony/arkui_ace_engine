@@ -334,6 +334,7 @@ private:
     bool firstTransitionIn_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
+    bool isDisappearing_ = false;
     int disappearingTransitionCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;
