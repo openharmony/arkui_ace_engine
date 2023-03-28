@@ -145,24 +145,13 @@ HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetText00
  */
 HWTEST_F(SelectAccessibilityPropertyTestNg, SelectAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
-    auto gestureEventHub = frameNode_->GetOrCreateGestureEventHub();
-    gestureEventHub->longPressEventActuator_ =
-        AceType::MakeRefPtr<LongPressEventActuator>(WeakPtr<GestureEventHub>(gestureEventHub));
-    gestureEventHub->CheckClickActuator();
-
-    auto focusHub = frameNode_->GetOrCreateFocusHub();
-    frameNode_->eventHub_->enabled_ = true;
-    focusHub->focusable_ = true;
-    focusHub->focusType_ = FocusType::NODE;
     selectAccessibilityProperty_->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = selectAccessibilityProperty_->GetSupportAction();
-    uint64_t actions = 0, exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLICK);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_LONG_CLICK);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }
-    EXPECT_EQ(actions, exptectActions);
+    EXPECT_EQ(actions, expectActions);
 }
 } // namespace OHOS::Ace::NG

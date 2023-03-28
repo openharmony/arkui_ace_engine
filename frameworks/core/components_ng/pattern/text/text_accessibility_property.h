@@ -35,6 +35,7 @@ public:
 
     int32_t GetTextSelectionEnd() const override;
 
+protected:
     void SetSpecificSupportAction() override;
 
 private:

@@ -2225,27 +2225,12 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetSupportAction001, TestSize.Leve
     ASSERT_NE(textPattern, nullptr);
     auto textAccessibilityProperty = frameNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     ASSERT_NE(textAccessibilityProperty, nullptr);
-    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureEventHub, nullptr);
-    gestureEventHub->longPressEventActuator_ =
-        AceType::MakeRefPtr<LongPressEventActuator>(WeakPtr<GestureEventHub>(gestureEventHub));
-    gestureEventHub->CheckClickActuator();
-    auto focusHub = frameNode->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->enabled_ = true;
-    focusHub->focusable_ = true;
-    focusHub->focusType_ = FocusType::NODE;
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     textLayoutProperty->UpdateCopyOption(CopyOptions::InApp);
     textAccessibilityProperty->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = textAccessibilityProperty->GetSupportAction();
     uint64_t actions = 0, expectActions = 0;
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_FOCUS);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLICK);
-    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_LONG_CLICK);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_COPY);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
     expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SET_SELECTION);
