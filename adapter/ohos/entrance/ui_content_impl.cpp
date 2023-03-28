@@ -488,7 +488,7 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         basePaths.emplace_back("js/");
         basePaths.emplace_back("ets/");
         auto assetProvider =
-            CreateAssetProvider("/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap", basePaths);
+            CreateAssetProvider("/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap", basePaths, false);
         if (assetProvider) {
             LOGE("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));

@@ -20,7 +20,8 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths)
+bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths,
+    bool useCache)
 {
     ACE_SCOPED_TRACE("Initialize");
     if (hapPath.empty() || assetBasePaths.empty()) {
@@ -30,6 +31,9 @@ bool HapAssetProvider::Initialize(const std::string& hapPath, const std::vector<
 
     bool newCreate = false;
     loadPath_ = AbilityBase::ExtractorUtil::GetLoadFilePath(hapPath);
+    if (!useCache) {
+        AbilityBase::ExtractorUtil::DeleteExtractor(loadPath_);
+    }
     runtimeExtractor_ = AbilityBase::ExtractorUtil::GetExtractor(loadPath_, newCreate);
     CHECK_NULL_RETURN_NOLOG(runtimeExtractor_, false);
     assetBasePaths_ = assetBasePaths;
