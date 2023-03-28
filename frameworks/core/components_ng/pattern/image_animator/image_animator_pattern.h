@@ -72,26 +72,22 @@ public:
 
     void SetDuration(int32_t duration)
     {
-        if (durationTotal_ > 0) {
-            animator_->SetDuration(durationTotal_);
+        auto finalDuration = durationTotal_ > 0 ? durationTotal_ : duration;
+        if (animator_->GetDuration() == finalDuration) {
+            animator_->RemoveRepeatListener(repeatCallbackId_);
             return;
         }
-        if (!isSetDuration_) {
-            animator_->SetDuration(duration);
-            isSetDuration_ = true;
+        if (animator_->GetStatus() == Animator::Status::IDLE || animator_->GetStatus() == Animator::Status::STOPPED) {
+            animator_->SetDuration(finalDuration);
+            animator_->RemoveRepeatListener(repeatCallbackId_);
             return;
         }
+        // if animator is running or paused, duration will work next time
         animator_->RemoveRepeatListener(repeatCallbackId_);
-        repeatCallbackId_ = animator_->AddRepeatListener([weak = WeakClaim(this), duration]() {
+        repeatCallbackId_ = animator_->AddRepeatListener([weak = WeakClaim(this), finalDuration]() {
             auto imageAnimator = weak.Upgrade();
             CHECK_NULL_VOID(imageAnimator);
-            imageAnimator->animator_->SetDuration(duration);
-        });
-        animator_->RemoveStopListener(stopCallbackId_);
-        stopCallbackId_ = animator_->AddStopListener([weak = WeakClaim(this)]() {
-            auto imageAnimator = weak.Upgrade();
-            CHECK_NULL_VOID(imageAnimator);
-            imageAnimator->isSetDuration_ = false;
+            imageAnimator->animator_->SetDuration(finalDuration);
         });
     }
 
@@ -144,13 +140,11 @@ private:
     int32_t durationTotal_ = 0;
     int32_t nowImageIndex_ = 0;
     uint64_t repeatCallbackId_ = 0;
-    uint64_t stopCallbackId_ = 0;
     bool isReverse_ = false;
     bool fixedSize_ = true;
 
     bool imagesChangedFlag_ = false;
     bool firstUpdateEvent_ = true;
-    bool isSetDuration_ = false;
 };
 
 } // namespace OHOS::Ace::NG
