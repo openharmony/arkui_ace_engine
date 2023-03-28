@@ -370,6 +370,13 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         }
     }
 
+    // update focus state
+    auto focusHub = GetFocusHub();
+    if (focusHub && focusHub->IsCurrentFocus()) {
+        focusHub->ClearFocusState();
+        focusHub->PaintFocusState();
+    }
+
     // rebuild child render node.
     RebuildRenderContextTree();
 }
@@ -1213,6 +1220,27 @@ HitTestResult FrameNode::AxisTest(
         return HitTestResult::STOP_BUBBLING;
     }
     return HitTestResult::BUBBLING;
+}
+
+void FrameNode::AnimateHoverEffect(bool isHovered) const
+{
+    auto renderContext = GetRenderContext();
+    if (!renderContext) {
+        return;
+    }
+    HoverEffectType animationType = HoverEffectType::UNKNOWN;
+    auto inputEventHub = eventHub_->GetInputEventHub();
+    if (inputEventHub) {
+        animationType = inputEventHub->GetHoverEffect();
+        if (animationType == HoverEffectType::UNKNOWN || animationType == HoverEffectType::AUTO) {
+            animationType = inputEventHub->GetHoverEffectAuto();
+        }
+    }
+    if (animationType == HoverEffectType::SCALE) {
+        renderContext->AnimateHoverEffectScale(isHovered);
+    } else if (animationType == HoverEffectType::BOARD) {
+        renderContext->AnimateHoverEffectBoard(isHovered);
+    }
 }
 
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
