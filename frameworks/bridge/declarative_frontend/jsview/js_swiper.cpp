@@ -58,6 +58,8 @@ namespace {
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
 const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::DOT, SwiperIndicatorType::DIGIT };
+const static int32_t DEFAULT_INTERVAL = 3000;
+const static int32_t DEFAULT_DURATION = 400;
 
 JSRef<JSVal> SwiperChangeEventToJSValue(const SwiperChangeEvent& eventInfo)
 {
@@ -187,11 +189,26 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
     }
 }
 
-void JSSwiper::SetDuration(int32_t duration)
+void JSSwiper::SetDuration(const JSCallbackInfo& info)
 {
-    if (duration < 0) {
-        LOGE("duration is not valid: %{public}d", duration);
+    int32_t duration = DEFAULT_DURATION;
+
+    if (info.Length() < 1) { // user do not set any value
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
+    }
+
+    // undefined value turn to default 400
+    if (!info[0]->IsUndefined()) {
+        if (!info[0]->IsNumber()) { // user set value type not Number
+            LOGE("info is not a number, set to default 400.");
+        } else { // Number type
+            duration = info[0]->ToNumber<int32_t>();
+            if (duration < 0) {
+                LOGE("duration is not valid: %{public}d, set to default 400.", duration);
+                duration = DEFAULT_DURATION;
+            }
+        }
     }
 
     SwiperModel::GetInstance()->SetDuration(duration);
@@ -207,11 +224,26 @@ void JSSwiper::SetIndex(int32_t index)
     SwiperModel::GetInstance()->SetIndex(index);
 }
 
-void JSSwiper::SetInterval(int32_t interval)
+void JSSwiper::SetInterval(const JSCallbackInfo& info)
 {
-    if (interval < 0) {
-        LOGE("interval is not valid: %{public}d", interval);
+    int32_t interval = DEFAULT_INTERVAL;
+
+    if (info.Length() < 1) { // user do not set any value
+        LOGE("The info is wrong, it is supposed to have atleast 1 arguments");
         return;
+    }
+
+    // undefined value turn to default 3000
+    if (!info[0]->IsUndefined()) {
+        if (!info[0]->IsNumber()) { // user set value type not Number
+            LOGE("info is not a number, set to default 3000.");
+        } else { // Number type
+            interval = info[0]->ToNumber<int32_t>();
+            if (interval < 0) {
+                LOGE("interval is not valid: %{public}d, set to default 3000.", interval);
+                interval = DEFAULT_INTERVAL;
+            }
+        }
     }
 
     SwiperModel::GetInstance()->SetAutoPlayInterval(interval);
