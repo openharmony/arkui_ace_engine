@@ -3530,7 +3530,7 @@ void WebDelegate::OnGeolocationPermissionsHidePrompt()
 }
 
 void WebDelegate::OnGeolocationPermissionsShowPrompt(
-    const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback)
+    const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
