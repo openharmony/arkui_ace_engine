@@ -50,11 +50,10 @@ public:
 
     bool IsValid() const override
     {
-        // TODO
         return true;
     }
 
-    RefPtr<Asset> GetAsset(const std::string &assetName) const override
+    RefPtr<Asset> GetAsset(const std::string& assetName) const override
     {
         errno = 0;
         LOGI("GetAsset: %{private}s, %{private}s", assetName.c_str(), basePath_.c_str());
