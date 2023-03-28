@@ -1155,6 +1155,12 @@ void ViewAbstractModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
     box->SetOnDragEnterId(onDragEnter);
 }
 
+void ViewAbstractModelImpl::SetOnDragFinish(OnNewDragFunc&& onDragFinish)
+{
+    auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    box->SetOnDragFinishId(onDragFinish);
+}
+
 void ViewAbstractModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
 {
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();

@@ -193,6 +193,8 @@ public:
         std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragMove);
     static void SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDrop);
 
+    static void SetOnDragFinish(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragFinish);
+
     // flex properties
     static void SetAlignSelf(FlexAlign value);
     static void SetFlexShrink(float value);

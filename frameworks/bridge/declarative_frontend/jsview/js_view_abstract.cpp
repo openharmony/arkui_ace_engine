@@ -3624,6 +3624,24 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(onDragEnter));
 }
 
+void JSViewAbstract::JsOnDragFinish(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
+    if (!CheckJSCallbackInfo("JsOnDragFinish", info, checkList)) {
+        return;
+    }
+    RefPtr<JsDragFunction> jsOnDragFinishFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+
+    auto onDragFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFinishFunc)](
+                           const RefPtr<OHOS::Ace::DragEvent>& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onDragFinish");
+        func->Execute(info);
+    };
+
+    ViewAbstractModel::GetInstance()->SetOnDragFinish(std::move(onDragFinish));
+}
+
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
@@ -4575,6 +4593,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);
     JSClass<JSViewAbstract>::StaticMethod("onDrop", &JSViewAbstract::JsOnDrop);
+    JSClass<JSViewAbstract>::StaticMethod("onDragFinish", &JSViewAbstract::JsOnDragFinish);
 
     JSClass<JSViewAbstract>::StaticMethod("linearGradient", &JSViewAbstract::JsLinearGradient);
     JSClass<JSViewAbstract>::StaticMethod("sweepGradient", &JSViewAbstract::JsSweepGradient);

@@ -189,6 +189,7 @@ public:
     static bool ParseAndUpdateDragItemInfo(const JSRef<JSVal>& info, NG::DragDropBaseInfo& dragInfo);
     static RefPtr<AceType> ParseDragNode(const JSRef<JSVal>& info);
     static void JsOnDragEnter(const JSCallbackInfo& info);
+    static void JsOnDragFinish(const JSCallbackInfo& info);
     static void JsOnDragMove(const JSCallbackInfo& info);
     static void JsOnDragLeave(const JSCallbackInfo& info);
     static void JsOnDrop(const JSCallbackInfo& info);

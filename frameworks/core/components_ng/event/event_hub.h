@@ -172,6 +172,7 @@ public:
     }
 
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
+    using OnNewDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>;
     using OnDragStartFunc = std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
     void SetOnDragStart(OnDragStartFunc&& onDragStart)
     {
@@ -227,6 +228,16 @@ public:
     void SetOnDrop(OnDragFunc&& onDrop)
     {
         onDrop_ = std::move(onDrop);
+    }
+
+    void SetOnDragFinish(OnNewDragFunc&& onDragFinish)
+    {
+        onDragFinish_ = std::move(onDragFinish);
+    }
+
+    const OnNewDragFunc& GetOnDragFinish() const
+    {
+        return onDragFinish_;
     }
 
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
@@ -339,6 +350,7 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDragMove_;
     OnDragFunc onDrop_;
+    OnNewDragFunc onDragFinish_;
 
     bool enabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;

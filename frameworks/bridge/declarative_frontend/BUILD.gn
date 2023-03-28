@@ -339,6 +339,12 @@ template("declarative_js_engine") {
     }
 
     external_deps = []
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      external_deps += [
+        "udmf:udmf_client",
+        "udmf:udmf_data_napi",
+      ]
+    }
 
     # rich components needed by phone and TV. wearable like watch do not need them
     if (defined(config.rich_components_support) &&
@@ -600,6 +606,13 @@ template("declarative_js_engine_ng") {
       ":gen_obj_src_js_enum_style",
       ":gen_obj_src_js_proxyclass",
     ]
+
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+      external_deps = [
+        "udmf:udmf_client",
+        "udmf:udmf_data_napi",
+      ]
+    }
   }
 }
 
