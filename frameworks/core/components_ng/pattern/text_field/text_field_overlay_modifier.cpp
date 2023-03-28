@@ -93,10 +93,12 @@ void TextFieldOverlayModifier::PaintSelection(DrawingContext& context) const
                     textBox.rect_.GetBottom() + (isTextArea ? textRect.GetY() : contentOffset_->Get().GetY())));
         }
     } else {
-        auto theOnlyBox = *textBoxes.begin();
-        // for inline style, selection height is equal to the frame height
-        canvas.DrawRect(RSRect(theOnlyBox.rect_.GetLeft() + textRect.GetX(), 0.0f,
-            theOnlyBox.rect_.GetRight() + textRect.GetX(), textFieldPattern->GetFrameRect().Height()));
+        if (!textBoxes.empty()) {
+            auto theOnlyBox = *textBoxes.begin();
+            // for inline style, selection height is equal to the frame height
+            canvas.DrawRect(RSRect(theOnlyBox.rect_.GetLeft() + textRect.GetX(), 0.0f,
+                theOnlyBox.rect_.GetRight() + textRect.GetX(), textFieldPattern->GetFrameRect().Height()));
+        }
     }
 
     canvas.Restore();
