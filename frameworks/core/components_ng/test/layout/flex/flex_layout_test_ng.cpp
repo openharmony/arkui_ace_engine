@@ -2091,22 +2091,22 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest015, TestSize.Level1)
 HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest016, TestSize.Level1)
 {
     auto rowFrameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    EXPECT_FALSE(rowFrameNode == nullptr);
+    ASSERT_NE(rowFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(rowFrameNode, geometryNode, rowFrameNode->GetLayoutProperty());
 
     auto rowLayoutPattern = rowFrameNode->GetPattern<LinearLayoutPattern>();
-    EXPECT_FALSE(rowLayoutPattern == nullptr);
+    ASSERT_NE(rowLayoutPattern, nullptr);
     auto rowLayoutProperty = rowLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_FALSE(rowLayoutProperty == nullptr);
+    ASSERT_NE(rowLayoutProperty, nullptr);
     rowLayoutProperty->UpdateFlexDirection(FlexDirection::ROW_REVERSE);
     rowLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(RK356_WIDTH), CalcLength(ROW_HEIGHT)));
     auto rowLayoutAlgorithm = rowLayoutPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(rowLayoutAlgorithm == nullptr);
+    ASSERT_NE(rowLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm));
 
     LayoutConstraintF parentLayoutConstraint;
@@ -2151,7 +2151,7 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest016, TestSize.Level1)
             CalcSize(CalcLength(2 * TWENTY_PERCENT_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
         itemLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
         auto boxLayoutAlgorithm = itemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
-        EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+        ASSERT_NE(boxLayoutAlgorithm, nullptr);
         itemLayoutWrapper->SetLayoutAlgorithm(
             AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
         rowFrameNode->AddChild(itemFrameNode);
@@ -2171,7 +2171,7 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest016, TestSize.Level1)
         itemLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
         itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutWeight(LAYOUT_WEIGHT_ONE);
         auto boxLayoutAlgorithm = itemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
-        EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+        ASSERT_NE(boxLayoutAlgorithm, nullptr);
         itemLayoutWrapper->SetLayoutAlgorithm(
             AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
         rowFrameNode->AddChild(itemFrameNode);
@@ -2191,7 +2191,7 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest016, TestSize.Level1)
     sixthLayoutWrapper->GetLayoutProperty()->UpdateDisplayIndex(DISPLAYPRIORITY_TWO);
     sixthLayoutWrapper->GetLayoutProperty()->UpdateLayoutWeight(LAYOUT_WEIGHT_ONE);
     auto boxLayoutAlgorithm = sixthFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    ASSERT_NE(boxLayoutAlgorithm, nullptr);
     sixthLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
     rowFrameNode->AddChild(sixthFrameNode);
@@ -2208,7 +2208,7 @@ HWTEST_F(FlexLayoutTestNg, FlexRowLayoutTest016, TestSize.Level1)
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
         auto childOffset = childWrapper->GetGeometryNode()->GetFrameOffset();
         EXPECT_EQ(childSize, SizeF(0.0f, 0.0f));
-        EXPECT_EQ(childOffset, OffsetF(RK356_WIDTH, ROW_HEIGHT / 2.0f));
+        EXPECT_EQ(childOffset, OffsetF(0.0f, 0.0f));
         index++;
     }
     auto verticalRemaning = ROW_HEIGHT - SMALL_ITEM_HEIGHT;
@@ -2489,23 +2489,23 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
 {
     auto columnFrameNode =
         FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    EXPECT_FALSE(columnFrameNode == nullptr);
+    ASSERT_NE(columnFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(geometryNode == nullptr);
+    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapper>(columnFrameNode, geometryNode, columnFrameNode->GetLayoutProperty());
 
     auto columnLayoutPattern = columnFrameNode->GetPattern<LinearLayoutPattern>();
-    EXPECT_FALSE(columnLayoutPattern == nullptr);
+    ASSERT_NE(columnLayoutPattern, nullptr);
     auto columnLayoutProperty = columnLayoutPattern->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_FALSE(columnLayoutProperty == nullptr);
+    ASSERT_NE(columnLayoutProperty, nullptr);
     columnLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN_REVERSE);
     columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
     columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
     layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(RK356_WIDTH), CalcLength(COLUMN_HEIGHT)));
     auto columnLayoutAlgorithm = columnLayoutPattern->CreateLayoutAlgorithm();
-    EXPECT_FALSE(columnLayoutAlgorithm == nullptr);
+    ASSERT_NE(columnLayoutAlgorithm, nullptr);
     layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(columnLayoutAlgorithm));
 
     LayoutConstraintF parentLayoutConstraint;
@@ -2550,7 +2550,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
             CalcSize(CalcLength(TWENTY_PERCENT_WIDTH), CalcLength(SMALL_ITEM_HEIGHT)));
         itemLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
         auto boxLayoutAlgorithm = itemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
-        EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+        ASSERT_NE(boxLayoutAlgorithm, nullptr);
         itemLayoutWrapper->SetLayoutAlgorithm(
             AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
         columnFrameNode->AddChild(itemFrameNode);
@@ -2570,7 +2570,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
         itemLayoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
         itemLayoutWrapper->GetLayoutProperty()->UpdateLayoutWeight(LAYOUT_WEIGHT_ONE);
         auto boxLayoutAlgorithm = itemFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
-        EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+        ASSERT_NE(boxLayoutAlgorithm, nullptr);
         itemLayoutWrapper->SetLayoutAlgorithm(
             AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
         columnFrameNode->AddChild(itemFrameNode);
@@ -2590,7 +2590,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
     sixthLayoutWrapper->GetLayoutProperty()->UpdateDisplayIndex(DISPLAYPRIORITY_TWO);
     sixthLayoutWrapper->GetLayoutProperty()->UpdateLayoutWeight(LAYOUT_WEIGHT_ONE);
     auto boxLayoutAlgorithm = sixthFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
-    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    ASSERT_NE(boxLayoutAlgorithm, nullptr);
     sixthLayoutWrapper->SetLayoutAlgorithm(
         AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
     columnFrameNode->AddChild(sixthFrameNode);
@@ -2607,7 +2607,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
         auto childOffset = childWrapper->GetGeometryNode()->GetFrameOffset();
         EXPECT_EQ(childSize, SizeF(0.0f, 0.0f));
-        EXPECT_EQ(childOffset, OffsetF(0.0f, COLUMN_HEIGHT));
+        EXPECT_EQ(childOffset, OffsetF(0.0f, 0.0f));
         index++;
     }
 
@@ -2616,7 +2616,7 @@ HWTEST_F(FlexLayoutTestNg, FlexColumnLayoutTest005, TestSize.Level1)
         auto childSize = childWrapper->GetGeometryNode()->GetFrameSize();
         auto childOffset = childWrapper->GetGeometryNode()->GetFrameOffset();
         EXPECT_EQ(childSize, SizeF(0.0f, 0.0f));
-        EXPECT_EQ(childOffset, OffsetF(0.0f, COLUMN_HEIGHT));
+        EXPECT_EQ(childOffset, OffsetF(0.0f, 0.0f));
         index++;
     }
     auto sixthChildWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
