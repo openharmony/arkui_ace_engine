@@ -26,8 +26,6 @@ namespace OHOS::Ace {
 
 std::unique_ptr<ProgressModel> ProgressModel::instance_ = nullptr;
 
-OHOS::Ace::Framework::ProgressStyle g_progressStyle = OHOS::Ace::Framework::ProgressStyle::Linear;
-
 ProgressModel* ProgressModel::GetInstance()
 {
     if (!instance_) {
@@ -94,7 +92,6 @@ void JSProgress::Create(const JSCallbackInfo& info)
     } else if (progressStyle == ProgressStyle::ScaleRing) {
         progressType = ProgressType::SCALE;
     } else if (progressStyle == ProgressStyle::Capsule) {
-        g_progressStyle = ProgressStyle::Capsule;
         progressType = ProgressType::CAPSULE;
     }
 
@@ -213,11 +210,8 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
 
 void JSProgress::JsBorderColor(const JSCallbackInfo& info)
 {
-    if (g_progressStyle != ProgressStyle::Capsule) {
-        JSViewAbstract::JsBorderColor(info);
-        return;
-    }
-    
+    JSViewAbstract::JsBorderColor(info);
+
     if (info.Length() < 1) {
         LOGE("The arg is wrong, it is supposed to have atleast 1 arguments");
         return;
