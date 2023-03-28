@@ -89,6 +89,7 @@ public:
     MOCK_METHOD0(FlushPipelineImmediately, void());
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
+    MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
 
     static RefPtr<MockPipelineBase> pipeline_;
 };
