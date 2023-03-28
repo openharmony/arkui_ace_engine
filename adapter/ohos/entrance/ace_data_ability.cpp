@@ -97,26 +97,6 @@ void AceDataAbility::OnStart(const OHOS::AAFwk::Want& want)
         auto assetBasePathStr = { std::string("assets/js/default/"), std::string("assets/js/share/") };
         Platform::PaContainer::AddAssetPath(abilityId_, packagePathStr, moduleInfo->hapPath, assetBasePathStr);
     }
-    std::shared_ptr<ApplicationInfo> appInfo = GetApplicationInfo();
-    if (appInfo) {
-        /* Note: DO NOT modify the sequence of adding libPath  */
-        std::string nativeLibraryPath = appInfo->nativeLibraryPath;
-        std::string quickFixLibraryPath = appInfo->appQuickFix.deployedAppqfInfo.nativeLibraryPath;
-        std::vector<std::string> libPaths;
-        if (!quickFixLibraryPath.empty()) {
-            std::string libPath = GenerateFullPath(GetBundleCodePath(), quickFixLibraryPath);
-            libPaths.push_back(libPath);
-            LOGI("napi quick fix lib path = %{private}s", libPath.c_str());
-        }
-        if (!nativeLibraryPath.empty()) {
-            std::string libPath = GenerateFullPath(GetBundleCodePath(), nativeLibraryPath);
-            libPaths.push_back(libPath);
-            LOGI("napi lib path = %{private}s", libPath.c_str());
-        }
-        if (!libPaths.empty()) {
-            Platform::PaContainer::AddLibPath(abilityId_, libPaths);
-        }
-    }
 
     // run data ability
     Platform::PaContainer::RunPa(abilityId_, parsedUrl, want);
