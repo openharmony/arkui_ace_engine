@@ -83,10 +83,10 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        if (!IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && IsOutOfBoundary(currentOffset_)) {
-            return MakeRefPtr<SwiperPaintMethod>(GetDirection(), currentOffset_);
-        }
-        return nullptr;
+        bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && IsOutOfBoundary(currentOffset_);
+        auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), currentOffset_);
+        paintMethod->SetNeedPaintFade(needPaintFade);
+        return paintMethod;
     }
 
     RefPtr<EventHub> CreateEventHub() override
