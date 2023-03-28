@@ -122,8 +122,7 @@ void GetSpanInspector(
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
-    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    RectF rect = node->GetTransformRectRelativeToWindow();
     rect = rect.Constrain(deviceRect);
     if (rect.IsEmpty()) {
         rect.SetRect(0, 0, 0, 0);
@@ -157,8 +156,7 @@ void GetInspectorChildren(
         RectF rect;
         isActive = isActive && node->IsActive();
         if (isActive) {
-            rect = node->GetRenderContext()->GetPaintRectWithTransform();
-            rect.SetOffset(node->GetTransformRelativeOffset());
+            rect = node->GetTransformRectRelativeToWindow();
         }
         rect = rect.Constrain(deviceRect);
         if (rect.IsEmpty()) {
@@ -231,9 +229,7 @@ void GetSpanInspector(
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
-    auto ctx = node->GetRenderContext();
-    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    RectF rect = node->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     jsonNodeArray->Put(jsonNode);
 }
@@ -255,8 +251,7 @@ void GetInspectorChildren(
     RectF rect;
     isActive = isActive && node->IsActive();
     if (isActive) {
-        rect = node->GetRenderContext()->GetPaintRectWithTransform();
-        rect.SetOffset(node->GetTransformRelativeOffset());
+        rect = node->GetTransformRectRelativeToWindow();
     }
 
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
@@ -319,8 +314,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
     auto frameNode = AceType::DynamicCast<FrameNode>(inspectorElement);
     if (frameNode) {
-        auto rect = frameNode->GetRenderContext()->GetPaintRectWithTransform();
-        rect.SetOffset(frameNode->GetTransformRelativeOffset());
+        auto rect = frameNode->GetTransformRectRelativeToWindow();
         jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     }
     auto jsonAttrs = JsonUtil::Create(true);
