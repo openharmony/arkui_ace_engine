@@ -363,7 +363,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         dragEndCallback_();
     }
     RelatedEventEnd();
-    if (!moved_) {
+    if (!moved_ || info.GetInputEventType() == InputEventType::AXIS) {
         LOGI("It is not moved now,  no need to handle drag end motion");
         if (scrollEndCallback_) {
             scrollEndCallback_();
