@@ -584,6 +584,17 @@ void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std:
     }
 }
 
+void SearchModelNG::RequestKeyboardOnFocus(bool needToRequest)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
+}
+
 void SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode)
 {
     auto pipeline = PipelineBase::GetCurrentContext();

@@ -34,6 +34,7 @@ public:
 
     virtual RefPtr<TextFieldControllerBase> Create(const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
+    virtual void RequestKeyboardOnFocus(bool needToRequest) = 0;
     virtual void SetSearchButton(const std::string& text);
     virtual void SetCaretWidth(const Dimension& value);
     virtual void SetCaretColor(const Color& color);
