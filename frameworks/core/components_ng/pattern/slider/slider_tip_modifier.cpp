@@ -152,6 +152,6 @@ void SliderTipModifier::PaintBubble(DrawingContext& context)
     canvas.AttachPen(pen);
     canvas.AttachBrush(brush);
     canvas.DrawPath(path);
-    canvas.ClipPath(path, RSClipOp::INTERSECT);
+    canvas.ClipPath(path, RSClipOp::INTERSECT, true);
 }
 } // namespace OHOS::Ace::NG
