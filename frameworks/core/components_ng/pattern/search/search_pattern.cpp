@@ -824,7 +824,8 @@ void SearchPattern::ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) c
     // icon path
     auto searchIconPath = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
     searchIconJson->Put("src", searchIconPath.c_str());
-    json->Put("icon", searchIconJson);
+    json->Put("icon", searchIconPath.c_str());
+    json->Put("searchIcon", searchIconJson);
 }
 
 void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json) const
