@@ -24,6 +24,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const int32_t DIVIDER_SIZE = 2;
+const int32_t CHILDREN_SIZE = 3;
 } // namespace
 void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -37,12 +38,16 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         pickerTheme->GetGradientHeight().ConvertToPx() * 4 + pickerTheme->GetDividerSpacing().ConvertToPx());
     auto columnNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(columnNode);
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    CHECK_NULL_VOID(layoutConstraint);
-    auto width = layoutConstraint->parentIdealSize.Width();
+    auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto pickerNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(pickerNode);
+    auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
+    auto width = layoutConstraint->selfIdealSize.Width();
+    auto children = pickerNode->GetChildren();
     float pickerWidth = 0.0f;
     if (width.has_value()) {
-        pickerWidth = width.value();
+        pickerWidth = width.value() / static_cast<float>(children.size() >= CHILDREN_SIZE ? CHILDREN_SIZE : 1);
     } else {
         pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
     }
