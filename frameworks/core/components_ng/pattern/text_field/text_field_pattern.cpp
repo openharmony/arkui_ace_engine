@@ -1617,6 +1617,10 @@ void TextFieldPattern::OnModifyDone()
         }
         SetEdgeEffect(EdgeEffect::SPRING);
         SetScrollBar(DisplayMode::ON);
+        auto scrollBar = GetScrollBar();
+        if (scrollBar) {
+            scrollBar->SetMinHeight(SCROLL_BAR_MIN_HEIGHT);
+        }
     }
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
