@@ -311,19 +311,17 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
     return idealSize;
 }
 
-void CreateChildrenConstraint(SizeF& size, const std::unique_ptr<PaddingProperty>& padding)
+void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding)
 {
     float width = 0;
     float height = 0;
 
-    if (padding) {
-        float paddingLeft = padding->left.has_value() ? padding->left->GetDimension().ConvertToPx() : 0;
-        float paddingRight = padding->right.has_value() ? padding->right->GetDimension().ConvertToPx() : 0;
-        float paddingTop = padding->top.has_value() ? padding->top->GetDimension().ConvertToPx() : 0;
-        float paddingBottom = padding->bottom.has_value() ? padding->bottom->GetDimension().ConvertToPx() : 0;
-        width += (paddingLeft + paddingRight);
-        height += (paddingTop + paddingBottom);
-    }
+    float paddingLeft = padding.left.has_value() ? padding.left.value() : 0;
+    float paddingRight = padding.right.has_value() ? padding.right.value() : 0;
+    float paddingTop = padding.top.has_value() ? padding.top.value() : 0;
+    float paddingBottom = padding.bottom.has_value() ? padding.bottom.value() : 0;
+    width += (paddingLeft + paddingRight);
+    height += (paddingTop + paddingBottom);
 
     size.SetHeight(size.Height() - height);
     size.SetWidth(size.Width() - width);
