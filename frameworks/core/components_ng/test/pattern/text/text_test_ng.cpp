@@ -20,6 +20,8 @@
 
 #define private public
 #define protected public
+
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
@@ -28,9 +30,16 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_ng/pattern/text/text_accessibility_property.h"
+#include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/text_paint_method.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_ng/test/pattern/text/mock/mock_txt_paragraph.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
@@ -47,11 +56,15 @@ constexpr float RK356_LOW_WIDTH = 50.0f;
 constexpr float RK356_LOW_HEIGHT = 20.0f;
 constexpr float TEXT_WIDTH = 100.0f;
 constexpr float TEXT_HEIGHT = 75.0f;
+constexpr float LARGE_WIDTH = 1000000.0f;
 constexpr float DIMENSION = 10.0f;
 constexpr float CONTEXT_WIDTH_VALUE = 10.0f;
+constexpr float CONTEXT_LARGE_WIDTH_VALUE = 10000.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 10.0f;
 constexpr float BASE_LINE_OFFSET_VALUE = 1.0;
+constexpr float BASE_LINE_OFFSET = 20.f;
 constexpr double RECT_X_VALUE = 1.0;
+constexpr double RECT_SECOND_X_VALUE = 2.0;
 constexpr double RECT_Y_VALUE = 1.0;
 constexpr double RECT_WIDTH_VALUE = 5.0;
 constexpr double RECT_HEIGHT_VALUE = 10.0;
@@ -75,11 +88,13 @@ const std::string CREATE_VALUE = "Hello World";
 const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const SizeF CONTAINER_LOW_SIZE(RK356_LOW_WIDTH, RK356_LOW_HEIGHT);
 const SizeF TEXT_SIZE(TEXT_WIDTH, TEXT_HEIGHT);
+const SizeF LARGE_CONTAINER_SIZE(LARGE_WIDTH, TEXT_HEIGHT);
 constexpr Dimension ADAPT_LINE_HEIGHT_VALUE = Dimension(10, DimensionUnit::PX);
 constexpr Dimension ADAPT_FONT_SIZE_VALUE = Dimension(30, DimensionUnit::PX);
 constexpr Dimension ADAPT_BASE_LINE_OFFSET_VALUE = Dimension(10, DimensionUnit::PX);
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
+const SizeT<float> LARGE_SIZE = SizeT<float>(10000.0f, 1000.0f);
 const Ace::FontStyle ITALIC_FONT_STYLE_VALUE = Ace::FontStyle::ITALIC;
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
@@ -136,6 +151,9 @@ public:
 
 protected:
     static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
+    static void SetContentModifier(TextContentModifier &textContentModifier);
+    static void SetPaintMethodModifier(TextPaintMethod &textPaintMethod);
+    static void UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutProperty);
 };
 
 void TextTestNg::SetUp()
@@ -147,6 +165,7 @@ void TextTestNg::SetUp()
 void TextTestNg::TearDown()
 {
     MockPipelineBase::TearDown();
+    MockTxtParagraph::SetCanConstruct();
 }
 
 void TextTestNg::InitTextObject() {}
@@ -208,6 +227,54 @@ RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue
     return AceType::DynamicCast<FrameNode>(element);
 }
 
+void TextTestNg::SetContentModifier(TextContentModifier &textContentModifier)
+{
+    textContentModifier.SetFontWeight(Ace::FontWeight::W200);
+    textContentModifier.SetTextColor(TEXT_COLOR_VALUE);
+    textContentModifier.SetTextDecorationColor(TEXT_COLOR_VALUE);
+    Shadow textShadow;
+    textShadow.SetBlurRadius(BLURRADIUS_VALUE);
+    textShadow.SetColor(TEXT_COLOR_VALUE);
+    textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
+    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
+    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
+    textContentModifier.SetTextShadow(textShadow);
+    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    OffsetF paintOffset;
+    textContentModifier.SetPrintOffset(paintOffset);
+}
+
+void TextTestNg::SetPaintMethodModifier(TextPaintMethod &textPaintMethod)
+{
+    textPaintMethod.textContentModifier_->fontSize_ = ADAPT_FONT_SIZE_VALUE;
+    textPaintMethod.textContentModifier_->fontWeight_ = FontWeight::LIGHTER;
+    textPaintMethod.textContentModifier_->textColor_ = TEXT_COLOR_VALUE;
+    Shadow textShadow;
+    textPaintMethod.textContentModifier_->textShadow_ = textShadow;
+    textPaintMethod.textContentModifier_->textDecorationColorAlpha_ =
+        AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
+    textPaintMethod.textContentModifier_->textDecoration_ = TextDecoration::NONE;
+    textPaintMethod.textContentModifier_->baselineOffset_ = BASELINE_OFFSET_VALUE;
+}
+
+void TextTestNg::UpdateTextLayoutProperty(RefPtr<TextLayoutProperty> textLayoutProperty)
+{
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
+    textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
+    textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
+    Shadow textShadow;
+    textShadow.SetBlurRadius(BLURRADIUS_VALUE);
+    textShadow.SetColor(TEXT_COLOR_VALUE);
+    textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
+    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
+    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
+    textLayoutProperty->UpdateTextShadow(textShadow);
+    textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
+    textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
+    textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
+}
 /**
  * @tc.name: TextFrameNodeCreator001
  * @tc.desc: Test all the properties of text.
@@ -1572,16 +1639,15 @@ HWTEST_F(TextTestNg, DidExceedMaxLines002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextLayoutTest009
+ * @tc.name: TextLayoutAlgorithmTest001
  * @tc.desc: test text_layout_algorithm.cpp:Set textHeightAdaptivePolicy to MIN_FONT_SIZE_FIRST
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest009, TestSize.Level1)
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1590,16 +1656,13 @@ HWTEST_F(TextTestNg, TextLayoutTest009, TestSize.Level1)
         AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
+    textPattern->textContentModifier_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
-     * content: CREATE_VALUE
-     * width: 100.0f
-     * height: 75.0f
      */
-
     textLayoutProperty->UpdateContent(CREATE_VALUE);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     LayoutConstraintF parentLayoutConstraint;
@@ -1607,51 +1670,48 @@ HWTEST_F(TextTestNg, TextLayoutTest009, TestSize.Level1)
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
 
     /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to maxWidth of paragraph_
      */
-
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    // set TextHeightAdaptivePolicy MAX_LINES_FIRST
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    MockTxtParagraph::SetCanConstruct(false);
     textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    // set SetCanConstruct true
+    MockTxtParagraph::SetCanConstruct(true);
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->baselineOffset_ = BASE_LINE_OFFSET;
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-
-    /**
-     * @tc.steps: step4. check the HeightAdaptivePolicyValue.
-     */
-
-    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
-        TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
 }
 
 /**
- * @tc.name: TextLayoutTest010
+ * @tc.name: TextLayoutAlgorithmTest002
  * @tc.desc: test text_layout_algorithm.cpp:Set textHeightAdaptivePolicy to LAYOUT_CONSTRAINT_FIRST and set lineHeight
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest010, TestSize.Level1)
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
     RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textLayoutProperty);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
-     * content: CREATE_VALUE
-     * width: 100.0f
-     * height: 75.0f
      */
-
     textLayoutProperty->UpdateContent(CREATE_VALUE);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     LayoutConstraintF parentLayoutConstraint;
@@ -1659,36 +1719,46 @@ HWTEST_F(TextTestNg, TextLayoutTest010, TestSize.Level1)
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
     textLayoutProperty->UpdateAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
     textLayoutProperty->UpdateLineHeight(ADAPT_LINE_HEIGHT_VALUE);
+    textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
+    textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
+    textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
+    Shadow textShadow;
+    textLayoutProperty->UpdateTextShadow(textShadow);
+    textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
+    textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
+    textLayoutProperty->UpdateBaselineOffset(BASELINE_OFFSET_VALUE);
 
     /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent/SetPropertyToModifier function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to maxWidth of paragraph_
      */
-
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-
-    /**
-     * @tc.steps: step4. check the HeightAdaptivePolicyValue.
-     */
-
-    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
-        TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    auto frameNode = layoutWrapper->GetHostNode();
+    auto pipeline = frameNode->GetContext();
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    textPattern->textContentModifier_ =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(std::move(textStyle)));
+    auto contentModifier = textPattern->GetContentModifier();
+    textLayoutAlgorithm->SetPropertyToModifier(textLayoutProperty, contentModifier);
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
 }
 
 /**
- * @tc.name: TextLayoutTest011
+ * @tc.name: TextLayoutAlgorithmTest003
  * @tc.desc: test text_layout_algorithm.cpp:Set textHeightAdaptivePolicy to MIN_FONT_SIZE_FIRST, minFontSize and
  *           fontSize are equal
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest011, TestSize.Level1)
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1702,11 +1772,7 @@ HWTEST_F(TextTestNg, TextLayoutTest011, TestSize.Level1)
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
-     * content: CREATE_VALUE
-     * width: 100.0f
-     * height: 75.0f
      */
-
     textLayoutProperty->UpdateContent(CREATE_VALUE);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     LayoutConstraintF parentLayoutConstraint;
@@ -1717,34 +1783,28 @@ HWTEST_F(TextTestNg, TextLayoutTest011, TestSize.Level1)
     textLayoutProperty->UpdateLineHeight(ADAPT_LINE_HEIGHT_VALUE);
 
     /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to maxWidth of paragraph_
      */
-
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-
-    /**
-     * @tc.steps: step4. check the HeightAdaptivePolicyValue.
-     */
-
-    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
-        TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
 }
 
 /**
- * @tc.name: TextLayoutTest012
+ * @tc.name: TextLayoutAlgorithmTest004
  * @tc.desc: test text_layout_algorithm.cpp:Set textHeightAdaptivePolicy to LAYOUT_CONSTRAINT_FIRST and set lineHeight,
  *     the height of text is bigger than the height of container
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest012, TestSize.Level1)
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1758,11 +1818,7 @@ HWTEST_F(TextTestNg, TextLayoutTest012, TestSize.Level1)
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
-     * content: CREATE_VALUE
-     * width: 100.0f
-     * height: 75.0f
      */
-
     textLayoutProperty->UpdateContent(CREATE_VALUE);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     LayoutConstraintF parentLayoutConstraint;
@@ -1772,34 +1828,28 @@ HWTEST_F(TextTestNg, TextLayoutTest012, TestSize.Level1)
     textLayoutProperty->UpdateLineHeight(ADAPT_LINE_HEIGHT_VALUE);
 
     /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to maxWidth of paragraph_
      */
-
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-
-    /**
-     * @tc.steps: step4. check the HeightAdaptivePolicyValue.
-     */
-
-    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
-        TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
 }
 
 /**
- * @tc.name: TextLayoutTest013
+ * @tc.name: TextLayoutAlgorithmTest005
  * @tc.desc: test text_layout_algorithm.cpp:Set textHeightAdaptivePolicy to LAYOUT_CONSTRAINT_FIRST and set lineHeight,
  *     the height of text is bigger than the height of container,set maxlines.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest013, TestSize.Level1)
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1813,11 +1863,7 @@ HWTEST_F(TextTestNg, TextLayoutTest013, TestSize.Level1)
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
-     * content: CREATE_VALUE
-     * width: 100.0f
-     * height: 75.0f
      */
-
     textLayoutProperty->UpdateContent(CREATE_VALUE);
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
     LayoutConstraintF parentLayoutConstraint;
@@ -1826,34 +1872,29 @@ HWTEST_F(TextTestNg, TextLayoutTest013, TestSize.Level1)
     textLayoutProperty->UpdateAdaptMinFontSize(ADAPT_OVER_MIN_FONT_SIZE_VALUE);
     textLayoutProperty->UpdateLineHeight(ADAPT_LINE_HEIGHT_VALUE);
     textLayoutProperty->UpdateMaxLines(MAX_LINES);
-    /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
-     */
 
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to maxWidth of paragraph_
+     */
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-
-    /**
-     * @tc.steps: step4. check the HeightAdaptivePolicyValue.
-     */
-
-    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
-        TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
 }
 
 /**
- * @tc.name: TextLayoutTest014
+ * @tc.name: TextPaintMethodTest001
  * @tc.desc: test text_paint_method.cpp :set textOverflow to MARQUEE
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest014, TestSize.Level1)
+HWTEST_F(TextTestNg, TextPaintMethodTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
      */
-
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1865,7 +1906,21 @@ HWTEST_F(TextTestNg, TextLayoutTest014, TestSize.Level1)
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+
+    /**
+     * @tc.steps: step3. create textPaintMethod and call UpdateContentModifier function.
+     * @tc.expected: textContentModifier_'s paragraph_ is equal to textPaintMethod's paragraph_.
+     *               The return value of GetOverlayModifier is not null.
+     */
     auto pattern = textFrameNode->GetPattern<Pattern>();
+    AceType::DynamicCast<TextPattern>(pattern)->textSelector_.Update(0, -1);
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
     RefPtr<TextContentModifier> textContentModifier =
@@ -1873,40 +1928,237 @@ HWTEST_F(TextTestNg, TextLayoutTest014, TestSize.Level1)
     RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
     TextPaintMethod textPaintMethod(
         pattern, paragraph, BASE_LINE_OFFSET_VALUE, textContentModifier, textOverlayModifier);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-    textLayoutProperty->UpdateFontSize(ADAPT_FONT_SIZE_VALUE);
-    textLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
-    textLayoutProperty->UpdateTextColor(TEXT_COLOR_VALUE);
-    Shadow textShadow;
-    textShadow.SetBlurRadius(BLURRADIUS_VALUE);
-    textShadow.SetColor(TEXT_COLOR_VALUE);
-    textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
-    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
-    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textLayoutProperty->UpdateTextShadow(textShadow);
-    textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
-    textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
-    textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
+    UpdateTextLayoutProperty(textLayoutProperty);
     RefPtr<RenderContext> renderContext = RenderContext::Create();
     auto paintProperty = textPattern->CreatePaintProperty();
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    textPaintMethod.UpdateContentModifier(paintWrapper);
-    textPaintMethod.UpdateOverlayModifier(paintWrapper);
-    auto OverlayModifier = textPaintMethod.GetOverlayModifier(paintWrapper);
-    EXPECT_NE(OverlayModifier, nullptr);
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    SetPaintMethodModifier(textPaintMethod);
+    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    textPaintMethod.textContentModifier_->textDecoration_ = TextDecoration::UNDERLINE;
+    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(textPaintMethod.textContentModifier_->paragraph_, textPaintMethod.paragraph_);
+    ASSERT_NE(textPaintMethod.GetOverlayModifier(AceType::RawPtr(paintWrapper)), nullptr);
 }
 
 /**
- * @tc.name: TextLayoutTest015
- * @tc.desc: test text_content_modifier.cpp.
+ * @tc.name: TextContentModifier001
+ * @tc.desc: test text_content_modifier.cpp onDraw function.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest015, TestSize.Level1)
+HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textFrameNode.
      */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
 
+    /**
+     * @tc.steps: step2. call onDraw function.
+     * @tc.expected: The member variable value of textContentModifier is the value set above
+     */
+    auto frameNode = layoutWrapper->GetHostNode();
+    auto pipeline = frameNode->GetContext();
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
+    textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
+    SetContentModifier(textContentModifier);
+    auto pattern = textFrameNode->GetPattern<Pattern>();
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    RefPtr<TextContentModifier> contentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(pattern, paragraph, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
+    // set pipelineContext nullptr
+    MockPipelineBase::TearDown();
+    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    MockPipelineBase::SetUp();
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textContentModifier.SetParagraph(paragraph);
+    // call onDraw function(textRacing_ = true)
+    textContentModifier.StartTextRace();
+    context.width = CONTEXT_LARGE_WIDTH_VALUE;
+    textContentModifier.onDraw(context);
+    // call onDraw function(textRacing_ = false)
+    textContentModifier.StopTextRace();
+    textContentModifier.onDraw(context);
+    EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
+    EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
+    EXPECT_EQ(textContentModifier.paragraph_, paragraph);
+}
+
+/**
+ * @tc.name: TextContentModifier002
+ * @tc.desc: test text_content_modifier.cpp ModifyTextStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call ModifyTextStyle function.
+     * @tc.expected: The member variable value of textContentModifier is the value set above
+     */
+    auto frameNode = layoutWrapper->GetHostNode();
+    auto pipeline = frameNode->GetContext();
+    TextStyle textStyle = CreateTextStyleUsingTheme(
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
+    textStyle.SetTextDecorationColor(TEXT_COLOR_VALUE);
+    SetContentModifier(textContentModifier);
+    auto pattern = textFrameNode->GetPattern<Pattern>();
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    RefPtr<TextContentModifier> contentModifier =
+        AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    RefPtr<TextOverlayModifier> textOverlayModifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    TextPaintMethod textPaintMethod(pattern, paragraph, BASE_LINE_OFFSET_VALUE, contentModifier, textOverlayModifier);
+    // set pipelineContext nullptr
+    MockPipelineBase::TearDown();
+    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
+    MockPipelineBase::SetUp();
+    // set textDecorationAnimatable_ true
+    textContentModifier.textDecorationAnimatable_ = true;
+    textContentModifier.oldTextDecoration_ = TextDecoration::UNDERLINE;
+    textContentModifier.SetTextDecoration(TextDecoration::NONE);
+    textContentModifier.ModifyTextStyle(textStyle);
+    // set textDecorationColorAlpha_ value
+    textContentModifier.textDecorationColorAlpha_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1000.0f);
+    textContentModifier.ModifyTextStyle(textStyle);
+    // set textDecorationAnimatable_ false
+    textContentModifier.SetTextDecoration(TextDecoration::LINE_THROUGH);
+    textContentModifier.ModifyTextStyle(textStyle);
+    EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
+    EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
+    EXPECT_EQ(textStyle.GetFontSize().Value(), textContentModifier.fontSizeFloat_->Get());
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithmTest006
+ * @tc.desc: text_layout_algorithm.cpp:Set TextOverflow to MARQUEE
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm and call MeasureContent function.
+     * @tc.expected: The width of the return value of MeasureContent is equal to 100.0f
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentSize.value().Width(), 100.0f);
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithmTest007
+ * @tc.desc: text_layout_algorithm.cpp:set TextHeightAdaptivePolicy to LAYOUT_CONSTRAINT_FIRST and set minFontSize to
+ *           zero. ADAPT_ZERO_FONT_SIZE_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set textLayoutProperty.
+     */
+    textLayoutProperty->UpdateContent(CREATE_VALUE);
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.selfIdealSize.SetSize(TEXT_SIZE);
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    textLayoutProperty->UpdateAdaptMinFontSize(ADAPT_ZERO_FONT_SIZE_VALUE);
+    textLayoutProperty->UpdateLineHeight(ADAPT_LINE_HEIGHT_VALUE);
+    textLayoutProperty->UpdateMaxLines(MAX_LINES);
+
+    /**
+     * @tc.steps: step3. create textLayoutAlgorithm.
+     * @tc.expected: The width of the return value of MeasureContent is equal to maxWidth of paragraph_
+     */
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    auto contentSize =
+        textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(contentSize.value().Width(), textLayoutAlgorithm->paragraph_->GetMaxWidth());
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithmTest008
+ * @tc.desc: text_layout_algorithm.cpp:call AdaptMaxTextSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1922,178 +2174,93 @@ HWTEST_F(TextTestNg, TextLayoutTest015, TestSize.Level1)
     auto pipeline = frameNode->GetContext();
     TextStyle textStyle = CreateTextStyleUsingTheme(
         textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
-    TextContentModifier textContentModifier(std::optional<TextStyle>(std::move(textStyle)));
-    textContentModifier.SetFontSize(ADAPT_FONT_SIZE_VALUE);
-    textContentModifier.SetFontWeight(Ace::FontWeight::W200);
-    textContentModifier.SetTextColor(TEXT_COLOR_VALUE);
-    Shadow textShadow;
-    textShadow.SetBlurRadius(BLURRADIUS_VALUE);
-    textShadow.SetColor(TEXT_COLOR_VALUE);
-    textShadow.SetSpreadRadius(SPREADRADIUS_VALUE);
-    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
-    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
-    textContentModifier.SetTextShadow(textShadow);
-    textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
-    textContentModifier.ModifyTextStyle(textStyle);
-    RSCanvas canvas;
-    DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
-    ParagraphStyle paragraphStyle;
-    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    textContentModifier.SetParagraph(paragraph);
-    textContentModifier.onDraw(context);
-    textContentModifier.StartTextRace();
-    textContentModifier.StopTextRace();
-    textContentModifier.SetTextDecoration(TextDecoration::LINE_THROUGH);
-    OffsetF paintOffset;
-    textContentModifier.SetPrintOffset(paintOffset);
-}
-
-/**
- * @tc.name: TextLayoutTest016
- * @tc.desc: text_layout_algorithm.cpp:Set TextOverflow to MARQUEE
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextLayoutTest016, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
+    textStyle.SetAdaptFontSizeStep(ADAPT_FONT_SIZE_STEP_VALUE);
 
     /**
-     * @tc.steps: step2. set textLayoutProperty.
-     * content: CREATE_VALUE
-     * width: 100.0f
-     * height: 75.0f
+     * @tc.steps: step2. create textLayoutAlgorithm and call AdaptMaxTextSize.
+     * @tc.expected: when maxFontSize < minFontSize,The return value of AdaptMaxTextSize is false.
+     *               when create paragraph failed,The return value of AdaptMaxTextSize is false.
+     *               when increase font size,The return value of AdaptMaxTextSize is true.
+     *               when set NormalizeToPx false,The return value of AdaptMaxTextSize is false.
      */
-
-    textLayoutProperty->UpdateContent(CREATE_VALUE);
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.selfIdealSize.SetSize(TEXT_SIZE);
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
-    /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
-     */
-
     auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
-    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+
+    MockTxtParagraph::SetCanConstruct(false);
+
+    // maxFontSize < minFontSize
+    textStyle.SetAdaptMaxFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
+    textStyle.SetAdaptMinFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline), false);
+
+    // create paragraph failed
+    textStyle.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
+    textStyle.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline), false);
+
+    MockTxtParagraph::SetCanConstruct(true);
+
+    // increase font size
+    std::vector<bool> didExceedMaxLines = { false, true };
+    MockTxtParagraph::SetDidExceedMaxLines(didExceedMaxLines);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline), true);
+    didExceedMaxLines.clear();
+    MockTxtParagraph::SetDidExceedMaxLines(didExceedMaxLines);
+
+    // set NormalizeToPx false
+    textStyle.adaptFontSizeStep_.SetUnit(DimensionUnit::CALC);
+    EXPECT_EQ(textLayoutAlgorithm->AdaptMaxTextSize(textStyle, "abc", parentLayoutConstraint, pipeline), false);
 }
 
 /**
- * @tc.name: TextLayoutTest017
- * @tc.desc: text_layout_algorithm.cpp:set TextHeightAdaptivePolicy to LAYOUT_CONSTRAINT_FIRST and set minFontSize to
- *           zero. ADAPT_ZERO_FONT_SIZE_VALUE
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNg, TextLayoutTest017, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textFrameNode.
-     */
-
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. set textLayoutProperty.
-     * content: CREATE_VALUE
-     * width: 100.0f
-     * height: 75.0f
-     */
-
-    textLayoutProperty->UpdateContent(CREATE_VALUE);
-    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.selfIdealSize.SetSize(TEXT_SIZE);
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-    textLayoutProperty->UpdateAdaptMinFontSize(ADAPT_ZERO_FONT_SIZE_VALUE);
-    textLayoutProperty->UpdateLineHeight(ADAPT_LINE_HEIGHT_VALUE);
-    textLayoutProperty->UpdateMaxLines(MAX_LINES);
-    /**
-     * @tc.steps: step3. create textLayoutAlgorithm.
-     */
-
-    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
-    textLayoutAlgorithm->MeasureContent(parentLayoutConstraint, AccessibilityManager::RawPtr(layoutWrapper));
-    textLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
-    textLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
-
-    /**
-     * @tc.steps: step4. check the HeightAdaptivePolicyValue.
-     */
-
-    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
-        TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
-}
-
-/**
- * @tc.name: TextLayoutTest018
+ * @tc.name: TextOverlayModifierTest001
  * @tc.desc: test text_overlay_modifier.cpp.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest018, TestSize.Level1)
+HWTEST_F(TextTestNg, TextOverlayModifierTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textFrameNode.
+     * @tc.steps: step1. create textOverlayModifier and call text_overlay_modifier.cpp function.
+     * @tc.expected: The member variable value of textOverlayModifier is the value set above
      */
-
-    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
-    auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
-    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
-
     TextOverlayModifier textOverlayModifier;
-
     OffsetF paintOffset;
     textOverlayModifier.SetPrintOffset(paintOffset);
     textOverlayModifier.SetSelectedColor(SELECTED_COLOR);
     std::vector<Rect> rectList;
-    Rect rect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
-    rectList.push_back(rect);
+    rectList.push_back(Rect(RECT_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE));
     textOverlayModifier.SetSelectedRects(rectList);
-    RSCanvas canvas;
+    // change selectedRects_ and call IsSelectedRectsChanged function
+    Rect secondRect(RECT_SECOND_X_VALUE, RECT_Y_VALUE, RECT_WIDTH_VALUE, RECT_HEIGHT_VALUE);
+    textOverlayModifier.selectedRects_[0] = secondRect;
+    Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, Save()).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    RectF contentRect;
+    textOverlayModifier.SetContentRect(contentRect);
     textOverlayModifier.onDraw(context);
+    EXPECT_EQ(textOverlayModifier.paintOffset_->Get(), paintOffset);
+    EXPECT_EQ(textOverlayModifier.selectedColor_->Get(), SELECTED_COLOR);
+    EXPECT_EQ(textOverlayModifier.IsSelectedRectsChanged(rectList), true);
+    EXPECT_EQ(textOverlayModifier.contentRect_, contentRect);
 }
 
 /**
- * @tc.name: TextLayoutTest019
+ * @tc.name: TextPaintMethodTest002
  * @tc.desc: test text_paint_method.cpp without setting textOverflow
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestNg, TextLayoutTest019, TestSize.Level1)
+HWTEST_F(TextTestNg, TextPaintMethodTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create textFrameNode.
+     * @tc.steps: step1. create textFrameNode and textLayoutProperty.
      */
-
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
     ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -2105,6 +2272,9 @@ HWTEST_F(TextTestNg, TextLayoutTest019, TestSize.Level1)
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
 
+    /**
+     * @tc.steps: step2. create textPaintMethod and update textLayoutProperty.
+     */
     auto pattern = textFrameNode->GetPattern<Pattern>();
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
@@ -2126,13 +2296,18 @@ HWTEST_F(TextTestNg, TextLayoutTest019, TestSize.Level1)
     textLayoutProperty->UpdateTextDecorationColor(TEXT_COLOR_VALUE);
     textLayoutProperty->UpdateTextDecoration(TextDecoration::OVERLINE);
     textLayoutProperty->UpdateBaselineOffset(ADAPT_BASE_LINE_OFFSET_VALUE);
+
+    /**
+     * @tc.steps: step3. call UpdateContentModifier,UpdateOverlayModifier and GetOverlayModifier.
+     * @tc.expected: The return value of GetOverlayModifier is not empty
+     */
     RefPtr<RenderContext> renderContext = RenderContext::Create();
     auto paintProperty = textPattern->CreatePaintProperty();
-    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
-    textPaintMethod.UpdateContentModifier(paintWrapper);
-    textPaintMethod.UpdateOverlayModifier(paintWrapper);
-    auto OverlayModifier = textPaintMethod.GetOverlayModifier(paintWrapper);
-    EXPECT_NE(OverlayModifier, nullptr);
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+    textPaintMethod.UpdateContentModifier(AceType::RawPtr(paintWrapper));
+    textPaintMethod.UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    auto OverlayModifier = textPaintMethod.GetOverlayModifier(AceType::RawPtr(paintWrapper));
+    ASSERT_NE(OverlayModifier, nullptr);
 }
 
 /**
@@ -2256,5 +2431,64 @@ HWTEST_F(TextTestNg, TextAccessibilityPropertyGetSupportAction001, TestSize.Leve
         actions |= 1UL << static_cast<uint32_t>(action);
     }
     EXPECT_EQ(actions, expectActions);
+}
+
+/**
+ * @tc.name: TextModelNgTest001
+ * @tc.desc: test text_model_ng.cpp SetHeightAdaptivePolicy and SetTextShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextModelNgTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetHeightAdaptivePolicy and SetTextShadow.
+     * @tc.expected: The HeightAdaptivePolicyValue of textLayoutProperty is MAX_LINES_FIRST.
+     *               The TextShadowValue of textLayoutProperty is textShadow.
+     */
+    TextModelNG text;
+    text.Create("text");
+    text.SetHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    Shadow textShadow;
+    text.SetTextShadow(textShadow);
+    EXPECT_EQ(textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST),
+        TextHeightAdaptivePolicy::MAX_LINES_FIRST);
+    EXPECT_EQ(textLayoutProperty->GetTextShadowValue(textShadow), textShadow);
+}
+
+/**
+ * @tc.name: TextPatternTest001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextPatternTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod function.
+     * @tc.expected: The return value of CreateNodePaintMethod is not empty.
+     *               textPattern's textContentModifier_ is not empty.
+     *               textPattern's textOverlayModifier_ is not empty.
+     */
+    auto nodePaintMethod = textPattern->CreateNodePaintMethod();
+    ASSERT_NE(nodePaintMethod, nullptr);
+    ASSERT_NE(textPattern->textContentModifier_, nullptr);
+    ASSERT_NE(textPattern->textOverlayModifier_, nullptr);
 }
 } // namespace OHOS::Ace::NG
