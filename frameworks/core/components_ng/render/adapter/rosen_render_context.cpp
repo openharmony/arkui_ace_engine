@@ -100,6 +100,7 @@ void RosenRenderContext::StopRecordingIfNeeded()
 
 void RosenRenderContext::OnNodeAppear()
 {
+    isDisappearing_ = false;
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
     // to calculate the pivot, so just mark need to perform appearing transition.
     if (!propTransitionAppearing_ && !transitionEffect_) {
@@ -110,6 +111,7 @@ void RosenRenderContext::OnNodeAppear()
 
 void RosenRenderContext::OnNodeDisappear()
 {
+    isDisappearing_ = true;
     if (!propTransitionDisappearing_ && !transitionEffect_) {
         return;
     }
@@ -177,7 +179,10 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
-    CHECK_NULL_VOID(paintRect.IsValid());
+    if (isDisappearing_) {
+        LOGW("isDisappearing, do not need SyncGeometryProperties, rect:%{public}s", paintRect.ToString().c_str());
+        return;
+    }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (!isSynced_) {
