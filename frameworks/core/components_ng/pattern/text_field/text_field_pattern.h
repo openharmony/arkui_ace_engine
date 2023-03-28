@@ -65,6 +65,7 @@ class OnTextChangedListener;
 namespace OHOS::Ace::NG {
 
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
+constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
 
 enum class SelectionMode { SELECT, SELECT_ALL, NONE };
 
