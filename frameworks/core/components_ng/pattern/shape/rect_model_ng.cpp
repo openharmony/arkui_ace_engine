@@ -38,14 +38,16 @@ void RectModelNG::Create()
 void RectModelNG::SetRadiusWidth(const Dimension& value)
 {
     Radius radius;
-    radius.SetX(value);
+    value.IsNegative() ? radius.SetX(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetX(value);
+    radius.SetY(DEFAULT_RADIUS_INVALID);
     RectModelNG::UpdateRadius(radius);
 }
 
 void RectModelNG::SetRadiusHeight(const Dimension& value)
 {
     Radius radius;
-    radius.SetY(value);
+    value.IsNegative() ? radius.SetY(Dimension(DEFAULT_RADIUS_VALUE)) : radius.SetY(value);
+    radius.SetX(DEFAULT_RADIUS_INVALID);
     RectModelNG::UpdateRadius(radius);
 }
 
