@@ -211,6 +211,7 @@ void CalendarPattern::FireRequestData(MonthState monthState)
 
 void CalendarPattern::FireGoToRequestData(int32_t year, int32_t month, int32_t day)
 {
+    LOGI("Jump to date %{public}d-%{public}d-%{public}d.", year, month, day);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = GetEventHub<CalendarEventHub>();
@@ -223,7 +224,21 @@ void CalendarPattern::FireGoToRequestData(int32_t year, int32_t month, int32_t d
     json->Put("month", month);
     json->Put("MonthState", 0);
     goToCalendarDay_ = day;
+    goToCalendarMonth_ = month;
+    goToCalendarYear_ = year;
     eventHub->UpdateRequestDataEvent(json->ToString());
+}
+
+void CalendarPattern::JumpTo(ObtainedMonth& obtainedMonth)
+{
+    for (auto& day : obtainedMonth.days) {
+        if (day.month.year == goToCalendarYear_ && day.month.month == goToCalendarMonth_ &&
+            day.day == goToCalendarDay_) {
+            day.focused = true;
+        } else {
+            day.focused = false;
+        }
+    }
 }
 
 void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr<FrameNode>& curFrameNode,
@@ -238,11 +253,11 @@ void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr
     auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto currentIndex = swiperPattern->GetCurrentIndex();
+    if (goTo_) {
+        JumpTo(currentMonth_);
+    }
     switch (currentIndex) {
         case 0: {
-            if (goTo_) {
-                currentMonth_.days[--goToCalendarDay_].focused = true;
-            }
             prePattern->SetMonthData(currentMonth_, MonthState::CUR_MONTH);
             if (backToToday_) {
                 prePattern->SetCalendarDay(calendarDay_);
@@ -259,9 +274,6 @@ void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr
         }
         case 1: {
             prePattern->SetMonthData(preMonth_, MonthState::PRE_MONTH);
-            if (goTo_) {
-                currentMonth_.days[--goToCalendarDay_].focused = true;
-            }
             currentPattern->SetMonthData(currentMonth_, MonthState::CUR_MONTH);
             if (backToToday_) {
                 currentPattern->SetCalendarDay(calendarDay_);
@@ -278,9 +290,6 @@ void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr
         case 2: {
             prePattern->SetMonthData(nextMonth_, MonthState::NEXT_MONTH);
             currentPattern->SetMonthData(preMonth_, MonthState::PRE_MONTH);
-            if (goTo_) {
-                currentMonth_.days[--goToCalendarDay_].focused = true;
-            }
             nextPattern->SetMonthData(currentMonth_, MonthState::CUR_MONTH);
             if (backToToday_) {
                 nextPattern->SetCalendarDay(calendarDay_);
