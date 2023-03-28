@@ -147,7 +147,6 @@ void AceContainer::Initialize()
 
 void AceContainer::Destroy()
 {
-    std::lock_guard<std::mutex> lock(dumpMutex_);
     ContainerScope scope(instanceId_);
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
@@ -881,7 +880,6 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
         LOGI("another dump is still running");
         return false;
     }
-    std::lock_guard<std::mutex> lock(dumpMutex_);
     ContainerScope scope(instanceId_);
     auto result = false;
     if (!SystemProperties::GetDebugEnabled()) {
