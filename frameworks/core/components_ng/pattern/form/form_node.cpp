@@ -99,7 +99,7 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
             CHECK_NULL_VOID(formNode);
             formNode->DispatchPointerEvent(point);
         };
-        context->AddEtsCardTouchEventCallback(callback);
+        context->AddEtsCardTouchEventCallback(touchRestrict.touchEvent.id, callback);
         return testResult;
     }
     auto subContext = DynamicCast<OHOS::Ace::PipelineBase>(subContainer->GetPipelineContext());

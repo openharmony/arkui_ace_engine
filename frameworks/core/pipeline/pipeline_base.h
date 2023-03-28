@@ -57,6 +57,7 @@ class FontManager;
 class ManagerInterface;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
+using EtsCardTouchEventCallback = std::function<void(const TouchEvent&)>;
 
 class ACE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -741,10 +742,11 @@ public:
         parentPipeline_ = pipeline;
     }
 
-    void AddEtsCardTouchEventCallback(const std::function<void(const TouchEvent&)>&& callback)
-    {
-        etsCardTouchEventCallback_ = std::move(callback);
-    }
+    void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
+
+    void HandleEtsCardTouchEvent(const TouchEvent& point);
+
+    void RemoveEtsCardTouchEventCallback(int32_t ponitId);
 
 protected:
     void TryCallNextFrameLayoutCallback()
@@ -825,7 +827,7 @@ protected:
     WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
-    std::function<void(const TouchEvent&)> etsCardTouchEventCallback_;
+    std::unordered_map<int32_t, EtsCardTouchEventCallback> etsCardTouchEventCallback_;
 
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
