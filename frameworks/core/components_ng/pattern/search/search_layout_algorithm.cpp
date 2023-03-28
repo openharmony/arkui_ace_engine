@@ -47,11 +47,7 @@ bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(layoutProperty, false);
 
     auto constraint = layoutProperty->GetLayoutConstraint();
-    if (constraint->selfIdealSize.Height().has_value()) {
-        return true;
-    }
-
-    return false;
+    return constraint->selfIdealSize.Height().has_value();
 }
 
 void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
