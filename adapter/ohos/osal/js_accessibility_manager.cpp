@@ -662,10 +662,7 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
 {
     NG::RectF rect;
     if (node->IsActive()) {
-        auto renderContext = node->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        rect = renderContext->GetPaintRectWithTransform();
-        rect.SetOffset(node->GetTransformRelativeOffset());
+        rect = node->GetTransformRectRelativeToWindow();
     }
     nodeInfo.SetParent(GetParentId(node));
     std::vector<int32_t> children;
@@ -788,10 +785,7 @@ RefPtr<NG::FrameNode> FindNodeInRelativeDirection(
 RefPtr<NG::FrameNode> FindNodeInAbsoluteDirection(
     const std::list<RefPtr<NG::FrameNode>>& nodeList, RefPtr<NG::FrameNode>& node, const int direction)
 {
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_RETURN_NOLOG(renderContext, nullptr);
-    NG::RectF rect = renderContext->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    NG::RectF rect = node->GetTransformRectRelativeToWindow();
     auto left = rect.Left();
     auto top = rect.Top();
     auto width = rect.Width();
@@ -820,9 +814,7 @@ RefPtr<NG::FrameNode> FindNodeInAbsoluteDirection(
         if (nodeItem->GetAccessibilityId() == node->GetAccessibilityId() || nodeItem->IsRootNode()) {
             continue;
         }
-        renderContext = nodeItem->GetRenderContext();
-        CHECK_NULL_RETURN_NOLOG(renderContext, nullptr);
-        rect = renderContext->GetPaintRectWithTransform();
+        rect = nodeItem->GetTransformRectRelativeToWindow();
         rect.SetOffset(nodeItem->GetTransformRelativeOffset());
         Rect itemRect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
         if (CheckBetterRect(nodeRect, direction, itemRect, tempBest)) {
@@ -1261,12 +1253,9 @@ void JsAccessibilityManager::DumpPropertyNG(const std::vector<std::string>& para
     auto windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
     auto windowTop = GetWindowTop(ngPipeline->GetWindowId());
 
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     NG::RectF rect;
     if (frameNode->IsActive()) {
-        rect = renderContext->GetPaintRectWithTransform();
-        rect.SetOffset(frameNode->GetTransformRelativeOffset());
+        rect = frameNode->GetTransformRectRelativeToWindow();
     }
 
     int32_t pageId = 0;
@@ -1351,10 +1340,8 @@ static void DumpTreeNG(
     if (!node->IsActive()) {
         return;
     }
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    NG::RectF rect = renderContext->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+
+    NG::RectF rect = node->GetTransformRectRelativeToWindow();
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetAccessibilityId()));
     DumpLog::GetInstance().AddDesc("compid: " + node->GetInspectorId().value_or(""));
     DumpLog::GetInstance().AddDesc("text: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());

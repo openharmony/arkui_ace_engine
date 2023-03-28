@@ -250,6 +250,8 @@ public:
 
     OffsetF GetTransformRelativeOffset() const;
 
+    RectF GetTransformRectRelativeToWindow() const;
+
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;
@@ -323,6 +325,7 @@ public:
     {
         exclusiveEventForChild_ = exclusiveEventForChild;
     }
+
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
