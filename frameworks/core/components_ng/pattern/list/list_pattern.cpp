@@ -66,8 +66,15 @@ void ListPattern::OnModifyDone()
     }
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     SetEdgeEffect(edgeEffect);
+
+    auto defaultDisplayMode = DisplayMode::OFF;
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        defaultDisplayMode = DisplayMode::AUTO;
+    }
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
-    SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF));
+    SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(defaultDisplayMode));
     SetChainAnimation(edgeEffect == EdgeEffect::SPRING && listLayoutProperty->GetChainAnimation().value_or(false));
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
