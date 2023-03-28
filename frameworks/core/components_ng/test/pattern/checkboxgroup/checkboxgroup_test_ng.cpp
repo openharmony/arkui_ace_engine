@@ -690,6 +690,43 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBoxGroupPatternTest017
+ * @tc.desc: Test SetUnSelectedColor, SetCheckMarkColor, SetCheckMarkSize, SetCheckMarkWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBoxGroup node
+     */
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+
+    /**
+     * @tc.steps: step2. Set parameters to CheckBoxGroup property
+     */
+    Color unselected = Color::BLACK;
+
+    checkBoxGroupModelNG.SetUnSelectedColor(unselected);
+    checkBoxGroupModelNG.SetCheckMarkColor(unselected);
+    checkBoxGroupModelNG.SetCheckMarkSize(CHECK_MARK_SIZE);
+    checkBoxGroupModelNG.SetCheckMarkWidth(CHECK_MARK_WIDTH);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetGroupName(GROUP_NAME);
+    EXPECT_EQ(eventHub->GetGroupName(), GROUP_NAME);
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupUnSelectedColor(), unselected);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkColor(), unselected);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkSize(), CHECK_MARK_SIZE);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxGroupCheckMarkWidth(), CHECK_MARK_WIDTH);
+}
+
+/**
  * @tc.name: CheckBoxGroupPaintMethodTest001
  * @tc.desc: Test CheckBoxGroup Modifier DrawTouchBoard.
  * @tc.type: FUNC

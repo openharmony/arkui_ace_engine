@@ -91,6 +91,7 @@ HWTEST_F(FullScreenManagerTestNg, FullScreenManagerTest001, TestSize.Level1)
     /**
      * @tc.steps: step4. call RequestFullScreen function
      */
+    MockPipelineBase::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
     fullScreenManager->RequestFullScreen(frameNode);
 
     /**
@@ -209,6 +210,7 @@ HWTEST_F(FullScreenManagerTestNg, FullScreenManagerTest003, TestSize.Level1)
      * @tc.expected: step4. the layout property of the FrameNode match the demand of full screen and
      *                      the parent node of the FrameNode is the root
      */
+    MockPipelineBase::GetCurrent()->SetRootSize(ROOT_WIDTH, ROOT_HEIGHT);
     fullScreenManager->RequestFullScreen(frameNode);
     auto selfIdealSizeFullScreen = frameNode->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
     auto maxSizeFullScreen = frameNode->GetLayoutProperty()->GetCalcLayoutConstraint()->maxSize;
