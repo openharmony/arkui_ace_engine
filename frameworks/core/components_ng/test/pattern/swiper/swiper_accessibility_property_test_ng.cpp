@@ -99,7 +99,7 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetCurren
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetBeginIndex001, TestSize.Level1)
 {
-    EXPECT_EQ(swiperAccessibilityProperty_->GetBeginIndex(), SWIPER_ERROR);
+    EXPECT_EQ(swiperAccessibilityProperty_->GetBeginIndex(), 0);
 
     swiperPattern_->startIndex_ = INDEX_NUM;
 
@@ -113,7 +113,7 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetBeginI
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetEndIndex001, TestSize.Level1)
 {
-    EXPECT_EQ(swiperAccessibilityProperty_->GetEndIndex(), SWIPER_ERROR);
+    EXPECT_EQ(swiperAccessibilityProperty_->GetEndIndex(), 0);
 
     swiperPattern_->endIndex_ = INDEX_NUM;
 

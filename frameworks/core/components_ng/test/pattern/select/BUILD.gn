@@ -177,7 +177,6 @@ ohos_unittest("select_pattern_test_ng") {
 
   configs = [
     "$ace_root/test/unittest:ace_unittest_config",
-
     "//commonlibrary/c_utils/base:utils_config",
   ]
 }
