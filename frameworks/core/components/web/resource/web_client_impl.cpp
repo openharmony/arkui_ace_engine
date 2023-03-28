@@ -792,4 +792,12 @@ void WebClientImpl::OnResizeNotWork()
     CHECK_NULL_VOID(delegate);
     delegate->OnResizeNotWork();
 }
+
+void WebClientImpl::OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnGetTouchHandleHotZone(hotZone);
+}
 } // namespace OHOS::Ace

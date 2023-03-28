@@ -436,9 +436,9 @@ public:
     void ClosePort(std::string& handle);
     void PostPortMessage(std::string& handle, std::string& data);
     void SetPortMessageCallback(std::string& handle, std::function<void(const std::string&)>&& callback);
-    void HandleTouchDown(const int32_t& id, const double& x, const double& y);
-    void HandleTouchUp(const int32_t& id, const double& x, const double& y);
-    void HandleTouchMove(const int32_t& id, const double& x, const double& y);
+    void HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchCancel();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
@@ -515,6 +515,7 @@ public:
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
     void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs);
+    void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();

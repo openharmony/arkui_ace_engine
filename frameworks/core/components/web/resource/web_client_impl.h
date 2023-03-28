@@ -177,6 +177,7 @@ public:
     void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;
+    void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {
