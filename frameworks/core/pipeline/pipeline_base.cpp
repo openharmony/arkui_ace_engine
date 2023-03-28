@@ -595,6 +595,45 @@ void PipelineBase::SetFormVsyncCallback(AceVsyncCallback&& callback, int32_t for
     }
 }
 
+void PipelineBase::AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback)
+{
+    if (!callback || ponitId < 0) {
+        return;
+    }
+
+    etsCardTouchEventCallback_[ponitId] = std::move(callback);
+}
+
+void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
+{
+    if (point.id < 0) {
+        return;
+    }
+
+    auto iter = etsCardTouchEventCallback_.find(point.id);
+    if (iter == etsCardTouchEventCallback_.end()) {
+        return;
+    }
+
+    if (iter->second) {
+        iter->second(point);
+    }
+}
+
+void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t ponitId)
+{
+    if (ponitId < 0) {
+        return;
+    }
+
+    auto iter = etsCardTouchEventCallback_.find(ponitId);
+    if (iter == etsCardTouchEventCallback_.end()) {
+        return;
+    }
+
+    etsCardTouchEventCallback_.erase(iter);
+}
+
 void PipelineBase::RemoveFormVsyncCallback(int32_t formWindowId)
 {
     formVsyncCallbacks_.erase(formWindowId);
@@ -617,6 +656,7 @@ void PipelineBase::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
+    etsCardTouchEventCallback_.clear();
     LOGI("PipelineBase::Destroy end.");
 }
 } // namespace OHOS::Ace
