@@ -25,6 +25,7 @@
 #include "core/components_ng/layout/layout_wrapper_builder.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -349,8 +350,11 @@ void LayoutWrapper::MountToHostOnMainThread()
 
 void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
 {
-    for (const auto& child : children_) {
-        if (child) {
+    if (GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG || isActive_) {
+        for (const auto& child : children_) {
+            if (!child) {
+                continue;
+            }
             auto node = child->GetHostNode();
             if (node && node->GetLayoutProperty()) {
                 const auto& geometryTransition = node->GetLayoutProperty()->GetGeometryTransition();
@@ -360,10 +364,10 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
             }
             child->SwapDirtyLayoutWrapperOnMainThread();
         }
-    }
 
-    if (layoutWrapperBuilder_) {
-        layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
+        if (layoutWrapperBuilder_) {
+            layoutWrapperBuilder_->SwapDirtyAndUpdateBuildCache();
+        }
     }
 
     auto host = hostNode_.Upgrade();
