@@ -1487,13 +1487,7 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto taskExecutor = Container::CurrentTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostSyncTask(
-        [&]() {
-            container->Dump(params, info);
-        },
-        TaskExecutor::TaskType::UI);
+    container->Dump(params, info);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
