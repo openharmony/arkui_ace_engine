@@ -638,6 +638,62 @@ HWTEST_F(TogglePatternTestNg, TogglePatternTest0011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TogglePatternTest0012
+ * @tc.desc: Test toggle OnModifyDone default margin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TogglePatternTestNg, TogglePatternTest0012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create switch and get frameNode.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(switchFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create switch frameNode, get switchPattern.
+     * @tc.expected: step2. get switchPattern success.
+     */
+    auto switchPattern = switchFrameNode->GetPattern<SwitchPattern>();
+    EXPECT_NE(switchPattern, nullptr);
+    auto layoutProperty = switchFrameNode->GetLayoutProperty();
+
+    // set switchTheme to themeManager before using themeManager to get switchTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(switchTheme));
+
+    MarginProperty margin;
+    margin.left = CalcLength(PADDING.ConvertToPx());
+    layoutProperty->UpdateMargin(margin); // GetMarginProperty
+
+    switchPattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(PADDING.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
+              CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+
+    MarginProperty margin1;
+    margin1.right = CalcLength(PADDING.ConvertToPx());
+    layoutProperty->UpdateMargin(margin1); // GetMarginProperty
+
+    switchPattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(PADDING.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
+              CalcLength(switchTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+              CalcLength(switchTheme->GetHotZoneVerticalPadding().Value()));
+}
+
+/**
  * @tc.name: ToggleLayoutTest001
  * @tc.desc: Test toggle layout.
  * @tc.type: FUNC
