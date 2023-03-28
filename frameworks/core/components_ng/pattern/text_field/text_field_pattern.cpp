@@ -709,7 +709,8 @@ void TextFieldPattern::GetTextRectsInRange(
 bool TextFieldPattern::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetricsF& result)
 {
     CHECK_NULL_RETURN_NOLOG(paragraph_, false);
-    if (!IsTextArea() && static_cast<size_t>(extent) >= textEditingValue_.GetWideText().length()) {
+    auto wideText = textEditingValue_.GetWideText();
+    if (!IsTextArea() && static_cast<size_t>(extent) >= wideText.length()) {
         return false;
     }
 
@@ -725,6 +726,17 @@ bool TextFieldPattern::ComputeOffsetForCaretDownstream(int32_t extent, CaretMetr
     }
 
     const auto& textBox = *textBoxes.begin();
+    auto lastStringBeforeCursor = wideText.substr(
+        std::clamp(textEditingValue_.caretPosition - 1, 0, static_cast<int32_t>(wideText.length()) - 1), 1);
+    // Caret is within width of the downstream glyphs.
+    if (lastStringBeforeCursor == WIDE_NEWLINE &&
+        (caretUpdateType_ == CaretUpdateType::INPUT || caretUpdateType_ == CaretUpdateType::DEL)) {
+        result.offset.SetX(MakeEmptyOffset().GetX());
+        result.offset.SetY(textBox.rect_.GetTop());
+        result.height = textBox.rect_.GetHeight();
+        return true;
+    }
+
     // Caret is within width of the downstream glyphs.
     float offsetX = textBox.rect_.GetLeft();
     result.offset.SetX(offsetX);
