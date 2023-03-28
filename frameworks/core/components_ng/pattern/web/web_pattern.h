@@ -284,6 +284,8 @@ public:
     {
         selectPopupMenuShowing_ = showing;
     }
+    void OnCompleteSwapWithNewSize();
+    void OnResizeNotWork();
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -439,6 +441,8 @@ private:
     bool selectPopupMenuShowing_ = false;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
+    bool isInWindowDrag_ = false;
+    bool isWaiting_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG
