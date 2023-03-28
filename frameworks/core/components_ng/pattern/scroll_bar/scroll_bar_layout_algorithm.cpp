@@ -23,6 +23,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -106,8 +107,23 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     auto childSize = childGeometryNode->GetMarginFrameSize();
     scrollableDistance_ = std::abs(GetMainAxisSize(size, axis) - GetMainAxisSize(childSize, axis));
-    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
-    childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset);
+    auto scrollBarPattern = AceType::DynamicCast<ScrollBarPattern>(layoutWrapper->GetHostNode()->GetPattern());
+    auto controlDistance = scrollBarPattern->GetControlDistance();
+    auto scrollOffset = scrollBarPattern->GetScrollOffset();
+    float currentOffset = 0.0f;
+    if (!NearZero(controlDistance)) {
+        currentOffset = scrollOffset * scrollableDistance_ / controlDistance;
+    } else {
+        LOGW("scroll bar scrollable distance is zero");
+    }
+    currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
+    if (currentOffset_ == currentOffset || scrollableDistance_ <= 0.0f) {
+        return;
+    } else {
+        currentOffset_ = currentOffset;
+    }
+    auto currentAxisOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
+    childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentAxisOffset);
     childWrapper->Layout();
 }
 
