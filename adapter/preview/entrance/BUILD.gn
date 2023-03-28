@@ -61,6 +61,7 @@ template("preview_entrance_source") {
         defines -= [ "UNICODE" ]
         deps += [ "//base/global/resource_management/frameworks/resmgr:global_resmgr_win" ]
         cflags_cc += [ "-DNONLS" ]
+        libs = [ "//prebuilts/mingw-w64/ohos/linux-x86_64/clang-mingw/x86_64-w64-mingw32/lib/libshlwapi.a" ]
       }
 
       if (platform == "mac") {
