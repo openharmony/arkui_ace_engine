@@ -158,14 +158,22 @@ const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 void SubwindowManager::ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = GetSubwindow(containerId);
-    if (!subwindow) {
-        LOGI("Subwindow is null, add a new one.");
-        subwindow = Subwindow::CreateSubwindow(containerId);
-        subwindow->InitContainer();
-        AddSubwindow(containerId, subwindow);
-    }
-    subwindow->ShowMenuNG(menuNode, targetId, offset);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [containerId, menuNode, targetId, offset] {
+            auto manager = SubwindowManager::GetInstance();
+            CHECK_NULL_VOID(manager);
+            auto subwindow = manager->GetSubwindow(containerId);
+            if (!subwindow) {
+                LOGI("Subwindow is null, add a new one.");
+                subwindow = Subwindow::CreateSubwindow(containerId);
+                subwindow->InitContainer();
+                manager->AddSubwindow(containerId, subwindow);
+            }
+            subwindow->ShowMenuNG(menuNode, targetId, offset);
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void SubwindowManager::HideMenuNG(int32_t targetId)
@@ -195,14 +203,22 @@ void SubwindowManager::ClearMenuNG()
 void SubwindowManager::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = GetSubwindow(containerId);
-    if (!subwindow) {
-        LOGI("Subwindow is null, add a new one.");
-        subwindow = Subwindow::CreateSubwindow(containerId);
-        subwindow->InitContainer();
-        AddSubwindow(containerId, subwindow);
-    }
-    subwindow->ShowPopupNG(targetId, popupInfo);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [containerId, targetId, popupInfo] {
+            auto manager = SubwindowManager::GetInstance();
+            CHECK_NULL_VOID(manager);
+            auto subwindow = manager->GetSubwindow(containerId);
+            if (!subwindow) {
+                LOGI("Subwindow is null, add a new one.");
+                subwindow = Subwindow::CreateSubwindow(containerId);
+                subwindow->InitContainer();
+                manager->AddSubwindow(containerId, subwindow);
+            }
+            subwindow->ShowPopupNG(targetId, popupInfo);
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void SubwindowManager::HidePopupNG(int32_t targetId)
@@ -224,14 +240,22 @@ void SubwindowManager::HidePopupNG()
 void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool disableTouchEvent)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = GetSubwindow(containerId);
-    if (!subwindow) {
-        LOGI("Subwindow is null, add a new one.");
-        subwindow = Subwindow::CreateSubwindow(containerId);
-        subwindow->InitContainer();
-        AddSubwindow(containerId, subwindow);
-    }
-    subwindow->ShowPopup(newComponent, disableTouchEvent);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [containerId, newComponent, disableTouchEvent] {
+            auto manager = SubwindowManager::GetInstance();
+            CHECK_NULL_VOID(manager);
+            auto subwindow = manager->GetSubwindow(containerId);
+            if (!subwindow) {
+                LOGI("Subwindow is null, add a new one.");
+                subwindow = Subwindow::CreateSubwindow(containerId);
+                subwindow->InitContainer();
+                manager->AddSubwindow(containerId, subwindow);
+            }
+            subwindow->ShowPopup(newComponent, disableTouchEvent);
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 bool SubwindowManager::CancelPopup(const std::string& id)
@@ -246,14 +270,22 @@ bool SubwindowManager::CancelPopup(const std::string& id)
 void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = GetSubwindow(containerId);
-    if (!subwindow) {
-        LOGI("Subwindow is null, add a new one.");
-        subwindow = Subwindow::CreateSubwindow(containerId);
-        subwindow->InitContainer();
-        AddSubwindow(containerId, subwindow);
-    }
-    subwindow->ShowMenu(newComponent);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [containerId, newComponent] {
+            auto manager = SubwindowManager::GetInstance();
+            CHECK_NULL_VOID(manager);
+            auto subwindow = manager->GetSubwindow(containerId);
+            if (!subwindow) {
+                LOGI("Subwindow is null, add a new one.");
+                subwindow = Subwindow::CreateSubwindow(containerId);
+                subwindow->InitContainer();
+                manager->AddSubwindow(containerId, subwindow);
+            }
+            subwindow->ShowMenu(newComponent);
+        },
+        TaskExecutor::TaskType::PLATFORM);
 }
 
 void SubwindowManager::CloseMenu()
@@ -365,14 +397,22 @@ void SubwindowManager::ShowToast(const std::string& message, int32_t duration, c
         subwindow->ShowToast(message, duration, bottom);
         // for ability
     } else {
-        auto subwindow = GetSubwindow(containerId);
-        if (!subwindow) {
-            LOGI("Subwindow is null, add a new one.");
-            subwindow = Subwindow::CreateSubwindow(containerId);
-            subwindow->InitContainer();
-            AddSubwindow(containerId, subwindow);
-        }
-        subwindow->ShowToast(message, duration, bottom);
+        auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [containerId, message, duration, bottom] {
+                auto manager = SubwindowManager::GetInstance();
+                CHECK_NULL_VOID(manager);
+                auto subwindow = manager->GetSubwindow(containerId);
+                if (!subwindow) {
+                    LOGI("Subwindow is null, add a new one.");
+                    subwindow = Subwindow::CreateSubwindow(containerId);
+                    subwindow->InitContainer();
+                    manager->AddSubwindow(containerId, subwindow);
+                }
+                subwindow->ShowToast(message, duration, bottom);
+            },
+            TaskExecutor::TaskType::PLATFORM);
     }
 }
 
