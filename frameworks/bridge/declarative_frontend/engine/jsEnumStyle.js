@@ -32,7 +32,7 @@ var Color;
 
 var ColoringStrategy;
 (function (ColoringStrategy){
-  ColoringStrategy["Invert"] = "Invert";
+  ColoringStrategy["INVERT"] = "Invert";
 })(ColoringStrategy || (ColoringStrategy = {}));
 
 var TextInputStyle;
@@ -1307,7 +1307,7 @@ var OperationStyle;
 
 var TabItemType;
 (function (TabItemType) {
-  TabItemType[TabItemType["Tex"] = 0] = "Text";
+  TabItemType[TabItemType["Text"] = 0] = "Text";
   TabItemType[TabItemType["Icon"] = 1] = "Icon";
 })(TabItemType || (TabItemType = {}));
 

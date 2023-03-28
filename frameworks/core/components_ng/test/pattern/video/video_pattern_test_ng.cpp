@@ -84,6 +84,15 @@ constexpr float MAX_HEIGHT = 400.0f;
 const SizeF MAX_SIZE(MAX_WIDTH, MAX_HEIGHT);
 constexpr float VIDEO_WIDTH = 300.0f;
 constexpr float VIDEO_HEIGHT = 300.0f;
+constexpr float SCREEN_WIDTH_SMALL = 500.0f;
+constexpr float SCREEN_HEIGHT_SMALL = 1000.0f;
+constexpr float SCREEN_WIDTH_MEDIUM = 1000.0f;
+constexpr float SCREEN_HEIGHT_MEDIUM = 2000.0f;
+constexpr float SCREEN_WIDTH_LARGE = 1500.0f;
+constexpr float SCREEN_HEIGHT_LARGE = 2500.0f;
+const SizeF SCREEN_SIZE_SMALL(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
+const SizeF SCREEN_SIZE_MEDIUM(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
+const SizeF SCREEN_SIZE_LARGE(SCREEN_WIDTH_LARGE, SCREEN_HEIGHT_LARGE);
 const SizeF VIDEO_SIZE(VIDEO_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_GREATER_THAN_1(MAX_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
@@ -1142,133 +1151,6 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest013, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoPatternTest014
- * @tc.desc: Test OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(VideoPropertyTestNg, VideoPatternTest014, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create Video
-     * @tc.expected: step1. Create Video successfully
-     */
-    auto frameNode = CreateVideoNode(testProperty);
-    ASSERT_TRUE(frameNode);
-    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
-    auto pattern = frameNode->GetPattern<VideoPattern>();
-    ASSERT_TRUE(pattern);
-
-    // prepare the param for OnDirtyLayoutWrapperSwap
-    DirtySwapConfig config;
-    auto videoLayoutAlgorithm = AceType::MakeRefPtr<VideoLayoutAlgorithm>();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetContentSize(MAX_SIZE);
-    auto layoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
-    EXPECT_TRUE(layoutProperty);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
-    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm, false);
-    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
-
-    /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap several times
-     *            case: skipMeasure is true
-     */
-    bool skipMeasures[2] { true, false };
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 2; j++) {
-            if (i == 1 && j == 1) {
-                break;
-            }
-            layoutWrapper->skipMeasureContent_ = skipMeasures[i];
-            config.skipMeasure = skipMeasures[j];
-            pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-        }
-    }
-
-    /**
-     * @tc.steps: step3. call OnDirtyLayoutWrapperSwap several times
-     *            case: skipMeasure is false
-     */
-    layoutWrapper->skipMeasureContent_ = false;
-    config.skipMeasure = false;
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
-        SetBounds(0.0f, 0.0f, MAX_WIDTH, MAX_HEIGHT))
-        .Times(1);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config); // case: layoutProperty has not VideoSize()
-
-    vector<ImageFit> objectFits { ImageFit::FILL, ImageFit::CONTAIN, ImageFit::COVER, ImageFit::FITWIDTH,
-        ImageFit::SCALE_DOWN };
-    layoutProperty->UpdateVideoSize(VIDEO_SIZE);
-    vector<SizeF> idealSizes { MAX_SIZE, MAX_SIZE, MAX_SIZE, MAX_SIZE, VIDEO_SIZE, MAX_SIZE };
-
-    // case: layoutSize = {400, 400}, videoSize = {300, 300}
-    for (ImageFit& objectFit : objectFits) {
-        layoutProperty->UpdateObjectFit(objectFit);
-        if (objectFit != ImageFit::SCALE_DOWN) {
-            EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
-                SetBounds(0.0f, 0.0f, MAX_WIDTH, MAX_HEIGHT))
-                .Times(1);
-        } else {
-            EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
-                SetBounds(50.0f, 50.0f, VIDEO_WIDTH, VIDEO_HEIGHT))
-                .Times(1);
-        }
-        pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    }
-
-    // case: layoutSize or VideoSize is inValid (near 0)
-    vector<SizeF> videoSizes { VIDEO_SIZE, INVALID_SIZE, INVALID_SIZE };
-    vector<SizeF> layoutSizes { INVALID_SIZE, MAX_SIZE, INVALID_SIZE };
-    for (int i = 0; i < 3; i++) {
-        layoutProperty->UpdateVideoSize(videoSizes[i]);
-        geometryNode->SetContentSize(layoutSizes[i]);
-        EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
-            SetBounds(0.0f, 0.0f, layoutSizes[i].width_, layoutSizes[i].height_))
-            .Times(2);
-        layoutProperty->UpdateObjectFit(ImageFit::CONTAIN);
-        pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-        layoutProperty->UpdateObjectFit(ImageFit::COVER);
-        pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    }
-
-    // case: objectFit = COVER, sourceRatio < layoutRatio, widthRatio <= 1
-    layoutProperty->UpdateObjectFit(ImageFit::COVER);
-    layoutProperty->UpdateVideoSize(VIDEO_SIZE);
-    geometryNode->SetContentSize(SizeF(300.0f, 200.0f));
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
-        SetBounds(50.0f, 0.0f, 200.0f, 200.0f))
-        .Times(1);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-
-    // case: objectFit = SCALE_DOWN, layout.width < video.width, sourceRatio < layoutRatio
-    layoutProperty->UpdateObjectFit(ImageFit::SCALE_DOWN);
-    layoutProperty->UpdateVideoSize(VIDEO_SIZE);
-    geometryNode->SetContentSize(SizeF(200.0f, 100.0f));
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
-        SetBounds(50.0f, 0.0f, 100.0f, 100.0f))
-        .Times(1);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-
-    // case: objectFit = NONE, heightRatio <= 1
-    layoutProperty->UpdateObjectFit(ImageFit::NONE);
-    geometryNode->SetContentSize(MAX_SIZE); // layoutSize = (400, 400)
-    layoutProperty->UpdateVideoSize(SizeF(500.0f, 400.0f));
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
-        SetBounds(0.0f, 40.0f, 400.0f, 320.0f))
-        .Times(1);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-
-    // case: objectFit = NONE, widthRatio & heightRatio >= 1
-    layoutProperty->UpdateObjectFit(ImageFit::NONE);
-    geometryNode->SetContentSize(MAX_SIZE); // layoutSize = (400, 400)
-    layoutProperty->UpdateVideoSize(SizeF(500.0f, 800.0f));
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderContext>(pattern->renderContextForMediaPlayer_)),
-        SetBounds(75.0f, 0.0f, 250.0f, 400.0f))
-        .Times(1);
-    pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-}
-
-/**
  * @tc.name: VideoPatternTest015
  * @tc.desc: Test OnResolutionChange & OnHiddenChange
  * @tc.type: FUNC
@@ -1334,5 +1216,86 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest015, TestSize.Level1)
     pattern->OnVisibleChange(false); // case: isPlaying_=true, hidden=true, mediaPlayer is null
     pattern->OnVisibleChange(true);  // case: isPlaying_=true, hidden=false, mediaPlayer is null
     EXPECT_FALSE(pattern->pastPlayingStatus_);
+}
+
+/**
+ * @tc.name: VideoFullScreenTest016
+ * @tc.desc: Create Video, and invoke its MeasureContent function to calculate the content size when it is fullscreen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_MEDIUM, SCREEN_HEIGHT_MEDIUM);
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+
+    auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNodeTemp);
+    auto videoPatternTemp = AceType::DynamicCast<VideoPattern>(frameNodeTemp->GetPattern());
+    CHECK_NULL_VOID(videoPatternTemp);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::VIDEO_ETS_TAG);
+    auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    EXPECT_FALSE(videoLayoutProperty == nullptr);
+
+    // Create LayoutWrapper and set videoLayoutAlgorithm.
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto videoPattern = frameNode->GetPattern<VideoPattern>();
+    EXPECT_FALSE(videoPattern == nullptr);
+    auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
+    EXPECT_FALSE(videoLayoutAlgorithm == nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm));
+
+    videoPattern->FullScreen(); // will called onFullScreenChange(true)
+    EXPECT_TRUE(videoPattern->isFullScreen_);
+
+    // Test MeasureContent when it is fullScreen.
+    /**
+    //     corresponding ets code:
+    //         Video({ src: this.videoSrc, previewUri: this.previewUri, controller: this.controller })
+    //             .height(400).width(400)
+    */
+
+    // Set layout size.
+    LayoutConstraintF layoutConstraint;
+    videoLayoutProperty->UpdateVideoSize(VIDEO_SIZE);
+    layoutConstraint.selfIdealSize.SetSize(VIDEO_SIZE);
+
+    /**
+     * @tc.steps: step2. change to full screen, check size.
+     * @tc.expected: step2. Video size is same to rootsize.
+     */
+    auto videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SCREEN_SIZE_MEDIUM);
+
+    // Change the root size to small
+    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_SMALL, SCREEN_HEIGHT_SMALL);
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SCREEN_SIZE_SMALL);
+
+    // Change the root size to large
+    MockPipelineBase::GetCurrent()->SetRootSize(SCREEN_WIDTH_LARGE, SCREEN_HEIGHT_LARGE);
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SCREEN_SIZE_LARGE);
+
+    /**
+     * @tc.steps: step3. change from full screen to normal size, check size.
+     * @tc.expected: step2. Video size is same to origional size.
+     */
+    videoPattern->ExitFullScreen(); // will called onFullScreenChange(true)
+    EXPECT_FALSE(videoPattern->isFullScreen_);
+
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper).value_or(SizeF(0.0f, 0.0f));
+    EXPECT_EQ(videoSize, SizeF(VIDEO_WIDTH, VIDEO_HEIGHT));
 }
 } // namespace OHOS::Ace::NG

@@ -84,6 +84,11 @@ TextAlign TextFieldPattern::GetTextAlign() const
     return TextAlign::START;
 }
 
+std::string TextFieldPattern::GetPlaceHolder() const
+{
+    return "string";
+}
+
 std::string TextFieldPattern::GetPlaceholderColor() const
 {
     return "string";
@@ -111,4 +116,7 @@ void TextFieldPattern::UpdateScrollBarOffset() {}
 
 void TextFieldPattern::HandleBlurEvent() {}
 void TextFieldPattern::HandleFocusEvent() {}
+
+void TextFieldPattern::InitSurfaceChangedCallback() {}
+void TextFieldPattern::InitSurfacePositionChangedCallback() {}
 } // namespace OHOS::Ace::NG

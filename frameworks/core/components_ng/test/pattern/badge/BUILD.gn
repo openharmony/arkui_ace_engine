@@ -49,11 +49,13 @@ ohos_unittest("badge_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/test/pattern/text/mock/mock_txt_paragraph.cpp",
 
     # self
+    "$ace_root/frameworks/core/components_ng/pattern/badge/badge_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+    "badge_accessibility_property_test_ng.cpp",
     "badge_pattern_test_ng.cpp",
   ]
 

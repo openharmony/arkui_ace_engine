@@ -114,7 +114,6 @@ void RosenRenderContext::OnNodeDisappear()
         return;
     }
     CHECK_NULL_VOID(rsNode_);
-    LOGD("rsNode disappear transition, rsNode:%{public}p", rsNode_.get());
     auto rect = GetPaintRectWithoutTransform();
     NotifyTransitionInner(rect.GetSize(), false);
 }
@@ -178,6 +177,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(paintRect.IsValid());
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (!isSynced_) {
@@ -200,6 +200,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         float xPivot = ConvertDimensionToScaleBySize(vec.GetX(), paintRect.Width());
         float yPivot = ConvertDimensionToScaleBySize(vec.GetY(), paintRect.Height());
         SetPivot(xPivot, yPivot);
+    }
+
+    if (propTransform_ && propTransform_->HasTransformTranslate()) {
+        // if translate unit is percent, it is related with frameSize
+        OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
     }
 
     if (bgLoadingCtx_ && bgImage_) {
@@ -436,10 +441,16 @@ void RosenRenderContext::OnPixelStretchEffectUpdate(const PixStretchEffectOption
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f pixStretchVector;
-    pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
-        static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
-        static_cast<float>(option.bottom.ConvertToPx()));
-    rsNode_->SetPixelStretch(pixStretchVector);
+    if (option.IsPercentOption()) {
+        pixStretchVector.SetValues(static_cast<float>(option.left.Value()), static_cast<float>(option.top.Value()),
+            static_cast<float>(option.right.Value()), static_cast<float>(option.bottom.Value()));
+        rsNode_->SetPixelStretchPercent(pixStretchVector);
+    } else {
+        pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
+            static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
+            static_cast<float>(option.bottom.ConvertToPx()));
+        rsNode_->SetPixelStretch(pixStretchVector);
+    }
     RequestNextFrame();
 }
 
@@ -464,10 +475,24 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
+void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& translate)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetTranslate(translate.x, translate.y, 0.0f);
+    float xValue = 0.0f;
+    float yValue = 0.0f;
+    if (translate.x.Unit() == DimensionUnit::PERCENT || translate.y.Unit() == DimensionUnit::PERCENT) {
+        auto rect = GetPaintRectWithoutTransform();
+        if (!rect.IsValid()) {
+            // size is not determined yet
+            return;
+        }
+        xValue = translate.x.ConvertToPxWithSize(rect.Width());
+        yValue = translate.y.ConvertToPxWithSize(rect.Height());
+    } else {
+        xValue = translate.x.ConvertToPx();
+        yValue = translate.y.ConvertToPx();
+    }
+    rsNode_->SetTranslate(xValue, yValue, 0.0f);
     RequestNextFrame();
 }
 
@@ -1777,21 +1802,21 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
 
     if (transitionIn) {
         UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
-        UpdateTransformTranslate(Vector3F(translateOptions->x.Value(), translateOptions->y.Value(), 0.0f));
+        UpdateTransformTranslate(translateOptions.value());
         UpdateOpacity(effect->GetOpacityEffect().value());
         AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
         UpdateTransformScale(VectorF(1.0f, 1.0f));
-        UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+        UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
         AnimationUtils::CloseImplicitAnimation();
         return true;
     }
     UpdateTransformScale(VectorF(1.0f, 1.0f));
-    UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+    UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
-    UpdateTransformTranslate(Vector3F(translateOptions->x.Value(), translateOptions->y.Value(), 0.0f));
+    UpdateTransformTranslate(translateOptions.value());
     UpdateOpacity(effect->GetOpacityEffect().value());
     AnimationUtils::CloseImplicitAnimation();
     return true;

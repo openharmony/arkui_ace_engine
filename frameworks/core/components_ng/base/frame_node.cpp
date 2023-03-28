@@ -35,6 +35,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -1051,7 +1052,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             consumed = true;
             if ((child->GetHitTestMode() == HitTestMode::HTMBLOCK) ||
                 (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
-                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF)) {
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild())) {
                 break;
             }
         }
@@ -1059,7 +1061,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         // In normal process, the node block the brother node.
         if (childHitResult == HitTestResult::BUBBLING &&
             ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
-                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF))) {
+                (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
             consumed = true;
             break;
         }
@@ -1306,6 +1309,21 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
+}
+
+OffsetF FrameNode::GetPaintRectOffsetToPage() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    OffsetF offset = context->GetPaintRectWithTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
 }
 
 void FrameNode::OnNotifyMemoryLevel(int32_t level)

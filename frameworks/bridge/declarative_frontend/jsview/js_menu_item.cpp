@@ -141,6 +141,10 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
 
 void JSMenuItem::OnChange(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        LOGE("The arg is wrong, it is supposed to have atleast 1 argument.");
+        return;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](bool selected) {

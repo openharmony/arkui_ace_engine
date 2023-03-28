@@ -95,6 +95,8 @@ public:
         return menuPattern->IsSelectMenu();
     }
 
+    void HideSubMenu();
+
 private:
     void OnModifyDone() override;
 

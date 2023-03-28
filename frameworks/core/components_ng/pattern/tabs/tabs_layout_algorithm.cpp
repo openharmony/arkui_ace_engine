@@ -200,11 +200,11 @@ float TabsLayoutAlgorithm::MeasureDivider(const RefPtr<TabsLayoutProperty>& layo
     
     auto dividerIdealSize = CreateIdealSize(
         constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
-    TabsItemDivider defalutDivider;
+    TabsItemDivider defaultDivider;
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto parentWidth = idealSize.Width();
     auto parentHeight = idealSize.Height();
-    auto divider = layoutProperty->GetDivider().value_or(defalutDivider);
+    auto divider = layoutProperty->GetDivider().value_or(defaultDivider);
     auto dividerStrokeWidth = divider.strokeWidth.ConvertToPx();
     auto dividerStartMargin = divider.startMargin.ConvertToPx();
     auto dividerEndMargin = divider.endMargin.ConvertToPx();

@@ -138,7 +138,7 @@ class ACE_EXPORT FocusPattern : public virtual AceType {
     DECLARE_ACE_TYPE(FocusPattern, AceType)
 
 public:
-    explicit FocusPattern() = default;
+    FocusPattern() = default;
     FocusPattern(FocusType focusType, bool focusable) : focusType_(focusType), focusable_(focusable) {}
     FocusPattern(FocusType focusType, bool focusable, FocusStyleType styleType)
         : focusType_(focusType), focusable_(focusable), styleType_(styleType)
@@ -241,7 +241,7 @@ struct ScopeFocusAlgorithm final {
 class ACE_EXPORT FocusCallbackEvents : public virtual AceType {
     DECLARE_ACE_TYPE(FocusCallbackEvents, AceType)
 public:
-    explicit FocusCallbackEvents() = default;
+    FocusCallbackEvents() = default;
     ~FocusCallbackEvents() override = default;
 
     void SetOnFocusCallback(OnFocusFunc&& onFocusCallback)
@@ -669,7 +669,7 @@ public:
 
     std::optional<bool> IsFocusOnTouch() const
     {
-        return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : false;
+        return focusCallbackEvents_ ? focusCallbackEvents_->IsFocusOnTouch() : std::nullopt;
     }
     void SetIsFocusOnTouch(bool isFocusOnTouch);
 
@@ -721,11 +721,11 @@ public:
 
     static inline bool IsFocusStepVertical(FocusStep step)
     {
-        return (static_cast<int32_t>(step) & 0x1) == 0;
+        return (static_cast<uint32_t>(step) & 0x1) == 0;
     }
     static inline bool IsFocusStepForward(FocusStep step)
     {
-        return (static_cast<int32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
+        return (static_cast<uint32_t>(step) & MASK_FOCUS_STEP_FORWARD) != 0;
     }
 
 protected:

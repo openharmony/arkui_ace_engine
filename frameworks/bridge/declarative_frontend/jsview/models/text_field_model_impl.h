@@ -33,6 +33,7 @@ public:
     {
         return nullptr;
     }
+    void RequestKeyboardOnFocus(bool needToRequest) override {};
     void SetWidthAuto(bool isAuto) override {};
     void SetType(TextInputType value) override;
     void SetPlaceholderColor(const Color& value) override;

@@ -127,6 +127,7 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetEndInd
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetAccessibilityValue001, TestSize.Level1)
 {
+    EXPECT_TRUE(swiperAccessibilityProperty_->HasRange());
     AccessibilityValue result = swiperAccessibilityProperty_->GetAccessibilityValue();
     EXPECT_EQ(result.min, 0);
     EXPECT_EQ(result.max, SWIPER_RANGE_MAX_ERROR);

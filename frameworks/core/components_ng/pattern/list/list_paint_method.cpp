@@ -85,7 +85,7 @@ void ListPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
         canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     }
 
-    if (!divider_.strokeWidth.IsValid()) {
+    if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0) {
         return;
     }
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;

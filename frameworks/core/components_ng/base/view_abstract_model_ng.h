@@ -325,7 +325,7 @@ public:
 
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override
     {
-        ViewAbstract::SetTranslate(NG::Vector3F(x.ConvertToPx(), y.ConvertToPx(), z.ConvertToPx()));
+        ViewAbstract::SetTranslate(TranslateOptions(x, y, z));
     }
 
     void SetRotate(float x, float y, float z, float angle) override
@@ -688,6 +688,9 @@ public:
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+#ifdef ENABLE_DRAG_FRAMEWORK
+        ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
         ViewAbstract::BindPopup(param, targetNode, AceType::DynamicCast<UINode>(customNode));
     }
 

@@ -19,10 +19,10 @@
 #include <memory>
 #include <vector>
 
-#include "core/components_ng/test/mock/rosen/testing_font_collection.h"
-#include "core/components_ng/test/mock/rosen/testing_typography.h"
-#include "core/components_ng/test/mock/rosen/testing_typography_properties.h"
-#include "core/components_ng/test/mock/rosen/testing_typography_style.h"
+#include "testing_font_collection.h"
+#include "testing_typography.h"
+#include "testing_typography_properties.h"
+#include "testing_typography_style.h"
 
 namespace OHOS::Ace::Testing {
 class TestingTypographyCreate {

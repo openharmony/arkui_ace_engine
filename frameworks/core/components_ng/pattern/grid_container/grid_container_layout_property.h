@@ -22,6 +22,7 @@
 #include "../linear_layout/linear_layout_property.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/property.h"
 #include "frameworks/core/components/common/layout/grid_container_info.h"
 
 namespace OHOS::Ace::NG {
@@ -81,7 +82,8 @@ public:
         return globalOffset_;
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(ContainerInfo, GridContainerInfo, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(
+        ContainerInfo, GridContainerInfo, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:
     void OnContainerInfoUpdate(const GridContainerInfo& info);

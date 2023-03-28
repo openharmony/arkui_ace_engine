@@ -37,7 +37,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT PipelineContext final : public PipelineBase {
+class ACE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
 public:
@@ -178,6 +178,8 @@ public:
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
 
     void AddPredictTask(PredictTask&& task);
+
+    void AddAfterLayoutTask(std::function<void()>&& task);
 
     void FlushDirtyNodeUpdate();
 

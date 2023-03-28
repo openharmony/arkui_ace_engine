@@ -52,13 +52,25 @@ const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] =
     { OHOS::NWeb::CursorType::CT_NORTHWESTSOUTHEASTRESIZE, MouseFormat::NORTH_WEST_SOUTH_EAST },
     { OHOS::NWeb::CursorType::CT_COLUMNRESIZE, MouseFormat::RESIZE_LEFT_RIGHT },
     { OHOS::NWeb::CursorType::CT_ROWRESIZE, MouseFormat::RESIZE_UP_DOWN },
+    { OHOS::NWeb::CursorType::CT_MIDDLEPANNING, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
+    { OHOS::NWeb::CursorType::CT_EASTPANNING, MouseFormat::MIDDLE_BTN_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHPANNING, MouseFormat::MIDDLE_BTN_NORTH },
+    { OHOS::NWeb::CursorType::CT_NORTHEASTPANNING, MouseFormat::MIDDLE_BTN_NORTH_EAST },
+    { OHOS::NWeb::CursorType::CT_NORTHWESTPANNING, MouseFormat::MIDDLE_BTN_NORTH_WEST },
+    { OHOS::NWeb::CursorType::CT_SOUTHPANNING, MouseFormat::MIDDLE_BTN_SOUTH },
+    { OHOS::NWeb::CursorType::CT_SOUTHEASTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_EAST },
+    { OHOS::NWeb::CursorType::CT_SOUTHWESTPANNING, MouseFormat::MIDDLE_BTN_SOUTH_WEST },
+    { OHOS::NWeb::CursorType::CT_WESTPANNING, MouseFormat::MIDDLE_BTN_WEST },
     { OHOS::NWeb::CursorType::CT_MOVE, MouseFormat::CURSOR_MOVE },
     { OHOS::NWeb::CursorType::CT_NODROP, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_COPY, MouseFormat::CURSOR_COPY },
     { OHOS::NWeb::CursorType::CT_NOTALLOWED, MouseFormat::CURSOR_FORBID },
     { OHOS::NWeb::CursorType::CT_ZOOMIN, MouseFormat::ZOOM_IN },
     { OHOS::NWeb::CursorType::CT_ZOOMOUT, MouseFormat::ZOOM_OUT },
+    { OHOS::NWeb::CursorType::CT_GRAB, MouseFormat::HAND_OPEN },
     { OHOS::NWeb::CursorType::CT_GRABBING, MouseFormat::HAND_GRABBING },
+    { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_VERTICAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH },
+    { OHOS::NWeb::CursorType::CT_MIDDLE_PANNING_HORIZONTAL, MouseFormat::MIDDLE_BTN_NORTH_SOUTH_WEST_EAST },
 };
 } // namespace
 
@@ -1437,9 +1449,11 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
 void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback)
 {
-    auto menuContainer = menu->GetChildAtIndex(0);
+    auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuContainer);
-    auto options = menuContainer->GetChildren();
+    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
     for (auto&& option : options) {
         auto selectCallback = [callback](int32_t index) {
             std::vector<int32_t> indices { static_cast<int32_t>(index) };
@@ -1448,6 +1462,9 @@ void WebPattern::RegisterSelectPopupCallback(RefPtr<FrameNode>& menu,
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
             auto hub = optionNode->GetEventHub<OptionEventHub>();
+            if (!hub) {
+                continue;
+            }
             hub->SetOnSelect(std::move(selectCallback));
             optionNode->MarkModifyDone();
         }

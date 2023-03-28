@@ -502,6 +502,10 @@ void VideoElement::SetMediaSource(std::string& filePath, int32_t& fd)
             return;
         }
     } else {
+        // relative path
+        if (StringUtils::StartWith(filePath, "/")) {
+            filePath = filePath.substr(1);
+        }
         RelativePathPlay(filePath);
     }
 }

@@ -71,6 +71,23 @@ RefPtr<JsAcePage> GetRunningPage(const AceType *data)
     return nullptr;
 }
 
+RefPtr<FrontendDelegate> GetDelegate(const AceType *data)
+{
+#ifndef PA_SUPPORT
+    if (data == nullptr) {
+        return nullptr;
+    }
+    if (AceType::InstanceOf<JsiEngineInstance>(data)) {
+        auto instance = static_cast<const JsiEngineInstance *>(data);
+        return instance->GetDelegate();
+    } else if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
+        auto instance = static_cast<const JsiDeclarativeEngineInstance *>(data);
+        return instance->GetDelegate();
+    }
+#endif
+    return nullptr;
+}
+
 std::string JsiBaseUtils::GenerateErrorMsg(
     const std::shared_ptr<JsValue>& error, const std::shared_ptr<JsRuntime>& runtime)
 {
@@ -137,7 +154,7 @@ std::string JsiBaseUtils::GenerateSummaryBody(
             pageUrl = runningPage->GetUrl();
             appMap = runningPage->GetAppMap();
             if (!JSNApi::IsBundle(vm)) {
-                sourceMaps = runningPage->GetSourceMap();
+                GetStageSourceMap(data, sourceMaps);
             } else {
                 pageMap = runningPage->GetPageMap();
             }
@@ -348,8 +365,10 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
             replace(str.begin(), str.end(), '/', '\\');
         }
         char* ch = strrchr((char*)str.c_str(), '.');
-        int index = ch - str.c_str();
-        str.insert(index, "_");
+        if (ch != nullptr) {
+            int index = ch - str.c_str();
+            str.insert(index, "_");
+        }
         runningPageTag = str;
     }
 
@@ -398,8 +417,10 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
     if (!isAppPage) {
         std::string tag = std::as_const(pageUrl);
         char* ch = strrchr((char*)tag.c_str(), '.');
-        int index = ch - tag.c_str();
-        tag.insert(index, "_");
+        if (ch != nullptr) {
+            int index = ch - tag.c_str();
+            tag.insert(index, "_");
+        }
         runningPageTag = tag;
     }
     // find per line of stack
@@ -834,5 +855,19 @@ NativeValue* AppWarnLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* inf
 NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* info)
 {
     return AppLogPrint(nativeEngine, info, JsLogLevel::ERROR);
+}
+
+void JsiBaseUtils::GetStageSourceMap(const AceType *data,
+    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMaps)
+{
+    auto delegate = GetDelegate(data);
+    std::string maps;
+    if (delegate != nullptr &&
+        delegate->GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
+        auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
+        SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
+    } else {
+        LOGW("GetRunningPage SourceMap load failed!");
+    }
 }
 } // namespace OHOS::Ace::Framework

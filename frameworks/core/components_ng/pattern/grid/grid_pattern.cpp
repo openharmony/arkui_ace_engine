@@ -147,8 +147,7 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             ClearMultiSelect();
             mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
+            // do not select when click
         } else if (info.GetAction() == MouseAction::MOVE) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
@@ -346,10 +345,9 @@ void GridPattern::FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo)
         return;
     }
     auto childFocusList = gridFocus->GetChildren();
-    for (const auto& childFocus : childFocusList) {
-        if (childFocus->IsCurrentFocus()) {
-            return;
-        }
+    if (std::any_of(childFocusList.begin(), childFocusList.end(),
+            [](const RefPtr<FocusHub>& childFocus) { return childFocus->IsCurrentFocus(); })) {
+        return;
     }
     int32_t curMainIndex = gridLayoutInfo.startMainLineIndex_;
     if (gridLayoutInfo.gridMatrix_.find(curMainIndex) == gridLayoutInfo.gridMatrix_.end()) {

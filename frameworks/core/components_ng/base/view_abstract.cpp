@@ -777,7 +777,7 @@ void ViewAbstract::SetPivot(const DimensionOffset& value)
     ACE_UPDATE_RENDER_CONTEXT(TransformCenter, value);
 }
 
-void ViewAbstract::SetTranslate(const NG::Vector3F& value)
+void ViewAbstract::SetTranslate(const NG::TranslateOptions& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
@@ -852,7 +852,12 @@ void ViewAbstract::BindPopup(
         // use param to update PopupParm
         if (!isUseCustom) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
-            LOGI("Update pop node.");
+            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            LOGI("Update normal PopUp node.");
+        } else {
+            BubbleView::UpdateCustomPopupParam(popupId, param);
+            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            LOGI("Update Custom Popup node.");
         }
     }
     // update PopupInfo props

@@ -129,7 +129,7 @@ RSFontWeight ToRSFontWeight(FontWeight fontWeight)
 RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak)
 {
     // should keep enum same with rosen.
-    return static_cast<rosen::WordBreakType>(wordBreak);
+    return static_cast<RSWordBreakType>(wordBreak);
 }
 
 RSTextDecoration ToRSTextDecoration(TextDecoration textDecoration)
@@ -162,8 +162,8 @@ RSTextStyle ToRSTextStyle(const RefPtr<PipelineBase>& context, const TextStyle& 
 
     // TODO: convert missing textBaseline
     rsTextStyle.fontWeight_ = ToRSFontWeight(textStyle.GetFontWeight());
-    rsTextStyle.fontStyle_ = static_cast<rosen::FontStyle>(textStyle.GetFontStyle());
-    rsTextStyle.textBaseline_ = static_cast<rosen::TextBaseline>(textStyle.GetTextBaseline());
+    rsTextStyle.fontStyle_ = static_cast<RSFontStyle>(textStyle.GetFontStyle());
+    rsTextStyle.textBaseline_ = static_cast<RSTextBaseline>(textStyle.GetTextBaseline());
     rsTextStyle.fontFamilies_ = textStyle.GetFontFamilies();
     if (textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
         rsTextStyle.ellipsis_ = StringUtils::Str8ToStr16(StringUtils::ELLIPSIS);

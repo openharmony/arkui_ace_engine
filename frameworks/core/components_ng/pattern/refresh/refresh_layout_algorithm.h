@@ -32,8 +32,6 @@ public:
     RefreshLayoutAlgorithm();
     ~RefreshLayoutAlgorithm() override = default;
 
-    std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:

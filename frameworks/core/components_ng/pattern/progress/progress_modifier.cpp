@@ -68,79 +68,68 @@ void ProgressModifier::onDraw(DrawingContext& context)
 
 void ProgressModifier::SetStrokeWidth(float width)
 {
-    if (strokeWidth_) {
-        strokeWidth_->Set(width);
-    }
+    CHECK_NULL_VOID(strokeWidth_);
+    strokeWidth_->Set(width);
 }
 
 void ProgressModifier::SetColor(LinearColor color)
 {
-    if (color_) {
-        color_->Set(color);
-    }
+    CHECK_NULL_VOID(color_);
+    color_->Set(color);
 }
 
 void ProgressModifier::SetBackgroundColor(LinearColor color)
 {
-    if (bgColor_) {
-        bgColor_->Set(color);
-    }
+    CHECK_NULL_VOID(bgColor_);
+    bgColor_->Set(color);
 }
 
 void ProgressModifier::SetBorderColor(LinearColor color)
 {
-    if (borderColor_) {
-        borderColor_->Set(color);
-    }
+    CHECK_NULL_VOID(borderColor_);
+    borderColor_->Set(color);
 }
 
 void ProgressModifier::SetProgressType(ProgressType type)
 {
-    if (progressType_) {
-        progressType_->Set(static_cast<int32_t>(type));
-    }
+    CHECK_NULL_VOID(progressType_);
+    progressType_->Set(static_cast<int32_t>(type));
 }
 
 void ProgressModifier::SetMaxValue(float value)
 {
-    if (maxValue_) {
-        maxValue_->Set(value);
-    }
+    CHECK_NULL_VOID(maxValue_);
+    maxValue_->Set(value);
 }
 
 void ProgressModifier::SetValue(float value)
 {
-    if (value_) {
-        value_->Set(value);
-    }
+    CHECK_NULL_VOID(value_);
+    value_->Set(value);
 }
 
 void ProgressModifier::SetScaleWidth(float value)
 {
-    if (scaleWidth_) {
-        scaleWidth_->Set(value);
-    }
+    CHECK_NULL_VOID(scaleWidth_);
+    scaleWidth_->Set(value);
 }
 
 void ProgressModifier::SetScaleCount(int32_t value)
 {
-    if (scaleCount_) {
-        scaleCount_->Set(value);
-    }
+    CHECK_NULL_VOID(scaleCount_);
+    scaleCount_->Set(value);
 }
 
 void ProgressModifier::SetContentOffset(const OffsetF& offset)
 {
-    if (offset_) {
-        offset_->Set(offset);
-    }
+    CHECK_NULL_VOID(offset_);
+    offset_->Set(offset);
 }
 
 void ProgressModifier::SetContentSize(const SizeF& contentSize)
 {
-    if (contentSize_) {
-        contentSize_->Set(contentSize);
-    }
+    CHECK_NULL_VOID(contentSize_);
+    contentSize_->Set(contentSize);
 }
 
 void ProgressModifier::SetBorderWidth(const Dimension& width)
@@ -240,10 +229,6 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     double lengthOfScale = strokeWidth_->Get();
-    if (lengthOfScale > radius) {
-        LOGI("strokeWidth is lager than radius,  auto set strokeWidth as half of radius");
-        lengthOfScale = radius / INT32_TWO;
-    }
     double pathDistance = FLOAT_TWO_ZERO * M_PI * radius / scaleCount_->Get();
     if (scaleWidth_->Get() > pathDistance) {
         LOGI("scaleWidth is lager than pathDistance,  auto changeto paint ring");
@@ -265,6 +250,7 @@ void ProgressModifier::PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, c
     canvas.DrawArc(
         { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
         ANGLE_270, totalDegree);
+    // start to draw cur value progress
     pen.SetColor(ToRSColor((color_->Get())));
     canvas.AttachPen(pen);
     double angle = (value_->Get() / maxValue_->Get()) * totalDegree;
@@ -279,6 +265,7 @@ void ProgressModifier::PaintMoon(RSCanvas& canvas, const OffsetF& offset, const 
     PointF centerPt = PointF(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO) + offset;
     double radius = std::min(contentSize.Width() / INT32_TWO, contentSize.Height() / INT32_TWO);
     RSBrush brush;
+    brush.SetAntiAlias(true);
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
     double angle = (value_->Get() / maxValue_->Get()) * totalDegree;

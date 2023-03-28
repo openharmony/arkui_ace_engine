@@ -26,7 +26,10 @@ base_test_outout_path = "ace_engine/NewFrameworkInfrastructure"
 syntax_test_output_path = "ace_engine/NewFrameworkSyntaxNodes"
 image_test_output_path = "ace_engine/NewFrameworkImageResourceLoading"
 basic_test_output_path = "ace_engine/FrameworkBasicAbility"
+manager_test_output_path = "ace_engine/NewFrameworkManager"
+gestures_test_out_path = "ace_engine/NewFrameworkGestures"
 interface_test_output_path = "ace_engine/FrameworkInterfaces"
+accessibility_test_output_path = "ace_engine/FrameworkAccessibility"
 
 # ======================== common template =================================================================
 test_pattern_sources = [
@@ -78,6 +81,7 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
   "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
   "$ace_root/frameworks/core/components_ng/property/property.cpp",
+  "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
   "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
 
   # components_v2
@@ -95,7 +99,6 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/test/mock/base/mock_localization.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/pattern/grid_container/mock_grid_container_layout_property.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animation_utils.cpp",
-  "$ace_root/frameworks/core/components_ng/test/mock/render/mock_drawing_convertor.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_modifier_adapter.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context.cpp",
   "$ace_root/frameworks/core/components_ng/test/mock/render/mock_render_context_creator.cpp",
@@ -103,7 +106,6 @@ test_pattern_sources = [
   "$ace_root/frameworks/core/components_ng/test/mock/syntax/mock_for_each_node.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_element_register.cpp",
   "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_base.cpp",
-  "$ace_root/frameworks/core/pipeline_ng/test/mock/mock_pipeline_context.cpp",
 ]
 
 test_pattern_deps = [

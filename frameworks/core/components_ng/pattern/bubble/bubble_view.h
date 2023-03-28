@@ -42,6 +42,8 @@ public:
     static RefPtr<FrameNode> CreateButton(
         ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param);
     static void UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
+    static void UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param);
+    static void UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param);
 };
 } // namespace OHOS::Ace::NG
 

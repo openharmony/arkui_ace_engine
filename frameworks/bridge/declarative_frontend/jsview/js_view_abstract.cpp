@@ -1881,28 +1881,41 @@ void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
     }
     auto jsObject = JSRef<JSObject>::Cast(info[0]);
     Dimension left;
-    if (!ParseJsDimensionVp(jsObject->GetProperty("left"), left)) {
-        return;
-    }
+    ParseJsDimensionVp(jsObject->GetProperty("left"), left);
     Dimension right;
-    if (!ParseJsDimensionVp(jsObject->GetProperty("right"), right)) {
-        return;
-    }
+    ParseJsDimensionVp(jsObject->GetProperty("right"), right);
     Dimension top;
-    if (!ParseJsDimensionVp(jsObject->GetProperty("top"), top)) {
-        return;
-    }
+    ParseJsDimensionVp(jsObject->GetProperty("top"), top);
     Dimension bottom;
-    if (!ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom)) {
-        return;
-    }
+    ParseJsDimensionVp(jsObject->GetProperty("bottom"), bottom);
+
     PixStretchEffectOption option;
-    if ((left.IsNonNegative() && right.IsNonNegative() && top.IsNonNegative() && bottom.IsNonNegative()) ||
-        (left.IsNonPositive() && right.IsNonPositive() && top.IsNonPositive() && bottom.IsNonPositive())) {
+    bool illegalInput = false;
+    if (left.Unit() == DimensionUnit::PERCENT || right.Unit() == DimensionUnit::PERCENT ||
+        top.Unit() == DimensionUnit::PERCENT || bottom.Unit() == DimensionUnit::PERCENT) {
+        if ((NearEqual(left.Value(), 0.0) || left.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(top.Value(), 0.0) || top.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(right.Value(), 0.0) || right.Unit() == DimensionUnit::PERCENT) &&
+            (NearEqual(bottom.Value(), 0.0) || bottom.Unit() == DimensionUnit::PERCENT)) {
+            left.SetUnit(DimensionUnit::PERCENT);
+            top.SetUnit(DimensionUnit::PERCENT);
+            right.SetUnit(DimensionUnit::PERCENT);
+            bottom.SetUnit(DimensionUnit::PERCENT);
+        } else {
+            illegalInput = true;
+        }
+    }
+    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
         option.left = left;
-        option.right = right;
         option.top = top;
+        option.right = right;
         option.bottom = bottom;
+    } else {
+        illegalInput = true;
+    }
+    if (illegalInput) {
+        option.ResetValue();
     }
     ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
 }
@@ -4177,31 +4190,30 @@ void JSViewAbstract::JsMask(const JSCallbackInfo& info)
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeParam = paramObject->GetProperty("type");
-    if (!typeParam->IsNull()) {
-        if (typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
-            auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
-            JSRef<JSVal> jValue = paramObject->GetProperty("value");
-            auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
-            if (value < 0.0f) {
-                value = 0.0f;
-            }
-            progressMask->SetValue(value);
-            JSRef<JSVal> jTotal = paramObject->GetProperty("total");
-            auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
-            if (total < 0.0f) {
-                total = DEFAULT_PROGRESS_TOTAL;
-            }
-            progressMask->SetMaxValue(total);
-            JSRef<JSVal> jColor = paramObject->GetProperty("color");
-            Color colorVal;
-            if (ParseJsColor(jColor, colorVal)) {
-                progressMask->SetColor(colorVal);
-            } else {
-                RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
-                progressMask->SetColor(theme->GetMaskColor());
-            }
-            ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
+    if (!typeParam->IsNull() && !typeParam->IsUndefined() &&
+        typeParam->IsString() && typeParam->ToString() == "ProgressMask") {
+        auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
+        JSRef<JSVal> jValue = paramObject->GetProperty("value");
+        auto value = jValue->IsNumber() ? jValue->ToNumber<float>() : 0.0f;
+        if (value < 0.0f) {
+            value = 0.0f;
         }
+        progressMask->SetValue(value);
+        JSRef<JSVal> jTotal = paramObject->GetProperty("total");
+        auto total = jTotal->IsNumber() ? jTotal->ToNumber<float>() : DEFAULT_PROGRESS_TOTAL;
+        if (total < 0.0f) {
+            total = DEFAULT_PROGRESS_TOTAL;
+        }
+        progressMask->SetMaxValue(total);
+        JSRef<JSVal> jColor = paramObject->GetProperty("color");
+        Color colorVal;
+        if (ParseJsColor(jColor, colorVal)) {
+            progressMask->SetColor(colorVal);
+        } else {
+            RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+            progressMask->SetColor(theme->GetMaskColor());
+        }
+        ViewAbstractModel::GetInstance()->SetProgressMask(progressMask);
     } else {
         JSShapeAbstract* maskShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
         if (maskShape == nullptr) {

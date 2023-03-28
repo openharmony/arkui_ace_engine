@@ -99,7 +99,7 @@ public:
 
     void UpdateLayoutConstraint(const MeasureProperty& calcLayoutConstraint);
 
-    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false);
+    RefPtr<LayoutWrapper> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
     RefPtr<LayoutWrapper> UpdateLayoutWrapper(
         RefPtr<LayoutWrapper> layoutWrapper, bool forceMeasure = false, bool forceLayout = false);
@@ -267,6 +267,8 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
+    OffsetF GetPaintRectOffsetToPage() const;
+
     void AdjustGridOffset();
 
     void SetActive(bool active) override;
@@ -320,6 +322,22 @@ public:
     }
 
     bool OnRemoveFromParent() override;
+
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChildDone() override
+    {
+        OnMountToParentDone();
+    }
+
+    bool IsExclusiveEventForChild() const
+    {
+        return exclusiveEventForChild_;
+    }
+
+    void SetExclusiveEventForChild(bool exclusiveEventForChild)
+    {
+        exclusiveEventForChild_ = exclusiveEventForChild;
+    }
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -391,6 +409,8 @@ private:
     bool isMeasureBoundary_ = false;
     bool hasPendingRequest_ = false;
 
+    // for container, this flag controls only the last child in touch area is consuming event.
+    bool exclusiveEventForChild_ = false;
     bool isActive_ = false;
     bool isResponseRegion_ = false;
 

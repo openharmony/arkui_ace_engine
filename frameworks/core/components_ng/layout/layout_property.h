@@ -362,7 +362,9 @@ public:
 
     void SetHost(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
-
+#ifdef ENABLE_DRAG_FRAMEWORK
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsBindOverlay, bool, PROPERTY_UPDATE_MEASURE);
+#endif // ENABLE_DRAG_FRAMEWORK
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Visibility, VisibleType, PROPERTY_UPDATE_MEASURE);
     void OnVisibilityUpdate(VisibleType visible) const;
 

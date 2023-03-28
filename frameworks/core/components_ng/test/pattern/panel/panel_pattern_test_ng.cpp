@@ -158,6 +158,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest001, TestSize.Level1)
     slidingPanelModelNG.SetBorderWidth(BORDER_WIDTH);
     slidingPanelModelNG.SetBorderStyle(BORDER_STYLE);
     slidingPanelModelNG.SetBorder(BORDER_STYLE, BORDER_WIDTH);
+    slidingPanelModelNG.SetBackgroundMask(BACKGROUND_COLOR_VALUE);
     slidingPanelModelNG.Pop();
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(frameNode == nullptr);
@@ -387,6 +388,20 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest005, TestSize.Level1)
     panelPattern->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     bool flag = panelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(flag == true);
+    panelPattern->isShow_ = true;
+    flag = panelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    /**
+     * @tc.steps: step5. frameNode HeightDynamicUpdate.
+     */
+    panelPattern->isDrag_ = false;
+    panelPattern->isAnimating_ = false;
+    panelPattern->previousMode_ = PanelMode::HALF;
+    panelPattern->HeightDynamicUpdate();
+    panelPattern->previousMode_ = PanelMode::FULL;
+    panelPattern->HeightDynamicUpdate();
+    panelPattern->previousMode_ = PanelMode::MINI;
+    panelPattern->HeightDynamicUpdate();
+    EXPECT_TRUE(flag);
 }
 
 /**
@@ -777,6 +792,77 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0014, TestSize.Level1)
     EXPECT_TRUE(slidingPanelPattern->isAnimating_ == false);
     slidingPanelPattern->UpdateCurrentOffset(CURRENT_OFFSET);
     slidingPanelPattern->UpdateCurrentOffsetOnAnimate(CURRENT_OFFSET);
+}
+
+/**
+ * @tc.name: PanelPatternTest0015
+ * @tc.desc: Test panel pattern GetLinearLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelPatternTestNg, PanelPatternTest0015, TestSize.Level1)
+{
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    auto columnLayoutProperty = slidingPanelModelNG.GetLinearLayoutProperty();
+    EXPECT_NE(columnLayoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: PanelPatternTest0016
+ * @tc.desc: Test panel pattern HandleDragStart HandleDragUpdate HandleDragEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanelPatternTestNg, PanelPatternTest0016, TestSize.Level1)
+{
+    SlidingPanelModelNG slidingPanelModelNG;
+    slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+    slidingPanelModelNG.SetHalfHeight(SLIDING_PANEL_HALF_HEIGHT);
+    slidingPanelModelNG.SetPanelType(PANEL_PANEL_TYPE[0]);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto slidingPanelPattern = frameNode->GetPattern<SlidingPanelPattern>();
+    ASSERT_NE(slidingPanelPattern, nullptr);
+    auto panelLayoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    ASSERT_NE(panelLayoutProperty, nullptr);
+    slidingPanelPattern->isAnimating_ = false;
+    slidingPanelPattern->currentOffset_ = CURRENT_OFFSET;
+    slidingPanelPattern->dragStartCurrentOffset_ = ZERO;
+    slidingPanelPattern->mode_ = panelLayoutProperty->GetPanelMode().value_or(PanelMode::HALF);
+    slidingPanelPattern->type_ = panelLayoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR);
+    slidingPanelPattern->previousMode_ = slidingPanelPattern->mode_.value_or(PanelMode::FULL);
+
+    slidingPanelPattern->isShow_ = true;
+
+    /**
+     * @tc.steps: step1. HandleDragStart.
+     */
+    GestureEvent startInfo;
+    startInfo.SetLocalLocation(START_POINT);
+    slidingPanelPattern->HandleDragStart(startInfo.GetLocalLocation());
+    EXPECT_EQ(startInfo.GetLocalLocation(), START_POINT);
+
+    /**
+     * @tc.steps: step2. HandleDragUpdate.
+     */
+    GestureEvent updateInfo;
+    updateInfo.SetMainDelta(MAIN_DELTA);
+    slidingPanelPattern->HandleDragUpdate(updateInfo);
+    EXPECT_EQ(updateInfo.GetMainDelta(), MAIN_DELTA);
+
+    /**
+     * @tc.steps: step3. HandleDragEnd.
+     */
+    GestureEvent endInfo;
+    endInfo.SetMainVelocity(MAIN_VELOCITY);
+    slidingPanelPattern->type_ = PanelType::MINI_BAR;
+    slidingPanelPattern->HandleDragEnd(static_cast<float>(endInfo.GetMainVelocity()));
+    slidingPanelPattern->type_ = PanelType::FOLDABLE_BAR;
+    slidingPanelPattern->halfMiniBoundary_ = 100.0f;
+    slidingPanelPattern->HandleDragEnd(static_cast<float>(endInfo.GetMainVelocity()));
+    slidingPanelPattern->type_ = PanelType::TEMP_DISPLAY;
+    slidingPanelPattern->currentOffset_ = 110.0f;
+    slidingPanelPattern->HandleDragEnd(static_cast<float>(endInfo.GetMainVelocity()));
+    EXPECT_EQ(endInfo.GetMainVelocity(), MAIN_VELOCITY);
 }
 
 } // namespace OHOS::Ace::NG

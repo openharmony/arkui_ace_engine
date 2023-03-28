@@ -92,5 +92,4 @@ void ShapeContainerPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     host->GetRenderContext()->SetClipToFrame(true);
 }
-
 } // namespace OHOS::Ace::NG

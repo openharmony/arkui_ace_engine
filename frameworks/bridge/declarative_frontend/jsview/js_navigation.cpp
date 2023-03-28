@@ -255,9 +255,11 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
         if (height->IsNumber()) {
             if (height->ToNumber<int32_t>() == 0) {
                 NG::NavigationView::SetTitleHeight(NG::FULL_SINGLE_LINE_TITLEBAR_HEIGHT);
+                return;
             }
             if (height->ToNumber<int32_t>() == 1) {
                 NG::NavigationView::SetTitleHeight(NG::FULL_DOUBLE_LINE_TITLEBAR_HEIGHT);
+                return;
             }
             Dimension titleHeight;
             if (!JSContainerBase::ParseJsDimensionVp(height, titleHeight)) {

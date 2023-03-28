@@ -36,10 +36,10 @@
 #include "core/common/ime/text_selection.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -52,12 +52,14 @@
 #include "core/components_ng/property/property.h"
 #include "core/gestures/gesture_info.h"
 
+#if not defined(ACE_UNITTEST)
 #if defined(ENABLE_STANDARD_INPUT)
 #include "commonlibrary/c_utils/base/include/refbase.h"
 
 namespace OHOS::MiscServices {
 class OnTextChangedListener;
 } // namespace OHOS::MiscServices
+#endif
 #endif
 
 namespace OHOS::Ace::NG {
@@ -112,8 +114,8 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         if (!textFieldOverlayModifier_) {
-            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(WeakClaim(this),
-                AceType::WeakClaim(AceType::RawPtr(GetScrollBar())), GetScrollEdgeEffect());
+            textFieldOverlayModifier_ = AceType::MakeRefPtr<TextFieldOverlayModifier>(
+                WeakClaim(this), AceType::WeakClaim(AceType::RawPtr(GetScrollBar())), GetScrollEdgeEffect());
         }
         if (!textFieldContentModifier_) {
             textFieldContentModifier_ = AceType::MakeRefPtr<TextFieldContentModifier>(WeakClaim(this));
@@ -471,6 +473,9 @@ public:
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) const;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) const;
 
+    void InitSurfaceChangedCallback();
+    void InitSurfacePositionChangedCallback();
+
     bool HasSurfaceChangedCallback()
     {
         return surfaceChangedCallbackId_.has_value();
@@ -515,30 +520,37 @@ public:
 
     void UpdateEditingValueToRecord();
     void UpdateScrollBarOffset() override;
+    
     bool UpdateCurrentOffset(float offset, int32_t source) override
     {
         return true;
     }
+
     bool IsAtTop() const override
     {
         return true;
     }
+
     bool IsAtBottom() const override
     {
         return true;
     }
+
     bool IsScrollable() const override
     {
         return scrollable_;
     }
+
     bool IsAtomicNode() const override
     {
         return true;
     }
+
     float GetCurrentOffset() const
     {
         return currentOffset_;
     }
+
     RefPtr<TextFieldContentModifier> GetContentModifier()
     {
         return textFieldContentModifier_;
@@ -569,6 +581,10 @@ public:
     void HandleFocusEvent();
     bool OnBackPressed();
     void CheckScrollable();
+    void SetNeedToRequestKeyboardOnFocus(bool needToRequest)
+    {
+        needToRequestKeyboardOnFocus_ = needToRequest;
+    }
 
 private:
     bool HasFocus() const;
@@ -587,6 +603,7 @@ private:
     bool CaretPositionCloseToTouchPosition();
     void CreateSingleHandle();
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
+    bool HasStateStyle(UIState state) const;
 
     void AddScrollEvent();
     void OnTextAreaScroll(float offset);
@@ -622,6 +639,7 @@ private:
     void HandleOnCopy();
     void HandleOnPaste();
     void HandleOnCut();
+    void CreateHandles();
 
     void FireEventHubOnChange(const std::string& text);
     void FireOnChangeIfNeeded();
@@ -632,7 +650,6 @@ private:
     void UpdateCaretOffsetByLastTouchOffset();
     bool UpdateCaretPositionByMouseMovement();
     bool UpdateCaretPosition();
-    int32_t GetLineNumber(float offsetY);
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
@@ -669,6 +686,8 @@ private:
     void OnImageLoadFail(bool checkHidePasswordIcon);
 
     bool IsSearchParentNode() const;
+    void RequestKeyboardOnFocus();
+    void SetNeedToRequestKeyboardOnFocus();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -719,6 +738,9 @@ private:
     bool enableTouchAndHoverEffect_ = true;
     bool isUsingMouse_ = false;
     bool isOnHover_ = false;
+    bool needToRefreshSelectOverlay_ = false;
+    bool needToRequestKeyboardInner_ = false;
+    bool needToRequestKeyboardOnFocus_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
 

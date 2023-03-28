@@ -70,8 +70,8 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
         return;
     }
 
-    constraint.selfIdealSize = OptionalSizeF(static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()),
-        static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()));
+    constraint.selfIdealSize = OptionalSizeF(
+        static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()), static_cast<float>(BACK_BUTTON_SIZE.ConvertToPx()));
     backButtonWrapper->Measure(constraint);
 }
 
@@ -105,24 +105,21 @@ void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, cons
     // navBar title bar
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
         auto occupiedWidth = maxPaddingStart_ + maxPaddingEnd_ + HORIZONTAL_MARGIN;
-        constraint.maxSize.SetWidth(titleBarSize.Width() -
-            static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+        constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
         subtitleWrapper->Measure(constraint);
         return;
     }
 
     if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         auto occupiedWidth = maxPaddingStart_ + maxPaddingEnd_ + HORIZONTAL_MARGIN;
-        constraint.maxSize.SetWidth(titleBarSize.Width() -
-            static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+        constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
         subtitleWrapper->Measure(constraint);
         return;
     }
 
-    auto occupiedWidth = maxPaddingStart_ + BACK_BUTTON_ICON_SIZE +
-        HORIZONTAL_MARGIN_M + HORIZONTAL_MARGIN + maxPaddingEnd_;
-    constraint.maxSize.SetWidth(titleBarSize.Width() -
-        static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+    auto occupiedWidth =
+        maxPaddingStart_ + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN_M + HORIZONTAL_MARGIN + maxPaddingEnd_;
+    constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
     subtitleWrapper->Measure(constraint);
 }
 
@@ -136,11 +133,6 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     CHECK_NULL_VOID(titleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
     constraint.maxSize.SetHeight(titleBarSize.Height());
-
-    if (titleBarLayoutProperty->HasTitleHeight()) {
-        constraint.maxSize.SetHeight(
-            static_cast<float>(titleBarLayoutProperty->GetTitleHeightValue().ConvertToPx()));
-    }
 
     // navDestination title bar
     if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) ==
@@ -161,23 +153,20 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     // navBar title bar
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
         auto occupiedWidth = maxPaddingStart_ + defaultPaddingStart_ + HORIZONTAL_MARGIN;
-        constraint.maxSize.SetWidth(titleBarSize.Width() -
-            static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+        constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
         titleWrapper->Measure(constraint);
         return;
     }
 
     if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
         auto occupiedWidth = maxPaddingStart_ + defaultPaddingStart_ + HORIZONTAL_MARGIN;
-        constraint.maxSize.SetWidth(titleBarSize.Width() -
-            static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+        constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
         titleWrapper->Measure(constraint);
         return;
     }
 
     auto occupiedWidth = defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN * 2 + defaultPaddingStart_;
-    constraint.maxSize.SetWidth(titleBarSize.Width() -
-        static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
+    constraint.maxSize.SetWidth(titleBarSize.Width() - static_cast<float>(occupiedWidth.ConvertToPx()) - menuWidth);
     titleWrapper->Measure(constraint);
 }
 
@@ -291,63 +280,64 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     }
 
     // navBar title bar
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
-        if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE) {
-            if (isInitialTitle_) {
-                auto title = AceType::DynamicCast<FrameNode>(titleNode);
-                CHECK_NULL_VOID(title);
-
-                auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
-                CHECK_NULL_VOID(textLayoutProperty);
-                MeasureContext context;
-                context.textContent = textLayoutProperty->GetContentValue();
-                context.fontSize = titleFontSize_;
-#ifdef ENABLE_ROSEN_BACKEND
-                minTitleHeight_ = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(context).Height());
-#else
-                minTitleHeight_ = 0.0;
-#endif
-                initialTitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
-                isInitialTitle_ = false;
-                OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
-                geometryNode->SetMarginFrameOffset(titleOffset);
-                titleWrapper->Layout();
-                return;
-            }
-
-            auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-            CHECK_NULL_VOID(titlePattern);
-            if (NearZero(titlePattern->GetTempTitleOffsetY())) {
-                OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
-                geometryNode->SetMarginFrameOffset(titleOffset);
-                titleWrapper->Layout();
-                return;
-            }
-
-            OffsetF titleOffset =
-                OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), titlePattern->GetTempTitleOffsetY());
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::MINI) {
+        if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
+            OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), offsetY);
             geometryNode->SetMarginFrameOffset(titleOffset);
             titleWrapper->Layout();
             return;
         }
 
+        auto occupiedWidth = defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN;
+        OffsetF offset = OffsetF(static_cast<float>(occupiedWidth.ConvertToPx()), offsetY);
+        geometryNode->SetMarginFrameOffset(offset);
+        titleWrapper->Layout();
+        return;
+    }
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
         OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
             static_cast<float>(menuHeight_.ConvertToPx()) + offsetY);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
     }
+    if (isInitialTitle_) {
+        auto title = AceType::DynamicCast<FrameNode>(titleNode);
+        CHECK_NULL_VOID(title);
 
-    if (titleBarLayoutProperty->GetHideBackButton().value_or(false)) {
-        OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), offsetY);
+        auto textLayoutProperty = title->GetLayoutProperty<TextLayoutProperty>();
+        if (!textLayoutProperty) {
+            titleWrapper->Layout();
+            return;
+        }
+        MeasureContext context;
+        context.textContent = textLayoutProperty->GetContentValue();
+        context.fontSize = titleFontSize_;
+#ifdef ENABLE_ROSEN_BACKEND
+        minTitleHeight_ = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(context).Height());
+#else
+        minTitleHeight_ = 0.0;
+#endif
+        initialTitleOffsetY_ = static_cast<float>(menuHeight_.ConvertToPx()) + offsetY;
+        isInitialTitle_ = false;
+        OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
     }
 
-    auto occupiedWidth = defaultPaddingStart_ + BACK_BUTTON_ICON_SIZE + HORIZONTAL_MARGIN;
-    OffsetF offset = OffsetF(static_cast<float>(occupiedWidth.ConvertToPx()), offsetY);
-    geometryNode->SetMarginFrameOffset(offset);
+    auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titlePattern);
+    if (NearZero(titlePattern->GetTempTitleOffsetY())) {
+        OffsetF titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
+        geometryNode->SetMarginFrameOffset(titleOffset);
+        titleWrapper->Layout();
+        return;
+    }
+
+    OffsetF titleOffset =
+        OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), titlePattern->GetTempTitleOffsetY());
+    geometryNode->SetMarginFrameOffset(titleOffset);
     titleWrapper->Layout();
 }
 

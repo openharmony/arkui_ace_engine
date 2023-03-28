@@ -37,6 +37,9 @@ namespace OHOS::Ace::NG {
 void ToggleButtonPattern::OnAttachToFrameNode()
 {
     InitParameters();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->GetRenderContext()->SetClipToFrame(true);
 }
 
 void ToggleButtonPattern::InitParameters()
@@ -103,6 +106,7 @@ void ToggleButtonPattern::OnModifyDone()
     InitButtonAndText();
     HandleEnabled();
     InitTouchEvent();
+    InitOnKeyEvent();
 }
 
 void ToggleButtonPattern::HandleEnabled()
@@ -114,6 +118,11 @@ void ToggleButtonPattern::HandleEnabled()
     auto enabled = eventHub->IsEnabled();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ToggleTheme>();
+    CHECK_NULL_VOID(theme);
+    auto backgroundColor = renderContext->GetBackgroundColor().value_or(theme->GetCheckedColor());
     if (!enabled) {
         if (host->GetFirstChild()) {
             auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
@@ -123,9 +132,9 @@ void ToggleButtonPattern::HandleEnabled()
             auto color = textLayoutProperty->GetTextColorValue(textColor_);
             textLayoutProperty->UpdateTextColor(color.BlendOpacity(disabledAlpha_));
         }
-        renderContext->BlendBgColor(Color::WHITE.BlendOpacity(disabledAlpha_));
+        renderContext->OnBackgroundColorUpdate(backgroundColor.BlendOpacity(disabledAlpha_));
     } else {
-        renderContext->ResetBlendBgColor();
+        renderContext->OnBackgroundColorUpdate(backgroundColor);
     }
 }
 
@@ -213,4 +222,30 @@ void ToggleButtonPattern::InitButtonAndText()
     textNode->MarkDirtyNode();
 }
 
+void ToggleButtonPattern::InitOnKeyEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (!pattern) {
+            return false;
+        }
+        return pattern->OnKeyEvent(event);
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool ToggleButtonPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if (event.code == KeyCode::KEY_SPACE || event.code == KeyCode::KEY_ENTER) {
+        OnClick();
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

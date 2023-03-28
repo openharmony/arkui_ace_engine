@@ -31,6 +31,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -142,23 +143,45 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     }
 }
 
-void ToggleModelNG::SetSelectedColor(const Color& selectedColor)
+void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    Color color;
+    if (selectedColor.has_value()) {
+        color = selectedColor.value();
+    }
+
     auto checkboxPattern = stack->GetMainFrameNodePattern<CheckBoxPattern>();
     if (checkboxPattern) {
+        if (!selectedColor.has_value()) {
+            auto theme = pipeline->GetTheme<CheckboxTheme>();
+            CHECK_NULL_VOID(theme);
+            color = theme->GetActiveColor();
+        }
         CheckBoxModelNG checkBoxModelNG;
-        checkBoxModelNG.SetSelectedColor(selectedColor);
+        checkBoxModelNG.SetSelectedColor(color);
         return;
     }
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
     if (buttonPattern) {
-        ToggleButtonModelNG::SetSelectedColor(selectedColor);
+        if (!selectedColor.has_value()) {
+            auto theme = pipeline->GetTheme<ToggleTheme>();
+            CHECK_NULL_VOID(theme);
+            color = theme->GetCheckedColor();
+        }
+        ToggleButtonModelNG::SetSelectedColor(color);
         return;
     }
 
-    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, selectedColor);
+    if (!selectedColor.has_value()) {
+        auto theme = pipeline->GetTheme<SwitchTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetActiveColor();
+    }
+    ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color);
 }
 
 void ToggleModelNG::SetSwitchPointColor(const Color& switchPointColor)

@@ -100,8 +100,7 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    props->UpdateCalcMaxSize(
-        CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
+    props->UpdateCalcMaxSize(CalcSize(CalcLength(theme->GetIconSideLength()), CalcLength(theme->GetIconSideLength())));
     props->UpdateAlignment(Alignment::CENTER_LEFT);
 
     auto renderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
@@ -112,7 +111,7 @@ RefPtr<FrameNode> OptionView::CreateIcon(const std::string& icon, const RefPtr<F
     margin.right = CalcLength(theme->GetIconContentPadding());
     props->UpdateMargin(margin);
 
-    iconNode->MountToParent(parent);
+    iconNode->MountToParent(parent, 0);
     iconNode->MarkModifyDone();
     return iconNode;
 }

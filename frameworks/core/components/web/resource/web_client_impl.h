@@ -174,6 +174,7 @@ public:
     void OnSelectPopupMenu(std::shared_ptr<NWeb::NWebSelectPopupMenuParam> params,
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
+    void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

@@ -128,6 +128,7 @@ public:
     static void HorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     static void VerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     static void OnAudioStateChanged(const JSCallbackInfo& args);
+    static void OnFirstContentfulPaint(const JSCallbackInfo& args);
 
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;

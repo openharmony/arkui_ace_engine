@@ -79,9 +79,7 @@ void StateStyleManager::FireStateFunc()
         LOGE("fail to find custom node to fire update func of %{public}d", nodeId);
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    context->PostAsyncEvent([customNode, nodeId]() { customNode->FireNodeUpdateFunc(nodeId); });
+    customNode->FireNodeUpdateFunc(nodeId);
 }
 
 } // namespace OHOS::Ace::NG

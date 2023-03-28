@@ -59,6 +59,7 @@
 #include "core/common/form_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/plugin_manager.h"
+#include "locale_config.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -193,8 +194,9 @@ public:
                 action = DragEventAction::DRAG_EVENT_START;
                 break;
         }
-
+#ifndef ENABLE_DRAG_FRAMEWORK
         aceView->ProcessDragEvent(x, y, action);
+#endif // ENABLE_DRAG_FRAMEWORK
     }
 
 private:
@@ -244,7 +246,11 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context,
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
     auto hapModuleInfo = context->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
     moduleName_ = hapModuleInfo->name;
+    auto applicationInfo = context->GetApplicationInfo();
+    CHECK_NULL_VOID(applicationInfo);
+    minCompatibleVersionCode_ = applicationInfo->minCompatibleVersionCode;
     isBundle_ = (hapModuleInfo->compileMode == AppExecFwk::CompileMode::JS_BUNDLE);
     const auto& obj = context->GetBindingObject();
     CHECK_NULL_VOID(obj);
@@ -440,7 +446,9 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         }
     } else {
         LOGI("Context is nullptr, set localeInfo to default");
-        AceApplicationInfo::GetInstance().SetLocale("", "", "", "");
+        UErrorCode status = U_ZERO_ERROR;
+        icu::Locale locale = icu::Locale::forLanguageTag(Global::I18n::LocaleConfig::GetSystemLanguage(), status);
+        AceApplicationInfo::GetInstance().SetLocale(locale.getLanguage(), locale.getCountry(), locale.getScript(), "");
         SystemProperties::SetColorMode(ColorMode::LIGHT);
     }
 
@@ -769,8 +777,12 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
     }
 
     if (isFormRender_) {
-        Platform::AceViewOhos::SurfaceChanged(
-            aceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
+        Platform::AceViewOhos::SurfaceChanged(aceView, formWidth_, formHeight_, deviceHeight >= deviceWidth ? 0 : 1);
+        // Set sdk version in module json mode for form
+        auto pipeline = container->GetPipelineContext();
+        if (pipeline) {
+            pipeline->SetMinPlatformVersion(minCompatibleVersionCode_);
+        }
     } else {
         Platform::AceViewOhos::SurfaceChanged(aceView, 0, 0, deviceHeight >= deviceWidth ? 0 : 1);
     }

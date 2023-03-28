@@ -84,7 +84,10 @@ void RenderText::Update(const RefPtr<Component>& component)
     auto fontManager = context->GetFontManager();
     if (fontManager) {
         for (const auto& familyName : textStyle_.GetFontFamilies()) {
-            fontManager->RegisterCallback(AceType::WeakClaim(this), familyName, callback);
+            auto isCustomFont = fontManager->RegisterCallback(AceType::WeakClaim(this), familyName, callback);
+            if (isCustomFont) {
+                isCustomFont_ = true;
+            }
         }
         fontManager->AddVariationNode(WeakClaim(this));
     }

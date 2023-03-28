@@ -125,14 +125,10 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<Pattern>& weakScrollableNode)
             continue;
         }
 
-        float scrollBarOffset = 0.0f;
-        float scrollableDistance = scrollBar->GetScrollableDistance();
-        if (!NearZero(controlDistance)) {
-            scrollBarOffset = scrollOffset * scrollableDistance / controlDistance;
-        } else {
-            LOGW("scroll bar scrollable distance is zero");
-        }
-        scrollBar->SetCurrentPosition(scrollBarOffset);
+        scrollBar->SetControlDistance(controlDistance);
+        scrollBar->SetScrollOffset(scrollOffset);
+        auto host = scrollBar->GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
 }
 

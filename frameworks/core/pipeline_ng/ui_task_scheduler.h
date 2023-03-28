@@ -76,11 +76,13 @@ public:
     void AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty);
     void AddDirtyRenderNode(const RefPtr<FrameNode>& dirty);
     void AddPredictTask(PredictTask&& task);
+    void AddAfterLayoutTask(std::function<void()>&& task);
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
     void FlushTask();
     void FlushPredictTask(int64_t deadline);
+    void FlushAfterLayoutTask();
 
     void UpdateCurrentPageId(uint32_t id)
     {
@@ -127,6 +129,7 @@ private:
     RootDirtyMap dirtyLayoutNodes_;
     RootDirtyMap dirtyRenderNodes_;
     std::list<PredictTask> predictTask_;
+    std::list<std::function<void()>> afterLayoutTasks_;
 
     uint32_t currentPageId_ = 0;
 

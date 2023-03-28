@@ -33,6 +33,9 @@ void ViewAbstractModelNG::BindMenu(
     std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam)
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
     GestureEventFunc showMenu;
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (!params.empty()) {
@@ -78,6 +81,9 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
 {
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
+#ifdef ENABLE_DRAG_FRAMEWORK
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+#endif // ENABLE_DRAG_FRAMEWORK
     auto hub = targetNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(hub);
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
@@ -130,13 +136,13 @@ void ViewAbstractModelNG::SetPivot(const Dimension& x, const Dimension& y, const
 
 void ViewAbstractModelNG::SetScale(float x, float y, float z)
 {
-    VectorF scale(x, y);
     if (x < 0) {
         x = 1;
     }
     if (y < 0) {
         y = 1;
     }
+    VectorF scale(x, y);
     ViewAbstract::SetScale(scale);
 }
 

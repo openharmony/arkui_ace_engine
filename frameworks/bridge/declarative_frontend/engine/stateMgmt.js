@@ -378,6 +378,7 @@ class LocalStorage extends NativeLocalStorage {
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
+        this.storage_.clear();
         
         return true;
     }
@@ -1193,6 +1194,7 @@ class PersistentStorage {
      */
     static ConfigureBackend(storage) {
         PersistentStorage.Storage_ = storage;
+        
     }
     /**
      * private, use static functions!
@@ -1353,6 +1355,13 @@ class PersistentStorage {
     propertyHasChanged(info) {
         
         this.write();
+    }
+    syncPeerHasChanged(eventSource) {
+        
+        this.write();
+    }
+    propertyHasBeenReadPU(eventSource) {
+        // not needed
     }
     // public required by the interface, use the static method instead!
     aboutToBeDeleted() {
@@ -1872,10 +1881,11 @@ class SubscribableArrayHandler extends SubscribableHandler {
         if (this.arrFunctions.includes(property.toString()) &&
             typeof ret === "function" && target["length"] > 0) {
             const self = this;
+            const prop = property.toString();
             return function () {
                 // execute original function with given arguments
                 ret.apply(this, arguments);
-                self.notifyObjectPropertyHasChanged(property.toString(), this[0]);
+                self.notifyObjectPropertyHasChanged(prop, this);
             }.bind(target); // bind "this" to target inside the function
         }
         return ret;
@@ -3961,13 +3971,6 @@ class SynchedPropertyNesedObjectPU extends ObservedPropertyObjectAbstractPU {
 */
 // denotes a missing elemntId, this is the case during initial render
 const UndefinedElmtId = -1;
-// Create ID generator at TS/JS side to avoid hops to native
-class UniqueId {
-    static get() {
-        return "autoid_" + (++UniqueId.currentId);
-    }
-}
-UniqueId.currentId = Date.now();
 // Nativeview
 // implemented in C++  for release
 // and in utest/view_native_mock.ts for testing
@@ -4357,17 +4360,7 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         if (idGenFunc === undefined) {
             
-            idGenFunc = (item, index) => {
-                if (!item || !(typeof item === 'object') || ((typeof item === 'object') && Array.isArray(item))) {
-                    return `${index}__${JSON.stringify(item)}`;
-                }
-                else {
-                    if (!item[ViewPU.autoIdProp]) {
-                        item[ViewPU.autoIdProp] = UniqueId.get();
-                    }
-                    return item[ViewPU.autoIdProp];
-                }
-            }; // idGenFunc
+            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
             idGenFuncUsesIndex = true;
         }
         let diffIndexArray = []; // New indexes compared to old one.
@@ -4458,7 +4451,6 @@ class ViewPU extends NativeViewPartialUpdate {
 ViewPU.compareNumber = (a, b) => {
     return (a < b) ? -1 : (a > b) ? 1 : 0;
 };
-ViewPU.autoIdProp = Symbol("__ace_id__");
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

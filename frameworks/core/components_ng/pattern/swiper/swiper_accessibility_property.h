@@ -34,6 +34,11 @@ public:
 
     int32_t GetEndIndex() const override;
 
+    bool HasRange() const override
+    {
+        return true;
+    }
+
     AccessibilityValue GetAccessibilityValue() const override;
 
     void SetSpecificSupportAction() override;

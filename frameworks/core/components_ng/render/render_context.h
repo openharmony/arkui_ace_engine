@@ -168,7 +168,7 @@ public:
     virtual void OpacityAnimation(const AnimationOption& option, double begin, double end) {}
     virtual void ScaleAnimation(const AnimationOption& option, double begin, double end) {}
 
-    virtual void OnTransformTranslateUpdate(const Vector3F& value) {}
+    virtual void OnTransformTranslateUpdate(const TranslateOptions& value) {}
     virtual void OnTransformScaleUpdate(const VectorF& value) {}
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
@@ -251,7 +251,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Transform, TransformProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformScale, VectorF);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformCenter, DimensionOffset);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, Vector3F);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformTranslate, TranslateOptions);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Transform, TransformRotate, Vector4F);
 
     // Background

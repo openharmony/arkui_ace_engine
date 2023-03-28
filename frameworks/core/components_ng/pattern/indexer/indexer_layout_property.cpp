@@ -38,8 +38,8 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("AlignStyle",
         propAlignStyle_.value_or(AlignStyle::LEFT) == AlignStyle::LEFT ? "AlignStyle::LEFT" : "AlignStyle::RIGHT");
     auto PopupPositionJsonObject = JsonUtil::Create(true);
-    PopupPositionJsonObject->Put("PopupPositionX", std::to_string(propPopupPositionX_.value_or(0)).c_str());
-    PopupPositionJsonObject->Put("PopupPositionY", std::to_string(propPopupPositionY_.value_or(0)).c_str());
+    PopupPositionJsonObject->Put("PopupPositionX", propPopupPositionX_.value_or(Dimension()).ToString().c_str());
+    PopupPositionJsonObject->Put("PopupPositionY", propPopupPositionY_.value_or(Dimension()).ToString().c_str());
     json->Put("PopupPosition", PopupPositionJsonObject);
     auto jsonArrayValue = JsonUtil::CreateArray(true);
     auto arrayValue = propArrayValue_.value_or(std::vector<std::string>());
@@ -56,7 +56,7 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     fontFamily.emplace_back(DEFAULT_FAMILY);
     defaultFont.SetFontFamilies(fontFamily);
     auto fontJsonObject = ToJsonObjectValue(propFont_.value_or(defaultFont));
-    json->Put("Font", fontJsonObject);
+    json->Put("font", fontJsonObject);
     auto selectFontJsonObject = ToJsonObjectValue(propSelectedFont_.value_or(defaultFont));
     json->Put("SelectFont", selectFontJsonObject);
     auto popupFontJsonObject = ToJsonObjectValue(propPopupFont_.value_or(defaultFont));

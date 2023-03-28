@@ -113,6 +113,7 @@ public:
     static void SetHorizontalScrollBarAccessEnabled(bool isHorizontalScrollBarAccessEnabled);
     static void SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAccessEnabled);
     static void SetAudioStateChangedId(OnWebAsyncFunc&& audioStateChanged);
+    static void SetFirstContentfulPaintId(OnWebAsyncFunc&& firstContentfulPaintId);
     static void NotifyPopupWindowResult(int32_t webId, bool result);
 
 private:

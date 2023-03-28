@@ -137,7 +137,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
 {
     CHECK_NULL_RETURN(stageNode_, false);
     CHECK_NULL_RETURN(node, false);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_RETURN(pipeline, false);
     StopPageTransition();
 
@@ -165,7 +165,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     CHECK_NULL_RETURN(pagePattern, false);
     stagePattern_->currentPageIndex_ = pagePattern->GetPageInfo()->GetPageId();
     if (needTransition) {
-        pagePattern->SetFirstBuildCallback([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
+        pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                                weakOut = WeakPtr<FrameNode>(outPageNode)]() {
             auto stage = weakStage.Upgrade();
             CHECK_NULL_VOID(stage);
@@ -244,6 +244,8 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         return true;
     }
 
+    // log for cppCrash
+    LOGI("PopPageToIndex, to index:%{public}d, children size:%{public}zu", index, children.size());
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
     }
@@ -268,7 +270,10 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
         // the last node will be deleted after pageTransition
-        auto iter = children.rbegin();
+        LOGI("PopPageToIndex, before pageTransition, to index:%{public}d, children size:%{public}zu, "
+             "stage children size:%{public}zu",
+            index, children.size(), stageNode_->GetChildren().size());
+        iter = children.rbegin();
         ++iter;
         for (int32_t current = 1; current < popSize; ++current) {
             auto pageNode = *(iter++);

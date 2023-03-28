@@ -35,7 +35,6 @@ constexpr int32_t SEQUENCE_GESTURE_TIMEOUT = 300;
 
 void SequencedRecognizer::OnAccepted()
 {
-    LOGD("%{public}p sequenced gesture recognizer has been accepted.", this);
     refereeState_ = RefereeState::SUCCEED;
 
     auto iter = recognizers_.begin();
@@ -51,7 +50,6 @@ void SequencedRecognizer::OnAccepted()
 
 void SequencedRecognizer::OnRejected()
 {
-    LOGD("%{public}p the sequenced gesture recognizer has been rejected!", this);
     refereeState_ = RefereeState::FAIL;
 
     auto iter = recognizers_.begin();
@@ -72,7 +70,6 @@ void SequencedRecognizer::OnRejected()
 
 void SequencedRecognizer::OnPending()
 {
-    LOGD("%{public}p the sequenced gesture recognizer is in pending!", this);
     refereeState_ = RefereeState::PENDING;
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
@@ -117,8 +114,6 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
-    LOGD("%{public}p dispatch to the %{public}d gesture recognizer, event type is %{public}d", this, currentIndex_,
-        static_cast<int32_t>(point.type));
     if (!curRecognizer) {
         LOGE("curRecognizer is nullptr");
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -210,7 +205,6 @@ void SequencedRecognizer::UpdateCurrentIndex()
 
 void SequencedRecognizer::OnResetStatus()
 {
-    LOGD("%{public}p SequencedRecognizer OnResetStatus", this);
     RecognizerGroup::OnResetStatus();
     currentIndex_ = 0;
     deadlineTimer_.Cancel();

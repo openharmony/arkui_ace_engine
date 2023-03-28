@@ -75,7 +75,7 @@ bool TextOverlayModifier::IsSelectedRectsChanged(const std::vector<Rect>& select
 {
     bool result = false;
     if (selectedRects.size() == selectedRects_.size()) {
-        for (int ii = 0; ii < selectedRects.size(); ii++) {
+        for (unsigned int ii = 0; ii < selectedRects.size(); ii++) {
             if (selectedRects[ii] != selectedRects_[ii]) {
                 result = true;
                 break;

@@ -63,7 +63,7 @@ void MenuPatternTestNg::TearDown() {}
 
 /**
  * @tc.name: MenuPatternTestNg001
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg001, TestSize.Level1)
@@ -71,13 +71,13 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg001, TestSize.Level1)
     RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
     std::string type = "1";
     TouchEventInfo info(type);
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_TRUE(info.GetTouches().empty());
 }
 
 /**
  * @tc.name: MenuPatternTestNg002
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg002, TestSize.Level1)
@@ -91,14 +91,14 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg002, TestSize.Level1)
     locationInfo.SetTouchType(touchType);
     auto touchLocationInfo = locationInfo.SetGlobalLocation(globalLocation);
     info.touches_.emplace_back(touchLocationInfo);
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_FALSE(info.GetTouches().empty());
     EXPECT_TRUE(info.GetTouches().front().GetTouchType() == TouchType::UP);
 }
 
 /**
  * @tc.name: MenuPatternTestNg003
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg003, TestSize.Level1)
@@ -113,14 +113,14 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg003, TestSize.Level1)
     auto touchLocationInfo = locationInfo.SetGlobalLocation(globalLocation);
     info.touches_.emplace_back(touchLocationInfo);
     menuPattern->type_ = MenuType::CONTEXT_MENU;
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_FALSE(info.GetTouches().empty());
     EXPECT_TRUE(info.GetTouches().front().GetTouchType() == TouchType::UP);
 }
 
 /**
  * @tc.name: MenuPatternTestNg004
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg004, TestSize.Level1)
@@ -132,14 +132,14 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg004, TestSize.Level1)
     Offset globalLocation(1, 1);
     auto touchLocationInfo = locationInfo.SetGlobalLocation(globalLocation);
     info.touches_.emplace_back(touchLocationInfo);
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_FALSE(info.GetTouches().empty());
     EXPECT_TRUE(info.GetTouches().front().GetTouchType() == TouchType::UNKNOWN);
 }
 
 /**
  * @tc.name: MenuPatternTestNg005
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg005, TestSize.Level1)
@@ -150,7 +150,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg005, TestSize.Level1)
     TouchType touchType = TouchType::UP;
     TouchLocationInfo locationInfo(TARGET_ID);
     locationInfo.SetTouchType(touchType);
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_TRUE(info.GetTouches().empty());
     EXPECT_FALSE(info.GetTouches().front().GetTouchType() == TouchType::UP);
 }
@@ -436,8 +436,8 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg010, TestSize.Level1)
     itemPattern->OnModifyDone();
     itemNode->MountToParent(groupNode);
     itemNode->OnMountToParentDone();
-    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     auto textPattern = textNode->GetPattern<TextPattern>();
     textPattern->OnModifyDone();
     textNode->MountToParent(groupNode);
@@ -525,8 +525,10 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg012, TestSize.Level1)
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
 
-    ASSERT_EQ(menuNode->GetChildren().size(), 4);
-    const auto& children = menuNode->GetChildren();
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    const auto& children = menuPattern->GetOptions();
     auto childIt = children.begin();
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
@@ -551,10 +553,8 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg012, TestSize.Level1)
     }
 
     params.clear();
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
     menuPattern->UpdateSelectParam(params);
-    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 0);
 }
 
 /**
@@ -573,8 +573,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg013, TestSize.Level1)
     ASSERT_NE(wrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
-
-    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+    ASSERT_EQ(menuNode->GetChildren().size(), 1);
 
     params.emplace_back("content1", "icon1");
     params.emplace_back("content2", "");
@@ -583,9 +582,9 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg013, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
     menuPattern->UpdateSelectParam(params);
-    ASSERT_EQ(menuNode->GetChildren().size(), 4);
 
-    const auto& children = menuNode->GetChildren();
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
+    const auto& children = menuPattern->GetOptions();
     auto childIt = children.begin();
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
@@ -626,13 +625,12 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg014, TestSize.Level1)
     ASSERT_NE(wrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
-
-    ASSERT_EQ(menuNode->GetChildren().size(), 0);
-
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 0);
+
     menuPattern->UpdateSelectParam(params);
-    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 0);
 }
 
 /**
@@ -656,19 +654,19 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg015, TestSize.Level1)
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
 
-    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
 
     params.clear();
     params.emplace_back("content1_new", "");
     params.emplace_back("content2_new", "icon2_new");
     params.emplace_back("", "");
     params.emplace_back("", "icon4_new");
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
     menuPattern->UpdateSelectParam(params);
-    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
 
-    const auto& children = menuNode->GetChildren();
+    const auto& children = menuPattern->GetOptions();
     auto childIt = children.begin();
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
@@ -714,18 +712,18 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg016, TestSize.Level1)
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
 
-    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
 
     params.clear();
     params.emplace_back("content1_new", "");
     params.emplace_back("content2_new", "icon2_new");
     params.emplace_back("", "");
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
     menuPattern->UpdateSelectParam(params);
-    ASSERT_EQ(menuNode->GetChildren().size(), 3);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 3);
 
-    const auto& children = menuNode->GetChildren();
+    const auto& children = menuPattern->GetOptions();
     auto childIt = children.begin();
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
@@ -770,19 +768,19 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg017, TestSize.Level1)
     auto menuNode = AceType::DynamicCast<FrameNode>(wrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
 
-    ASSERT_EQ(menuNode->GetChildren().size(), 3);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 3);
 
     params.clear();
     params.emplace_back("content1_new", "");
     params.emplace_back("content2_new", "icon2_new");
     params.emplace_back("", "");
     params.emplace_back("", "icon4_new");
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
     menuPattern->UpdateSelectParam(params);
-    ASSERT_EQ(menuNode->GetChildren().size(), 4);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 4);
 
-    const auto& children = menuNode->GetChildren();
+    const auto& children = menuPattern->GetOptions();
     auto childIt = children.begin();
     for (size_t i = 0; i < children.size(); i++, childIt++) {
         const auto& childNode = AceType::DynamicCast<FrameNode>(*childIt);
@@ -824,11 +822,11 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg018, TestSize.Level1)
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
 
-    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 0);
     std::vector<SelectParam> params;
     params.emplace_back("content1", "icon1");
     menuPattern->UpdateSelectParam(params);
-    ASSERT_EQ(menuNode->GetChildren().size(), 0);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 0);
 }
 } // namespace
 } // namespace OHOS::Ace::NG

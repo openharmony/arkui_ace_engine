@@ -65,7 +65,6 @@ public:
         maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
         value_ = paintProperty->GetValue().value_or(value_);
         scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
-
         progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         progressModifier_->SetContentSize(paintWrapper->GetContentSize());
         CalculateStrokeWidth(paintWrapper->GetContentSize());
@@ -87,9 +86,9 @@ private:
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;
     Color borderColor_ = Color::GRAY;
-    float strokeWidth_ = 2.0f;
-    float scaleWidth_ = 10.0f;
-    int32_t scaleCount_ = 100;
+    float strokeWidth_ = 0.0f;
+    float scaleWidth_ = 0.0f;
+    int32_t scaleCount_ = 0;
     float maxValue_ = 100.0f;
     float value_ = 0.0f;
     Dimension capsuleBorderWidth_ = Dimension(DEFAULT_BORDER_WIDTH,  DimensionUnit::VP);

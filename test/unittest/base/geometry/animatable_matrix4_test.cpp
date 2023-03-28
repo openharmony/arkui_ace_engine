@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+
 #include "base/memory/referenced.h"
 // Add the following two macro definitions to test the private and protected method.
 #define private public
@@ -28,35 +29,9 @@ namespace {
 const int32_t VALID_ROW0 = 0;
 const int32_t VALID_COL0 = 0;
 const double DEFAULT_DOUBLE0 = 0.0;
-}
+} // namespace
 
-class AnimatableMatrix4Test : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-void AnimatableMatrix4Test::SetUpTestCase()
-{
-    GTEST_LOG_(INFO) << "AnimatableMatrix4Test SetUpTestCase";
-}
-
-void AnimatableMatrix4Test::TearDownTestCase()
-{
-    GTEST_LOG_(INFO) << "AnimatableMatrix4Test TearDownTestCase";
-}
-
-void AnimatableMatrix4Test::SetUp()
-{
-    GTEST_LOG_(INFO) << "AnimatableMatrix4Test SetUp";
-}
-
-void AnimatableMatrix4Test::TearDown()
-{
-    GTEST_LOG_(INFO) << "AnimatableMatrix4Test TearDown";
-}
+class AnimatableMatrix4Test : public testing::Test {};
 
 /**
  * @tc.name: AnimatableMatrix4Test001
@@ -115,7 +90,7 @@ HWTEST_F(AnimatableMatrix4Test, AnimatableMatrix4Test002, TestSize.Level1)
      */
     animatableMatrix4Obj1.AnimateTo(animatableMatrix4Obj1);
     EXPECT_EQ(animatableMatrix4Obj1.animationController_, nullptr);
-    
+
     /**
      * @tc.steps: Test the function AnimateTo thirdly, the function will run until the end of it.
      */
@@ -152,7 +127,7 @@ HWTEST_F(AnimatableMatrix4Test, AnimatableMatrix4Test004, TestSize.Level1)
     AnimatableMatrix4 animatableMatrix4Obj1;
     animatableMatrix4Obj1.OnAnimationCallback(transformOperation);
     bool flagEventCbk = false;
-    animatableMatrix4Obj1.SetContextAndCallback(nullptr, [&flagEventCbk] () { flagEventCbk = true; });
+    animatableMatrix4Obj1.SetContextAndCallback(nullptr, [&flagEventCbk]() { flagEventCbk = true; });
     /**
      * @tc.steps: Set the animationCallback_ as the function which changes the value of flagEventCbk,
      *            the value will be modified when the onReadyEvent is fired.

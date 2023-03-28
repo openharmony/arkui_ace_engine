@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -494,7 +494,11 @@ std::optional<TextStyle> TextLayoutAlgorithm::GetTextStyle() const
 void TextLayoutAlgorithm::UpdateTextColorIfForeground(const RefPtr<FrameNode>& frameNode, TextStyle& textStyle)
 {
     auto renderContext = frameNode->GetRenderContext();
-    if (renderContext->HasForegroundColor() || renderContext->HasForegroundColorStrategy()) {
+    if (renderContext->HasForegroundColor()) {
+        if (renderContext->GetForegroundColorValue().GetValue() != textStyle.GetTextColor().GetValue()) {
+            textStyle.SetTextColor(Color::FOREGROUND);
+        }
+    } else if (renderContext->HasForegroundColorStrategy()) {
         textStyle.SetTextColor(Color::FOREGROUND);
     }
 }

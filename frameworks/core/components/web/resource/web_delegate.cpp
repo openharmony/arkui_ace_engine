@@ -1596,6 +1596,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onPageVisibleV2_ = useNewPipe ? eventHub->GetOnPageVisibleEvent() : nullptr;
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
+        onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
     }
     return true;
 }
@@ -1647,7 +1648,6 @@ void WebDelegate::GLContextInit(void* window)
         LOGE("unable to get EGL window.");
         return;
     }
-    LOGD("GLContextInit window = %{public}p", window);
     mEglWindow = static_cast<EGLNativeWindowType>(window);
 
     // 1. create sharedcontext
@@ -1723,6 +1723,7 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
     surfaceDelegate_->AddSurfaceCallback(surfaceCallback_);
     surfaceDelegate_->CreateSurface();
     SetBoundsOrResize(drawSize_, offset_);
+    needResizeAtFirst_ = true;
     auto aNativeSurface = surfaceDelegate_->GetNativeWindow();
     if (aNativeSurface == nullptr) {
         LOGE("fail to call WebDelegate::InitWebSurfaceDelegate Create get NativeWindow is null");
@@ -4207,6 +4208,14 @@ void WebDelegate::OnPageVisible(const std::string& url)
     }
 }
 
+void WebDelegate::OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs)
+{
+    if (onFirstContentfulPaintV2_) {
+        onFirstContentfulPaintV2_(std::make_shared<FirstContentfulPaintEvent>(navigationStartTick,
+            firstContentfulPaintMs));
+    }
+}
+
 void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
 {
     auto param = std::make_shared<DataResubmittedEvent>(AceType::MakeRefPtr<DataResubmittedOhos>(handler));
@@ -4542,6 +4551,11 @@ void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset)
             LOGI("WebDelegate::SetBounds: x:%{public}d, y:%{public}d, w::%{public}d, h:%{public}d",
                 (int32_t)offset.GetX(), (int32_t)offset.GetY(),
                 (int32_t)drawSize.Width(), (int32_t)drawSize.Height());
+            if (needResizeAtFirst_) {
+                LOGI("WebDelegate::SetBounds: resize at first");
+                Resize(drawSize.Width(), drawSize.Height());
+                needResizeAtFirst_ = false;
+            }
             Size webSize = GetEnhanceSurfaceSize(drawSize);
             surfaceDelegate_->SetBounds(offset.GetX(), (int32_t)offset.GetY(), webSize.Width(), webSize.Height());
         }

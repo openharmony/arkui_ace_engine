@@ -16,19 +16,18 @@
 #ifndef HDC_TEST
 #define HDC_TEST
 
-#include <sys/un.h>
-#include <unistd.h>
+#include <cinttypes>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <vector>
+#include <cstring>
 #include <iostream>
-#include <string>
-#include <cstring>
-#include <cstdint>
-#include <cinttypes>
-#include <cstring>
-#include <uv.h>
 #include <securec.h>
+#include <string>
+#include <sys/un.h>
+#include <unistd.h>
+#include <uv.h>
+#include <vector>
 
 using std::string;
 using std::vector;
@@ -38,5 +37,4 @@ enum class RetErrCode {
     ERR_BUF_ALLOC = -2,
 };
 const string HANDSHAKE_MESSAGE = "OHOS HDC-HELLO";
-
 #endif // end HDC_TEST

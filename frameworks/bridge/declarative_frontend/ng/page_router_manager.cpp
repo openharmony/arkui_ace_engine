@@ -328,6 +328,18 @@ bool PageRouterManager::StartPop()
         // the last page.
         return false;
     }
+
+    auto currentPage = pageRouterStack_.back().Upgrade();
+    CHECK_NULL_RETURN(currentPage, false);
+    auto pagePattern = currentPage->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    auto pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
+    CHECK_NULL_RETURN(pageInfo, false);
+    if (pageInfo->GetAlertCallback()) {
+        BackCheckAlert(NG::RouterPageInfo(), "");
+        return true;
+    }
+
     auto topNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
     if (!OnPopPage(true, true)) {
@@ -460,6 +472,9 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target, const std::stri
 {
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         LOGE("router stack size is larger than max size 32.");
+        if (errorCallback != nullptr) {
+            errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
+        }
         return;
     }
     std::string url = target.url;
@@ -534,6 +549,9 @@ void PageRouterManager::StartPush(const RouterPageInfo& target, const std::strin
     }
     if (GetStackSize() >= MAX_ROUTER_STACK_SIZE) {
         LOGE("router stack size is larger than max size 32.");
+        if (errorCallback != nullptr) {
+            errorCallback("The pages are pushed too much.", Framework::ERROR_CODE_PAGE_STACK_FULL);
+        }
         return;
     }
     std::string url = target.url;

@@ -71,7 +71,6 @@ const char I18N_FOLDER[] = "i18n/";
 const char RESOURCES_FOLDER[] = "resources/";
 const char STYLES_FOLDER[] = "styles/";
 const char I18N_FILE_SUFFIX[] = "/properties/string.json";
-const char MERGE_SOURCEMAPS_PATH[] = "sourceMaps.map";
 
 // helper function to run OverlayManager task
 // ensures that the task runs in subwindow instead of main Window
@@ -780,11 +779,10 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
         return;
     }
 
-    std::string appMap;
-    if (GetAssetContent(MERGE_SOURCEMAPS_PATH, appMap)) {
-        AceType::MakeRefPtr<RevSourceMap>();
+    std::string maps;
+    if (GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
         auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
-        SourceMap->StageModeSourceMapSplit(appMap, sourceMaps);
+        SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
     } else {
         LOGW("app map load failed!");
     }
@@ -1713,7 +1711,7 @@ std::string FrontendDelegateDeclarative::GetAssetPath(const std::string& url)
 void FrontendDelegateDeclarative::LoadPage(
     int32_t pageId, const PageTarget& target, bool isMainPage, const std::string& params, bool isRestore)
 {
-    LOGI("FrontendDelegateDeclarative %{private}p LoadPage[%{public}d]: %{public}s.", this, pageId, target.url.c_str());
+    LOGI("LoadPage[%{public}d]: %{public}s.", pageId, target.url.c_str());
     if (pageId == INVALID_PAGE_ID) {
         LOGE("FrontendDelegateDeclarative, invalid page id");
         EventReport::SendPageRouterException(PageRouterExcepType::LOAD_PAGE_ERR, target.url);

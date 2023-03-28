@@ -18,9 +18,9 @@ group("unittest") {
   deps = []
   if (!is_asan) {
     deps = [
+      "accessibility:accessibility_unittest",
       "base:base_unittest",
       "event:event_unittest",
-      "image_provider:image_provider_unittest",
       "layout:layout_unittest",
       "manager:manager_unittest",
       "pattern:pattern_unittest",

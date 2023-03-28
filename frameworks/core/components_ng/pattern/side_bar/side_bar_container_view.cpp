@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 2;
+constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 1;
 constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 } // namespace
@@ -68,7 +68,10 @@ void SideBarContainerView::Pop()
     sideBarContainerNode->RebuildRenderContextTree();
 
     auto begin = children.begin();
-    InitSideBarContentEvent(sideBarContainerNode, AceType::DynamicCast<FrameNode>(*(++begin)));
+    // when side bar only have one component, no need to init side bar content
+    if (children.size() > DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER) {
+        InitSideBarContentEvent(sideBarContainerNode, AceType::DynamicCast<FrameNode>(*(++begin)));
+    }
 
     CreateAndMountDivider(sideBarContainerNode);
     CreateAndMountControlButton(sideBarContainerNode);

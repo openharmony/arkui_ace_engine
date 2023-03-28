@@ -15,6 +15,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OPTION_OPTION_LAYOUT_ALGORITHM_H
 
+#include <optional>
+
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 
@@ -31,6 +33,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
+    std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     float horInterval_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionLayoutAlgorithm);

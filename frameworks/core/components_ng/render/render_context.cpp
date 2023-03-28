@@ -51,6 +51,7 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ACE_PROPERTY_TO_JSON_VALUE(propGradient_, GradientProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propTransform_, TransformProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propClip_, ClipProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(GetBackBlurStyle(), BlurStyleOption);
     if (propTransformMatrix_.has_value()) {
         auto jsonValue = JsonUtil::Create(true);
         jsonValue->Put("type", "matrix");
@@ -76,16 +77,11 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("sphericalEffect", propSphericalEffect_.value_or(0.0f));
     auto pixStretchEffectOption = propPixelStretchEffect_.value_or(PixStretchEffectOption());
     auto pixelJsonValue = JsonUtil::Create(true);
-    pixelJsonValue->Put("left", pixStretchEffectOption.left.ConvertToPx());
-    pixelJsonValue->Put("right", pixStretchEffectOption.right.ConvertToPx());
-    pixelJsonValue->Put("top", pixStretchEffectOption.top.ConvertToPx());
-    pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ConvertToPx());
+    pixelJsonValue->Put("left", pixStretchEffectOption.left.ToString().c_str());
+    pixelJsonValue->Put("right", pixStretchEffectOption.right.ToString().c_str());
+    pixelJsonValue->Put("top", pixStretchEffectOption.top.ToString().c_str());
+    pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
     json->Put("pixelStretchEffect", pixelJsonValue);
-    static const char* STYLE[] = {"", "BlurStyle.Thin", "BlurStyle.Regular", "BlurStyle.Thick",
-        "BlurStyle.BackgroundThin", "BlurStyle.BackgroundRegular",
-        "BlurStyle.BackgroundThick", "BlurStyle.BackgroundUltraThick"};
-    json->Put("backgroundBlurStyle", STYLE[static_cast<int>(
-        GetBackBlurStyle().value_or(BlurStyleOption()).blurStyle)]);
     json->Put("foregroundColor", propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str());
 }
 } // namespace OHOS::Ace::NG

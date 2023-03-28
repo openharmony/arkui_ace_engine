@@ -65,6 +65,11 @@ MappingInfo RevSourceMap::Find(int32_t row, int32_t col)
             left = mid + 1;
         }
     }
+    int32_t sourcesSize = static_cast<int32_t>(sources_.size());
+    if (afterPos_[res].sourcesVal < 0 || afterPos_[res].sourcesVal >= sourcesSize) {
+        LOGE("sourcesVal invalid");
+        return MappingInfo {};
+    }
     std::string sources = sources_[afterPos_[res].sourcesVal];
     auto pos = sources.find(WEBPACK);
     if (pos != std::string::npos) {
@@ -257,6 +262,11 @@ void RevSourceMap::MergeInit(const std::string& sourceMap,
         }
     }
 
+    if (curMapData->mappings_.empty()) {
+        LOGE("MergeInit decode sourcemap fail, mapping: %{public}s", sourceMap.c_str());
+        return;
+    }
+
     // transform to vector for mapping easily
     curMapData->mappings_ = HandleMappings(curMapData->mappings_[0]);
 
@@ -383,9 +393,9 @@ bool RevSourceMap::VlqRevCode(const std::string& vStr, std::vector<int32_t>& ans
         if (continuation) {
             shift += VLQ_BASE_SHIFT;
         } else {
-            bool isNegate = result & 1;
+            bool isOdd = result & 1;
             result >>= 1;
-            ans.push_back(isNegate ? -result : result);
+            ans.push_back(isOdd ? -result : result);
             result = 0;
             shift = 0;
         }
@@ -406,11 +416,20 @@ void RevSourceMap::StageModeSourceMapSplit(const std::string& sourceMap,
     std::string key;
     while ((leftBracket = sourceMap.find(": {", rightBracket)) != std::string::npos) {
         rightBracket = sourceMap.find("},", leftBracket);
+        if (rightBracket == std::string::npos) {
+            return;
+        }
         uint32_t subLeftBracket = leftBracket;
         uint32_t subRightBracket = rightBracket;
         value = sourceMap.substr(subLeftBracket + SOURCES_VAL, subRightBracket - subLeftBracket + BEFORE_ROW);
-        uint32_t sources = value.find("\"sources\": [");
-        uint32_t names = value.find("],");
+        std::size_t  sources = value.find("\"sources\": [");
+        if (sources == std::string::npos) {
+            continue;
+        }
+        std::size_t  names = value.find("],");
+        if (names == std::string::npos) {
+            continue;
+        }
         // Intercept the sourcemap file path as the key
         key = value.substr(sources + P0S_SPACE_LENGTH, names - sources - SPACE_LEN);
         RefPtr<RevSourceMap> curMapData = MakeRefPtr<RevSourceMap>();

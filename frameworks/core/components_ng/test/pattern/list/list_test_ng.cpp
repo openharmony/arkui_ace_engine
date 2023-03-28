@@ -1488,6 +1488,8 @@ HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     info.SetLocalLocation(Offset(0.f, 0.f));
     pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
     RefPtr<ListItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
     EXPECT_TRUE(firstItemPattern->IsSelected());
     info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
@@ -1502,6 +1504,8 @@ HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
     info.SetAction(MouseAction::PRESS);
     info.SetLocalLocation(Offset(240.f, 350.f));
     pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
     RefPtr<ListItemPattern> fourthItemPattern = GetItemPattern(frameNode, 3);
     EXPECT_TRUE(fourthItemPattern->IsSelected());
     info.SetAction(MouseAction::RELEASE);
@@ -1514,6 +1518,8 @@ HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
      */
     info.SetAction(MouseAction::PRESS);
     info.SetLocalLocation(Offset(240.f, 400.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
     pattern->HandleMouseEventWithoutKeyboard(info);
     fourthItemPattern = GetItemPattern(frameNode, 3);
     EXPECT_TRUE(fourthItemPattern->IsSelected());
@@ -1728,5 +1734,118 @@ HWTEST_F(ListTestNg, ListSelectTest003, TestSize.Level1)
     pattern->HandleMouseEventWithoutKeyboard(info);
     fourthItemPattern->MarkIsSelected(false);
     fifthItemPattern->MarkIsSelected(false);
+}
+
+/**
+ * @tc.name: ListAccessibilityTest001
+ * @tc.desc: Test :List Accessibility func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListAccessibilityTest001, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 9;
+
+    /**
+     * @tc.steps: step1. Create List and SetMultiSelectable.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibility = frameNode->GetAccessibilityProperty<ListAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step3. Run accessibility func.
+     * @tc.expected: Verify return value.
+     */
+    EXPECT_TRUE(accessibility->IsScrollable());
+    EXPECT_EQ(accessibility->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibility->GetEndIndex(), 7);
+    EXPECT_EQ(accessibility->GetCollectionItemCounts(), ITEM_COUNT);
+}
+
+/**
+ * @tc.name: ListAccessibilityTest002
+ * @tc.desc: Test :ListItem Accessibility func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListAccessibilityTest002, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 9;
+
+    /**
+     * @tc.steps: step1. Create List and SetMultiSelectable.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step3. Get itemFrameNode, itemAccessibility.
+     */
+    auto itemFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
+    ASSERT_NE(itemFrameNode, nullptr);
+    auto itemAccessibility = itemFrameNode->GetAccessibilityProperty<ListItemAccessibilityProperty>();
+    ASSERT_NE(itemAccessibility, nullptr);
+
+    /**
+     * @tc.steps: step3. Run accessibility func.
+     * @tc.expected: Verify return value.
+     */
+    EXPECT_FALSE(itemAccessibility->IsSelected());
+}
+
+/**
+ * @tc.name: ListItemEventTest001
+ * @tc.desc: Test ListItem Event func
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListTestNg, ListItemEventTest001, TestSize.Level1)
+{
+    constexpr int32_t ITEM_COUNT = 9;
+
+    /**
+     * @tc.steps: step1. Create List and SetMultiSelectable.
+     */
+    ListModelNG listModelNG;
+    listModelNG.Create();
+    CreateListItem(ITEM_COUNT);
+
+    /**
+     * @tc.steps: step2. Get frameNode.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto itemFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
+    ASSERT_NE(itemFrameNode, nullptr);
+    auto itemEventHub = itemFrameNode->GetEventHub<ListItemEventHub>();
+    ASSERT_NE(itemEventHub, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step3. Run GetDragExtraParams func.
+     * @tc.expected: Verify return value.
+     */
+    auto jsonStr = itemEventHub->GetDragExtraParams("", Point(0, 0), DragEventType::ENTER);
+    EXPECT_NE(jsonStr, "");
+    jsonStr = itemEventHub->GetDragExtraParams("info", Point(0, 0), DragEventType::START);
+    EXPECT_NE(jsonStr, "");
 }
 } // namespace OHOS::Ace::NG

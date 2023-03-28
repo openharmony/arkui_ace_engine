@@ -50,7 +50,7 @@ void CustomNode::Render()
             FireOnAppear();
         }
         {
-            ACE_SCOPED_TRACE("CustomNode:BuildItem");
+            ACE_SCOPED_TRACE("CustomNode:BuildItem %s", GetJSViewName().c_str());
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
             auto child = renderFunction_();
@@ -94,6 +94,12 @@ void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bo
             CHECK_NULL_VOID(frameChild);
             frameChild->UpdateLayoutWrapper(layoutWrapper, forceMeasure, forceLayout);
         }));
+}
+
+RefPtr<LayoutWrapper> CustomNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
+{
+    Build();
+    return UINode::CreateLayoutWrapper(forceMeasure, forceLayout);
 }
 
 } // namespace OHOS::Ace::NG

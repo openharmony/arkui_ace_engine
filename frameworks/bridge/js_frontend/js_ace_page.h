@@ -51,6 +51,8 @@ class DOMDocument;
 using JsPageRadioGroups = std::unordered_map<std::string, RadioGroupComponent<std::string>>;
 #endif
 
+const char MERGE_SOURCEMAPS_PATH[] = "sourceMaps.map";
+
 // One JsAcePage corresponding to a JS bundle, so it should maintain page's lifecycle.
 class ACE_EXPORT JsAcePage final : public AcePage {
     DECLARE_ACE_TYPE(JsAcePage, AcePage);
@@ -287,16 +289,6 @@ public:
         return pageRootNode_;
     }
 
-    void SetSourceMap(const std::string& pageMap)
-    {
-        RevSourceMap::StageModeSourceMapSplit(pageMap, sourceMaps_);
-    }
-
-    const std::unordered_map<std::string, RefPtr<RevSourceMap>>& GetSourceMap() const
-    {
-        return sourceMaps_;
-    }
-
     void SetPageMap(const std::string& pageMap)
     {
         pageMap_ = AceType::MakeRefPtr<RevSourceMap>();
@@ -407,7 +399,6 @@ private:
 
     RefPtr<RevSourceMap> pageMap_;
     RefPtr<RevSourceMap> appMap_;
-    std::unordered_map<std::string, RefPtr<RevSourceMap>> sourceMaps_;
     bool useLiteStyle_ = false;
     bool useBoxWrap_ = false;
     std::string pluginComponentJsonData_;

@@ -82,7 +82,6 @@ const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib/libark_debugger.z.so";
 #else
 const std::string ARK_DEBUGGER_LIB_PATH = "/system/lib64/libark_debugger.z.so";
 #endif
-const std::string MERGE_SOURCEMAPS_PATH = "sourceMaps.map";
 const std::string FORM_ES_MODULE_PATH = "ets/widgets.abc";
 const std::string ASSET_PATH_PREFIX = "/data/storage/el1/bundle/";
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
@@ -1120,7 +1119,7 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
 void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadJs");
-    LOGI("JsiDeclarativeEngine %{private}p LoadJs page:%{public}d", RawPtr(engineInstance_), page->GetPageId());
+    LOGI("LoadJs page:%{public}d", page->GetPageId());
     ACE_DCHECK(engineInstance_);
     engineInstance_->SetStagingPage(page);
     if (isMainPage) {
@@ -1132,13 +1131,7 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     // get source map
     std::string jsSourceMap;
-    if (!JSNApi::IsBundle(vm)) {
-        if (delegate->GetAssetContent(MERGE_SOURCEMAPS_PATH, jsSourceMap)) {
-            page->SetSourceMap(jsSourceMap);
-        } else {
-            LOGW("js source map load failed!");
-        }
-    } else {
+    if (JSNApi::IsBundle(vm)) {
         if (delegate->GetAssetContent(url + ".map", jsSourceMap)) {
             page->SetPageMap(jsSourceMap);
         } else {
@@ -2001,7 +1994,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 
     globalRuntime_ = nullptr;
     cardRuntime_ = runtime;
-    JSNApi::TriggerGC(vm);
+    JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework

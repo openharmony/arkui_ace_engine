@@ -270,7 +270,10 @@ void JSTextField::SetPlaceholderFont(const JSCallbackInfo& info)
         font.fontSize = Dimension(-1);
     } else {
         Dimension size;
-        if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
+        if (fontSize->IsString()) {
+            auto result = StringUtils::StringToDimensionWithThemeValue(fontSize->ToString(), true, Dimension(-1));
+            font.fontSize = result;
+        } else if (!ParseJsDimensionFp(fontSize, size) || size.Unit() == DimensionUnit::PERCENT) {
             font.fontSize = Dimension(-1);
             LOGW("Parse to dimension FP failed.");
         } else {
@@ -364,7 +367,7 @@ void JSTextField::SetCaretStyle(const JSCallbackInfo& info)
     }
     CaretStyle caretStyle;
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto caretWidth = paramObject->GetProperty("caretWidth");
+    auto caretWidth = paramObject->GetProperty("width");
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -467,6 +470,11 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetFontSize(fontSize);
 }
 
+void JSTextField::RequestKeyboardOnFocus(bool needToRequest)
+{
+    TextFieldModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
+}
+
 void JSTextField::SetFontWeight(const std::string& value)
 {
     TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
@@ -540,7 +548,7 @@ void JSTextField::SetInputFilter(const JSCallbackInfo& info)
         LOGI("Parse inputFilter failed");
         return;
     }
-    if (info[1]->IsFunction()) {
+    if (info.Length() > 1 && info[1]->IsFunction()) {
         auto jsFunc = AceType::MakeRefPtr<JsClipboardFunction>(JSRef<JSFunc>::Cast(info[1]));
         auto resultId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const std::string& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);

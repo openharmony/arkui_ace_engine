@@ -76,6 +76,9 @@ public:
         return menu_;
     }
 
+    // The function is only used for fast preview.
+    void FastPreviewUpdateChild(int32_t slot, const RefPtr<UINode>& newChild) override;
+
 private:
     RefPtr<UINode> backButton_;
     RefPtr<UINode> title_;

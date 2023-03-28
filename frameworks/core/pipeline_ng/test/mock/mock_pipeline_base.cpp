@@ -15,27 +15,264 @@
 
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
-#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/test/mock/mock_interface.h"
+
+namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t NODE_ID = 143;
+} // namespace
+RefPtr<MockPipelineBase> MockPipelineBase::pipeline_;
+
+void MockPipelineBase::SetUp()
+{
+    pipeline_ = AceType::MakeRefPtr<MockPipelineBase>();
+}
+
+void MockPipelineBase::TearDown()
+{
+    pipeline_ = nullptr;
+}
+
+RefPtr<MockPipelineBase> MockPipelineBase::GetCurrent()
+{
+    return pipeline_;
+}
+
+void MockPipelineBase::SetRootSize(double rootWidth, double rootHeight)
+{
+    rootWidth_ = rootWidth;
+    rootHeight_ = rootHeight;
+}
+
+float PipelineContext::GetCurrentRootWidth()
+{
+    return static_cast<float>(MockPipelineBase::GetCurrent()->rootWidth_);
+}
+
+float PipelineContext::GetCurrentRootHeight()
+{
+    return static_cast<float>(MockPipelineBase::GetCurrent()->rootHeight_);
+}
+
+RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
+{
+    return MockPipelineBase::GetCurrent();
+}
+
+void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::SetupRootElement() {}
+
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
+
+void PipelineContext::OnMouseEvent(const MouseEvent& event) {}
+
+void PipelineContext::OnAxisEvent(const AxisEvent& event) {}
+
+void PipelineContext::OnDragEvent(int32_t x, int32_t y, DragEventAction action) {}
+
+void PipelineContext::OnIdle(int64_t deadline) {}
+
+void PipelineContext::Destroy() {}
+
+void PipelineContext::OnShow() {}
+
+void PipelineContext::OnHide() {}
+
+void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId) {}
+
+void PipelineContext::AddWindowStateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::RemoveWindowStateChangedCallback(int32_t nodeId) {}
+
+void PipelineContext::AddNodesToNotifyMemoryLevel(int32_t nodeId) {}
+
+void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
+
+void PipelineContext::WindowFocus(bool isFocus) {}
+
+void PipelineContext::ShowContainerTitle(bool isShow, bool hasDeco) {}
+
+void PipelineContext::SetContainerWindow(bool isShow) {}
+
+void PipelineContext::SetAppBgColor(const Color& color) {}
+
+void PipelineContext::SetAppTitle(const std::string& title) {}
+
+void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
+
+void PipelineContext::OnSurfaceDensityChanged(double density) {}
+
+void PipelineContext::SetRootRect(double width, double height, double offset) {}
+
+void PipelineContext::FlushBuild() {}
+
+void PipelineContext::NotifyMemoryLevel(int32_t level) {}
+
+void PipelineContext::FlushMessages() {}
+
+void PipelineContext::Finish(bool autoFinish) const {}
+
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
+
+void PipelineContext::FlushPipelineWithoutAnimation() {}
+
+void PipelineContext::FlushFocus() {}
+
+void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
+
+void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight) {}
+
+void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction> rsTransaction)
+{}
+
+void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
+
+void PipelineContext::FlushReload() {}
+
+const RefPtr<SelectOverlayManager>& PipelineContext::GetSelectOverlayManager()
+{
+    if (selectOverlayManager_) {
+        return selectOverlayManager_;
+    }
+    const std::string rootTag = "root";
+    auto root = AceType::MakeRefPtr<FrameNode>(rootTag, -1, AceType::MakeRefPtr<Pattern>(), true);
+    selectOverlayManager_ = AceType::MakeRefPtr<SelectOverlayManager>(root);
+
+    // mock the selectOverlayInfo, the SelectOverlayId is NODE_ID
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    SelectHandleInfo firstHandleInfo;
+    selectOverlayInfo.firstHandle = firstHandleInfo;
+    SelectHandleInfo secondHandleInfo;
+    selectOverlayInfo.secondHandle = secondHandleInfo;
+    selectOverlayManager_->CreateAndShowSelectOverlay(selectOverlayInfo);
+    return selectOverlayManager_;
+}
+
+const RefPtr<DragDropManager>& PipelineContext::GetDragDropManager()
+{
+    dragDropManager_ = AceType::MakeRefPtr<DragDropManager>();
+    return dragDropManager_;
+}
+
+uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
+{
+    return 0;
+}
+
+void PipelineContext::AddOnAreaChangeNode(int32_t nodeId) {}
+
+bool PipelineContext::OnKeyEvent(const KeyEvent& event)
+{
+    return false;
+}
+
+bool PipelineContext::RequestFocus(const std::string& targetNodeId)
+{
+    return false;
+}
+
+bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
+{
+    return false;
+}
+
+bool PipelineContext::OnBackPressed()
+{
+    return false;
+}
+
+// core/pipeline_ng/pipeline_context.h depends on the specific impl
+void UITaskScheduler::FlushTask() {}
+
+UITaskScheduler::~UITaskScheduler() = default;
+
+void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
+
+void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty) {}
+
+const RefPtr<StageManager>& PipelineContext::GetStageManager()
+{
+    return stageManager_;
+}
+
+void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback) {}
+
+const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
+{
+    if (fullScreenManager_) {
+        return fullScreenManager_;
+    }
+    auto root = AceType::MakeRefPtr<FrameNode>("ROOT", -1, AceType::MakeRefPtr<Pattern>(), true);
+    fullScreenManager_ = AceType::MakeRefPtr<FullScreenManager>(root);
+    return fullScreenManager_;
+}
+
+const RefPtr<OverlayManager>& PipelineContext::GetOverlayManager()
+{
+    if (!overlayManager_) {
+        overlayManager_ = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    }
+    return overlayManager_;
+}
+
+void PipelineContext::AddPredictTask(PredictTask&& task) {}
+
+void PipelineContext::FlushPipelineImmediately() {}
+
+FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)
+{
+    return nullptr;
+}
+
+void PipelineContext::DumpPipelineInfo() const {}
+
+void PipelineContext::AddVisibleAreaChangeNode(
+    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
+{}
+void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
+
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
+{
+    return true;
+}
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
+class ManagerInterface : public AceType {
+    DECLARE_ACE_TYPE(ManagerInterface, AceType);
+};
+class FontManager : public AceType {
+    DECLARE_ACE_TYPE(FontManager, AceType);
+};
+
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
 } // namespace
-class Window : public AceType {
-    DECLARE_ACE_TYPE(Window, AceType);
-};
-class Frontend : public AceType {
-    DECLARE_ACE_TYPE(Frontend, AceType);
-};
-class OffscreenCanvas : public AceType {
-    DECLARE_ACE_TYPE(OffscreenCanvas, AceType);
-};
-enum class FrontendType {};
 
-RefPtr<MockPipelineBase> MockPipelineBase::pipeline_;
+void PipelineBase::OpenImplicitAnimation(
+    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
+{}
+
+bool PipelineBase::CloseImplicitAnimation()
+{
+    return true;
+}
+
+RefPtr<Frontend> PipelineBase::GetFrontend() const
+{
+    return nullptr;
+}
+
+void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
+
+RefPtr<ImageCache> PipelineBase::GetImageCache() const
+{
+    return nullptr;
+}
 
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
@@ -47,7 +284,7 @@ void PipelineBase::SetRootSize(double density, int32_t width, int32_t height) {}
 
 RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 {
-    return MockPipelineBase::GetCurrent();
+    return NG::MockPipelineBase::GetCurrent();
 }
 
 double PipelineBase::NormalizeToPx(const Dimension& /*dimension*/) const
@@ -89,41 +326,5 @@ void PipelineBase::RequestFrame() {}
 Rect PipelineBase::GetCurrentWindowRect() const
 {
     return { 0., 0., DISPLAY_WIDTH, DISPLAY_HEIGHT };
-}
-
-void MockPipelineBase::SetUp()
-{
-    pipeline_ = AceType::MakeRefPtr<MockPipelineBase>();
-}
-
-void MockPipelineBase::TearDown()
-{
-    pipeline_ = nullptr;
-}
-
-RefPtr<MockPipelineBase> MockPipelineBase::GetCurrent()
-{
-    return pipeline_;
-}
-
-void PipelineBase::OpenImplicitAnimation(
-    const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallBack)
-{}
-
-bool PipelineBase::CloseImplicitAnimation()
-{
-    return true;
-}
-
-RefPtr<Frontend> PipelineBase::GetFrontend() const
-{
-    return nullptr;
-}
-
-void PipelineBase::SetTouchPipeline(const WeakPtr<PipelineBase>& context) {}
-
-RefPtr<ImageCache> PipelineBase::GetImageCache() const
-{
-    return nullptr;
 }
 } // namespace OHOS::Ace

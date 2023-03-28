@@ -92,6 +92,8 @@ private:
 
     // native aceTraceObject
     static std::unique_ptr<AceScopedTrace> aceScopedTrace_;
+    static void GetStageSourceMap(const AceType* data,
+        std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps);
 };
 } // namespace OHOS::Ace::Framework
 

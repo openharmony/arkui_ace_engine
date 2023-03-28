@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -65,14 +66,20 @@ public:
 
     void BuildChild();
 
-    void SetMenuNode(const RefPtr<FrameNode>& menu)
+    void SetMenuNode(const RefPtr<FrameNode>& menuWrapper)
     {
-        menu_ = menu;
+        menuWrapper_ = menuWrapper;
     }
 
-    const RefPtr<FrameNode> GetMenuNode()
+    const RefPtr<FrameNode>& GetMenuWrapper() const
     {
-        return menu_;
+        return menuWrapper_;
+    }
+
+    RefPtr<FrameNode> GetMenuNode() const
+    {
+        CHECK_NULL_RETURN(menuWrapper_, nullptr);
+        return DynamicCast<FrameNode>(menuWrapper_->GetChildAtIndex(0));
     }
 
     void SetSelectSize(const SizeF& selectSize)
@@ -234,7 +241,7 @@ private:
         const RefPtr<FrameNode>& spinner, const RefPtr<IconTheme>& iconTheme, const RefPtr<SelectTheme>& selectTheme);
 
     std::vector<RefPtr<FrameNode>> options_;
-    RefPtr<FrameNode> menu_ = nullptr;
+    RefPtr<FrameNode> menuWrapper_ = nullptr;
     RefPtr<FrameNode> text_ = nullptr;
     RefPtr<FrameNode> spinner_ = nullptr;
     SizeF selectSize_;

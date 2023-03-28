@@ -105,6 +105,9 @@ struct GridLayoutInfo {
     // rect of grid item dragged in
     RectF currentRect_;
 
+    // Grid has GridItem whose columnEnd - columnStart > 0
+    bool hasBigItem_;
+
 private:
     int32_t GetItemIndexByPosition(int32_t position);
     int32_t GetPositionByItemIndex(int32_t itemIndex);

@@ -168,9 +168,8 @@ private:
     SizeF size_;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
-    bool isFirstAddhotZoneRect_ = true;
     bool isGroupChanged_ = false;
-    TouchHoverAnimationType touchHoverType_;
+    TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
 
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);

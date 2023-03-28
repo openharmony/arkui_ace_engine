@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,12 @@ const int32_t DAY_VALUE = 1;
 const int32_t MONTH_VALUE = 1;
 const int32_t YEAR_VALUE = 1;
 const int32_t INDEX_VALUE = 1;
+const int32_t JUMP_YEAR = 2023;
+const int32_t JUMP_MONTH = 3;
+const int32_t JUMP_DAY_FIRST = 3;
+const int32_t JUMP_DAY_SECOND = 13;
+const int32_t JUMP_DAY_THIRD = 23;
+
 const int32_t FIRST_DAY_INDEX_VALUE = 1;
 const std::string LUNAR_MONTH_VALUE = "五月";
 const std::string LUNAR_DAY_VALUE = "初五";
@@ -331,5 +337,90 @@ HWTEST_F(CalendarPatternTestNg, CalendarViewTest003, TestSize.Level1)
     EXPECT_EQ(calendarPaintProperty->GetStartOfWeekValue(), Week::Sun);
     EXPECT_EQ(calendarPaintProperty->GetOffDaysValue(), OFF_DAYS_VALUE);
     EXPECT_EQ(swiperLayoutProperty->GetDirectionValue(), Axis::HORIZONTAL);
+}
+
+/**
+ * @tc.name: CalendarTest004
+ * @tc.desc: Create calendar, and invoke its JumpTo function to calculate the date.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPatternTestNg, CalendarTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Calendar
+     * @tc.expected: step1. Create Calendar successfully.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    RefPtr<CalendarPattern> calendar = AceType::MakeRefPtr<CalendarPattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("testNode", 1, calendar);
+    stack->Push(frameNode);
+    ObtainedMonth obtainedMonth;
+    obtainedMonth.year = JUMP_YEAR;
+    obtainedMonth.month = JUMP_MONTH;
+    obtainedMonth.firstDayIndex = FIRST_DAY_INDEX_VALUE;
+
+    // Add 31 days.
+    std::vector<CalendarDay> days;
+    for (int32_t i = 0; i < 31; i++) {
+        CalendarDay day;
+        day.index = i;
+        day.month.year = JUMP_YEAR;
+        day.month.month = JUMP_MONTH;
+        day.day = i + 1;
+        if (i == 1) {
+            day.focused = true;
+        }
+        days.emplace_back(std::move(day));
+    }
+    obtainedMonth.days = days;
+    CalendarView::SetCurrentData(obtainedMonth);
+    CalendarView::SetPreData(obtainedMonth);
+    CalendarView::SetNextData(obtainedMonth);
+
+    CalendarDay calendarDay;
+    calendarDay.index = INDEX_VALUE;
+    calendarDay.day = DAY_VALUE;
+    calendarDay.today = false;
+    calendarDay.focused = true;
+    calendarDay.touched = true;
+
+    /**
+     * @tc.steps: step2. Jump to destination from 1 to 3.
+     * @tc.expected: step2. Jumped successfully, the focused changed from 1 to 3.
+     */
+    CalendarMonth calendarMonth;
+    calendarMonth.year = JUMP_YEAR;
+    calendarMonth.month = JUMP_MONTH;
+    calendarDay.month = calendarMonth;
+    CalendarView::SetCalendarDay(calendarDay);
+
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<CalendarPattern>();
+    pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_FIRST);
+    pattern->JumpTo(pattern->currentMonth_);
+    EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_FIRST - 1].focused, true);
+
+    /**
+     * @tc.steps: step3. Jump to destination from 3 to 13.
+     * @tc.expected: step3. Jumped successfully, the focused changed from 3 to 13.
+     */
+    pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_SECOND);
+    pattern->JumpTo(pattern->currentMonth_);
+    EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_SECOND - 1].focused, true);
+
+    /**
+     * @tc.steps: step4. Jump to destination from 13 to 23.
+     * @tc.expected: step4. Jumped successfully, the focused changed from 13 to 23.
+     */
+    pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_THIRD);
+    pattern->JumpTo(pattern->currentMonth_);
+    EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_THIRD - 1].focused, true);
+
+    /**
+     * @tc.steps: step5. Jump to destination from 23 to 3.
+     * @tc.expected: step5. Jumped successfully, the focused changed from 23 to 3.
+     */
+    pattern->FireGoToRequestData(JUMP_YEAR, JUMP_MONTH, JUMP_DAY_FIRST);
+    pattern->JumpTo(pattern->currentMonth_);
+    EXPECT_EQ(pattern->currentMonth_.days[JUMP_DAY_FIRST - 1].focused, true);
 }
 } // namespace OHOS::Ace::NG
