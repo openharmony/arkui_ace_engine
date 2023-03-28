@@ -24,7 +24,7 @@
 
 #include "common/task_runners.h"
 #include "flutter/fml/message_loop.h"
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
 #include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
 #endif
 #include "shell/common/thread_host.h"
@@ -32,7 +32,6 @@
 #include "base/log/log.h"
 
 namespace OHOS::Ace {
-
 std::unique_ptr<FlutterThreadModel> FlutterThreadModel::CreateThreadModel(
     bool useCurrentEventRunner, bool hasUiThread, bool hasGpuThread)
 {
@@ -53,11 +52,23 @@ std::unique_ptr<FlutterThreadModel> FlutterThreadModel::CreateThreadModel(
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     fml::RefPtr<fml::TaskRunner> gpuRunner;
     fml::RefPtr<fml::TaskRunner> uiRunner;
-    fml::RefPtr<fml::TaskRunner> platformRunner =
+    
 #ifdef OHOS_PLATFORM
+    fml::RefPtr<fml::TaskRunner> platformRunner =
         flutter::PlatformTaskRunnerAdapter::CurrentTaskRunner(useCurrentEventRunner);
 #else
-        fml::MessageLoop::GetCurrent().GetTaskRunner();
+#ifdef ANDROID_PLATFORM
+    fml::RefPtr<fml::TaskRunner> platformRunner;
+    if (hasUiThread) {
+        platformRunner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+    } else {
+        LOGI("FlutterThreadModel create platfrom thread by eventhandler.");
+        platformRunner = flutter::PlatformTaskRunnerAdapter::CurrentTaskRunner(useCurrentEventRunner);
+    }
+#else
+    fml::RefPtr<fml::TaskRunner> platformRunner;
+    platformRunner = fml::MessageLoop::GetCurrent().GetTaskRunner();
+#endif
 #endif
 
     if (hasUiThread) {
