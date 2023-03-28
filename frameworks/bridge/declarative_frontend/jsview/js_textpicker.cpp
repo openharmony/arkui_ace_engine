@@ -75,48 +75,48 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
 
 void JSTextPicker::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        LOGE("TextPicker create error, info is non-valid");
-        return;
-    }
-
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto getSelected = paramObject->GetProperty("selected");
-    auto getValue = paramObject->GetProperty("value");
-    JSRef<JSArray> getRange = paramObject->GetProperty("range");
-    std::vector<std::string> getRangeVector;
-    if (!ParseJsStrArray(getRange, getRangeVector)) {
-        LOGE("parse range failed");
-        return;
-    }
-
-    std::string value = "";
-    if (!ParseJsString(getValue, value)) {
-        value = getRangeVector.front();
-    }
-    uint32_t selected = 0;
-    if (!ParseJsInteger(getSelected, selected) && !value.empty()) {
-        auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
-        if (valueIterator != getRangeVector.end()) {
-            selected = std::distance(getRangeVector.begin(), valueIterator);
+    if (info.Length() >= 1 && info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        auto getSelected = paramObject->GetProperty("selected");
+        auto getValue = paramObject->GetProperty("value");
+        JSRef<JSArray> getRange = paramObject->GetProperty("range");
+        std::vector<std::string> getRangeVector;
+        if (getRange->Length() == 0) {
+            return;
         }
-    }
+        if (!ParseJsStrArray(getRange, getRangeVector)) {
+            LOGE("parse range failed");
+            return;
+        }
 
-    if (selected < 0 || selected >= getRangeVector.size()) {
-        LOGE("selected is out of range");
-        selected = 0;
+        std::string value = "";
+        if (!ParseJsString(getValue, value)) {
+            value = getRangeVector.front();
+        }
+        uint32_t selected = 0;
+        if (!ParseJsInteger(getSelected, selected) && !value.empty()) {
+            auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
+            if (valueIterator != getRangeVector.end()) {
+                selected = std::distance(getRangeVector.begin(), valueIterator);
+            }
+        }
+
+        if (selected < 0 || selected >= getRangeVector.size()) {
+            LOGE("selected is out of range");
+            selected = 0;
+        }
+        auto theme = GetTheme<PickerTheme>();
+        if (!theme) {
+            LOGE("PickerText Theme is null");
+            return;
+        }
+        TextPickerModel::GetInstance()->Create(theme);
+        TextPickerModel::GetInstance()->SetRange(getRangeVector);
+        TextPickerModel::GetInstance()->SetSelected(selected);
+        TextPickerModel::GetInstance()->SetValue(value);
+        JSInteractableView::SetFocusable(false);
+        JSInteractableView::SetFocusNode(true);
     }
-    auto theme = GetTheme<PickerTheme>();
-    if (!theme) {
-        LOGE("PickerText Theme is null");
-        return;
-    }
-    TextPickerModel::GetInstance()->Create(theme);
-    TextPickerModel::GetInstance()->SetRange(getRangeVector);
-    TextPickerModel::GetInstance()->SetSelected(selected);
-    TextPickerModel::GetInstance()->SetValue(value);
-    JSInteractableView::SetFocusable(false);
-    JSInteractableView::SetFocusNode(true);
 }
 
 void JSTextPicker::SetDefaultPickerItemHeight(const JSCallbackInfo& info)
