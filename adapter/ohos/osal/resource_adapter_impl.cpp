@@ -504,12 +504,23 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     if (!packagePathStr_.empty()) {
         std::string outPath;
         std::shared_lock<std::shared_mutex> lock(resourceMutex_);
-        auto state = resourceManager_->GetRawFilePathByName(fileName, outPath);
+        CHECK_NULL_RETURN_NOLOG(resourceManager_, "");
+        // Adapt to the input like: "file:///index.html?a=1", before the new solution comes.
+        auto it = std::find_if(fileName.begin(), fileName.end(), [](char c) {
+            return (c == '#') || (c == '?');
+        });
+        std::string params;
+        std::string newFileName = fileName;
+        if (it != fileName.end()) {
+            newFileName = std::string(fileName.begin(), it);
+            params = std::string(it, fileName.end());
+        }
+        auto state = resourceManager_->GetRawFilePathByName(newFileName, outPath);
         if (state != Global::Resource::SUCCESS) {
             LOGE("GetRawfile error, filename:%{public}s, error:%{public}u", fileName.c_str(), state);
             return "";
         }
-        return "file:///" + outPath;
+        return "file:///" + outPath + params;
     }
     return "resource://RAWFILE/" + fileName;
 }
