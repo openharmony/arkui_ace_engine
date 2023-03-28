@@ -127,6 +127,7 @@ struct DialogProperties {
     bool autoCancel = true;               // pop dialog when click mask if autoCancel is true.
     bool customStyle = false;             // when true, dialog doesn't paint background or constraint child size.
     bool isMenu = false;
+    bool isSelect = false;                // init checkbox state
     std::vector<ButtonInfo> buttons;
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
     std::function<void()> onCancel;                         // NG cancel callback
