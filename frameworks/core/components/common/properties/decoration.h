@@ -25,6 +25,7 @@
 #include "base/geometry/rect.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animatable_color.h"
 #include "core/components/common/properties/border.h"
@@ -132,13 +133,40 @@ struct BlurStyleOption {
 };
 
 struct PixStretchEffectOption {
-    Dimension top;
-    Dimension bottom;
     Dimension left;
+    Dimension top;
     Dimension right;
+    Dimension bottom;
     bool operator==(const PixStretchEffectOption& other) const
     {
-        return top == other.top && bottom == other.bottom && left == other.left && right == other.right;
+        return left == other.left && top == other.top && right == other.right && bottom == other.bottom;
+    }
+
+    bool IsPercentOption() const
+    {
+        return (left.Unit() == DimensionUnit::PERCENT && top.Unit() == DimensionUnit::PERCENT &&
+                right.Unit() == DimensionUnit::PERCENT && bottom.Unit() == DimensionUnit::PERCENT);
+    }
+
+    void ResetValue()
+    {
+        left = Dimension(0.0f);
+        top = Dimension(0.0f);
+        right = Dimension(0.0f);
+        bottom = Dimension(0.0f);
+    }
+
+    std::string ToString() const
+    {
+        return std::string("PixStretchEffectOption (")
+            .append(left.ToString())
+            .append(",")
+            .append(top.ToString())
+            .append(",")
+            .append(right.ToString())
+            .append(",")
+            .append(bottom.ToString())
+            .append(")");
     }
 };
 
