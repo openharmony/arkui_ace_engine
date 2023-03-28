@@ -4863,11 +4863,11 @@ HWTEST_F(GesturesTestNg, GestureRefereeTest005, TestSize.Level1)
      * @tc.steps: step2. call IsPending function and compare result
      * @tc.steps: expected equal
      */
-    auto result = gestureScope.IsPending();
+    auto result = gestureScope.IsPending(0);
     EXPECT_EQ(result, false);
 
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
-    result = gestureScope.IsPending();
+    result = gestureScope.IsPending(0);
     EXPECT_EQ(result, true);
 }
 

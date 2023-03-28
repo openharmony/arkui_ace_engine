@@ -48,7 +48,7 @@ public:
 
     void Close();
 
-    bool IsPending();
+    bool IsPending(size_t touchId);
 
     bool IsEmpty() const
     {

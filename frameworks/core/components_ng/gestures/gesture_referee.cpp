@@ -93,17 +93,17 @@ RefPtr<NGGestureRecognizer> GestureScope::UnBlockGesture()
     return (*iter).Upgrade();
 }
 
-bool GestureScope::IsPending()
+bool GestureScope::IsPending(size_t touchId)
 {
-    auto iter =
-        std::find_if(std::begin(recognizers_), std::end(recognizers_), [](const WeakPtr<NGGestureRecognizer>& member) {
+    auto iter = std::find_if(
+        std::begin(recognizers_), std::end(recognizers_), [touchId](const WeakPtr<NGGestureRecognizer>& member) {
             auto recognizer = member.Upgrade();
             RefereeState state = RefereeState::READY;
             if (recognizer) {
                 state = recognizer->GetRefereeState();
                 if (AceType::InstanceOf<RecognizerGroup>(recognizer)) {
                     auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
-                    state = group->CheckStates();
+                    state = group->CheckStates(touchId);
                 }
             }
             return recognizer && ((state == RefereeState::PENDING));
@@ -181,7 +181,7 @@ void GestureReferee::CleanGestureScope(size_t touchId)
     const auto iter = gestureScopes_.find(touchId);
     if (iter != gestureScopes_.end()) {
         const auto& scope = iter->second;
-        if (scope->IsPending()) {
+        if (scope->IsPending(touchId)) {
             scope->SetDelayClose();
             return;
         }
