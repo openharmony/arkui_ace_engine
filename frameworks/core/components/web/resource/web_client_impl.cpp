@@ -239,7 +239,7 @@ void WebClientImpl::OnGeolocationHide()
 }
 
 void WebClientImpl::OnGeolocationShow(const std::string& origin,
-    OHOS::NWeb::NWebGeolocationCallbackInterface* callback)
+    std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> callback)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();

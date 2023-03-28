@@ -235,7 +235,8 @@ class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
 public:
-    WebGeolocationOhos(OHOS::NWeb::NWebGeolocationCallbackInterface* callback) : geolocationCallback_(callback) {}
+    WebGeolocationOhos(const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
+        : geolocationCallback_(callback) {}
 
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 
@@ -475,7 +476,7 @@ public:
     void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
     void OnGeolocationPermissionsShowPrompt(
-        const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
+        const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback);
     void OnRequestFocus();
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);

@@ -103,7 +103,7 @@ public:
     void OnFullScreenExit() override;
     void OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler) override;
     void OnGeolocationShow(const std::string& origin,
-        OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
+        std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> callback) override;
 
     bool OnAlertDialogByJS(const std::string &url,
                            const std::string &message,
