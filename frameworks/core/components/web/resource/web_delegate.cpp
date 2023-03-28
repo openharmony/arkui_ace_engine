@@ -3142,6 +3142,42 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline == nullptr) {
+        return;
+    }
+
+    auto themeManager = pipeline->GetThemeManager();
+    if (themeManager == nullptr) {
+        return;
+    }
+
+    auto themeConstants = themeManager->GetThemeConstants();
+    if (themeConstants == nullptr) {
+        return;
+    }
+    Color color = themeConstants->GetColorByName(colorValue);
+    uint32_t colorContent = color.GetValue();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), colorContent]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutScrollBarColor(colorContent);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::LoadUrl()
 {
     auto context = context_.Upgrade();
