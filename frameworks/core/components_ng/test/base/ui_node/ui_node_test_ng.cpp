@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -47,9 +48,19 @@ const RefPtr<FrameNode> F_ONE = FrameNode::CreateFrameNode("one", 5, AceType::Ma
 
 class UINodeTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
+
+void UINodeTestNg::SetUpTestSuite()
+{
+    MockPipelineBase::SetUp();
+}
+
+void UINodeTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: UINodeTestNg001
