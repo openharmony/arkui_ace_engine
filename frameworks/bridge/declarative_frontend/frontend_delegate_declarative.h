@@ -280,6 +280,9 @@ public:
     // Get the currently running JS page information in NG structure.
     RefPtr<RevSourceMap> GetFaAppSourceMap();
 
+    void GetStageSourceMap(
+        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap);
+
     void InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback);
 
     const RefPtr<NG::PageRouterManager>& GetPageRouterManager() const

@@ -106,6 +106,10 @@ public:
         return nullptr;
     };
 
+    // Get the stage mode sourceMap.
+    virtual void GetStageSourceMap(
+        std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const {};
+
     virtual void RunPage(int32_t pageId, const std::string& content, const std::string& params) = 0;
 
     virtual void ReplacePage(const std::string& url, const std::string& params) = 0;

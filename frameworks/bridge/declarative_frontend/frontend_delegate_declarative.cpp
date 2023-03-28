@@ -792,6 +792,22 @@ RefPtr<RevSourceMap> FrontendDelegateDeclarative::GetFaAppSourceMap()
     return appSourceMap_;
 }
 
+void FrontendDelegateDeclarative::GetStageSourceMap(
+    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMaps)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return;
+    }
+
+    std::string maps;
+    if (GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
+        auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
+        SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
+    } else {
+        LOGW("app map load failed!");
+    }
+}
+
 void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback)
 {
     pageRouterManager_ = AceType::MakeRefPtr<NG::PageRouterManager>();
