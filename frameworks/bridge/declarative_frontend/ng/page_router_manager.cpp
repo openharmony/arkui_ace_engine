@@ -80,12 +80,14 @@ void PageRouterManager::RunCard(const std::string& url, const std::string& param
 {
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url };
+#ifndef PREVIEW
     if (!info.url.empty()) {
         info.path = manifestParser_->GetRouter()->GetPagePath(url);
     } else {
         info.path = manifestParser_->GetRouter()->GetEntry();
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
+#endif
     LoadCard(0, info, params, cardId);
 }
 
