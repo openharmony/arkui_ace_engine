@@ -35,7 +35,7 @@ public:
     HapAssetProvider() = default;
     ~HapAssetProvider() override = default;
 
-    bool Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths);
+    bool Initialize(const std::string& hapPath, const std::vector<std::string>& assetBasePaths, bool useCache = true);
 
     std::unique_ptr<fml::Mapping> GetAsMapping(const std::string& assetName) const override;
 
