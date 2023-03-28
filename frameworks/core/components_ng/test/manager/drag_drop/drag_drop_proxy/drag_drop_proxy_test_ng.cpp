@@ -31,6 +31,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -49,11 +50,21 @@ const DragType DRAG_TYPE_GRID = DragType::GRID;
 
 class DragDropProxyTestNg : public testing::Test {
 public:
-    static void SetUpTestSuite() {};
-    static void TearDownTestSuite() {};
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 
 protected:
 };
+
+void DragDropProxyTestNg::SetUpTestCase()
+{
+    MockPipelineBase::SetUp();
+}
+
+void DragDropProxyTestNg::TearDownTestCase()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: DragDropProxyTest001
