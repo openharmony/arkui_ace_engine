@@ -577,11 +577,32 @@ public:
     std::string GetShowPasswordIconString() const;
     std::string GetInputStyleString() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd);
-    bool HandleKeyEvent(const KeyEvent& keyEvent);
     void HandleBlurEvent();
     void HandleFocusEvent();
     bool OnBackPressed();
     void CheckScrollable();
+
+    void HandleSelectionUp();
+    void HandleSelectionDown();
+    void HandleSelectionLeft();
+    void HandleSelectionRight();
+
+    void HandleOnUndoAction();
+    void HandleOnRedoAction();
+    void HandleOnSelectAll();
+    void HandleOnCopy();
+    void HandleOnPaste();
+    void HandleOnCut();
+    bool OnKeyEvent(const KeyEvent& event);
+    TextInputType GetKeyboard()
+    {
+        return keyboard_;
+    }
+    TextInputAction GetAction()
+    {
+        return action_;
+    }
+
     void SetNeedToRequestKeyboardOnFocus(bool needToRequest)
     {
         needToRequestKeyboardOnFocus_ = needToRequest;
@@ -589,9 +610,6 @@ public:
 
 private:
     bool HasFocus() const;
-    bool OnKeyEvent(const KeyEvent& event);
-    void ParseAppendValue(KeyCode keycode, std::string& appendElement);
-    void HandleDirectionalKey(const KeyEvent& keyEvent);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
@@ -629,17 +647,7 @@ private:
     void UpdateCaretByRightClick();
 
     void AfterSelection();
-    void HandleSelectionUp();
-    void HandleSelectionDown();
-    void HandleSelectionLeft();
-    void HandleSelectionRight();
-
-    void HandleOnUndoAction();
-    void HandleOnRedoAction();
-    void HandleOnSelectAll();
-    void HandleOnCopy();
-    void HandleOnPaste();
-    void HandleOnCut();
+    
     void CreateHandles();
 
     void FireEventHubOnChange(const std::string& text);

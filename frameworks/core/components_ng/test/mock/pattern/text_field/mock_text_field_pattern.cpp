@@ -59,6 +59,11 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode*) {}
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
 
+bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
+{
+    return false;
+}
+
 std::string TextFieldPattern::GetFontSize() const
 {
     return "string";
@@ -97,11 +102,6 @@ std::string TextFieldPattern::GetPlaceholderColor() const
 std::string TextFieldPattern::GetPlaceholderFont() const
 {
     return "string";
-}
-
-bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
-{
-    return true;
 }
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd) {}
