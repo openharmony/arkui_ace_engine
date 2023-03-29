@@ -82,7 +82,8 @@ public:
                 loadingProgressModifier_->ChangeRefreshFollowData(
                     paintProperty->GetRefreshFadeAwayRatio().value_or(0.0f));
                 break;
-            default:;
+            default:
+                break;
         }
     }
 
