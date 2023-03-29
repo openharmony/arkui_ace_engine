@@ -60,11 +60,13 @@ public:
 
 void FocusHubTestNg::SetUpTestSuite()
 {
+    MockPipelineBase::SetUp();
     GTEST_LOG_(INFO) << "FocusHubTestNg SetUpTestCase";
 }
 
 void FocusHubTestNg::TearDownTestSuite()
 {
+    MockPipelineBase::TearDown();
     GTEST_LOG_(INFO) << "FocusHubTestNg TearDownTestCase";
 }
 

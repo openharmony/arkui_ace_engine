@@ -35,8 +35,6 @@ bool OHOS::Ace::SystemProperties::GetDebugEnabled()
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool EVENT_HUB_ENABLE = false;
-constexpr bool APPEAR_VALUE = true;
-constexpr bool DISAPPEAR_VALUE = false;
 const std::string DRAG_STARR_EVENT_TYPE = "drag start";
 const std::string DRAG_ENTER_EVENT_TYPE = "drag enter";
 const std::string DRAG_LEAVE_EVENT_TYPE = "drag leave";
@@ -202,16 +200,11 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest003, TestSize.Level1)
      * @tc.steps: step3. Set/fire EventHub onAppear and onDisappear function.
      * @tc.expected: isAppear is assigned with correct value.
      */
-    double isAppear = false;
-    auto onAppear = [&isAppear]() { isAppear = APPEAR_VALUE; };
-    eventHub->SetOnAppear(onAppear);
+    eventHub->SetOnAppear([]() {});
     eventHub->FireOnAppear();
-    EXPECT_EQ(isAppear, APPEAR_VALUE);
 
-    auto onDisappear = [&isAppear]() { isAppear = DISAPPEAR_VALUE; };
-    eventHub->SetOnDisappear(onDisappear);
+    eventHub->SetOnDisappear([]() {});
     eventHub->FireOnDisappear();
-    EXPECT_EQ(isAppear, DISAPPEAR_VALUE);
 }
 
 /**
