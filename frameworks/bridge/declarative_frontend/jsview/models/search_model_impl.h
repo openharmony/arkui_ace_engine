@@ -28,6 +28,7 @@ class ACE_EXPORT SearchModelImpl : public OHOS::Ace::SearchModel {
 public:
     RefPtr<TextFieldControllerBase> Create(const std::optional<std::string>& value,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& icon) override;
+    void RequestKeyboardOnFocus(bool needToRequest) override {};
     void SetSearchButton(const std::string& text) override;
     void SetCaretWidth(const Dimension& value) override {}
     void SetCaretColor(const Color& color) override {}
