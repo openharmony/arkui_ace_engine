@@ -214,6 +214,7 @@ protected:
         return index;
     }
 
+    virtual void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount);
     void SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos, bool forwardLayout,
         const RefPtr<ListLayoutProperty>& layoutProperty);
     static void SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index);
