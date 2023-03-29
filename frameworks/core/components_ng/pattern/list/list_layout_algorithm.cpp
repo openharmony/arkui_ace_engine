@@ -26,6 +26,8 @@
 #include "core/components/common/layout/layout_param.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_item_group_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -124,7 +126,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(contentIdealSize.ConvertToSizeT());
 
     // set list cache info.
-    layoutWrapper->SetCacheCount(listLayoutProperty->GetCachedCountValue(1) * GetLanes());
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
 
     LOGD("new start index is %{public}d, new end index is %{public}d, offset is %{public}f, mainSize is %{public}f",
         GetStartIndex(), GetEndIndex(), currentOffset_, contentMainSize_);
@@ -459,6 +461,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             offset = offset + OffsetF(pos.second.startPos + chainOffset, crossOffset);
         }
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
+        SetListItemIndex(wrapper, index);
         if (!overScrollFeature_ || wrapper->CheckNeedForceMeasureAndLayout()) {
             wrapper->Layout();
         }
@@ -516,6 +519,11 @@ void ListLayoutAlgorithm::OnSurfaceChanged(LayoutWrapper* layoutWrapper)
     }
 }
 
+void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
+{
+    layoutWrapper->SetCacheCount(cachedCount);
+}
+
 void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& layoutWrapper, float referencePos,
     bool forwardLayout, const RefPtr<ListLayoutProperty>& layoutProperty) const
 {
@@ -525,6 +533,20 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     CHECK_NULL_VOID(itemGroup);
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
+}
+
+void ListLayoutAlgorithm::SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID_NOLOG(host);
+    auto listItem = host->GetPattern<ListItemPattern>();
+    if (listItem) {
+        listItem->SetIndexInList(index);
+        return;
+    }
+    auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID_NOLOG(listItemGroup);
+    listItemGroup->SetIndexInList(index);
 }
 
 void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper, int32_t index,

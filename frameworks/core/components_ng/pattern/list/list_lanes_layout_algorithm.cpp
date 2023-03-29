@@ -304,4 +304,23 @@ int32_t ListLanesLayoutAlgorithm::GetLanesFloor(LayoutWrapper* layoutWrapper, in
     }
     return index;
 }
+
+void ListLanesLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount)
+{
+    auto range = layoutWrapper->GetLazyBuildRange();
+    auto itemPosition = GetItemPosition();
+    if (!itemPosition.empty() && range.first >= 0) {
+        auto startNode = itemPosition.begin();
+        if ((startNode->first >= range.first && startNode->first < range.second) && startNode->second.isGroup) {
+            layoutWrapper->SetCacheCount(cachedCount);
+            return;
+        }
+        auto endNode = itemPosition.rbegin();
+        if ((endNode->first >= range.first && endNode->first < range.second) && endNode->second.isGroup) {
+            layoutWrapper->SetCacheCount(cachedCount);
+            return;
+        }
+    }
+    layoutWrapper->SetCacheCount(cachedCount * GetLanes());
+}
 } // namespace OHOS::Ace::NG

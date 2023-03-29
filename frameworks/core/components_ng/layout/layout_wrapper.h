@@ -207,6 +207,8 @@ public:
 
     void SetCacheCount(int32_t cacheCount = 0);
 
+    std::pair<int32_t, int32_t> GetLazyBuildRange();
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;

@@ -307,4 +307,14 @@ void LayoutWrapper::SwapDirtyLayoutWrapperOnMainThread()
     CHECK_NULL_VOID_NOLOG(layoutWrapperBuilder_);
     layoutWrapperBuilder_->AdjustGridOffset();
 }
+
+std::pair<int32_t, int32_t> LayoutWrapper::GetLazyBuildRange()
+{
+    if (layoutWrapperBuilder_) {
+        auto start = layoutWrapperBuilder_->GetStartIndex();
+        auto end = start + layoutWrapperBuilder_->GetTotalCount();
+        return { start, end };
+    }
+    return { -1, 0 };
+}
 } // namespace OHOS::Ace::NG
