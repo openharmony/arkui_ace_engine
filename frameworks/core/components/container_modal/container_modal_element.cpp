@@ -620,6 +620,7 @@ RefPtr<RenderImage> ContainerModalElement::GetIconRender(bool isFloatingTitle)
 
 void ContainerModalElement::SetTitleAccessibilityNodeOffset()
 {
+    CHECK_NULL_VOID(floatingTitleBox_);
     auto floatingTitleBoxRender = AceType::DynamicCast<RenderBox>(floatingTitleBox_->GetRenderNode());
     if (floatingTitleBoxRender) {
         auto accessibilityNode = floatingTitleBoxRender->GetAccessibilityNode().Upgrade();
