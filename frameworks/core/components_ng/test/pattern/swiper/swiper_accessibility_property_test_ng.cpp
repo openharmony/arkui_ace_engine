@@ -32,7 +32,6 @@ using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SWIPER_ERROR = -1;
-constexpr int32_t SWIPER_RANGE_MAX_ERROR = -2;
 constexpr int32_t INDEX_NUM = 10;
 } // namespace
 class SwiperAccessibilityPropertyTestNg : public testing::Test {
@@ -75,6 +74,8 @@ bool SwiperAccessibilityPropertyTestNg::InitSwiperTestNg()
     swiperAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<SwiperAccessibilityProperty>();
     CHECK_NULL_RETURN(swiperAccessibilityProperty_, false);
 
+    swiperLayoutProperty_->UpdateShowIndicator(false);
+
     return true;
 }
 
@@ -85,10 +86,13 @@ bool SwiperAccessibilityPropertyTestNg::InitSwiperTestNg()
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetCurrentIndex001, TestSize.Level1)
 {
-    EXPECT_EQ(swiperAccessibilityProperty_->GetCurrentIndex(), 0);
+    EXPECT_EQ(swiperAccessibilityProperty_->GetCurrentIndex(), SWIPER_ERROR);
 
+    RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode_->AddChild(indicatorNode);
     swiperPattern_->currentIndex_ = INDEX_NUM;
-
     EXPECT_EQ(swiperAccessibilityProperty_->GetCurrentIndex(), INDEX_NUM);
 }
 
@@ -101,8 +105,11 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetBeginI
 {
     EXPECT_EQ(swiperAccessibilityProperty_->GetBeginIndex(), SWIPER_ERROR);
 
+    RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode_->AddChild(indicatorNode);
     swiperPattern_->startIndex_ = INDEX_NUM;
-
     EXPECT_EQ(swiperAccessibilityProperty_->GetBeginIndex(), INDEX_NUM);
 }
 
@@ -115,8 +122,11 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetEndInd
 {
     EXPECT_EQ(swiperAccessibilityProperty_->GetEndIndex(), SWIPER_ERROR);
 
+    RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode_->AddChild(indicatorNode);
     swiperPattern_->endIndex_ = INDEX_NUM;
-
     EXPECT_EQ(swiperAccessibilityProperty_->GetEndIndex(), INDEX_NUM);
 }
 
@@ -130,18 +140,21 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetAccess
     EXPECT_TRUE(swiperAccessibilityProperty_->HasRange());
     AccessibilityValue result = swiperAccessibilityProperty_->GetAccessibilityValue();
     EXPECT_EQ(result.min, 0);
-    EXPECT_EQ(result.max, SWIPER_RANGE_MAX_ERROR);
+    EXPECT_EQ(result.max, 0);
     EXPECT_EQ(result.current, 0);
 
-    swiperLayoutProperty_->propShowIndicator_ = false;
-    RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    frameNode_->AddChild(indicatorNode);
+    for (int index = 0; index <= INDEX_NUM; index++) {
+        RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        frameNode_->AddChild(indicatorNode);
+    }
     swiperPattern_->currentIndex_ = INDEX_NUM;
 
     result = swiperAccessibilityProperty_->GetAccessibilityValue();
     EXPECT_EQ(result.min, 0);
-    EXPECT_EQ(result.max, 0);
+    EXPECT_EQ(result.max, INDEX_NUM);
     EXPECT_EQ(result.current, INDEX_NUM);
 }
 
@@ -152,18 +165,20 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetAccess
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyIsScrollable001, TestSize.Level1)
 {
-    ASSERT_TRUE(InitSwiperTestNg());
-    EXPECT_EQ(swiperAccessibilityProperty_->IsScrollable(), false);
+    auto swiperPaintProperty = frameNode_->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+    swiperPaintProperty->UpdateLoop(false);
+    EXPECT_FALSE(swiperAccessibilityProperty_->IsScrollable());
 
-    swiperLayoutProperty_->propShowIndicator_ = false;
-    RefPtr<FrameNode> indicatorNodeOne = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    RefPtr<FrameNode> indicatorNodeTwo = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    frameNode_->AddChild(indicatorNodeOne);
-    frameNode_->AddChild(indicatorNodeTwo);
-
-    EXPECT_EQ(swiperAccessibilityProperty_->IsScrollable(), true);
+    for (int index = 0; index <= INDEX_NUM; index++) {
+        RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        frameNode_->AddChild(indicatorNode);
+    }
+    swiperPattern_->OnModifyDone();
+    EXPECT_TRUE(swiperAccessibilityProperty_->IsScrollable());
 }
 
 /**
@@ -173,15 +188,17 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyIsScrolla
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetCollectionItemCounts001, TestSize.Level1)
 {
-    ASSERT_TRUE(InitSwiperTestNg());
-    EXPECT_EQ(swiperAccessibilityProperty_->GetCollectionItemCounts(), SWIPER_ERROR);
+    EXPECT_EQ(swiperAccessibilityProperty_->GetCollectionItemCounts(), 0);
 
-    swiperLayoutProperty_->propShowIndicator_ = false;
-    RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
-    frameNode_->AddChild(indicatorNode);
-
-    EXPECT_EQ(swiperAccessibilityProperty_->GetCollectionItemCounts(), 1);
+    for (int index = 0; index <= INDEX_NUM; index++) {
+        RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        frameNode_->AddChild(indicatorNode);
+    }
+    swiperPattern_->OnModifyDone();
+    EXPECT_EQ(swiperAccessibilityProperty_->GetCollectionItemCounts(), INDEX_NUM);
 }
 
 /**
@@ -191,26 +208,36 @@ HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetCollec
  */
 HWTEST_F(SwiperAccessibilityPropertyTestNg, SwiperAccessibilityPropertyGetSupportAction001, TestSize.Level1)
 {
-    ASSERT_TRUE(InitSwiperTestNg());
-    auto gestureEventHub = frameNode_->GetOrCreateGestureEventHub();
-    gestureEventHub->longPressEventActuator_ =
-        AceType::MakeRefPtr<LongPressEventActuator>(WeakPtr<GestureEventHub>(gestureEventHub));
-    gestureEventHub->CheckClickActuator();
-
-    auto focusHub = frameNode_->GetOrCreateFocusHub();
-    frameNode_->eventHub_->enabled_ = true;
-    focusHub->focusable_ = true;
-    focusHub->focusType_ = FocusType::NODE;
+    auto swiperPaintProperty = frameNode_->GetPaintProperty<SwiperPaintProperty>();
+    ASSERT_NE(swiperPaintProperty, nullptr);
+    swiperPaintProperty->UpdateLoop(false);
+    for (int index = 0; index <= INDEX_NUM; index++) {
+        RefPtr<FrameNode> indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        ASSERT_NE(indicatorNode, nullptr);
+        frameNode_->AddChild(indicatorNode);
+    }
+    swiperPattern_->currentIndex_ = 1;
+    swiperPattern_->OnModifyDone();
     swiperAccessibilityProperty_->ResetSupportAction();
     std::unordered_set<AceAction> supportAceActions = swiperAccessibilityProperty_->GetSupportAction();
-    uint64_t actions = 0, exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_FOCUS);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLICK);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_LONG_CLICK);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
     for (auto action : supportAceActions) {
         actions |= 1UL << static_cast<uint32_t>(action);
     }
-    EXPECT_EQ(actions, exptectActions);
+    EXPECT_EQ(actions, expectActions);
+
+    swiperPaintProperty->UpdateLoop(true);
+    swiperAccessibilityProperty_->ResetSupportAction();
+    supportAceActions = swiperAccessibilityProperty_->GetSupportAction();
+    actions = 0;
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
 }
 } // namespace OHOS::Ace::NG

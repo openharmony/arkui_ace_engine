@@ -39,6 +39,7 @@ public:
 
     std::string GetText() const override;
 
+protected:
     void SetSpecificSupportAction() override
     {
         AddSupportAction(AceAction::ACTION_SELECT);

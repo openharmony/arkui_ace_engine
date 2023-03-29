@@ -30,6 +30,7 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
         AceAction::ACTION_SCROLL_FORWARD,
         AceAction::ACTION_SCROLL_BACKWARD,
         AceAction::ACTION_FOCUS,
+        AceAction::ACTION_CLEAR_FOCUS,
         AceAction::ACTION_ACCESSIBILITY_FOCUS,
         AceAction::ACTION_CLEAR_ACCESSIBILITY_FOCUS,
         AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY,
@@ -55,37 +56,5 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
         }
     }
     return supportActions;
-}
-
-void AccessibilityProperty::SetCommonSupportAction()
-{
-    auto node = host_.Upgrade();
-    if (!node) {
-        return;
-    }
-    auto eventHub = node->GetEventHub<NG::EventHub>();
-    CHECK_NULL_VOID_NOLOG(eventHub);
-    auto gestureEventHub = eventHub->GetGestureEventHub();
-    if (gestureEventHub) {
-        if (gestureEventHub->IsClickable()) {
-            AddSupportAction(AceAction::ACTION_CLICK);
-        }
-
-        if (gestureEventHub->IsLongClickable()) {
-            AddSupportAction(AceAction::ACTION_LONG_CLICK);
-        }
-    }
-
-    auto focusHub = node->GetFocusHub();
-    if (focusHub) {
-        if (focusHub->IsFocusable()) {
-            AddSupportAction(AceAction::ACTION_FOCUS);
-        }
-    }
-
-    if (IsScrollable()) {
-        AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
-        AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
-    }
 }
 } // namespace OHOS::Ace::NG
