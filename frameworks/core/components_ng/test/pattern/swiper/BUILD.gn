@@ -171,6 +171,7 @@ ohos_unittest("swiper_pattern_test_ng") {
   configs = [
     ":config_swiper_indicator_test",
     "$ace_root:ace_config",
+    "$ace_root/test/unittest:ace_unittest_config",
   ]
 }
 
