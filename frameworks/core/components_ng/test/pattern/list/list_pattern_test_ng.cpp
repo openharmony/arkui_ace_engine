@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -100,9 +101,21 @@ struct ListItemGroupTestProperty {
 
 class ListPatternTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     static RefPtr<FrameNode> CreateListParagraph(const TestProperty& testProperty);
     static RefPtr<FrameNode> CreateListItemGroupParagraph(const ListItemGroupTestProperty& listItemGroupTestProperty);
 };
+
+void ListPatternTestNg::SetUpTestSuite()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ListPatternTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+}
 
 RefPtr<FrameNode> ListPatternTestNg::CreateListParagraph(const TestProperty& testProperty)
 {

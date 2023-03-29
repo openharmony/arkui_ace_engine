@@ -12,10 +12,10 @@
 # limitations under the License.
 
 import("//build/test.gni")
-import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("frame_node_test_ng") {
-  module_out_path = "$test_output_path/base"
+  module_out_path = base_test_outout_path
 
   sources = [
     # old

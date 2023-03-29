@@ -21,19 +21,20 @@
 #define private public
 
 #include "base/json/json_util.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/test/mock/render/mock_render_context.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #include "base/log/dump_log.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/animation/geometry_transition.h"
 #include "base/memory/referenced.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/syntax/if_else_model_ng.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/animation/geometry_transition.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/syntax/if_else_model_ng.h"
+#include "core/components_ng/test/mock/render/mock_render_context.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
 
@@ -51,11 +52,19 @@ std::string srcimages = "";
 } // namespace
 class FrameNodeTestNg : public testing::Test {
 public:
-    static void SetUpTestCase() {}
-    static void TearDownTestCase() {}
-    void SetUp() {}
-    void TearDown() {}
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 };
+
+void FrameNodeTestNg::SetUpTestSuite()
+{
+    MockPipelineBase::SetUp();
+}
+
+void FrameNodeTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+}
 
 /**
  * @tc.name: FrameNodeTestNg001
@@ -420,7 +429,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0014, TestSize.Level1)
     auto parent = FRAME_NODE2->GetParent();
     EXPECT_EQ(parent, 1);
 
-
     auto parentNode1 = FrameNode::CreateFrameNode("parent", 2, AceType::MakeRefPtr<Pattern>());
     RefPtr<FrameNode> frameNodes[3] = { parentNode1, nullptr, nullptr };
     FRAME_NODE2->TriggerVisibleAreaChangeCallback(visibleCallbackInfo);
@@ -571,10 +579,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0021, TestSize.Level1)
      * @tc.steps: step1. build a object to PostTask
      * @tc.expected: step1. expect The function is run ok.
      */
-    auto callback = []() {
-        srcimages = "test";
-    };
-    TaskExecutor::TaskType taskType {1};
+    auto callback = []() { srcimages = "test"; };
+    TaskExecutor::TaskType taskType { 1 };
 
     FrameNode frameNode("main", 10, AceType::MakeRefPtr<Pattern>(), true);
     frameNode.PostTask(callback, std::move(taskType));
@@ -626,9 +632,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0024, TestSize.Level1)
      * @tc.steps: step1. build a object to MarkModifyDone.
      * @tc.expected: step1. expect The function is run ok.
      */
-    FrameNode frameNode("main", 10, AceType::MakeRefPtr<Pattern>(), true);
-    frameNode.MarkModifyDone();
-    EXPECT_NE(frameNode.pattern_, nullptr);
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("main", 10, pattern, true);
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->MarkModifyDone();
+    EXPECT_NE(frameNode->pattern_, nullptr);
 }
 
 /**
@@ -642,9 +650,11 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0025, TestSize.Level1)
      * @tc.steps: step1. build a object to OnMountToParentDone.
      * @tc.expected: step1. expect The function is run ok.
      */
-    FrameNode frameNode("main", 10, AceType::MakeRefPtr<Pattern>(), true);
-    frameNode.OnMountToParentDone();
-    EXPECT_NE(frameNode.pattern_, nullptr);
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("main", 10, pattern, true);
+    pattern->AttachToFrameNode(frameNode);
+    frameNode->OnMountToParentDone();
+    EXPECT_NE(frameNode->pattern_, nullptr);
 }
 
 /**
@@ -705,7 +715,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0028, TestSize.Level1)
      * @tc.expected: step2. expect The function return value is true.
      */
     auto test = FRAME_NODE2->IsNeedRequestParentMeasure();
-    EXPECT_FALSE(test);
+    EXPECT_TRUE(test);
 
     FRAME_NODE2->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_BY_CHILD_REQUEST;
     FRAME_NODE2->IsNeedRequestParentMeasure();
@@ -1050,7 +1060,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0048, TestSize.Level1)
      * @tc.steps: step1. callback GetOffsetRelativeToWindow.
      * @tc.expected: step1. expect The function is run ok.
      */
-    OffsetF Offset = {0, 0};
+    OffsetF Offset = { 0, 0 };
     FRAME_NODE2->layoutProperty_->positionProperty_ = std::make_unique<PositionProperty>();
     auto test = FRAME_NODE2->GetOffsetRelativeToWindow();
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
@@ -1068,7 +1078,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0049, TestSize.Level1)
      * @tc.steps: step1. callback GetTransformRelativeOffset.
      * @tc.expected: step1. expect The function is run ok.
      */
-    OffsetF Offset = {0, 0};
+    OffsetF Offset = { 0, 0 };
     auto test = FRAME_NODE2->GetTransformRelativeOffset();
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     EXPECT_EQ(test, Offset);
@@ -1085,7 +1095,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0050, TestSize.Level1)
      * @tc.steps: step1. callback GetPaintRectOffset.
      * @tc.expected: step1. expect The function is run ok.
      */
-    OffsetF Offset = {0, 0};
+    OffsetF Offset = { 0, 0 };
     auto test = FRAME_NODE2->GetPaintRectOffset(true);
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
     EXPECT_EQ(test, Offset);
@@ -1156,7 +1166,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg0054, TestSize.Level1)
     FRAME_NODE2->layoutProperty_->UpdateGeometryTransition("id");
     auto test = FRAME_NODE2->MarkRemoving();
     FRAME_NODE2->Clean();
-    EXPECT_FALSE(test);
+    EXPECT_TRUE(test);
 }
 
 /**
