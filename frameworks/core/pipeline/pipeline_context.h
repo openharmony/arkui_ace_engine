@@ -275,13 +275,6 @@ public:
 
     void RequestFullWindow(int32_t duration) override;
 
-    using WebPaintCallback = std::function<void()>;
-    void SetWebPaintCallback(WebPaintCallback&& listener)
-    {
-        webPaintCallback_.push_back(std::move(listener));
-    }
-    void NotifyWebPaint() const;
-
     // Get the font scale used to covert fp to logic px.
     double GetFontUnitScale() const
     {
@@ -339,8 +332,6 @@ public:
     void RefreshStageFocus();
 
     void ShowContainerTitle(bool isShow, bool hasDeco = true) override;
-
-    void BlurWindowWithDrag(bool isBlur);
 
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
 
@@ -767,11 +758,6 @@ public:
 
     std::string GetRestoreInfo(int32_t restoreId);
 
-    bool GetIsDragStart() const
-    {
-        return isDragStart_;
-    }
-
     bool GetIsTabKeyPressed() const
     {
         return isTabKeyPressed_;
@@ -928,8 +914,6 @@ private:
     RefPtr<TextOverlayManager> textOverlayManager_;
     EventTrigger eventTrigger_;
 
-    std::list<WebPaintCallback> webPaintCallback_;
-
     WeakPtr<RenderNode> requestedRenderNode_;
     // Make page update tasks pending here to avoid block receiving vsync.
     std::queue<std::function<void()>> pageUpdateTasks_;
@@ -963,8 +947,6 @@ private:
     bool needWindowBlurRegionRefresh_ = false;
     bool useLiteStyle_ = false;
     bool isFirstLoaded_ = true;
-    bool isDragStart_ = false;
-    bool isFirstDrag_ = true;
     bool isDensityUpdate_ = false;
     uint64_t flushAnimationTimestamp_ = 0;
     TimeProvider timeProvider_;
