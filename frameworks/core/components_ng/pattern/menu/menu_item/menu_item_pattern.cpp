@@ -206,6 +206,10 @@ void MenuItemPattern::ShowSubMenu()
         menuProps->UpdateMenuOffset(offset);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         RegisterWrapperMouseEvent();
+
+        auto focusHub = subMenu->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
     }
 }
 
