@@ -450,7 +450,6 @@ private:
     mutable std::mutex cardFrontMutex_;
     mutable std::mutex cardPipelineMutex_;
     mutable std::mutex cardTokensMutex_;
-    mutable std::mutex dumpMutex_;
 
     std::string webHapPath_;
 
