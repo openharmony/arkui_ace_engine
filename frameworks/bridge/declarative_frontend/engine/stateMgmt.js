@@ -1537,8 +1537,8 @@ class stateMgmtConsole {
     }
 }
 class stateMgmtTrace {
-    static scopedTrace(codeBlock, ...args) {
-        aceTrace.begin(...args);
+    static scopedTrace(codeBlock, arg1, ...args) {
+        aceTrace.begin(arg1, ...args);
         let result = codeBlock();
         aceTrace.end();
         return result;

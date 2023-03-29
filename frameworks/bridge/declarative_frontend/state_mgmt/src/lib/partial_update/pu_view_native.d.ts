@@ -32,6 +32,4 @@ declare class NativeViewPartialUpdate {
   isLazyItemRender(elmtId : number) : boolean;
   setCardId(cardId: number): void;
   getCardId(): number;
-  static aceTraceBegin(...args:string[]): void;
-  static aceTraceEnd(): void;
 }

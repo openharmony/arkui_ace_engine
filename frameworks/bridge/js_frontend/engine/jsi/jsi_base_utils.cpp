@@ -780,15 +780,19 @@ std::unique_ptr<AceScopedTrace> JsiBaseUtils::aceScopedTrace_ = nullptr;
 shared_ptr<JsValue> JsiBaseUtils::JsTraceBegin(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    std::string traceName = GetLogContent(runtime, argv, argc);
-    aceScopedTrace_ = std::make_unique<AceScopedTrace>(traceName.c_str());
+    if (SystemProperties::GetDebugEnabled()) {
+        std::string traceName = GetLogContent(runtime, argv, argc);
+        aceScopedTrace_ = std::make_unique<AceScopedTrace>(traceName.c_str());
+    }
     return runtime->NewUndefined();
 }
 
 shared_ptr<JsValue> JsiBaseUtils::JsTraceEnd(const shared_ptr<JsRuntime>& runtime,
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
-    aceScopedTrace_.reset();
+    if (SystemProperties::GetDebugEnabled()) {
+        aceScopedTrace_.reset();
+    }
     return runtime->NewUndefined();
 }
 

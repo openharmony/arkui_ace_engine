@@ -39,9 +39,11 @@ class stateMgmtConsole {
     }
 }
 
+type TraceArgs = string | number | boolean;
+
 class stateMgmtTrace {
-    public static scopedTrace<T>(codeBlock: () => T, ...args: any): T {
-        aceTrace.begin(...args);
+    public static scopedTrace<T>(codeBlock: () => T, arg1: string, ...args: TraceArgs[]): T{
+        aceTrace.begin(arg1, ...args);
         let result: T = codeBlock();
         aceTrace.end();
         return result;
