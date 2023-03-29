@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/gestures/gesture_info.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -64,31 +65,22 @@ class GestureEventHubTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
 };
 
 void GestureEventHubTestNg::SetUpTestSuite()
 {
+    MockPipelineBase::SetUp();
     MOCK_DRAG_WINDOW = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
     GTEST_LOG_(INFO) << "GestureEventHubTestNg SetUpTestCase";
 }
 
 void GestureEventHubTestNg::TearDownTestSuite()
 {
+    MockPipelineBase::TearDown();
     MOCK_DRAG_WINDOW = nullptr;
     GTEST_LOG_(INFO) << "GestureEventHubTestNg TearDownTestCase";
 }
 
-void GestureEventHubTestNg::SetUp()
-{
-    GTEST_LOG_(INFO) << "GestureEventHubTestNg SetUp";
-}
-
-void GestureEventHubTestNg::TearDown()
-{
-    GTEST_LOG_(INFO) << "GestureEventHubTestNg TearDown";
-}
 
 /**
  * @tc.name: GestureEventHubTest001
