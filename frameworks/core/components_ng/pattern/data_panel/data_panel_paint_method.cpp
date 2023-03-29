@@ -83,11 +83,11 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 void DataPanelPaintMethod::CreateGradient(const std::pair<Color, Color>& itemParam, Gradient& gradient) const
 {
     GradientColor gradientColorStart;
-    gradientColorStart.SetColor(itemParam.first);
+    gradientColorStart.SetLinearColor(LinearColor(itemParam.first));
     gradientColorStart.SetDimension(Dimension(0.0));
     gradient.AddColor(gradientColorStart);
     GradientColor gradientColorEnd;
-    gradientColorEnd.SetColor(itemParam.second);
+    gradientColorEnd.SetLinearColor(LinearColor(itemParam.second));
     gradientColorEnd.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorEnd);
 }
