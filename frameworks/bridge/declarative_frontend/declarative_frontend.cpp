@@ -584,6 +584,14 @@ RefPtr<Framework::RevSourceMap> DeclarativeFrontend::GetFaAppSourceMap() const
     return delegate_->GetFaAppSourceMap();
 }
 
+void DeclarativeFrontend::GetStageSourceMap(
+    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMap) const
+{
+    if (delegate_) {
+        delegate_->GetStageSourceMap(sourceMap);
+    }
+}
+
 RefPtr<NG::PageRouterManager> DeclarativeFrontend::GetPageRouterManager() const
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
