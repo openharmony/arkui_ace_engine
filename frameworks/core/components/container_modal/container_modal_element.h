@@ -32,7 +32,6 @@ public:
     RefPtr<OverlayElement> GetOverlayElement() const;
     RefPtr<StageElement> GetStageElement() const;
     void ShowTitle(bool isShow);
-    void BlurWindow(bool isBlur);
     void WindowFocus(bool isFocus);
     void SetAppBgColor(const Color& color);
     void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);

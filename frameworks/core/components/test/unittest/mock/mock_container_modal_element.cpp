@@ -68,10 +68,6 @@ void ContainerModalElement::ChangeTitleIcon(bool isFocus)
 {
 }
 
-void ContainerModalElement::BlurWindow(bool isBlur)
-{
-}
-
 void ContainerModalElement::WindowFocus(bool isFocus)
 {
     windowMode_ = WindowMode::WINDOW_MODE_UNDEFINED;
