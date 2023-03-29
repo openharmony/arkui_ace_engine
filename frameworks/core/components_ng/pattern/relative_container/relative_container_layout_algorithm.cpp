@@ -91,6 +91,9 @@ void RelativeContainerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             childWrapper->GetGeometryNode()->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
             continue;
         }
+        if (!childWrapper->GetHostNode()->GetInspectorId().has_value()) {
+            continue;
+        }
         auto curOffset = recordOffsetMap_[childWrapper->GetHostNode()->GetInspectorIdValue()];
         childWrapper->GetGeometryNode()->SetMarginFrameOffset(curOffset);
         childWrapper->Layout();
@@ -107,7 +110,7 @@ void RelativeContainerLayoutAlgorithm::CollectNodesById(LayoutWrapper* layoutWra
         auto childLayoutProperty = childWrapper->GetLayoutProperty();
         auto childHostNode = childWrapper->GetHostNode();
         childWrapper->SetActive();
-        if (childHostNode) {
+        if (childHostNode && childHostNode->GetInspectorId().has_value()) {
             auto geometryNode = childWrapper->GetGeometryNode();
             auto childConstraint = relativeContainerLayoutProperty->CreateChildConstraint();
             if (childHostNode->GetInspectorId()->empty()) {
