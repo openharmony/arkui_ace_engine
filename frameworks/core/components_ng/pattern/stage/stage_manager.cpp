@@ -335,6 +335,7 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
         FirePageHide(lastPage, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
     }
     node->MovePosition(static_cast<int32_t>(stageNode_->GetChildren().size() - 1));
+    node->GetRenderContext()->ResetPageTransitionEffect();
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     stageNode_->RebuildRenderContextTree();
