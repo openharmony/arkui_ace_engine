@@ -806,15 +806,6 @@ void NavigationView::SetHideBackButton(bool hideBackButton)
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
     navBarLayoutProperty->UpdateHideBackButton(hideBackButton);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(navBarNode->GetBackButton());
-    CHECK_NULL_VOID(backButtonNode);
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
-    CHECK_NULL_VOID(backButtonLayoutProperty);
-    if (hideBackButton) {
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::GONE);
-    } else {
-        backButtonLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-    }
 }
 
 void NavigationView::SetHideToolBar(bool hideToolBar)
