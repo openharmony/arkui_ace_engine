@@ -348,6 +348,7 @@ void TextFieldPattern::CreateSingleHandle()
     auto emptyOffset = MakeEmptyOffset();
     OffsetF firstHandleOffset(firstHandleMetrics.offset.GetX() + parentGlobalOffset_.GetX() + emptyOffset.GetX(),
         firstHandleMetrics.offset.GetY() + parentGlobalOffset_.GetY() + emptyOffset.GetY());
+    textSelector_.firstHandleOffset_ = firstHandleOffset;
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     firstHandle.SetOffset(firstHandleOffset);
     firstHandle.SetSize(handlePaintSize);
@@ -490,6 +491,7 @@ void TextFieldPattern::UpdateSelectionOffset()
                 LessOrEqual(textBoxLocalOffsetBegin.GetX(), contentRect_.GetX() + contentRect_.Width())) {
                 OffsetF firstHandleOffset(textBoxLocalOffsetBegin.GetX() + parentGlobalOffset_.GetX(),
                     textBoxLocalOffsetBegin.GetY() + parentGlobalOffset_.GetY());
+                textSelector_.firstHandleOffset_ = firstHandleOffset;
                 RectF firstHandle;
                 firstHandle.SetOffset(firstHandleOffset);
                 firstHandle.SetSize(handlePaintSize);
@@ -499,6 +501,7 @@ void TextFieldPattern::UpdateSelectionOffset()
                 LessOrEqual(textBoxLocalOffsetEnd.GetX(), contentRect_.GetX() + contentRect_.Width())) {
                 OffsetF secondHandleOffset(textBoxLocalOffsetEnd.GetX() + parentGlobalOffset_.GetX(),
                     textBoxLocalOffsetEnd.GetY() + parentGlobalOffset_.GetY());
+                textSelector_.secondHandleOffset_ = secondHandleOffset;
                 RectF secondHandle;
                 secondHandle.SetOffset(secondHandleOffset);
                 secondHandle.SetSize(handlePaintSize);
@@ -693,6 +696,25 @@ void TextFieldPattern::OnTextAreaScroll(float offset)
     caretRect_.SetTop(caretRect_.GetY() + offset);
     currentOffset_ = textRect_.GetY() + offset;
     textRect_.SetOffset(OffsetF(textRect_.GetX(), currentOffset_));
+    UpdateSelectionOffset();
+    if (SelectOverlayIsOn()) {
+        SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
+        RectF firstHandle;
+        textSelector_.firstHandleOffset_.SetY(textSelector_.firstHandleOffset_.GetY() + offset);
+        firstHandle.SetOffset(textSelector_.firstHandleOffset_);
+        firstHandle.SetSize(handlePaintSize);
+        std::optional<RectF> secondHandleOption;
+        if (isSingleHandle_ == true) {
+            secondHandleOption = std::nullopt;
+        } else {
+            RectF secondHandle;
+            textSelector_.secondHandleOffset_.SetY(textSelector_.secondHandleOffset_.GetY() + offset);
+            secondHandle.SetOffset(textSelector_.secondHandleOffset_);
+            secondHandle.SetSize(handlePaintSize);
+            secondHandleOption = secondHandle;
+        }
+        ShowSelectOverlay(firstHandle, secondHandleOption);
+    }
     UpdateScrollBarOffset();
 }
 
@@ -1740,9 +1762,11 @@ void TextFieldPattern::CreateHandles()
     auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart());
     OffsetF firstHandleOffset(firstHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),
         firstHandlePosition.offset.GetY() + parentGlobalOffset_.GetY());
+    textSelector_.firstHandleOffset_ = firstHandleOffset;
     auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd());
     OffsetF secondHandleOffset(secondHandlePosition.offset.GetX() + parentGlobalOffset_.GetX(),
         secondHandlePosition.offset.GetY() + parentGlobalOffset_.GetY());
+    textSelector_.secondHandleOffset_ = secondHandleOffset;
     SizeF handlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretRect_.Height() };
     RectF firstHandle;
     firstHandle.SetOffset(firstHandleOffset);
@@ -1982,9 +2006,11 @@ void TextFieldPattern::SetHandlerOnMoveDone()
     info.paintRect = newHandle;
     selectionMode_ = isSingleHandle_ ? SelectionMode::NONE : SelectionMode::SELECT;
     if (isFirstHandle_) {
+        textSelector_.firstHandleOffset_ = newHandleOffset;
         selectOverlayProxy_->UpdateFirstSelectHandleInfo(info);
         return;
     }
+    textSelector_.secondHandleOffset_ = newHandleOffset;
     selectOverlayProxy_->UpdateSecondSelectHandleInfo(info);
 }
 
