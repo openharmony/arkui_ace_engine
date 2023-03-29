@@ -693,6 +693,54 @@ HWTEST_F(RadioTestNg, RadioPatternTest020, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RadioPatternTest021
+ * @tc.desc: Test Radio OnModifyDone default margin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioPatternTest021, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto radioPattern = frameNode->GetPattern<RadioPattern>();
+    EXPECT_NE(radioPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto radioTheme = AceType::MakeRefPtr<RadioTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(radioTheme));
+
+    MarginProperty margin;
+    margin.left = CalcLength(HORIZONTAL_PADDING.ConvertToPx());
+    layoutProperty->UpdateMargin(margin); // GetMarginProperty
+
+    radioPattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(HORIZONTAL_PADDING.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
+              CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+              CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+              CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+
+    MarginProperty margin1;
+    margin1.right = CalcLength(HORIZONTAL_PADDING.ConvertToPx());
+    layoutProperty->UpdateMargin(margin1); // GetMarginProperty
+
+    radioPattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(), CalcLength(HORIZONTAL_PADDING.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
+              CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+              CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+              CalcLength(radioTheme->GetHotZoneVerticalPadding().Value()));
+}
+
+/**
  * @tc.name: RadioPaintMethodTest001
  * @tc.desc: Test Radio PaintMethod PaintRadio.
  * @tc.type: FUNC

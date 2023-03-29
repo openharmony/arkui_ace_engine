@@ -50,14 +50,27 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(checkBoxTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetMarginProperty()) {
-        MarginProperty margin;
-        margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-        margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-        margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-        margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-        layoutProperty->UpdateMargin(margin);
+    MarginProperty margin;
+    margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+    margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
+    margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+    margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+    auto& setMargin = layoutProperty->GetMarginProperty();
+    if (setMargin) {
+        if (setMargin->left.has_value()) {
+            margin.left = setMargin->left;
+        }
+        if (setMargin->right.has_value()) {
+            margin.right = setMargin->right;
+        }
+        if (setMargin->top.has_value()) {
+            margin.top = setMargin->top;
+        }
+        if (setMargin->bottom.has_value()) {
+            margin.bottom = setMargin->bottom;
+        }
     }
+    layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     InitClickEvent();
