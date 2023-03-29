@@ -13,28 +13,26 @@
  * limitations under the License.
  */
 
-
-/**
- * state mgmt library uses its own class for logging
-* allows to remap separately from other use of aceConsole
-*
-* everything in this file is framework internal
-*/
-
 class stateMgmtConsole {
     public static log (...args : any) : void {
-        aceConsole.log(...args);
+        console.log(...args);
     }
     public static debug(...args : any) : void {
-        aceConsole.debug(...args);
+        console.debug(...args);
     }
     public static info (...args : any) : void {
-        aceConsole.info(...args);
+        console.info(...args);
     }
     public static warn (...args : any) : void  {
-        aceConsole.warn(...args);
+        console.warn(...args);
     }
     public static error (...args : any) : void {
-        aceConsole.error(...args);
+        console.error(...args);
+    }
+}
+
+class stateMgmtTrace {
+    public static scopedTrace<T>(codeBlock: () => T, ...args: any): T {
+        return codeBlock();
     }
 }

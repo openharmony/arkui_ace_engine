@@ -337,6 +337,12 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
 
+    // preload aceTrace
+    shared_ptr<JsValue> aceTraceObj = arkRuntime->NewObject();
+    aceTraceObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsiBaseUtils::JsTraceBegin));
+    aceTraceObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsiBaseUtils::JsTraceEnd));
+    global->SetProperty(arkRuntime, "aceTrace", aceTraceObj);
+
     // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
 
@@ -409,6 +415,12 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
     aceConsoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::JsWarnLogPrint));
     aceConsoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(runtime_, "aceConsole", aceConsoleObj);
+
+    // js framework trace method
+    shared_ptr<JsValue> aceTraceObj = runtime_->NewObject();
+    aceTraceObj->SetProperty(runtime_, "begin", runtime_->NewFunction(JsiBaseUtils::JsTraceBegin));
+    aceTraceObj->SetProperty(runtime_, "end", runtime_->NewFunction(JsiBaseUtils::JsTraceEnd));
+    global->SetProperty(runtime_, "aceTrace", aceTraceObj);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule(ArkNativeEngine* engine)
@@ -1951,6 +1963,11 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+    // preload aceTrace
+    shared_ptr<JsValue> aceTraceObj = arkRuntime->NewObject();
+    aceTraceObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsiBaseUtils::JsTraceBegin));
+    aceTraceObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsiBaseUtils::JsTraceEnd));
+    global->SetProperty(arkRuntime, "aceTrace", aceTraceObj);
     // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
     // preload exports and requireNative
