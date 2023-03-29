@@ -74,7 +74,7 @@ void AceEngine::InitJsDumpHeadSignal()
 void AceEngine::AddContainer(int32_t instanceId, const RefPtr<Container>& container)
 {
     LOGI("AddContainer %{public}d", instanceId);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::unique_lock<std::shared_mutex> lock(mutex_);
     const auto result = containerMap_.try_emplace(instanceId, container);
     if (!result.second) {
         LOGW("already have container of this instance id: %{public}d", instanceId);
@@ -86,7 +86,7 @@ void AceEngine::RemoveContainer(int32_t instanceId)
     LOGI("RemoveContainer %{public}d", instanceId);
     size_t num = 0;
     {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::unique_lock<std::shared_mutex> lock(mutex_);
         num = containerMap_.erase(instanceId);
     }
     if (num == 0) {
@@ -101,7 +101,7 @@ RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
         instanceId = PluginManager::GetInstance().GetPluginParentContainerId(instanceId);
     }
 #endif
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     auto container = containerMap_.find(instanceId);
     if (container != containerMap_.end()) {
         return container->second;
@@ -138,7 +138,7 @@ void AceEngine::TriggerGarbageCollection()
 {
     std::unordered_map<int32_t, RefPtr<Container>> copied;
     {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::shared_lock<std::shared_mutex> lock(mutex_);
         if (containerMap_.empty()) {
             return;
         }
@@ -165,7 +165,7 @@ void AceEngine::TriggerGarbageCollection()
 void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback)
 {
     CHECK_NULL_VOID_NOLOG(callback);
-    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    std::shared_lock<std::shared_mutex> lock(mutex_);
     for (const auto& [first, second] : containerMap_) {
         // first = container ID
         ContainerScope scope(first);
@@ -177,7 +177,7 @@ void AceEngine::DumpJsHeap(bool isPrivate) const
 {
     std::unordered_map<int32_t, RefPtr<Container>> copied;
     {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
+        std::shared_lock<std::shared_mutex> lock(mutex_);
         copied = containerMap_;
     }
     for (const auto& container : copied) {
