@@ -57,6 +57,7 @@ const Dimension CURSOR_WIDTH_SIZE = 10.0_vp;
 const Dimension DEFAULT_FONT_SIZE { 14, DimensionUnit::PX };
 const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
+const Axis AXIS_VERTICAL = Axis::VERTICAL;
 constexpr float CONTEXT_WIDTH_VALUE = 10.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 10.0f;
 const std::string EMPTY_TEXT_VALUE;
@@ -583,6 +584,9 @@ HWTEST_F(TextFieldPatternTestNg, SelectedColor001, TestSize.Level1)
     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
     paintProperty->UpdateSelectedBackgroundColor(Color::BLACK);
+    textFieldPattern->scrollableEvent_ = nullptr;
+    textFieldPattern->OnModifyDone();
+    textFieldPattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(AXIS_VERTICAL);
     textFieldPattern->OnModifyDone();
     EXPECT_TRUE(paintProperty->GetSelectedBackgroundColor().has_value());
 }
@@ -728,6 +732,7 @@ HWTEST_F(TextFieldPatternTestNg, CheckScrollable001, TestSize.Level1)
 {
     auto textFieldPattern = GetPattern();
     ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->textEditingValue_.text = "";
     EXPECT_TRUE(textFieldPattern->scrollable_);
     textFieldPattern->CheckScrollable();
     EXPECT_FALSE(textFieldPattern->scrollable_);
@@ -965,8 +970,10 @@ HWTEST_F(TextFieldPatternTestNg, SetContentOffset002, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     TextFieldContentModifier textFieldContentModifier(pattern);
-    textFieldContentModifier.contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     OffsetF value = CONTENT_OFFSET;
+    textFieldContentModifier.contentOffset_ = nullptr;
+    textFieldContentModifier.SetContentOffset(value);
+    textFieldContentModifier.contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     textFieldContentModifier.SetContentOffset(value);
     EXPECT_EQ(textFieldContentModifier.contentOffset_->Get(), value);
 }
@@ -983,8 +990,10 @@ HWTEST_F(TextFieldPatternTestNg, SetContentSize002, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     TextFieldContentModifier textFieldContentModifier(pattern);
-    textFieldContentModifier.contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     SizeF value = CONTENT_SIZE;
+    textFieldContentModifier.contentSize_ = nullptr;
+    textFieldContentModifier.SetContentSize(value);
+    textFieldContentModifier.contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textFieldContentModifier.SetContentSize(value);
     EXPECT_EQ(textFieldContentModifier.contentSize_->Get(), value);
 }
@@ -1001,10 +1010,12 @@ HWTEST_F(TextFieldPatternTestNg, SetTextValue001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     TextFieldContentModifier textFieldContentModifier(pattern);
+    std::string value1 = "";
     textFieldContentModifier.textValue_ = AceType::MakeRefPtr<PropertyString>("");
-    std::string value = "text";
-    textFieldContentModifier.SetTextValue(value);
-    EXPECT_EQ(textFieldContentModifier.textValue_->Get(), value);
+    textFieldContentModifier.SetTextValue(value1);
+    std::string value2 = "text";
+    textFieldContentModifier.SetTextValue(value2);
+    EXPECT_EQ(textFieldContentModifier.textValue_->Get(), value2);
 }
 
 /**
@@ -1051,9 +1062,18 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternUpdateScrollBarOffset002, TestS
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->textEditingValue_.Reset();
+    pattern->UpdateScrollBarOffset();
+    EXPECT_TRUE(pattern->textEditingValue_.text.empty());
     pattern->textEditingValue_.text = "updateScrollBarOffset";
     pattern->UpdateScrollBarOffset();
     EXPECT_EQ(pattern->GetScrollBar(), nullptr);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    pattern->scrollBar_ = scrollBar;
+    auto scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+    pattern->scrollBarProxy_ = scrollBarProxy;
+    pattern->UpdateScrollBarOffset();
+    ASSERT_FALSE(!pattern->GetScrollBar() && !pattern->GetScrollBarProxy());
 }
 
 /**
@@ -1092,7 +1112,15 @@ HWTEST_F(TextFieldPatternTestNg, onDraw001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(AXIS_VERTICAL);
+    pattern->AddScrollEvent();
+    pattern->scrollable_ = true;
+    pattern->CheckScrollable();
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBar->isScrollable_ = true;
+    scrollBar->displayMode_ = DisplayMode::AUTO;
+    scrollBar->SetNormalWidth(CURSOR_WIDTH_SIZE);
+    scrollBar->opacity_ = UINT8_MAX;
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
@@ -1124,6 +1152,90 @@ HWTEST_F(TextFieldPatternTestNg, PaintSelection001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PaintSelection002
+ * @tc.desc: Verify that the PaintSelection interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PaintSelection002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectionMode_ = SelectionMode::SELECT;
+    pattern->textSelector_.baseOffset = 1;
+    pattern->textSelector_.destinationOffset = 0;
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).WillRepeatedly(Return());
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldOverlayModifier.PaintSelection(context);
+}
+
+/**
+ * @tc.name: PaintSelection003
+ * @tc.desc: Verify that the PaintSelection interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, PaintSelection003, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->selectionMode_ = SelectionMode::SELECT;
+    pattern->textSelector_.baseOffset = 1;
+    pattern->textSelector_.destinationOffset = 0;
+    std::vector<RSTypographyProperties::TextBox> textBoxs;
+    RSTypographyProperties::TextBox textBox;
+    textBoxs.emplace_back(textBox);
+    pattern->textBoxes_ = textBoxs;
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRoundRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).WillRepeatedly(Return());
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldOverlayModifier.inputStyle_ = InputStyle::INLINE;
+    textFieldOverlayModifier.PaintSelection(context);
+    textFieldOverlayModifier.inputStyle_ = InputStyle::DEFAULT;
+    textFieldOverlayModifier.PaintSelection(context);
+}
+
+/**
+ * @tc.name: SetCursortWidth001
+ * @tc.desc: Verify that the SetCursorWidth interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetCursortWidth001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    TextFieldOverlayModifier textFieldOverlayModifier(pattern, scrollBar, scrollEdgeEffect);
+    float value = 1.0;
+    textFieldOverlayModifier.SetCursorWidth(value);
+    EXPECT_EQ(textFieldOverlayModifier.cursorWidth_->Get(), value);
+}
+/**
  * @tc.name: PaintCursor001
  * @tc.desc: Verify that the PaintCursor interface calls normally and exits without exception.
  * @tc.type: FUNC
@@ -1134,6 +1246,8 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    pattern->selectionMode_ = SelectionMode::NONE;
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
     auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
@@ -1141,6 +1255,9 @@ HWTEST_F(TextFieldPatternTestNg, PaintCursor001, TestSize.Level1)
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    textFieldOverlayModifier.cursorVisible_ = AceType::MakeRefPtr<PropertyBool>(true);
+    textFieldOverlayModifier.PaintCursor(context);
+    textFieldOverlayModifier.cursorVisible_ = AceType::MakeRefPtr<PropertyBool>(true);
     textFieldOverlayModifier.PaintCursor(context);
 }
 
@@ -1220,5 +1337,695 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldModelSetOnEditChanged, TestSize.Level1
     EXPECT_TRUE(eventHub);
     eventHub->FireOnEditChanged(true);
     EXPECT_TRUE(callback);
+}
+
+/**
+ * @tc.name: SetTextObscured
+ * @tc.desc: Verify that the SetTextObscured interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetTextObscured, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    bool value = true;
+    textFieldContentModifier.textObscured_ = nullptr;
+    textFieldContentModifier.SetTextObscured(value);
+    textFieldContentModifier.textObscured_ = AceType::MakeRefPtr<PropertyBool>(value);
+
+    /**
+     * @tc.steps: step2. call SetTextObscured function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.SetTextObscured(value);
+    EXPECT_EQ(textFieldContentModifier.textObscured_->Get(), value);
+}
+
+/**
+ * @tc.name: SetTextAlign
+ * @tc.desc: Verify that the SetTextAlign interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetTextAlign, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const TextAlign value1 = TextAlign::START;
+    textFieldContentModifier.SetTextAlign(value1);
+    textFieldContentModifier.textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(value1));
+    const TextAlign value2 = TextAlign::END;
+
+    /**
+     * @tc.steps: step2. call SetTextAlign function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.SetTextAlign(value2);
+    EXPECT_EQ(textFieldContentModifier.textAlign_->Get(), static_cast<int32_t>(value2));
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate001
+ * @tc.desc: Verify that the NeedMeasureUpdate interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, NeedMeasureUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    PropertyChangeFlag flag;
+
+    /**
+     * @tc.steps: step2. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of false.
+     */
+    bool ret = true;
+    ret = textFieldContentModifier.NeedMeasureUpdate(flag);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate002
+ * @tc.desc: Verify that the NeedMeasureUpdate interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, NeedMeasureUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    float fontSizeValue1 = 5.0;
+    float fontSizeValue2 = 1.0;
+    const Dimension fontSize = Dimension(5.0);
+    textFieldContentModifier.SetFontSize(fontSize);
+    PropertyChangeFlag flag;
+
+    /**
+     * @tc.steps: step2. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of false.
+     */
+    textFieldContentModifier.fontSizeFloat_ = nullptr;
+    EXPECT_FALSE(textFieldContentModifier.NeedMeasureUpdate(flag));
+
+    /**
+     * @tc.steps: step3. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of false.
+     */
+    textFieldContentModifier.fontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue1);
+    textFieldContentModifier.fontSizeFloat_->Set(fontSizeValue1);
+    EXPECT_FALSE(textFieldContentModifier.NeedMeasureUpdate(flag));
+
+    /**
+     * @tc.steps: step4. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of true.
+     */
+    textFieldContentModifier.fontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue2);
+    textFieldContentModifier.fontSizeFloat_->Set(fontSizeValue2);
+    EXPECT_TRUE(textFieldContentModifier.NeedMeasureUpdate(flag));
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate003
+ * @tc.desc: Verify that the NeedMeasureUpdate interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, NeedMeasureUpdate003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    PropertyChangeFlag flag;
+    const FontWeight fontWeight = FontWeight::W100;
+    textFieldContentModifier.SetFontWeight(fontWeight);
+    float fontWeightValue1 = 0.0;
+    float fontWeightValue2 = 1.0;
+
+    /**
+     * @tc.steps: step2. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of false.
+     */
+    textFieldContentModifier.fontWeightFloat_ = nullptr;
+    EXPECT_FALSE(textFieldContentModifier.NeedMeasureUpdate(flag));
+
+    /**
+     * @tc.steps: step3. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of false.
+     */
+    textFieldContentModifier.fontWeightFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontWeightValue1);
+    textFieldContentModifier.fontWeightFloat_->Set(fontWeightValue1);
+    EXPECT_FALSE(textFieldContentModifier.NeedMeasureUpdate(flag));
+
+    /**
+     * @tc.steps: step4. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of true.
+     */
+    textFieldContentModifier.fontWeightFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontWeightValue2);
+    textFieldContentModifier.fontWeightFloat_->Set(fontWeightValue2);
+    EXPECT_TRUE(textFieldContentModifier.NeedMeasureUpdate(flag));
+}
+
+/**
+ * @tc.name: NeedMeasureUpdate004
+ * @tc.desc: Verify that the NeedMeasureUpdate interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, NeedMeasureUpdate004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    PropertyChangeFlag flag;
+    const Color color1 = Color::WHITE;
+    const Color color2 = Color::RED;
+
+    /**
+     * @tc.steps: step2. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of false.
+     */
+    textFieldContentModifier.SetTextColor(color2);
+    textFieldContentModifier.animatableTextColor_ = nullptr;
+    EXPECT_FALSE(textFieldContentModifier.NeedMeasureUpdate(flag));
+
+    /**
+     * @tc.steps: step3. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of false.
+     */
+    textFieldContentModifier.animatableTextColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(color2));
+    textFieldContentModifier.animatableTextColor_->Set(LinearColor(color2));
+    EXPECT_FALSE(textFieldContentModifier.NeedMeasureUpdate(flag));
+
+    /**
+     * @tc.steps: step4. call NeedMeasureUpdate function.
+     * @tc.expected: The NeedMeasureUpdate function returns a value of true.
+     */
+    textFieldContentModifier.animatableTextColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(color1));
+    textFieldContentModifier.animatableTextColor_->Set(LinearColor(color1));
+    EXPECT_TRUE(textFieldContentModifier.NeedMeasureUpdate(flag));
+}
+
+/**
+ * @tc.name: SetFontSize
+ * @tc.desc: Verify that the SetFontSize interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetFontSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const Dimension fontSize = Dimension(5.0);
+
+    /**
+     * @tc.steps: step2. call SetFontSize function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.SetFontSize(fontSize);
+    EXPECT_EQ(textFieldContentModifier.fontSize_, fontSize);
+}
+
+/**
+ * @tc.name: UpdateContentModifier002
+ * @tc.desc: Verify that the UpdateContentModifier interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateContentModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+
+    /**
+     * @tc.steps: step2. create textFieldOverlayModifier and textFieldContentModifier.
+     */
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
+    textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
+    textFieldContentModifier->textValue_ = AceType::MakeRefPtr<PropertyString>("");
+    textFieldContentModifier->textRectY_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
+    textFieldContentModifier->textRectX_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
+    float fontSizeValue = 1.0;
+    textFieldContentModifier->fontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
+    const Dimension fontSize = Dimension(5.0);
+    textFieldContentModifier->SetFontSize(fontSize);
+    textFieldContentModifier->fontSizeFloat_->Set(fontSizeValue);
+    TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
+
+    /**
+     * @tc.steps: step3. create paintWrapper.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
+
+    /**
+     * @tc.steps: step4. call UpdateContentModifier function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldPaintMethod.UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(textFieldContentModifier->contentOffset_->Get(), CONTENT_OFFSET);
+}
+
+/**
+ * @tc.name: UpdateOverlayModifier002
+ * @tc.desc: Verify that the UpdateOverlayModifier interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, UpdateOverlayModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    EdgeEffect edgeEffect;
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
+    auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern, scrollBar, scrollEdgeEffect);
+    auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
+    TextFieldPaintMethod textFieldPaintMethod(pattern, textFieldOverlayModifier, textFieldContentModifier);
+
+    /**
+     * @tc.steps: step2. create paintWrapper.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(CONTENT_SIZE);
+    geometryNode->SetContentOffset(CONTENT_OFFSET);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateCursorWidth(CURSOR_WIDTH_SIZE);
+    PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty);
+
+    /**
+     * @tc.steps: step3. call UpdateOverlayModifier function.
+     * @tc.expected: The member variable value of textFieldOverlayModifier is the value set above.
+     */
+    textFieldPaintMethod.UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(textFieldOverlayModifier->contentSize_->Get(), CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: SetFontWeight
+ * @tc.desc: Verify that the SetFontWeight interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetFontWeight, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const FontWeight fontWeight = FontWeight::W100;
+
+    /**
+     * @tc.steps: step2. call SetFontWeight function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.SetFontWeight(fontWeight);
+    EXPECT_EQ(textFieldContentModifier.fontWeight_, fontWeight);
+}
+
+/**
+ * @tc.name: SetTextColor
+ * @tc.desc: Verify that the SetTextColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetTextColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const Color color = Color::RED;
+
+    /**
+     * @tc.steps: step2. call SetTextColor function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldContentModifier.SetTextColor(color);
+    EXPECT_EQ(textFieldContentModifier.textColor_.value(), color);
+}
+
+/**
+ * @tc.name: ModifyTextStyle002
+ * @tc.desc: Verify that the ModifyTextStyle interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ModifyTextStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    float fontSizeValue;
+    textFieldContentModifier.fontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
+    const Dimension fontSize = Dimension(2.0);
+    textFieldContentModifier.SetFontSize(fontSize);
+    float fontWeightValue;
+    textFieldContentModifier.fontWeightFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontWeightValue);
+    const FontWeight fontWeight = FontWeight::W100;
+    textFieldContentModifier.SetFontWeight(fontWeight);
+    const Color color = Color::WHITE;
+    textFieldContentModifier.animatableTextColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(color));
+    textFieldContentModifier.SetTextColor(color);
+
+    /**
+     * @tc.steps: step2. call ModifyTextStyle function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier.ModifyTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetFontSize().ConvertToPx(), fontSize.ConvertToPx());
+    EXPECT_EQ(textStyle.GetFontWeight(), fontWeight);
+    EXPECT_EQ(textStyle.GetTextColor(), color);
+}
+
+/**
+ * @tc.name: ModifyTextStyle003
+ * @tc.desc: Verify that the ModifyTextStyle interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ModifyTextStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    const Dimension fontSize = Dimension(2.0);
+    textFieldContentModifier.SetFontSize(fontSize);
+    textFieldContentModifier.fontSizeFloat_ = nullptr;
+    const FontWeight fontWeight = FontWeight::W100;
+    textFieldContentModifier.SetFontWeight(fontWeight);
+    textFieldContentModifier.fontWeightFloat_ = nullptr;
+    const Color color = Color::WHITE;
+    textFieldContentModifier.SetTextColor(color);
+    textFieldContentModifier.animatableTextColor_ = nullptr;
+
+    /**
+     * @tc.steps: step2. call ModifyTextStyle function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier.ModifyTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetFontSize().ConvertToPx(), DEFAULT_FONT_SIZE.ConvertToPx());
+}
+
+/**
+ * @tc.name: ModifyTextStyle004
+ * @tc.desc: Verify that the ModifyTextStyle interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, ModifyTextStyle004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldContentModifier textFieldContentModifier(pattern);
+    float fontSizeValue;
+    textFieldContentModifier.fontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontSizeValue);
+    float fontWeightValue;
+    textFieldContentModifier.fontWeightFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(fontWeightValue);
+    const Color color = Color::WHITE;
+    textFieldContentModifier.animatableTextColor_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(color));
+
+    /**
+     * @tc.steps: step2. call ModifyTextStyle function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    TextStyle textStyle;
+    textFieldContentModifier.ModifyTextStyle(textStyle);
+    EXPECT_EQ(textStyle.GetFontSize().ConvertToPx(), DEFAULT_FONT_SIZE.ConvertToPx());
+}
+
+/**
+ * @tc.name: onDraw002
+ * @tc.desc: Verify that the onDraw interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, onDraw002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
+    textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
+    textFieldContentModifier->textValue_ = AceType::MakeRefPtr<PropertyString>("");
+    textFieldContentModifier->textRectY_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
+    textFieldContentModifier->textRectX_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
+    textFieldContentModifier->textObscured_ = AceType::MakeRefPtr<PropertyBool>(true);
+
+    /**
+     * @tc.steps: step2. call onDraw function.
+     * @tc.expected: The onDraw interface calls normally and exits without exception.
+     */
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    textFieldContentModifier->onDraw(context);
+}
+
+/**
+ * @tc.name: onDraw003
+ * @tc.desc: Verify that the onDraw interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, onDraw003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. paragraph_ Pointer instantiation.
+     */
+    pattern->paragraph_ = std::make_shared<RSParagraph>();
+    auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
+    textFieldContentModifier->contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
+    textFieldContentModifier->contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
+    textFieldContentModifier->textValue_ = AceType::MakeRefPtr<PropertyString>("");
+    textFieldContentModifier->textRectY_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
+    textFieldContentModifier->textRectX_ = AceType::MakeRefPtr<PropertyFloat>(0.0);
+    textFieldContentModifier->textObscured_ = AceType::MakeRefPtr<PropertyBool>(true);
+
+    /**
+     * @tc.steps: step3. call onDraw function.
+     * @tc.expected: The onDraw interface calls normally and exits without exception.
+     */
+    Testing::MockCanvas rsCanvas;
+    DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    textFieldContentModifier->onDraw(context);
+}
+
+/**
+ * @tc.name: SetPropertyToModifier
+ * @tc.desc: Verify that the SetPropertyToModifier interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetPropertyToModifier, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    TextFieldLayoutAlgorithm textFieldLayoutAlgorithm;
+    TextStyle textStyle;
+    const Color color = Color::RED;
+    textStyle.SetTextColor(color);
+    auto textFieldContentModifier = AceType::MakeRefPtr<TextFieldContentModifier>(pattern);
+
+    /**
+     * @tc.steps: step2. call SetPropertyToModifier function.
+     * @tc.expected: The member variable value of textFieldContentModifier is the value set above.
+     */
+    textFieldLayoutAlgorithm.SetPropertyToModifier(textStyle, textFieldContentModifier);
+    EXPECT_EQ(textFieldContentModifier->textColor_.value(), color);
+}
+
+/**
+ * @tc.name: SetCaretStyle
+ * @tc.desc: Create frameNode and SetCaretStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetCaretStyle, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldModelInstance.
+     */
+    TextFieldModelNG textFieldModelInstance;
+    const CaretStyle value1 = {};
+    textFieldModelInstance.SetCaretStyle(value1);
+    const CaretStyle value2 = { CURSOR_WIDTH_SIZE };
+    textFieldModelInstance.SetCaretStyle(value2);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetCursorWidthValue function.
+     * @tc.expected: The GetCursorWidthValue function returns the value set above.
+     */
+    EXPECT_EQ(paintProperty->GetCursorWidthValue(), CURSOR_WIDTH_SIZE);
+}
+
+/**
+ * @tc.name: SetSelectedBackgroundColor
+ * @tc.desc: Verify that the SetSelectedBackgroundColor interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, SetSelectedBackgroundColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldModelInstance.
+     */
+    TextFieldModelNG textFieldModelInstance;
+    const Color value = Color::BLACK;
+    textFieldModelInstance.SetSelectedBackgroundColor(value);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetSelectedBackgroundColor function.
+     * @tc.expected: The GetSelectedBackgroundColor function returns the value set above.
+     */
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), value);
+}
+
+/**
+ * @tc.name: OnScrollCallback002
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnScrollCallback002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto textFieldPattern = GetPattern();
+    ASSERT_NE(textFieldPattern, nullptr);
+    const float offset = 0.0;
+    const int32_t source = 0;
+    bool ret = false;
+    textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
+    textFieldPattern->scrollBar_->SetDriving(true);
+
+    /**
+     * @tc.steps: step2. call OnScrollCallback function.
+     * @tc.expected: The OnScrollCallback function returns a value of true.
+     */
+    ret = textFieldPattern->OnScrollCallback(offset, source);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: OnScrollCallback003
+ * @tc.desc: Verify that the OnScrollCallback interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, OnScrollCallback003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFieldPattern.
+     */
+    auto textFieldPattern = GetPattern();
+    ASSERT_NE(textFieldPattern, nullptr);
+    const float offset = 0.0;
+    const int32_t source = 0;
+    bool ret = false;
+    textFieldPattern->scrollBar_ = AccessibilityManager::MakeRefPtr<ScrollBar>();
+    textFieldPattern->scrollBar_->SetDriving(false);
+
+    /**
+     * @tc.steps: step2. call OnScrollCallback function.
+     * @tc.expected: The OnScrollCallback function returns a value of true.
+     */
+    ret = textFieldPattern->OnScrollCallback(offset, source);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG
