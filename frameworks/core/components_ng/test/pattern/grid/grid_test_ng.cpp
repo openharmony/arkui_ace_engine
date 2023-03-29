@@ -23,6 +23,9 @@
 #include "base/utils/utils.h"
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
@@ -79,6 +82,17 @@ struct GridTestProperty {
 
 class GridPatternTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineBase::SetUp();
+        auto pipeline = MockPipelineBase::GetCurrent();
+    }
+
+    static void TearDownTestSuite()
+    {
+        MockPipelineBase::TearDown();
+    }
+
     static void SetWidth(const Dimension& width)
     {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -128,8 +142,7 @@ public:
         return itemFrameNode->GetPattern<GridItemPattern>();
     }
 
-    static RefPtr<FrameNode> CreateGrid(
-        const GridTestProperty& gridTestProperty, const int32_t girdItemCount = 0)
+    static RefPtr<FrameNode> CreateGrid(const GridTestProperty& gridTestProperty, const int32_t girdItemCount = 0)
     {
         GridModelNG grid;
         RefPtr<ScrollControllerBase> positionController = grid.CreatePositionController();
@@ -196,14 +209,14 @@ HWTEST_F(GridPatternTestNg, GridTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set grid properties.
-    */
+     */
     GridTestProperty gridTestProperty;
     gridTestProperty.rowsTemplate = std::make_optional("1fr 1fr 1fr");
     gridTestProperty.columnsTemplate = std::make_optional("1fr 1fr 1fr");
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     const int32_t gridItemCount = 9;
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, gridItemCount);
     ASSERT_NE(frameNode, nullptr);
@@ -245,7 +258,7 @@ HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -309,7 +322,7 @@ HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -429,7 +442,7 @@ HWTEST_F(GridPatternTestNg, GridTest004, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -519,7 +532,7 @@ HWTEST_F(GridPatternTestNg, GridTest005, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -573,7 +586,7 @@ HWTEST_F(GridPatternTestNg, GridTest006, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -627,7 +640,7 @@ HWTEST_F(GridPatternTestNg, GridTest007, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -1047,7 +1060,7 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create grid.
-    */
+     */
     GridModelNG grid;
     RefPtr<ScrollControllerBase> positionController = grid.CreatePositionController();
     RefPtr<ScrollProxy> scrollBarProxy = grid.CreateScrollBarProxy();
@@ -1080,7 +1093,7 @@ HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create gridItem and Set properties.
-    */
+     */
     GridItemModelNG gridItem;
     gridItem.Create([](int32_t) {}, true);
     gridItem.SetRowStart(1);
@@ -1094,7 +1107,7 @@ HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
     /**
      * @tc.steps: step2. Get frameNode and properties.
      * @tc.expected: step2. Check properties is correct.
-    */
+     */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<GridItemLayoutProperty>();
@@ -1158,7 +1171,8 @@ HWTEST_F(GridPatternTestNg, GridTest021, TestSize.Level1)
      */
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_))),
-        GetPaintRectWithTransform()).WillRepeatedly(Return(gridRect));
+        GetPaintRectWithTransform())
+        .WillRepeatedly(Return(gridRect));
 
     /**
      * @tc.steps: step4. Run GetInsertPosition func.
@@ -1299,7 +1313,7 @@ HWTEST_F(GridPatternTestNg, GridTest024, TestSize.Level1)
      * @tc.steps: step2. Test GetInsertPosition func.
      * @tc.expected: Verify return value.
      */
-    pattern->gridLayoutInfo_.currentRect_= RectF(0, 0, 100, 100);
+    pattern->gridLayoutInfo_.currentRect_ = RectF(0, 0, 100, 100);
     pattern->gridLayoutInfo_.currentMovingItemPosition_ = 1;
     int32_t insertPosition = pattern->GetInsertPosition(50.f, 50.f);
     EXPECT_EQ(insertPosition, 1);
@@ -1770,7 +1784,6 @@ HWTEST_F(GridPatternTestNg, GridSelectTest005, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     RunMeasureAndLayout(frameNode);
 
-
     /**
      * @tc.steps: step5. Select (225, 50) - (315, 150) zone with RIGHT_BUTTON.
      * @tc.expected: The item is not selected.
@@ -1872,7 +1885,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest001, TestSize.Level1)
     EXPECT_EQ(eventHub->draggedIndex_, 1);
     EXPECT_NE(eventHub->dragDropProxy_, nullptr);
     auto itemFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
-    EXPECT_EQ(eventHub->draggingItem_ , itemFrameNode);
+    EXPECT_EQ(eventHub->draggingItem_, itemFrameNode);
 
     /**
      * @tc.steps: step6. Trigger HandleOnItemDragUpdate, HandleOnItemDragEnd.
@@ -1882,8 +1895,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest001, TestSize.Level1)
     HandleOnItemDragEnd(info);
     EXPECT_EQ(eventHub->draggedIndex_, 0);
     EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
-    EXPECT_EQ(eventHub->draggingItem_ , nullptr);
-
+    EXPECT_EQ(eventHub->draggingItem_, nullptr);
 
     /**
      * @tc.steps: step7. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd.
@@ -1894,7 +1906,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest001, TestSize.Level1)
     HandleOnItemDragCancel();
     EXPECT_EQ(eventHub->draggedIndex_, 0);
     EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
-    EXPECT_EQ(eventHub->draggingItem_ , nullptr);
+    EXPECT_EQ(eventHub->draggingItem_, nullptr);
 }
 
 /**

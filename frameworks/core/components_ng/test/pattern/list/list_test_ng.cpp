@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,6 +59,16 @@ constexpr Dimension DEFAULT_ITEM_CROSS_SIZE = Dimension(1.0, DimensionUnit::PERC
 } // namespace
 class ListTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineBase::SetUp();
+    }
+
+    static void TearDownTestSuite()
+    {
+        MockPipelineBase::TearDown();
+    }
+
     static void SetWidth(const Dimension& width)
     {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

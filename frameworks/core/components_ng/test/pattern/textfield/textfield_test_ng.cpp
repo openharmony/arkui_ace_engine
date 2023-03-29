@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
@@ -79,6 +80,8 @@ public:
 void TextFieldPatternTestNg::SetUpTestSuite()
 {
     MockPipelineBase::SetUp();
+    MockPipelineBase::GetCurrent()->rootNode_ =
+        FrameNode::CreateFrameNodeWithTree(V2::ROOT_ETS_TAG, 0, AceType::MakeRefPtr<RootPattern>());
 }
 
 void TextFieldPatternTestNg::TearDownTestSuite()
