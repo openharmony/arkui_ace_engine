@@ -841,7 +841,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY() + frameRect_.Height()), frameRect_.Height());
     if (caretUpdateType_ != CaretUpdateType::PRESSED) {
         needToRequestKeyboardInner_ = true;
         caretUpdateType_ = CaretUpdateType::EVENT;
@@ -1441,16 +1441,22 @@ void TextFieldPattern::InitClickEvent()
 void TextFieldPattern::HandleClickEvent(GestureEvent& info)
 {
     LOGI("TextFieldPattern::HandleClickEvent");
-    UpdateTextFieldManager(info.GetGlobalLocation(), frameRect_.Height());
-    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
+    // emulate clicking bottom of the textField
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY() + frameRect_.Height()), frameRect_.Height());
+    auto focusHub = host->GetOrCreateFocusHub();
 
     if (IsSearchParentNode()) {
-        auto parentFrameNode = AceType::DynamicCast<FrameNode>(GetHost()->GetParent());
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
         focusHub = parentFrameNode->GetOrCreateFocusHub();
     }
 
     if (!focusHub->IsFocusable()) {
-        LOGI("Textfield %{public}d is not focusable ,cannot request keyboard", GetHost()->GetId());
+        LOGI("Textfield %{public}d is not focusable ,cannot request keyboard", host->GetId());
         return;
     }
     lastTouchOffset_ = info.GetLocalLocation();
@@ -1464,11 +1470,11 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         LOGI("Password Icon pressed, change text to be shown only");
         textObscured_ = !textObscured_;
         ProcessPasswordIcon();
-        GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         caretUpdateType_ = CaretUpdateType::ICON_PRESSED;
         return;
     }
-    GetHost()->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     StartTwinkling();
 
     if (isMousePressed_) {
@@ -1482,7 +1488,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         return;
     }
     if (RequestKeyboard(false, true, true)) {
-        auto eventHub = GetHost()->GetEventHub<TextFieldEventHub>();
+        auto eventHub = host->GetEventHub<TextFieldEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->FireOnEditChanged(true);
     }
