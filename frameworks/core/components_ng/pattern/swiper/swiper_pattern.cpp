@@ -787,11 +787,11 @@ void SwiperPattern::HandleTouchDown()
 
 void SwiperPattern::HandleTouchUp()
 {
-    if (controller_ && !controller_->IsStopped()) {
+    if (controller_ && controller_->GetStatus() == Animator::Status::PAUSED) {
         controller_->Resume();
     }
 
-    if (springController_ && !springController_->IsStopped()) {
+    if (springController_ && springController_->GetStatus() == Animator::Status::PAUSED) {
         springController_->Resume();
     }
 
@@ -882,6 +882,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
 
         if (edgeEffect == EdgeEffect::NONE) {
+            UpdateCurrentOffset(0.0f);
             return;
         }
     }
