@@ -372,7 +372,7 @@ void SwiperPattern::ShowNext()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
-    if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
+    if (currentIndex_ >= childrenSize - GetDisplayCount() && !IsLoop()) {
         LOGW("already last one, can't show next");
         return;
     }
@@ -1019,7 +1019,7 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
     }
 
     auto isOutOfStart = index == 0 && NonNegative(mainOffset);
-    auto isOutOfEnd = index == TotalCount() - 1 && NonPositive(mainOffset);
+    auto isOutOfEnd = index == TotalCount() - GetDisplayCount() && NonPositive(mainOffset);
     return isOutOfStart || isOutOfEnd;
 }
 
