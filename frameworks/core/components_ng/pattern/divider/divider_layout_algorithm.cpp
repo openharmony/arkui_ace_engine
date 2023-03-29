@@ -26,8 +26,6 @@ DividerLayoutAlgorithm::DividerLayoutAlgorithm() = default;
 std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto frameNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(frameNode, std::nullopt);
     auto dividerLayoutProperty = DynamicCast<DividerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(dividerLayoutProperty, std::nullopt);
 
@@ -43,13 +41,13 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     SizeF constrainSize;
     if (!vertical_) {
         dividerLength_ = (contentConstraint.selfIdealSize.Width()) ? contentConstraint.selfIdealSize.Width().value()
-                                                                   : contentConstraint.maxSize.Width();
+                                                                   : contentConstraint.percentReference.Width();
         constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
         constrainSize = SizeF(dividerLength_, constrainStrokeWidth_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
     } else {
         dividerLength_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()
-                                                                    : contentConstraint.maxSize.Height();
+                                                                    : contentConstraint.percentReference.Height();
         constrainStrokeWidth_ = constrainStrokeWidth_ > dividerLength_ ? dividerLength_ : constrainStrokeWidth_;
         constrainSize = SizeF(constrainStrokeWidth_, dividerLength_);
         constrainSize.Constrain(contentConstraint.minSize, contentConstraint.maxSize);
