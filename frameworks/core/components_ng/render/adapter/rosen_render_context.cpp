@@ -1783,6 +1783,13 @@ void RosenRenderContext::ResetSharedTranslate()
     sharedTransitionModifier_->translateXY = nullptr;
 }
 
+void RosenRenderContext::ResetPageTransitionEffect()
+{
+    UpdateTransformScale(VectorF(1.0f, 1.0f));
+    UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+    UpdateOpacity(1.0);
+}
+
 void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, int index)
 {
     CHECK_NULL_VOID(rsNode_);

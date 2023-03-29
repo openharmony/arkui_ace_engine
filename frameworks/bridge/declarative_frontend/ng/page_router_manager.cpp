@@ -613,7 +613,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target, const std::st
     if (mode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(url);
         if (pageInfo.second) {
-            // find page in stack, move postion and update params.
+            // find page in stack, move position and update params.
             MovePageToFront(pageInfo.first, pageInfo.second, params, false, true, false);
             return;
         }
@@ -783,6 +783,7 @@ void PageRouterManager::MovePageToFront(int32_t index, const RefPtr<FrameNode>& 
             pageInfo->ReplacePageParams(params);
         }
         if (forceShowCurrent) {
+            pageNode->GetRenderContext()->ResetPageTransitionEffect();
             StageManager::FirePageShow(pageNode, PageTransitionType::NONE);
         }
         return;
