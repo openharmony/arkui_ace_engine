@@ -1886,7 +1886,7 @@ void RosenRenderContext::ResetSharedTranslate()
 void RosenRenderContext::ResetPageTransitionEffect()
 {
     UpdateTransformScale(VectorF(1.0f, 1.0f));
-    UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+    UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
 }
 
