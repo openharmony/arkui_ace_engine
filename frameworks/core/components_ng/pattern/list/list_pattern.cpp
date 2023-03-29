@@ -229,11 +229,12 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
-    if (IsOutOfBoundary(false)) {
+    if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() && scrollState_ != SCROLL_FROM_BAR;
+    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() &&
+        scrollState_ != SCROLL_FROM_BAR && scrollState_ != SCROLL_FROM_AXIS;
     listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
     if (chainAdapter_) {
         listLayoutAlgorithm->SetChainOffsetCallback([weak = AceType::WeakClaim(this)](int32_t index) {
