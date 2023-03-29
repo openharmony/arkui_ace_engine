@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,6 +59,16 @@ constexpr Dimension DEFAULT_ITEM_CROSS_SIZE = Dimension(1.0, DimensionUnit::PERC
 } // namespace
 class ListTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineBase::SetUp();
+    }
+
+    static void TearDownTestSuite()
+    {
+        MockPipelineBase::TearDown();
+    }
+
     static void SetWidth(const Dimension& width)
     {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1483,52 +1494,17 @@ HWTEST_F(ListTestNg, ListSelectTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. Click the (0, 0) point of firstItem.
-     * @tc.expected: The 1st item is selected.
+     * @tc.expected: Can not select by click, the item is not selected.
      */
     info.SetAction(MouseAction::PRESS);
     info.SetLocalLocation(Offset(0.f, 0.f));
     pattern->HandleMouseEventWithoutKeyboard(info);
-    info.SetAction(MouseAction::MOVE);
-    pattern->HandleMouseEventWithoutKeyboard(info);
     RefPtr<ListItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
-    EXPECT_TRUE(firstItemPattern->IsSelected());
+    EXPECT_FALSE(firstItemPattern->IsSelected());
     info.SetAction(MouseAction::RELEASE); // Release the mouse to deselect.
     pattern->HandleMouseEventWithoutKeyboard(info);
     firstItemPattern->MarkIsSelected(false);
     EXPECT_FALSE(firstItemPattern->IsSelected());
-
-    /**
-     * @tc.steps: step5. Click the middle of the 4th item.
-     * @tc.expected: The 4th item is selected.
-     */
-    info.SetAction(MouseAction::PRESS);
-    info.SetLocalLocation(Offset(240.f, 350.f));
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    info.SetAction(MouseAction::MOVE);
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    RefPtr<ListItemPattern> fourthItemPattern = GetItemPattern(frameNode, 3);
-    EXPECT_TRUE(fourthItemPattern->IsSelected());
-    info.SetAction(MouseAction::RELEASE);
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    fourthItemPattern->MarkIsSelected(false);
-
-    /**
-     * @tc.steps: step6. Click the lower boundary of the 4th item.
-     * @tc.expected: The 4th and 5th items are selected.
-     */
-    info.SetAction(MouseAction::PRESS);
-    info.SetLocalLocation(Offset(240.f, 400.f));
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    info.SetAction(MouseAction::MOVE);
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    fourthItemPattern = GetItemPattern(frameNode, 3);
-    EXPECT_TRUE(fourthItemPattern->IsSelected());
-    RefPtr<ListItemPattern> fifthItemPattern = GetItemPattern(frameNode, 4);
-    EXPECT_TRUE(fifthItemPattern->IsSelected());
-    info.SetAction(MouseAction::RELEASE);
-    pattern->HandleMouseEventWithoutKeyboard(info);
-    fourthItemPattern->MarkIsSelected(false);
-    fifthItemPattern->MarkIsSelected(false);
 }
 
 /**
