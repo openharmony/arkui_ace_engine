@@ -30,7 +30,7 @@
 namespace OHOS::Ace::Framework {
 constexpr char JS_CRASH_CODE[] = "100001";
 
-int32_t GetLineOffset(const AceType *data)
+int32_t GetLineOffset(const AceType* data)
 {
 #ifndef PA_SUPPORT
     if (data == nullptr) {
@@ -54,36 +54,42 @@ std::string GetMsgStr(const std::string& msg)
     return msg.substr(0, pos);
 }
 
-RefPtr<JsAcePage> GetRunningPage(const AceType *data)
+RefPtr<JsAcePage> GetRunningPage(const AceType* data)
 {
 #ifndef PA_SUPPORT
     if (data == nullptr) {
         return nullptr;
     }
-    if (AceType::InstanceOf<JsiEngineInstance>(data)) {
-        auto instance = static_cast<const JsiEngineInstance *>(data);
-        return instance->GetRunningPage();
-    } else if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
-        auto instance = static_cast<const JsiDeclarativeEngineInstance *>(data);
+    if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
+        auto instance = static_cast<const JsiDeclarativeEngineInstance*>(data);
         return instance->GetRunningPage();
     }
+#ifndef NG_BUILD
+    else if (AceType::InstanceOf<JsiEngineInstance>(data)) {
+        auto instance = static_cast<const JsiEngineInstance*>(data);
+        return instance->GetRunningPage();
+    }
+#endif
 #endif
     return nullptr;
 }
 
-RefPtr<FrontendDelegate> GetDelegate(const AceType *data)
+RefPtr<FrontendDelegate> GetDelegate(const AceType* data)
 {
 #ifndef PA_SUPPORT
     if (data == nullptr) {
         return nullptr;
     }
-    if (AceType::InstanceOf<JsiEngineInstance>(data)) {
-        auto instance = static_cast<const JsiEngineInstance *>(data);
-        return instance->GetDelegate();
-    } else if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
-        auto instance = static_cast<const JsiDeclarativeEngineInstance *>(data);
+    if (AceType::InstanceOf<JsiDeclarativeEngineInstance>(data)) {
+        auto instance = static_cast<const JsiDeclarativeEngineInstance*>(data);
         return instance->GetDelegate();
     }
+#ifndef NG_BUILD
+    else if (AceType::InstanceOf<JsiEngineInstance>(data)) {
+        auto instance = static_cast<const JsiEngineInstance*>(data);
+        return instance->GetDelegate();
+    }
+#endif
 #endif
     return nullptr;
 }
@@ -109,8 +115,11 @@ std::string JsiBaseUtils::GenerateErrorMsg(
         rawStack = stack->ToString(runtime);
     }
 
-    errMsg.append("{\"ErrMsg\":\"").append(messageStr)
-        .append("\", \"Stacktrace\": \"").append(GetMsgStr(rawStack)).append("\"}");
+    errMsg.append("{\"ErrMsg\":\"")
+        .append(messageStr)
+        .append("\", \"Stacktrace\": \"")
+        .append(GetMsgStr(rawStack))
+        .append("\"}");
     return errMsg;
 }
 
@@ -223,8 +232,7 @@ std::string JsiBaseUtils::GenerateSummaryBody(
         if (currPosOfNextLine == -1) {
             break;
         }
-        summaryBodyInsertedWithTagStr
-            .append("[Engine Log]")
+        summaryBodyInsertedWithTagStr.append("[Engine Log]")
             .append(summaryBody.substr(lastPosOfNextLine, (currPosOfNextLine - lastPosOfNextLine) + 1));
         lastPosOfNextLine = currPosOfNextLine;
     }
@@ -404,8 +412,8 @@ std::string JsiBaseUtils::TranslateStack(const std::string& stackStr, const std:
 }
 
 std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, const std::string& pageUrl,
-    const std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps,
-    const RefPtr<RevSourceMap>& appMap, const AceType* data)
+    const std::unordered_map<std::string, RefPtr<RevSourceMap>>& sourceMaps, const RefPtr<RevSourceMap>& appMap,
+    const AceType* data)
 {
     const std::string closeBrace = ")";
     const std::string openBrace = "(";
@@ -431,7 +439,7 @@ std::string JsiBaseUtils::TranslateBySourceMap(const std::string& stackStr, cons
     for (uint32_t i = 0; i < res.size(); i++) {
         std::string temp = res[i];
         uint32_t start = temp.find(openBrace);
-        uint32_t end  = temp.find(":");
+        uint32_t end = temp.find(":");
         std::string key = temp.substr(start + 1, end - start - 1);
         auto closeBracePos = static_cast<int32_t>(temp.find(closeBrace));
         auto openBracePos = static_cast<int32_t>(temp.find(openBrace));
@@ -861,13 +869,12 @@ NativeValue* AppErrorLogPrint(NativeEngine* nativeEngine, NativeCallbackInfo* in
     return AppLogPrint(nativeEngine, info, JsLogLevel::ERROR);
 }
 
-void JsiBaseUtils::GetStageSourceMap(const AceType *data,
-    std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMaps)
+void JsiBaseUtils::GetStageSourceMap(
+    const AceType* data, std::unordered_map<std::string, RefPtr<Framework::RevSourceMap>>& sourceMaps)
 {
     auto delegate = GetDelegate(data);
     std::string maps;
-    if (delegate != nullptr &&
-        delegate->GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
+    if (delegate != nullptr && delegate->GetAssetContent(MERGE_SOURCEMAPS_PATH, maps)) {
         auto SourceMap = AceType::MakeRefPtr<RevSourceMap>();
         SourceMap->StageModeSourceMapSplit(maps, sourceMaps);
     } else {
