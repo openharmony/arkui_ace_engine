@@ -92,7 +92,12 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
 
 void JSImage::SetObjectFit(int32_t value)
 {
-    ImageModel::GetInstance()->SetImageFit(value);
+    auto fit = static_cast<ImageFit>(value);
+    if (fit < ImageFit::FILL || fit > ImageFit::SCALE_DOWN) {
+        LOGW("The value of objectFit is out of range %{public}d", value);
+        fit = ImageFit::COVER;
+    }
+    ImageModel::GetInstance()->SetImageFit(fit);
 }
 
 void JSImage::SetMatchTextDirection(bool value)
@@ -236,17 +241,32 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
 void JSImage::SetImageRenderMode(int32_t imageRenderMode)
 {
-    ImageModel::GetInstance()->SetImageRenderMode(static_cast<ImageRenderMode>(imageRenderMode));
+    auto renderMode = static_cast<ImageRenderMode>(imageRenderMode);
+    if (renderMode < ImageRenderMode::ORIGINAL || renderMode > ImageRenderMode::TEMPLATE) {
+        LOGW("invalid imageRenderMode value %{public}d", imageRenderMode);
+        renderMode = ImageRenderMode::ORIGINAL;
+    }
+    ImageModel::GetInstance()->SetImageRenderMode(renderMode);
 }
 
 void JSImage::SetImageInterpolation(int32_t imageInterpolation)
 {
-    ImageModel::GetInstance()->SetImageInterpolation(static_cast<ImageInterpolation>(imageInterpolation));
+    auto interpolation = static_cast<ImageInterpolation>(imageInterpolation);
+    if (interpolation < ImageInterpolation::NONE || interpolation > ImageInterpolation::HIGH) {
+        LOGW("invalid imageInterpolation value %{public}d", imageInterpolation);
+        interpolation = ImageInterpolation::NONE;
+    }
+    ImageModel::GetInstance()->SetImageInterpolation(interpolation);
 }
 
 void JSImage::SetImageRepeat(int32_t imageRepeat)
 {
-    ImageModel::GetInstance()->SetImageRepeat(static_cast<ImageRepeat>(imageRepeat));
+    auto repeat = static_cast<ImageRepeat>(imageRepeat);
+    if (repeat < ImageRepeat::NO_REPEAT || repeat > ImageRepeat::REPEAT) {
+        LOGW("invalid imageRepeat value %{public}d", imageRepeat);
+        repeat = ImageRepeat::NO_REPEAT;
+    }
+    ImageModel::GetInstance()->SetImageRepeat(repeat);
 }
 
 void JSImage::JsTransition(const JSCallbackInfo& info)
@@ -502,8 +522,12 @@ void JSImage::SetCopyOption(const JSCallbackInfo& info)
     }
     auto copyOptions = CopyOptions::None;
     if (info[0]->IsNumber()) {
-        auto emunNumber = info[0]->ToNumber<int>();
-        copyOptions = static_cast<CopyOptions>(emunNumber);
+        auto enumNumber = info[0]->ToNumber<int>();
+        copyOptions = static_cast<CopyOptions>(enumNumber);
+        if (copyOptions < CopyOptions::None || copyOptions > CopyOptions::Distributed) {
+            LOGW("copy option is invalid %{public}d", copyOptions);
+            copyOptions = CopyOptions::None;
+        }
     }
     LOGI("copy option: %{public}d", copyOptions);
     ImageModel::GetInstance()->SetCopyOption(copyOptions);

@@ -30,7 +30,7 @@ public:
     void SetBorder(const Border& border) override;
     void SetBackBorder() override;
     void SetBlur(double blur) override;
-    void SetImageFit(int32_t value) override;
+    void SetImageFit(ImageFit value) override;
     void SetMatchTextDirection(bool value) override;
     void SetFitOriginSize(bool value) override;
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;

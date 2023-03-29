@@ -102,7 +102,7 @@ public:
             jsonConstructor->Put("justifyContent",
                 V2::ConvertFlexAlignToStirng(property->GetMainAxisAlign().value_or(FlexAlign::FLEX_START)).c_str());
             jsonConstructor->Put("alignItems",
-                V2::ConvertFlexAlignToStirng(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START)).c_str());
+                V2::ConvertItemAlignToStirng(property->GetCrossAxisAlign().value_or(FlexAlign::FLEX_START)).c_str());
             jsonConstructor->Put("alignContent", "FlexAlign.Start");
         } else {
             auto wrapDirection = property->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
