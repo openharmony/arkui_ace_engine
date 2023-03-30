@@ -55,10 +55,10 @@ HWTEST_F(GaugeAccessibilityPropertyTestNg, GaugeAccessibilityPropertyTestNg001, 
     GaugeModelNG gauge;
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto gaugeAccessibilityProperty = frameNode->GetAccessibilityProperty<GaugeAccessibilityProperty>();
-    EXPECT_NE(gaugeAccessibilityProperty, nullptr);
+    ASSERT_NE(gaugeAccessibilityProperty, nullptr);
     EXPECT_TRUE(gaugeAccessibilityProperty->HasRange());
     EXPECT_EQ(gaugeAccessibilityProperty->GetAccessibilityValue().current, VALUE);
     EXPECT_EQ(gaugeAccessibilityProperty->GetAccessibilityValue().max, MAX);
@@ -75,10 +75,10 @@ HWTEST_F(GaugeAccessibilityPropertyTestNg, GaugeAccessibilityPropertyTestNg002, 
     GaugeModelNG gauge;
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
 
     auto gaugeAccessibilityProperty = frameNode->GetAccessibilityProperty<GaugeAccessibilityProperty>();
-    EXPECT_NE(gaugeAccessibilityProperty, nullptr);
+    ASSERT_NE(gaugeAccessibilityProperty, nullptr);
     EXPECT_EQ(gaugeAccessibilityProperty->GetText(), std::to_string(VALUE));
 }
 } // namespace OHOS::Ace::NG
