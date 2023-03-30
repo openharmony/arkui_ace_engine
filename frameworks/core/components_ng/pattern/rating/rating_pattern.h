@@ -94,8 +94,10 @@ public:
 
 private:
     void OnModifyDone() override;
-
     void ConstrainsRatingScore();
+    void LoadForeground();
+    void LoadSecondary();
+    void LoadBackground();
     void OnImageDataReady(int32_t imageFlag);
     void OnImageLoadSuccess(int32_t imageFlag);
     void CheckImageInfoHasChangedOrNot(
@@ -150,9 +152,9 @@ private:
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
-    ImagePaintConfig singleStarImagePaintConfig_;
-    RectF singleStarDstRect_;
-    RectF singleStarRect_;
+    ImagePaintConfig foregroundConfig_;
+    ImagePaintConfig secondaryConfig_;
+    ImagePaintConfig backgroundConfig_;
     int32_t imageReadyStateCode_ = 0;
     int32_t imageSuccessStateCode_ = 0;
     bool hasInit_ = false;
