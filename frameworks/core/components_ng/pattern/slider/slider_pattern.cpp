@@ -548,8 +548,8 @@ void SliderPattern::CreateParagraphFunc()
     fontStyle->UpdateTextColor(paintProperty->GetTextColor().value_or(sliderTheme->GetTipTextColor()));
     TextStyle textStyle = CreateTextStyleUsingTheme(fontStyle, nullptr, pipeline->GetTheme<TextTheme>());
     auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
-    auto contentSize = layoutProperty->GetContentLayoutConstraint();
-    CreateParagraphAndLayout(textStyle, paintProperty->GetContent().value_or(""), contentSize.value());
+    auto contentSize = layoutProperty->CreateContentConstraint();
+    CreateParagraphAndLayout(textStyle, paintProperty->GetContent().value_or(""), contentSize);
 }
 
 void SliderPattern::CreateParagraphAndLayout(
