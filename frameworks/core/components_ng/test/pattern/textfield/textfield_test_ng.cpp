@@ -61,6 +61,16 @@ const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
 const Axis AXIS_VERTICAL = Axis::VERTICAL;
 constexpr float CONTEXT_WIDTH_VALUE = 10.0f;
 constexpr float CONTEXT_HEIGHT_VALUE = 10.0f;
+constexpr float CONTENT_RECT_HEIGHT = 15.0f;
+constexpr float CONTENT_RECT_WIDTH = 10.0f;
+constexpr float CONTENT_RECT_Y = 5.0f;
+constexpr float CONTENT_RECT_Y_LARGE = 50.0f;
+constexpr float TEXT_AREA_SCROLL_OFFSET = 10.0f;
+constexpr float TEXT_RECT_HEIGHT = 10.0f;
+constexpr float TEXT_RECT_HEIGHT_LARGE = 20.0f;
+constexpr float TEXT_RECT_WIDTH = 5.0f;
+constexpr float TEXT_RECT_Y = 5.0f;
+constexpr float TEXT_RECT_Y_LARGE = 50.0f;
 const std::string EMPTY_TEXT_VALUE;
 const std::string TEXT_EDITING_VALUE("textEditingValue");
 const std::string PLACEHOLDER("DEFAULT PLACEHOLDER");
@@ -1102,6 +1112,62 @@ HWTEST_F(TextFieldPatternTestNg, TextFieldPatternSearchNodeTest001, TestSize.Lev
     auto mouseInfo = MouseInfo();
     pattern->HandleMouseEvent(mouseInfo);
     EXPECT_EQ(pattern->IsSearchParentNode(), true);
+}
+
+/**
+ * @tc.name: TextFieldPatternOnTextAreaScroll001
+ * @tc.desc: Verify that the AddScrollEvent interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNg, TextFieldPatternOnTextAreaScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextFieldPattern.
+     * @tc.expected: step1. Check the TextFieldPattern success.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call the OnTextAreaScroll.
+     * @tc.expected: step2. Check the value set in OnTextAreaScroll.
+     */
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(5);
+    // Is TextArea, textRect_.Height() < contentRect_.Height()
+    pattern->textRect_.SetHeight(TEXT_RECT_HEIGHT);
+    pattern->textRect_.SetWidth(TEXT_RECT_WIDTH);
+    pattern->contentRect_.SetHeight(CONTENT_RECT_HEIGHT);
+    pattern->contentRect_.SetWidth(CONTENT_RECT_WIDTH);
+    pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
+    // Is TextArea, textRect Height > contentRect Height, textRect Y + offset > contentRect Y.
+    pattern->textRect_.SetHeight(TEXT_RECT_HEIGHT_LARGE);
+    pattern->textRect_.SetWidth(TEXT_RECT_WIDTH);
+    pattern->textRect_.SetTop(TEXT_RECT_Y);
+    pattern->contentRect_.SetHeight(CONTENT_RECT_HEIGHT);
+    pattern->contentRect_.SetWidth(CONTENT_RECT_WIDTH);
+    pattern->contentRect_.SetTop(CONTENT_RECT_Y);
+    pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
+    // Is TextArea, textRect Height > contentRect Height, textRect Y + offset < contentRect Y.
+    // textRect Y + offset - contentRect Heigh > textRect Height.
+    pattern->contentRect_.SetTop(CONTENT_RECT_Y_LARGE);
+    pattern->textRect_.SetTop(TEXT_RECT_Y_LARGE);
+    pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
+    // Is TextArea, textRect Height > contentRect Height, textRect Y + offset < contentRect Y.
+    // textRect Y + offset - contentRectHeight < textRect Height.
+    pattern->contentRect_.SetTop(CONTENT_RECT_Y_LARGE);
+    pattern->textRect_.SetTop(TEXT_RECT_Y);
+    pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
+    pattern->isSingleHandle_ = false;
+    pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
+    pattern->isSingleHandle_ = true;
+    float oldCaretRectY = pattern->caretRect_.GetY();
+    pattern->OnTextAreaScroll(TEXT_AREA_SCROLL_OFFSET);
+    EXPECT_EQ(pattern->caretRect_.GetY(), oldCaretRectY + TEXT_AREA_SCROLL_OFFSET);
+    EXPECT_EQ(pattern->textRect_.GetOffset(), OffsetF(pattern->textRect_.GetX(), pattern->currentOffset_));
 }
 
 /**
