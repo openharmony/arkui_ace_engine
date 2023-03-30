@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ const char ACCESSIBILITY_CLEAR_FOCUS_EVENT[] = "accessibilityclearfocus";
 const char TEXT_CHANGE_EVENT[] = "textchange";
 const char PAGE_CHANGE_EVENT[] = "pagechange";
 const char SCROLL_END_EVENT[] = "scrollend";
-const char SCROLL_START_EVENT [] = "scrollstart";
+const char SCROLL_START_EVENT[] = "scrollstart";
 const char MOUSE_HOVER_ENTER[] = "mousehoverenter";
 const char MOUSE_HOVER_EXIT[] = "mousehoverexit";
 const char IMPORTANT_YES[] = "yes";
@@ -621,6 +621,10 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
 void UpdateAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo)
 {
+    NG::RectF rect;
+    if (node->IsActive()) {
+        rect = node->GetTransformRectRelativeToWindow();
+    }
     nodeInfo.SetParent(GetParentId(node));
     std::vector<int32_t> children;
     for (const auto& item : node->GetChildren()) {
@@ -641,10 +645,10 @@ void UpdateAccessibilityElementInfo(
     nodeInfo.SetContent(accessibilityProperty->GetText());
     nodeInfo.SetVisible(node->IsVisible());
     if (node->IsVisible()) {
-        auto left = node->GetTransformRelativeOffset().GetX() + commonProperty.windowLeft;
-        auto top = node->GetTransformRelativeOffset().GetY() + commonProperty.windowTop;
-        auto right = left + node->GetGeometryNode()->GetFrameRect().Width();
-        auto bottom = top + node->GetGeometryNode()->GetFrameRect().Height();
+        auto left = rect.Left() + commonProperty.windowLeft;
+        auto top = rect.Top() + commonProperty.windowTop;
+        auto right = rect.Right() + commonProperty.windowLeft;
+        auto bottom = rect.Bottom() + commonProperty.windowTop;
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -739,10 +743,11 @@ RefPtr<NG::FrameNode> FindNodeInRelativeDirection(
 RefPtr<NG::FrameNode> FindNodeInAbsoluteDirection(
     const std::list<RefPtr<NG::FrameNode>>& nodeList, RefPtr<NG::FrameNode>& node, const int direction)
 {
-    auto left = node->GetOffsetRelativeToWindow().GetX();
-    auto top = node->GetOffsetRelativeToWindow().GetY();
-    auto width = node->GetGeometryNode()->GetFrameRect().Width();
-    auto height = node->GetGeometryNode()->GetFrameRect().Height();
+    NG::RectF rect = node->GetTransformRectRelativeToWindow();
+    auto left = rect.Left();
+    auto top = rect.Top();
+    auto width = rect.Width();
+    auto height = rect.Height();
     Rect tempBest(left, top, width, height);
     auto nodeRect = tempBest;
     switch (direction) {
@@ -767,8 +772,8 @@ RefPtr<NG::FrameNode> FindNodeInAbsoluteDirection(
         if (nodeItem->GetAccessibilityId() == node->GetAccessibilityId() || nodeItem->IsRootNode()) {
             continue;
         }
-        Rect itemRect(nodeItem->GetOffsetRelativeToWindow().GetX(), nodeItem->GetOffsetRelativeToWindow().GetY(),
-            nodeItem->GetGeometryNode()->GetFrameRect().Width(), nodeItem->GetGeometryNode()->GetFrameRect().Height());
+        rect = nodeItem->GetTransformRectRelativeToWindow();
+        Rect itemRect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
         if (CheckBetterRect(nodeRect, direction, itemRect, tempBest)) {
             tempBest = itemRect;
             nearestNode = nodeItem;
@@ -1150,15 +1155,18 @@ static void DumpTreeNG(
         return;
     }
 
+    if (!node->IsActive()) {
+        return;
+    }
+
+    NG::RectF rect = node->GetTransformRectRelativeToWindow();
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetAccessibilityId()));
     DumpLog::GetInstance().AddDesc("compid: " + node->GetInspectorId().value_or(""));
     DumpLog::GetInstance().AddDesc("text: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());
-    DumpLog::GetInstance().AddDesc(
-        "top: " + std::to_string(node->GetTransformRelativeOffset().GetY() + commonProperty.windowTop));
-    DumpLog::GetInstance().AddDesc(
-        "left: " + std::to_string(node->GetTransformRelativeOffset().GetX() + commonProperty.windowLeft));
-    DumpLog::GetInstance().AddDesc("width: " + std::to_string(node->GetGeometryNode()->GetFrameRect().Width()));
-    DumpLog::GetInstance().AddDesc("height: " + std::to_string(node->GetGeometryNode()->GetFrameRect().Height()));
+    DumpLog::GetInstance().AddDesc("top: " + std::to_string(rect.Top() + commonProperty.windowTop));
+    DumpLog::GetInstance().AddDesc("left: " + std::to_string(rect.Left() + commonProperty.windowLeft));
+    DumpLog::GetInstance().AddDesc("width: " + std::to_string(rect.Width()));
+    DumpLog::GetInstance().AddDesc("height: " + std::to_string(rect.Height()));
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->IsVisible()));
     auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     DumpLog::GetInstance().AddDesc(

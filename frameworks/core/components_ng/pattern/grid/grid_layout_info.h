@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,8 +94,8 @@ struct GridLayoutInfo {
     int32_t endMainLineIndex_ = 0;
 
     int32_t jumpIndex_ = -1;
-    uint32_t crossCount_ = 0;
-    uint32_t childrenCount_ = 0;
+    int32_t crossCount_ = 0;
+    int32_t childrenCount_ = 0;
 
     bool reachEnd_ = false;
     bool reachStart_ = false;
@@ -107,6 +107,9 @@ struct GridLayoutInfo {
     std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_;
     // in vertical grid, this map is like: [rowIndex: rowHeight]
     std::map<int32_t, float> lineHeightMap_;
+
+    // Grid has GridItem whose columnEnd - columnStart > 0
+    bool hasBigItem_;
 };
 
 } // namespace OHOS::Ace::NG
