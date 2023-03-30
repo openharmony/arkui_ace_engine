@@ -493,6 +493,11 @@ void AceAbility::OnStart(const Want& want)
         parsedPageUrl = "";
     }
 
+    auto windowRect = window->GetRect();
+    if (!windowRect.isUninitializedRect()) {
+        LOGI("notify window rect explicitly");
+        OnSizeChange(windowRect, OHOS::Rosen::WindowSizeChangeReason::UNDEFINED);
+    }
     // run page.
     Platform::AceContainer::RunPage(abilityId_, Platform::AceContainer::GetContainer(abilityId_)->GeneratePageId(),
         parsedPageUrl, want.GetStringParam(START_PARAMS_KEY));
