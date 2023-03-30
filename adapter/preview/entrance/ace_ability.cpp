@@ -602,7 +602,20 @@ std::string AceAbility::GetJSONTree()
 std::string AceAbility::GetDefaultJSONTree()
 {
     std::string defaultJsonTreeStr;
-    OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleDefaultJSONTreeStr(defaultJsonTreeStr);
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    if (!container) {
+        return "";
+    }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        return "";
+    }
+    taskExecutor->PostSyncTask(
+        [&defaultJsonTreeStr, instanceId = ACE_INSTANCE_ID] {
+            OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleDefaultJSONTreeStr(defaultJsonTreeStr);
+        },
+        TaskExecutor::TaskType::UI);
+
     return defaultJsonTreeStr;
 }
 
