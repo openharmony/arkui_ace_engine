@@ -151,6 +151,10 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest003, TestSize.Level1)
     EXPECT_EQ(accessibilityNode.accessibilityLabel_, "ACCESSIBILITY_TEXT");
     EXPECT_EQ(accessibilityNode.accessibilityHint_, "ACCESSIBILITY_DESCRIPTION");
     EXPECT_EQ(accessibilityNode.importantForAccessibility_, "ACCESSIBILITY_IMPORTANCE");
+
+    accessibilityNode.attrs_.emplace_back(std::make_pair(IMPORTANCE, "ACCESSIBILITY_IMPORTANCE"));
+    accessibilityNode.SetAttr(vec);
+    EXPECT_EQ(accessibilityNode.importantForAccessibility_, "ACCESSIBILITY_IMPORTANCE");
 }
 
 /**
@@ -173,5 +177,21 @@ HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest004, TestSize.Level1)
     accessibilityNode.AddEvent(0, vec);
     EXPECT_TRUE(accessibilityNode.isClickable_);
     EXPECT_TRUE(accessibilityNode.isLongClickable_);
+}
+
+/**
+ * @tc.name: accessibilityNodeTest005
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityNodeTestNg, accessibilityNodeTest005, TestSize.Level1)
+{
+    NodeId id = 0;
+    std::string nodeName = "text";
+    AccessibilityNode accessibilityNode(id, nodeName);
+    auto child = AceType::MakeRefPtr<AccessibilityNode>(1, "child");
+    accessibilityNode.AddNode(child, 0);
+    EXPECT_EQ(accessibilityNode.children_.size(), 1);
+    accessibilityNode.RemoveNode(child);
+    EXPECT_EQ(accessibilityNode.children_.size(), 0);
 }
 } // namespace OHOS::Ace::NG
