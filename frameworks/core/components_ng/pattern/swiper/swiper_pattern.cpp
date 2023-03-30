@@ -260,8 +260,8 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     currentIndex_ = swiperLayoutAlgorithm->GetCurrentIndex();
     oldIndex_ = currentIndex_;
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     maxChildSize_ = swiperLayoutAlgorithm->GetMaxChildSize();
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
