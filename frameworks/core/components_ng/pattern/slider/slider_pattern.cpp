@@ -125,8 +125,8 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_RETURN(theme, false);
-    Dimension hotBlockShadowWidth = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET) ==
-                                            SliderModel::SliderMode::OUTSET
+    auto sliderMode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
+    Dimension hotBlockShadowWidth = sliderMode == SliderModel::SliderMode::OUTSET
                                         ? theme->GetOutsetHotBlockShadowWidth()
                                         : theme->GetInsetHotBlockShadowWidth();
 
@@ -134,7 +134,11 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto blockLength = direction == Axis::HORIZONTAL ? blockSize_.Width() : blockSize_.Height();
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
-    borderBlank_ = std::max(trackThickness_, blockLength + hotBlockShadowWidth_ / HALF);
+    if (sliderMode == SliderModel::SliderMode::OUTSET) {
+        borderBlank_ = std::max(trackThickness_, blockLength + hotBlockShadowWidth_ / HALF);
+    } else {
+        borderBlank_ = trackThickness_ + hotBlockShadowWidth_ / HALF;
+    }
     // slider track length
     sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
     borderBlank_ = (length - sliderLength_) * HALF;
