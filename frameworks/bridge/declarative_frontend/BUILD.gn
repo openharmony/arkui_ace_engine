@@ -571,6 +571,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_toggle.cpp",
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
+      "jsview/js_view_context.cpp",
     ]
 
     sources += [
@@ -593,6 +594,26 @@ template("declarative_js_engine_ng") {
         deps += [ "$ace_napi:ace_container_scope" ]
       }
     }
+
+    # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
+    if (is_cross_platform_build) {
+      configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
+      } else {
+        deps += [ "$ark_ets_path:libark_jsruntime" ]
+      }
+    } else {
+      if (defined(config.build_for_ios) && config.build_for_ios) {
+        # static library for ios platform
+        external_deps = [ "ets_runtime:libark_jsruntime_static" ]
+      } else {
+        external_deps = [ "ets_runtime:libark_jsruntime" ]
+      }
+    }
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_frontend_sources
 
     deps += [ "engine/$engine_path:declarative_js_engine_bridge_${engine_name}_$platform" ]
 

@@ -31,11 +31,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
 {
-#ifndef NG_BUILD
     return AceType::MakeRefPtr<PixelMapImage>(pixelMap);
-#else
-    return nullptr;
-#endif
 }
 
 int32_t PixelMapImage::GetWidth() const

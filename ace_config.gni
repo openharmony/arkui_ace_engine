@@ -75,8 +75,6 @@ ability_runtime_napi_path = "${ability_runtime_path}/frameworks/js/napi"
 ability_runtime_services_path = "${ability_runtime_path}/services"
 flutter_root = "//third_party/flutter"
 ace_flutter_engine_root = "$flutter_root/build"
-flutter_root_new = "//third_party/flutter_ace_shell"
-ace_flutter_engine_root_new = "$flutter_root_new/engine/ace_shell"
 expat_root = "//third_party/expat"
 cjson_root = "//third_party/cJSON"
 jsoncpp_root = "//third_party/jsoncpp"
@@ -174,7 +172,6 @@ if (enable_dump_drawcmd) {
 
 if (enable_ng_build) {
   ace_common_defines += [ "NG_BUILD" ]
-  ace_common_defines += [ "FLUTTER_2_5" ]
 }
 
 if (!defined(global_parts_info) ||

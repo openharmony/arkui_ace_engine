@@ -634,6 +634,7 @@ template("ace_core_ng_source_set") {
 
       # image
       "image/animated_image_player.cpp",
+      "image/flutter_image_cache.cpp",
       "image/image_cache.cpp",
       "image/image_compressor.cpp",
       "image/image_loader.cpp",
@@ -681,14 +682,25 @@ template("ace_core_ng_source_set") {
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
+      "components/common/painter/flutter_decoration_painter.cpp",
+      "components/common/painter/flutter_svg_painter.cpp",
+      "components/custom_paint/render_custom_paint_creator.cpp",
       "components/custom_paint/render_offscreen_canvas_creator.cpp",
+      "components/custom_paint/rosen_render_custom_paint.cpp",
+      "components/custom_paint/rosen_render_offscreen_canvas.cpp",
+      "components/declaration/common/event.cpp",
       "components/font/constants_converter.cpp",
+      "components/font/flutter_font_collection.cpp",
       "components/font/font_loader_creator.cpp",
       "components/font/font_manager_creator.cpp",
+      "components/font/rosen_font_collection.cpp",
+      "components/font/rosen_font_loader.cpp",
+      "components/font/rosen_font_manager.cpp",
       "components/panel/sliding_events.cpp",
       "components/picker/picker_animation.cpp",
       "components/picker/picker_data.cpp",
       "components/scroll/scrollable.cpp",
+      "components/svg/svg_transform.cpp",
       "components/theme/app_theme.cpp",
       "components/theme/icon_theme.cpp",
       "components/theme/theme_attributes.cpp",
@@ -719,12 +731,13 @@ template("ace_core_ng_source_set") {
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
 
-    if (enable_ng_build) {
-      deps += [
-        "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
-        "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_$platform",
-      ]
-    }
+    deps += [
+      "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
+      "$ace_flutter_engine_root/skia:ace_skia_$platform",
+    ]
+
+    defines += uicast_configs.uicast_defines
+    sources += uicast_configs.uicast_core_sources
 
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {

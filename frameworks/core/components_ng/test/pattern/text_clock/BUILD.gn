@@ -77,17 +77,10 @@ ohos_unittest("text_clock_pattern_test_ng") {
     "//third_party/googletest:gmock_main",
   ]
 
-  if (enable_ng_build) {
-    deps += [
-      "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_ohos",
-      "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_ohos",
-    ]
-  } else {
-    deps += [
-      "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
-      "$ace_flutter_engine_root/skia:ace_skia_ohos",
-    ]
-  }
+  deps += [
+    "$ace_flutter_engine_root:third_party_flutter_engine_ohos",
+    "$ace_flutter_engine_root/skia:ace_skia_ohos",
+  ]
 
   configs = [
     ":config_text_clock_test",

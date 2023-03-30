@@ -42,7 +42,7 @@ RefPtr<ImageObject> ImageObject::BuildImageObject(
 {
     // build svg image object.
     if (source.IsSvg()) {
-#ifdef FLUTTER_2_5
+#ifdef NG_BUILD
         return nullptr;
 #else
         const auto svgStream = std::make_unique<SkMemoryStream>(skData);
@@ -120,14 +120,12 @@ Size SvgImageObject::MeasureForImage(RefPtr<RenderImage> image)
     return image->MeasureForSvgImage();
 }
 
-#ifndef NG_BUILD
 void SvgSkiaImageObject::PerformLayoutImageObject(RefPtr<RenderImage> image) {}
 
 Size SvgSkiaImageObject::MeasureForImage(RefPtr<RenderImage> image)
 {
     return image->MeasureForSvgImage();
 }
-#endif
 
 void StaticImageObject::UploadToGpuForRender(const WeakPtr<PipelineBase>& context,
     const UploadSuccessCallback& successCallback,

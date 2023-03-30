@@ -1919,6 +1919,7 @@ bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
 }
 
 // ArkTsCard start
+#ifdef FORM_SUPPORTED
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 {
     JsiDeclarativeEngineInstance::PreloadAceModuleCard(runtime);
@@ -1998,5 +1999,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     cardRuntime_ = runtime;
     JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
+#endif
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework

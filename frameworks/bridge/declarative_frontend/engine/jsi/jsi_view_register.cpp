@@ -1027,6 +1027,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
     return panda::BooleanRef::New(vm, result);
 }
 
+#ifdef FORM_SUPPORTED
 void JsRegisterFormViews(BindingTarget globalObj)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
@@ -1198,7 +1199,7 @@ void JsRegisterFormViews(BindingTarget globalObj)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
     LOGD("View classes and jsCreateDocument, registerObservableObject functions registered.");
 }
-
+#endif
 
 void JsRegisterViews(BindingTarget globalObj)
 {
