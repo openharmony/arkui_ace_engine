@@ -3035,7 +3035,11 @@ std::string TextFieldPattern::GetPlaceholderFont() const
         jsonValue->Put("style", "FontStyle.Italic");
     }
     // placeholder font size not exist in theme, use normal font size by default
-    jsonValue->Put("size", GetFontSize().c_str());
+    if (!layoutProperty->GetPlaceholderFontSize()) {
+        jsonValue->Put("size", GetFontSize().c_str());
+    } else {
+        jsonValue->Put("size", layoutProperty->GetPlaceholderFontSize()->ToString().c_str());
+    }
     auto weight = layoutProperty->GetPlaceholderFontWeightValue(theme->GetFontWeight());
     switch (weight) {
         case FontWeight::W100:
