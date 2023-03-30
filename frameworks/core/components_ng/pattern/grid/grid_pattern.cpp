@@ -43,8 +43,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     StringUtils::StringSplitter(gridLayoutProperty->GetColumnsTemplate().value_or(""), ' ', cols);
     std::vector<std::string> rows;
     StringUtils::StringSplitter(gridLayoutProperty->GetRowsTemplate().value_or(""), ' ', rows);
-    auto crossCount = cols.empty() ? Infinity<int32_t>() : cols.size();
-    auto mainCount = rows.empty() ? Infinity<int32_t>() : rows.size();
+    auto crossCount = cols.empty() ? Infinity<int32_t>() : static_cast<int32_t>(cols.size());
+    auto mainCount = rows.empty() ? Infinity<int32_t>() : static_cast<int32_t>(rows.size());
     if (!gridLayoutProperty->IsVertical()) {
         std::swap(crossCount, mainCount);
     }
@@ -147,8 +147,7 @@ void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
             ClearMultiSelect();
             mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
-            MultiSelectWithoutKeyboard(selectedZone);
+            // do not select when click
         } else if (info.GetAction() == MouseAction::MOVE) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
@@ -199,8 +198,9 @@ void GridPattern::ClearMultiSelect()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-
-    for (const auto& item : host->GetChildren()) {
+    std::list<RefPtr<FrameNode>> children;
+    host->GenerateOneDepthAllFrame(children);
+    for (const auto& item : children) {
         if (!AceType::InstanceOf<FrameNode>(item)) {
             continue;
         }
@@ -289,7 +289,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     if (!isConfigScrollable_) {
         return false;
     }
-
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     // When finger moves down, offset is positive.
@@ -423,7 +422,7 @@ std::pair<int32_t, int32_t> GridPattern::GetNextIndexByStep(
     auto curMainEnd = gridLayoutInfo_.endMainLineIndex_;
     auto curChildStartIndex = gridLayoutInfo_.startIndex_;
     auto curChildEndIndex = gridLayoutInfo_.endIndex_;
-    auto childrenCount = static_cast<int32_t>(gridLayoutInfo_.childrenCount_);
+    auto childrenCount = gridLayoutInfo_.childrenCount_;
     auto curMaxCrossCount = static_cast<int32_t>((gridLayoutInfo_.gridMatrix_[curMainIndex]).size());
     LOGD("Current main index start-end: %{public}d-%{public}d, Current cross count: %{public}d, Current child "
          "index start-end: %{public}d-%{public}d, Total children count: %{public}d",
@@ -710,12 +709,12 @@ void GridPattern::UpdateScrollBarOffset()
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
 
     float heightSum = 0;
-    size_t itemCount = 0;
+    int32_t itemCount = 0;
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
     for (const auto& item : info.lineHeightMap_) {
         auto line = info.gridMatrix_.find(item.first);
         if (line != info.gridMatrix_.end()) {
-            itemCount += line->second.size();
+            itemCount += static_cast<int32_t>(line->second.size());
         } else {
             itemCount += info.crossCount_;
         }

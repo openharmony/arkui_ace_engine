@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,7 +80,6 @@ TouchEvent GetUpPoint(const TouchEvent& downPoint)
         .x = downPoint.x, .y = downPoint.y, .type = TouchType::UP, .time = std::chrono::high_resolution_clock::now()
     };
 }
-
 #ifdef PREVIEW
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId)
 {
@@ -122,8 +121,7 @@ void GetSpanInspector(
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
-    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    RectF rect = node->GetTransformRectRelativeToWindow();
     rect = rect.Constrain(deviceRect);
     if (rect.IsEmpty()) {
         rect.SetRect(0, 0, 0, 0);
@@ -157,8 +155,7 @@ void GetInspectorChildren(
         RectF rect;
         isActive = isActive && node->IsActive();
         if (isActive) {
-            rect = node->GetRenderContext()->GetPaintRectWithTransform();
-            rect.SetOffset(node->GetTransformRelativeOffset());
+            rect = node->GetTransformRectRelativeToWindow();
         }
         rect = rect.Constrain(deviceRect);
         if (rect.IsEmpty()) {
@@ -231,9 +228,7 @@ void GetSpanInspector(
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
     jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
     jsonNode->Put(INSPECTOR_ID, parent->GetId());
-    auto ctx = node->GetRenderContext();
-    RectF rect = node->GetRenderContext()->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    RectF rect = node->GetTransformRectRelativeToWindow();
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     jsonNodeArray->Put(jsonNode);
 }
@@ -255,9 +250,9 @@ void GetInspectorChildren(
     RectF rect;
     isActive = isActive && node->IsActive();
     if (isActive) {
-        rect = node->GetRenderContext()->GetPaintRectWithTransform();
-        rect.SetOffset(node->GetTransformRelativeOffset());
+        rect = node->GetTransformRectRelativeToWindow();
     }
+
     jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     auto jsonObject = JsonUtil::Create(true);
     parent->ToJsonValue(jsonObject);
@@ -308,10 +303,7 @@ std::string Inspector::GetInspectorNodeByKey(const std::string& key)
     jsonNode->Put(INSPECTOR_ID, inspectorElement->GetId());
     auto frameNode = AceType::DynamicCast<FrameNode>(inspectorElement);
     if (frameNode) {
-        RectF rect;
-        rect.SetOffset(frameNode->GetTransformRelativeOffset());
-        rect.SetWidth(frameNode->GetGeometryNode()->GetFrameRect().Width());
-        rect.SetHeight(frameNode->GetGeometryNode()->GetFrameRect().Height());
+        auto rect = frameNode->GetTransformRectRelativeToWindow();
         jsonNode->Put(INSPECTOR_RECT, rect.ToBounds().c_str());
     }
     auto jsonAttrs = JsonUtil::Create(true);

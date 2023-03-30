@@ -1227,6 +1227,33 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     return offset;
 }
 
+RectF FrameNode::GetTransformRectRelativeToWindow() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, RectF());
+    RectF rect = context->GetPaintRectWithTransform();
+    auto offset = rect.GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(parentRenderContext, rect);
+        auto parentScale = parentRenderContext->GetTransformScale();
+        if (parentScale) {
+            auto oldSize = rect.GetSize();
+            auto newSize = SizeF(oldSize.Width() * parentScale.value().x, oldSize.Height() * parentScale.value().y);
+            rect.SetSize(newSize);
+
+            offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+        }
+
+        offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
+
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    rect.SetOffset(offset);
+    return rect;
+}
+
 OffsetF FrameNode::GetTransformRelativeOffset() const
 {
     auto context = GetRenderContext();
