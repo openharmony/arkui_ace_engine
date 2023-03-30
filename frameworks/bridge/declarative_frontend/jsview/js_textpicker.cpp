@@ -81,30 +81,28 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         auto getValue = paramObject->GetProperty("value");
         JSRef<JSArray> getRange = paramObject->GetProperty("range");
         std::vector<std::string> getRangeVector;
-        if (getRange->Length() == 0) {
-            return;
-        }
-        if (!ParseJsStrArray(getRange, getRangeVector)) {
-            LOGE("parse range failed");
-            return;
-        }
-
         std::string value = "";
-        if (!ParseJsString(getValue, value)) {
-            value = getRangeVector.front();
-        }
         uint32_t selected = 0;
-        if (!ParseJsInteger(getSelected, selected) && !value.empty()) {
-            auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
-            if (valueIterator != getRangeVector.end()) {
-                selected = std::distance(getRangeVector.begin(), valueIterator);
+        if (getRange->Length() > 0) {
+            if (!ParseJsStrArray(getRange, getRangeVector)) {
+                LOGE("parse range failed");
+                return;
+            }
+            if (!ParseJsString(getValue, value)) {
+                value = getRangeVector.front();
+            }  
+            if (!ParseJsInteger(getSelected, selected) && !value.empty()) {
+                auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
+                if (valueIterator != getRangeVector.end()) {
+                    selected = std::distance(getRangeVector.begin(), valueIterator);
+                }
+            }
+            if (selected < 0 || selected >= getRangeVector.size()) {
+                LOGE("selected is out of range");
+                selected = 0;
             }
         }
-
-        if (selected < 0 || selected >= getRangeVector.size()) {
-            LOGE("selected is out of range");
-            selected = 0;
-        }
+        
         auto theme = GetTheme<PickerTheme>();
         if (!theme) {
             LOGE("PickerText Theme is null");
