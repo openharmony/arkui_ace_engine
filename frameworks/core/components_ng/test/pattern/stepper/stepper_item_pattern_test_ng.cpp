@@ -16,8 +16,10 @@
 #include "gtest/gtest.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/stepper/stepper_item_pattern.h"
 #include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
+#include "core/components_ng/pattern/stepper/stepper_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -76,5 +78,25 @@ HWTEST_F(StepperItemPatternTestNg, StepperFrameNodeCreator001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetLeftLabelValue(), LEFT_LABEL);
     EXPECT_EQ(layoutProperty->GetRightLabelValue(), RIGHT_LABEL);
     EXPECT_EQ(layoutProperty->GetLabelStatus(), LABEL_STATUS);
+}
+
+/**
+ * @tc.name: StepperItemPatternCreate001
+ * @tc.desc: Test All the pattern of StepperItemPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperItemPatternTestNg, StepperItemPatternCreate001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.leftLabelValue = LEFT_LABEL;
+    testProperty.rightLabelValue = RIGHT_LABEL;
+    testProperty.labelStatusValue = LABEL_STATUS;
+
+    RefPtr<FrameNode> frameNode = CreateStepperItemNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto stepperItemPattern = frameNode->GetPattern<StepperItemPattern>();
+    ASSERT_NE(stepperItemPattern, nullptr);
+    bool isAtomicNode = stepperItemPattern->IsAtomicNode();
+    EXPECT_FALSE(isAtomicNode);
 }
 } // namespace OHOS::Ace::NG
