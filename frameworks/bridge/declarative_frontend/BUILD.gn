@@ -433,7 +433,11 @@ template("declarative_js_engine") {
       deps += [ "$ace_root/build:libace" ]
       if (defined(config.build_container_scope_lib) &&
           config.build_container_scope_lib) {
-        deps += [ "$ace_napi:ace_container_scope" ]
+        if (is_cross_platform_build) {
+          deps += [ "$ace_napi:ace_container_scope_static" ]
+        } else {
+          deps += [ "$ace_napi:ace_container_scope" ]
+        }
       }
     }
 
@@ -452,18 +456,9 @@ template("declarative_js_engine") {
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
-      } else {
-        deps += [ "$ark_ets_path:libark_jsruntime" ]
-      }
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
     } else {
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        # static library for ios platform
-        external_deps += [ "ets_runtime:libark_jsruntime_static" ]
-      } else {
-        external_deps += [ "ets_runtime:libark_jsruntime" ]
-      }
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
 
     if (platform == "windows" || platform == "mac" || platform == "linux") {
