@@ -68,6 +68,7 @@ const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const char BUTTON_ETS_TAG[] = "Button";
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF BUTTON_ONLY_HAS_WIDTH_SIZE(BUTTON_ONLY_HAS_WIDTH_VALUE, BUTTON_ONLY_HAS_WIDTH_VALUE);
+const Dimension DEFAULT_HEIGTH = 40.0_vp;
 } // namespace
 
 struct TestProperty {
@@ -112,7 +113,9 @@ void ButtonPatternTestNg::SetUpTestCase()
     // set buttonTheme to themeManager before using themeManager to get buttonTheme
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ButtonTheme>()));
+    auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
+    buttonTheme->height_ = DEFAULT_HEIGTH;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 }
 
 void ButtonPatternTestNg::TearDownTestCase()
@@ -866,5 +869,80 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest014, TestSize.Level1)
     EXPECT_EQ(textLayoutProp->GetHeightAdaptivePolicy(), Ace::TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
 
     FontWeightTest(buttonLayoutProperty, buttonPattern, textLayoutProp);
+}
+
+/**
+ * @tc.name: ButtonPatternTest015
+ * @tc.desc: Test HandleLabelCircleButtonConstraint and HandleLabelCircleButtonFrameSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPatternTestNg, ButtonPatternTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(ButtonType::CIRCLE);
+    testProperty.stateEffectValue = std::make_optional(STATE_EFFECT);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    EXPECT_NE(buttonPattern, nullptr);
+    auto buttonLayoutAlgorithm =
+        AccessibilityManager::DynamicCast<ButtonLayoutAlgorithm>(buttonPattern->CreateLayoutAlgorithm());
+    EXPECT_NE(buttonLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(buttonLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. update layoutWrapper.
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+
+    PaddingProperty noPadding = CreatePadding(ZERO, ZERO, ZERO, ZERO);
+    layoutWrapper->GetLayoutProperty()->UpdatePadding(noPadding);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to call HandleLabelCircleButtonConstraint and
+     * HandleLabelCircleButtonFrameSize.
+     * @tc.expected: step4. check whether the value of constraint size and frame szie are correct.
+     */
+    SizeF frameSize;
+    auto constraintSize =
+        buttonLayoutAlgorithm->HandleLabelCircleButtonConstraint(AccessibilityManager::RawPtr(layoutWrapper));
+    buttonLayoutAlgorithm->HandleLabelCircleButtonFrameSize(
+        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize);
+    EXPECT_EQ(constraintSize, SizeF(DEFAULT_HEIGTH.ConvertToPx(), DEFAULT_HEIGTH.ConvertToPx()));
+    EXPECT_EQ(frameSize, SizeF(DEFAULT_HEIGTH.ConvertToPx(), DEFAULT_HEIGTH.ConvertToPx()));
+    parentLayoutConstraint.selfIdealSize.SetHeight(BUTTON_HEIGHT);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    constraintSize =
+        buttonLayoutAlgorithm->HandleLabelCircleButtonConstraint(AccessibilityManager::RawPtr(layoutWrapper));
+    frameSize.SetHeight(BUTTON_HEIGHT);
+    buttonLayoutAlgorithm->HandleLabelCircleButtonFrameSize(
+        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize);
+    EXPECT_EQ(constraintSize, SizeF(BUTTON_HEIGHT, BUTTON_HEIGHT));
+    EXPECT_EQ(frameSize, SizeF(BUTTON_HEIGHT, BUTTON_HEIGHT));
+    parentLayoutConstraint.selfIdealSize.Reset();
+    parentLayoutConstraint.selfIdealSize.SetWidth(BUTTON_WIDTH);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+    constraintSize =
+        buttonLayoutAlgorithm->HandleLabelCircleButtonConstraint(AccessibilityManager::RawPtr(layoutWrapper));
+    frameSize.SetWidth(BUTTON_WIDTH);
+    buttonLayoutAlgorithm->HandleLabelCircleButtonFrameSize(
+        layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize);
+    EXPECT_EQ(constraintSize, SizeF(BUTTON_WIDTH, BUTTON_WIDTH));
+    EXPECT_EQ(frameSize, SizeF(BUTTON_WIDTH, BUTTON_WIDTH));
 }
 } // namespace OHOS::Ace::NG
