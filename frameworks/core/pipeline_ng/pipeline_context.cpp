@@ -147,13 +147,22 @@ void PipelineContext::FlushDirtyNodeUpdate()
         FrameReport::GetInstance().BeginFlushBuild();
     }
 
-    decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
-    for (const auto& node : dirtyNodes) {
-        if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
-            auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
-            ACE_SCOPED_TRACE("CustomNodeUpdate %s", customNode->GetJSViewName().c_str());
-            customNode->Update();
+    // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
+    // use maxFlushTimes to avoid dead cycle.
+    int maxFlushTimes = 3;
+    while (!dirtyNodes_.empty() && maxFlushTimes > 0) {
+        decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
+        for (const auto& node : dirtyNodes) {
+            if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
+                auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
+                ACE_SCOPED_TRACE("CustomNodeUpdate %s", customNode->GetJSViewName().c_str());
+                customNode->Update();
+            }
         }
+        --maxFlushTimes;
+    }
+    if (!dirtyNodes_.empty()) {
+        LOGW("FlushDirtyNodeUpdate 3 times, still has dirty nodes");
     }
 
     if (FrameReport::GetInstance().GetEnable()) {
