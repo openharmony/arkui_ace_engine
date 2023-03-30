@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/test/mock/pattern/picker/mock_picker_theme_manager.h"
+#include "core/components_ng/test/mock/theme/mock_theme_manager.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #undef private
 #undef protected
@@ -46,6 +47,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t HALF_INDEX_NUM = 5;
 constexpr int32_t INDEX_NUM = 10;
 constexpr int32_t CURRENT_INDEX = 8;
 constexpr int32_t CURRENT_END_INDEX = 3;
@@ -2155,5 +2157,55 @@ HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertyIsScrollable001, TestS
     textPickerColumnPattern_->SetOptions(contents);
     EXPECT_TRUE(textPickerAccessibilityProperty_->IsScrollable());
     DestroyTextPickerTestNgObject();
+}
+
+/**
+ * @tc.name: TextPickerAccessibilityPropertySetSpecificSupportAction001
+ * @tc.desc: Test SetSpecificSupportAction of textPickerAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerTestNg, TextPickerAccessibilityPropertySetSpecificSupportAction001, TestSize.Level1)
+{
+    InitTextPickerTestNg();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineContext::GetCurrentContext()->SetThemeManager(themeManager);
+    auto pickerTheme = AceType::MakeRefPtr<PickerTheme>();
+    ASSERT_NE(pickerTheme, nullptr);
+    pickerTheme->showOptionCount_ = INDEX_NUM;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(pickerTheme));
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(0);
+    NG::RangeContent content;
+    content.icon_ = EMPTY_TEXT;
+    content.text_ = TEXT_PICKER_CONTENT;
+    std::vector<NG::RangeContent> contents;
+    for (int index = 0; index <= HALF_INDEX_NUM; index++) {
+        contents.emplace_back(content);
+    }
+    textPickerColumnPattern_->SetOptions(contents);
+    textPickerColumnPattern_->SetCurrentIndex(1);
+    textPickerAccessibilityProperty_->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = textPickerAccessibilityProperty_->GetSupportAction();
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
+
+    for (int index = 0; index <= INDEX_NUM; index++) {
+        contents.emplace_back(content);
+    }
+    textPickerColumnPattern_->SetOptions(contents);
+    textPickerAccessibilityProperty_->ResetSupportAction();
+    supportAceActions = textPickerAccessibilityProperty_->GetSupportAction();
+    actions = 0;
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
 }
 } // namespace OHOS::Ace::NG

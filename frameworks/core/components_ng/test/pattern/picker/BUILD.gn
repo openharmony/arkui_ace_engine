@@ -126,6 +126,7 @@ ohos_unittest("picker_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_row_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/toss_animation_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",
