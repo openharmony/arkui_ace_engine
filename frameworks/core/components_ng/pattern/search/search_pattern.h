@@ -148,6 +148,8 @@ private:
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent();
     void HandleBlurEvent();
+    void InitClickEvent();
+    void HandleClickEvent(GestureEvent& info);
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;
@@ -169,6 +171,7 @@ private:
     RefPtr<InputEvent> searchButtonMouseEvent_;
     RefPtr<InputEvent> cancelButtonMouseEvent_;
     RefPtr<InputEvent> textFieldHoverEvent_ = nullptr;
+    RefPtr<ClickEvent> clickListener_;
 
     bool isHover_ = false;
     bool isCancelButtonHover_ = false;

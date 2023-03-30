@@ -119,4 +119,6 @@ void TextFieldPattern::HandleFocusEvent() {}
 
 void TextFieldPattern::InitSurfaceChangedCallback() {}
 void TextFieldPattern::InitSurfacePositionChangedCallback() {}
+
+void TextFieldPattern::HandleClickEvent(GestureEvent& info) {}
 } // namespace OHOS::Ace::NG
