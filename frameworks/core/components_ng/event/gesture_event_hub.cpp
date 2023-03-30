@@ -362,17 +362,26 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-    auto location = info.GetScreenLocation();
-    DragData dragData {{pixelMap_, -10, -10}, {}, 2, 1, 0, location.GetX(), location.GetY(), 0, false};
+    uint32_t width = pixelMap->GetWidth();
+    uint32_t height = pixelMap->GetHeight();
+    DragData dragData {{pixelMap_, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {},
+        static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
+        info.GetScreenLocation().GetY(), info.GetDeviceId(), false};
     auto callback = [](const DragNotifyMsg& notifyMessage) {};
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
     InteractionManager::GetInstance()->SetDragWindowVisible(true);
     if (ret != 0) {
+        LOGE("InteractionManager: drag start error");
+        return;
+    }
+    dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
+    if (!dragDropProxy_) {
         LOGE("HandleOnDragStart: drag start error");
         return;
     }
+    CHECK_NULL_VOID(dragDropProxy_);
+    dragDropProxy_->OnDragStart(info, dragDropInfo.extraInfo, GetFrameNode());
 #else
-
     if (dragDropInfo.customNode) {
         dragDropProxy_ = dragDropManager->CreateAndShowDragWindow(dragDropInfo.customNode, info);
     } else if (dragDropInfo.pixelMap) {
@@ -409,14 +418,10 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
     // Only the onDrop callback of dragged frame node is triggered.
     // The onDrop callback of target frame node is triggered in PipelineContext::OnDragEvent.
     if (eventHub->HasOnDrop()) {
-#ifdef ENABLE_DRAG_FRAMEWORK
-        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_SUCCESS, false);
-#else
         RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         event->SetX(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetX(), DimensionUnit::PX)));
         event->SetY(pipeline->ConvertPxToVp(Dimension(info.GetGlobalPoint().GetY(), DimensionUnit::PX)));
         eventHub->FireOnDrop(event, "");
-#endif // ENABLE_DRAG_FRAMEWORK
     }
 
     CHECK_NULL_VOID(dragDropProxy_);
