@@ -64,7 +64,7 @@ const Alignment ALIGNMENT = Alignment::BOTTOM_RIGHT;
 constexpr Dimension SLIDER_OUTSET_TRACK_THICKNRESS = Dimension(10.0);
 constexpr Dimension SLIDER_INSET_TRACK_THICKNRESS = Dimension(20.0);
 constexpr Dimension SLIDER_OUTSET_BLOCK_SIZE = Dimension(30.0);
-constexpr Dimension SLIDER_INSET_BLOCK_SIZE = Dimension(40.0);
+constexpr Dimension SLIDER_INSET_BLOCK_SIZE = Dimension(15.0);
 constexpr Dimension SLIDER_OUTSET_BLOCK_HOTSIZE = Dimension(50.0);
 constexpr Dimension SLIDER_INSET_BLOCK_HOTSIZE = Dimension(60.0);
 constexpr Dimension SLIDER_MODEL_NG_BLOCK_BORDER_WIDTH = Dimension(20.1);
@@ -95,6 +95,9 @@ const Dimension RADIUS_X = Dimension(20.1, DimensionUnit::PX);
 const Dimension RADIUS_Y = Dimension(20.1, DimensionUnit::PX);
 const Dimension SHAPE_WIDTH = 10.0_vp;
 const Dimension SHAPE_HEIGHT = 20.0_vp;
+constexpr float CONTENT_WIDTH = 100.0f;
+constexpr float CONTENT_HEIGHT = 50.0f;
+constexpr float HOT_BLOCK_SHADOW_WIDTH = 3.0f;
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
@@ -1653,6 +1656,65 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderPatternTest005
+ * @tc.desc: Test SliderPattern::OnDirtyLayoutWrapperSwap function.
+ *           Calculate the value of borderBlank_ in the INSET/OUTSET scenario.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider and prepare environment.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, sliderLayoutProperty);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto sliderLayoutAlgorithm = AceType::MakeRefPtr<SliderLayoutAlgorithm>();
+    ASSERT_NE(sliderLayoutAlgorithm, nullptr);
+    auto layoutAlgorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(sliderLayoutAlgorithm, false, false);
+    ASSERT_NE(layoutAlgorithmWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(layoutAlgorithmWrapper);
+
+    geometryNode->SetContentSize(SizeF(CONTENT_WIDTH, CONTENT_HEIGHT));
+    sliderTheme->outsetHotBlockShadowWidth_ = Dimension(HOT_BLOCK_SHADOW_WIDTH);
+    sliderTheme->insetHotBlockShadowWidth_ = Dimension(HOT_BLOCK_SHADOW_WIDTH);
+
+    /**
+     * @tc.steps: step2. Calculate in the INSET scenario.
+     * @tc.expected: borderBlank_ == block_width / 2 + shadow_width
+     */
+    sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::INSET);
+    sliderLayoutAlgorithm->trackThickness_ = SLIDER_INSET_TRACK_THICKNRESS.Value();
+    sliderLayoutAlgorithm->blockSize_ = SizeF(SLIDER_INSET_BLOCK_SIZE.Value(), SLIDER_INSET_BLOCK_SIZE.Value());
+    EXPECT_TRUE(sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
+    EXPECT_EQ(sliderPattern->borderBlank_, SLIDER_INSET_TRACK_THICKNRESS.Value() * HALF + HOT_BLOCK_SHADOW_WIDTH);
+
+    /**
+     * @tc.steps: step3. Calculate in the OUTSET scenario.
+     * @tc.expected: borderBlank_ == max(block_width, track_thickness) / 2 + shadow_width
+     */
+    sliderLayoutProperty->UpdateSliderMode(SliderModel::SliderMode::OUTSET);
+    sliderLayoutAlgorithm->trackThickness_ = SLIDER_OUTSET_TRACK_THICKNRESS.Value();
+    sliderLayoutAlgorithm->blockSize_ = SizeF(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_BLOCK_SIZE.Value());
+    EXPECT_TRUE(sliderPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, false, false));
+    EXPECT_EQ(sliderPattern->borderBlank_,
+        std::max(SLIDER_OUTSET_BLOCK_SIZE.Value(), SLIDER_OUTSET_TRACK_THICKNRESS.Value()) * HALF +
+            HOT_BLOCK_SHADOW_WIDTH);
+}
+
+/**
  * @tc.name: SliderLayoutAlgorithmTest001
  * @tc.desc: Test slider_layout_algorithm Measure and Layout(Reverse=false)
  * @tc.type: FUNC
@@ -1851,7 +1913,7 @@ HWTEST_F(SliderPatternTestNg, SliderLayoutAlgorithmTest004, TestSize.Level1)
     // No child node would be layout
     sliderLayoutAlgorithm.Layout(Referenced::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetContentOffset(), OffsetF());
-    EXPECT_NE(layoutWrapper->GetTotalChildCount(), 0);
+    EXPECT_EQ(layoutWrapper->GetTotalChildCount(), 0);
 }
 
 /**
