@@ -196,30 +196,31 @@ class SubscribableArrayHandler extends SubscribableHandler {
      * @param property 
      * @returns 
      */
+
     public get(target: Object, property: PropertyKey): any {
       let ret = super.get(target, property);
       if (this.arrFunctions.includes(property.toString()) &&
-          typeof ret === "function" && target["length"] > 0) {
+        typeof ret === "function" && Reflect.get(target, "length") > 0) {
         const self = this;
         const prop = property.toString();
-        return function() {
-            // execute original function with given arguments
-            ret.apply(this, arguments);
-            self.notifyObjectPropertyHasChanged(prop, this);
+        return function () {
+          // execute original function with given arguments
+          const val = ret.apply(this, arguments);
+          self.notifyObjectPropertyHasChanged(prop, this);
+          return val;
         }.bind(target) // bind "this" to target inside the function
       }
-  
+
       return ret;
     }
 }
-
 
 class SubscribableDateHandler extends SubscribableHandler {
 
     constructor(owningProperty: IPropertySubscriber) {
       super(owningProperty);
     }
-  
+
     /**
      * Get trap for Date type proxy
      * Functions that modify Date in-place are intercepted and replaced with a function
@@ -244,7 +245,6 @@ class SubscribableDateHandler extends SubscribableHandler {
       return ret;
     }
 }
-
 
 class ExtendableProxy {
   constructor(obj: Object, handler: SubscribableHandler) {
@@ -350,7 +350,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     if (!obj || typeof obj !== 'object') {
       return obj;
     }
-   
+
     let stack = new Array<{ name: string}>();
     let copiedObjects = new Map<Object, Object>();
   
