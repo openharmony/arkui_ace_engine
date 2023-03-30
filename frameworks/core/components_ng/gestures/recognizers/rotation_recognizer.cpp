@@ -85,7 +85,9 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     LOGD("rotation recognizer receives touch move event");
     touchPoints_[event.id] = event;
-    currentAngle_ = ComputeAngle();
+    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+        currentAngle_ = ComputeAngle();
+    }
     time_ = event.time;
 
     if (refereeState_ == RefereeState::DETECTING) {
