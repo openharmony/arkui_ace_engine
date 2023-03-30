@@ -53,25 +53,24 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
             if (ParseJsMedia(startIcon, startIconPath)) {
                 menuItemProps.startIcon = startIconPath;
             } else {
-                LOGW("startIcon is null");
+                LOGI("startIcon is null");
             }
 
             if (!ParseJsString(content, contentStr)) {
-                LOGE("content is null");
-                return;
+                LOGI("content is null");
             }
             menuItemProps.content = contentStr;
 
             if (ParseJsMedia(endIcon, endIconPath)) {
                 menuItemProps.endIcon = endIconPath;
             } else {
-                LOGW("endIcon is null");
+                LOGI("endIcon is null");
             }
 
             if (ParseJsString(label, labelStr)) {
                 menuItemProps.labelInfo = labelStr;
             } else {
-                LOGW("labelInfo is null");
+                LOGI("labelInfo is null");
             }
 
             auto builder = menuItemObj->GetProperty("builder");
