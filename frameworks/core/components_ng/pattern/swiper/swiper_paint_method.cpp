@@ -120,6 +120,9 @@ CanvasDrawFunction SwiperPaintMethod::GetContentDrawFunction(PaintWrapper* paint
 
 void SwiperPaintMethod::ClipPadding(PaintWrapper* paintWrapper, RSCanvas& canvas) const
 {
+    if (!needClipPadding_) {
+        return;
+    }
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     auto frameSize = geometryNode->GetPaddingSize();
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
