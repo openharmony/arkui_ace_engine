@@ -125,6 +125,7 @@ build_component_ng("pattern_ng") {
     "image/image_pattern.cpp",
     "image_animator/image_animator_pattern.cpp",
     "image_animator/image_animator_view.cpp",
+    "indexer/indexer_accessibility_property.cpp",
     "indexer/indexer_layout_algorithm.cpp",
     "indexer/indexer_layout_property.cpp",
     "indexer/indexer_pattern.cpp",
