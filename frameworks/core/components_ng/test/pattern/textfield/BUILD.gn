@@ -101,6 +101,7 @@ ohos_unittest("textfield_test_ng") {
     "$ace_root/test/unittest/core/pipeline/mock_overlay_manager.cpp",
 
     # self
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/key_event_handler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_controller.cpp",
