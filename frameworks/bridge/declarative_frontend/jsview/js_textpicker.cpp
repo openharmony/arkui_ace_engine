@@ -115,35 +115,35 @@ bool JSTextPickerParser::ParseTextArray(const JSRef<JSObject>& paramObject,
     auto getValue = paramObject->GetProperty("value");
     JSRef<JSArray> getRange = paramObject->GetProperty("range");
     std::vector<std::string> getRangeVector;
-    if (getRange->Length() == 0) {
-        return false;
-    }
-    if (!ParseJsStrArray(getRange, getRangeVector)) {
-        LOGE("parse str array error.");
-        return false;
-    }
-    result.clear();
-    for (const auto& text : getRangeVector) {
-        NG::RangeContent content;
-        content.icon_ = "";
-        content.text_ = text;
-        result.emplace_back(content);
-    }
-    kind = NG::TEXT;
-    if (!ParseJsString(getValue, value)) {
-        value = getRangeVector.front();
-    }
-    if (!ParseJsInteger(getSelected, selected) && !value.empty()) {
-        auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
-        if (valueIterator != getRangeVector.end()) {
-            selected = std::distance(getRangeVector.begin(), valueIterator);
+    if (getRange->Length() > 0) {
+        if (!ParseJsStrArray(getRange, getRangeVector)) {
+            LOGE("parse str array error.");
+            return false;
+        }
+
+        result.clear();
+        for (const auto& text : getRangeVector) {
+            NG::RangeContent content;
+            content.icon_ = "";
+            content.text_ = text;
+            result.emplace_back(content);
+        }
+        kind = NG::TEXT;
+        if (!ParseJsString(getValue, value)) {
+            value = getRangeVector.front();
+        }
+        if (!ParseJsInteger(getSelected, selected) && !value.empty()) {
+            auto valueIterator = std::find(getRangeVector.begin(), getRangeVector.end(), value);
+            if (valueIterator != getRangeVector.end()) {
+                selected = std::distance(getRangeVector.begin(), valueIterator);
+            }
+        }
+        if (selected < 0 || selected >= getRangeVector.size()) {
+            LOGE("selected is out of range");
+            selected = 0;
         }
     }
-
-    if (selected < 0 || selected >= getRangeVector.size()) {
-        LOGE("selected is out of range");
-        selected = 0;
-    }
+    
     return true;
 }
 
