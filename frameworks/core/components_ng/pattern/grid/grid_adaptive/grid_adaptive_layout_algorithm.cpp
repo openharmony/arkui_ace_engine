@@ -80,7 +80,7 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     mainCount_ = std::clamp(mainCount_, minCount, maxCount);
     crossCount_ = std::floor((idealSize.CrossSize(axis).value_or(Infinity<float>()) + crossGap) /
                              (gridCellSize_.CrossSize(axis) + crossGap));
-    auto maxCrossCount = std::max(static_cast<int32_t>(std::ceil(childrenCount / mainCount_)), 1);
+    auto maxCrossCount = std::max(static_cast<int32_t>(std::ceil(static_cast<float>(childrenCount) / mainCount_)), 1);
     crossCount_ = std::clamp(crossCount_, 1, maxCrossCount);
     displayCount_ = std::min(childrenCount, mainCount_ * crossCount_);
     LOGI("axis: %{public}d, main count: %{public}d, cross count: %{public}d, displayCount: %{public}d, gridCellSize: "
