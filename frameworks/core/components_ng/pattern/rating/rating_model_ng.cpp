@@ -55,25 +55,28 @@ void RatingModelNG::SetStepSize(double value)
 
 void RatingModelNG::SetForegroundSrc(const std::string& value, bool flag)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, ImageSourceInfo(value));
     if (flag) {
         ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, ForegroundImageSourceInfo, ImageSourceInfo(value));
     }
 }
 
 void RatingModelNG::SetSecondarySrc(const std::string& value, bool flag)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value));
     if (flag) {
         ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, SecondaryImageSourceInfo, ImageSourceInfo(value));
     }
 }
 
 void RatingModelNG::SetBackgroundSrc(const std::string& value, bool flag)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value));
     if (flag) {
         ACE_RESET_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo);
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, BackgroundImageSourceInfo, ImageSourceInfo(value));
     }
 }
 
