@@ -30,13 +30,13 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/frameworks/core/components_ng/image_provider/svg_image_object.cpp",
 
     # mock
-    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_flutter_image_provider.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_cache.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_loader.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_painter.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_source_info.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_image_utils.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_skia_image_data.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/image_provider/mock_skia_image_provider.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_animated_image.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_pixmap_image.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/render/mock_skia_image.cpp",
