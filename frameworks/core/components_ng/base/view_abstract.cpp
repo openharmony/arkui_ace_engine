@@ -466,7 +466,7 @@ void ViewAbstract::SetEnabled(bool enabled)
     }
 
     // The SetEnabled of focusHub must be after at eventHub
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }
