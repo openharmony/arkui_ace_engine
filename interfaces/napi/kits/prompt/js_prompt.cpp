@@ -102,8 +102,8 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         int32_t type = 0;
         std::vector<std::string> params;
         if (!ParseResourceParam(env, messageNApi, id, type, params)) {
-            LOGE("can not parse resource info from inout params.");
-            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            LOGE("can not parse resource info from input params.");
+            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, messageString)) {
@@ -130,8 +130,8 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         int32_t type = 0;
         std::vector<std::string> params;
         if (!ParseResourceParam(env, durationNApi, id, type, params)) {
-            LOGE("can not parse resource info from inout params.");
-            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            LOGE("can not parse resource info from input params.");
+            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, durationStr)) {
@@ -157,8 +157,8 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         int32_t type = 0;
         std::vector<std::string> params;
         if (!ParseResourceParam(env, bottomNApi, id, type, params)) {
-            LOGE("can not parse resource info from inout params.");
-            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            LOGE("can not parse resource info from input params.");
+            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, bottomString)) {
