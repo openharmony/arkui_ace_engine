@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
+#include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #undef private
 #undef protected
 
@@ -807,5 +808,77 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest004, TestSize.Level1)
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->FireChangeEvent(true);
+}
+
+/**
+ * @tc.name: DatePickerPaintTest001
+ * @tc.desc: Test GetForegroundDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPaintTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto datePickerPaintMethod = AceType::MakeRefPtr<DatePickerPaintMethod>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).Times(1);
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
+    canvasDrawFunction(rsCanvas);
+}
+
+/**
+ * @tc.name: DatePickerPaintTest002
+ * @tc.desc: Test GetForegroundDrawFunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerPaintTest002, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto pickerPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(pickerPaintProperty, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto datePickerPaintMethod = AceType::MakeRefPtr<DatePickerPaintMethod>();
+    datePickerPaintMethod->SetEnabled(false);
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, pickerPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    auto canvasDrawFunction = datePickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
+    canvasDrawFunction(rsCanvas);
 }
 } // namespace OHOS::Ace::NG
