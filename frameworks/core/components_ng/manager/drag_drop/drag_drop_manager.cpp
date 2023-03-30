@@ -25,7 +25,15 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "base/geometry/rect.h"
+#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
+#endif // ENABLE_DRAG_FRAMEWORK
+
 namespace OHOS::Ace::NG {
+#ifdef ENABLE_DRAG_FRAMEWORK
+using namespace Msdp::DeviceStatus;
+#endif // ENABLE_DRAG_FRAMEWORK
 namespace {
 int64_t g_proxyId = 0;
 } // namespace
@@ -285,7 +293,13 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         event->SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
         event->SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
         auto extraParams = eventHub->GetDragExtraParams(extraInfo, Point(globalX, globalY), DragEventType::DROP);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        InteractionManager::GetInstance()->SetDragWindowVisible(false);
+#endif // ENABLE_DRAG_FRAMEWORK
         eventHub->FireOnDrop(event, extraParams);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_SUCCESS, false);
+#endif // ENABLE_DRAG_FRAMEWORK
         break;
     }
 }
@@ -601,4 +615,12 @@ void DragDropManager::DestroyDragWindow()
     currentId_ = -1;
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+RefPtr<DragDropProxy> DragDropManager::CreateFrameworkDragDropProxy()
+{
+    isDragged_ = false;
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

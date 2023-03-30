@@ -72,6 +72,9 @@ public:
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
+#endif // ENABLE_DRAG_FRAMEWORK
 
     bool CheckDragDropProxy(int64_t id) const;
 

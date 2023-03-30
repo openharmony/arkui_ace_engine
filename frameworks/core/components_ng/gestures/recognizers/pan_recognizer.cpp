@@ -372,6 +372,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         if (!touchPoints_.empty()) {
             touchPoint = touchPoints_.begin()->second;
         }
+#ifdef ENABLE_DRAG_FRAMEWORK
+        info.SetPointerId(touchPoint.id);
+#endif // ENABLE_DRAG_FRAMEWORK
         info.SetGlobalPoint(globalPoint_)
             .SetLocalLocation(Offset(globalPoint_.GetX(), globalPoint_.GetY()) - coordinateOffset_);
         info.SetDeviceId(deviceId_);
