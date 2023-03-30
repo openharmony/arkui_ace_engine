@@ -130,6 +130,11 @@ OffsetF FrameNode::GetParentGlobalOffset() const
     return { 1.0f, 1.0f };
 }
 
+OffsetF FrameNode::GetPaintRectOffsetToPage() const
+{
+    return { 1.0f, 1.0f };
+}
+
 RefPtr<LayoutWrapper> FrameNode::CreateLayoutWrapper(bool forceMeasure, bool forceLayout)
 {
     return nullptr;

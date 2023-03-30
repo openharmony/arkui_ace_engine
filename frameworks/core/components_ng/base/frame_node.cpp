@@ -35,6 +35,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_wrapper.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -1283,6 +1284,21 @@ OffsetF FrameNode::GetPaintRectOffset() const
         parent = parent->GetAncestorNodeOfFrame();
     }
     return offset;
+}
+
+OffsetF FrameNode::GetPaintRectOffsetToPage() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    OffsetF offset = context->GetPaintRectWithTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
 }
 
 void FrameNode::OnNotifyMemoryLevel(int32_t level)
