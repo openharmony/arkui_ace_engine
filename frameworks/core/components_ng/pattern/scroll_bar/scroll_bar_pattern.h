@@ -59,17 +59,6 @@ public:
         return MakeRefPtr<ScrollEventHub>();
     }
 
-    void SetCurrentPosition(float currentOffset)
-    {
-        currentOffset = std::clamp(currentOffset, 0.0f, scrollableDistance_);
-        if (currentOffset_ == currentOffset || scrollableDistance_ <= 0.0f) {
-            return;
-        }
-        currentOffset_ = currentOffset;
-        auto host = GetHost();
-        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-    }
-
     float GetCurrentPosition() const
     {
         return currentOffset_;
@@ -95,6 +84,26 @@ public:
         return displayMode_;
     }
 
+    float GetControlDistance() const
+    {
+        return controlDistance_;
+    }
+
+    void SetControlDistance(float controlDistance)
+    {
+        controlDistance_ = controlDistance;
+    }
+
+    float GetScrollOffset() const
+    {
+        return scrollOffset_;
+    }
+
+    void SetScrollOffset(float scrollOffset)
+    {
+        scrollOffset_ = scrollOffset;
+    }
+
     bool IsAtTop() const;
     bool IsAtBottom() const;
     bool UpdateCurrentOffset(float offset, int32_t source);
@@ -118,6 +127,8 @@ private:
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
+    float controlDistance_ = 0.0f;
+    float scrollOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG
