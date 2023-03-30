@@ -444,8 +444,7 @@ HWTEST_F(XComponentPropertyTestNg, XComponentLayoutAlgorithmTest006, TestSize.Le
     EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_))), IsSurfaceValid())
         .WillOnce(Return(true))
         .WillOnce(Return(true))
-        .WillOnce(Return(false))
-        .WillOnce(Return(false));
+        .WillRepeatedly(Return(true));
     auto flag = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config); // IsSurfaceValid=true
     EXPECT_FALSE(flag);
     EXPECT_TRUE(pattern->hasXComponentInit_);
