@@ -35,6 +35,11 @@ public:
     int32_t OnSurfaceCreate(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
         const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want) override;
 
+    int32_t OnSurfaceReuse(uint64_t surfaceId,
+        const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want) override;
+
+    int32_t OnSurfaceRelease(uint64_t surfaceId) override;
+
     int32_t OnActionEvent(const std::string& action) override;
 
     int32_t OnError(const std::string& code, const std::string& msg) override;

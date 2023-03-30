@@ -48,6 +48,26 @@ public:
         const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
         const AAFwk::Want& want) = 0;
     /**
+     * @brief OnSurfaceReuse.
+     * @param surfaceId The surfaceNode ID.
+     * @param formJsInfo The formJsInfo.
+     * @param want The want.
+     */
+    virtual int32_t OnSurfaceReuse(uint64_t surfaceId,
+        const OHOS::AppExecFwk::FormJsInfo& formJsInfo,
+        const AAFwk::Want& want)
+    {
+        return ERR_OK;
+    }
+    /**
+     * @brief OnSurfaceRelease.
+     * @param surfaceId The surfaceNode ID.
+     */
+    virtual int32_t OnSurfaceRelease(uint64_t surfaceId)
+    {
+        return ERR_OK;
+    }
+    /**
      * @brief OnActionEvent.
      * @param action The action.
      */
@@ -67,6 +87,8 @@ public:
 
     enum Message : uint32_t {
         ON_SURFACE_CREATE = 1,
+        ON_SURFACE_REUSE,
+        ON_SURFACE_RELEASE,
         ON_ACTION_CREATE,
         ON_ERROR,
         ON_SURFACE_CHANGE,

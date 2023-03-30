@@ -32,31 +32,96 @@ int32_t FormRendererDelegateProxy::OnSurfaceCreate(
         HILOG_ERROR("%{public}s, failed to write interface token", __func__);
         return ERR_INVALID_VALUE;
     }
-
-    if (surfaceNode == nullptr || !surfaceNode->Marshalling(data)) {
+    if (surfaceNode == nullptr) {
+        HILOG_ERROR("%{public}s fail, surfaceNode is nullptr", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    if (!surfaceNode->Marshalling(data)) {
         HILOG_ERROR("%{public}s fail, write surfaceNode error", __func__);
         return ERR_INVALID_VALUE;
     }
-
     if (!data.WriteParcelable(&formJsInfo)) {
         HILOG_ERROR("%{public}s fail, write formJsInfo error", __func__);
         return ERR_INVALID_VALUE;
     }
-
     if (!data.WriteParcelable(&want)) {
         HILOG_ERROR("%{public}s fail, write want error", __func__);
         return ERR_INVALID_VALUE;
     }
+    HILOG_INFO("Proxy create surfaceNode:%{public}s", std::to_string(surfaceNode->GetId()).c_str());
 
     MessageParcel reply;
     MessageOption option;
     auto remoteProxy = Remote();
     if (!remoteProxy) {
-        HILOG_ERROR("Send surfaceNode failed, ipc remoteobj is null");
+        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
         return IPC_PROXY_ERR;
     }
     int32_t error = remoteProxy->SendRequest(
         static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t FormRendererDelegateProxy::OnSurfaceReuse(uint64_t surfaceId,
+    const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    data.WriteUint64(surfaceId);
+    if (!data.WriteParcelable(&formJsInfo)) {
+        HILOG_ERROR("%{public}s fail, write formJsInfo error", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    if (!data.WriteParcelable(&want)) {
+        HILOG_ERROR("%{public}s fail, write want error", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    HILOG_INFO("Proxy reuse surfaceNode:%{public}s", std::to_string(surfaceId).c_str());
+
+    MessageParcel reply;
+    MessageOption option;
+    auto remoteProxy = Remote();
+    if (!remoteProxy) {
+        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
+        return IPC_PROXY_ERR;
+    }
+    int32_t error = remoteProxy->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
+int32_t FormRendererDelegateProxy::OnSurfaceRelease(uint64_t surfaceId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    data.WriteUint64(surfaceId);
+    HILOG_INFO("Proxy release surfaceNode:%{public}s", std::to_string(surfaceId).c_str());
+
+    MessageParcel reply;
+    MessageOption option;
+    auto remoteProxy = Remote();
+    if (!remoteProxy) {
+        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
+        return IPC_PROXY_ERR;
+    }
+    int32_t error = remoteProxy->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_RELEASE), data, reply, option);
     if (error != NO_ERROR) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
         return error;

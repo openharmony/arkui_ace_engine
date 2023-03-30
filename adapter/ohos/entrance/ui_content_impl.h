@@ -128,7 +128,7 @@ private:
 
     // ITouchOutsideListener is used for touching out of hot areas of window.
     OHOS::sptr<OHOS::Rosen::ITouchOutsideListener> touchOutsideListener_ = nullptr;
-    
+
     // ArkTS Form
     bool isFormRender_ = false;
     bool isFormRenderInit_ = false;

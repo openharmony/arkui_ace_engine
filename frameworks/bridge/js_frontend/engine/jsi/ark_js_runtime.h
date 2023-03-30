@@ -197,7 +197,6 @@ public:
 private:
     EcmaVM* vm_ = nullptr;
     int32_t instanceId_ = 0;
-    std::vector<PandaFunctionData*> dataList_;
     LOG_PRINT print_ { nullptr };
     UncaughtExceptionCallback uncaughtErrorHandler_ { nullptr };
     std::string libPath_ {};
@@ -215,8 +214,8 @@ private:
 
 class PandaFunctionData {
 public:
-    PandaFunctionData(shared_ptr<ArkJSRuntime> runtime, RegisterFunctionType func)
-        : runtime_(std::move(runtime)), func_(std::move(func))
+    PandaFunctionData(std::weak_ptr<ArkJSRuntime> runtime, RegisterFunctionType func)
+        : runtime_(runtime), func_(std::move(func))
     {}
 
     ~PandaFunctionData() = default;
@@ -226,7 +225,7 @@ public:
 
 private:
     Local<JSValueRef> Callback(panda::JsiRuntimeCallInfo* info) const;
-    shared_ptr<ArkJSRuntime> runtime_;
+    std::weak_ptr<ArkJSRuntime> runtime_;
     RegisterFunctionType func_;
     friend Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info);
 };
