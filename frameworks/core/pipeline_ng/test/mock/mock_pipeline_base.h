@@ -95,6 +95,9 @@ public:
     MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
 
     static RefPtr<MockPipelineBase> pipeline_;
+
+protected:
+    double dipScale_ = 1.0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H

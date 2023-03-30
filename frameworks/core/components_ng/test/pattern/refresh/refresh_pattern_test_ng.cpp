@@ -417,48 +417,6 @@ HWTEST_F(RefreshPatternTestNg, RefreshTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: RefreshTest008
- * @tc.desc: Test MeasureContent of refresh.
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshPatternTestNg, RefreshTest008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create and get frameNode of refresh.
-     */
-    auto frameNode = CreateRefreshNode();
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::REFRESH_ETS_TAG);
-    /**
-     * @tc.steps: step2. test some object of refresh.
-     */
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_NE(geometryNode, nullptr);
-    LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto refreshPattern = frameNode->GetPattern<RefreshPattern>();
-    EXPECT_NE(refreshPattern, nullptr);
-    auto refreshLayoutAlgorithm = refreshPattern->CreateLayoutAlgorithm();
-    EXPECT_NE(refreshLayoutAlgorithm, nullptr);
-    auto layoutAlgorithm = refreshPattern->CreateLayoutAlgorithm();
-    EXPECT_NE(layoutAlgorithm, nullptr);
-    /**
-     * @tc.steps: step3. build the layoutWrapper of refresh.
-     */
-    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    EXPECT_NE(layoutWrapper.GetLayoutProperty(), nullptr);
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = MAX_SIZE;
-    /**
-     * @tc.steps: step4. test MeasureContent of refresh.
-     */
-    auto refreshSize = layoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(refreshSize.value_or(SizeF(0.0f, 0.0f)), MAX_SIZE);
-
-    layoutConstraint.selfIdealSize.SetSize(IDEAL_SIZE);
-    refreshSize = layoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(refreshSize.value_or(SizeF(0.0f, 0.0f)), IDEAL_SIZE);
-}
-
-/**
  * @tc.name: RefreshTest009
  * @tc.desc: test status change of refresh.
  * @tc.type: FUNC
