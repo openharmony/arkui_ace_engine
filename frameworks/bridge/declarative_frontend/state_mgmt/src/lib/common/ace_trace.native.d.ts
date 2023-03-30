@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,15 @@
  * limitations under the License.
  */
 
-class stateMgmtConsole {
-    public static log (...args : any) : void {
-        console.log(...args);
-    }
-    public static debug(...args : any) : void {
-        console.debug(...args);
-    }
-    public static info (...args : any) : void {
-        console.info(...args);
-    }
-    public static warn (...args : any) : void  {
-        console.warn(...args);
-    }
-    public static error (...args : any) : void {
-        console.error(...args);
-    }
+/**
+ * AceTrace implemented onm C++ Side
+ * 
+ * non-public API
+ */
+
+declare class AceTrace {
+  begin(...args : any) : void;
+  end() : void;
 }
+
+declare const aceTrace : AceTrace;

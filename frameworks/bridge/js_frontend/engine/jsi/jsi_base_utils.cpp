@@ -612,15 +612,19 @@ std::string ParseLogContent(const std::vector<std::string>& params)
     }
     switch (flag) {
         case 0:
+            ret += " ";
             for (int32_t i = 1; i < size; ++i) {
                 ret += params[i];
-                break;
+                if (i != size - 1) {
+                    ret += " ";
+                }
             }
+            break;
         case 1:
             for (int32_t i = 2; i < size; ++i) {
                 ret += params[i];
-                break;
             }
+            break;
         default:
             break;
     }
@@ -769,6 +773,27 @@ shared_ptr<JsValue> JsiBaseUtils::JsErrorLogPrint(const shared_ptr<JsRuntime>& r
     const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
 {
     return JsLogPrint(runtime, JsLogLevel::ERROR, argv, argc);
+}
+
+std::unique_ptr<AceScopedTrace> JsiBaseUtils::aceScopedTrace_ = nullptr;
+
+shared_ptr<JsValue> JsiBaseUtils::JsTraceBegin(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        std::string traceName = GetLogContent(runtime, argv, argc);
+        aceScopedTrace_ = std::make_unique<AceScopedTrace>(traceName.c_str());
+    }
+    return runtime->NewUndefined();
+}
+
+shared_ptr<JsValue> JsiBaseUtils::JsTraceEnd(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (SystemProperties::GetDebugEnabled()) {
+        aceScopedTrace_.reset();
+    }
+    return runtime->NewUndefined();
 }
 
 std::string GetLogContent(NativeEngine* nativeEngine, NativeCallbackInfo* info)

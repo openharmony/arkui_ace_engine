@@ -64,6 +64,12 @@ void CustomNode::Render()
 
 void CustomNode::AdjustLayoutWrapperTree(const RefPtr<LayoutWrapper>& parent, bool forceMeasure, bool forceLayout)
 {
+    if (parent->GetHostTag() != V2::TAB_CONTENT_ITEM_ETS_TAG) {
+        Build();
+        UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
+        return;
+    }
+
     if (!renderFunction_) {
         UINode::AdjustLayoutWrapperTree(parent, forceMeasure, forceLayout);
         return;

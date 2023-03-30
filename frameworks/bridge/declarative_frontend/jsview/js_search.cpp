@@ -89,6 +89,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSearch>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
     JSClass<JSSearch>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
+    JSClass<JSSearch>::StaticMethod("requestKeyboardOnFocus", &JSSearch::RequestKeyboardOnFocus);
     JSClass<JSSearch>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSSearch>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSearch>::StaticMethod("onCopy", &JSSearch::SetOnCopy);
@@ -139,6 +140,11 @@ void JSSearch::Create(const JSCallbackInfo& info)
         JSInteractableView::SetFocusable(true);
         JSInteractableView::SetFocusNode(true);
     }
+}
+
+void JSSearch::RequestKeyboardOnFocus(bool needToRequest)
+{
+    SearchModel::GetInstance()->RequestKeyboardOnFocus(needToRequest);
 }
 
 void JSSearch::SetSearchButton(const JSCallbackInfo& info)

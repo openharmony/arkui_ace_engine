@@ -29,20 +29,6 @@ void RosenRenderWeb::Update(const RefPtr<Component>& component)
     if (GetRSNode()) {
         GetRSNode()->SetBackgroundColor(Color::WHITE.GetValue());
     }
-
-    if (needUpdateWeb_) {
-        auto pipelineContext = context_.Upgrade();
-        if (!pipelineContext) {
-            return;
-        }
-        pipelineContext->SetWebPaintCallback([weak = AceType::WeakClaim(this)]() {
-            auto renderWeb = weak.Upgrade();
-            if (renderWeb) {
-                renderWeb->MarkNeedRender();
-            }
-        });
-        needUpdateWeb_ = false;
-    }
 }
 
 void RosenRenderWeb::PerformLayout()
@@ -77,17 +63,8 @@ void RosenRenderWeb::OnAttachContext()
 
 void RosenRenderWeb::Paint(RenderContext& context, const Offset& offset)
 {
-    auto pipelineContext = context_.Upgrade();
-    if (!pipelineContext) {
-        LOGE("context null");
-        return;
-    }
-    if (pipelineContext->GetIsDragStart()) {
-        drawSize_ = Size(1.0, 1.0);
-    } else {
-        drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
-        drawSizeCache_ = drawSize_;
-    }
+    drawSize_ = Size(GetLayoutParam().GetMaxSize().Width(), GetLayoutParam().GetMaxSize().Height());
+    drawSizeCache_ = drawSize_;
     if (drawSize_.Width() == Size::INFINITE_SIZE || drawSize_.Height() == Size::INFINITE_SIZE ||
         drawSize_.Width() == 0 || drawSize_.Height() == 0) {
         LOGE("Web drawSize height or width is invalid");
@@ -127,7 +104,7 @@ void RosenRenderWeb::SyncGeometryProperties()
 
 std::shared_ptr<RSNode> RosenRenderWeb::CreateRSNode() const
 {
-    struct OHOS::Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderWeb"};
+    struct OHOS::Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = "RosenRenderWeb" };
     return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
 }
 

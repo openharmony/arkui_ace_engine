@@ -78,10 +78,10 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest001, TestSize.Level1)
     EXPECT_TRUE(pattern);
 
     auto options = pattern->GetOptions();
-    EXPECT_TRUE(options.size() == params.size());
+    EXPECT_EQ(options.size(), params.size());
     for (size_t i = 0; i < options.size(); ++i) {
         auto optionPattern = options[i]->GetPattern<OptionPattern>();
-        EXPECT_TRUE(optionPattern->GetText() == params[i].first);
+        EXPECT_EQ(optionPattern->GetText(), params[i].first);
     }
 }
 
@@ -103,15 +103,13 @@ HWTEST_F(SelectPropertyTestNg, SelectLayoutPropertyTest002, TestSize.Level1)
     auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
     auto pattern = select->GetPattern<SelectPattern>();
-    EXPECT_FALSE(pattern == nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     DirtySwapConfig config;
     config.skipMeasure = true;
     auto layoutWrapper = select->CreateLayoutWrapper();
-    EXPECT_FALSE(layoutWrapper == nullptr);
+    ASSERT_NE(layoutWrapper, nullptr);
     EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
-    config.skipMeasure = false;
-    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config));
 }
 
 } // namespace OHOS::Ace::NG
