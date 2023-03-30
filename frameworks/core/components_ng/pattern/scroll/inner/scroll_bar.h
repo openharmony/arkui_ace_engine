@@ -246,8 +246,10 @@ public:
 
     void SetPositionMode(PositionMode positionMode)
     {
-        positionMode_ = positionMode;
-        positionModeUpdate_ = true;
+        if (positionMode_ != positionMode) {
+            positionModeUpdate_ = true;
+            positionMode_ = positionMode;
+        }
     }
 
     void SetShapeMode(ShapeMode shapeMode)
