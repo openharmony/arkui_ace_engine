@@ -141,8 +141,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto geometryNode = contentWrapper->GetGeometryNode();
 
     auto contentChildSize = contentNode->GetChildren().size();
-    if (navigationLayoutProperty->GetDestinationChange().value_or(false) ||
-        (contentChildSize != 0 && navigationLayoutProperty->GetNavigationMode() == NavigationMode::STACK)) {
+    if (contentChildSize != 0 && navigationLayoutProperty->GetNavigationMode() == NavigationMode::STACK &&
+        navigationLayoutProperty->GetDestinationChange().value_or(false)) {
         auto contentOffset = OffsetT<float>(0.0f, 0.0f);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();

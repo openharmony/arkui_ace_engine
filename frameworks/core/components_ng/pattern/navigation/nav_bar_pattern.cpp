@@ -154,7 +154,7 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
 
-    if (!hostNode->GetTitle() && !hostNode->GetSubtitle() && !hostNode->GetMenu()) {
+    if (!hostNode->GetTitle() && !hostNode->GetSubtitle() && !hostNode->GetMenu() && !hostNode->GetBackButton()) {
         return;
     }
     titleBarLayoutProperty->UpdateTitleMode(navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE));
