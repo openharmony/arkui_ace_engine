@@ -320,7 +320,7 @@ public:
 
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override
     {
-        ViewAbstract::SetTranslate(NG::Vector3F(x.ConvertToPx(), y.ConvertToPx(), z.ConvertToPx()));
+        ViewAbstract::SetTranslate(TranslateOptions(x, y, z));
     }
 
     void SetRotate(float x, float y, float z, float angle) override

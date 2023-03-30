@@ -197,9 +197,9 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 
     if (propTransformTranslate.has_value()) {
         auto jsonValue = JsonUtil::Create(true);
-        jsonValue->Put("x", std::to_string(propTransformTranslate->x).c_str());
-        jsonValue->Put("y", std::to_string(propTransformTranslate->y).c_str());
-        jsonValue->Put("z", std::to_string(propTransformTranslate->z).c_str());
+        jsonValue->Put("x", propTransformTranslate->x.ToString().c_str());
+        jsonValue->Put("y", propTransformTranslate->y.ToString().c_str());
+        jsonValue->Put("z", propTransformTranslate->z.ToString().c_str());
         json->Put("translate", jsonValue);
     } else {
         json->Put("translate", JsonUtil::Create(true));
