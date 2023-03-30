@@ -1649,7 +1649,7 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadInterceptEvent(eventInfo);
-    obj->SetPropertyObject("request", requestObj);
+    obj->SetPropertyObject("data", requestObj);
     return JSRef<JSVal>::Cast(obj);
 }
 
