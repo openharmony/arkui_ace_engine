@@ -4325,6 +4325,17 @@ void WebDelegate::OnAudioStateChanged(bool audible)
     }
 }
 
+void WebDelegate::OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    auto touchHandleSize = theme->GetHandleHotZoneRadius().ConvertToPx();
+    hotZone.width = touchHandleSize;
+    hotZone.height = touchHandleSize;
+}
+
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
     if (isRefreshPixelMap_) {
@@ -4336,29 +4347,32 @@ RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
-void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
-        nweb_->OnTouchPress(id, x, y);
+        nweb_->OnTouchPress(id, x, y, from_overlay);
     }
 }
 
-void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
-        nweb_->OnTouchRelease(id, x, y);
+        nweb_->OnTouchRelease(id, x, y, from_overlay);
     }
 }
 
-void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnTouchMove(id, x, y);
+        nweb_->OnTouchMove(id, x, y, from_overlay);
     }
 }
 
