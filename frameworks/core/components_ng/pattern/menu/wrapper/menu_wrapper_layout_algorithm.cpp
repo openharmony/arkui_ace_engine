@@ -35,15 +35,17 @@ void MenuWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         constraint.value(), Axis::FREE, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 
-    auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    menu->Measure(layoutConstraint);
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Measure(layoutConstraint);
+    }
 }
 
 void MenuWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto menu = layoutWrapper->GetOrCreateChildByIndex(0);
-    menu->Layout();
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        child->Layout();
+    }
 }
 
 } // namespace OHOS::Ace::NG

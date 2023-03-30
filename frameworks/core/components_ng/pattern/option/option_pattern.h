@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "base/memory/referenced.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -127,6 +128,16 @@ public:
 
     void PlayBgColorAnimation(bool isHoverChange = true);
 
+    void SetMenu(const WeakPtr<FrameNode>& menuWeak)
+    {
+        menuWeak_ = menuWeak;
+    }
+
+    const WeakPtr<FrameNode>& GetMenu() const
+    {
+        return menuWeak_;
+    }
+
 private:
     void OnModifyDone() override;
 
@@ -148,6 +159,7 @@ private:
 
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
+    WeakPtr<FrameNode> menuWeak_;
     RefPtr<FrameNode> text_ = nullptr;
     RefPtr<TextTheme> textTheme_ = nullptr;
     RefPtr<SelectTheme> selectTheme_ = nullptr;

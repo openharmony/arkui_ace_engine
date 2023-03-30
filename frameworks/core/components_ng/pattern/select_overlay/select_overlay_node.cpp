@@ -39,11 +39,15 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-
 constexpr char BUTTON_COPY_ALL[] = "textoverlay.select_all";
 constexpr char BUTTON_CUT[] = "textoverlay.cut";
 constexpr char BUTTON_COPY[] = "textoverlay.copy";
 constexpr char BUTTON_PASTE[] = "textoverlay.paste";
+
+constexpr int32_t OPTION_INDEX_CUT = 0;
+constexpr int32_t OPTION_INDEX_COPY = 1;
+constexpr int32_t OPTION_INDEX_PASTE = 2;
+constexpr int32_t OPTION_INDEX_COPY_ALL = 3;
 
 RefPtr<FrameNode> BuildButton(
     const std::string& data, const std::function<void()>& callback, int32_t overlayId, bool isSelectAll = false)
@@ -93,6 +97,42 @@ RefPtr<FrameNode> BuildButton(
     return button;
 }
 
+std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    std::vector<OptionParam> params;
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste);
+    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll);
+    return params;
+}
+
+void SetOptionDisable(const RefPtr<FrameNode>& option)
+{
+    CHECK_NULL_VOID(option);
+    auto optionEventHub = option->GetEventHub<OptionEventHub>();
+    CHECK_NULL_VOID(optionEventHub);
+    optionEventHub->SetEnabled(false);
+}
+
+void SetOptionsAction(const std::shared_ptr<SelectOverlayInfo>& info, const std::vector<RefPtr<FrameNode>>& options)
+{
+    if (options.empty()) {
+        return;
+    }
+    if (!info->menuInfo.showCut) {
+        SetOptionDisable(options[OPTION_INDEX_CUT]);
+    }
+    if (!info->menuInfo.showCopy) {
+        SetOptionDisable(options[OPTION_INDEX_COPY]);
+    }
+    if (!info->menuInfo.showPaste) {
+        SetOptionDisable(options[OPTION_INDEX_PASTE]);
+    }
+    if (!info->menuInfo.showCopyAll) {
+        SetOptionDisable(options[OPTION_INDEX_COPY_ALL]);
+    }
+}
 } // namespace
 
 SelectOverlayNode::SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
@@ -194,52 +234,24 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
 
 RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info)
 {
-    std::vector<OptionParam> params;
-    params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_CUT), info->menuCallback.onCut);
-    params.emplace_back(
-        Localization::GetInstance()->GetEntryLetters(BUTTON_COPY), info->menuCallback.onCopy);
-    params.emplace_back(
-        Localization::GetInstance()->GetEntryLetters(BUTTON_PASTE), info->menuCallback.onPaste);
-    params.emplace_back(
-        Localization::GetInstance()->GetEntryLetters(BUTTON_COPY_ALL), info->menuCallback.onSelectAll);
+    std::vector<OptionParam> params = GetOptionsParams(info);
 
     auto menuWrapper = MenuView::Create(std::move(params), -1);
+    CHECK_NULL_RETURN(menuWrapper, nullptr);
     auto menu = DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     menuWrapper->RemoveChild(menu);
     menuWrapper.Reset();
     // set click position to menu
+    CHECK_NULL_RETURN(menu, nullptr);
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateMenuOffset(info->rightClickOffset);
 
-    if (!info->menuInfo.showCut) {
-        auto cutOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
-        auto optionEventHub = cutOption->GetEventHub<OptionEventHub>();
-        if (optionEventHub) {
-            optionEventHub->SetEnabled(false);
-        }
-    }
-    if (!info->menuInfo.showCopy) {
-        auto copyOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(1));
-        auto optionEventHub = copyOption->GetEventHub<OptionEventHub>();
-        if (optionEventHub) {
-            optionEventHub->SetEnabled(false);
-        }
-    }
-    if (!info->menuInfo.showPaste) {
-        auto pasteOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(2));
-        auto optionEventHub = pasteOption->GetEventHub<OptionEventHub>();
-        if (optionEventHub) {
-            optionEventHub->SetEnabled(false);
-        }
-    }
-    if (!info->menuInfo.showCopyAll) {
-        auto selectAllOption = DynamicCast<FrameNode>(menu->GetChildAtIndex(3));
-        auto optionEventHub = selectAllOption->GetEventHub<OptionEventHub>();
-        if (optionEventHub) {
-            optionEventHub->SetEnabled(false);
-        }
-    }
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, nullptr);
+    auto options = menuPattern->GetOptions();
+    SetOptionsAction(info, options);
+
     menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ElementRegister::GetInstance()->AddUINode(menu);
 

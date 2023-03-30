@@ -37,6 +37,7 @@ public:
         auto value = MakeRefPtr<MenuLayoutProperty>();
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propMenuOffset_ = CloneMenuOffset();
+        value->propTargetSize_ = CloneTargetSize();
 
         return value;
     }
@@ -45,36 +46,15 @@ public:
     {
         LayoutProperty::Reset();
         ResetMenuOffset();
+        ResetTargetSize();
     }
 
     // target frameNode that this menu belongs to
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuOffset, NG::OffsetF, PROPERTY_UPDATE_MEASURE);
+    // target frameNode size, null for click show menu
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TargetSize, NG::SizeF, PROPERTY_UPDATE_MEASURE);
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
-    {
-        LayoutProperty::ToJsonValue(json);
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto options = host->GetChildren();
-        auto jsonDashArray = JsonUtil::CreateArray(true);
-        int index = 0;
-        // output format
-        // {
-        //     "bindMenu" : [
-        //         <index> : <value>,
-        //         ...
-        //     ]
-        // }
-        for (auto && option : options) {
-            auto pattern = DynamicCast<FrameNode>(option)->GetPattern<OptionPattern>();
-            CHECK_NULL_VOID(pattern);
-            auto jsonValue = JsonUtil::Create(true);
-
-            jsonValue->Put("value", pattern->GetText().c_str());
-            jsonDashArray->Put(std::to_string(index++).c_str(), jsonValue);
-        }
-        json->Put("bindMenu", jsonDashArray);
-    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutProperty);
 };
