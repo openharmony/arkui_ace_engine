@@ -107,6 +107,9 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         } else {
             LOGD("ProcessMouseEvent");
             view->ProcessMouseEvent(pointerEvent);
+#ifdef ENABLE_DRAG_FRAMEWORK
+            view->ProcessDragEvent(pointerEvent);
+#endif // ENABLE_DRAG_FRAMEWORK
         }
     } else {
         // touch event
