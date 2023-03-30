@@ -166,7 +166,7 @@ void LayoutWrapper::DidLayout(const RefPtr<LayoutWrapper>& root)
         LOGD("GeometryTransition: node%{public}d did layout", host->GetId());
     }
 
-    for (const auto& child : children_) {
+    for (auto&& child : GetAllChildrenWithBuild(false)) {
         child->DidLayout(root);
     }
 
