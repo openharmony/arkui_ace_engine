@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -30,6 +31,26 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
+    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
+        auto buttonNode = backButtonNode->GetChildren().front();
+        CHECK_NULL_VOID(buttonNode);
+        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(buttonNode->GetChildren().front());
+        CHECK_NULL_VOID(backButtonImageNode);
+        auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(backButtonImageLayoutProperty);
+        auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+        CHECK_NULL_VOID(navBarNode);
+        auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+        CHECK_NULL_VOID(navBarLayoutProperty);
+        auto hideBackButton = navBarLayoutProperty->GetHideBackButtonValue(false);
+        if (hideBackButton) {
+            backButtonImageLayoutProperty->UpdateVisibility(VisibleType::GONE);
+        } else {
+            backButtonImageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        }
+        backButtonImageNode->MarkModifyDone();
+        return;
+    }
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
 
