@@ -44,37 +44,23 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 class CanvasPaintMethodTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
 private:
     static RefPtr<CanvasPaintMethod> paintMethod_;
 };
 
 RefPtr<CanvasPaintMethod> CanvasPaintMethodTestNg::paintMethod_ = nullptr;
 
-void CanvasPaintMethodTestNg::SetUpTestCase()
+void CanvasPaintMethodTestNg::SetUpTestSuite()
 {
-    GTEST_LOG_(INFO) << "CanvasPaintMethodTestNg SetUpTestCase";
     RefPtr<PipelineBase> pipelineContext = AceType::MakeRefPtr<MockPipelineBase>();
     paintMethod_ = AceType::MakeRefPtr<CanvasPaintMethod>(pipelineContext);
 }
 
-void CanvasPaintMethodTestNg::TearDownTestCase()
+void CanvasPaintMethodTestNg::TearDownTestSuite()
 {
-    GTEST_LOG_(INFO) << "CanvasPaintMethodTestNg TearDownTestCase";
-}
-
-void CanvasPaintMethodTestNg::SetUp()
-{
-    GTEST_LOG_(INFO) << "CanvasPaintMethodTestNg SetUp";
-}
-
-void CanvasPaintMethodTestNg::TearDown()
-{
-    GTEST_LOG_(INFO) << "CanvasPaintMethodTestNg TearDown";
+    paintMethod_ =  nullptr;
 }
 
 /**
