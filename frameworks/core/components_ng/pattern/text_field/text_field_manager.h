@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 #include "core/common/manager_interface.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_field/key_event_handler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -52,10 +53,7 @@ public:
         onFocusTextField_ = onFocusTextField;
     }
 
-    void ClearOnFocusTextField()
-    {
-        onFocusTextField_ = nullptr;
-    }
+    void ClearOnFocusTextField();
 
     bool ResetSlidingPanelParentHeight();
 
@@ -70,10 +68,13 @@ public:
         return height_;
     }
 
+    const RefPtr<KeyEventHandler>& GetKeyEventHandler();
+
 private:
     bool hasMove_ = false;
     Offset position_;
     float height_ = 0.0f;
+    RefPtr<KeyEventHandler> keyEventHandler_;
     WeakPtr<Pattern> onFocusTextField_;
 };
 

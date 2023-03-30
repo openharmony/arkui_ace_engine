@@ -293,7 +293,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, false);
 
-    return textFieldPattern->HandleKeyEvent(event);
+    return textFieldPattern->OnKeyEvent(event);
 }
 
 void SearchPattern::PaintFocusState()

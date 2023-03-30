@@ -508,15 +508,32 @@ public:
     uint32_t GetMaxLength() const;
     std::string GetInputFilter() const;
 
-    bool HandleKeyEvent(const KeyEvent& keyEvent);
-    void ParseAppendValue(KeyCode keycode, std::string& appendElement);
+    void HandleSelectionUp();
+    void HandleSelectionDown();
+    void HandleSelectionLeft();
+    void HandleSelectionRight();
+
+    void HandleOnUndoAction();
+    void HandleOnRedoAction();
+    void HandleOnSelectAll();
+    void HandleOnCopy();
+    void HandleOnPaste();
+    void HandleOnCut();
+    bool OnKeyEvent(const KeyEvent& event);
+    
+    TextInputType GetKeyboard()
+    {
+        return keyboard_;
+    }
+    TextInputAction GetAction()
+    {
+        return action_;
+    }
 
 private:
     void HandleBlurEvent();
     bool HasFocus() const;
     void HandleFocusEvent();
-    bool OnKeyEvent(const KeyEvent& event);
-    void HandleDirectionalKey(const KeyEvent& keyEvent);
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
@@ -551,17 +568,6 @@ private:
     void UpdateCaretByRightClick();
 
     void AfterSelection();
-    void HandleSelectionUp();
-    void HandleSelectionDown();
-    void HandleSelectionLeft();
-    void HandleSelectionRight();
-
-    void HandleOnUndoAction();
-    void HandleOnRedoAction();
-    void HandleOnSelectAll();
-    void HandleOnCopy();
-    void HandleOnPaste();
-    void HandleOnCut();
 
     void FireEventHubOnChange(const std::string& text);
     void FireOnChangeIfNeeded();

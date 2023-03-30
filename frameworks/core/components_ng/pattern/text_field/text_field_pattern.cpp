@@ -920,6 +920,11 @@ void TextFieldPattern::HandleBlurEvent()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     LOGI("TextField %{public}d OnBlur", host->GetId());
+    auto context = PipelineContext::GetCurrentContext();
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    if (textFieldManager) {
+        textFieldManager->ClearOnFocusTextField();
+    }
     StopTwinkling();
     CloseKeyboard(true);
     auto pos = static_cast<int32_t>(textEditingValue_.GetWideText().length());
@@ -936,105 +941,12 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
     caretUpdateType_ = CaretUpdateType::EVENT;
     CloseSelectOverlay();
-    return HandleKeyEvent(event);
-}
-
-void TextFieldPattern::HandleDirectionalKey(const KeyEvent& keyEvent)
-{
-    bool updateSelection = false;
-    if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_UP }) ||
-        keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_UP })) {
-        HandleSelectionUp();
-        updateSelection = true;
-    } else if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_DOWN }) ||
-               keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_DOWN })) {
-        HandleSelectionDown();
-        updateSelection = true;
-    } else if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_LEFT }) ||
-               keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_LEFT })) {
-        HandleSelectionLeft();
-        updateSelection = true;
-    } else if (keyEvent.IsKey({ KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_DPAD_RIGHT }) ||
-               keyEvent.IsKey({ KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_DPAD_RIGHT })) {
-        HandleSelectionRight();
-        updateSelection = true;
-    }
-}
-
-bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
-{
-    LOGD("HandleKeyEvent, action %{public}d, code %{public}d", keyEvent.action, keyEvent.code);
-    if (keyEvent.action == KeyAction::DOWN) {
-        std::string appendElement;
-        if (keyEvent.code == KeyCode::KEY_ENTER || keyEvent.code == KeyCode::KEY_NUMPAD_ENTER ||
-            keyEvent.code == KeyCode::KEY_DPAD_CENTER) {
-            if (keyboard_ != TextInputType::MULTILINE) {
-                PerformAction(action_, false);
-            }
-        } else if (keyEvent.IsDirectionalKey()) {
-            HandleDirectionalKey(keyEvent);
-        } else if (keyEvent.IsNumberKey()) {
-            appendElement = keyEvent.ConvertCodeToString();
-        } else if (keyEvent.IsLetterKey()) {
-            if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_SHIFT_RIGHT, KeyCode::KEY_Z }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Y }) ||
-                keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Y })) {
-                HandleOnRedoAction();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_Z }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_Z })) {
-                HandleOnUndoAction();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_A }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_A })) {
-                HandleOnSelectAll();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_C }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_C })) {
-                HandleOnCopy();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_V }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_V })) {
-                HandleOnPaste();
-            } else if (keyEvent.IsKey({ KeyCode::KEY_CTRL_LEFT, KeyCode::KEY_X }) ||
-                       keyEvent.IsKey({ KeyCode::KEY_CTRL_RIGHT, KeyCode::KEY_X })) {
-                HandleOnCut();
-            } else {
-                appendElement = keyEvent.ConvertCodeToString();
-            }
-        }
-        if (keyEvent.code == KeyCode::KEY_DEL) {
-#if defined(PREVIEW)
-            DeleteBackward(1);
-#else
-            DeleteForward(1);
-#endif
-            return true;
-        }
-        if (keyEvent.code == KeyCode::KEY_FORWARD_DEL) {
-#if defined(PREVIEW)
-            DeleteForward(1);
-#else
-            DeleteBackward(1);
-#endif
-            return true;
-        }
-        ParseAppendValue(keyEvent.code, appendElement);
-        if (!appendElement.empty()) {
-            InsertValue(appendElement);
-        }
-    }
-    return true;
-}
-
-void TextFieldPattern::ParseAppendValue(KeyCode keycode, std::string& appendElement)
-{
-    switch (keycode) {
-        case KeyCode::KEY_SPACE:
-            appendElement = " ";
-            break;
-        default:
-            break;
-    }
+    auto context = PipelineContext::GetCurrentContext();
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    auto keyEventHandler = textFieldManager->GetKeyEventHandler();
+    keyEventHandler->UpdateWeakPattern(AceType::WeakClaim(this));
+    return keyEventHandler->HandleKeyEvent(event);
 }
 
 void TextFieldPattern::HandleOnUndoAction()
@@ -1756,6 +1668,10 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode* /*node*/)
         LOGD("Unregister surface position change callback with id %{public}d",
             surfacePositionChangedCallbackId_.value_or(-1));
         pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionChangedCallbackId_.value_or(-1));
+    }
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    if (textFieldManager) {
+        textFieldManager->ClearOnFocusTextField();
     }
 }
 
