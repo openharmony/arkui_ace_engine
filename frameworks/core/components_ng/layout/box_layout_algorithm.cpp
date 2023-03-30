@@ -65,7 +65,7 @@ std::optional<SizeF> BoxLayoutAlgorithm::MeasureContent(
         if (measureType == MeasureType::MATCH_PARENT) {
             contentSize.UpdateIllegalSizeWithCheck(contentConstraint.parentIdealSize);
             // use max is parent ideal size is invalid.
-            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
+            contentSize.UpdateIllegalSizeWithCheck(contentConstraint.percentReference);
             break;
         }
 
