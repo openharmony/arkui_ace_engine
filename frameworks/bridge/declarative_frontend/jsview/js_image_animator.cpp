@@ -23,6 +23,7 @@ namespace OHOS::Ace::Framework {
 
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr uint32_t DEFAULT_ITERATIONS = 1;
+constexpr FillMode DEFAULT_FILL_MODE = FillMode::FORWARDS;
 
 void JSImageAnimator::Create()
 {
@@ -99,6 +100,11 @@ void JSImageAnimator::SetImages(const JSCallbackInfo& info)
 
 void JSImageAnimator::SetState(int32_t state)
 {
+    if (state < static_cast<int32_t>(Animator::Status::IDLE) ||
+        state > static_cast<int32_t>(Animator::Status::STOPPED)) {
+        LOGW("ImageAnimator SetState %{public}d, invalid, use default AnimationStatus.Initial", state);
+        state = static_cast<int32_t>(Animator::Status::IDLE);
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ImageAnimatorView::SetStatus(static_cast<Animator::Status>(state));
         return;
@@ -112,6 +118,10 @@ void JSImageAnimator::SetState(int32_t state)
 
 void JSImageAnimator::SetDuration(int32_t duration)
 {
+    if (duration < 0) {
+        LOGW("ImageAnimator SetDuration %{public}d, invalid, use default %{public}d", duration, DEFAULT_DURATION);
+        duration = DEFAULT_DURATION;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ImageAnimatorView::SetDuration(duration);
         return;
@@ -125,6 +135,10 @@ void JSImageAnimator::SetDuration(int32_t duration)
 
 void JSImageAnimator::SetIteration(int32_t iteration)
 {
+    if (iteration < -1) {
+        LOGW("ImageAnimator SetIteration %{public}d, invalid, use default %{public}d", iteration, DEFAULT_ITERATIONS);
+        iteration = DEFAULT_ITERATIONS;
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ImageAnimatorView::SetIteration(iteration);
         return;
@@ -138,6 +152,11 @@ void JSImageAnimator::SetIteration(int32_t iteration)
 
 void JSImageAnimator::SetFillMode(int32_t fillMode)
 {
+    if (fillMode < static_cast<int32_t>(FillMode::NONE) || fillMode > static_cast<int32_t>(FillMode::BOTH)) {
+        LOGW("ImageAnimator SetFillMode %{public}d, invalid, use default %{public}d", fillMode,
+            static_cast<int32_t>(DEFAULT_FILL_MODE));
+        fillMode = static_cast<int32_t>(DEFAULT_FILL_MODE);
+    }
     if (Container::IsCurrentUseNewPipeline()) {
         NG::ImageAnimatorView::SetFillMode(static_cast<FillMode>(fillMode));
         return;
