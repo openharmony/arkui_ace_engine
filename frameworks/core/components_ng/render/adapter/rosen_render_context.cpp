@@ -179,8 +179,7 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (isDisappearing_) {
-        LOGW("isDisappearing, do not need SyncGeometryProperties, rect:%{public}s", paintRect.ToString().c_str());
+    if (isDisappearing_ && !paintRect.IsValid()) {
         return;
     }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
