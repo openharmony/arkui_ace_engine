@@ -173,7 +173,7 @@ public:
 
     void AddChild(const RefPtr<RenderContext>& renderContext, int index) override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
-    void OnTransformTranslateUpdate(const Vector3F& value) override;
+    void OnTransformTranslateUpdate(const TranslateOptions& value) override;
 
     RectF GetPaintRectWithTransform() override;
 

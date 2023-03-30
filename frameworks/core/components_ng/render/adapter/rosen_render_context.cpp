@@ -203,6 +203,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         SetPivot(xPivot, yPivot);
     }
 
+    if (propTransform_ && propTransform_->HasTransformTranslate()) {
+        // if translate unit is percent, it is related with frameSize
+        OnTransformTranslateUpdate(propTransform_->GetTransformTranslateValue());
+    }
+
     if (bgLoadingCtx_ && bgImage_) {
         PaintBackground();
     }
@@ -417,10 +422,24 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
     RequestNextFrame();
 }
 
-void RosenRenderContext::OnTransformTranslateUpdate(const Vector3F& translate)
+void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& translate)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetTranslate(translate.x, translate.y, 0.0f);
+    float xValue = 0.0f;
+    float yValue = 0.0f;
+    if (translate.x.Unit() == DimensionUnit::PERCENT || translate.y.Unit() == DimensionUnit::PERCENT) {
+        auto rect = GetPaintRectWithoutTransform();
+        if (!rect.IsValid()) {
+            // size is not determined yet
+            return;
+        }
+        xValue = translate.x.ConvertToPxWithSize(rect.Width());
+        yValue = translate.y.ConvertToPxWithSize(rect.Height());
+    } else {
+        xValue = translate.x.ConvertToPx();
+        yValue = translate.y.ConvertToPx();
+    }
+    rsNode_->SetTranslate(xValue, yValue, 0.0f);
     RequestNextFrame();
 }
 
@@ -1715,21 +1734,21 @@ bool RosenRenderContext::TriggerPageTransition(PageTransitionType type, const st
 
     if (transitionIn) {
         UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
-        UpdateTransformTranslate(Vector3F(translateOptions->x.Value(), translateOptions->y.Value(), 0.0f));
+        UpdateTransformTranslate(translateOptions.value());
         UpdateOpacity(effect->GetOpacityEffect().value());
         AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
         UpdateTransformScale(VectorF(1.0f, 1.0f));
-        UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+        UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         UpdateOpacity(1.0);
         AnimationUtils::CloseImplicitAnimation();
         return true;
     }
     UpdateTransformScale(VectorF(1.0f, 1.0f));
-    UpdateTransformTranslate(Vector3F(0.0f, 0.0f, 0.0f));
+    UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     UpdateOpacity(1.0);
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), onFinish);
     UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
-    UpdateTransformTranslate(Vector3F(translateOptions->x.Value(), translateOptions->y.Value(), 0.0f));
+    UpdateTransformTranslate(translateOptions.value());
     UpdateOpacity(effect->GetOpacityEffect().value());
     AnimationUtils::CloseImplicitAnimation();
     return true;
