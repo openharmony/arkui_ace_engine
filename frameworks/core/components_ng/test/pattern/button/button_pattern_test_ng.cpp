@@ -18,6 +18,7 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#include "core/components_ng/pattern/text/text_styles.h"
 
 #define protected public
 #define private public
@@ -69,6 +70,7 @@ const char BUTTON_ETS_TAG[] = "Button";
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF BUTTON_ONLY_HAS_WIDTH_SIZE(BUTTON_ONLY_HAS_WIDTH_VALUE, BUTTON_ONLY_HAS_WIDTH_VALUE);
 const Dimension DEFAULT_HEIGTH = 40.0_vp;
+const uint32_t MAX_LINE_VALUE = 10;
 } // namespace
 
 struct TestProperty {
@@ -944,5 +946,47 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest015, TestSize.Level1)
         layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize);
     EXPECT_EQ(constraintSize, SizeF(BUTTON_WIDTH, BUTTON_WIDTH));
     EXPECT_EQ(frameSize, SizeF(BUTTON_WIDTH, BUTTON_WIDTH));
+}
+
+/**
+ * @tc.name: ButtonPatternTest016
+ * @tc.desc: Test button view branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPatternTestNg, ButtonPatternTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button and set button view's value.
+     */
+    ButtonView::CreateWithLabel(CREATE_VALUE);
+    ButtonView::ButtonParameters buttonParameters;
+    buttonParameters.textOverflow = std::make_optional(TextOverflow::NONE);
+    buttonParameters.maxLines = std::make_optional(MAX_LINE_VALUE);
+    buttonParameters.minFontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
+    buttonParameters.maxFontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
+    buttonParameters.fontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
+    buttonParameters.heightAdaptivePolicy = std::make_optional(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    buttonParameters.fontWeight = std::make_optional(FontWeight::MEDIUM);
+    buttonParameters.fontFamily = std::make_optional(FONT_FAMILY_VALUE);
+    buttonParameters.fontStyle = std::make_optional(Ace::FontStyle::NORMAL);
+
+    /**
+     * @tc.steps: step3. ButtonView setLabelStyle.
+     * @tc.expected: step3. Button properties are set successfully.
+     */
+    ButtonView::SetLableStyle(buttonParameters);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextOverflowValue(), TextOverflow::NONE);
+    EXPECT_EQ(layoutProperty->GetMaxLinesValue(), MAX_LINE_VALUE);
+    EXPECT_EQ(layoutProperty->GetMinFontSizeValue(), BUTTON_FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetMaxFontSizeValue(), BUTTON_FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontSizeValue(), BUTTON_FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetHeightAdaptivePolicyValue(), TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(layoutProperty->GetFontWeightValue(), FontWeight::MEDIUM);
+    EXPECT_EQ(layoutProperty->GetFontFamilyValue(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontStyleValue(), Ace::FontStyle::NORMAL);
 }
 } // namespace OHOS::Ace::NG
