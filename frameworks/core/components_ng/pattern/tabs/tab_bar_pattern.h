@@ -26,6 +26,7 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/tabs/tab_bar_accessibility_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_method.h"
@@ -136,7 +137,12 @@ public:
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
-    
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<TabBarAccessibilityProperty>();
+    }
+
     FocusPattern GetFocusPattern() const override
     {
         FocusPaintParam focusPaintParams;
@@ -242,6 +248,15 @@ public:
         }
     }
 
+    int32_t GetIndicator()
+    {
+        return indicator_;
+    }
+
+    bool IsAtTop() const;
+
+    bool IsAtBottom() const;
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -282,8 +297,6 @@ private:
     float CalculateBackChildrenMainSize(int32_t indicator);
     void SetEdgeEffect(const RefPtr<GestureEventHub>& gestureHub);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect);
-    bool IsAtTop() const;
-    bool IsAtBottom() const;
     bool IsOutOfBoundary();
 
     RefPtr<ClickEvent> clickEvent_;

@@ -333,6 +333,7 @@ build_component_ng("pattern_ng") {
     "swiper_indicator/dot_indicator/dot_indicator_modifier.cpp",
     "swiper_indicator/dot_indicator/dot_indicator_paint_method.cpp",
     "swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
+    "tabs/tab_bar_accessibility_property.cpp",
     "tabs/tab_bar_layout_algorithm.cpp",
     "tabs/tab_bar_layout_property.cpp",
     "tabs/tab_bar_modifier.cpp",
