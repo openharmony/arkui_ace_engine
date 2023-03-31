@@ -507,7 +507,7 @@ void FrontendDelegateDeclarative::OnBackGround()
 void FrontendDelegateDeclarative::OnForeground()
 {
     // first page show will be called by push page successfully
-    if (Container::IsCurrentUseNewPipeline() || !isFirstNotifyShow_) {
+    if (!isFirstNotifyShow_) {
         OnPageShow();
     }
     isFirstNotifyShow_ = false;
