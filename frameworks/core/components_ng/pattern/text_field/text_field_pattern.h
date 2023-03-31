@@ -581,6 +581,7 @@ public:
     void HandleFocusEvent();
     bool OnBackPressed();
     void CheckScrollable();
+    void HandleClickEvent(GestureEvent& info);
 
     void HandleSelectionUp();
     void HandleSelectionDown();
@@ -613,7 +614,6 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
     void HandleTouchUp();
-    void HandleClickEvent(GestureEvent& info);
 
     void InitFocusEvent();
     void InitTouchEvent();
