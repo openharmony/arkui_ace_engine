@@ -30,7 +30,10 @@ template("napi_mediaquery_static") {
 
     sources = [ "js_media_query.cpp" ]
 
-    deps = [ "//foundation/arkui/napi/:ace_napi" ]
+    deps = []
+    if (!is_cross_platform_build) {
+      deps += [ "//foundation/arkui/napi/:ace_napi" ]
+    }
 
     if (defined(config.libace_target)) {
       deps += [ config.libace_target ]

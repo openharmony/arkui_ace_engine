@@ -146,7 +146,12 @@ template("build_component_ng") {
       if (defined(config.enable_rosen_backend) && config.enable_rosen_backend &&
           defined(invoker.rosen_sources)) {
         sources += invoker.rosen_sources
-        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+        if (is_cross_platform_build) {
+          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+        } else {
+          deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+        }
+
         include_dirs +=
             [ "//foundation/window/window_manager/interfaces/innerkits" ]
       }

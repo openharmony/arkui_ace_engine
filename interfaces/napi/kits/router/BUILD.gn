@@ -31,10 +31,10 @@ template("napi_router_static") {
 
     sources = [ "js_router.cpp" ]
 
-    deps = [
-      "//foundation/arkui/napi/:ace_napi",
-      "//third_party/libuv:uv",
-    ]
+    deps = [ "//third_party/libuv:uv" ]
+    if (!is_cross_platform_build) {
+      deps += [ "//foundation/arkui/napi/:ace_napi" ]
+    }
 
     # Use static libuv for cross build
     if (is_cross_platform_build) {
