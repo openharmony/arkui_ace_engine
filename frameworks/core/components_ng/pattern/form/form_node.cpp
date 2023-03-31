@@ -119,9 +119,25 @@ void FormNode::DispatchPointerEvent(const TouchEvent& point) const
 {
     auto pattern = GetPattern<FormPattern>();
     CHECK_NULL_VOID(pattern);
-    auto selfGlobalOffset = GetTransformRelativeOffset();
+    auto selfGlobalOffset = GetFormOffset();
     auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, point);
     pattern->DispatchPointerEvent(pointerEvent);
+}
+
+OffsetF FormNode::GetFormOffset() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto offset = context->GetPaintRectWithoutTransform().GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+
+    return offset;
 }
 
 RefPtr<FormNode> FormNode::GetOrCreateFormNode(
