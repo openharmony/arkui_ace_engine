@@ -19,8 +19,7 @@
  * all definitions in this file are framework internal
  */
 
-abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> 
-{
+abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T> {
 
   private dependentElementIds_: Set<number> = new Set<number>();
 
@@ -28,38 +27,29 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
     super(subscribingView, viewName);
   }
 
-  protected notifyPropertyRead() {
-    stateMgmtConsole.error(`ObservedPropertyAbstractPU[${this.id__()}, '${this.info() || "unknown"}']: \
-        notifyPropertyRead, DO NOT USE with PU. Use notifyPropertryHasBeenReadPU`);
-  }
-
-  protected notifyPropertryHasBeenReadPU() {
+  protected notifyHasChanged(newValue: T) {
+    stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged, notifying.`);
     this.subscribers_.forEach((subscribedId) => {
       var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (subscriber) {
-        if ('propertyHasBeenReadPU' in subscriber) {
-          (subscriber as unknown as PropertyEventsReceiverPU<T>).propertyHasBeenReadPU(this);
+        if ('hasChanged' in subscriber) {
+          (subscriber as ISinglePropertyChangeSubscriber<T>).hasChanged(newValue);
         }
-      }
-    });
-    this.recordDependentUpdate();
-  } 
-
-  protected notifyPropertryHasChangedPU() {
-    this.subscribers_.forEach((subscribedId) => {
-      var subscriber: IPropertySubscriber = SubscriberManager.Find(subscribedId)
-      if (subscriber) {
         if ('viewPropertyHasChanged' in subscriber) {
           (subscriber as ViewPU).viewPropertyHasChanged(this.info_, this.dependentElementIds_);
-        } else if ('syncPeerHasChanged' in subscriber) {
-          (subscriber as unknown as PropertyEventsReceiverPU<T>).syncPeerHasChanged(this);
-        } else  {
-          stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyPropertryHasChangedPU: unknown subscriber ID '${subscribedId}' error!`);
+        } else if ('propertyHasChanged' in subscriber) {
+          (subscriber as IMultiPropertiesChangeSubscriber).propertyHasChanged(this.info_);
         }
+      } else {
+        stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
       }
     });
   }
-  
+
+  protected notifyPropertyRead() {
+    super.notifyPropertyRead();
+    this.recordDependentUpdate();
+  }
 
   public markDependentElementsDirty(view: ViewPU) {
     // TODO ace-ets2bundle, framework, compilated apps need to update together
@@ -121,28 +111,4 @@ abstract class ObservedPropertyAbstractPU<T> extends ObservedPropertyAbstract<T>
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {
     throw new Error("Can not create a AppStorage 'Prop' from a @State property. ");
   }
-
-  /*
-    Below empty functions required to keep as long as this class derives from FU version
-    ObservedPropertyAbstract. Need to overwrite these functions to do nothing for PU
-    */
-    protected notifyHasChanged(_: T) {
-      stateMgmtConsole.error(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: \
-          notifyHasChanged, DO NOT USE with PU. Use notifyPropertryHasBeenReadPU`);
-    }
-  
-    hasChanged(_: T): void {
-      // unused for PU
-      // need to overwrite impl of base class with empty function.
-    }
-  
-    propertyHasChanged(_?: PropertyInfo): void {
-      // unused for PU
-      // need to overwrite impl of base class with empty function.
-    }
-  
-    propertyRead(_?: PropertyInfo): void {
-      // unused for PU
-      // need to overwrite impl of base class with empty function.
-    }
 }

@@ -3,7 +3,6 @@
     // common
     // declarations of C++ exposed classes
     "src/lib/common/ace_console.native.d.ts",
-    "src/lib/common/ace_trace.native.d.ts",
     "src/lib/common/environment_setting.d.ts",
     "src/lib/common/storage.d.ts",
     "src/lib/common/local_storage_native.d.ts",
@@ -26,7 +25,7 @@
     "src/lib/sdk/environment.ts",
 
     // common
-    "src/lib/common/state_mgmt_console_trace.ts",
+    "src/lib/common/state_mgmt_console.ts",
     "src/lib/common/distributed_storage.ts",
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
@@ -44,7 +43,6 @@
     "src/lib/full_update/fu_view.ts",
 
     // partial_update specifc
-    "src/lib/partial_update/pu_types_events.ts",
     "src/lib/partial_update/pu_viewstack_processor.d.ts",
     "src/lib/partial_update/pu_foreach.d.ts",
     "src/lib/partial_update/pu_view_native.d.ts",
