@@ -146,7 +146,6 @@ RefPtr<FrameNode> RefreshPattern::FindScrollableChild()
             auto node = frameNodeQueue.front();
             CHECK_NULL_RETURN(node, nullptr);
             if (AceType::InstanceOf<ScrollablePattern>(node->GetPattern())) {
-                scrollableNodeIndex_++;
                 return node;
             }
             frameNodeQueue.pop();
@@ -158,9 +157,7 @@ RefPtr<FrameNode> RefreshPattern::FindScrollableChild()
                 }
             }
             size--;
-            scrollableNodeIndex_++;
         }
-        scrollableNodeIndex_ = -1;
     }
     return nullptr;
 }
