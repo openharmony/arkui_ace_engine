@@ -534,11 +534,15 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest008, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(minSize, minSize));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameOffset(), OffsetF());
 
+    parentLayoutConstraint.selfIdealSize.Reset();
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_->Reset();
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     auto layoutProperty = AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     layoutProperty->UpdateBorderRadius(BORDER_RADIUS);
     buttonLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(),
-        SizeF(BORDER_RADIUS.ConvertToPx(), BORDER_RADIUS.ConvertToPx()));
+        SizeF(BORDER_RADIUS.ConvertToPx() * 2, BORDER_RADIUS.ConvertToPx() * 2));
 }
 
 /**
@@ -923,6 +927,12 @@ HWTEST_F(ButtonPatternTestNg, ButtonPatternTest015, TestSize.Level1)
         layoutWrapper->GetLayoutProperty()->CreateChildConstraint(), frameSize);
     EXPECT_EQ(constraintSize, SizeF(DEFAULT_HEIGTH.ConvertToPx(), DEFAULT_HEIGTH.ConvertToPx()));
     EXPECT_EQ(frameSize, SizeF(DEFAULT_HEIGTH.ConvertToPx(), DEFAULT_HEIGTH.ConvertToPx()));
+    auto buttonLayoutProperty =
+        AccessibilityManager::DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    buttonLayoutProperty->UpdateBorderRadius(BORDER_RADIUS);
+    constraintSize =
+        buttonLayoutAlgorithm->HandleLabelCircleButtonConstraint(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(constraintSize, SizeF(BORDER_RADIUS.ConvertToPx() * 2, BORDER_RADIUS.ConvertToPx() * 2));
     parentLayoutConstraint.selfIdealSize.SetHeight(BUTTON_HEIGHT);
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
