@@ -910,8 +910,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest002, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->pointColor_, CHECK_MARK_COLOR);
     EXPECT_EQ(
         checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CHECK_MARK_SIZE.ConvertToPx()));
+    auto checkStroke = static_cast<float>(CHECK_MARK_SIZE.ConvertToPx() * 0.2);
     EXPECT_EQ(
-        checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), static_cast<float>(CHECK_MARK_WIDTH.ConvertToPx()));
+        checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), checkStroke);
 }
 
 /**
