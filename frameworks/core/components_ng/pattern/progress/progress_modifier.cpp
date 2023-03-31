@@ -313,6 +313,7 @@ void ProgressModifier::PaintCapsule(RSCanvas& canvas, const OffsetF& offset, con
     double offsetY = offset.GetY() + capsuleBorderWidth_.ConvertToPx();
     double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * capsuleSize.Width();
     RSBrush brush;
+    brush.SetAntiAlias(true);
     RSPen pen;
     brush.SetAlpha(true);
     brush.SetColor(ToRSColor(bgColor_->Get()));
@@ -370,6 +371,7 @@ void ProgressModifier::PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& off
     double offsetY = offset.GetY() + capsuleBorderWidth_.ConvertToPx();
     double progressWidth = (value_->Get() / maxValue_->Get()) * totalDegree * capsuleSize.Height();
     RSBrush brush;
+    brush.SetAntiAlias(true);
     RSPen pen;
     pen.SetWidth(capsuleBorderWidth_.ConvertToPx());
     pen.SetAntiAlias(true);
