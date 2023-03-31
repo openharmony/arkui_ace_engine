@@ -156,7 +156,7 @@ bool KeyEventHandler::HandleShiftPressedEvent(const KeyEvent& event)
         }
     } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
                                                                event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
-        auto iterCode = SHIFT_KEYBOARD_SYMBOLS.find(event.code);
+        iterCode = SHIFT_KEYBOARD_SYMBOLS.find(event.code);
         if (iterCode != SHIFT_KEYBOARD_SYMBOLS.end()) {
             keyChar = iterCode->second;
         } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
