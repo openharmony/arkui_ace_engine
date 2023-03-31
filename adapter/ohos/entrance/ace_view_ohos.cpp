@@ -97,6 +97,7 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
 
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_VOID_NOLOG(view);
     LogPointInfo(pointerEvent);
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
