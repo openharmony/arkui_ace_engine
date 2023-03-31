@@ -310,6 +310,9 @@ void FormRenderer::AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInf
         HILOG_ERROR("rsSurfaceNode is nullptr.");
         return;
     }
+    uiContent_->SetFormWidth(width_);
+    uiContent_->SetFormHeight(height_);
+    uiContent_->OnFormSurfaceChange(width_, height_);
     rsSurfaceNode->SetBounds(0.0f, 0.0f, width_, height_);
 }
 }  // namespace Ace
