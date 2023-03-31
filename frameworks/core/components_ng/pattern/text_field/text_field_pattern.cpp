@@ -2145,6 +2145,9 @@ void TextFieldPattern::UpdatePositionOfParagraph(int32_t position)
 
 void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height)
 {
+    if (!HasFocus()) {
+        return;
+    }
     auto context = GetHost()->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
