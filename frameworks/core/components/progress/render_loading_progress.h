@@ -50,8 +50,8 @@ public:
                 ringController_ = nullptr;
             }
             if (cometController_) {
-                cometController_->Stop();
                 cometController_->ClearStopListeners();
+                cometController_->Stop();
                 cometController_ = nullptr;
             }
             usedScale_ = 0.0;
