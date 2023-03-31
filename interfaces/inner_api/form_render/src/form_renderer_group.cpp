@@ -16,7 +16,6 @@
 #include "form_renderer_group.h"
 
 #include "configuration.h"
-#include "form_js_info.h"
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
 
@@ -40,76 +39,78 @@ FormRendererGroup::FormRendererGroup(
 void FormRendererGroup::AddForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     auto compId = want.GetStringParam(FORM_RENDERER_COMP_ID);
-    HILOG_INFO("AddForm compId %{public}s.", compId.c_str());
-    auto iter = rendererMap_.find(compId);
-    if (iter != rendererMap_.end()) {
-        HILOG_WARN("AddForm compId: %{public}s exist", compId.c_str());
-        auto renderer = iter->second;
-        renderer->Destroy();
-        rendererMap_.erase(iter);
+    currentCompId_ = compId;
+    FormRequest formRequest;
+    formRequest.compId = compId;
+    formRequest.want = want;
+    formRequest.formJsInfo = formJsInfo;
+    formRequests_.push_back(formRequest);
+    if (formRenderer_ == nullptr) {
+        formRenderer_ = std::make_shared<FormRenderer>(context_, runtime_);
+        if (!formRenderer_) {
+            HILOG_ERROR("AddForm create form render failed");
+            return;
+        }
+        HILOG_INFO("AddForm compId is %{public}s. formId is %{public}s", compId.c_str(),
+            std::to_string(formJsInfo.formId).c_str());
+        formRenderer_->AddForm(want, formJsInfo);
+    } else {
+        HILOG_INFO("AttachForm compId is %{public}s formRequests size is :%{public}s.",
+            compId.c_str(), std::to_string(formRequests_.size()).c_str());
+        formRenderer_->AttachForm(want, formJsInfo);
     }
-    auto formRenderer = std::make_shared<FormRenderer>(context_, runtime_);
-    if (!formRenderer) {
-        HILOG_ERROR("AddForm create formrender failed");
-        return;
-    }
-    rendererMap_.try_emplace(compId, formRenderer);
-    formRenderer->AddForm(want, formJsInfo);
 }
 
 void FormRendererGroup::ReloadForm()
 {
-    auto iter = rendererMap_.begin();
-    while (iter != rendererMap_.end()) {
-        auto renderer = iter->second;
-        renderer->ReloadForm();
-        iter++;
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("ReloadForm failed, formRenderer is null");
+        return;
     }
+    formRenderer_->ReloadForm();
 }
 
 void FormRendererGroup::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_INFO("UpdateForm formId %{public}s.", std::to_string(formJsInfo.formId).c_str());
-    auto iter = rendererMap_.begin();
-    while (iter!= rendererMap_.end()) {
-        auto renderer = iter->second;
-        renderer->UpdateForm(formJsInfo);
-        iter++;
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("UpdateForm failed, formRenderer is null");
+        return;
     }
+    formRenderer_->UpdateForm(formJsInfo);
 }
 
 void FormRendererGroup::DeleteForm(const std::string& compId)
 {
-    HILOG_INFO("DeleteForm compId %{public}s.", compId.c_str());
-    auto iter = rendererMap_.find(compId);
-    if (iter == rendererMap_.end()) {
-        return;
+    HILOG_INFO("DeleteForm compId is %{public}s, currentCompId is %{public}s, formRequests size is %{public}s.",
+        compId.c_str(), currentCompId_.c_str(), std::to_string(formRequests_.size()).c_str());
+
+    for (auto iter = formRequests_.begin(); iter != formRequests_.end(); ++iter) {
+        if (iter->compId == compId) {
+            formRequests_.erase(iter);
+            break;
+        }
     }
-    auto renderer = iter->second;
-    // should release the occupancy of resources of the context, runtime and ui content
-    if (!renderer) {
-        HILOG_ERROR("DeleteForm compId %{public}s renderer is null.", compId.c_str());
+
+    if (formRequests_.empty() || compId != currentCompId_) {
         return;
     }
 
-    renderer->Destroy();
-    rendererMap_.erase(iter);
+    FormRequest request = formRequests_.back();
+    currentCompId_ = request.compId;
+    HILOG_INFO("RestoreForm compId is %{public}s.", currentCompId_.c_str());
+    formRenderer_->AttachForm(request.want, request.formJsInfo);
 }
 
 void FormRendererGroup::DeleteForm()
 {
-    HILOG_INFO("DeleteForm all compIds, size: %{public}zu", rendererMap_.size());
-    for (const auto &iter : rendererMap_) {
-        HILOG_INFO("DeleteForm compId %{public}s.", iter.first.c_str());
-        iter.second->Destroy();
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("DeleteForm failed, formRenderer is null");
+        return;
     }
-
-    rendererMap_.clear();
-}
-
-bool FormRendererGroup::IsEmpty()
-{
-    return rendererMap_.empty();
+    formRenderer_->Destroy();
+    formRenderer_ = nullptr;
+    formRequests_.clear();
 }
 
 void FormRendererGroup::UpdateConfiguration(
@@ -119,11 +120,11 @@ void FormRendererGroup::UpdateConfiguration(
         HILOG_ERROR("UpdateConfiguration config is null");
         return;
     }
-
-    HILOG_INFO("UpdateConfiguration all compIds, size: %{public}zu", rendererMap_.size());
-    for (const auto& iter : rendererMap_) {
-        iter.second->UpdateConfiguration(config);
+    if (formRenderer_ == nullptr) {
+        HILOG_ERROR("UpdateConfiguration failed, formRenderer is null");
+        return;
     }
+    formRenderer_->UpdateConfiguration(config);
 }
 }  // namespace Ace
 }  // namespace OHOS
