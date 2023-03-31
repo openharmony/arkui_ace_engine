@@ -67,11 +67,11 @@ void ImageModelImpl::SetBlur(double blur)
     }
 }
 
-void ImageModelImpl::SetImageFit(int32_t value)
+void ImageModelImpl::SetImageFit(ImageFit value)
 {
     auto image = AceType::DynamicCast<ImageComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (image) {
-        image->SetImageFit(static_cast<ImageFit>(value));
+        image->SetImageFit(value);
     }
 }
 

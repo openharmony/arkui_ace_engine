@@ -67,9 +67,9 @@ void ImageModelNG::SetBackBorder()
 
 void ImageModelNG::SetBlur(double blur) {}
 
-void ImageModelNG::SetImageFit(int32_t value)
+void ImageModelNG::SetImageFit(ImageFit value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, static_cast<ImageFit>(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value);
 }
 
 void ImageModelNG::SetMatchTextDirection(bool value)

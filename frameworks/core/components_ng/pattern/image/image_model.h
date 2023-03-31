@@ -37,7 +37,7 @@ public:
     virtual void SetBlur(double blur) = 0;
     virtual void SetBorder(const Border& border) = 0;
     virtual void SetBackBorder() = 0;
-    virtual void SetImageFit(int32_t value) = 0;
+    virtual void SetImageFit(ImageFit value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitOriginSize(bool value) = 0;
     virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) = 0;

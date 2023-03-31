@@ -84,7 +84,7 @@ RefPtr<FrameNode> ImagePatternTest::CreateImageNode(const std::string& src, cons
     image.SetAlt(alt);
     image.SetImageFill(svgFillColor);
     if (imageFit != ImageFit::NONE) {
-        image.SetImageFit(static_cast<int32_t>(imageFit));
+        image.SetImageFit(imageFit);
     }
     if (renderMode != ImageRenderMode::TEMPLATE) {
         image.SetImageRenderMode(renderMode);

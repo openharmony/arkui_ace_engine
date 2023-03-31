@@ -164,6 +164,26 @@ inline std::string ConvertFlexDirectionToStirng(FlexDirection direction)
         }
     }
 
+    inline std::string ConvertItemAlignToStirng(FlexAlign align)
+    {
+        if (align == FlexAlign::FLEX_START) {
+            return "ItemAlign.Start";
+        }
+        if (align == FlexAlign::CENTER) {
+            return "ItemAlign.Center";
+        }
+        if (align == FlexAlign::FLEX_END) {
+            return "ItemAlign.End";
+        }
+        if (align == FlexAlign::BASELINE) {
+            return "ItemAlign.Baseline";
+        }
+        if (align == FlexAlign::STRETCH) {
+            return "ItemAlign.Stretch";
+        }
+        return "ItemAlign.Auto";
+    }
+
     inline std::string ConvertWrapAlignmentToStirng(WrapAlignment align)
     {
         if (align == WrapAlignment::START) {
