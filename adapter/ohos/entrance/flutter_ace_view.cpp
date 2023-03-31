@@ -371,6 +371,9 @@ void FlutterAceView::SetViewportMetrics(FlutterAceView* view, const flutter::Vie
 
 void FlutterAceView::DispatchTouchEvent(FlutterAceView* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    if (view == nullptr) {
+        return;
+    }
     LogPointInfo(pointerEvent);
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
