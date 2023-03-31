@@ -481,49 +481,32 @@ void SwiperLayoutAlgorithm::LoopLayout(LayoutWrapper* layoutWrapper)
     std::list<int32_t> preItems;
     std::list<int32_t> nextItems;
     SortItems(preItems, nextItems, displayCount);
-
     LayoutItems(layoutWrapper, preItems, nextItems);
 }
 
 void SwiperLayoutAlgorithm::SortItems(std::list<int32_t>& preItems, std::list<int32_t>& nextItems, int32_t displayCount)
 {
-    if (static_cast<int32_t>(itemRange_.size()) == totalCount_) {
-        auto cacheCount = static_cast<int32_t>(ceilf(static_cast<float>(totalCount_ - displayCount) / 2.0f));
-        auto loopIndex = (currentIndex_ - 1 + totalCount_) % totalCount_;
-        int32_t count = 0;
-        while (loopIndex >= 0 && itemRange_.find(loopIndex) != itemRange_.end() && count < cacheCount) {
-            preItems.emplace_back(loopIndex);
-            loopIndex--;
-            count++;
-        }
+    auto itemCount = static_cast<int32_t>(itemRange_.size());
+    displayCount = std::clamp(displayCount, 0, itemCount);
+    auto cacheCount = static_cast<int32_t>(ceilf(static_cast<float>(itemCount - displayCount) / 2.0f));
+    auto loopIndex = (currentIndex_ - 1 + totalCount_) % totalCount_;
+    int32_t count = 0;
+    while (itemRange_.find(loopIndex) != itemRange_.end() && count < cacheCount) {
+        preItems.emplace_back(loopIndex);
+        loopIndex = (loopIndex - 1 + totalCount_) % totalCount_;
+        count++;
+    }
 
-        loopIndex = currentIndex_;
-        count = 0;
-        while (itemRange_.find(loopIndex) != itemRange_.end() && count < (displayCount + cacheCount)) {
-            nextItems.emplace_back(loopIndex);
-            loopIndex = (loopIndex + 1) % totalCount_;
-            count++;
-        }
+    loopIndex = currentIndex_;
+    count = 0;
+    while (itemRange_.find(loopIndex) != itemRange_.end() && count < (displayCount + cacheCount)) {
+        nextItems.emplace_back(loopIndex);
+        loopIndex = (loopIndex + 1) % totalCount_;
+        count++;
+    }
 
-        if (targetIndex_.has_value()) {
-            nextItems.emplace_back(targetIndex_.value());
-        }
-    } else {
-        auto loopIndex = (currentIndex_ - 1 + totalCount_) % totalCount_;
-        while (loopIndex >= 0 && itemRange_.find(loopIndex) != itemRange_.end()) {
-            preItems.emplace_back(loopIndex);
-            loopIndex--;
-        }
-
-        loopIndex = currentIndex_;
-        while (itemRange_.find(loopIndex) != itemRange_.end()) {
-            nextItems.emplace_back(loopIndex);
-            loopIndex = (loopIndex + 1) % totalCount_;
-        }
-
-        if (targetIndex_.has_value()) {
-            nextItems.emplace_back(targetIndex_.value());
-        }
+    if (targetIndex_.has_value()) {
+        nextItems.emplace_back(targetIndex_.value());
     }
 }
 
