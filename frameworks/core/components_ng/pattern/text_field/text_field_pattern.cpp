@@ -205,6 +205,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     auto textRectNotNeedToChange = UpdateCaretPosition();
+    caretUpdateType_ = CaretUpdateType::NONE;
     UpdateCaretInfoToController();
     if (needToRefreshSelectOverlay_) {
         ProcessOverlay();
