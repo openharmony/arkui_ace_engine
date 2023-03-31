@@ -84,7 +84,7 @@ struct TestProperty {
     std::optional<bool> isShow = std::nullopt;
 };
 
-class PanelPatternTestNg : public testing::Test {
+class PanelTestNg : public testing::Test {
 public:
     static void SetUpTestSuite() {};
     static void TearDownTestSuite() {};
@@ -95,8 +95,8 @@ protected:
     static RefPtr<FrameNode> CreateSlidingPanel(const TestProperty& testProperty);
 };
 
-void PanelPatternTestNg::SetUp() {}
-void PanelPatternTestNg::TearDown() {}
+void PanelTestNg::SetUp() {}
+void PanelTestNg::TearDown() {}
 
 PaddingProperty CreatePadding(float left, float top, float right, float bottom)
 {
@@ -108,7 +108,7 @@ PaddingProperty CreatePadding(float left, float top, float right, float bottom)
     return padding;
 }
 
-RefPtr<FrameNode> PanelPatternTestNg::CreateSlidingPanel(const TestProperty& testProperty)
+RefPtr<FrameNode> PanelTestNg::CreateSlidingPanel(const TestProperty& testProperty)
 {
     SlidingPanelModelNG slidingPanelModelNG;
     slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
@@ -138,11 +138,11 @@ RefPtr<FrameNode> PanelPatternTestNg::CreateSlidingPanel(const TestProperty& tes
 }
 
 /**
- * @tc.name: PanelPatternTest001
+ * @tc.name: PanelTestNg001
  * @tc.desc: Verify whether the layout property, layoutAlgorithm and event functions are created.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest001, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -189,11 +189,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest002
+ * @tc.name: PanelTestNg002
  * @tc.desc: Test event function of slidingPanel.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest002, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and frameNode.
@@ -237,11 +237,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest002, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest003
+ * @tc.name: PanelTestNg003
  * @tc.desc: Test all the properties of slidingPanel.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest003, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Initialize all properties of panel.
@@ -281,11 +281,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest004
+ * @tc.name: PanelTestNg004
  * @tc.desc: Test panel onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest004, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg004, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -323,11 +323,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest005
+ * @tc.name: PanelTestNg005
  * @tc.desc: Test panel pattern OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest005, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg005, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -405,11 +405,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest006
+ * @tc.name: PanelTestNg006
  * @tc.desc: Test panel pattern HandleDragStart .
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest006, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -450,11 +450,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest007
+ * @tc.name: PanelTestNg007
  * @tc.desc: Test panel pattern HandleDragUpdate .
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest007, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -497,11 +497,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest007, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest008
+ * @tc.name: PanelTestNg008
  * @tc.desc: Test panel pattern HandleDragEnd .
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest008, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg008, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -533,11 +533,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest008, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest009
+ * @tc.name: PanelTestNg009
  * @tc.desc: Test panel pattern CalculateModeTypeMini.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest009, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg009, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -569,11 +569,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest009, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest0010
+ * @tc.name: PanelTestNg0010
  * @tc.desc: Test panel pattern CalculateModeTypeFold.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest0010, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg0010, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -615,11 +615,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0010, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest0011
+ * @tc.name: PanelTestNg0011
  * @tc.desc: Test panel pattern CalculateModeTypeFold.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest0011, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg0011, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -651,11 +651,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0011, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest0012
+ * @tc.name: PanelTestNg0012
  * @tc.desc: Test panel pattern AnimateTo.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest0012, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg0012, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -705,11 +705,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0012, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest0013
+ * @tc.name: PanelTestNg0013
  * @tc.desc: Test panel pattern GetDragBarNode GetPanelType GetPanelMode.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest0013, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg0013, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -736,11 +736,11 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0013, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest0014
+ * @tc.name: PanelTestNg0014
  * @tc.desc: Test panel pattern OnAnimationStop UpdateCurrentOffset UpdateCurrentOffsetOnAnimate.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest0014, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg0014, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create slidingPanel and get frameNode.
@@ -779,6 +779,10 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0014, TestSize.Level1)
         CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(PANEL_HEIGHT)));
     panelPattern->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     layoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    RefPtr<LayoutWrapper> child =
+        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    layoutWrapper->AppendChild(child);
     layoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
 
     /**
@@ -795,24 +799,46 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0014, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanelPatternTest0015
- * @tc.desc: Test panel pattern GetLinearLayoutProperty.
+ * @tc.name: PanelTestNg0015
+ * @tc.desc: Test panel pattern GetLinearLayoutProperty IsShowChanged FireSizeChangeEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest0015, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg0015, TestSize.Level1)
 {
     SlidingPanelModelNG slidingPanelModelNG;
     slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
+
+    /**
+     * step1. GetLinearLayoutProperty
+     */
     auto columnLayoutProperty = slidingPanelModelNG.GetLinearLayoutProperty();
     EXPECT_NE(columnLayoutProperty, nullptr);
+
+    /**
+     * step2. IsShowChanged
+     */
+    auto panelFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(panelFrameNode, nullptr);
+    auto panelPattern = panelFrameNode->GetPattern<SlidingPanelPattern>();
+    bool isShow = true;
+    panelPattern->IsShowChanged(isShow);
+    EXPECT_TRUE(isShow);
+    isShow = false;
+    panelPattern->IsShowChanged(isShow);
+    EXPECT_FALSE(isShow);
+    /**
+     * step3. FireSizeChangeEvent
+     */
+    panelPattern->FireSizeChangeEvent();
+    EXPECT_EQ(panelPattern->previousMode_, PanelMode::HALF);
 }
 
 /**
- * @tc.name: PanelPatternTest0016
+ * @tc.name: PanelTestNg0016
  * @tc.desc: Test panel pattern HandleDragStart HandleDragUpdate HandleDragEnd.
  * @tc.type: FUNC
  */
-HWTEST_F(PanelPatternTestNg, PanelPatternTest0016, TestSize.Level1)
+HWTEST_F(PanelTestNg, PanelTestNg0016, TestSize.Level1)
 {
     SlidingPanelModelNG slidingPanelModelNG;
     slidingPanelModelNG.Create(SLIDING_PANEL_SHOW);
@@ -835,6 +861,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0016, TestSize.Level1)
 
     /**
      * @tc.steps: step1. HandleDragStart.
+     * @tc.expected: step1. Check that the branch is covered by the test.
      */
     GestureEvent startInfo;
     startInfo.SetLocalLocation(START_POINT);
@@ -843,6 +870,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0016, TestSize.Level1)
 
     /**
      * @tc.steps: step2. HandleDragUpdate.
+     * @tc.expected: step2. Check that the branch is covered by the test.
      */
     GestureEvent updateInfo;
     updateInfo.SetMainDelta(MAIN_DELTA);
@@ -851,6 +879,7 @@ HWTEST_F(PanelPatternTestNg, PanelPatternTest0016, TestSize.Level1)
 
     /**
      * @tc.steps: step3. HandleDragEnd.
+     * @tc.expected: step3. Check that the branch is covered by the test.
      */
     GestureEvent endInfo;
     endInfo.SetMainVelocity(MAIN_VELOCITY);
