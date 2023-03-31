@@ -138,6 +138,7 @@ ohos_unittest("swiper_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "swiper_accessibility_property_test_ng.cpp",
     "swiper_indicator_pattern_test_ng.cpp",
+    "swiper_pattern_test_ng.cpp",
   ]
 
   deps = [
