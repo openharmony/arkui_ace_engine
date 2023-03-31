@@ -140,7 +140,7 @@ private:
     void ToJsonValueForTextField(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValueForSearchIcon(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json) const;
-    void ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json) const;
+    void ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>& json) const;
     void ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const;
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
