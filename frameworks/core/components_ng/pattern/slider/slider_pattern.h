@@ -36,6 +36,11 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        auto visibility = GetLayoutProperty<LayoutProperty>()->GetVisibility().value_or(VisibleType::VISIBLE);
+        if (visibility == VisibleType::GONE) {
+            return MakeRefPtr<NodePaintMethod>();
+        }
+
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
             sliderContentModifier_ =
