@@ -27,4 +27,11 @@ bool RefreshAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(pattern, false);
     return !pattern->IsRefreshing();
 }
+
+void RefreshAccessibilityProperty::SetSpecificSupportAction()
+{
+    if (IsScrollable()) {
+        AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+    }
+}
 } // namespace OHOS::Ace::NG

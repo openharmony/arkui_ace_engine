@@ -26,7 +26,7 @@ bool ScrollBarAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(frameNode, false);
     auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
     CHECK_NULL_RETURN(scrollBarPattern, false);
-    if (scrollBarPattern->GetScrollableDistance() != 0.0) {
+    if (scrollBarPattern->GetAxis() != Axis::NONE && scrollBarPattern->GetScrollableDistance() != 0.0) {
         return true;
     }
     return false;
@@ -43,5 +43,21 @@ AccessibilityValue ScrollBarAccessibilityProperty::GetAccessibilityValue() const
     result.min = 0.0;
     result.max = scrollBarPattern->GetScrollableDistance();
     return result;
+}
+
+void ScrollBarAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
+    CHECK_NULL_VOID(scrollBarPattern);
+    if (IsScrollable()) {
+        if (!scrollBarPattern->IsAtTop()) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+        if (!scrollBarPattern->IsAtBottom()) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
