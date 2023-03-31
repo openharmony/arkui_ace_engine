@@ -39,6 +39,14 @@ Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info)
     return package->Callback(info);
 }
 
+void FunctionDeleter(void *nativePointer, void *data)
+{
+    auto info = reinterpret_cast<PandaFunctionData*>(data);
+    if (info != nullptr) {
+        delete info;
+    }
+}
+
 bool ArkJSRuntime::Initialize(const std::string& libraryPath, bool isDebugMode, int32_t instanceId)
 {
     RuntimeOption option;
@@ -85,10 +93,6 @@ void ArkJSRuntime::Reset()
             vm_ = nullptr;
         }
     }
-    for (auto data : dataList_) {
-        delete data;
-    }
-    dataList_.clear();
 #if defined(PREVIEW)
     previewComponents_.clear();
 #endif
@@ -232,8 +236,8 @@ shared_ptr<JsValue> ArkJSRuntime::NewFunction(RegisterFunctionType func)
 {
     LocalScope scope(vm_);
     auto data = new PandaFunctionData(shared_from_this(), func);
-    dataList_.emplace_back(data);
-    return std::make_shared<ArkJSValue>(shared_from_this(), FunctionRef::New(vm_, FunctionCallback, nullptr, data));
+    return std::make_shared<ArkJSValue>(shared_from_this(),
+        FunctionRef::New(vm_, FunctionCallback, FunctionDeleter, data));
 }
 
 shared_ptr<JsValue> ArkJSRuntime::NewNativePointer(void* ptr)
@@ -303,19 +307,24 @@ void ArkJSRuntime::DumpHeapSnapshot(bool isPrivate)
 
 Local<JSValueRef> PandaFunctionData::Callback(panda::JsiRuntimeCallInfo* info) const
 {
-    EscapeLocalScope scope(runtime_->GetEcmaVm());
+    auto runtime = runtime_.lock();
+    if (runtime == nullptr) {
+        LOGE("runtime is nullptr");
+        return Local<JSValueRef>();
+    }
+    EscapeLocalScope scope(runtime->GetEcmaVm());
     shared_ptr<JsValue> thisPtr =
-        std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, info->GetThisRef()));
+        std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime, info->GetThisRef()));
 
     std::vector<shared_ptr<JsValue>> argv;
     int32_t length = info->GetArgsNumber();
     argv.reserve(length);
     for (int32_t i = 0; i < length; ++i) {
         argv.emplace_back(
-            std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime_, info->GetCallArgRef(i))));
+            std::static_pointer_cast<JsValue>(std::make_shared<ArkJSValue>(runtime, info->GetCallArgRef(i))));
     }
-    shared_ptr<JsValue> result = func_(runtime_, thisPtr, argv, length);
-    return scope.Escape(std::static_pointer_cast<ArkJSValue>(result)->GetValue(runtime_));
+    shared_ptr<JsValue> result = func_(runtime, thisPtr, argv, length);
+    return scope.Escape(std::static_pointer_cast<ArkJSValue>(result)->GetValue(runtime));
 }
 
 } // namespace OHOS::Ace::Framework
