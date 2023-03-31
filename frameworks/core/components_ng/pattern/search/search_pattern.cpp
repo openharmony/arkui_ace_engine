@@ -905,7 +905,7 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     json->Put("cancelButton", cancelButtonJson);
 }
 
-void SearchPattern::ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>& json) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -922,7 +922,7 @@ void SearchPattern::ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json)
     // font color
     auto searchButtonFontColor = searchButtonLayoutProperty->GetFontColor().value_or(Color());
     searchButtonJson->Put("fontColor", searchButtonFontColor.ColorToString().c_str());
-    json->Put("searchButton", searchButtonJson);
+    json->Put("searchButtonOption", searchButtonJson);
 }
 
 void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
@@ -951,7 +951,7 @@ void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ToJsonValueForSearchIcon(json);
     ToJsonValueForCancelButton(json);
     ToJsonValueForCursor(json);
-    ToJsonValueForSearchButton(json);
+    ToJsonValueForSearchButtonOption(json);
 }
 
 } // namespace OHOS::Ace::NG
