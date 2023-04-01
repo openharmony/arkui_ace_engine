@@ -100,6 +100,13 @@ private:
     void LoadItemWithDrag(float translateLength);
     void InitInActiveItems(float translateLength);
     int32_t ClampIndex(int32_t index);
+    void LoopMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
+        float& crossSize, float& mainSize);
+    void LoopLayout(LayoutWrapper* layoutWrapper);
+    void NonLoopLayout(LayoutWrapper* layoutWrapper);
+    void SortItems(std::list<int32_t>& preItems, std::list<int32_t>& nextItems, int32_t displayCount);
+    void LayoutItems(
+        LayoutWrapper* layoutWrapper, const std::list<int32_t>& preItems, const std::list<int32_t>& nextItems);
 
     bool isLoop_ = true;
     int32_t currentIndex_ = 0;

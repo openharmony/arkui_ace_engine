@@ -58,6 +58,11 @@ public:
 
     const std::list<RefPtr<LayoutWrapper>>& GetCachedChildLayoutWrapper() override;
 
+    void SetLazySwiper(bool flag = true)
+    {
+        lazySwiper_ = flag;
+    }
+
 protected:
     int32_t OnGetTotalCount() override;
     RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndex(int32_t index) override;
@@ -76,11 +81,13 @@ private:
     std::list<std::optional<std::string>> nodeIds_;
 
     std::optional<std::string> GetKeyByIndexFromPreNodes(int32_t index);
+    RefPtr<LayoutWrapper> OnGetOrCreateWrapperByIndexLegacy(int32_t index);
 
     std::list<RefPtr<LayoutWrapper>> childWrappers_;
 
     bool forceMeasure_ = false;
     bool forceLayout_ = false;
+    bool lazySwiper_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(LazyLayoutWrapperBuilder);
 };

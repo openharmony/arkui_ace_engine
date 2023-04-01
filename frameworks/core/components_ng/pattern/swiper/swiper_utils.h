@@ -62,12 +62,13 @@ public:
             auto childSelfIdealSize = idealSize;
             if (axis == Axis::HORIZONTAL) {
                 if (idealSize.Width()) {
-                    childSelfIdealSize.SetWidth((idealSize.Width().value() - itemSpace * displayCount) / displayCount);
+                    childSelfIdealSize.SetWidth(
+                        (idealSize.Width().value() - itemSpace * (displayCount - 1)) / displayCount);
                 }
             } else if (axis == Axis::VERTICAL) {
                 if (idealSize.Height()) {
                     childSelfIdealSize.SetHeight(
-                        (idealSize.Height().value() - itemSpace * displayCount) / displayCount);
+                        (idealSize.Height().value() - itemSpace * (displayCount - 1)) / displayCount);
                 }
             }
             layoutConstraint.selfIdealSize = childSelfIdealSize;
