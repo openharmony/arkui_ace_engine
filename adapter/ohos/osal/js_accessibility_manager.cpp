@@ -617,13 +617,13 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
 {
     auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     if (gestureEventHub) {
-        nodeInfo.SetClickable(gestureEventHub->IsClickable());
-        if (gestureEventHub->IsClickable()) {
+        nodeInfo.SetClickable(gestureEventHub->IsAccessibilityClickable());
+        if (gestureEventHub->IsAccessibilityClickable()) {
             AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
             nodeInfo.AddAction(action);
         }
-        nodeInfo.SetLongClickable(gestureEventHub->IsLongClickable());
-        if (gestureEventHub->IsLongClickable()) {
+        nodeInfo.SetLongClickable(gestureEventHub->IsAccessibilityLongClickable());
+        if (gestureEventHub->IsAccessibilityLongClickable()) {
             AccessibleAction action(ACCESSIBILITY_ACTION_LONG_CLICK, "ace");
             nodeInfo.AddAction(action);
         }
@@ -1426,7 +1426,7 @@ static void DumpTreeNG(
     DumpLog::GetInstance().AddDesc("visible: " + std::to_string(node->IsVisible()));
     auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
     DumpLog::GetInstance().AddDesc(
-        "clickable: " + std::to_string(gestureEventHub ? gestureEventHub->IsClickable() : false));
+        "clickable: " + std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityClickable() : false));
     DumpLog::GetInstance().AddDesc(
         "checkable: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsCheckable()));
 
