@@ -1993,6 +1993,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     if (info.GetLocalLocation().GetX() > (frameRect_.Width() - imageRect_.Width() - GetIconRightOffset()) &&
         NeedShowPasswordIcon()) {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT);
+        return;
     } else {
         pipeline->ChangeMouseStyle(frameId, MouseFormat::TEXT_CURSOR);
     }
