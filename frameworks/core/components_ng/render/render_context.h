@@ -242,6 +242,10 @@ public:
     virtual void OnSphericalEffectUpdate(float radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnLightUpEffectUpdate(float radio) {}
+    virtual RefPtr<PixelMap> GetThumbnailPixelMap()
+    {
+        return nullptr;
+    }
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(SphericalEffect, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(PixelStretchEffect, PixStretchEffectOption);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, float);

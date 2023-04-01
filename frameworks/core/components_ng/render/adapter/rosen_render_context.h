@@ -207,6 +207,7 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
+    RefPtr<PixelMap> GetThumbnailPixelMap() override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

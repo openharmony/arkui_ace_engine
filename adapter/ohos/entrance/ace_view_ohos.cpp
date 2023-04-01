@@ -107,18 +107,18 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
             view->ProcessAxisEvent(pointerEvent);
         } else {
             LOGD("ProcessMouseEvent");
-            view->ProcessMouseEvent(pointerEvent);
 #ifdef ENABLE_DRAG_FRAMEWORK
-            view->ProcessDragEvent(pointerEvent);
+            ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
+            view->ProcessMouseEvent(pointerEvent);
         }
     } else {
         // touch event
         LOGD("ProcessTouchEvent");
-        view->ProcessTouchEvent(pointerEvent);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        view->ProcessDragEvent(pointerEvent);
+        ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
+        view->ProcessTouchEvent(pointerEvent);
     }
 }
 
