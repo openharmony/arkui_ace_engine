@@ -24,6 +24,19 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+OffsetF GetPageOffset()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF());
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, OffsetF());
+    auto page = stageManager->GetLastPage();
+    CHECK_NULL_RETURN(page, OffsetF());
+    return page->GetOffsetRelativeToWindow();
+}
+} // namespace
+
 void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
 {
     isHided_ = true;
@@ -40,12 +53,7 @@ void MenuWrapperPattern::HideMenu(const RefPtr<FrameNode>& menu)
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     LOGI("MenuWrapperPattern closing menu %{public}d", targetId_);
-    // ContextMenu: close in subwindowManager
-    if (menuPattern->IsContextMenu()) {
-        SubwindowManager::GetInstance()->HideMenuNG(targetId_);
-        return;
-    }
-    overlayManager->HideMenu(targetId_);
+    menuPattern->HideMenu();
 }
 
 void MenuWrapperPattern::OnModifyDone()
@@ -76,16 +84,19 @@ void MenuWrapperPattern::OnModifyDone()
         if (pattern->IsHided()) {
             return;
         }
-        // get menu frame node (child of menu wrapper)
-        auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-        CHECK_NULL_VOID(menuNode);
+        OffsetF position = OffsetF(touch.GetGlobalLocation().GetX(), touch.GetGlobalLocation().GetY());
+        position -= GetPageOffset();
+        for (const auto& child : host->GetChildren()) {
+            // get menu frame node (child of menu wrapper)
+            auto menuNode = DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(menuNode);
 
-        // get menuNode's touch region
-        auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
-        const auto& position = touch.GetGlobalLocation();
-        // if DOWN-touched outside the menu region, then hide menu
-        if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
-            pattern->HideMenu(menuNode);
+            // get menuNode's touch region
+            auto menuZone = menuNode->GetGeometryNode()->GetFrameRect();
+            // if DOWN-touched outside the menu region, then hide menu
+            if (!menuZone.IsInRegion(PointF(position.GetX(), position.GetY()))) {
+                pattern->HideMenu(menuNode);
+            }
         }
     };
     onTouch_ = MakeRefPtr<TouchEventImpl>(std::move(callback));
@@ -95,17 +106,11 @@ void MenuWrapperPattern::OnModifyDone()
 // close subMenu when mouse move outside
 void MenuWrapperPattern::HandleMouseEvent(const MouseInfo& info, RefPtr<MenuItemPattern>& menuItemPattern)
 {
-    auto menuItem = menuItemPattern->GetHost();
-    CHECK_NULL_VOID(menuItem);
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
     const auto& mousePosition = info.GetGlobalLocation();
     if (!menuItemPattern->IsInHoverRegions(mousePosition.GetX(), mousePosition.GetY()) &&
         menuItemPattern->IsSubMenuShowed()) {
         LOGI("MenuWrapperPattern Hide SubMenu");
-        overlayManager->HideMenu(menuItem->GetId());
+        HideSubMenu();
         menuItemPattern->SetIsSubMenuShowed(false);
         menuItemPattern->ClearHoverRegions();
         menuItemPattern->ResetWrapperMouseEvent();
@@ -119,5 +124,22 @@ void MenuWrapperPattern::HideMenu()
     auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuNode);
     HideMenu(menuNode);
+}
+
+void MenuWrapperPattern::HideSubMenu()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetChildren().size() <= 1) {
+        // sub menu not show
+        return;
+    }
+    auto subMenu = host->GetChildren().back();
+    host->RemoveChild(subMenu);
+    auto menuPattern = DynamicCast<FrameNode>(subMenu)->GetPattern<MenuPattern>();
+    if (menuPattern) {
+        menuPattern->RemoveParentHoverStyle();
+    }
+    host->MarkDirtyNode();
 }
 } // namespace OHOS::Ace::NG

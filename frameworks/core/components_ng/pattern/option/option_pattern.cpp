@@ -80,7 +80,7 @@ void OptionPattern::OnSelectProcess()
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto menu = AceType::DynamicCast<FrameNode>(host->GetParent());
+    auto menu = GetMenu().Upgrade();
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);

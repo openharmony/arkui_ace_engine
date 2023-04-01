@@ -43,7 +43,7 @@ void MenuPatternTestNg::TearDown() {}
 
 /**
  * @tc.name: MenuPatternTestNg001
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg001, TestSize.Level1)
@@ -51,13 +51,13 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg001, TestSize.Level1)
     RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TYPE);
     std::string type = "1";
     TouchEventInfo info(type);
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_TRUE(info.GetTouches().empty());
 }
 
 /**
  * @tc.name: MenuPatternTestNg002
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg002, TestSize.Level1)
@@ -71,14 +71,14 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg002, TestSize.Level1)
     locationInfo.SetTouchType(touchType);
     auto touchLocationInfo = locationInfo.SetGlobalLocation(globalLocation);
     info.touches_.emplace_back(touchLocationInfo);
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_FALSE(info.GetTouches().empty());
     EXPECT_TRUE(info.GetTouches().front().GetTouchType() == TouchType::UP);
 }
 
 /**
  * @tc.name: MenuPatternTestNg003
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg003, TestSize.Level1)
@@ -93,14 +93,14 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg003, TestSize.Level1)
     auto touchLocationInfo = locationInfo.SetGlobalLocation(globalLocation);
     info.touches_.emplace_back(touchLocationInfo);
     menuPattern->type_ = MenuType::CONTEXT_MENU;
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_FALSE(info.GetTouches().empty());
     EXPECT_TRUE(info.GetTouches().front().GetTouchType() == TouchType::UP);
 }
 
 /**
  * @tc.name: MenuPatternTestNg004
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg004, TestSize.Level1)
@@ -112,14 +112,14 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg004, TestSize.Level1)
     Offset globalLocation(1, 1);
     auto touchLocationInfo = locationInfo.SetGlobalLocation(globalLocation);
     info.touches_.emplace_back(touchLocationInfo);
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_FALSE(info.GetTouches().empty());
     EXPECT_TRUE(info.GetTouches().front().GetTouchType() == TouchType::UNKNOWN);
 }
 
 /**
  * @tc.name: MenuPatternTestNg005
- * @tc.desc: Verify RegisterOnClick.
+ * @tc.desc: Verify RegisterOnTouch.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuPatternTestNg, MenuPatternTestNg005, TestSize.Level1)
@@ -130,7 +130,7 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg005, TestSize.Level1)
     TouchType touchType = TouchType::UP;
     TouchLocationInfo locationInfo(TARGET_ID);
     locationInfo.SetTouchType(touchType);
-    menuPattern->RegisterOnClick();
+    menuPattern->RegisterOnTouch();
     EXPECT_TRUE(info.GetTouches().empty());
     EXPECT_FALSE(info.GetTouches().front().GetTouchType() == TouchType::UP);
 }

@@ -17,11 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_LAYOUT_ALGORITHM_H
 
 #include "base/geometry/ng/offset_t.h"
-#include "core/components_ng/layout/layout_algorithm.h"
+#include "core/components_ng/layout/box_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
-class MenuLayoutAlgorithm : public LayoutAlgorithm {
-    DECLARE_ACE_TYPE(MenuLayoutAlgorithm, LayoutAlgorithm)
+class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
+    DECLARE_ACE_TYPE(MenuLayoutAlgorithm, BoxLayoutAlgorithm)
 public:
     MenuLayoutAlgorithm() = default;
     ~MenuLayoutAlgorithm() override = default;
@@ -33,26 +33,35 @@ public:
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition);
-    float HorizontalLayout(const SizeF& size, float clickPosition);
+    float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
 
     OffsetF position_;
 
 private:
     void Initialize(LayoutWrapper* layoutWrapper);
+    LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
+    void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+    void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+    void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
+    void UpdateOptionConstraint(std::vector<RefPtr<FrameNode>>& options, float width);
+    void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
 
     void LayoutSubMenu(LayoutWrapper* layoutWrapper);
     float VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
     float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
 
-    float GetChildrenMaxWidth(
-        const std::list<RefPtr<LayoutWrapper>>& children, const LayoutConstraintF& layoutConstraint);
+    float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
 
-    SizeF screenSize_;
+    SizeF wrapperSize_;
 
     // current page offset relative to window.
     OffsetF pageOffset_;
+    float topSpace_ = 0.0f;
+    float bottomSpace_ = 0.0f;
+    float leftSpace_ = 0.0f;
+    float rightSpace_ = 0.0f;
 
-    float outPadding_ = 0.0f;
+    float margin_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };

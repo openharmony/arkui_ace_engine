@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/option/option_layout_algorithm.h"
 
+#include <optional>
 #include <string>
 
 #include "base/utils/utils.h"
@@ -24,7 +25,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-
 void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -38,24 +38,31 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint);
+    auto idealSize = CreateIdealSize(
+        layoutConstraint.value(), Axis::HORIZONTAL, props->GetMeasureType(MeasureType::MATCH_CONTENT), true);
+    float maxChildWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0f;
 
-    float maxTextWidth = layoutConstraint->maxSize.Width() - horInterval_ * 2.0;
-
-    // measure text
+    // measure child
     auto childConstraint = props->CreateChildConstraint();
-    childConstraint.maxSize.SetWidth(maxTextWidth);
-    childConstraint.percentReference.SetWidth(maxTextWidth);
-    auto text = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(text);
-    text->Measure(childConstraint);
-
-    // set self size based on TextNode size;
+    childConstraint.maxSize.SetWidth(maxChildWidth);
+    childConstraint.percentReference.SetWidth(maxChildWidth);
+    // set self size based on childNode size;
     auto minOptionHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
+    childConstraint.minSize.SetHeight(minOptionHeight);
+    auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(child);
+    child->Measure(childConstraint);
 
-    auto textSize = text->GetGeometryNode()->GetFrameSize();
-    SizeF size(textSize.Width() + horInterval_ * 2.0, std::max(textSize.Height(), minOptionHeight));
-    LOGD("option frame size set to %{public}f x %{public}f", size.Width(), size.Height());
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+    childSize.AddWidth(horInterval_ * 2.0f);
+    idealSize.UpdateSizeWithCheck(childSize);
+
+    auto idealWidth = GetIdealWidth(layoutWrapper);
+    if (idealWidth.has_value()) {
+        idealSize.SetWidth(idealWidth.value());
+    }
+    LOGD("option frame size set to %{public}s", idealSize.ToString().c_str());
+    layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 }
 
 void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -64,10 +71,23 @@ void OptionLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto optionSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto optionHeight = optionSize.Height();
 
-    auto text = layoutWrapper->GetOrCreateChildByIndex(0);
-    text->GetGeometryNode()->SetMarginFrameOffset(
-        OffsetF(horInterval_, (optionHeight - text->GetGeometryNode()->GetFrameSize().Height()) / 2.0));
-    text->Layout();
+    auto child = layoutWrapper->GetOrCreateChildByIndex(0);
+    child->GetGeometryNode()->SetMarginFrameOffset(
+        OffsetF(horInterval_, (optionHeight - child->GetGeometryNode()->GetFrameSize().Height()) / 2.0f));
+    child->Layout();
 }
 
+std::optional<float> OptionLayoutAlgorithm::GetIdealWidth(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
+    // layout property not update in layoutWrapper when measure
+    auto optionProps = layoutWrapper->GetHostNode()->GetLayoutProperty();
+    CHECK_NULL_RETURN(optionProps, std::nullopt);
+    CHECK_NULL_RETURN(optionProps->GetCalcLayoutConstraint(), std::nullopt);
+    if (optionProps->GetCalcLayoutConstraint()->selfIdealSize->Width()->IsValid()) {
+        auto idealWidth = optionProps->GetCalcLayoutConstraint()->selfIdealSize->Width()->GetDimension().ConvertToPx();
+        return idealWidth;
+    }
+    return std::nullopt;
+}
 } // namespace OHOS::Ace::NG

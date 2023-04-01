@@ -101,10 +101,7 @@ void MenuItemPattern::ShowSubMenu()
     LOGI("MenuItemPattern::ShowSubMenu menu item id is %{public}d", host->GetId());
     auto buildFunc = GetSubBuilder();
     if (buildFunc && !isSubMenuShowed_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto overlayManager = pipeline->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
+        isSubMenuShowed_ = true;
 
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         buildFunc();
@@ -119,41 +116,25 @@ void MenuItemPattern::ShowSubMenu()
         auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(menuWrapperPattern);
         menuWrapperPattern->AddSubMenuId(host->GetId());
+        subMenu->MountToParent(menuWrapper);
 
-        isSubMenuShowed_ = true;
         OffsetF offset = GetSubMenuPostion(host);
-        overlayManager->ShowMenu(host->GetId(), offset, subMenu);
 
+        auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuProps);
+        menuProps->UpdateMenuOffset(offset);
+        menuWrapper->MarkDirtyNode();
         RegisterWrapperMouseEvent();
     }
 }
 
 void MenuItemPattern::CloseMenu()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    if (GetSubBuilder() != nullptr && isSubMenuShowed_) {
-        int32_t itemId = GetHost()->GetId();
-        overlayManager->HideMenu(itemId);
-    }
-
-    int32_t menuTargetId = 0;
-
     auto menuWrapper = GetMenuWrapper();
-    if (menuWrapper) {
-        auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(menuWrapperPattern);
-        menuWrapperPattern->HideMenu();
-    } else {
-        auto subMenu = GetMenu();
-        CHECK_NULL_VOID(subMenu);
-        auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(subMenuPattern);
-        menuTargetId = subMenuPattern->IsSubMenu() ? subMenuPattern->GetTargetId() : -1;
-        overlayManager->HideMenu(menuTargetId);
-    }
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->HideMenu();
 }
 
 void MenuItemPattern::RegisterOnClick()
