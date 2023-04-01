@@ -406,26 +406,25 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *
    */
   public updateDirtyElements() {
-    if (this.dirtDescendantElementIds_.size == 0) {
-      stateMgmtConsole.debug(`No dirty elements for ${this.constructor.name}`);
-      return;
-    }
+    do {
+        stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
 
-    stateMgmtConsole.debug(`View ${this.constructor.name} elmtId ${this.id__()}:  updateDirtyElements: sorted dirty elmtIds: ${JSON.stringify(Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber))}, starting ....`);
+        // request list of all (gloabbly) deleteelmtIds;
+        let deletedElmtIds: number[] = [];
+        this.getDeletedElemtIds(deletedElmtIds);
 
-    // request list of all (gloabbly) deleteelmtIds;
-    let deletedElmtIds: number[] = [];
-    this.getDeletedElemtIds(deletedElmtIds);
+        // see which elmtIds are managed by this View
+        // and clean up all book keeping for them
+        this.purgeDeletedElmtIds(deletedElmtIds);
 
-    // see which elmtIds are managed by this View
-    // and clean up all book keeping for them
-    this.purgeDeletedElmtIds(deletedElmtIds);
-
-    // process all elmtIds marked as needing update in ascending order.
-    // ascending order ensures parent nodes will be updated before their children
-    // prior cleanup ensure no already deleted Elements have their update func executed
-    Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => this.UpdateElement(elmtId));
-    this.dirtDescendantElementIds_.clear();
+        // process all elmtIds marked as needing update in ascending order.
+        // ascending order ensures parent nodes will be updated before their children
+        // prior cleanup ensure no already deleted Elements have their update func executed
+        Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
+            this.UpdateElement(elmtId);
+            this.dirtDescendantElementIds_.delete(elmtId);
+        });
+    } while(this.dirtDescendantElementIds_.size);
   }
 
   //  given a list elementIds removes these from state variables dependency list and from elmtId -> updateFunc map
