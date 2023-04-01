@@ -349,7 +349,9 @@ class LocalStorage extends NativeLocalStorage {
       var p: ObservedPropertyAbstract<any> = this.storage_.get(propName);
       p.aboutToBeDeleted();
     }
+    this.storage_.clear();
     stateMgmtConsole.debug(`${this.constructor.name}.deleteAll: success`);
+    return true;
   }
 
   /**

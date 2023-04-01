@@ -362,7 +362,8 @@
             var p = this.storage_.get(propName);
             p.aboutToBeDeleted();
         }
-
+        this.storage_.clear();
+        return true;
     }
     /**
      * Subscribe to value change notifications of named property
