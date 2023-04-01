@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/animation/animator.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -143,6 +144,7 @@ void PagePattern::OnShow()
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID_NOLOG(isRenderDone_);
     CHECK_NULL_VOID_NOLOG(!isOnShow_);
+    CHECK_NULL_VOID_NOLOG(Container::IsForeground());
     isOnShow_ = true;
     if (onPageShow_) {
         onPageShow_();
