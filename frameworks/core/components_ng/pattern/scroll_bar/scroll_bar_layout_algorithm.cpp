@@ -122,7 +122,6 @@ void ScrollBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     } else {
         currentOffset_ = currentOffset;
     }
-    scrollBarPattern->SetCurrentPosition(currentOffset_);
     auto currentAxisOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentAxisOffset);
     childWrapper->Layout();
