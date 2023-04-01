@@ -238,17 +238,20 @@ void TextFieldLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto textOffset = Alignment::GetAlignPosition(contentSize, textRect_.GetSize(), Alignment::CENTER_LEFT);
         // adjust text rect to the basic padding
         auto textRectOffsetX = pattern->GetPaddingLeft();
-        switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
-            case TextAlign::START:
-                break;
-            case TextAlign::CENTER:
-                textRectOffsetX += (contentSize.Width() - textRect_.Width()) * 0.5f;
-                break;
-            case TextAlign::END:
-                textRectOffsetX += contentSize.Width() - textRect_.Width();
-                break;
-            default:
-                break;
+        auto isEmptyTextEditValue = pattern->GetTextEditingValue().text.empty();
+        if (!isEmptyTextEditValue) {
+            switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+                case TextAlign::START:
+                    break;
+                case TextAlign::CENTER:
+                    textRectOffsetX += (contentSize.Width() - textRect_.Width()) * 0.5f;
+                    break;
+                case TextAlign::END:
+                    textRectOffsetX += contentSize.Width() - textRect_.Width();
+                    break;
+                default:
+                    break;
+            }
         }
         textRect_.SetOffset(OffsetF(textRectOffsetX, textOffset.GetY()));
     }
