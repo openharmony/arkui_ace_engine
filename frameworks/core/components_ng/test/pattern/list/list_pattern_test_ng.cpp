@@ -26,12 +26,13 @@
 #include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
-#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
-#include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/list/list_position_controller.h"
+#include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -100,10 +101,21 @@ struct ListItemGroupTestProperty {
 
 class ListPatternTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
     static RefPtr<FrameNode> CreateListParagraph(const TestProperty& testProperty);
-    static RefPtr<FrameNode> CreateListItemGroupParagraph(
-        const ListItemGroupTestProperty& listItemGroupTestProperty);
+    static RefPtr<FrameNode> CreateListItemGroupParagraph(const ListItemGroupTestProperty& listItemGroupTestProperty);
 };
+
+void ListPatternTestNg::SetUpTestSuite()
+{
+    MockPipelineBase::SetUp();
+}
+
+void ListPatternTestNg::TearDownTestSuite()
+{
+    MockPipelineBase::TearDown();
+}
 
 RefPtr<FrameNode> ListPatternTestNg::CreateListParagraph(const TestProperty& testProperty)
 {
@@ -115,10 +127,8 @@ RefPtr<FrameNode> ListPatternTestNg::CreateListParagraph(const TestProperty& tes
     if (testProperty.initialIndexValue.has_value()) {
         listModelNG.SetInitialIndex(testProperty.initialIndexValue.value());
     }
-    if (testProperty.scrollControllerBasePtr.has_value() &&
-        testProperty.scrollBarProxyPtr.has_value()) {
-            listModelNG.SetScroller(testProperty.scrollControllerBasePtr.value(),
-                testProperty.scrollBarProxyPtr.value());
+    if (testProperty.scrollControllerBasePtr.has_value() && testProperty.scrollBarProxyPtr.has_value()) {
+        listModelNG.SetScroller(testProperty.scrollControllerBasePtr.value(), testProperty.scrollBarProxyPtr.value());
     }
     if (testProperty.listDirectionValue.has_value()) {
         listModelNG.SetListDirection(testProperty.listDirectionValue.value());
@@ -164,7 +174,7 @@ RefPtr<FrameNode> ListPatternTestNg::CreateListItemGroupParagraph(
     if (listItemGroupTestProperty.itemDividerValue.has_value()) {
         listItemGroupModelNG.SetDivider(listItemGroupTestProperty.itemDividerValue.value());
     }
-    
+
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     return AceType::DynamicCast<FrameNode>(element);
 }
@@ -241,7 +251,7 @@ HWTEST_F(ListPatternTestNg, ListTest002, TestSize.Level1)
     testProperty.initialIndexValue = std::make_optional(INITIAL_INDEX_VALUE);
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
     testProperty.cachedCountValue = std::make_optional(CACHED_COUNT_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -263,8 +273,7 @@ HWTEST_F(ListPatternTestNg, ListTest002, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -272,8 +281,8 @@ HWTEST_F(ListPatternTestNg, ListTest002, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -283,7 +292,7 @@ HWTEST_F(ListPatternTestNg, ListTest002, TestSize.Level1)
      */
     auto listLayoutAlgorithm = ListLayoutAlgorithm();
     listLayoutAlgorithm.jumpIndex_ = 0;
-    
+
     listLayoutAlgorithm.Measure(&layoutWrapper);
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
         EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos,
@@ -291,7 +300,7 @@ HWTEST_F(ListPatternTestNg, ListTest002, TestSize.Level1)
         EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].endPos,
             (index - INITIAL_INDEX_VALUE) * (SPACE_VALUE.Value() + LIST_ITEM_HEIGHT) + LIST_ITEM_HEIGHT);
     }
-    
+
     listLayoutAlgorithm.Layout(&layoutWrapper);
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
         auto childWrapper = layoutWrapper.GetOrCreateChildByIndex(index);
@@ -329,8 +338,7 @@ HWTEST_F(ListPatternTestNg, ListTest003, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.Reset();
-    OptionalSizeF idealSize = OptionalSizeF(LIST_ITEM_WIDTH * LANES_VALUE,
-        LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
+    OptionalSizeF idealSize = OptionalSizeF(LIST_ITEM_WIDTH * LANES_VALUE, LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
     layoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(idealSize);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
@@ -341,8 +349,7 @@ HWTEST_F(ListPatternTestNg, ListTest003, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -350,8 +357,8 @@ HWTEST_F(ListPatternTestNg, ListTest003, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -402,11 +409,9 @@ HWTEST_F(ListPatternTestNg, ListTest004, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.Reset();
-    OptionalSizeF idealSize = OptionalSizeF(LIST_WIDTH_CONSTRAINT_CASE1_VALUE,
-        LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
+    OptionalSizeF idealSize = OptionalSizeF(LIST_WIDTH_CONSTRAINT_CASE1_VALUE, LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
     layoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(idealSize);
-    layoutConstraint.maxSize = SizeF(LIST_WIDTH_CONSTRAINT_CASE1_VALUE,
-        LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
+    layoutConstraint.maxSize = SizeF(LIST_WIDTH_CONSTRAINT_CASE1_VALUE, LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
@@ -416,8 +421,7 @@ HWTEST_F(ListPatternTestNg, ListTest004, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -425,8 +429,8 @@ HWTEST_F(ListPatternTestNg, ListTest004, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -477,11 +481,9 @@ HWTEST_F(ListPatternTestNg, ListTest005, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.Reset();
-    OptionalSizeF idealSize = OptionalSizeF(LIST_WIDTH_CONSTRAINT_CASE2_VALUE,
-        LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
+    OptionalSizeF idealSize = OptionalSizeF(LIST_WIDTH_CONSTRAINT_CASE2_VALUE, LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
     layoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(idealSize);
-    layoutConstraint.maxSize = SizeF(LIST_WIDTH_CONSTRAINT_CASE2_VALUE,
-        LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
+    layoutConstraint.maxSize = SizeF(LIST_WIDTH_CONSTRAINT_CASE2_VALUE, LIST_ITEM_HEIGHT * LIST_ITEM_NUMBER);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
@@ -491,8 +493,7 @@ HWTEST_F(ListPatternTestNg, ListTest005, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -500,8 +501,8 @@ HWTEST_F(ListPatternTestNg, ListTest005, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -538,7 +539,7 @@ HWTEST_F(ListPatternTestNg, ListTest006, TestSize.Level1)
     TestProperty testProperty;
     testProperty.initialIndexValue = std::make_optional(INITIAL_INDEX_VALUE);
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE2_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -560,8 +561,7 @@ HWTEST_F(ListPatternTestNg, ListTest006, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -569,8 +569,8 @@ HWTEST_F(ListPatternTestNg, ListTest006, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -580,13 +580,13 @@ HWTEST_F(ListPatternTestNg, ListTest006, TestSize.Level1)
      */
     auto listLayoutAlgorithm = ListLayoutAlgorithm();
     listLayoutAlgorithm.jumpIndex_ = 0;
-    
+
     listLayoutAlgorithm.Measure(&layoutWrapper);
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
         EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos, index * LIST_ITEM_WIDTH);
         EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].endPos, (index + 1) * LIST_ITEM_WIDTH);
     }
-    
+
     listLayoutAlgorithm.Layout(&layoutWrapper);
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
         auto childWrapper = layoutWrapper.GetOrCreateChildByIndex(index);
@@ -610,7 +610,7 @@ HWTEST_F(ListPatternTestNg, ListTest007, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -632,8 +632,7 @@ HWTEST_F(ListPatternTestNg, ListTest007, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -641,8 +640,8 @@ HWTEST_F(ListPatternTestNg, ListTest007, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -652,13 +651,11 @@ HWTEST_F(ListPatternTestNg, ListTest007, TestSize.Level1)
      */
     auto listLayoutAlgorithm = ListLayoutAlgorithm();
     listLayoutAlgorithm.jumpIndex_ = JUMP_INDEX;
-    
+
     listLayoutAlgorithm.Measure(&layoutWrapper);
     for (int32_t index = JUMP_INDEX; index < END_INDEX; index++) {
-        EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos,
-            (index - JUMP_INDEX) * LIST_ITEM_HEIGHT);
-        EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].endPos,
-            (index - JUMP_INDEX + 1) * LIST_ITEM_HEIGHT);
+        EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos, (index - JUMP_INDEX) * LIST_ITEM_HEIGHT);
+        EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].endPos, (index - JUMP_INDEX + 1) * LIST_ITEM_HEIGHT);
     }
 }
 
@@ -674,7 +671,7 @@ HWTEST_F(ListPatternTestNg, ListTest008, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -696,8 +693,7 @@ HWTEST_F(ListPatternTestNg, ListTest008, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -705,18 +701,18 @@ HWTEST_F(ListPatternTestNg, ListTest008, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
-    
+
     /**
      * @tc.steps: step4. jump to 0. do listLayoutAlgorithm Measure and compare values.
      * @tc.expected: step4. layout result equals expected result.
      */
     auto listLayoutAlgorithm = ListLayoutAlgorithm();
     listLayoutAlgorithm.jumpIndex_ = JUMP_INDEX_SPECIAL_CASE1;
-    
+
     listLayoutAlgorithm.Measure(&layoutWrapper);
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
         EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos, index * LIST_ITEM_HEIGHT);
@@ -737,7 +733,7 @@ HWTEST_F(ListPatternTestNg, ListTest009, TestSize.Level1)
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
     testProperty.cachedCountValue = std::make_optional(CACHED_COUNT_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -762,8 +758,7 @@ HWTEST_F(ListPatternTestNg, ListTest009, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -771,8 +766,8 @@ HWTEST_F(ListPatternTestNg, ListTest009, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -782,7 +777,7 @@ HWTEST_F(ListPatternTestNg, ListTest009, TestSize.Level1)
      */
     auto listLayoutAlgorithm = ListLayoutAlgorithm();
     listLayoutAlgorithm.jumpIndex_ = JUMP_INDEX_SPECIAL_CASE2;
-    
+
     listLayoutAlgorithm.Measure(&layoutWrapper);
     int32_t expected = LIST_HEIGHT_LIMIT / LIST_ITEM_HEIGHT;
     for (int32_t index = START_INDEX; index < expected; index++) {
@@ -803,7 +798,7 @@ HWTEST_F(ListPatternTestNg, ListTest010, TestSize.Level1)
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
     testProperty.cachedCountValue = std::make_optional(CACHED_COUNT_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -829,7 +824,7 @@ HWTEST_F(ListPatternTestNg, ListTest010, TestSize.Level1)
      */
     auto listLayoutAlgorithm = ListLayoutAlgorithm();
     listLayoutAlgorithm.jumpIndex_ = 0;
-    
+
     listLayoutAlgorithm.Measure(&layoutWrapper);
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
         EXPECT_EQ(listLayoutAlgorithm.itemPosition_[index].startPos, 0);
@@ -851,7 +846,7 @@ HWTEST_F(ListPatternTestNg, ListTest011, TestSize.Level1)
     OptionalSizeF selfIdealSize;
     LayoutConstraintF contentConstraint;
     Axis axis;
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case1: axis is VERTICAL, selfIdealSize has no value
@@ -860,7 +855,7 @@ HWTEST_F(ListPatternTestNg, ListTest011, TestSize.Level1)
     axis = Axis::VERTICAL;
     listLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
     EXPECT_EQ(contentConstraint.maxSize.Width(), Infinity<float>());
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case2: axis is VERTICAL, selfIdealSize has value
@@ -878,7 +873,7 @@ HWTEST_F(ListPatternTestNg, ListTest011, TestSize.Level1)
     axis = Axis::HORIZONTAL;
     listLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
     EXPECT_EQ(contentConstraint.maxSize.Height(), Infinity<float>());
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case4: axis is HORIZONTAL, selfIdealSize has value
@@ -900,7 +895,7 @@ HWTEST_F(ListPatternTestNg, ListTest012, TestSize.Level1)
      * @tc.steps: step1. create listLayoutAlgorithm and input.
      */
     ListLayoutAlgorithm listLayoutAlgorithm;
-    
+
     /**
      * @tc.steps: step2. call function and compare.
      * @tc.steps: case1: itemPosition is empty
@@ -938,24 +933,22 @@ HWTEST_F(ListPatternTestNg, ListTest013, TestSize.Level1)
      * @tc.expected: step1. getLayoutAlgorithm.
      */
     ListLayoutAlgorithm listLayoutAlgorithm;
-    
+
     /**
      * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
      * @tc.steps: case1: crossSize == childCrossSize
      * @tc.expected: step2. function result equals expected result.
      */
-    auto result = listLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
+    auto result = listLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
     EXPECT_EQ(result, 0);
-    
+
     /**
      * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
      * @tc.steps: case2: crossSize > childCrossSize, itemAlign_ is START
      * @tc.expected: step2. function result equals expected result.
      */
     listLayoutAlgorithm.listItemAlign_ = OHOS::Ace::V2::ListItemAlign::START;
-    result = listLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    result = listLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
     EXPECT_EQ(result, 0);
 
     /**
@@ -965,8 +958,7 @@ HWTEST_F(ListPatternTestNg, ListTest013, TestSize.Level1)
      */
     constexpr float half = 0.5f;
     listLayoutAlgorithm.listItemAlign_ = OHOS::Ace::V2::ListItemAlign::CENTER;
-    result = listLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    result = listLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
     EXPECT_EQ(result, half * (CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE2));
 
     /**
@@ -975,8 +967,7 @@ HWTEST_F(ListPatternTestNg, ListTest013, TestSize.Level1)
      * @tc.expected: step2. function result equals expected result.
      */
     listLayoutAlgorithm.listItemAlign_ = OHOS::Ace::V2::ListItemAlign::END;
-    result = listLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    result = listLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
     EXPECT_EQ(result, CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE2);
 }
 
@@ -993,7 +984,7 @@ HWTEST_F(ListPatternTestNg, ListTest014, TestSize.Level1)
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
     testProperty.cachedCountValue = std::make_optional(CACHED_COUNT_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -1009,33 +1000,31 @@ HWTEST_F(ListPatternTestNg, ListTest014, TestSize.Level1)
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
     LayoutWrapper layoutWrapper = LayoutWrapper(frameNode, geometryNode, layoutProperty);
-    
+
     /**
      * @tc.steps: step3. add head layoutWrapper to listItemGroup frameNode layoutWrapper.
      * @tc.expected: step3. create layoutWrapper success.
      */
-    auto headFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-        AceType::MakeRefPtr<Pattern>());
+    auto headFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
     ViewStackProcessor::GetInstance()->Push(headFrameNode);
     RefPtr<GeometryNode> headGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     headGeometryNode->SetFrameSize(SizeF(LIST_ITEM_GROUP_HEAD_VALUE, LIST_ITEM_GROUP_HEAD_VALUE));
     RefPtr<LayoutProperty> headLayoutProperty = headFrameNode->GetLayoutProperty();
-    RefPtr<LayoutWrapper> headLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-        headFrameNode, headGeometryNode, headLayoutProperty);
+    RefPtr<LayoutWrapper> headLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(headFrameNode, headGeometryNode, headLayoutProperty);
     layoutWrapper.AppendChild(std::move(headLayoutWrapper));
 
     /**
      * @tc.steps: step4. add foot layoutWrapper to listItemGroup frameNode layoutWrapper.
      * @tc.expected: step4. create layoutWrapper success.
      */
-    auto footFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-        AceType::MakeRefPtr<Pattern>());
+    auto footFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
     ViewStackProcessor::GetInstance()->Push(footFrameNode);
     RefPtr<GeometryNode> footGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     footGeometryNode->SetFrameSize(SizeF(LIST_ITEM_GROUP_FOOT_VALUE, LIST_ITEM_GROUP_FOOT_VALUE));
     RefPtr<LayoutProperty> footLayoutProperty = footFrameNode->GetLayoutProperty();
-    RefPtr<LayoutWrapper> footLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-        footFrameNode, footGeometryNode, footLayoutProperty);
+    RefPtr<LayoutWrapper> footLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(footFrameNode, footGeometryNode, footLayoutProperty);
     layoutWrapper.AppendChild(std::move(footLayoutWrapper));
 
     /**
@@ -1111,7 +1100,7 @@ HWTEST_F(ListPatternTestNg, ListItemGroupTest008, TestSize.Level1)
     LayoutConstraintF contentConstraint;
     listItemGroupLayoutAlgorithm.axis_ = Axis::VERTICAL;
     listItemGroupLayoutAlgorithm.lanes_ = 1;
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case1: axis is VERTICAL, selfIdealSize has no value
@@ -1119,7 +1108,7 @@ HWTEST_F(ListPatternTestNg, ListItemGroupTest008, TestSize.Level1)
      */
     listItemGroupLayoutAlgorithm.UpdateListItemConstraint(selfIdealSize, contentConstraint);
     EXPECT_EQ(contentConstraint.maxSize.Width(), Infinity<float>());
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case2: axis is VERTICAL, selfIdealSize has value
@@ -1139,7 +1128,7 @@ HWTEST_F(ListPatternTestNg, ListItemGroupTest008, TestSize.Level1)
     listItemGroupLayoutAlgorithm.axis_ = Axis::HORIZONTAL;
     listItemGroupLayoutAlgorithm.UpdateListItemConstraint(selfIdealSize, contentConstraint);
     EXPECT_EQ(contentConstraint.maxSize.Height(), Infinity<float>());
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case4: axis is HORIZONTAL, selfIdealSize has value
@@ -1164,24 +1153,22 @@ HWTEST_F(ListPatternTestNg, ListItemGroupTest009, TestSize.Level1)
      * @tc.expected: step1. getLayoutAlgorithm.
      */
     auto listItemGroupLayoutAlgorithm = ListItemGroupLayoutAlgorithm(-1, -1, 0);
-    
+
     /**
      * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
      * @tc.steps: case1: crossSize == childCrossSize
      * @tc.expected: step2. function result equals expected result.
      */
-    auto result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
+    auto result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
     EXPECT_EQ(result, 0);
-    
+
     /**
      * @tc.steps: step2. call CalculateLaneCrossOffset function and compare.
      * @tc.steps: case2: crossSize > childCrossSize, itemAlign_ is START
      * @tc.expected: step2. function result equals expected result.
      */
     listItemGroupLayoutAlgorithm.itemAlign_ = OHOS::Ace::V2::ListItemAlign::START;
-    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
     EXPECT_EQ(result, 0);
 
     /**
@@ -1191,8 +1178,7 @@ HWTEST_F(ListPatternTestNg, ListItemGroupTest009, TestSize.Level1)
      */
     constexpr float half = 0.5f;
     listItemGroupLayoutAlgorithm.itemAlign_ = OHOS::Ace::V2::ListItemAlign::CENTER;
-    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
     EXPECT_EQ(result, half * (CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE2));
 
     /**
@@ -1201,8 +1187,7 @@ HWTEST_F(ListPatternTestNg, ListItemGroupTest009, TestSize.Level1)
      * @tc.expected: step2. function result equals expected result.
      */
     listItemGroupLayoutAlgorithm.itemAlign_ = OHOS::Ace::V2::ListItemAlign::END;
-    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    result = listItemGroupLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
     EXPECT_EQ(result, CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE2);
 }
 
@@ -1222,7 +1207,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest001, TestSize.Level1)
     LayoutConstraintF contentConstraint;
     Axis axis = Axis::VERTICAL;
     listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case1: axis is VERTICAL, selfIdealSize has no value
@@ -1230,7 +1215,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest001, TestSize.Level1)
      */
     listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
     EXPECT_EQ(contentConstraint.maxSize.Width(), Infinity<float>());
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case2: axis is VERTICAL, selfIdealSize has value
@@ -1281,7 +1266,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest002, TestSize.Level1)
     LayoutConstraintF contentConstraint;
     Axis axis = Axis::HORIZONTAL;
     listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case1: axis is HORIZONTAL, selfIdealSize has no value
@@ -1289,7 +1274,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest002, TestSize.Level1)
      */
     listLanesLayoutAlgorithm.UpdateListItemConstraint(axis, selfIdealSize, contentConstraint);
     EXPECT_EQ(contentConstraint.maxSize.Height(), Infinity<float>());
-    
+
     /**
      * @tc.steps: step2. create selfIdealSize and contentConstraintSize, call function and compare.
      * @tc.steps: case2: axis is HORIZONTAL, selfIdealSize has value
@@ -1366,15 +1351,14 @@ HWTEST_F(ListPatternTestNg, ListLanesTest004, TestSize.Level1)
      * @tc.expected: step1. getLayoutAlgorithm.
      */
     ListLanesLayoutAlgorithm listLanesLayoutAlgorithm;
-    
+
     /**
      * @tc.steps: step2. call calculateLaneCrossOffset function and compare.
      * @tc.steps: case1: special case, lanes_ <= 0
      * @tc.expected: step2. result equals expected result.
      */
     listLanesLayoutAlgorithm.lanes_ = 0;
-    auto result = listLanesLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
+    auto result = listLanesLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE2);
     EXPECT_EQ(result, 0);
 
     /**
@@ -1383,8 +1367,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest004, TestSize.Level1)
      * @tc.expected: step2. result equals expected result.
      */
     listLanesLayoutAlgorithm.lanes_ = LANES_VALUE;
-    result = listLanesLayoutAlgorithm.CalculateLaneCrossOffset(
-        CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
+    result = listLanesLayoutAlgorithm.CalculateLaneCrossOffset(CROSS_SIZE_CASE, CHILD_CROSS_SIZE_CASE1);
     EXPECT_EQ(result, (CROSS_SIZE_CASE - CHILD_CROSS_SIZE_CASE1) / LANES_VALUE);
 }
 
@@ -1406,7 +1389,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest005, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -1428,8 +1411,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest005, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1437,8 +1419,8 @@ HWTEST_F(ListPatternTestNg, ListLanesTest005, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -1470,7 +1452,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest006, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and layoutWrapper.
      * @tc.expected: step2. create layoutWrapper success.
@@ -1492,8 +1474,7 @@ HWTEST_F(ListPatternTestNg, ListLanesTest006, TestSize.Level1)
      * @tc.expected: step3. create layoutWrapper success.
      */
     for (int32_t index = START_INDEX; index < END_INDEX; index++) {
-        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0,
-            AceType::MakeRefPtr<Pattern>());
+        auto childFrameNode = FrameNode::CreateFrameNode(LIST_ITEM_TYPE, 0, AceType::MakeRefPtr<Pattern>());
         EXPECT_NE(childFrameNode, nullptr);
         ViewStackProcessor::GetInstance()->Push(childFrameNode);
         RefPtr<GeometryNode> childGeometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -1501,8 +1482,8 @@ HWTEST_F(ListPatternTestNg, ListLanesTest006, TestSize.Level1)
         childGeometryNode->SetFrameSize(SizeF(LIST_ITEM_WIDTH, LIST_ITEM_HEIGHT));
         RefPtr<LayoutProperty> childLayoutProperty = childFrameNode->GetLayoutProperty();
         EXPECT_NE(childLayoutProperty, nullptr);
-        RefPtr<LayoutWrapper> childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(
-            childFrameNode, childGeometryNode, childLayoutProperty);
+        RefPtr<LayoutWrapper> childLayoutWrapper =
+            AceType::MakeRefPtr<LayoutWrapper>(childFrameNode, childGeometryNode, childLayoutProperty);
         layoutWrapper.AppendChild(std::move(childLayoutWrapper));
     }
 
@@ -1527,7 +1508,7 @@ HWTEST_F(ListPatternTestNg, ListEvent001, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and eventHub.
      * @tc.expected: step2. create eventHub success.
@@ -1558,7 +1539,7 @@ HWTEST_F(ListPatternTestNg, ListEvent002, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and eventHub.
      * @tc.expected: step2. create eventHub success.
@@ -1592,7 +1573,7 @@ HWTEST_F(ListPatternTestNg, ListEvent003, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and eventHub.
      * @tc.expected: step2. create eventHub success.
@@ -1642,7 +1623,7 @@ HWTEST_F(ListPatternTestNg, ListEvent004, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and eventHub.
      * @tc.expected: step2. create eventHub success.
@@ -1691,7 +1672,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest001, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
@@ -1720,7 +1701,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest001, TestSize.Level1)
     listPattern->axis_ = Axis::NONE;
     listPattern->OnModifyDone();
     EXPECT_EQ(listPattern->scrollableEvent_->axis_, Axis::VERTICAL);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and eventHub.
      * @tc.steps: case3: axis same, !scrollEffect_
@@ -1729,7 +1710,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest001, TestSize.Level1)
     listPattern->scrollEffect_ = nullptr;
     listPattern->OnModifyDone();
     EXPECT_NE(listPattern->scrollEffect_, nullptr);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and eventHub.
      * @tc.steps: case3: axis same, scrollEffect_, scrollEffect = NONE
@@ -1738,7 +1719,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest001, TestSize.Level1)
     listPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::NONE);
     listPattern->OnModifyDone();
     EXPECT_NE(listPattern->scrollEffect_, nullptr);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and eventHub.
      * @tc.steps: case4: axis same, scrollEffect_, scrollEffect = SPRING
@@ -1764,7 +1745,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest002, TestSize.Level1)
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
     testProperty.edgeEffectValue = std::make_optional(EDGE_EFFECT_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
@@ -1773,7 +1754,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest002, TestSize.Level1)
     listPattern->scrollEffect_ = nullptr;
     listPattern->OnModifyDone();
     EXPECT_EQ(listPattern->scrollEffect_, nullptr);
-    
+
     /**
      * @tc.steps: step2. create list frameNode and eventHub.
      * @tc.steps: case6: edgeEffect NONE, scrollEffect
@@ -1796,15 +1777,14 @@ HWTEST_F(ListPatternTestNg, ListPatternTest003, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<LayoutAlgorithm> layoutAlgorithm = layoutWrapper->GetLayoutAlgorithm();
     layoutWrapper->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm);
     DirtySwapConfig config;
@@ -1831,7 +1811,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest003, TestSize.Level1)
     config.skipLayout = false;
     result = listPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(result);
-    
+
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
      * @tc.steps: case3: !config.skipMeasure, config.skipLayout, jumpIndex_, itemPosition empty
@@ -1843,7 +1823,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest003, TestSize.Level1)
     listPattern->itemPosition_.clear();
     result = listPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(result);
-    
+
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
      * @tc.steps: case4: !config.skipMeasure, !config.skipLayout, jumpIndex_, itemPosition not empty
@@ -1871,15 +1851,14 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     auto listEventHub = frameNode->GetEventHub<ListEventHub>();
@@ -1904,7 +1883,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
     listPattern->scrollStop_ = true;
     listPattern->ProcessEvent(true, 0, false, 0, 0);
     EXPECT_EQ(listPattern->scrollStop_, false);
-    
+
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
      * @tc.steps: case3: onScroll, finalOffset!=0; indexChanged, onScrollIndex,
@@ -1920,7 +1899,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
     listPattern->scrollStop_ = true;
     listPattern->ProcessEvent(true, 1, false, 0, 0);
     EXPECT_EQ(listPattern->scrollStop_, false);
-    
+
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
      * @tc.steps: case4: onScroll, finalOffset=0, SCROLL_FROM_UPDATE
@@ -1941,7 +1920,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest004, TestSize.Level1)
      */
     listPattern->scrollState_ = SCROLL_FROM_ANIMATION;
     listPattern->ProcessEvent(true, 0, false, 0, 0);
-    
+
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
      * @tc.steps: case6: onScroll, finalOffset=0, SCROLL_FROM_ANIMATION_SPRING
@@ -1973,15 +1952,14 @@ HWTEST_F(ListPatternTestNg, ListPatternTest005, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     ListItemInfo listItemInfo;
@@ -2052,19 +2030,18 @@ HWTEST_F(ListPatternTestNg, ListPatternTest006, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     RefPtr<LayoutAlgorithm> result;
-    
+
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
      * @tc.steps: case1: no lanes, no LaneMin, no LaneMax, no jumpIndex_, not outOfBoundary
@@ -2093,7 +2070,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest006, TestSize.Level1)
     testProperty1.lanesValue = std::make_optional(LANES_VALUE);
     testProperty1.laneMinLengthValue = std::make_optional(LANE_MIN_LENGTH_CASE1_VALUE);
     testProperty1.laneMaxlengthValue = std::make_optional(LANE_MAX_LENGTH_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode1, nullptr);
     RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
@@ -2112,19 +2089,18 @@ HWTEST_F(ListPatternTestNg, ListPatternTest007, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     bool result;
-    
+
     /**
      * @tc.steps: step2. call OnDirtyLayoutWrapperSwap function
      * @tc.steps: case1: no scrollEffect, !isScrollContent
@@ -2181,15 +2157,14 @@ HWTEST_F(ListPatternTestNg, ListPatternTest008, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     bool result;
@@ -2273,15 +2248,14 @@ HWTEST_F(ListPatternTestNg, ListPatternTest009, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     bool result;
@@ -2317,15 +2291,14 @@ HWTEST_F(ListPatternTestNg, ListPatternTest010, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
 
@@ -2376,15 +2349,14 @@ HWTEST_F(ListPatternTestNg, ListPatternTest011, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapper> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
+    RefPtr<LayoutWrapper> layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(frameNode, geometryNode, layoutProperty);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     RefPtr<ScrollEdgeEffect> scrollEffect;
@@ -2449,7 +2421,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
@@ -2478,13 +2450,13 @@ HWTEST_F(ListPatternTestNg, ListPatternTest012, TestSize.Level1)
      */
     TestProperty testProperty1;
     testProperty1.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE2_VALUE);
-    
+
     RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty1);
     ASSERT_NE(frameNode1, nullptr);
     RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
     ASSERT_NE(listPattern1, nullptr);
     listPattern1->axis_ = LIST_DIRECTION_CASE2_VALUE;
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case3: HORIZONTAL, KEY_DPAD_LEFT, next != scroll
@@ -2515,12 +2487,12 @@ HWTEST_F(ListPatternTestNg, ListPatternTest013, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: animator is nullptr
@@ -2563,12 +2535,12 @@ HWTEST_F(ListPatternTestNg, ListPatternTest014, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: index == -1
@@ -2576,7 +2548,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest014, TestSize.Level1)
      */
     listPattern->ScrollToIndex(-1);
     EXPECT_EQ(listPattern->jumpIndex_, -1);
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case2: index >= 0
@@ -2585,7 +2557,7 @@ HWTEST_F(ListPatternTestNg, ListPatternTest014, TestSize.Level1)
     listPattern->maxListItemIndex_ = LIST_ITEM_NUMBER;
     listPattern->ScrollToIndex(1);
     EXPECT_EQ(listPattern->jumpIndex_, 1);
-    
+
     /**
      * @tc.steps: step3. call function
      * @tc.steps: case3: index < -2
@@ -2608,12 +2580,12 @@ HWTEST_F(ListPatternTestNg, ListPatternTest015, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: ScrollEdgeType::SCROLL_TOP
@@ -2653,13 +2625,13 @@ HWTEST_F(ListPatternTestNg, ListPatternTest016, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     Offset result;
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: VERTICAL
@@ -2675,13 +2647,13 @@ HWTEST_F(ListPatternTestNg, ListPatternTest016, TestSize.Level1)
      */
     TestProperty testProperty1;
     testProperty1.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE2_VALUE);
-    
+
     RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty1);
     ASSERT_NE(frameNode1, nullptr);
     RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
     ASSERT_NE(listPattern1, nullptr);
     listPattern1->axis_ = LIST_DIRECTION_CASE2_VALUE;
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: VERTICAL
@@ -2705,12 +2677,12 @@ HWTEST_F(ListPatternTestNg, ListPatternTest017, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: DisplayMode::OFF, no scrollBar, no touchEvent, !isInitialized_
@@ -2776,12 +2748,12 @@ HWTEST_F(ListPatternTestNg, ListPatternTest018, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
     RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: itemPosition is empty
@@ -2879,26 +2851,23 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest001, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(Axis::NONE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<ListPattern> listPattern =
-        AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
     listPattern->axis_ = Axis::NONE;
-    RefPtr<ListPositionController> positionController =
-        AceType::MakeRefPtr<ListPositionController>();
+    RefPtr<ListPositionController> positionController = AceType::MakeRefPtr<ListPositionController>();
     ASSERT_NE(positionController, nullptr);
     bool result = false;
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: !listPattern
      * @tc.expected: step2. equal.
      */
     result = positionController->AnimateTo(Dimension(0), 0, nullptr);
-    EXPECT_EQ(
-        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_EQ(AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
     EXPECT_FALSE(result);
 
     /**
@@ -2908,8 +2877,7 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest001, TestSize.Level1)
      */
     positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
     result = positionController->AnimateTo(Dimension(0), 0, nullptr);
-    EXPECT_NE(
-        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_NE(AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
     EXPECT_FALSE(result);
 }
 
@@ -2925,19 +2893,17 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest002, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(Axis::VERTICAL);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<ListPattern> listPattern =
-        AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
-    RefPtr<ListPositionController> positionController =
-        AceType::MakeRefPtr<ListPositionController>();
+    RefPtr<ListPositionController> positionController = AceType::MakeRefPtr<ListPositionController>();
     ASSERT_NE(positionController, nullptr);
     bool result = false;
     positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
     Dimension position;
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case3: Unit is PERCENT, return
@@ -2945,8 +2911,7 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest002, TestSize.Level1)
      */
     position = Dimension(1, DimensionUnit::PERCENT);
     result = positionController->AnimateTo(position, 0, nullptr);
-    EXPECT_NE(
-        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_NE(AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
     EXPECT_FALSE(result);
 
     /**
@@ -2956,8 +2921,7 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest002, TestSize.Level1)
      */
     position = Dimension(1, DimensionUnit::PX);
     result = positionController->AnimateTo(position, 0, nullptr);
-    EXPECT_NE(
-        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_NE(AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
     EXPECT_TRUE(result);
 
     /**
@@ -2967,8 +2931,7 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest002, TestSize.Level1)
      */
     position = Dimension(1, DimensionUnit::PX);
     result = positionController->AnimateTo(position, 1, nullptr);
-    EXPECT_NE(
-        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_NE(AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
     EXPECT_TRUE(result);
 }
 
@@ -2984,17 +2947,15 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest003, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(Axis::VERTICAL);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<ListPattern> listPattern =
-        AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
-    RefPtr<ListPositionController> positionController =
-        AceType::MakeRefPtr<ListPositionController>();
+    RefPtr<ListPositionController> positionController = AceType::MakeRefPtr<ListPositionController>();
     ASSERT_NE(positionController, nullptr);
     positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: VERTICAL
@@ -3008,17 +2969,15 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest003, TestSize.Level1)
      */
     TestProperty testProperty1;
     testProperty1.listDirectionValue = std::make_optional(Axis::HORIZONTAL);
-    
+
     RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty1);
     ASSERT_NE(frameNode1, nullptr);
-    RefPtr<ListPattern> listPattern1 =
-        AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
+    RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
     ASSERT_NE(listPattern1, nullptr);
-    RefPtr<ListPositionController> positionController1 =
-        AceType::MakeRefPtr<ListPositionController>();
+    RefPtr<ListPositionController> positionController1 = AceType::MakeRefPtr<ListPositionController>();
     EXPECT_NE(positionController1, nullptr);
     positionController1->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern1));
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: VERTICAL
@@ -3040,16 +2999,14 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest004, TestSize.Level1)
      */
     TestProperty testProperty;
     testProperty.listDirectionValue = std::make_optional(Axis::NONE);
-    
+
     RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<ListPattern> listPattern =
-        AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
+    RefPtr<ListPattern> listPattern = AceType::DynamicCast<ListPattern>(frameNode->GetPattern());
     ASSERT_NE(listPattern, nullptr);
-    RefPtr<ListPositionController> positionController =
-        AceType::MakeRefPtr<ListPositionController>();
+    RefPtr<ListPositionController> positionController = AceType::MakeRefPtr<ListPositionController>();
     ASSERT_NE(positionController, nullptr);
-    
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case1: no listPattern
@@ -3057,9 +3014,8 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest004, TestSize.Level1)
      */
     positionController->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     positionController->ScrollPage(true, true);
-    EXPECT_EQ(
-        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
-    
+    EXPECT_EQ(AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+
     /**
      * @tc.steps: step2. call function
      * @tc.steps: case2: listPattern, direction is NONE
@@ -3068,22 +3024,19 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest004, TestSize.Level1)
     positionController->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern));
     positionController->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     positionController->ScrollPage(true, true);
-    EXPECT_NE(
-        AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
+    EXPECT_NE(AceType::DynamicCast<ListPattern>(positionController->scroll_.Upgrade()), nullptr);
 
     /**
      * @tc.steps: step1. create listTestProperty and set properties of it.
      */
     TestProperty testProperty1;
     testProperty1.listDirectionValue = std::make_optional(Axis::VERTICAL);
-    
+
     RefPtr<FrameNode> frameNode1 = CreateListParagraph(testProperty1);
     ASSERT_NE(frameNode1, nullptr);
-    RefPtr<ListPattern> listPattern1 =
-        AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
+    RefPtr<ListPattern> listPattern1 = AceType::DynamicCast<ListPattern>(frameNode1->GetPattern());
     ASSERT_NE(listPattern1, nullptr);
-    RefPtr<ListPositionController> positionController1 =
-        AceType::MakeRefPtr<ListPositionController>();
+    RefPtr<ListPositionController> positionController1 = AceType::MakeRefPtr<ListPositionController>();
     EXPECT_NE(positionController1, nullptr);
 
     /**
@@ -3094,8 +3047,7 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest004, TestSize.Level1)
     positionController1->scroll_ = AceType::WeakClaim(AceType::RawPtr(listPattern1));
     positionController1->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
     positionController1->ScrollPage(true, true);
-    EXPECT_NE(
-        AceType::DynamicCast<ListPattern>(positionController1->scroll_.Upgrade()), nullptr);
+    EXPECT_NE(AceType::DynamicCast<ListPattern>(positionController1->scroll_.Upgrade()), nullptr);
 }
 
 /**
@@ -3134,5 +3086,29 @@ HWTEST_F(ListPatternTestNg, ListPositionControllerTest005, TestSize.Level1)
     EXPECT_EQ(offset.GetX(), 0.f);
     EXPECT_EQ(offset.GetY(), 0.f);
 }
-} // namespace OHOS::Ace::NG
 
+/**
+ * @tc.name: ListPositionControllerTest006
+ * @tc.desc: Test list positionController GetScrollDirection, GetCurrentOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, ListPositionControllerTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create listTestProperty and set properties of it.
+     */
+    TestProperty testProperty;
+    testProperty.listDirectionValue = std::make_optional(LIST_DIRECTION_CASE1_VALUE);
+
+    /**
+     * @tc.steps: step2. Get frameNode, listRenderContext and listAccessibilityProperty.
+     */
+    RefPtr<FrameNode> frameNode = CreateListParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto listRenderContext = frameNode->GetRenderContext();
+    ASSERT_NE(listRenderContext, nullptr);
+    RefPtr<AccessibilityProperty> listAccessibilityProperty =
+        frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(listAccessibilityProperty, nullptr);
+}
+} // namespace OHOS::Ace::NG

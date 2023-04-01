@@ -111,6 +111,23 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto direction = swiperPattern->GetDirection();
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    const auto& swiperPaddingProperty = swiperLayoutProperty->GetPaddingProperty();
+    float swiperPaddingLeft = 0.0f;
+    float swiperPaddingRight = 0.0f;
+    float swiperPaddingTop = 0.0f;
+    float swiperPaddingBottom = 0.0f;
+    if (swiperPaddingProperty != nullptr) {
+        swiperPaddingLeft =
+            static_cast<float>(swiperPaddingProperty->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
+        swiperPaddingRight =
+            static_cast<float>(swiperPaddingProperty->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
+        swiperPaddingTop =
+            static_cast<float>(swiperPaddingProperty->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
+        swiperPaddingBottom =
+            static_cast<float>(swiperPaddingProperty->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
+    }
     auto layoutProperty = frameNode->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 
@@ -130,25 +147,26 @@ void DotIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     Dimension indicatorPositionDefault = 0.0_vp;
     if (left.has_value() && !NearEqual(left->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(left->Value()));
-        position.SetX(leftValue);
+        position.SetX(leftValue + swiperPaddingLeft);
     } else if (right.has_value() && !NearEqual(right->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth_, Dimension(right->Value()));
-        position.SetX(swiperWidth - indicatorWidth_ - rightValue);
+        position.SetX(swiperWidth - indicatorWidth_ - rightValue - swiperPaddingRight);
     } else {
-        position.SetX(
-            direction == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth_) * 0.5f : swiperWidth - indicatorWidth_);
+        position.SetX(direction == Axis::HORIZONTAL
+                          ? (swiperWidth - swiperPaddingRight + swiperPaddingLeft - indicatorWidth_) * 0.5f
+                          : swiperWidth - indicatorWidth_ - swiperPaddingRight);
     }
     if (top.has_value() && !NearEqual(top->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(top->Value()));
-        position.SetY(topValue);
+        position.SetY(topValue + swiperPaddingTop);
     } else if (bottom.has_value() && !NearEqual(bottom->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight_, Dimension(bottom->Value()));
-        position.SetY(swiperHeight - indicatorHeight_ - bottomValue);
+        position.SetY(swiperHeight - indicatorHeight_ - bottomValue - swiperPaddingBottom);
     } else {
         if (direction == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight - indicatorHeight_);
+            position.SetY(swiperHeight - indicatorHeight_ - swiperPaddingBottom);
         } else {
-            position.SetY((swiperHeight - indicatorHeight_) * 0.5f);
+            position.SetY((swiperHeight - swiperPaddingBottom + swiperPaddingTop - indicatorHeight_) * 0.5f);
         }
     }
     auto currentOffset = OffsetF {static_cast<float>(position.GetX()), static_cast<float>(position.GetY())};

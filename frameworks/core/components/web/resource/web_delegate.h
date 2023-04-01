@@ -235,7 +235,8 @@ class WebGeolocationOhos : public WebGeolocation {
     DECLARE_ACE_TYPE(WebGeolocationOhos, WebGeolocation)
 
 public:
-    WebGeolocationOhos(OHOS::NWeb::NWebGeolocationCallbackInterface* callback) : geolocationCallback_(callback) {}
+    WebGeolocationOhos(const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
+        : geolocationCallback_(callback) {}
 
     void Invoke(const std::string& origin, const bool& allow, const bool& retain) override;
 
@@ -428,15 +429,16 @@ public:
     void UpdateBlockNetwork(bool isNetworkBlocked);
     void UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled);
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
+    void UpdateScrollBarColor(const std::string& colorValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
     void PostWebMessage(std::string& message, std::vector<RefPtr<WebMessagePort>>& ports, std::string& uri);
     void ClosePort(std::string& handle);
     void PostPortMessage(std::string& handle, std::string& data);
     void SetPortMessageCallback(std::string& handle, std::function<void(const std::string&)>&& callback);
-    void HandleTouchDown(const int32_t& id, const double& x, const double& y);
-    void HandleTouchUp(const int32_t& id, const double& x, const double& y);
-    void HandleTouchMove(const int32_t& id, const double& x, const double& y);
+    void HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchCancel();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
@@ -460,6 +462,7 @@ public:
     void OnSelectPopupMenu(
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParam> params,
         std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuCallback> callback);
+    void SetShouldFrameSubmissionBeforeDraw(bool should);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -475,7 +478,9 @@ public:
     void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
     void OnGeolocationPermissionsShowPrompt(
-        const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback);
+        const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback);
+    void OnCompleteSwapWithNewSize();
+    void OnResizeNotWork();
     void OnRequestFocus();
     bool OnCommonDialog(const std::shared_ptr<BaseEventInfo>& info, DialogEventType dialogEventType);
     bool OnHttpAuthRequest(const std::shared_ptr<BaseEventInfo>& info);
@@ -510,6 +515,7 @@ public:
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
     void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs);
+    void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
 
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
     void RequestFocus();

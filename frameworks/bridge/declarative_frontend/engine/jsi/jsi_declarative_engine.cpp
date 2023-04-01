@@ -337,6 +337,12 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
 
+    // preload aceTrace
+    shared_ptr<JsValue> aceTraceObj = arkRuntime->NewObject();
+    aceTraceObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsiBaseUtils::JsTraceBegin));
+    aceTraceObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsiBaseUtils::JsTraceEnd));
+    global->SetProperty(arkRuntime, "aceTrace", aceTraceObj);
+
     // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
 
@@ -409,6 +415,12 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
     aceConsoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::JsWarnLogPrint));
     aceConsoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(runtime_, "aceConsole", aceConsoleObj);
+
+    // js framework trace method
+    shared_ptr<JsValue> aceTraceObj = runtime_->NewObject();
+    aceTraceObj->SetProperty(runtime_, "begin", runtime_->NewFunction(JsiBaseUtils::JsTraceBegin));
+    aceTraceObj->SetProperty(runtime_, "end", runtime_->NewFunction(JsiBaseUtils::JsTraceEnd));
+    global->SetProperty(runtime_, "aceTrace", aceTraceObj);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule(ArkNativeEngine* engine)
@@ -1188,12 +1200,13 @@ void JsiDeclarativeEngine::LoadJs(const std::string& url, const RefPtr<JsAcePage
     }
 }
 
-bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName)
+bool JsiDeclarativeEngine::LoadJsWithModule(const std::string& urlName,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     auto runtime = engineInstance_->GetJsRuntime();
     auto vm = const_cast<EcmaVM*>(std::static_pointer_cast<ArkJSRuntime>(runtime)->GetEcmaVm());
     if (!JSNApi::IsBundle(vm)) {
-        if (!runtime->ExecuteJsBin(urlName)) {
+        if (!runtime->ExecuteJsBin(urlName, errorCallback)) {
             LOGE("ExecuteJsBin %{private}s failed.", urlName.c_str());
         }
         return true;
@@ -1220,7 +1233,8 @@ bool JsiDeclarativeEngine::LoadFaAppSource()
 }
 
 // Load the js file of the page in NG structure..
-bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
+bool JsiDeclarativeEngine::LoadPageSource(const std::string& url,
+    const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadPageSource");
     LOGI("JsiDeclarativeEngine LoadJs %{private}s page", url.c_str());
@@ -1239,7 +1253,7 @@ bool JsiDeclarativeEngine::LoadPageSource(const std::string& url)
     }
 
 #if !defined(PREVIEW)
-    if (LoadJsWithModule(urlName.value())) {
+    if (LoadJsWithModule(urlName.value(), errorCallback)) {
         return true;
     }
 #else
@@ -1905,6 +1919,7 @@ bool JsiDeclarativeEngine::OnRestoreData(const std::string& data)
 }
 
 // ArkTsCard start
+#ifdef FORM_SUPPORTED
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 {
     JsiDeclarativeEngineInstance::PreloadAceModuleCard(runtime);
@@ -1949,6 +1964,11 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
     aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
     global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+    // preload aceTrace
+    shared_ptr<JsValue> aceTraceObj = arkRuntime->NewObject();
+    aceTraceObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsiBaseUtils::JsTraceBegin));
+    aceTraceObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsiBaseUtils::JsTraceEnd));
+    global->SetProperty(arkRuntime, "aceTrace", aceTraceObj);
     // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
     // preload exports and requireNative
@@ -1979,5 +1999,6 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
     cardRuntime_ = runtime;
     JSNApi::TriggerGC(vm, JSNApi::TRIGGER_GC_TYPE::FULL_GC);
 }
+#endif
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework

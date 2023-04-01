@@ -904,6 +904,10 @@ void AceContainer::AttachView(std::unique_ptr<Window> window, RSAceView* view, d
     auto state = flutter::UIDartState::Current()->GetStateById(instanceId);
     ACE_DCHECK(state != nullptr);
     auto rsTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
+    if (!rsTaskExecutor) {
+        LOGI("RsTaskExecutor is nullptr!");
+        return;
+    }
     rsTaskExecutor->InitOtherThreads(state->GetTaskRunners());
     if (type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::ETS_CARD) {
         // For DECLARATIVE_JS frontend display UI in JS thread temporarily.

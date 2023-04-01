@@ -28,6 +28,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
 
+    static void RequestKeyboardOnFocus(bool needToRequest);
     static void SetSearchButton(const JSCallbackInfo& info);
     static void SetSearchIcon(const JSCallbackInfo& info);
     static void SetCancelButton(const JSCallbackInfo& info);

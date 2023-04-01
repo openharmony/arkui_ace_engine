@@ -764,9 +764,16 @@ void GridPattern::UpdateScrollBarOffset()
 
 RefPtr<PaintProperty> GridPattern::CreatePaintProperty()
 {
+    auto defaultDisplayMode = DisplayMode::OFF;
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        defaultDisplayMode = DisplayMode::AUTO;
+    }
     auto property = MakeRefPtr<ScrollablePaintProperty>();
     // default "scrollBar" attribute of Grid is BarState.Off
-    property->UpdateScrollBarMode(NG::DisplayMode::OFF);
+    property->UpdateScrollBarMode(defaultDisplayMode);
     return property;
 }
 

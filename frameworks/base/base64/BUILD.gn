@@ -23,17 +23,10 @@ template("ace_base_base64") {
     include_dirs = []
     sources = []
 
-    if (enable_ng_build) {
-      deps += [
-        "$ace_flutter_engine_root_new:third_party_flutter_engine_dev_$platform",
-        "$ace_flutter_engine_root_new/third_party/skia:ace_skia_dev_$platform",
-      ]
-    } else {
-      deps += [
-        "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
-        "$ace_flutter_engine_root/skia:ace_skia_$platform",
-      ]
-    }
+    deps += [
+      "$ace_flutter_engine_root:third_party_flutter_engine_$platform",
+      "$ace_flutter_engine_root/skia:ace_skia_$platform",
+    ]
 
     # add base source file here
     sources += [ "base64_util.cpp" ]

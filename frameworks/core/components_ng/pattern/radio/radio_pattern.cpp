@@ -71,14 +71,27 @@ void RadioPattern::OnModifyDone()
     CHECK_NULL_VOID(radioTheme);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetMarginProperty()) {
-        MarginProperty margin;
-        margin.left = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
-        margin.right = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
-        margin.top = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
-        margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
-        layoutProperty->UpdateMargin(margin);
+    MarginProperty margin;
+    margin.left = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
+    margin.right = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
+    margin.top = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
+    margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
+    auto& setMargin = layoutProperty->GetMarginProperty();
+    if (setMargin) {
+        if (setMargin->left.has_value()) {
+            margin.left = setMargin->left;
+        }
+        if (setMargin->right.has_value()) {
+            margin.right = setMargin->right;
+        }
+        if (setMargin->top.has_value()) {
+            margin.top = setMargin->top;
+        }
+        if (setMargin->bottom.has_value()) {
+            margin.bottom = setMargin->bottom;
+        }
     }
+    layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
     InitClickEvent();

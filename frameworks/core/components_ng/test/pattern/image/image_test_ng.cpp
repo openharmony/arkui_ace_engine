@@ -118,7 +118,7 @@ RefPtr<FrameNode> ImageTestNg::CreateImageNodeWithDefaultProp(
     image.Create(src, pixMap, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetAlt(alt);
     image.SetImageFill(SVG_FILL_COLOR_DEFAULT);
-    image.SetImageFit(static_cast<int32_t>(IMAGE_FIT_DEFAULT));
+    image.SetImageFit(IMAGE_FIT_DEFAULT);
     image.SetImageRenderMode(IMAGE_RENDERMODE_DEFAULT);
     image.SetImageInterpolation(IMAGE_INTERPOLATION_DEFAULT);
     image.SetMatchTextDirection(MATCHTEXTDIRECTION_DEFAULT);
@@ -630,7 +630,7 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
     image.Create(IMAGE_SRC_URL, false, pixMap, BUNDLE_NAME, MODULE_NAME);
-    image.SetImageFit(static_cast<int32_t>(IMAGE_FIT_DEFAULT));
+    image.SetImageFit(IMAGE_FIT_DEFAULT);
     image.SetAlt(ALT_SRC_URL);
     image.SetSyncMode(SYNCMODE_DEFAULT);
     image.SetCopyOption(COPYOPTIONS_DEFAULT);

@@ -257,6 +257,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceDarkAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -283,6 +284,8 @@ public:
     {
         selectPopupMenuShowing_ = showing;
     }
+    void OnCompleteSwapWithNewSize();
+    void OnResizeNotWork();
 
 private:
     void RegistVirtualKeyBoardListener();
@@ -338,7 +341,8 @@ private:
     void OnForceDarkAccessUpdate(bool access);
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
-
+    void OnScrollBarColorUpdate(const std::string& value);
+    
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -437,6 +441,8 @@ private:
     bool selectPopupMenuShowing_ = false;
     bool isPopup_ = false;
     int32_t parentNWebId_ = -1;
+    bool isInWindowDrag_ = false;
+    bool isWaiting_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
 };
 } // namespace OHOS::Ace::NG

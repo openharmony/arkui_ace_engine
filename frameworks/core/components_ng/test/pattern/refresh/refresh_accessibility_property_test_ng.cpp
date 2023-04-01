@@ -37,7 +37,7 @@ public:
 
 /**
  * @tc.name: RefreshAccessibilityPropertyIsScrollable001
- * @tc.desc: Test IsScrollable of refresh.
+ * @tc.desc: Test IsScrollable and supportAction of refresh.
  * @tc.type: FUNC
  */
 HWTEST_F(RefreshAccessibilityPropertyTestNg, RefreshAccessibilityPropertyIsScrollable001, TestSize.Level1)
@@ -51,6 +51,14 @@ HWTEST_F(RefreshAccessibilityPropertyTestNg, RefreshAccessibilityPropertyIsScrol
     ASSERT_NE(refreshAccessibilityProperty, nullptr);
 
     EXPECT_TRUE(refreshAccessibilityProperty->IsScrollable());
+    refreshAccessibilityProperty->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = refreshAccessibilityProperty->GetSupportAction();
+    uint64_t actions = 0, expectActions = 0;
+    expectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, expectActions);
 
     refreshPattern->isRefreshing_ = true;
     EXPECT_FALSE(refreshAccessibilityProperty->IsScrollable());

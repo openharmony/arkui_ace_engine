@@ -24,6 +24,7 @@
 #include "core/components/indexer/indexer_theme.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/indexer/indexer_accessibility_property.h"
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_algorithm.h"
 #include "core/components_ng/pattern/indexer/indexer_layout_property.h"
@@ -59,6 +60,11 @@ public:
         return indexerLayoutAlgorithm;
     }
 
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<IndexerAccessibilityProperty>();
+    }
+
     void SetIsTouch(bool isTouch)
     {
         isTouch_ = isTouch;
@@ -72,6 +78,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::NODE, true };
+    }
+
+    int32_t GetSelected() const
+    {
+        return selected_;
     }
 
 private:

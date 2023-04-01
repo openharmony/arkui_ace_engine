@@ -15,9 +15,7 @@
 
 #include "core/image/image_provider.h"
 
-#ifndef NG_BUILD
 #include "experimental/svg/model/SkSVGDOM.h"
-#endif
 #include "image_compressor.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 #include "third_party/skia/include/core/SkStream.h"
@@ -284,7 +282,6 @@ sk_sp<SkData> ImageProvider::LoadImageRawDataFromFileCache(
     return nullptr;
 }
 
-#ifndef NG_BUILD
 void ImageProvider::GetSVGImageDOMAsyncFromSrc(const std::string& src,
     std::function<void(const sk_sp<SkSVGDOM>&)> successCallback, std::function<void()> failedCallback,
     const WeakPtr<PipelineBase> context, uint64_t svgThemeColor, OnPostBackgroundTask onBackgroundTaskPostCallback)
@@ -362,7 +359,6 @@ void ImageProvider::GetSVGImageDOMAsyncFromData(const sk_sp<SkData>& skData,
     }
     BackgroundTaskExecutor::GetInstance().PostTask(cancelableTask);
 }
-#endif
 
 void ImageProvider::UploadImageToGPUForRender(const WeakPtr<PipelineBase> context,
     const sk_sp<SkImage>& image,

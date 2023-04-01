@@ -83,7 +83,8 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     // Priority task creation
     uint64_t time = 0;
     for (auto& node : orderedNodes) {
-        if (!node) {
+        // need to check the node is destroying or not before CreateLayoutTask
+        if (!node || node->IsInDestroying()) {
             continue;
         }
         time = GetSysTimestamp();

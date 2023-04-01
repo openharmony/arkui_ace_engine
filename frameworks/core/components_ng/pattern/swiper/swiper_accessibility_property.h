@@ -41,11 +41,12 @@ public:
 
     AccessibilityValue GetAccessibilityValue() const override;
 
-    void SetSpecificSupportAction() override;
-
     bool IsScrollable() const override;
 
     int32_t GetCollectionItemCounts() const override;
+
+protected:
+    void SetSpecificSupportAction() override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SwiperAccessibilityProperty);

@@ -17,10 +17,10 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
-#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -31,6 +31,22 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+float GetTextHeight(const RefPtr<FrameNode>& textNode)
+{
+    auto textlayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textlayoutProperty, 0.0f);
+    auto layoutConstraint = textlayoutProperty->GetLayoutConstraint();
+
+    auto textLayoutWrapper = textNode->CreateLayoutWrapper();
+    CHECK_NULL_RETURN(textLayoutWrapper, 0.0f);
+    textLayoutWrapper->Measure(layoutConstraint);
+    auto textGeometry = textLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(textGeometry, 0.0f);
+    auto textSize = textGeometry->GetMarginFrameSize();
+    return textSize.Height();
+}
+} // namespace
 
 RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const std::string& bottom, bool isRightToLeft)
 {
@@ -116,7 +132,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const std::string& message, const s
     toastNode->MarkModifyDone();
 
     toastContext->UpdateOffset(
-        OffsetT<Dimension>(0.0_px, rootHeight - Dimension(CONTAINER_TITLE_HEIGHT.ConvertToPx()) - toastBottom));
+        OffsetT<Dimension>(0.0_px, rootHeight - toastBottom - Dimension(GetTextHeight(textNode))));
 
     textNode->MountToParent(toastNode);
     return toastNode;

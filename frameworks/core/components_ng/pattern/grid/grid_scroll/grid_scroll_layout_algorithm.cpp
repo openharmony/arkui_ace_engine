@@ -958,6 +958,9 @@ int32_t GridScrollLayoutAlgorithm::MeasureChild(const SizeF& frameSize, int32_t 
     int32_t itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
     int32_t itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
     int32_t itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+    if (itemRowSpan > 1 || itemColSpan > 1) {
+        gridLayoutInfo_.hasBigItem_ = true;
+    }
     auto mainStart = axis_ == Axis::VERTICAL ? itemRowStart : itemColStart;
     auto crossStart = axis_ == Axis::VERTICAL ? itemColStart : itemRowStart;
     auto mainSpan = axis_ == Axis::VERTICAL ? itemRowSpan : itemColSpan;
@@ -1005,6 +1008,9 @@ int32_t GridScrollLayoutAlgorithm::MeasureChildPlaced(const SizeF& frameSize, in
     int32_t itemColStart = childLayoutProperty->GetColumnStart().value_or(-1);
     int32_t itemRowSpan = std::max(childLayoutProperty->GetRowEnd().value_or(-1) - itemRowStart + 1, 1);
     int32_t itemColSpan = std::max(childLayoutProperty->GetColumnEnd().value_or(-1) - itemColStart + 1, 1);
+    if (itemRowSpan > 1 || itemColSpan > 1) {
+        gridLayoutInfo_.hasBigItem_ = true;
+    }
     auto crossSpan = axis_ == Axis::VERTICAL ? itemColSpan : itemRowSpan;
     if (static_cast<uint32_t>(crossStart + crossSpan) > crossCount_) {
         LOGE("cross not enough");
@@ -1081,21 +1087,36 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
     currentIndex =
         currentIndex < layoutWrapper->GetTotalChildCount() ? currentIndex : layoutWrapper->GetTotalChildCount() - 1;
     auto index = currentIndex;
-    while (index > 0) {
-        // Step1. Get wrapper of [GridItem]
-        auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-        if (!childLayoutWrapper) {
-            LOGE("GridItem wrapper of index %{public}u null", index);
-            break;
+    if (gridLayoutInfo_.hasBigItem_) {
+        while (index > 0) {
+            auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!childLayoutWrapper) {
+                LOGE("GridItem wrapper of index %{public}u null", index);
+                break;
+            }
+            auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
+            CHECK_NULL_RETURN(childLayoutProperty, 0);
+            auto crossIndex = childLayoutProperty->GetCustomCrossIndex(axis_);
+            if (crossIndex == 0) {
+                firstIndex = index;
+                break;
+            }
+            --index;
         }
-        auto childLayoutProperty = DynamicCast<GridItemLayoutProperty>(childLayoutWrapper->GetLayoutProperty());
-        CHECK_NULL_RETURN(childLayoutProperty, 0);
-        auto crossIndex = childLayoutProperty->GetCustomCrossIndex(axis_);
-        if (crossIndex == 0) {
-            firstIndex = index;
-            break;
+    } else {
+        while (index > 0) {
+            // need to obtain the item node in order and by step one
+            auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+            if (!childLayoutWrapper) {
+                LOGE("GridItem wrapper of index %{public}u null", index);
+                break;
+            }
+            if (index % gridLayoutInfo_.crossCount_ == 0) {
+                firstIndex = index;
+                break;
+            }
+            --index;
         }
-        --index;
     }
     return firstIndex;
 }

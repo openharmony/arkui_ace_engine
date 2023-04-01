@@ -67,19 +67,15 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
      * @tc.steps: step2. call AddForm
      * @tc.expected: step2. formRenderer is created successfully and added to the formRendererGroup
      */
-    EXPECT_TRUE(formRendererGroup->IsEmpty());
     // formRenderer->uiContent_ is null, so formRenderer->AddForm will not be called
     formRendererGroup->AddForm(want, formJsInfo);
-    EXPECT_FALSE(formRendererGroup->IsEmpty());
-    auto renderMap = formRendererGroup->rendererMap_;
-    auto iter = renderMap.find(FORM_COMPONENT_ID_1);
-    EXPECT_TRUE(iter != renderMap.end());
+    EXPECT_TRUE(formRendererGroup->formRenderer_ != nullptr);
 
     /**
      * @tc.steps: step3. call formRenderer's AddForm
      * @tc.expected: step3. uiContent's relevant methods are called & formRenderer's property are set
      */
-    auto formRenderer = iter->second;
+    auto formRenderer = formRendererGroup->formRenderer_;
     EXPECT_TRUE(formRenderer);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);
@@ -91,7 +87,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
         .WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetActionEventHandler(_)).WillOnce(Return());
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), SetErrorEventHandler(_)).WillOnce(Return());
-    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).WillOnce(Return(nullptr));
+    EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), GetFormRootNode()).Times(Exactly(2));
     // call AddForm manually
     formRenderer->AddForm(want, formJsInfo);
     EXPECT_EQ(formRenderer->allowUpdate_, true);
@@ -108,9 +104,7 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
     want2.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_2);
     want2.SetParam(FORM_RENDERER_ALLOW_UPDATE, true);
     formRendererGroup->AddForm(want2, formJsInfo);
-    EXPECT_EQ(static_cast<int32_t>(formRendererGroup->rendererMap_.size()), 2);
-    // call formRenderer2's events, nothing will happen for formRendererDelegate_ is null
-    auto formRenderer2 = formRendererGroup->rendererMap_.find(FORM_COMPONENT_ID_2)->second;
+    auto formRenderer2 = formRendererGroup->formRenderer_;
     formRenderer2->OnActionEvent("");
     formRenderer2->OnError("", "");
     formRenderer2->OnSurfaceChange(0.0f, 0.0f);
@@ -135,7 +129,6 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
      * @tc.expected: step7. delete fail
      */
     formRendererGroup->DeleteForm(FORM_COMPONENT_ID_3);
-    EXPECT_EQ(static_cast<int32_t>(formRendererGroup->rendererMap_.size()), 2);
 
     /**
      * @tc.steps: step8. delete formRenderer whose compId exists
@@ -144,14 +137,12 @@ HWTEST_F(FormRenderTest, FormRenderTest001, TestSize.Level1)
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), Destroy()).WillOnce(Return());
     // delete formRenderer that compId exists
     formRendererGroup->DeleteForm(FORM_COMPONENT_ID_1);
-    EXPECT_EQ(static_cast<int32_t>(formRendererGroup->rendererMap_.size()), 1);
 
     /**
      * @tc.steps: step9. delete all formRenderers
      * @tc.expected: step9. delete successfully
      */
     formRendererGroup->DeleteForm();
-    EXPECT_TRUE(formRendererGroup->IsEmpty());
 }
 
 /**
@@ -175,9 +166,7 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     want.SetParam(FORM_RENDERER_PROCESS_ON_ADD_SURFACE, renderDelegate->AsObject());
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     formRendererGroup->AddForm(want, formJsInfo);
-    auto renderMap = formRendererGroup->rendererMap_;
-    auto iter = renderMap.find(FORM_COMPONENT_ID_1);
-    auto formRenderer = iter->second;
+    auto formRenderer = formRendererGroup->formRenderer_;;
     EXPECT_TRUE(formRenderer);
     formRenderer->uiContent_ = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(formRenderer->uiContent_);

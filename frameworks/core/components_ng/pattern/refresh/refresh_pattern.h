@@ -76,11 +76,6 @@ public:
         return false;
     }
 
-    int32_t GetScrollableNodeIndex() const
-    {
-        return scrollableNodeIndex_;
-    }
-
     OffsetF GetScrollOffsetValue() const
     {
         return scrollOffset_;
@@ -142,7 +137,6 @@ private:
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> customBuilder_;
     WeakPtr<FrameNode> scrollableNode_;
-    int32_t scrollableNodeIndex_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
 };
 } // namespace OHOS::Ace::NG

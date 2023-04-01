@@ -442,10 +442,6 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
-        if (dialogs_.empty()) {
-            LOGW("dialogs are empty");
-            return;
-        }
         RefPtr<NG::FrameNode> dialog;
         while (!dialogs_.empty()) {
             dialog = dialogs_.back().Upgrade();
@@ -456,6 +452,10 @@ void JSCustomDialogController::JsCloseDialog(const JSCallbackInfo& info)
             dialogs_.pop_back();
         }
 
+        if (dialogs_.empty()) {
+            LOGW("dialogs are empty");
+            return;
+        }
         if (!dialog) {
             LOGW("dialog is null");
             return;

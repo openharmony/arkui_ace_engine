@@ -153,7 +153,8 @@ float FlexLayoutAlgorithm::GetSelfCrossAxisSize(const RefPtr<LayoutWrapper>& lay
 
 void FlexLayoutAlgorithm::CheckSizeValidity(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
-    if (layoutWrapper->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+    if (layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+        VisibleType::GONE) {
         return;
     }
     ++validSizeCount_;
@@ -245,7 +246,7 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper, 
         node.layoutWrapper = child;
         node.layoutConstraint = childLayoutConstraint;
 
-        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        if (child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             node.layoutConstraint.selfIdealSize = OptionalSize<float>(0.0f, 0.0f);
             continue;
         }
@@ -323,8 +324,8 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                         childLayoutWeight = childMagicItemProperty->GetLayoutWeight().value_or(0.0f);
                     }
                     if (LessOrEqual(childLayoutWeight, 0.0f)) {
-                        const auto& childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
-                        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+                        if (child.layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(
+                                VisibleType::VISIBLE) == VisibleType::GONE) {
                             continue;
                         }
                         childLayoutWrapper->Measure(child.layoutConstraint);
@@ -487,8 +488,8 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                 UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
                 childLayoutWrapper->Measure(child.layoutConstraint);
                 UpdateAllocatedSize(childLayoutWrapper, crossAxisSize_);
-                const auto& childLayoutProperty = childLayoutWrapper->GetLayoutProperty();
-                if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+                if (child.layoutWrapper->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) ==
+                    VisibleType::GONE) {
                     continue;
                 }
                 CheckSizeValidity(childLayoutWrapper);
@@ -735,7 +736,7 @@ void FlexLayoutAlgorithm::AdjustTotalAllocatedSize(LayoutWrapper* layoutWrapper)
     }
     for (const auto& child : children) {
         if (child->IsOutOfLayout() ||
-            child->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
         allocatedSize_ += GetChildMainAxisSize(child);
@@ -837,7 +838,7 @@ void FlexLayoutAlgorithm::PlaceChildren(
             child->Layout();
             continue;
         }
-        if (child->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+        if (child->GetHostNode()->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
         auto alignItem = GetSelfAlign(child);

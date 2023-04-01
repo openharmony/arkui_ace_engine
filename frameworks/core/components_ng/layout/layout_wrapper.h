@@ -235,6 +235,8 @@ public:
         finishCallbacks_.emplace_back(finishCallback);
     }
 
+    std::pair<int32_t, int32_t> GetLazyBuildRange();
+
 private:
     // Used to save a persist wrapper created by child, ifElse, ForEach, the map stores [index, Wrapper].
     std::list<RefPtr<LayoutWrapper>> children_;

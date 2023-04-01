@@ -173,17 +173,8 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
     paintMethod->UpdateContentModifier(&paintWrapper1);
     EXPECT_EQ(paintMethod->color_, COLOR_DEFAULT);
     /**
-     * @tc.cases: case2. renderContext has foreground color and modifier will foreground color flag
+     * @tc.cases: case2. renderContext ForegroundColorStrategy and modifier will use foreground color flag
      */
-    renderContext->UpdateForegroundColor(Color::BLUE);
-    PaintWrapper paintWrapper2(renderContext, nullptr, loadingProgressPaintProperty);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
-    paintMethod->UpdateContentModifier(&paintWrapper2);
-    EXPECT_EQ(paintMethod->color_, Color::FOREGROUND);
-    /**
-     * @tc.cases: case3. renderContext has not foreground color and modifier will foreground color flag
-     */
-    renderContext->ResetForegroundColor();
     renderContext->UpdateForegroundColorStrategy(ForegroundColorStrategy());
     PaintWrapper paintWrapper3(renderContext, nullptr, loadingProgressPaintProperty);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(progressTheme));
@@ -198,15 +189,34 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressPaintMethodTest001, TestSize.Leve
  */
 HWTEST_F(LoadingProgressTestNg, LoadingProgressModifierTest001, TestSize.Level1)
 {
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    progressTheme->loadingColor_ = COLOR_DEFAULT;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
     LoadingProgressModifier loadingProgressModifier;
     Testing::MockCanvas rsCanvas;
     DrawingContext context = { rsCanvas, 10.0f, 10.0f };
+    RingParam ringParam;
+    /**
+     * @tc.cases: case1. ringColor == defaultColor.
+     */
+    loadingProgressModifier.SetColor(LinearColor(COLOR_DEFAULT));
     EXPECT_CALL(rsCanvas, Save()).Times(1);
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(1);
     EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, Restore()).Times(1);
-    RingParam ringParam;
+    loadingProgressModifier.DrawRing(context, ringParam);
+    /**
+     * @tc.cases: case2. ringColor != defaultColor.
+     */
+    loadingProgressModifier.SetColor(LinearColor(Color::BLUE));
+    EXPECT_CALL(rsCanvas, Save()).Times(1);
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawCircle(_, _)).Times(1);
+    EXPECT_CALL(rsCanvas, DetachPen()).WillOnce(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, Restore()).Times(1);
     loadingProgressModifier.DrawRing(context, ringParam);
 }
 

@@ -154,6 +154,10 @@ void RosenRenderImage::InitializeCallbacks()
 
 void RosenRenderImage::ImageObjReady(const RefPtr<ImageObject>& imageObj)
 {
+    if (!Container::Current()) {
+        LOGW("container::current is null");
+        return;
+    }
     LOGD("image obj ready info : %{public}s", sourceInfo_.ToString().c_str());
     CHECK_NULL_VOID(imageObj);
     imageObj_ = imageObj;

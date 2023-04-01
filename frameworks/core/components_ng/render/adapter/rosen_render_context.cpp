@@ -100,6 +100,7 @@ void RosenRenderContext::StopRecordingIfNeeded()
 
 void RosenRenderContext::OnNodeAppear()
 {
+    isDisappearing_ = false;
     // because when call this function, the size of frameNode is not calculated. We need frameNode size
     // to calculate the pivot, so just mark need to perform appearing transition.
     if (!propTransitionAppearing_ && !transitionEffect_) {
@@ -110,6 +111,7 @@ void RosenRenderContext::OnNodeAppear()
 
 void RosenRenderContext::OnNodeDisappear()
 {
+    isDisappearing_ = true;
     if (!propTransitionDisappearing_ && !transitionEffect_) {
         return;
     }
@@ -177,7 +179,9 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/)
 void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
 {
     CHECK_NULL_VOID(rsNode_);
-    CHECK_NULL_VOID(paintRect.IsValid());
+    if (isDisappearing_ && !paintRect.IsValid()) {
+        return;
+    }
     rsNode_->SetBounds(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     if (!isSynced_) {
@@ -441,10 +445,16 @@ void RosenRenderContext::OnPixelStretchEffectUpdate(const PixStretchEffectOption
 {
     CHECK_NULL_VOID(rsNode_);
     Rosen::Vector4f pixStretchVector;
-    pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
-        static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
-        static_cast<float>(option.bottom.ConvertToPx()));
-    rsNode_->SetPixelStretch(pixStretchVector);
+    if (option.IsPercentOption()) {
+        pixStretchVector.SetValues(static_cast<float>(option.left.Value()), static_cast<float>(option.top.Value()),
+            static_cast<float>(option.right.Value()), static_cast<float>(option.bottom.Value()));
+        rsNode_->SetPixelStretchPercent(pixStretchVector);
+    } else {
+        pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
+            static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
+            static_cast<float>(option.bottom.ConvertToPx()));
+        rsNode_->SetPixelStretch(pixStretchVector);
+    }
     RequestNextFrame();
 }
 
@@ -1870,6 +1880,13 @@ void RosenRenderContext::ResetSharedTranslate()
     rsNode_->RemoveModifier(sharedTransitionModifier_->translateXY);
     sharedTransitionModifier_->translateXYValue = nullptr;
     sharedTransitionModifier_->translateXY = nullptr;
+}
+
+void RosenRenderContext::ResetPageTransitionEffect()
+{
+    UpdateTransformScale(VectorF(1.0f, 1.0f));
+    UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    UpdateOpacity(1.0);
 }
 
 void RosenRenderContext::AddChild(const RefPtr<RenderContext>& renderContext, int index)

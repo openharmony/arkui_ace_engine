@@ -122,7 +122,7 @@ public:
             for (size_t index = 0; index < gradientItem.GetColors().size(); ++index) {
                 auto gradientColor = gradientItem.GetColors()[index];
                 auto gradientColorJosn = JsonUtil::Create(true);
-                gradientColorJosn->Put("color", gradientColor.GetColor().ColorToString().c_str());
+                gradientColorJosn->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
                 gradientColorJosn->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
                 gradientItemJsonArray->Put(std::to_string(index).c_str(), gradientColorJosn);
             }
@@ -172,7 +172,7 @@ public:
             for (size_t index = 0; index < gradientItem.GetColors().size(); ++index) {
                 auto gradientColor = gradientItem.GetColors()[index];
                 auto gradientColorJosn = JsonUtil::Create(true);
-                gradientColorJosn->Put("color", gradientColor.GetColor().ColorToString().c_str());
+                gradientColorJosn->Put("color", gradientColor.GetLinearColor().ToColor().ColorToString().c_str());
                 gradientColorJosn->Put("offset", std::to_string(gradientColor.GetDimension().Value()).c_str());
                 gradientItemJsonArray->Put(std::to_string(index).c_str(), gradientColorJosn);
             }
@@ -185,11 +185,11 @@ public:
     void CreateGradient(const std::pair<Color, Color>& itemParam, Gradient& gradient) const
     {
         GradientColor gradientColorStart;
-        gradientColorStart.SetColor(itemParam.first);
+        gradientColorStart.SetLinearColor(LinearColor(itemParam.first));
         gradientColorStart.SetDimension(Dimension(0.0));
         gradient.AddColor(gradientColorStart);
         GradientColor gradientColorEnd;
-        gradientColorEnd.SetColor(itemParam.second);
+        gradientColorEnd.SetLinearColor(LinearColor(itemParam.second));
         gradientColorEnd.SetDimension(Dimension(1.0));
         gradient.AddColor(gradientColorEnd);
     }

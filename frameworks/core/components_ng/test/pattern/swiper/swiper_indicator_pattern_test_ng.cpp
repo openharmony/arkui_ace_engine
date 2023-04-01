@@ -45,13 +45,32 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr double SWIPER_INDICATOR_SIZE = 100.0;
 constexpr double SWIPER_INDICATOR_SIZE_MINUS = -1000.0;
+constexpr double SWIPER_INDEX_ONE = 1.0;
+constexpr double SWIPER_INDEX_ZERO = 0.0;
 const SizeF CONTENT_SIZE = SizeF(400.0, 500.0);
 const OffsetF CONTENT_OFFSET = OffsetF(50.0, 60.0);
+const OffsetF MARGIN_OFFSET = OffsetF(50.0, 60.0);
+constexpr float CONTEXT_WIDTH = 100.0f;
+constexpr float CONTEXT_HEIGHT = 100.0f;
 constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float ITEM_WIDTH = 20.0f;
+constexpr float ITEM_HEIGHT = 10.0f;
+constexpr float ITEM_HEIGHT_LARGE = 25.0f;
+constexpr float SELECTED_ITEM_WIDTH = 30.0f;
+constexpr float SELECTED_ITEM_HEIGHT = 15.0f;
+constexpr float SELECTED_ITEM_HEIGHT_LARGE = 35.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+const std::pair<float, float>& LONG_POINT_CENTER_X = { 0, 0 };
 static Axis indicatorDirection_;
 static SwiperIndicatorType indicatorType_;
+constexpr int32_t SWIPER_ITEMCOUNT = 10;
+constexpr int32_t SWIPER_HOVERINDEX = 10;
+constexpr int32_t SWIPER_CURRENTINDEX = 10;
+constexpr int32_t SWIPER_MOUSECLICKINDEX = 5;
+const SizeF SWIPER_CHILD_SIZEF_SMALL = SizeF(20.0, 20.0);
+const SizeF SWIPER_CHILD_SIZEF_BIG = SizeF(30.0, 30.0);
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33f;
 } // namespace
 class SwiperIndicatorPatternTestNg : public testing::Test {
 public:
@@ -60,6 +79,9 @@ public:
     void CommomAttrInfo();
     void SetUp() override;
     void TearDown() override;
+    void InitLayoutWrapper(const RefPtr<FrameNode>& frameNode, RefPtr<LayoutAlgorithm>& algorithm,
+        RefPtr<FrameNode>& indicatorNode, RefPtr<LayoutWrapper>& layoutWrapper);
+    void InitChild(RefPtr<LayoutWrapper>& indicatorNodeWrapper, const RefPtr<FrameNode>& indicatorNode);
 
 protected:
 };
@@ -91,6 +113,57 @@ void SwiperIndicatorPatternTestNg::CommomAttrInfo()
     pipeline->SetThemeManager(themeManager);
     auto swiperIndicatorTheme = AceType::MakeRefPtr<SwiperIndicatorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(swiperIndicatorTheme));
+}
+
+void SwiperIndicatorPatternTestNg::InitLayoutWrapper(const RefPtr<FrameNode>& frameNode,
+    RefPtr<LayoutAlgorithm>& algorithm, RefPtr<FrameNode>& indicatorNode, RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    indicatorPattern->OnModifyDone();
+
+    algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    layoutWrapper = AceType::MakeRefPtr<LayoutWrapper>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+}
+
+void SwiperIndicatorPatternTestNg::InitChild(
+    RefPtr<LayoutWrapper>& indicatorNodeWrapper, const RefPtr<FrameNode>& indicatorNode)
+{
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    indicatorNodeWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    ASSERT_NE(firstChild, nullptr);
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    firstGeometryNode->SetFrameSize(SWIPER_CHILD_SIZEF_SMALL);
+    RefPtr<LayoutWrapper> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
+    indicatorNodeWrapper->AppendChild(firstLayoutWrapper);
+    auto lastChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
+    ASSERT_NE(lastChild, nullptr);
+    RefPtr<GeometryNode> lastGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    lastGeometryNode->Reset();
+    lastGeometryNode->SetFrameSize(SWIPER_CHILD_SIZEF_BIG);
+    RefPtr<LayoutWrapper> lastLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(lastChild, lastGeometryNode, lastChild->GetLayoutProperty());
+    indicatorNodeWrapper->AppendChild(lastLayoutWrapper);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.percentReference = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    indicatorNodeWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
 }
 
 void SwiperIndicatorPatternTestNg::SetUp() {}
@@ -1629,5 +1702,1279 @@ HWTEST_F(SwiperIndicatorPatternTestNg, SelectedItemHeight002, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmLayout001
+ * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::HORIZONTAL;
+    indicatorType_ = SwiperIndicatorType::DIGIT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    RefPtr<FrameNode> indicatorNode;
+    RefPtr<LayoutWrapper> layoutWrapper;
+    RefPtr<LayoutAlgorithm> algorithm;
+    InitLayoutWrapper(frameNode, algorithm, indicatorNode, layoutWrapper);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+
+    auto swiperPatternAlgorithm = swiperPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(swiperPatternAlgorithm, nullptr);
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperNode->GetLayoutProperty());
+    swiperLayoutProperty->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> indicatorNodeWrapper;
+    InitChild(indicatorNodeWrapper, indicatorNode);
+    LayoutWrapper swiperLayoutWrapper = LayoutWrapper(swiperNode, geometryNode, swiperLayoutProperty);
+    ASSERT_NE(indicatorNodeWrapper, nullptr);
+    swiperLayoutWrapper.AppendChild(indicatorNodeWrapper);
+
+    /**
+     * @tc.steps: step3. call Layout.
+     * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 327.0, 1106.0 .
+     */
+    swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(327.0, 1106.0));
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmLayout002
+ * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::HORIZONTAL;
+    indicatorType_ = SwiperIndicatorType::DIGIT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    RefPtr<FrameNode> indicatorNode;
+    RefPtr<LayoutWrapper> layoutWrapper;
+    RefPtr<LayoutAlgorithm> algorithm;
+    InitLayoutWrapper(frameNode, algorithm, indicatorNode, layoutWrapper);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+
+    auto swiperPatternAlgorithm = swiperPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(swiperPatternAlgorithm, nullptr);
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperNode->GetLayoutProperty());
+    swiperLayoutProperty->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    swiperLayoutProperty->UpdateDirection(Axis::VERTICAL);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> indicatorNodeWrapper;
+    InitChild(indicatorNodeWrapper, indicatorNode);
+    LayoutWrapper swiperLayoutWrapper = LayoutWrapper(swiperNode, geometryNode, swiperLayoutProperty);
+    swiperLayoutWrapper.AppendChild(indicatorNodeWrapper);
+
+    /**
+     * @tc.steps: step3. call Layout.
+     * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 654.0, 553.0 .
+     */
+    swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(654.0, 553.0));
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmLayout003
+ * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout003, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::HORIZONTAL;
+    indicatorType_ = SwiperIndicatorType::DIGIT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    RefPtr<FrameNode> indicatorNode;
+    RefPtr<LayoutWrapper> layoutWrapper;
+    RefPtr<LayoutAlgorithm> algorithm;
+    InitLayoutWrapper(frameNode, algorithm, indicatorNode, layoutWrapper);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+
+    auto swiperPatternAlgorithm = swiperPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(swiperPatternAlgorithm, nullptr);
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperNode->GetLayoutProperty());
+    swiperLayoutProperty->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    Dimension dimension = 20.0_vp;
+    swiperLayoutProperty->UpdateLeft(dimension);
+    swiperLayoutProperty->UpdateTop(dimension);
+    swiperLayoutProperty->UpdateDirection(Axis::HORIZONTAL);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> indicatorNodeWrapper;
+    InitChild(indicatorNodeWrapper, indicatorNode);
+    LayoutWrapper swiperLayoutWrapper = LayoutWrapper(swiperNode, geometryNode, swiperLayoutProperty);
+    swiperLayoutWrapper.AppendChild(indicatorNodeWrapper);
+
+    /**
+     * @tc.steps: step3. call Layout.
+     * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 20.0, 20.0 .
+     */
+    swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(20.0, 20.0));
+}
+
+/**
+ * @tc.name: SwiperLayoutAlgorithmLayout004
+ * @tc.desc: Test SwiperLayoutAlgorithm SwiperLayoutAlgorithmLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperLayoutAlgorithmLayout004, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::HORIZONTAL;
+    indicatorType_ = SwiperIndicatorType::DIGIT;
+    CommomAttrInfo();
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    RefPtr<FrameNode> indicatorNode;
+    RefPtr<LayoutWrapper> layoutWrapper;
+    RefPtr<LayoutAlgorithm> algorithm;
+    InitLayoutWrapper(frameNode, algorithm, indicatorNode, layoutWrapper);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    auto swiperPatternAlgorithm = swiperPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(swiperPatternAlgorithm, nullptr);
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperNode->GetLayoutProperty());
+    swiperLayoutProperty->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    Dimension dimension = 20.0_vp;
+    swiperLayoutProperty->UpdateRight(dimension);
+    swiperLayoutProperty->UpdateBottom(dimension);
+    swiperLayoutProperty->UpdateDirection(Axis::VERTICAL);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapper> indicatorNodeWrapper;
+    InitChild(indicatorNodeWrapper, indicatorNode);
+    LayoutWrapper swiperLayoutWrapper = LayoutWrapper(swiperNode, geometryNode, swiperLayoutProperty);
+    swiperLayoutWrapper.AppendChild(indicatorNodeWrapper);
+
+    /**
+     * @tc.steps: step3. call Layout.
+     * @tc.expected: indicatorNodeWrapper MarginFrameOffset is 634.0, 1086.0 .
+     */
+    swiperPatternAlgorithm->Layout(&swiperLayoutWrapper);
+    EXPECT_EQ(indicatorNodeWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(634.0, 1086.0));
+}
+
+/**
+ * @tc.name: SwiperIndicatorUpdateContentModifier001
+ * @tc.desc: Test DotIndicatorPaintMethod UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorUpdateContentModifier001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper and GetContentModifier.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    paintMethod->isPressed_ = true;
+
+    /**
+     * @tc.steps: step3. call GetContentModifier.
+     * @tc.expected: dotIndicatorModifier_->isPressed_ is true.
+     */
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+}
+
+/**
+ * @tc.name: SwiperIndicatorUpdateContentModifier002
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorUpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorUpdateContentModifier002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper and GetContentModifier.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    paintMethod->isHover_ = true;
+
+    /**
+     * @tc.steps: step3. call GetContentModifier.
+     * @tc.expected: dotIndicatorModifier_->isHover_ is true.
+     */
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsHover());
+}
+
+/**
+ * @tc.name: SwiperIndicatorPaintNormalIndicator001
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintNormalIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorPaintNormalIndicator001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(SELECTED_ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(SELECTED_ITEM_HEIGHT, DimensionUnit::PX));
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+
+    /**
+     * @tc.steps: step3. call PaintNormalIndicator.
+     * @tc.expected: paintMethod->normalMargin_.X is 336.0
+     *               paintMethod->normalMargin_.Y is 547.5
+     */
+    paintMethod->PaintNormalIndicator(&paintWrapper);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 336.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 547.5);
+}
+
+/**
+ * @tc.name: SwiperIndicatorPaintNormalIndicator002
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintNormalIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorPaintNormalIndicator002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(SELECTED_ITEM_WIDTH, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(SELECTED_ITEM_HEIGHT, DimensionUnit::PX));
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->itemCount_ = SWIPER_ITEMCOUNT;
+
+    /**
+     * @tc.steps: step3. call PaintNormalIndicator.
+     * @tc.expected: paintMethod->normalMargin_.X is 196.0
+     *               paintMethod->normalMargin_.Y is 547.5
+     */
+    paintMethod->PaintNormalIndicator(&paintWrapper);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 196.0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 547.5);
+}
+
+/**
+ * @tc.name: SwiperIndicatorPaintPressIndicator001
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintPressIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorPaintPressIndicator001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+
+    /**
+     * @tc.steps: step3. call PaintPressIndicator.
+     * @tc.expected: paintMethod->dotIndicatorModifier_ is true.
+     */
+    paintMethod->PaintPressIndicator(&paintWrapper);
+    EXPECT_TRUE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+}
+
+/**
+ * @tc.name: SwiperIndicatorPaintPressIndicator002
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintPressIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorPaintPressIndicator002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    paintProperty->UpdateItemHeight(Dimension(ITEM_HEIGHT, DimensionUnit::PX));
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->itemCount_ = SWIPER_ITEMCOUNT;
+
+    /**
+     * @tc.steps: step3. call PaintPressIndicator.
+     * @tc.expected: itemHalfSizes_->Get()[1] is 6.65 .
+     */
+    paintMethod->PaintPressIndicator(&paintWrapper);
+    EXPECT_TRUE(NearEqual(
+        paintMethod->dotIndicatorModifier_->itemHalfSizes_->Get()[1], ITEM_HEIGHT * 0.5 * INDICATOR_ZOOM_IN_SCALE));
+}
+
+/**
+ * @tc.name: SwiperIndicatorPaintHoverIndicator001
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintHoverIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorPaintHoverIndicator001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->hoverIndex_ = SWIPER_HOVERINDEX;
+    paintMethod->currentIndex_ = SWIPER_CURRENTINDEX;
+    paintMethod->mouseClickIndex_ = SWIPER_MOUSECLICKINDEX;
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->dotIndicatorModifier_->SetNormalToHoverIndex(SWIPER_MOUSECLICKINDEX);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+
+    /**
+     * @tc.steps: step3. call PaintHoverIndicator.
+     * @tc.expected: dotIndicatorModifier_->GetIsPressed is false.
+     */
+    paintMethod->PaintHoverIndicator(&paintWrapper);
+    EXPECT_FALSE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+}
+
+/**
+ * @tc.name: SwiperIndicatorPaintHoverIndicator002
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintHoverIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorPaintHoverIndicator002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create PaintWrapper.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    paintProperty->UpdateItemWidth(Dimension(ITEM_WIDTH, DimensionUnit::PX));
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+
+    /**
+     * @tc.steps: step3. call PaintHoverIndicator.
+     * @tc.expected: itemHalfSizes_->Get()[0] is 13.30 .
+     */
+    paintMethod->PaintHoverIndicator(&paintWrapper);
+    EXPECT_TRUE(NearEqual(
+        paintMethod->dotIndicatorModifier_->itemHalfSizes_->Get()[0], ITEM_WIDTH * 0.5 * INDICATOR_ZOOM_IN_SCALE));
+}
+
+/**
+ * @tc.name: SwiperDigitIndicatorLayoutAlgorithmMeasure001
+ * @tc.desc: Test LayoutWrapper SwiperDigitIndicatorLayoutAlgorithmMeasure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmMeasure001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DIGIT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    ASSERT_NE(firstChild, nullptr);
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    firstGeometryNode->SetFrameSize(SWIPER_CHILD_SIZEF_SMALL);
+    RefPtr<LayoutWrapper> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
+    layoutWrapper.AppendChild(firstLayoutWrapper);
+
+    auto lastChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
+    ASSERT_NE(lastChild, nullptr);
+    RefPtr<GeometryNode> lastGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    lastGeometryNode->Reset();
+    lastGeometryNode->SetFrameSize(SWIPER_CHILD_SIZEF_BIG);
+    RefPtr<LayoutWrapper> lastLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(lastChild, lastGeometryNode, lastChild->GetLayoutProperty());
+    layoutWrapper.AppendChild(lastLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. call Measure.
+     * @tc.expected: layoutWrapper MarginFrameSize is 66.00, 30.00
+     */
+    algorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetMarginFrameSize(), SizeF(66.00, 30.00));
+}
+
+/**
+ * @tc.name: SwiperDigitIndicatorLayoutAlgorithmLayout002
+ * @tc.desc: Test TxtParagraph SwiperDigitIndicatorLayoutAlgorithmLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DIGIT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    indicatorPattern->OnModifyDone();
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode->GetFirstChild());
+    ASSERT_NE(firstChild, nullptr);
+    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    firstGeometryNode->Reset();
+    firstGeometryNode->SetFrameSize(SWIPER_CHILD_SIZEF_SMALL);
+    RefPtr<LayoutWrapper> firstLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
+    layoutWrapper.AppendChild(firstLayoutWrapper);
+
+    auto lastChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode->GetLastChild());
+    ASSERT_NE(lastChild, nullptr);
+    RefPtr<GeometryNode> lastGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    lastGeometryNode->Reset();
+    lastGeometryNode->SetFrameSize(SWIPER_CHILD_SIZEF_BIG);
+    RefPtr<LayoutWrapper> lastLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(lastChild, lastGeometryNode, lastChild->GetLayoutProperty());
+    layoutWrapper.AppendChild(lastLayoutWrapper);
+
+    /**
+     * @tc.steps: step3. call Layout.
+     * @tc.expected: firstLayoutWrapper MarginFrameOffset is 8.00, 558.00
+     *               lastLayoutWrapper MarginFrameOffset is 682.00, 553.00
+     */
+    algorithm->Layout(&layoutWrapper);
+    EXPECT_EQ(firstLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(8.00, 558.00));
+    EXPECT_EQ(lastLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(682.00, 553.00));
+}
+
+/**
+ * @tc.name: SwiperIndicatorHandleClick002
+ * @tc.desc: Test SwiperIndicatorPattern SwiperIndicatorHandleClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorHandleClick002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    ASSERT_NE(swiperNode, nullptr);
+    frameNode->AddChild(swiperNode);
+
+    auto swiperNodeTwo = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    ASSERT_NE(swiperNodeTwo, nullptr);
+    frameNode->AddChild(swiperNodeTwo);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateItemWidth(Dimension(10, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(10, DimensionUnit::PX));
+    indicatorPattern->mouseClickIndex_ = SWIPER_MOUSECLICKINDEX;
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    swiperPattern->indicatorDoingAnimation_ = false;
+    swiperPattern->currentIndex_ = 10;
+    indicatorPattern->hoverPoint_.SetX(5.0);
+    indicatorPattern->hoverPoint_.SetY(15.0);
+
+    /**
+     * @tc.steps: step3. call HandleClick.
+     * @tc.expected: swiperPattern->indicatorDoingAnimation_ is true.
+     */
+    indicatorPattern->HandleClick(info);
+    EXPECT_TRUE(swiperPattern->indicatorDoingAnimation_);
+}
+
+/**
+ * @tc.name: SwiperIndicatorHandleClick003
+ * @tc.desc: Test SwiperIndicatorPattern SwiperIndicatorHandleClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperIndicatorHandleClick003, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+    frameNode->AddChild(indicatorNode);
+
+    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::TOUCH);
+    auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateSize(Dimension(-1.0, DimensionUnit::PX));
+    paintProperty->UpdateItemWidth(Dimension(-1.0, DimensionUnit::PX));
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    swiperPattern->indicatorDoingAnimation_ = true;
+
+    /**
+     * @tc.steps: step3. call HandleClick.
+     * @tc.expected: swiperPattern->indicatorDoingAnimation_ is false.
+     */
+    indicatorPattern->HandleClick(info);
+    EXPECT_FALSE(swiperPattern->indicatorDoingAnimation_);
+}
+
+/**
+ * @tc.name: SwiperInitIndicator001
+ * @tc.desc: Test SwiperPattern SwiperInitIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperInitIndicator001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    swiperNode->AddChild(indicatorNode);
+
+    /**
+     * @tc.steps: step3. call InitIndicator.
+     * @tc.expected: swiperNode lastChild is SWIPER_INDICATOR_ETS_TAG
+     */
+    swiperPattern->InitIndicator();
+    ASSERT_EQ(swiperNode->GetLastChild()->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+}
+
+/**
+ * @tc.name: SwiperInitIndicator002
+ * @tc.desc: Test SwiperPattern SwiperInitIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperInitIndicator002, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    swiperNode->AddChild(indicatorNode);
+    auto layoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateShowIndicator(false);
+
+    /**
+     * @tc.steps: step3. call InitIndicator.
+     * @tc.expected: swiperNode->GetLastChild is nullptr.
+     */
+    swiperPattern->InitIndicator();
+    ASSERT_EQ(swiperNode->GetLastChild(), nullptr);
+}
+
+/**
+ * @tc.name: SwiperInitIndicator003
+ * @tc.desc: Test SwiperPattern SwiperInitIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperInitIndicator003, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    swiperNode->AddChild(textNode);
+
+    /**
+     * @tc.steps: step3. call InitIndicator.
+     * @tc.expected: swiperNode lastChild is SWIPER_INDICATOR_ETS_TAG
+     */
+    swiperPattern->InitIndicator();
+    ASSERT_EQ(swiperNode->GetLastChild()->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+}
+
+/**
+ * @tc.name: SwiperInitIndicator004
+ * @tc.desc: Test SwiperPattern SwiperInitIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperInitIndicator004, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DOT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    swiperNode->AddChild(textNode);
+    auto layoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateShowIndicator(false);
+
+    /**
+     * @tc.steps: step3. call InitIndicator.
+     * @tc.expected: swiperNode lastChild is TEXT_ETS_TAG
+     */
+    swiperPattern->InitIndicator();
+    ASSERT_EQ(swiperNode->GetLastChild()->GetTag(), V2::TEXT_ETS_TAG);
+}
+
+/**
+ * @tc.name: SwiperInitIndicator005
+ * @tc.desc: Test SwiperPattern SwiperInitIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperInitIndicator005, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DIGIT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto swiperNode = swiperPattern->GetHost();
+    ASSERT_NE(swiperNode, nullptr);
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    swiperNode->AddChild(indicatorNode);
+
+    /**
+     * @tc.steps: step3. call InitIndicator.
+     * @tc.expected: swiperNode lastChild is SWIPER_INDICATOR_ETS_TAG
+     */
+    swiperPattern->InitIndicator();
+    ASSERT_EQ(swiperNode->GetLastChild()->GetTag(), V2::SWIPER_INDICATOR_ETS_TAG);
+}
+
+/**
+ * @tc.name: SetDotIndicatorStyle001
+ * @tc.desc: Test SwiperModelNG SetDotIndicatorStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SetDotIndicatorStyle001, TestSize.Level1)
+{
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    ASSERT_NE(controller, nullptr);
+    SwiperParameters swiperParameters;
+    swiperParameters.colorVal = Color(Color::BLUE);
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperNode, nullptr);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. call SetDotIndicatorStyle.
+     * @tc.expected: swiperParameters_ colorVal is swiperParameters colorVal
+     */
+    mode.SetDotIndicatorStyle(swiperParameters);
+    ASSERT_EQ(pattern->swiperParameters_->colorVal, swiperParameters.colorVal);
+}
+
+/**
+ * @tc.name: SetDigitIndicatorStyle001
+ * @tc.desc: Test SwiperModelNG SetDigitIndicatorStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
+{
+    SwiperModelNG mode;
+    auto controller = mode.Create();
+    ASSERT_NE(controller, nullptr);
+    SwiperDigitalParameters digitalParameters;
+    digitalParameters.fontColor = Color(Color::GREEN);
+
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(swiperNode, nullptr);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. call SetDigitIndicatorStyle.
+     * @tc.expected: swiperDigitalParameters_ fontColor is digitalParameters fontColor
+     */
+    mode.SetDigitIndicatorStyle(digitalParameters);
+    ASSERT_EQ(pattern->swiperDigitalParameters_->fontColor, digitalParameters.fontColor);
+}
+
+/**
+ * @tc.name: SwiperDigitIndicatorLayoutAlgorithmLayout001
+ * @tc.desc: Test DigitIndicatorLayoutAlgorithm SwiperDigitIndicatorLayoutAlgorithmLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, SwiperDigitIndicatorLayoutAlgorithmLayout001, TestSize.Level1)
+{
+    indicatorDirection_ = Axis::VERTICAL;
+    indicatorType_ = SwiperIndicatorType::DIGIT;
+    CommomAttrInfo();
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper and set SwiperLayoutAlgorithm.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    ASSERT_NE(indicatorNode, nullptr);
+
+    frameNode->AddChild(indicatorNode);
+
+    auto indicatorPattern = indicatorNode->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+
+    auto algorithm = indicatorPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(algorithm, nullptr);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapper layoutWrapper = LayoutWrapper(indicatorNode, geometryNode, indicatorNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step3. call Layout.
+     * @tc.expected: indicatorNode children is empty.
+     */
+    algorithm->Layout(&layoutWrapper);
+    auto hostNode = layoutWrapper.GetHostNode();
+    ASSERT_NE(hostNode, nullptr);
+    auto children = hostNode->GetChildren();
+    EXPECT_TRUE(children.empty());
+}
+
+/**
+ * @tc.name: DotIndicatorModifier001
+ * @tc.desc: Test DotIndicatorModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, DotIndicatorModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DotIndicatorModifier. Update PaintProperty.Call the function onDraw.
+     * @tc.expected: step1. Check the PaintProperty update success.
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.emplace_back(ITEM_WIDTH);
+    LinearVector<float> normalItemHalfSizes;
+    // ITEM_HALF_WIDTH == SELECTED_ITEM_HALF_WIDTH, ITEM_HALF_HEIGHT == SELECTED_ITEM_HALF_HEIGHT.
+    normalItemHalfSizes.emplace_back(ITEM_WIDTH);
+    normalItemHalfSizes.emplace_back(ITEM_WIDTH);
+    normalItemHalfSizes.emplace_back(ITEM_WIDTH);
+    normalItemHalfSizes.emplace_back(ITEM_WIDTH);
+
+    dotIndicatorModifier.UpdateShrinkPaintProperty(
+        MARGIN_OFFSET, normalItemHalfSizes, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.onDraw(context);
+
+    /**
+     * @tc.expected: itemHalfSizes_->Get()[0] is ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[1] is ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[2] is ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[3] is ITEM_WIDTH.
+     */
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[0], ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], ITEM_WIDTH);
+
+    // ITEM_HALF_WIDTH == SELECTED_ITEM_HALF_WIDTH, ITEM_HALF_HEIGHT < SELECTED_ITEM_HALF_HEIGHT.
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ZERO;
+    LinearVector<float> normalItemHalfSizesSecond;
+    normalItemHalfSizesSecond.emplace_back(ITEM_WIDTH);
+    normalItemHalfSizesSecond.emplace_back(ITEM_HEIGHT_LARGE);
+    normalItemHalfSizesSecond.emplace_back(ITEM_WIDTH);
+    normalItemHalfSizesSecond.emplace_back(SELECTED_ITEM_HEIGHT);
+    dotIndicatorModifier.UpdateShrinkPaintProperty(
+        MARGIN_OFFSET, normalItemHalfSizesSecond, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.onDraw(context);
+
+    /**
+     * @tc.expected: itemHalfSizes_->Get()[0] is ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[1] is ITEM_HEIGHT_LARGE.
+     *               itemHalfSizes_->Get()[2] is ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[3] is SELECTED_ITEM_HEIGHT.
+     */
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[0], ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], ITEM_HEIGHT_LARGE);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], SELECTED_ITEM_HEIGHT);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier002
+ * @tc.desc: Test DotIndicatorModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, DotIndicatorModifier002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DotIndicatorModifier. Update PaintProperty.Call the function onDraw.
+     * @tc.expected: step1. Check the PaintProperty update success.
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.emplace_back(ITEM_WIDTH);
+
+    // ITEM_HALF_WIDTH != SELECTED_ITEM_HALF_WIDTH, ITEM_HALF_HEIGHT > SELECTED_ITEM_HALF_HEIGHT.
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ONE;
+    LinearVector<float> normalItemHalfSizesThird;
+    normalItemHalfSizesThird.emplace_back(ITEM_WIDTH);
+    normalItemHalfSizesThird.emplace_back(ITEM_HEIGHT);
+    normalItemHalfSizesThird.emplace_back(SELECTED_ITEM_WIDTH);
+    normalItemHalfSizesThird.emplace_back(SELECTED_ITEM_HEIGHT_LARGE);
+    dotIndicatorModifier.UpdateShrinkPaintProperty(
+        MARGIN_OFFSET, normalItemHalfSizesThird, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.onDraw(context);
+
+    /**
+     * @tc.expected: itemHalfSizes_->Get()[0] is ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[1] is ITEM_HEIGHT.
+     *               itemHalfSizes_->Get()[2] is SELECTED_ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[3] is SELECTED_ITEM_HEIGHT_LARGE.
+     */
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[0], ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], ITEM_HEIGHT);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], SELECTED_ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], SELECTED_ITEM_HEIGHT_LARGE);
+}
+
+/**
+ * @tc.name: DotIndicatorModifier003
+ * @tc.desc: Test DotIndicatorModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorPatternTestNg, DotIndicatorModifier003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DotIndicatorModifier. Update PaintProperty.Call the function onDraw.
+     * @tc.expected: step1. Check the PaintProperty update success.
+     */
+    DotIndicatorModifier dotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    dotIndicatorModifier.indicatorMask_ = true;
+    dotIndicatorModifier.currentIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ZERO;
+    dotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+    EXPECT_EQ(dotIndicatorModifier.backgroundColor_->Get().ToColor(), Color::BLUE);
+
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.emplace_back(ITEM_WIDTH);
+    // call the UpdateDilatePaintProperty to set property.
+    dotIndicatorModifier.normalToHoverIndex_ = SWIPER_INDEX_ONE;
+    dotIndicatorModifier.hoverToNormalIndex_ = SWIPER_INDEX_ONE;
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(ITEM_WIDTH);
+    itemHalfSizes.emplace_back(ITEM_HEIGHT);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_WIDTH);
+    itemHalfSizes.emplace_back(SELECTED_ITEM_HEIGHT_LARGE);
+    dotIndicatorModifier.UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.onDraw(context);
+
+    /**
+     * @tc.expected: itemHalfSizes_->Get()[0] is ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[1] is ITEM_HEIGHT.
+     *               itemHalfSizes_->Get()[2] is SELECTED_ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[3] is SELECTED_ITEM_HEIGHT_LARGE.
+     */
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[0], ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], ITEM_HEIGHT);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], SELECTED_ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], SELECTED_ITEM_HEIGHT_LARGE);
+    // call the UpdateHoverPaintProperty to set property.
+    dotIndicatorModifier.UpdateHoverPaintProperty(itemHalfSizes, vectorBlackPointCenterX, LONG_POINT_CENTER_X);
+    dotIndicatorModifier.onDraw(context);
+
+    /**
+     * @tc.expected: itemHalfSizes_->Get()[0] is ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[1] is ITEM_HEIGHT.
+     *               itemHalfSizes_->Get()[2] is SELECTED_ITEM_WIDTH.
+     *               itemHalfSizes_->Get()[3] is SELECTED_ITEM_HEIGHT_LARGE.
+     */
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[0], ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[1], ITEM_HEIGHT);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[2], SELECTED_ITEM_WIDTH);
+    EXPECT_EQ(dotIndicatorModifier.itemHalfSizes_->Get()[3], SELECTED_ITEM_HEIGHT_LARGE);
 }
 } // namespace OHOS::Ace::NG

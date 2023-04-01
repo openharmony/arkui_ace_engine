@@ -93,7 +93,7 @@ void ScrollBar::UpdateScrollBarRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
 {
     // return if nothing changes to avoid changing opacity
-    if (paintOffset_ == offset && viewPortSize_ == size && lastOffset_ == lastOffset &&
+    if (!positionModeUpdate_ && paintOffset_ == offset && viewPortSize_ == size && lastOffset_ == lastOffset &&
         NearEqual(estimatedHeight_, estimatedHeight, 0.000001f)) {
         return;
     }

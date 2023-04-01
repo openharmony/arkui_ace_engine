@@ -873,7 +873,7 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
                         }
                     });
                 }
-                delegate->nweb_->ExecuteJavaScript(jscode, callbackImpl);
+                delegate->nweb_->ExecuteJavaScript(jscode, callbackImpl, false);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -3142,6 +3142,42 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline == nullptr) {
+        return;
+    }
+
+    auto themeManager = pipeline->GetThemeManager();
+    if (themeManager == nullptr) {
+        return;
+    }
+
+    auto themeConstants = themeManager->GetThemeConstants();
+    if (themeConstants == nullptr) {
+        return;
+    }
+    Color color = themeConstants->GetColorByName(colorValue);
+    uint32_t colorContent = color.GetValue();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), colorContent]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutScrollBarColor(colorContent);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::LoadUrl()
 {
     auto context = context_.Upgrade();
@@ -3202,6 +3238,25 @@ void WebDelegate::OnActive()
             }
             if (delegate->nweb_) {
                 delegate->nweb_->OnContinue();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::SetShouldFrameSubmissionBeforeDraw(bool should)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), should]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetShouldFrameSubmissionBeforeDraw(should);
             }
         },
         TaskExecutor::TaskType::PLATFORM);
@@ -3569,7 +3624,7 @@ void WebDelegate::OnGeolocationPermissionsHidePrompt()
 }
 
 void WebDelegate::OnGeolocationPermissionsShowPrompt(
-    const std::string& origin, OHOS::NWeb::NWebGeolocationCallbackInterface* callback)
+    const std::string& origin, const std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface>& callback)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -4270,6 +4325,17 @@ void WebDelegate::OnAudioStateChanged(bool audible)
     }
 }
 
+void WebDelegate::OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    auto touchHandleSize = theme->GetHandleHotZoneRadius().ConvertToPx();
+    hotZone.width = touchHandleSize;
+    hotZone.height = touchHandleSize;
+}
+
 RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 {
     if (isRefreshPixelMap_) {
@@ -4281,29 +4347,32 @@ RefPtr<PixelMap> WebDelegate::GetDragPixelMap()
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
-void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchDown(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
-        nweb_->OnTouchPress(id, x, y);
+        nweb_->OnTouchPress(id, x, y, from_overlay);
     }
 }
 
-void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchUp(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         ResSchedReport::GetInstance().ResSchedDataReport("web_gesture");
-        nweb_->OnTouchRelease(id, x, y);
+        nweb_->OnTouchRelease(id, x, y, from_overlay);
     }
 }
 
-void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y)
+void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const double& y,
+    bool from_overlay)
 {
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
-        nweb_->OnTouchMove(id, x, y);
+        nweb_->OnTouchMove(id, x, y, from_overlay);
     }
 }
 
@@ -4688,5 +4757,19 @@ void WebDelegate::UnregisterSurfacePositionChangedCallback()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UnregisterSurfacePositionChangedCallback(callbackId_);
     callbackId_ = 0;
+}
+
+void WebDelegate::OnCompleteSwapWithNewSize()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnCompleteSwapWithNewSize();
+}
+
+void WebDelegate::OnResizeNotWork()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnResizeNotWork();
 }
 } // namespace OHOS::Ace

@@ -230,16 +230,14 @@ void JsiPaEngine::RegisterPaModule()
 void JsiPaEngine::EvaluateJsCode()
 {
     ACE_SCOPED_TRACE("JsiPaEngine::EvaluateJsCode");
-
+    CHECK_NULL_VOID(jsAbilityRuntime_);
     // load jsfwk
-    if (!runtime_->ExecuteJsBin("/system/etc/strip.native.min.abc")) {
+    if (!jsAbilityRuntime_->LoadScript("/system/etc/strip.native.min.abc")) {
         LOGE("Failed to load js framework!");
     }
-
     // load paMgmt.js
-    bool result =
-        runtime_->EvaluateJsCode((uint8_t*)_binary_paMgmt_abc_start, _binary_paMgmt_abc_end - _binary_paMgmt_abc_start);
-    if (!result) {
+    std::vector<uint8_t> paMgmt(_binary_paMgmt_abc_start, _binary_paMgmt_abc_end);
+    if (!jsAbilityRuntime_->LoadScript("", &paMgmt, true)) {
         LOGE("EvaluateJsCode paMgmt abc failed");
     }
 }
@@ -254,8 +252,8 @@ void JsiPaEngine::InitJsRuntimeOptions(AbilityRuntime::Runtime::Options& options
 
 bool JsiPaEngine::CreateJsRuntime(const AbilityRuntime::Runtime::Options& options)
 {
-    jsAilityRuntime_ = AbilityRuntime::Runtime::Create(options);
-    if (jsAilityRuntime_ == nullptr) {
+    jsAbilityRuntime_ = AbilityRuntime::JsRuntime::Create(options);
+    if (jsAbilityRuntime_ == nullptr) {
         LOGE("Create js runtime failed.");
         return false;
     }
@@ -316,14 +314,14 @@ std::shared_ptr<JsRuntime> JsiPaEngine::GetJsRuntime() const
 
 inline NativeEngine* JsiPaEngine::GetNativeEngine() const
 {
-    CHECK_NULL_RETURN(jsAilityRuntime_, nullptr);
-    return (static_cast<AbilityRuntime::JsRuntime&>(*jsAilityRuntime_)).GetNativeEnginePointer();
+    CHECK_NULL_RETURN(jsAbilityRuntime_, nullptr);
+    return jsAbilityRuntime_->GetNativeEnginePointer();
 }
 
 inline panda::ecmascript::EcmaVM* JsiPaEngine::GetEcmaVm() const
 {
-    CHECK_NULL_RETURN(jsAilityRuntime_, nullptr);
-    return (static_cast<AbilityRuntime::JsRuntime&>(*jsAilityRuntime_)).GetEcmaVm();
+    CHECK_NULL_RETURN(jsAbilityRuntime_, nullptr);
+    return jsAbilityRuntime_->GetEcmaVm();
 }
 
 void JsiPaEngine::SetDebuggerPostTask()
@@ -518,8 +516,9 @@ void JsiPaEngine::LoadJs(const std::string& url, const OHOS::AAFwk::Want& want)
             return;
         }
         std::string abcPath = jsBackendAssetManager_->GetAssetPath(urlName).append(urlName);
-        if (!runtime->EvaluateJsCode(content.data(), content.size(), abcPath)) {
-            LOGE("EvaluateJsCode \"%{public}s\" failed.", urlName.c_str());
+        CHECK_NULL_VOID(jsAbilityRuntime_);
+        if (!jsAbilityRuntime_->LoadScript(abcPath, &content, true)) {
+            LOGE("LoadScript \"%{public}s\" failed.", urlName.c_str());
             return;
         }
 

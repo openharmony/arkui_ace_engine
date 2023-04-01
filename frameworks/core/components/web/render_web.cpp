@@ -499,7 +499,7 @@ void RenderWeb::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
         touchOffset = Offset(touchPoint.x, touchPoint.y);
-        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
     // clear the recording position, for not move content when virtual keyboard popup when web get focused.
     auto context = GetContext().Upgrade();
@@ -524,7 +524,7 @@ void RenderWeb::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= GetGlobalOffset().GetX();
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
-        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
     if (web_ && !touchInfos.empty()) {
         web_->RequestFocus();
@@ -551,7 +551,7 @@ void RenderWeb::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= GetGlobalOffset().GetX();
             touchPoint.y -= GetGlobalOffset().GetY() + offsetFix_;
         }
-        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
 }
 

@@ -23,6 +23,9 @@
 #include "base/utils/utils.h"
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/button/button_view.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
@@ -79,6 +82,16 @@ struct GridTestProperty {
 
 class GridPatternTestNg : public testing::Test {
 public:
+    static void SetUpTestSuite()
+    {
+        MockPipelineBase::SetUp();
+    }
+
+    static void TearDownTestSuite()
+    {
+        MockPipelineBase::TearDown();
+    }
+
     static void SetWidth(const Dimension& width)
     {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -99,6 +112,20 @@ public:
             GridItemModelNG gridItemModel;
             gridItemModel.Create();
             SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+    }
+
+    static void CreateGridItemWithButton(int32_t number)
+    {
+        for (int32_t i = 0; i < number; i++) {
+            GridItemModelNG gridItemModel;
+            gridItemModel.Create();
+            SetHeight(Dimension(DEFAULT_ITEM_MAIN_SIZE));
+            {
+                ButtonView::Create("Button");
+                ViewStackProcessor::GetInstance()->Pop();
+            }
             ViewStackProcessor::GetInstance()->Pop();
         }
     }
@@ -128,8 +155,17 @@ public:
         return itemFrameNode->GetPattern<GridItemPattern>();
     }
 
-    static RefPtr<FrameNode> CreateGrid(
-        const GridTestProperty& gridTestProperty, const int32_t girdItemCount = 0)
+    static RefPtr<FocusHub> GetItemFocusHub(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        auto item = frameNode->GetChildAtIndex(index);
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        if (!itemFrameNode) {
+            return nullptr;
+        }
+        return itemFrameNode->GetOrCreateFocusHub();
+    }
+
+    static RefPtr<FrameNode> CreateGrid(const GridTestProperty& gridTestProperty, const int32_t girdItemCount = 0)
     {
         GridModelNG grid;
         RefPtr<ScrollControllerBase> positionController = grid.CreatePositionController();
@@ -196,14 +232,14 @@ HWTEST_F(GridPatternTestNg, GridTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Set grid properties.
-    */
+     */
     GridTestProperty gridTestProperty;
     gridTestProperty.rowsTemplate = std::make_optional("1fr 1fr 1fr");
     gridTestProperty.columnsTemplate = std::make_optional("1fr 1fr 1fr");
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     const int32_t gridItemCount = 9;
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, gridItemCount);
     ASSERT_NE(frameNode, nullptr);
@@ -245,7 +281,7 @@ HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -275,16 +311,21 @@ HWTEST_F(GridPatternTestNg, GridTest002, TestSize.Level1)
      */
     KeyEvent event;
     auto ret = pattern->OnKeyEvent(event);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_PAGE_DOWN;
     ret = pattern->OnKeyEvent(event);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     event.code = KeyCode::KEY_PAGE_UP;
     ret = pattern->OnKeyEvent(event);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
     ret = pattern->HandleDirectionKey(event.code);
-    EXPECT_EQ(ret, false);
+    EXPECT_FALSE(ret);
+    ret = pattern->HandleDirectionKey(KeyCode::KEY_DPAD_UP);
+    EXPECT_TRUE(ret);
+    ret = false;
+    ret = pattern->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -304,7 +345,7 @@ HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -379,8 +420,18 @@ HWTEST_F(GridPatternTestNg, GridTest003, TestSize.Level1)
     EXPECT_EQ(ret, true);
 
     /**
-     * @tc.steps: step9. When offsetEnd_ and reachStart_ are true, call OnScrollCallback functions.
-     * @tc.expected: step9. Check whether the return value is correct.
+     * @tc.steps: step9. Call AnimateTo functions again.
+     * @tc.expected: step9. Check the return value and related parameters.
+     */
+    ret = false;
+    pattern->animator_->status_ = Animator::Status::STOPPED;
+    ret = pattern->AnimateTo(GRID_POSITION, GRID_DURATION, Curves::LINEAR);
+    EXPECT_NE(pattern->animator_, nullptr);
+    EXPECT_EQ(ret, true);
+
+    /**
+     * @tc.steps: step10. When offsetEnd_ and reachStart_ are true, call OnScrollCallback functions.
+     * @tc.expected: step10. Check whether the return value is correct.
      */
     pattern->gridLayoutInfo_.offsetEnd_ = true;
     pattern->gridLayoutInfo_.reachStart_ = true;
@@ -414,7 +465,7 @@ HWTEST_F(GridPatternTestNg, GridTest004, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -504,7 +555,7 @@ HWTEST_F(GridPatternTestNg, GridTest005, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -558,7 +609,7 @@ HWTEST_F(GridPatternTestNg, GridTest006, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -612,7 +663,7 @@ HWTEST_F(GridPatternTestNg, GridTest007, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Create grid and gridItem.
-    */
+     */
     RefPtr<FrameNode> frameNode = CreateGrid(gridTestProperty, 10);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<GridPattern>();
@@ -1032,7 +1083,7 @@ HWTEST_F(GridPatternTestNg, GridTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create grid.
-    */
+     */
     GridModelNG grid;
     RefPtr<ScrollControllerBase> positionController = grid.CreatePositionController();
     RefPtr<ScrollProxy> scrollBarProxy = grid.CreateScrollBarProxy();
@@ -1065,7 +1116,7 @@ HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create gridItem and Set properties.
-    */
+     */
     GridItemModelNG gridItem;
     gridItem.Create([](int32_t) {}, true);
     gridItem.SetRowStart(1);
@@ -1079,7 +1130,7 @@ HWTEST_F(GridPatternTestNg, GridTest020, TestSize.Level1)
     /**
      * @tc.steps: step2. Get frameNode and properties.
      * @tc.expected: step2. Check properties is correct.
-    */
+     */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<GridItemLayoutProperty>();
@@ -1143,7 +1194,8 @@ HWTEST_F(GridPatternTestNg, GridTest021, TestSize.Level1)
      */
     RectF gridRect(0.f, 0.f, DEVICE_WIDTH, DEVICE_HEIGHT);
     EXPECT_CALL(*(AceType::RawPtr(AceType::DynamicCast<MockRenderContext>(frameNode->renderContext_))),
-        GetPaintRectWithTransform()).WillRepeatedly(Return(gridRect));
+        GetPaintRectWithTransform())
+        .WillRepeatedly(Return(gridRect));
 
     /**
      * @tc.steps: step4. Run GetInsertPosition func.
@@ -1206,7 +1258,7 @@ HWTEST_F(GridPatternTestNg, GridTest022, TestSize.Level1)
 
 /**
  * @tc.name: GridTest023
- * @tc.desc: Test GetFrameNodeChildSize func
+ * @tc.desc: Test positionController func
  * @tc.type: FUNC
  */
 HWTEST_F(GridPatternTestNg, GridTest023, TestSize.Level1)
@@ -1233,15 +1285,62 @@ HWTEST_F(GridPatternTestNg, GridTest023, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     RunMeasureAndLayout(frameNode);
 
+    /**
+     * @tc.steps: step2. Test positionController_ func.
+     * @tc.expected: Verify return value.
+     */
     auto controller = pattern->positionController_;
     controller->JumpTo(1, 0);
     auto layoutInfo = pattern->GetGridLayoutInfo();
     EXPECT_EQ(layoutInfo.jumpIndex_, 1);
     controller->AnimateTo(Dimension(GRID_POSITION, DimensionUnit::PX), GRID_DURATION, Curves::LINEAR);
     EXPECT_NE(pattern->animator_, nullptr);
-    MockPipelineBase::SetUp();
     Offset currentOffset = controller->GetCurrentOffset();
     EXPECT_EQ(currentOffset, Offset(0, 0));
+    layoutInfo.axis_ = Axis::HORIZONTAL;
+    currentOffset = controller->GetCurrentOffset();
+    EXPECT_EQ(currentOffset, Offset(0, 0));
+}
+
+/**
+ * @tc.name: GridTest024
+ * @tc.desc: Test GetInsertPosition func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridTest024, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateGridItem(itemCount);
+
+    /**
+     * @tc.steps: step2. Get something and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step2. Test GetInsertPosition func.
+     * @tc.expected: Verify return value.
+     */
+    pattern->gridLayoutInfo_.currentRect_ = RectF(0, 0, 100, 100);
+    pattern->gridLayoutInfo_.currentMovingItemPosition_ = 1;
+    int32_t insertPosition = pattern->GetInsertPosition(50.f, 50.f);
+    EXPECT_EQ(insertPosition, 1);
+    insertPosition = pattern->GetInsertPosition(200.f, 200.f);
+    EXPECT_EQ(insertPosition, -1);
 }
 
 /**
@@ -1678,6 +1777,71 @@ HWTEST_F(GridPatternTestNg, GridSelectTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridSelectTest005
+ * @tc.desc: Test select in other condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridSelectTest005, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 8;
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetMultiSelectable(true);
+    CreateGridItem(itemCount);
+
+    /**
+     * @tc.steps: step2. Get something and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step5. Select (225, 50) - (315, 150) zone with RIGHT_BUTTON.
+     * @tc.expected: The item is not selected.
+     */
+    MouseInfo info;
+    info.SetButton(MouseButton::RIGHT_BUTTON); // Use RIGHT_BUTTON to select.
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(225.f, 50.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(315.f, 150.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<GridItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_FALSE(secondItemPattern->IsSelected());
+    info.SetAction(MouseAction::RELEASE);
+    pattern->HandleMouseEventWithoutKeyboard(info);
+
+    /**
+     * @tc.steps: step6. Select (225, 50) - (315, 150) zone and trigger other MouseAction.
+     * @tc.expected: The item is still selected when trigger other MouseAction.
+     */
+    info.SetButton(MouseButton::LEFT_BUTTON); // Use RIGHT_BUTTON to select.
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(225.f, 50.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(315.f, 150.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    info.SetAction(MouseAction::HOVER); // Trigger other MouseAction.
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+}
+
+/**
  * @tc.name: GridDragTest001
  * @tc.desc: Verify drag func
  * @tc.type: FUNC
@@ -1743,7 +1907,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest001, TestSize.Level1)
     EXPECT_EQ(eventHub->draggedIndex_, 1);
     EXPECT_NE(eventHub->dragDropProxy_, nullptr);
     auto itemFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(1));
-    EXPECT_EQ(eventHub->draggingItem_ , itemFrameNode);
+    EXPECT_EQ(eventHub->draggingItem_, itemFrameNode);
 
     /**
      * @tc.steps: step6. Trigger HandleOnItemDragUpdate, HandleOnItemDragEnd.
@@ -1753,8 +1917,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest001, TestSize.Level1)
     HandleOnItemDragEnd(info);
     EXPECT_EQ(eventHub->draggedIndex_, 0);
     EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
-    EXPECT_EQ(eventHub->draggingItem_ , nullptr);
-
+    EXPECT_EQ(eventHub->draggingItem_, nullptr);
 
     /**
      * @tc.steps: step7. Trigger HandleOnItemDragStart, HandleOnItemDragUpdate, HandleOnItemDragEnd.
@@ -1765,7 +1928,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest001, TestSize.Level1)
     HandleOnItemDragCancel();
     EXPECT_EQ(eventHub->draggedIndex_, 0);
     EXPECT_EQ(eventHub->dragDropProxy_, nullptr);
-    EXPECT_EQ(eventHub->draggingItem_ , nullptr);
+    EXPECT_EQ(eventHub->draggingItem_, nullptr);
 }
 
 /**
@@ -1812,15 +1975,33 @@ HWTEST_F(GridPatternTestNg, GridDragTest002, TestSize.Level1)
     EXPECT_EQ(pattern->GetOriginalIndex(), itemCount);
 
     /**
-     * @tc.steps: step3. Run FireOnItemDragEnter, FireOnItemDragMove, FireOnItemDrop.
+     * @tc.steps: step4. MoveItemsForward.
      * @tc.expected: Verify GetOriginalIndex.
      */
     eventHub->FireOnItemDragEnter(dragInfo);
     eventHub->FireOnItemDragMove(dragInfo, 1, 5);
     EXPECT_EQ(pattern->GetOriginalIndex(), 5);
+    eventHub->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_EQ(pattern->GetOriginalIndex(), -1);
+
+    /**
+     * @tc.steps: step5. MoveItemsBack.
+     * @tc.expected: Verify GetOriginalIndex.
+     */
+    eventHub->FireOnItemDragEnter(dragInfo);
     eventHub->FireOnItemDragMove(dragInfo, 5, 2);
     EXPECT_EQ(pattern->GetOriginalIndex(), 2);
     eventHub->FireOnItemDrop(dragInfo, 0, 1, true);
+    EXPECT_EQ(pattern->GetOriginalIndex(), -1);
+
+    /**
+     * @tc.steps: step6. Move something to Grid.
+     * @tc.expected: Verify GetOriginalIndex.
+     */
+    eventHub->FireOnItemDragEnter(dragInfo);
+    eventHub->FireOnItemDragMove(dragInfo, -1, 2);
+    EXPECT_EQ(pattern->GetOriginalIndex(), 2);
+    eventHub->FireOnItemDrop(dragInfo, -1, 1, true);
     EXPECT_EQ(pattern->GetOriginalIndex(), -1);
 }
 
@@ -1847,6 +2028,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest003, TestSize.Level1)
     gridModel.SetOnItemDragLeave([](const ItemDragInfo&, int32_t) {});
     gridModel.SetOnItemDrop([](const ItemDragInfo&, int32_t, int32_t, bool) {});
     CreateGridItem(itemCount);
+
     /**
      * @tc.steps: step2. Get frameNode, pattern and eventHub and RunMeasureAndLayout.
      */
@@ -1872,7 +2054,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest003, TestSize.Level1)
     pattern->ClearDragState();
 
     /**
-     * @tc.steps: step3. MoveItemsForward.
+     * @tc.steps: step4. MoveItemsForward.
      * @tc.expected: Verify GetOriginalIndex.
      */
     eventHub->FireOnItemDragEnter(dragInfo);
@@ -1882,7 +2064,7 @@ HWTEST_F(GridPatternTestNg, GridDragTest003, TestSize.Level1)
     EXPECT_EQ(pattern->GetOriginalIndex(), -1);
 
     /**
-     * @tc.steps: step3. MoveItemsBack.
+     * @tc.steps: step5. MoveItemsBack.
      * @tc.expected: Verify GetOriginalIndex.
      */
     eventHub->FireOnItemDragEnter(dragInfo);
@@ -1890,5 +2072,240 @@ HWTEST_F(GridPatternTestNg, GridDragTest003, TestSize.Level1)
     EXPECT_EQ(pattern->GetOriginalIndex(), 2);
     eventHub->FireOnItemDrop(dragInfo, 0, 1, true);
     EXPECT_EQ(pattern->GetOriginalIndex(), -1);
+}
+
+/**
+ * @tc.name: GridFocusStepTest001
+ * @tc.desc: Test GetNextFocusNode func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridFocusStepTest001, TestSize.Level1)
+{
+    /**
+     *  ___180__360__540__720
+     * |____|____|____|____|100
+     * |____|____|____|____|200
+     * |____|____|          300
+     */
+    constexpr int32_t itemCount = 10;
+
+    /**
+     * @tc.steps: step1. Create Grid, Set 4 columns.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController;
+    RefPtr<ScrollProxy> scrollBarProxy;
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+
+    /**
+     * @tc.steps: step2. Create focusable GridItem.
+     */
+    CreateGridItemWithButton(itemCount);
+
+    /**
+     * @tc.steps: step3. Get frameNode and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step4. GetNextFocusNode from left_top.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    RefPtr<FocusHub> currentFocusNode = GetItemFocusHub(frameNode, 0);
+    currentFocusNode->RequestFocusImmediately();
+    RefPtr<FocusHub> nextFocusNode = pattern->GetNextFocusNode(FocusStep::NONE, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 1));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 4));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 3));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode from right_top.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentFocusNode = GetItemFocusHub(frameNode, 3);
+    currentFocusNode->RequestFocusImmediately();
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::NONE, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 2));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 4));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 7));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 0));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+
+    /**
+     * @tc.steps: step6. GetNextFocusNode from left_bottom.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentFocusNode = GetItemFocusHub(frameNode, 8);
+    currentFocusNode->RequestFocusImmediately();
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::NONE, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 7));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 4));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 9));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 9));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+
+    /**
+     * @tc.steps: step7. GetNextFocusNode from right_bottom.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentFocusNode = GetItemFocusHub(frameNode, 9);
+    currentFocusNode->RequestFocusImmediately();
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::NONE, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 8));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 5));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 8));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+
+    /**
+     * @tc.steps: step8. GetNextFocusNode from middle.
+     * @tc.expected: Verify all condition of FocusStep.
+     */
+    currentFocusNode = GetItemFocusHub(frameNode, 5);
+    currentFocusNode->RequestFocusImmediately();
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::NONE, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 4));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 1));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 6));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 9));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 4));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::UP_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 7));
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::DOWN_END, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, nullptr);
+}
+
+/**
+ * @tc.name: GridFocusStepTest002
+ * @tc.desc: Test GetNextFocusNode func with scrolled Grid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridFocusStepTest002, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 10;
+
+    /**
+     * @tc.steps: step1. Create Grid, Set 4 columns.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController;
+    RefPtr<ScrollProxy> scrollBarProxy;
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+
+    /**
+     * @tc.steps: step2. Create focusable GridItem.
+     */
+    CreateGridItemWithButton(itemCount);
+
+    /**
+     * @tc.steps: step3. Get frameNode and RunMeasureAndLayout.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    RunMeasureAndLayout(frameNode);
+
+    /**
+     * @tc.steps: step4. Set Grid height to 200.
+     */
+    RefPtr<LayoutWrapper> gridLayoutWrapper = frameNode->CreateLayoutWrapper(false, false);
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { DEVICE_WIDTH, 200.f };
+    LayoutConstraint.percentReference = { DEVICE_WIDTH, 200.f };
+    LayoutConstraint.selfIdealSize = { DEVICE_WIDTH, 200.f };
+    LayoutConstraint.maxSize = { DEVICE_WIDTH, 200.f };
+    gridLayoutWrapper->Measure(LayoutConstraint);
+    gridLayoutWrapper->Layout();
+
+    /**
+     * @tc.steps: step5. GetNextFocusNode from 8th item.
+     * @tc.expected: Grid jump up.
+     */
+    RefPtr<FocusHub> currentFocusNode = GetItemFocusHub(frameNode, 7);
+    currentFocusNode->RequestFocusImmediately();
+    RefPtr<FocusHub> nextFocusNode = pattern->GetNextFocusNode(FocusStep::RIGHT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 8));
+    EXPECT_EQ(pattern->gridLayoutInfo_.jumpIndex_, 8);
+
+    /**
+     * @tc.steps: step6. GetNextFocusNode from 5th item.
+     * @tc.expected: Grid jump Down.
+     */
+    currentFocusNode = GetItemFocusHub(frameNode, 4);
+    currentFocusNode->RequestFocusImmediately();
+    nextFocusNode = pattern->GetNextFocusNode(FocusStep::LEFT, currentFocusNode).Upgrade();
+    EXPECT_EQ(nextFocusNode, GetItemFocusHub(frameNode, 3));
+    EXPECT_EQ(pattern->gridLayoutInfo_.jumpIndex_, 3);
 }
 } // namespace OHOS::Ace::NG

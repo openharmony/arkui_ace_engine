@@ -268,7 +268,7 @@ void BubblePaintMethod::PaintTopBubble(RSCanvas& rsCanvas)
     // paint shadow
     PaintShadow(path_, ShadowConfig::DefaultShadowM, rsCanvas);
     rsCanvas.DrawPath(path_);
-    rsCanvas.ClipPath(path_, RSClipOp::INTERSECT);
+    rsCanvas.ClipPath(path_, RSClipOp::INTERSECT, true);
 }
 
 void BubblePaintMethod::PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas)
@@ -348,7 +348,7 @@ void BubblePaintMethod::PaintBottomBubble(RSCanvas& canvas)
     // paint shadow
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawPath(path_);
-    canvas.ClipPath(path_, RSClipOp::INTERSECT);
+    canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
 }
 
 void BubblePaintMethod::PaintDefaultBubble(RSCanvas& canvas)
@@ -381,7 +381,7 @@ void BubblePaintMethod::PaintBubbleWithArrow(RSCanvas& canvas, PaintWrapper* pai
     BuildCompletePath(path_);
     PaintShadow(path_, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawPath(path_);
-    canvas.ClipPath(path_, RSClipOp::INTERSECT);
+    canvas.ClipPath(path_, RSClipOp::INTERSECT, true);
 }
 
 void BubblePaintMethod::BuildCompletePath(RSPath& path)

@@ -68,6 +68,7 @@ void SwiperPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void SwiperPattern::OnIndexChange() const
@@ -260,9 +261,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     oldIndex_ = currentIndex_;
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     maxChildSize_ = swiperLayoutAlgorithm->GetMaxChildSize();
-    return GetEdgeEffect() == EdgeEffect::FADE;
+    return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
 }
 
 void SwiperPattern::CalculateCacheRange()
@@ -370,7 +372,7 @@ void SwiperPattern::ShowNext()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrenSize = TotalCount();
-    if (currentIndex_ >= childrenSize - 1 && !IsLoop()) {
+    if (currentIndex_ >= childrenSize - GetDisplayCount() && !IsLoop()) {
         LOGW("already last one, can't show next");
         return;
     }
@@ -719,11 +721,11 @@ void SwiperPattern::HandleTouchDown()
 
 void SwiperPattern::HandleTouchUp()
 {
-    if (controller_ && !controller_->IsStopped()) {
+    if (controller_ && controller_->GetStatus() == Animator::Status::PAUSED) {
         controller_->Resume();
     }
 
-    if (springController_ && !springController_->IsStopped()) {
+    if (springController_ && springController_->GetStatus() == Animator::Status::PAUSED) {
         springController_->Resume();
     }
 
@@ -814,6 +816,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         }
 
         if (edgeEffect == EdgeEffect::NONE) {
+            UpdateCurrentOffset(0.0f);
             return;
         }
     }
@@ -1016,7 +1019,7 @@ bool SwiperPattern::IsOutOfBoundary(float mainOffset) const
     }
 
     auto isOutOfStart = index == 0 && NonNegative(mainOffset);
-    auto isOutOfEnd = index == TotalCount() - 1 && NonPositive(mainOffset);
+    auto isOutOfEnd = index == TotalCount() - GetDisplayCount() && NonPositive(mainOffset);
     return isOutOfStart || isOutOfEnd;
 }
 

@@ -66,8 +66,16 @@ void ListPattern::OnModifyDone()
     }
     auto edgeEffect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
     SetEdgeEffect(edgeEffect);
+
+    auto defaultDisplayMode = DisplayMode::OFF;
+    const static int32_t PLATFORM_VERSION_TEN = 10;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
+        defaultDisplayMode = DisplayMode::AUTO;
+    }
     auto listPaintProperty = host->GetPaintProperty<ListPaintProperty>();
-    SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(DisplayMode::OFF));
+    SetScrollBar(listPaintProperty->GetBarDisplayMode().value_or(defaultDisplayMode));
     SetChainAnimation(edgeEffect == EdgeEffect::SPRING && listLayoutProperty->GetChainAnimation().value_or(false));
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
@@ -278,11 +286,12 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);
     listLayoutAlgorithm->SetItemsPosition(itemPosition_);
     listLayoutAlgorithm->SetPrevContentMainSize(contentMainSize_);
-    if (IsOutOfBoundary(false)) {
+    if (IsOutOfBoundary(false) && scrollState_ != SCROLL_FROM_AXIS) {
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() && scrollState_ != SCROLL_FROM_BAR;
+    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() &&
+        scrollState_ != SCROLL_FROM_BAR && scrollState_ != SCROLL_FROM_AXIS;
     listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
     if (chainAnimation_) {
         listLayoutAlgorithm->SetChainOffsetCallback([weak = AceType::WeakClaim(this)](int32_t index) {

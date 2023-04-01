@@ -92,8 +92,12 @@ public:
     MOCK_METHOD1(OnVirtualKeyboardHeightChange, void(float keyboardHeight));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
     MOCK_METHOD1(SetTouchPipeline, void(const WeakPtr<PipelineBase>& context));
+    MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
 
     static RefPtr<MockPipelineBase> pipeline_;
+
+protected:
+    double dipScale_ = 1.0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_PIPELINE_BASE_H

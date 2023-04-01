@@ -103,7 +103,7 @@ public:
     void OnFullScreenExit() override;
     void OnFullScreenEnter(std::shared_ptr<NWeb::NWebFullScreenExitHandler> handler) override;
     void OnGeolocationShow(const std::string& origin,
-        OHOS::NWeb::NWebGeolocationCallbackInterface* callback) override;
+        std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> callback) override;
 
     bool OnAlertDialogByJS(const std::string &url,
                            const std::string &message,
@@ -175,6 +175,9 @@ public:
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
     void OnFirstContentfulPaint(long navigationStartTick, long firstContentfulPaintMs) override;
+    void OnCompleteSwapWithNewSize() override;
+    void OnResizeNotWork() override;
+    void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

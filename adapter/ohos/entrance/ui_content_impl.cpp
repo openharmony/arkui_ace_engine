@@ -488,7 +488,7 @@ void UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* window,
         basePaths.emplace_back("js/");
         basePaths.emplace_back("ets/");
         auto assetProvider =
-            CreateAssetProvider("/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap", basePaths);
+            CreateAssetProvider("/data/bundles/" + bundleName_ + "/" + moduleName_ + ".hap", basePaths, false);
         if (assetProvider) {
             LOGE("push card asset provider to queue.");
             flutterAssetManager->PushBack(std::move(assetProvider));
@@ -1228,8 +1228,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     if (isModelJson) {
         auto pipeline = container->GetPipelineContext();
         if (pipeline && appInfo) {
-            LOGI("SetMinPlatformVersion code is %{public}d", appInfo->minCompatibleVersionCode);
-            pipeline->SetMinPlatformVersion(appInfo->minCompatibleVersionCode);
+            LOGI("SetMinPlatformVersion code is %{public}d", appInfo->apiCompatibleVersion);
+            pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
     if (runtime_) {
@@ -1487,7 +1487,13 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    container->Dump(params, info);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [&]() {
+            container->Dump(params, info);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)

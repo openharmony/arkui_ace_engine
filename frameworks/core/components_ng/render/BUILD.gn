@@ -49,14 +49,6 @@ build_component_ng("render_ng") {
     "shape_painter.cpp",
   ]
 
-  if (enable_ng_build) {
-    sources += [
-      "adapter/flutter_node.cpp",
-      "adapter/flutter_render_context.cpp",
-      "adapter/flutter_window.cpp",
-    ]
-  }
-
   rosen_sources = [
     "adapter/component_snapshot.cpp",
     "adapter/moon_progress_modifier.cpp",

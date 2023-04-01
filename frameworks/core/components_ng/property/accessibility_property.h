@@ -185,7 +185,6 @@ public:
     void ResetSupportAction()
     {
         supportActions_ = 0;
-        SetCommonSupportAction();
         SetSpecificSupportAction();
     };
 
@@ -194,9 +193,6 @@ protected:
     WeakPtr<FrameNode> host_;
     uint64_t supportActions_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
-
-private:
-    void SetCommonSupportAction();
 };
 } // namespace OHOS::Ace::NG
 

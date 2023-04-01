@@ -36,10 +36,10 @@ namespace OHOS::Ace::NG {
 namespace {
 const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const int32_t MARGIN_HALF = 2;
-constexpr double MONTHDAYS_WIDTH_PERCENT_ONE = 0.3429;
-constexpr double TIME_WIDTH_PERCENT_ONE = 0.4571;
-constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.2909;
-constexpr double TIME_WIDTH_PERCENT_TWO = 0.5091;
+constexpr double MONTHDAYS_WIDTH_PERCENT_ONE = 0.4285;
+constexpr double TIME_WIDTH_PERCENT_ONE = 0.5714;
+constexpr double MONTHDAYS_WIDTH_PERCENT_TWO = 0.3636;
+constexpr double TIME_WIDTH_PERCENT_TWO = 0.6363;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 
@@ -149,9 +149,17 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         acceptNode = monthDaysNode;
     }
 
+    auto dateLayoutProperty = dateNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(dateLayoutProperty, nullptr);
+    dateLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(Dimension(1,
+        DimensionUnit::PERCENT)), std::nullopt));
     dateNode->MarkModifyDone();
 
     ViewStackProcessor::GetInstance()->Finish();
+    auto stackLayoutProperty = pickerStack->GetLayoutProperty();
+    CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
+    stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(Dimension(1,
+        DimensionUnit::PERCENT)), std::nullopt));
     pickerStack->MountToParent(contentColumn);
 
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
@@ -178,6 +186,10 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
         gesturHub->AddClickEvent(onClick);
     }
     contentRow->AddChild(CreateDividerNode(dateNode), 1);
+    auto contentRowLayoutProperty = contentRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(contentRowLayoutProperty, nullptr);
+    contentRowLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(Dimension(1,
+        DimensionUnit::PERCENT)), std::nullopt));
     contentRow->MountToParent(contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
@@ -341,6 +353,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
     buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
@@ -617,6 +630,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+    buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
     buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(pickerTheme->GetButtonWidth()), CalcLength(pickerTheme->GetButtonHeight())));
 

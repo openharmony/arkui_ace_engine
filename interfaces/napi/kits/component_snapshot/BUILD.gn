@@ -34,9 +34,7 @@ template("napi_componentsnapshot_static") {
       deps += [ config.libace_target ]
     }
 
-    if (is_cross_platform_build) {
-      deps += [ "//foundation/arkui/napi/:ace_napi" ]
-    } else {
+    if (!is_cross_platform_build) {
       external_deps = [ "napi:ace_napi" ]
     }
 

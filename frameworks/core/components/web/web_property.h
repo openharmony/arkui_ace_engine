@@ -64,6 +64,7 @@ const std::string DEFAULT_FIXED_fONT_FAMILY = "monospace";
 const std::string DEFAULT_SANS_SERIF_FONT_FAMILY = "sans-serif";
 const std::string DEFAULT_SERIF_FONT_FAMILY = "serif";
 const std::string DEFAULT_STANDARD_FONT_FAMILY = "sans-serif";
+const std::string DEFAULT_SCROLLBAR_COLOR = "sys.color.ohos_id_color_foreground";
 
 class HitTestResult : public virtual AceType {
     DECLARE_ACE_TYPE(HitTestResult, AceType);

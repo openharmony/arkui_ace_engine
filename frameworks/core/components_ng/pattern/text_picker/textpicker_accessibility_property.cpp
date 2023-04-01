@@ -141,4 +141,29 @@ bool TextPickerAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(textPickerColumnPattern, false);
     return textPickerColumnPattern->GetOptionCount() > 1;
 }
+
+void TextPickerAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    auto columnNode = textPickerPattern->GetColumnNode();
+    CHECK_NULL_VOID(columnNode);
+    auto textPickerColumnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+    CHECK_NULL_VOID(textPickerColumnPattern);
+    if (IsScrollable()) {
+        if (textPickerColumnPattern->NotLoopOptions()) {
+            if (GetCurrentIndex() > GetBeginIndex()) {
+                AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+            }
+            if (GetCurrentIndex() < GetEndIndex()) {
+                AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            }
+        } else {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

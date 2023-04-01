@@ -33,6 +33,22 @@ const int SHOW_DIALOG_BUTTON_NUM_MAX = 3;
 const int SHOW_ACTION_MENU_BUTTON_NUM_MAX = 6;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
 
+#ifdef OHOS_STANDARD_SYSTEM
+bool ContainerIsService()
+{
+    auto containerId = Container::CurrentId();
+    // Get active container when current instanceid is less than 0
+    if (containerId < 0) {
+        auto container = Container::GetActive();
+        if (container) {
+            containerId = container->GetInstanceId();
+        }
+    }
+    // for pa service
+    return containerId >= MIN_PA_SERVICE_ID || containerId < 0;
+}
+#endif
+
 } // namespace
 
 napi_value GetReturnObject(napi_env env, std::string callbackString)
@@ -86,8 +102,8 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         int32_t type = 0;
         std::vector<std::string> params;
         if (!ParseResourceParam(env, messageNApi, id, type, params)) {
-            LOGE("can not parse resource info from inout params.");
-            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            LOGE("can not parse resource info from input params.");
+            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, messageString)) {
@@ -114,8 +130,8 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         int32_t type = 0;
         std::vector<std::string> params;
         if (!ParseResourceParam(env, durationNApi, id, type, params)) {
-            LOGE("can not parse resource info from inout params.");
-            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            LOGE("can not parse resource info from input params.");
+            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, durationStr)) {
@@ -141,8 +157,8 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         int32_t type = 0;
         std::vector<std::string> params;
         if (!ParseResourceParam(env, bottomNApi, id, type, params)) {
-            LOGE("can not parse resource info from inout params.");
-            NapiThrow(env, "Can not parse resource info from inout params.", Framework::ERROR_CODE_INTERNAL_ERROR);
+            LOGE("can not parse resource info from input params.");
+            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
         }
         if (!ParseString(id, type, params, bottomString)) {
@@ -152,7 +168,7 @@ static napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         }
     }
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (!delegate) {
             LOGE("can not get delegate.");
@@ -396,7 +412,7 @@ static napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
-    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
             delegate->ShowDialog(asyncContext->titleString, asyncContext->messageString, asyncContext->buttons,
@@ -718,7 +734,7 @@ static napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
         }
     }, nullptr, nullptr);
 #ifdef OHOS_STANDARD_SYSTEM
-    if (SystemProperties::GetExtSurfaceEnabled() || Container::IsCurrentUseNewPipeline()) {
+    if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
         auto delegate = EngineHelper::GetCurrentDelegate();
         if (delegate) {
             delegate->ShowActionMenu(asyncContext->titleString, asyncContext->buttons, std::move(callBack));

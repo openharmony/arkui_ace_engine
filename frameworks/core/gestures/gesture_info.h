@@ -598,6 +598,17 @@ public:
     {
         return inputEventType_;
     }
+#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetPointerId(int32_t pointerId)
+    {
+        pointerId_ = pointerId;
+    }
+
+    int32_t GetPointerId() const
+    {
+        return pointerId_;
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
 
 private:
     bool repeat_ = false;
@@ -611,6 +622,9 @@ private:
     double speed_ = 0.0;
     double mainSpeed_ = 0.0;
     double mainDelta_ = 0.0;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    int32_t pointerId_ = 0;
+#endif // ENABLE_DRAG_FRAMEWORK
     Point globalPoint_;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;

@@ -65,6 +65,7 @@ public:
         maxValue_ = paintProperty->GetMaxValue().value_or(maxValue_);
         value_ = paintProperty->GetValue().value_or(value_);
         scaleCount_ = paintProperty->GetScaleCount().value_or(scaleCount_);
+        scaleWidth_ = paintProperty->GetScaleWidth().value_or(Dimension(scaleWidth_)).ConvertToPx();
         progressModifier_->SetContentOffset(paintWrapper->GetContentOffset());
         progressModifier_->SetContentSize(paintWrapper->GetContentSize());
         CalculateStrokeWidth(paintWrapper->GetContentSize());

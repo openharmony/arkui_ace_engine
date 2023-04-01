@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,13 +16,32 @@
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
+#include "core/components_ng/test/pattern/text/mock/mock_txt_paragraph.h"
+
 namespace OHOS::Ace::NG {
 namespace LayoutWidth {
 float layoutWidth = 0.0f;
 }
+namespace {
+bool textParapraphCanConstruct = true;
+std::vector<bool> textParapraphDidExceedMaxLines;
+}
+
+void MockTxtParagraph::SetCanConstruct(bool canConstruct)
+{
+    textParapraphCanConstruct = canConstruct;
+}
+
+void MockTxtParagraph::SetDidExceedMaxLines(const std::vector<bool>& didExceedMaxLines)
+{
+    textParapraphDidExceedMaxLines = didExceedMaxLines;
+}
 
 RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
+    if (!textParapraphCanConstruct) {
+        return nullptr;
+    }
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
     CHECK_NULL_RETURN(txtFontCollection, nullptr);
     auto sharedFontCollection = txtFontCollection->GetRawFontCollection();
@@ -68,7 +87,12 @@ float TxtParagraph::GetMaxIntrinsicWidth()
 
 bool TxtParagraph::DidExceedMaxLines()
 {
-    return true;
+    if (textParapraphDidExceedMaxLines.empty()) {
+        return true;
+    }
+    bool result = *textParapraphDidExceedMaxLines.begin();
+    textParapraphDidExceedMaxLines.erase(textParapraphDidExceedMaxLines.begin());
+    return result;
 }
 
 float TxtParagraph::GetLongestLine()

@@ -114,7 +114,7 @@ public:
         jsViewName_ = name;
     }
 
-    const std::string& GetJSViewName()
+    const std::string& GetJSViewName() const
     {
         return jsViewName_;
     }

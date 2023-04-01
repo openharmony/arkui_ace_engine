@@ -569,7 +569,7 @@ void WebPattern::WebRequestFocus()
 
 bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (!config.contentSizeChange) {
+    if (!config.contentSizeChange || isInWindowDrag_) {
         return false;
     }
     CHECK_NULL_RETURN(delegate_, false);
@@ -606,6 +606,8 @@ void WebPattern::OnAreaChangedInner()
     }
     webOffset_ = offset;
     UpdateTouchHandleForOverlay();
+    if (isInWindowDrag_)
+        return;
     auto resizeOffset = Offset(offset.GetX(), offset.GetY());
     delegate_->SetBoundsOrResize(drawSize_, resizeOffset);
 }
@@ -877,6 +879,13 @@ void WebPattern::OnVerticalScrollBarAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnScrollBarColorUpdate(const std::string& value)
+{
+    if (delegate_) {
+        delegate_->UpdateScrollBarColor(value);
+    }
+}
+
 void WebPattern::RegistVirtualKeyBoardListener()
 {
     if (!needUpdateWeb_) {
@@ -961,6 +970,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateMinLogicalFontSize(GetMinLogicalFontSizeValue(DEFAULT_MINIMUM_LOGICAL_FONT_SIZE));
         delegate_->UpdateHorizontalScrollBarAccess(GetHorizontalScrollBarAccessEnabledValue(true));
         delegate_->UpdateVerticalScrollBarAccess(GetVerticalScrollBarAccessEnabledValue(true));
+        delegate_->UpdateScrollBarColor(GetScrollBarColorValue(DEFAULT_SCROLLBAR_COLOR));
         if (GetBlockNetwork()) {
             delegate_->UpdateBlockNetwork(GetBlockNetwork().value());
         }
@@ -1043,7 +1053,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
-        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchDown(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
 }
 
@@ -1060,7 +1070,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
-        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
     if (!touchInfos.empty()) {
         WebRequestFocus();
@@ -1084,7 +1094,7 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
-        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y);
+        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
     }
 }
 
@@ -1539,7 +1549,56 @@ void WebPattern::OnWindowHide()
     isWindowShow_ = false;
 }
 
-void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) {}
+void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    auto contentSize = GetHost()->GetGeometryNode()->GetContentSize();
+    ACE_SCOPED_TRACE("WebPattern::OnWindowSizeChanged || reason=%d || width=%f || height=%f",
+        static_cast<uint32_t>(type), contentSize.Width(), contentSize.Height());
+
+    if (type == WindowSizeChangeReason::DRAG_START) {
+        delegate_->SetShouldFrameSubmissionBeforeDraw(true);
+        isInWindowDrag_ = true;
+    } else if (type == WindowSizeChangeReason::DRAG_END) {
+        if (!isInWindowDrag_)
+            return;
+
+        drawSize_.SetWidth(contentSize.Width());
+        drawSize_.SetHeight(contentSize.Height());
+        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+        delegate_->SetBoundsOrResize(drawSize_, offset);
+
+        delegate_->SetShouldFrameSubmissionBeforeDraw(false);
+        isInWindowDrag_ = false;
+        isWaiting_ = false;
+    } else if (type == WindowSizeChangeReason::DRAG) {
+        if (!isInWindowDrag_ || isWaiting_)
+            return;
+
+        drawSize_.SetWidth(contentSize.Width());
+        drawSize_.SetHeight(contentSize.Height());
+        auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+        delegate_->SetBoundsOrResize(drawSize_, offset);
+        isWaiting_ = true;
+    }
+}
+
+void WebPattern::OnCompleteSwapWithNewSize()
+{
+    if (!isInWindowDrag_ || !isWaiting_)
+        return;
+
+    ACE_SCOPED_TRACE("WebPattern::OnCompleteSwapWithNewSize");
+    isWaiting_ = false;
+}
+
+void WebPattern::OnResizeNotWork()
+{
+    if (!isInWindowDrag_ || !isWaiting_)
+        return;
+
+    ACE_SCOPED_TRACE("WebPattern::OnResizeNotWork");
+    isWaiting_ = false;
+}
 
 void WebPattern::OnInActive()
 {

@@ -17,8 +17,8 @@
 
 #include <map>
 
-#include "base/log/log.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log.h"
 #include "core/common/container_scope.h"
 #include "adapter/preview/entrance/ace_container.h"
 #include "adapter/preview/entrance/editing/text_input_client_mgr.h"

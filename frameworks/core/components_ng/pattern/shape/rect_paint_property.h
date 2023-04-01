@@ -26,6 +26,11 @@
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+// Dimension(0) will update radius, but Dimension(-1) will not.
+const Dimension DEFAULT_RADIUS_VALUE(0, DimensionUnit::PX);
+const Dimension DEFAULT_RADIUS_INVALID(-1, DimensionUnit::PX);
+} // namespace
 class ACE_EXPORT RectPaintProperty : public ShapePaintProperty {
     DECLARE_ACE_TYPE(RectPaintProperty, ShapePaintProperty);
 
@@ -201,7 +206,8 @@ public:
 
     void UpdateRadius(std ::optional<Radius>& radiusOpt, const Radius& value)
     {
-        if (!value.GetX().IsValid() && !value.GetY().IsValid()) {
+        // Dimension(0) is a valid value in radius.
+        if (!value.GetX().IsNonNegative() && !value.GetY().IsNonNegative()) {
             return;
         }
         bool update = false;
@@ -209,11 +215,11 @@ public:
             radiusOpt = value; // value
             update = true;
         } else {
-            if (value.GetX().IsValid() && !NearEqual(radiusOpt.value_or(Radius()).GetX(), value.GetX())) {
+            if (value.GetX().IsNonNegative() && !NearEqual(radiusOpt.value_or(Radius()).GetX(), value.GetX())) {
                 radiusOpt->SetX(value.GetX());
                 update = true;
             }
-            if (value.GetY().IsValid() && !NearEqual(radiusOpt.value_or(Radius()).GetY(), value.GetY())) {
+            if (value.GetY().IsNonNegative() && !NearEqual(radiusOpt.value_or(Radius()).GetY(), value.GetY())) {
                 radiusOpt->SetY(value.GetY());
                 update = true;
             }

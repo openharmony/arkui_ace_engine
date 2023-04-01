@@ -206,6 +206,10 @@ void MenuItemPattern::ShowSubMenu()
         menuProps->UpdateMenuOffset(offset);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         RegisterWrapperMouseEvent();
+
+        auto focusHub = subMenu->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocus();
     }
 }
 
@@ -277,7 +281,7 @@ void MenuItemPattern::RegisterOnHover()
     };
     auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(mouseEvent);
-    inputHub->SetHoverAnimation(HoverEffectType::BOARD);
+    inputHub->SetHoverEffect(HoverEffectType::BOARD);
 }
 
 void MenuItemPattern::RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub)

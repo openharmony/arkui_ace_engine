@@ -60,7 +60,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<RefreshPattern>();
-
+    CHECK_NULL_VOID(pattern);
     // Update child position.
     int32_t index = 0;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -81,14 +81,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
             if (index == layoutProperty->GetCustomBuilderIndexValue(-1)) {
                 alignChild = Alignment::TOP_CENTER;
                 paddingOffsetChild += layoutProperty->GetCustomBuilderOffsetValue();
-            }
-
-            if (index == pattern->GetScrollableNodeIndex()) {
-                auto listLayoutProperty = AceType::DynamicCast<NG::ListLayoutProperty>(child->GetLayoutProperty());
-                if (!listLayoutProperty) {
-                    index++;
-                    continue;
-                }
+            } else {
                 paddingOffsetChild += pattern->GetScrollOffsetValue();
             }
         }

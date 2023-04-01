@@ -431,6 +431,7 @@ void ViewAbstract::SetBorderWidth(const Dimension& value)
         borderWidth.SetBorderWidth(value);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth);
+    ACE_UPDATE_RENDER_CONTEXT(BorderWidth, borderWidth);
 }
 
 void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
@@ -440,6 +441,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
         return;
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
+    ACE_UPDATE_RENDER_CONTEXT(BorderWidth, value);
 }
 
 void ViewAbstract::SetBorderStyle(const BorderStyle& value)
@@ -494,7 +496,14 @@ void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetHoverAnimation(hoverEffect);
+    eventHub->SetHoverEffect(hoverEffect);
+}
+
+void ViewAbstract::SetHoverEffectAuto(HoverEffectType hoverEffect)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEffectAuto(hoverEffect);
 }
 
 void ViewAbstract::SetEnabled(bool enabled)
@@ -505,7 +514,7 @@ void ViewAbstract::SetEnabled(bool enabled)
     }
 
     // The SetEnabled of focusHub must be after at eventHub
-    auto focusHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeFocusHub();
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }

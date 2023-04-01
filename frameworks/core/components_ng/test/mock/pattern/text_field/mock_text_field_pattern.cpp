@@ -59,6 +59,11 @@ void TextFieldPattern::OnDetachFromFrameNode(FrameNode*) {}
 
 void TextFieldPattern::OnValueChanged(bool needFireChangeEvent, bool needFireSelectChangeEvent) {}
 
+bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
+{
+    return false;
+}
+
 std::string TextFieldPattern::GetFontSize() const
 {
     return "string";
@@ -99,11 +104,6 @@ std::string TextFieldPattern::GetPlaceholderFont() const
     return "string";
 }
 
-bool TextFieldPattern::HandleKeyEvent(const KeyEvent& keyEvent)
-{
-    return true;
-}
-
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd) {}
 
 void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
@@ -119,4 +119,6 @@ void TextFieldPattern::HandleFocusEvent() {}
 
 void TextFieldPattern::InitSurfaceChangedCallback() {}
 void TextFieldPattern::InitSurfacePositionChangedCallback() {}
+
+void TextFieldPattern::HandleClickEvent(GestureEvent& info) {}
 } // namespace OHOS::Ace::NG

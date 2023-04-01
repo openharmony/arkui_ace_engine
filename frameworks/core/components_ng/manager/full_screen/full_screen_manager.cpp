@@ -50,15 +50,10 @@ void FullScreenManager::RequestFullScreen(const RefPtr<FrameNode>& frameNode)
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto calcRootWidth = CalcLength(rootWidth);
     auto calcRootHeight = CalcLength(rootHeight);
-    CalcSize idealSize = { calcRootWidth, calcRootHeight };
-    MeasureProperty layoutConstraint;
-    layoutConstraint.selfIdealSize = idealSize;
-    layoutConstraint.maxSize = idealSize;
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize.SetWidth(static_cast<float>(rootWidth));
     parentLayoutConstraint.maxSize.SetHeight(static_cast<float>(rootHeight));
     geometryNode->SetParentLayoutConstraint(parentLayoutConstraint);
-    frameNode->UpdateLayoutConstraint(layoutConstraint);
     frameNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF { 0.0f, 0.0f });
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     rootNode->RebuildRenderContextTree();
@@ -89,19 +84,12 @@ void FullScreenManager::ExitFullScreen(const RefPtr<FrameNode>& frameNode)
     auto originParentGlobalOffset = originGeometryNode->GetParentGlobalOffset();
     frameNode->GetGeometryNode()->SetMarginFrameOffset(originFrameOffset);
     frameNode->GetGeometryNode()->SetParentGlobalOffset(originParentGlobalOffset);
-    MeasureProperty layoutConstraint;
-    auto geoFrameSize = originGeometryNode->GetFrameSize();
-    CalcSize idealSize;
-    idealSize = { CalcLength(geoFrameSize.Width()), CalcLength(geoFrameSize.Height()) };
-    layoutConstraint.selfIdealSize = idealSize;
-
     originalParent_.erase(iterOfParent);
     originGeometryNode_.erase(iterOfGeometryNode);
     // TODO: need to reserve the value set by developers
-    frameNode->UpdateLayoutConstraint(layoutConstraint);
     frameNode->MountToParent(parent, slot);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    parent->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     parent->RebuildRenderContextTree();
 }
 

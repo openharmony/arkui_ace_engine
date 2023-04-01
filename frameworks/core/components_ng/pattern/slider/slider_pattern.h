@@ -36,6 +36,11 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        auto visibility = GetLayoutProperty<LayoutProperty>()->GetVisibility().value_or(VisibleType::VISIBLE);
+        if (visibility == VisibleType::GONE) {
+            return MakeRefPtr<NodePaintMethod>();
+        }
+
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
             sliderContentModifier_ =
@@ -134,6 +139,8 @@ private:
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
 
+    void OpenTranslateAnimation();
+    void CloseTranslateAnimation();
     SliderContentModifier::Parameters UpdateContentParameters();
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);

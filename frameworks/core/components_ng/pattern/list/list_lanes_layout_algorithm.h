@@ -51,6 +51,7 @@ protected:
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis) override;
     int32_t GetLanesFloor(LayoutWrapper* layoutWrapper, int32_t index) override;
+    void SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cachedCount) override;
 
 private:
     static void ModifyLaneLength(

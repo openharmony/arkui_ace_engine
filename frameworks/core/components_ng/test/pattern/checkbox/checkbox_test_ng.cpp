@@ -797,6 +797,55 @@ HWTEST_F(CheckBoxTestNG, CheckBoxMeasureTest024, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBoxPatternTest025
+ * @tc.desc: Test CheckBox OnModifyDone default margin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest025, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+
+    auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(checkBoxPattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+
+    MarginProperty margin;
+    margin.left = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
+    layoutProperty->UpdateMargin(margin); // GetMarginProperty
+
+    checkBoxPattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(), CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
+              CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+              CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+              CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+
+    MarginProperty margin1;
+    margin1.right = CalcLength(CHECK_MARK_SIZE.ConvertToPx());
+    layoutProperty->UpdateMargin(margin1); // GetMarginProperty
+
+    checkBoxPattern->OnModifyDone();
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->left.value(),
+              CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->right.value(),
+              CalcLength(CHECK_MARK_SIZE.ConvertToPx()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->top.value(),
+              CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+    EXPECT_EQ(layoutProperty->GetMarginProperty()->bottom.value(),
+              CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value()));
+}
+
+/**
  * @tc.name: CheckBoxPaintMethodTest001
  * @tc.desc: Test CheckBox PaintMethod PaintCheckBox.
  * @tc.type: FUNC
@@ -861,8 +910,9 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest002, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->pointColor_, CHECK_MARK_COLOR);
     EXPECT_EQ(
         checkBoxPaintMethod.checkboxModifier_->strokeSize_->Get(), static_cast<float>(CHECK_MARK_SIZE.ConvertToPx()));
+    auto checkStroke = static_cast<float>(CHECK_MARK_SIZE.ConvertToPx() * 0.2);
     EXPECT_EQ(
-        checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), static_cast<float>(CHECK_MARK_WIDTH.ConvertToPx()));
+        checkBoxPaintMethod.checkboxModifier_->checkStroke_->Get(), checkStroke);
 }
 
 /**

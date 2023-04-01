@@ -88,6 +88,7 @@ ohos_unittest("refresh_pattern_test_ng") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
 
     # components_ng_property
+    "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/calc_length.cpp",
     "$ace_root/frameworks/core/components_ng/property/grid_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/measure_utils.cpp",

@@ -194,11 +194,6 @@ public:
             CHECK_NULL_VOID(geometryTransition_);
             geometryTransition_->Build(host_, true);
         }
-
-        for (const auto& [id, geometryTransition] : ElementRegister::GetInstance()->GetGeometryTransitionMap()) {
-            LOGD("GeometryTransition map item: id: %{public}s, %{public}s",
-                id.c_str(), geometryTransition ? geometryTransition->ToString().c_str() : "null");
-        }
     }
 
     void UpdateAspectRatio(float ratio)

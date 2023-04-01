@@ -135,11 +135,18 @@ ActionType ConvertAceAction(AceAction aceAction)
         { AceAction::ACTION_SCROLL_FORWARD, ActionType::ACCESSIBILITY_ACTION_SCROLL_FORWARD },
         { AceAction::ACTION_SCROLL_BACKWARD, ActionType::ACCESSIBILITY_ACTION_SCROLL_BACKWARD },
         { AceAction::ACTION_FOCUS, ActionType::ACCESSIBILITY_ACTION_FOCUS },
+        { AceAction::ACTION_CLEAR_FOCUS, ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS },
         { AceAction::ACTION_ACCESSIBILITY_FOCUS, ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS },
         { AceAction::ACTION_CLEAR_ACCESSIBILITY_FOCUS, ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS },
         { AceAction::ACTION_NEXT_AT_MOVEMENT_GRANULARITY, ActionType::ACCESSIBILITY_ACTION_NEXT_TEXT },
         { AceAction::ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT },
         { AceAction::ACTION_SET_TEXT, ActionType::ACCESSIBILITY_ACTION_SET_TEXT },
+        { AceAction::ACTION_COPY, ActionType::ACCESSIBILITY_ACTION_COPY },
+        { AceAction::ACTION_PASTE, ActionType::ACCESSIBILITY_ACTION_PASTE },
+        { AceAction::ACTION_CUT, ActionType::ACCESSIBILITY_ACTION_CUT },
+        { AceAction::ACTION_SELECT, ActionType::ACCESSIBILITY_ACTION_SELECT },
+        { AceAction::ACTION_CLEAR_SELECTION, ActionType::ACCESSIBILITY_ACTION_CLEAR_SELECTION },
+        { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
     };
     for (const auto& item : actionTable) {
         if (aceAction == item.aceAction) {
@@ -606,6 +613,77 @@ inline bool IsPopupSupported(const RefPtr<NG::PipelineContext>& pipeline, int32_
     return false;
 }
 
+void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
+{
+    auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
+    if (gestureEventHub) {
+        nodeInfo.SetClickable(gestureEventHub->IsClickable());
+        if (gestureEventHub->IsClickable()) {
+            AccessibleAction action(ACCESSIBILITY_ACTION_CLICK, "ace");
+            nodeInfo.AddAction(action);
+        }
+        nodeInfo.SetLongClickable(gestureEventHub->IsLongClickable());
+        if (gestureEventHub->IsLongClickable()) {
+            AccessibleAction action(ACCESSIBILITY_ACTION_LONG_CLICK, "ace");
+            nodeInfo.AddAction(action);
+        }
+    }
+    if (nodeInfo.IsFocusable()) {
+        if (nodeInfo.IsFocused()) {
+            AccessibleAction action(ACCESSIBILITY_ACTION_CLEAR_FOCUS, "ace");
+            nodeInfo.AddAction(action);
+        } else {
+            AccessibleAction action(ACCESSIBILITY_ACTION_FOCUS, "ace");
+            nodeInfo.AddAction(action);
+        }
+    }
+
+    if (nodeInfo.HasAccessibilityFocus()) {
+        AccessibleAction action(ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, "ace");
+        nodeInfo.AddAction(action);
+    } else {
+        AccessibleAction action(ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "ace");
+        nodeInfo.AddAction(action);
+    }
+}
+
+void UpdateSupportAction(
+    const RefPtr<NG::FrameNode>& node, const RefPtr<NG::AccessibilityProperty>& accessibilityProperty)
+{
+    auto eventHub = node->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID_NOLOG(eventHub);
+    auto gestureEventHub = eventHub->GetGestureEventHub();
+    if (gestureEventHub) {
+        if (gestureEventHub->IsClickable()) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_CLICK);
+        }
+
+        if (gestureEventHub->IsLongClickable()) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_LONG_CLICK);
+        }
+    }
+
+    auto focusHub = node->GetFocusHub();
+    if (focusHub) {
+        if (focusHub->IsFocusable()) {
+            if (focusHub->IsCurrentFocus()) {
+                accessibilityProperty->AddSupportAction(AceAction::ACTION_CLEAR_FOCUS);
+            } else {
+                accessibilityProperty->AddSupportAction(AceAction::ACTION_FOCUS);
+            }
+        }
+    }
+
+    auto renderContext = node->GetRenderContext();
+    if (renderContext) {
+        if (renderContext->GetAccessibilityFocus()) {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+        } else {
+            accessibilityProperty->AddSupportAction(AceAction::ACTION_ACCESSIBILITY_FOCUS);
+        }
+    }
+}
+
 static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
     auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -649,6 +727,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     GridItemInfo gridItemInfo(row, rowSpan, column, columnSpan, false, nodeInfo.IsSelected());
     nodeInfo.SetGridItem(gridItemInfo);
 
+    UpdateSupportAction(node, nodeInfo);
     accessibilityProperty->ResetSupportAction();
     auto supportAceActions = accessibilityProperty->GetSupportAction();
     for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
@@ -662,10 +741,7 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
 {
     NG::RectF rect;
     if (node->IsActive()) {
-        auto renderContext = node->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        rect = renderContext->GetPaintRectWithTransform();
-        rect.SetOffset(node->GetTransformRelativeOffset());
+        rect = node->GetTransformRectRelativeToWindow();
     }
     nodeInfo.SetParent(GetParentId(node));
     std::vector<int32_t> children;
@@ -678,12 +754,6 @@ void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, const Com
 
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
     nodeInfo.SetComponentType(node->GetTag());
-
-    auto gestureEventHub = node->GetEventHub<NG::EventHub>()->GetGestureEventHub();
-    if (gestureEventHub) {
-        nodeInfo.SetClickable(gestureEventHub->IsClickable());
-        nodeInfo.SetLongClickable(gestureEventHub->IsLongClickable());
-    }
 
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocusable(node->GetFocusHub() ? node->GetFocusHub()->IsFocusable() : false);
@@ -788,10 +858,7 @@ RefPtr<NG::FrameNode> FindNodeInRelativeDirection(
 RefPtr<NG::FrameNode> FindNodeInAbsoluteDirection(
     const std::list<RefPtr<NG::FrameNode>>& nodeList, RefPtr<NG::FrameNode>& node, const int direction)
 {
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_RETURN_NOLOG(renderContext, nullptr);
-    NG::RectF rect = renderContext->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+    NG::RectF rect = node->GetTransformRectRelativeToWindow();
     auto left = rect.Left();
     auto top = rect.Top();
     auto width = rect.Width();
@@ -820,9 +887,7 @@ RefPtr<NG::FrameNode> FindNodeInAbsoluteDirection(
         if (nodeItem->GetAccessibilityId() == node->GetAccessibilityId() || nodeItem->IsRootNode()) {
             continue;
         }
-        renderContext = nodeItem->GetRenderContext();
-        CHECK_NULL_RETURN_NOLOG(renderContext, nullptr);
-        rect = renderContext->GetPaintRectWithTransform();
+        rect = nodeItem->GetTransformRectRelativeToWindow();
         rect.SetOffset(nodeItem->GetTransformRelativeOffset());
         Rect itemRect(rect.Left(), rect.Top(), rect.Width(), rect.Height());
         if (CheckBetterRect(nodeRect, direction, itemRect, tempBest)) {
@@ -879,6 +944,7 @@ static void DumpAccessibilityPropertyNG(
     const RefPtr<NG::FrameNode>& frameNode, const RefPtr<NG::AccessibilityProperty>& accessibilityProperty)
 {
     accessibilityProperty->ResetSupportAction();
+    UpdateSupportAction(frameNode, accessibilityProperty);
     const auto& supportAceActions = accessibilityProperty->GetSupportAction();
 
     DumpLog::GetInstance().AddDesc("checked: ", BoolToString(accessibilityProperty->IsChecked()));
@@ -1261,12 +1327,9 @@ void JsAccessibilityManager::DumpPropertyNG(const std::vector<std::string>& para
     auto windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
     auto windowTop = GetWindowTop(ngPipeline->GetWindowId());
 
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     NG::RectF rect;
     if (frameNode->IsActive()) {
-        rect = renderContext->GetPaintRectWithTransform();
-        rect.SetOffset(frameNode->GetTransformRelativeOffset());
+        rect = frameNode->GetTransformRectRelativeToWindow();
     }
 
     int32_t pageId = 0;
@@ -1351,10 +1414,8 @@ static void DumpTreeNG(
     if (!node->IsActive()) {
         return;
     }
-    auto renderContext = node->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    NG::RectF rect = renderContext->GetPaintRectWithTransform();
-    rect.SetOffset(node->GetTransformRelativeOffset());
+
+    NG::RectF rect = node->GetTransformRectRelativeToWindow();
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetAccessibilityId()));
     DumpLog::GetInstance().AddDesc("compid: " + node->GetInspectorId().value_or(""));
     DumpLog::GetInstance().AddDesc("text: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText());

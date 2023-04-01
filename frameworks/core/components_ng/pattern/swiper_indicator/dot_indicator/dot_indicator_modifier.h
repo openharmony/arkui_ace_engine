@@ -36,7 +36,9 @@ public:
           longPointDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           indicatorPadding_(AceType::MakeRefPtr<AnimatablePropertyFloat>(0)),
           indicatorMargin_(AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(0, 0))),
-          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4)))
+          itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(4))),
+          unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
+          selectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT))
     {
         AttachProperty(vectorBlackPointCenterX_);
         AttachProperty(longPointLeftCenterX_);
@@ -48,6 +50,8 @@ public:
         AttachProperty(indicatorPadding_);
         AttachProperty(indicatorMargin_);
         AttachProperty(itemHalfSizes_);
+        AttachProperty(unselectedColor_);
+        AttachProperty(selectedColor_);
     }
     ~DotIndicatorModifier() override = default;
 
@@ -115,12 +119,16 @@ public:
 
     void SetUnselectedColor(const Color& unselectedColor)
     {
-        unselectedColor_ = unselectedColor;
+        if (unselectedColor_) {
+            unselectedColor_->Set(unselectedColor);
+        }
     }
 
     void SetSelectedColor(const Color& selectedColor)
     {
-        selectedColor_ = selectedColor;
+        if (selectedColor_) {
+            selectedColor_->Set(selectedColor);
+        }
     }
 
     void SetCurrentIndex(int32_t index)
@@ -236,8 +244,8 @@ private:
 
     float centerY_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
-    Color unselectedColor_ = Color::TRANSPARENT;
-    Color selectedColor_ = Color::TRANSPARENT;
+    RefPtr<PropertyColor> unselectedColor_;
+    RefPtr<PropertyColor> selectedColor_;
     std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
     std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;
     bool longPointIsHover_ = false;

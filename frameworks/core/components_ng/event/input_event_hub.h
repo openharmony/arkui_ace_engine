@@ -59,7 +59,7 @@ public:
         mouseEventActuator_->RemoveInputEvent(onMouseEvent);
     }
 
-    void SetHoverAnimation(HoverEffectType type)
+    void SetHoverEffect(HoverEffectType type)
     {
         if (!hoverEffectActuator_) {
             hoverEffectActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
@@ -72,6 +72,19 @@ public:
         return hoverEffectType_;
     }
     std::string GetHoverEffectStr() const;
+
+    void SetHoverEffectAuto(HoverEffectType type)
+    {
+        if (!hoverEffectActuator_) {
+            hoverEffectActuator_ = MakeRefPtr<InputEventActuator>(WeakClaim(this));
+        }
+        hoverEffectAuto_ = type;
+    }
+
+    HoverEffectType GetHoverEffectAuto()
+    {
+        return hoverEffectAuto_;
+    }
 
     // Set by user define, which will replace old one.
     void SetHoverEvent(OnHoverEventFunc&& onHoverEventFunc)
@@ -136,6 +149,7 @@ private:
     RefPtr<InputEvent> showMenu_;
 
     HoverEffectType hoverEffectType_ = HoverEffectType::UNKNOWN;
+    HoverEffectType hoverEffectAuto_ = HoverEffectType::UNKNOWN;
 };
 
 } // namespace OHOS::Ace::NG

@@ -239,7 +239,7 @@ void WebClientImpl::OnGeolocationHide()
 }
 
 void WebClientImpl::OnGeolocationShow(const std::string& origin,
-    OHOS::NWeb::NWebGeolocationCallbackInterface* callback)
+    std::shared_ptr<OHOS::NWeb::NWebGeolocationCallbackInterface> callback)
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
@@ -775,5 +775,29 @@ void WebClientImpl::OnFirstContentfulPaint(long navigationStartTick, long firstC
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
+}
+
+void WebClientImpl::OnCompleteSwapWithNewSize()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnCompleteSwapWithNewSize();
+}
+
+void WebClientImpl::OnResizeNotWork()
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnResizeNotWork();
+}
+
+void WebClientImpl::OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnGetTouchHandleHotZone(hotZone);
 }
 } // namespace OHOS::Ace

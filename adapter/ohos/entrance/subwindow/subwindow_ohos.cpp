@@ -121,11 +121,14 @@ void SubwindowOhos::InitContainer()
 
     int32_t width = static_cast<int32_t>(window_->GetRequestRect().width_);
     int32_t height = static_cast<int32_t>(window_->GetRequestRect().height_);
-    LOGI("UIContent Initialize: width: %{public}d, height: %{public}d", width, height);
+    auto parentPipeline = parentContainer->GetPipelineContext();
+    CHECK_NULL_VOID(parentPipeline);
+    auto density = parentPipeline->GetDensity();
+    LOGI("UIContent Initialize: width: %{public}d, height: %{public}d, density: %{public}lf", width, height, density);
 
     Ace::Platform::UIEnvCallback callback = nullptr;
     // set view
-    Platform::AceContainer::SetView(aceView, config.Density(), width, height, window_, callback);
+    Platform::AceContainer::SetView(aceView, density, width, height, window_, callback);
     Platform::AceViewOhos::SurfaceChanged(aceView, width, height, config.Orientation());
 
 #ifdef ENABLE_ROSEN_BACKEND

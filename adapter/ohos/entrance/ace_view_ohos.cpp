@@ -97,6 +97,7 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
 
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_VOID_NOLOG(view);
     LogPointInfo(pointerEvent);
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
@@ -107,6 +108,9 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
         } else {
             LOGD("ProcessMouseEvent");
             view->ProcessMouseEvent(pointerEvent);
+#ifdef ENABLE_DRAG_FRAMEWORK
+            view->ProcessDragEvent(pointerEvent);
+#endif // ENABLE_DRAG_FRAMEWORK
         }
     } else {
         // touch event
@@ -175,6 +179,10 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
 {
     CHECK_NULL_VOID_NOLOG(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
+    if (SystemProperties::GetDebugEnabled()) {
+        ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
+            touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
+    }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);
         LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());

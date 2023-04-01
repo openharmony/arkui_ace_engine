@@ -1536,6 +1536,14 @@ class stateMgmtConsole {
         aceConsole.error(...args);
     }
 }
+class stateMgmtTrace {
+    static scopedTrace(codeBlock, arg1, ...args) {
+        aceTrace.begin(arg1, ...args);
+        let result = codeBlock();
+        aceTrace.end();
+        return result;
+    }
+}
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1871,13 +1879,14 @@ class SubscribableArrayHandler extends SubscribableHandler {
     get(target, property) {
         let ret = super.get(target, property);
         if (this.arrFunctions.includes(property.toString()) &&
-            typeof ret === "function" && target["length"] > 0) {
+            typeof ret === "function" && Reflect.get(target, "length") > 0) {
             const self = this;
             const prop = property.toString();
             return function () {
                 // execute original function with given arguments
-                ret.apply(this, arguments);
+                const val = ret.apply(this, arguments);
                 self.notifyObjectPropertyHasChanged(prop, this);
+                return val;
             }.bind(target); // bind "this" to target inside the function
         }
         return ret;
@@ -4188,25 +4197,27 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
-        
-        this.syncInstanceId();
-        if (dependentElmtIds.size && !this.isFirstRender()) {
-            if (!this.dirtDescendantElementIds_.size) {
-                // mark Composedelement dirty when first elmtIds are added
-                // do not need to do this every time
-                this.markNeedUpdate();
+        stateMgmtTrace.scopedTrace(() => {
+            
+            this.syncInstanceId();
+            if (dependentElmtIds.size && !this.isFirstRender()) {
+                if (!this.dirtDescendantElementIds_.size) {
+                    // mark Composedelement dirty when first elmtIds are added
+                    // do not need to do this every time
+                    this.markNeedUpdate();
+                }
+                
+                const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+                this.dirtDescendantElementIds_ = union;
+                
             }
-            
-            const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-            this.dirtDescendantElementIds_ = union;
-            
-        }
-        let cb = this.watchedProps.get(varName);
-        if (cb) {
-            
-            cb.call(this, varName);
-        }
-        this.restoreInstanceId();
+            let cb = this.watchedProps.get(varName);
+            if (cb) {
+                
+                cb.call(this, varName);
+            }
+            this.restoreInstanceId();
+        }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
     }
     /**
      * Function to be called from the constructor of the sub component
@@ -4350,8 +4361,16 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         if (idGenFunc === undefined) {
             
-            idGenFunc = (item, index) => `${index}__${JSON.stringify(item)}`;
             idGenFuncUsesIndex = true;
+            // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
+            idGenFunc = (item, index) => {
+                try {
+                    return `${index}__${JSON.stringify(item)}`;
+                }
+                catch (e) {
+                    throw new Error(`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`);
+                }
+            };
         }
         let diffIndexArray = []; // New indexes compared to old one.
         let newIdArray = [];

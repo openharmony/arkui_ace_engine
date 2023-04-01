@@ -30,9 +30,14 @@ namespace OHOS::Ace::NG {
         return false;
     }
 
-    bool GeometryTransition::IsRunning(const WeakPtr<FrameNode>& frameNode) const
+    bool GeometryTransition::IsRunning() const
     {
         return false;
+    }
+
+    bool GeometryTransition::IsInvalid() const
+    {
+        return true;
     }
 
     std::string GeometryTransition::ToString() const

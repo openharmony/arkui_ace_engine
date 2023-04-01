@@ -147,13 +147,22 @@ void PipelineContext::FlushDirtyNodeUpdate()
         FrameReport::GetInstance().BeginFlushBuild();
     }
 
-    decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
-    for (const auto& node : dirtyNodes) {
-        if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
-            auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
-            ACE_SCOPED_TRACE("CustomNodeUpdate %s", customNode->GetJSViewName().c_str());
-            customNode->Update();
+    // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
+    // use maxFlushTimes to avoid dead cycle.
+    int maxFlushTimes = 3;
+    while (!dirtyNodes_.empty() && maxFlushTimes > 0) {
+        decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
+        for (const auto& node : dirtyNodes) {
+            if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
+                auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
+                ACE_SCOPED_TRACE("CustomNodeUpdate %s", customNode->GetJSViewName().c_str());
+                customNode->Update();
+            }
         }
+        --maxFlushTimes;
+    }
+    if (!dirtyNodes_.empty()) {
+        LOGW("FlushDirtyNodeUpdate 3 times, still has dirty nodes");
     }
 
     if (FrameReport::GetInstance().GetEnable()) {
@@ -763,10 +772,7 @@ RefPtr<FrameNode> PipelineContext::GetNavDestinationBackButtonNode()
 void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 {
     CHECK_RUN_ON(UI);
-    if (etsCardTouchEventCallback_) {
-        etsCardTouchEventCallback_(point);
-    }
-
+    HandleEtsCardTouchEvent(point);
     if (uiExtensionCallback_) {
         uiExtensionCallback_(point);
     }
@@ -834,7 +840,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     if ((scalePoint.type == TouchType::UP) || (scalePoint.type == TouchType::CANCEL)) {
         // need to reset touchPluginPipelineContext_ for next touch down event.
         touchPluginPipelineContext_.clear();
-        etsCardTouchEventCallback_ = nullptr;
+        RemoveEtsCardTouchEventCallback(point.id);
         uiExtensionCallback_ = nullptr;
     }
 
@@ -1033,6 +1039,7 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 
 bool PipelineContext::RequestDefaultFocus()
 {
+    CHECK_NULL_RETURN(stageManager_, false);
     auto lastPage = stageManager_->GetLastPage();
     auto mainNode = lastPage ? lastPage : rootNode_;
     CHECK_NULL_RETURN(mainNode, false);

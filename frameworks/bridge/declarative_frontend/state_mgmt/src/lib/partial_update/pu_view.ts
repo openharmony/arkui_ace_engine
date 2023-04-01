@@ -312,28 +312,30 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
-    stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
-    this.syncInstanceId();
+    stateMgmtTrace.scopedTrace(() => {
+      stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}'. View needs ${dependentElmtIds.size ? 'update' : 'no update'}.`);
+      this.syncInstanceId();
 
-    if (dependentElmtIds.size && !this.isFirstRender()) {
-      if (!this.dirtDescendantElementIds_.size) {
-        // mark Composedelement dirty when first elmtIds are added
-        // do not need to do this every time
-        this.markNeedUpdate();
+      if (dependentElmtIds.size && !this.isFirstRender()) {
+        if (!this.dirtDescendantElementIds_.size) {
+          // mark Composedelement dirty when first elmtIds are added
+          // do not need to do this every time
+          this.markNeedUpdate();
+        }
+        stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
+        const union: Set<number> = new Set<number>([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+        this.dirtDescendantElementIds_ = union;
+        stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
       }
-      stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': elmtIds affected by value change [${Array.from(dependentElmtIds).toString()}].`)
-      const union: Set<number> = new Set<number>([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-      this.dirtDescendantElementIds_ = union;
-      stateMgmtConsole.debug(`${this.constructor.name}: viewPropertyHasChanged property '${varName}': all elmtIds need update [${Array.from(this.dirtDescendantElementIds_).toString()}].`)
-    }
 
-    let cb = this.watchedProps.get(varName)
-    if (cb) {
-      stateMgmtConsole.debug(`   .. calling @Watch function`);
-      cb.call(this, varName);
-    }
+      let cb = this.watchedProps.get(varName)
+      if (cb) {
+        stateMgmtConsole.debug(`   .. calling @Watch function`);
+        cb.call(this, varName);
+      }
 
-    this.restoreInstanceId();
+      this.restoreInstanceId();
+    }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
   }
 
   /**
@@ -510,8 +512,15 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
     if (idGenFunc === undefined) {
       stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: providing default id gen function `);
-      idGenFunc = (item: any, index : number) => `${index}__${JSON.stringify(item)}`;
       idGenFuncUsesIndex = true;
+      // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message
+      idGenFunc = (item: any, index : number) => {
+        try {
+          return `${index}__${JSON.stringify(item)}`;
+        } catch(e) {
+          throw new Error (`${this.constructor.name}[${this.id__()}]: ForEach id ${elmtId}: use of default id generator function not possble on provided data structure. Need to specify id generator function (ForEach 3rd parameter).`)
+        }
+      }
     }
 
     let diffIndexArray = []; // New indexes compared to old one.

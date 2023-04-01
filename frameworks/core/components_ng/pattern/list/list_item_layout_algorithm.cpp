@@ -24,50 +24,51 @@
 namespace OHOS::Ace::NG {
 void ListItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    std::optional<float> mainSize;
+    layoutWrapper->RemoveAllChildInRenderTree();
+
     std::list<RefPtr<LayoutWrapper>> childList;
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto child = layoutWrapper->GetOrCreateChildByIndex(childNodeIndex_);
     if (child) {
         child->Measure(layoutConstraint);
-        mainSize = child->GetGeometryNode()->GetMarginFrameSize().MainSize(axis_);
         childList.push_back(child);
     }
-    layoutWrapper->RemoveAllChildInRenderTree();
+    PerformMeasureSelfWithChildList(layoutWrapper, childList);
+    auto mainSize = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
+    if (NonPositive(mainSize)) {
+        curOffset_ = 0.0f;
+        return;
+    }
+
     if (Positive(curOffset_) && startNodeIndex_ >= 0) {
-        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        auto startLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(startNodeSize_) && curOffset_ > startNodeSize_) {
-            layoutConstraint.maxSize.SetCrossSize(curOffset_, axis_);
-            layoutConstraint.minSize.SetCrossSize(curOffset_, axis_);
+            startLayoutConstraint.maxSize.SetCrossSize(curOffset_, axis_);
+            startLayoutConstraint.minSize.SetCrossSize(curOffset_, axis_);
         }
-        if (mainSize.has_value()) {
-            layoutConstraint.maxSize.SetMainSize(mainSize.value(), axis_);
-            layoutConstraint.percentReference.SetMainSize(mainSize.value(), axis_);
-        }
-        auto child = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
-        CHECK_NULL_VOID(child);
-        child->Measure(layoutConstraint);
+        startLayoutConstraint.maxSize.SetMainSize(mainSize, axis_);
+        startLayoutConstraint.percentReference.SetMainSize(mainSize, axis_);
+        auto startNode = layoutWrapper->GetOrCreateChildByIndex(startNodeIndex_);
+        CHECK_NULL_VOID(startNode);
+        startNode->Measure(startLayoutConstraint);
         if (NearZero(startNodeSize_)) {
-            startNodeSize_ = child->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
+            startNodeSize_ = startNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
         }
     } else if (Negative(curOffset_) && endNodeIndex_ >= 0) {
-        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+        auto endLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         if (!NearZero(endNodeSize_) && -curOffset_ > endNodeSize_) {
-            layoutConstraint.maxSize.SetCrossSize(-curOffset_, axis_);
-            layoutConstraint.minSize.SetCrossSize(-curOffset_, axis_);
+            endLayoutConstraint.maxSize.SetCrossSize(-curOffset_, axis_);
+            endLayoutConstraint.minSize.SetCrossSize(-curOffset_, axis_);
         }
-        if (mainSize.has_value()) {
-            layoutConstraint.maxSize.SetMainSize(mainSize.value(), axis_);
-            layoutConstraint.percentReference.SetMainSize(mainSize.value(), axis_);
-        }
-        auto child = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
-        CHECK_NULL_VOID(child);
-        child->Measure(layoutConstraint);
+        endLayoutConstraint.maxSize.SetMainSize(mainSize, axis_);
+        endLayoutConstraint.percentReference.SetMainSize(mainSize, axis_);
+        auto endNode = layoutWrapper->GetOrCreateChildByIndex(endNodeIndex_);
+        CHECK_NULL_VOID(endNode);
+        endNode->Measure(endLayoutConstraint);
         if (NearZero(endNodeSize_)) {
-            endNodeSize_ = child->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
+            endNodeSize_ = endNode->GetGeometryNode()->GetMarginFrameSize().CrossSize(axis_);
         }
     }
-    PerformMeasureSelfWithChildList(layoutWrapper, childList);
 }
 
 void ListItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

@@ -538,6 +538,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
 
     PaddingProperty padding;
     padding.left = CalcLength(0.0);
@@ -582,6 +583,17 @@ void SearchModelNG::CreateImage(const RefPtr<SearchNode>& parentNode, const std:
         frameNode->MountToParent(parentNode);
         frameNode->MarkModifyDone();
     }
+}
+
+void SearchModelNG::RequestKeyboardOnFocus(bool needToRequest)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNeedToRequestKeyboardOnFocus(needToRequest);
 }
 
 void SearchModelNG::CreateCancelImage(const RefPtr<SearchNode>& parentNode, bool hasCancelImageNode)

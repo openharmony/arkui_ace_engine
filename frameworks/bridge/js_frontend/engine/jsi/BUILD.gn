@@ -120,18 +120,9 @@ template("js_engine_ark") {
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
     if (is_cross_platform_build) {
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        deps += [ "$ark_ets_path:libark_jsruntime_static" ]
-      } else {
-        deps += [ "$ark_ets_path:libark_jsruntime" ]
-      }
+      deps += [ "$ark_ets_path:libark_jsruntime_static" ]
     } else {
-      if (defined(config.build_for_ios) && config.build_for_ios) {
-        # static library for ios platform
-        external_deps += [ "ets_runtime:libark_jsruntime_static" ]
-      } else {
-        external_deps += [ "ets_runtime:libark_jsruntime" ]
-      }
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
     }
   }
 }

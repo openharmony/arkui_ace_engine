@@ -323,7 +323,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
     SetGeometryNode(dirty->GetGeometryNode());
 
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
-    bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
+    bool skipSync = geometryTransition != nullptr && geometryTransition->IsRunning();
     if (!skipSync && (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                          (pattern_->GetSurfaceNodeName().has_value() && contentSizeChange))) {
         if (pattern_->NeedOverridePaintRect()) {
@@ -368,6 +368,13 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
             renderContext_->UpdateBorderWidthF(ConvertToBorderWidthPropertyF(layoutProperty_->GetBorderWidthProperty(),
                 ScaleProperty::CreateScaleProperty(), PipelineContext::GetCurrentRootWidth()));
         }
+    }
+
+    // update focus state
+    auto focusHub = GetFocusHub();
+    if (focusHub && focusHub->IsCurrentFocus()) {
+        focusHub->ClearFocusState();
+        focusHub->PaintFocusState();
     }
 
     // rebuild child render node.
@@ -1215,6 +1222,27 @@ HitTestResult FrameNode::AxisTest(
     return HitTestResult::BUBBLING;
 }
 
+void FrameNode::AnimateHoverEffect(bool isHovered) const
+{
+    auto renderContext = GetRenderContext();
+    if (!renderContext) {
+        return;
+    }
+    HoverEffectType animationType = HoverEffectType::UNKNOWN;
+    auto inputEventHub = eventHub_->GetInputEventHub();
+    if (inputEventHub) {
+        animationType = inputEventHub->GetHoverEffect();
+        if (animationType == HoverEffectType::UNKNOWN || animationType == HoverEffectType::AUTO) {
+            animationType = inputEventHub->GetHoverEffectAuto();
+        }
+    }
+    if (animationType == HoverEffectType::SCALE) {
+        renderContext->AnimateHoverEffectScale(isHovered);
+    } else if (animationType == HoverEffectType::BOARD) {
+        renderContext->AnimateHoverEffectBoard(isHovered);
+    }
+}
+
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub() const
 {
     if (!pattern_) {
@@ -1278,6 +1306,33 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
     }
 
     return offset;
+}
+
+RectF FrameNode::GetTransformRectRelativeToWindow() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, RectF());
+    RectF rect = context->GetPaintRectWithTransform();
+    auto offset = rect.GetOffset();
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(parentRenderContext, rect);
+        auto parentScale = parentRenderContext->GetTransformScale();
+        if (parentScale) {
+            auto oldSize = rect.GetSize();
+            auto newSize = SizeF(oldSize.Width() * parentScale.value().x, oldSize.Height() * parentScale.value().y);
+            rect.SetSize(newSize);
+
+            offset = OffsetF(offset.GetX() * parentScale.value().x, offset.GetY() * parentScale.value().y);
+        }
+
+        offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
+
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    rect.SetOffset(offset);
+    return rect;
 }
 
 OffsetF FrameNode::GetTransformRelativeOffset() const

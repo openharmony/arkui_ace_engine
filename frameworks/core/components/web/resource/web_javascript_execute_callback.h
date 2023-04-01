@@ -23,16 +23,16 @@
 
 namespace OHOS::Ace {
 using namespace OHOS::NWeb;
-class WebJavaScriptExecuteCallBack : public OHOS::NWeb::NWebValueCallback<std::string> {
+class WebJavaScriptExecuteCallBack : public OHOS::NWeb::NWebValueCallback<std::shared_ptr<NWebMessage>> {
 public:
     WebJavaScriptExecuteCallBack() = delete;
     explicit WebJavaScriptExecuteCallBack(int32_t instanceId) : instanceId_(instanceId) {}
 
-    void OnReceiveValue(std::string result) override
+    void OnReceiveValue(std::shared_ptr<NWebMessage> result) override
     {
         ContainerScope scope(instanceId_);
-        if (callback_) {
-            callback_(result);
+        if (callback_ && result && result->GetType() == NWebValue::Type::STRING) {
+            callback_(result->GetString());
         }
     }
     void SetCallBack(const std::function<void(std::string)>&& callback)

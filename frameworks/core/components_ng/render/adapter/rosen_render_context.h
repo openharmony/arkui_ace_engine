@@ -155,6 +155,7 @@ public:
 
     void SetSharedTranslate(float xTranslate, float yTranslate) override;
     void ResetSharedTranslate() override;
+    void ResetPageTransitionEffect() override;
 
     static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
         const std::list<RefPtr<FrameNode>>& frameChildren);
@@ -334,6 +335,7 @@ private:
     bool firstTransitionIn_ = false;
     bool isBackBlurChanged_ = false;
     bool needDebugBoundary_ = false;
+    bool isDisappearing_ = false;
     int disappearingTransitionCount_ = 0;
     Color blendColor_ = Color::TRANSPARENT;
     Color hoveredColor_ = Color::TRANSPARENT;

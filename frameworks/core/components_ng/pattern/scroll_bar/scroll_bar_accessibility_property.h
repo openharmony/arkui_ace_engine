@@ -37,6 +37,9 @@ public:
 
     AccessibilityValue GetAccessibilityValue() const override;
 
+protected:
+    void SetSpecificSupportAction() override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarAccessibilityProperty);
 };
