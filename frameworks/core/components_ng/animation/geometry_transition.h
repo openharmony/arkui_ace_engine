@@ -65,6 +65,7 @@ private:
     bool hasInAnim_ = false;
     bool hasOutAnim_ = false;
     bool buildDuringLayout_ = false;
+    bool isInNodeLayoutModified_ = false;
     SizeF size_;
     OffsetF outNodePos_;
     OffsetF outNodeParentPos_;
