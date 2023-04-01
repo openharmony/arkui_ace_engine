@@ -454,11 +454,6 @@ void TextFieldPattern::UpdateCaretOffsetByEvent()
     if (!InSelectMode()) {
         UpdateSelection(textEditingValue_.caretPosition);
     }
-    // set caret and text rect to basic padding if caret is at position 0 or text not exists
-    if (textEditingValue_.caretPosition == 0) {
-        SetCaretOffsetForEmptyTextOrPositionZero();
-        return;
-    }
     UpdateCaretRectByPosition(textEditingValue_.caretPosition);
 }
 
