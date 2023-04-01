@@ -113,11 +113,9 @@ OptionalSizeF CreateIdealSize(const LayoutConstraintF& layoutConstraint, Axis ax
  * @brief Create max size for children which is parent's max size minus margin and padding.
  *
  * @param size the max size of parent node.
- * @param margin the margin property of this node.
  * @param padding the padding property of this node.
  */
-void CreateChildrenConstraint(
-    SizeF& size, const std::unique_ptr<MarginProperty>& margin, const std::unique_ptr<PaddingProperty>& padding);
+void CreateChildrenConstraint(SizeF& size, const std::unique_ptr<PaddingProperty>& padding);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_UTILS_H
