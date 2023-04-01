@@ -58,9 +58,9 @@ void SwiperLayoutAlgorithm::LoadItemWithDrag(float translateLength)
     }
 
     int32_t nextIndex = currentIndex_;
-    auto loadItems = std::abs(static_cast<int32_t>(floorf(currentOffset_ / translateLength)));
+    auto loadItems = static_cast<int32_t>(floorf(fabsf(currentOffset_) / translateLength));
     do {
-        nextIndex = Positive(currentOffset_) ? (nextIndex - 1) : (nextIndex + 1);
+        nextIndex = Positive(currentOffset_) ? (nextIndex - 1) : (nextIndex + displayCount_);
         AddToItemRange(nextIndex);
         loadItems--;
     } while (loadItems >= 0);
