@@ -118,6 +118,7 @@ public:
     virtual void MarkLazyForEachProcess(const std::string& groudId) {}
     virtual void ResetLazyForEachProcess() {}
     virtual void ExecuteUpdateWithValueParams(const std::string& jsonData) {}
+    virtual void ExecuteInitiallyProvidedValue(const std::string& jsonData) {}
 
     virtual bool isFullUpdate() const
     {
@@ -355,6 +356,11 @@ public:
 
     void IsFirstRender(const JSCallbackInfo& info);
     void FindChildByIdForPreview(const JSCallbackInfo& info);
+
+    void ExecuteInitiallyProvidedValue(const std::string& jsonData) override
+    {
+        jsViewFunction_->ExecuteInitiallyProvidedValue(jsonData);
+    }
 
 private:
     void MarkNeedUpdate() override;

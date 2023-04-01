@@ -40,6 +40,8 @@ class PluginFrontend : public Frontend {
     DECLARE_ACE_TYPE(PluginFrontend, Frontend);
 
 public:
+    using onPluginUpdateWithValueParams = std::function<void(const std::string&)>;
+    
     PluginFrontend() = default;
     ~PluginFrontend() override;
 
@@ -180,6 +182,12 @@ public:
 
     void UpdatePlugin(const std::string& content);
 
+    void SetDeclarativeOnUpdateWithValueParamsCallback(onPluginUpdateWithValueParams&& callback)
+    {
+        if (delegate_) {
+            delegate_->SetDeclarativeOnUpdateWithValueParamsCallback(std::move(callback));
+        }
+    }
 private:
     void InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExecutor);
 

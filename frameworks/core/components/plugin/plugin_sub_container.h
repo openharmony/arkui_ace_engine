@@ -31,6 +31,7 @@ class ACE_EXPORT PluginSubContainer : public virtual AceType {
 
 public:
     using OnPluginAcquiredCallback = std::function<void(const size_t)>;
+    using onPluginUpdateWithValueParams = std::function<void(const std::string&)>;
 
     explicit PluginSubContainer(const WeakPtr<PipelineBase>& context) : outSidePipelineContext_(context) {}
     PluginSubContainer(const WeakPtr<PipelineBase>& context, int32_t instanceId)
@@ -114,6 +115,12 @@ public:
         return pluginNode_;
     }
 
+    void SetDeclarativeOnUpdateWithValueParamsCallback(onPluginUpdateWithValueParams&& callback)
+    {
+        if (frontend_) {
+            frontend_->SetDeclarativeOnUpdateWithValueParamsCallback(std::move(callback));
+        }
+    }
 private:
     void SetPluginComponentTheme(const std::string& path, const RefPtr<AssetManager>& flutterAssetManager);
     void SetActionEventHandler();

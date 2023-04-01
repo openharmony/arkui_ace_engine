@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
+#include "core/components/common/properties/clip_path.h"
 #include "core/components_ng/pattern/plugin/plugin_pattern.h"
 #include "core/components_ng/pattern/plugin/plugin_view.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
@@ -54,12 +55,18 @@ void JSPlugin::Create(const JSCallbackInfo& info)
         LOGD("JSPlugin::Create: source=%{public}s bundleName=%{public}s", pluginInfo.pluginName.c_str(),
             pluginInfo.bundleName.c_str());
     }
-
+    if (pluginInfo.bundleName.size() > PATH_MAX || pluginInfo.pluginName.size() > PATH_MAX) {
+        LOGE("the source path or the bundleName is too long");
+        return;
+    }
     // Parse data
     auto dataValue = obj->GetProperty("data");
 
     if (Container::IsCurrentUseNewPipeline()) {
         NG::PluginView::Create(pluginInfo);
+        if (dataValue->IsObject()) {
+            NG::PluginView::SetData(dataValue->ToString());
+        }
         return;
     }
 

@@ -50,8 +50,10 @@ PluginElement::~PluginElement()
     PluginManager::GetInstance().RemovePluginSubContainer(pluginSubContainerId_);
     PluginManager::GetInstance().RemovePluginParentContainer(pluginSubContainerId_);
     pluginManagerBridge_.Reset();
-    pluginSubContainer_->Destroy();
-    pluginSubContainer_.Reset();
+    if (pluginSubContainer_) {
+        pluginSubContainer_->Destroy();
+        pluginSubContainer_.Reset();
+    }
 }
 
 void PluginElement::Update()

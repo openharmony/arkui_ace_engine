@@ -39,6 +39,12 @@ void PluginView::Create(const RequestPluginInfo& pluginInfo)
     ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, RequestPluginInfo, pluginInfo);
 }
 
+void PluginView::SetData(const std::string& data)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(PluginLayoutProperty, Data, data);
+}
+
+
 void PluginView::SetOnComplete(PluginCallback&& OnComplete)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
