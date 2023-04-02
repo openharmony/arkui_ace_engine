@@ -55,53 +55,52 @@ public:
     {
         auto layoutConstraint = property->CreateChildConstraint();
         layoutConstraint.parentIdealSize = idealSize;
-        if (IsStretch(property)) {
-            auto displayCount = property->GetDisplayCount().value_or(1);
-            auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
-            auto itemSpace = GetItemSpace(property);
-            auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
-            auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
-            auto itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
-            auto childSelfIdealSize = idealSize;
-            float childCalcIdealLength = 0.0f;
-
-            if (axis == Axis::HORIZONTAL) {
-                if (idealSize.Width()) {
-                    childCalcIdealLength = (idealSize.Width().value() - itemSpace * itemSpaceCount -
-                                            static_cast<float>(prevMargin + nextMargin)) / displayCount;
-                    if (CheckMarginPropertyExceed(property, childCalcIdealLength)) {
-                        prevMargin = 0.0;
-                        nextMargin = 0.0;
-                        itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
-                        childCalcIdealLength = (idealSize.Width().value() - itemSpace * itemSpaceCount) / displayCount;
-                    }
-                    childSelfIdealSize.SetWidth(childCalcIdealLength);
-                } else {
-                    property->UpdatePrevMargin(0.0_px);
-                    property->UpdateNextMargin(0.0_px);
-                }
-            } else if (axis == Axis::VERTICAL) {
-                if (idealSize.Height()) {
-                    childCalcIdealLength = (idealSize.Height().value() - itemSpace * itemSpaceCount -
-                                            static_cast<float>(prevMargin + nextMargin)) / displayCount;
-                    if (CheckMarginPropertyExceed(property, childCalcIdealLength)) {
-                        prevMargin = 0.0;
-                        nextMargin = 0.0;
-                        itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
-                        childCalcIdealLength = (idealSize.Height().value() -
-                                                itemSpace * itemSpaceCount) / displayCount;
-                    }
-                    childSelfIdealSize.SetHeight(childCalcIdealLength);
-                } else {
-                    property->UpdatePrevMargin(0.0_px);
-                    property->UpdateNextMargin(0.0_px);
-                }
-            }
-
-            layoutConstraint.selfIdealSize = childSelfIdealSize;
+        auto displayCount = property->GetDisplayCount().value_or(1);
+        if (!IsStretch(property) || NonPositive(static_cast<double>(displayCount))) {
             return layoutConstraint;
         }
+        auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
+        auto itemSpace = GetItemSpace(property);
+        auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
+        auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
+        auto itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
+        auto childSelfIdealSize = idealSize;
+        float childCalcIdealLength = 0.0f;
 
+        if (axis == Axis::HORIZONTAL) {
+            if (idealSize.Width().has_value()) {
+                childCalcIdealLength = (idealSize.Width().value() - itemSpace * itemSpaceCount -
+                                        static_cast<float>(prevMargin + nextMargin)) / displayCount;
+                if (CheckMarginPropertyExceed(property, childCalcIdealLength)) {
+                    prevMargin = 0.0;
+                    nextMargin = 0.0;
+                    itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
+                    childCalcIdealLength = (idealSize.Width().value() - itemSpace * itemSpaceCount) / displayCount;
+                }
+                childSelfIdealSize.SetWidth(childCalcIdealLength);
+            } else {
+                property->UpdatePrevMargin(0.0_px);
+                property->UpdateNextMargin(0.0_px);
+            }
+        } else if (axis == Axis::VERTICAL) {
+            if (idealSize.Height().has_value()) {
+                childCalcIdealLength = (idealSize.Height().value() - itemSpace * itemSpaceCount -
+                                        static_cast<float>(prevMargin + nextMargin)) / displayCount;
+                if (CheckMarginPropertyExceed(property, childCalcIdealLength)) {
+                    prevMargin = 0.0;
+                    nextMargin = 0.0;
+                    itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
+                    childCalcIdealLength = (idealSize.Height().value() -
+                                            itemSpace * itemSpaceCount) / displayCount;
+                }
+                childSelfIdealSize.SetHeight(childCalcIdealLength);
+            } else {
+                property->UpdatePrevMargin(0.0_px);
+                property->UpdateNextMargin(0.0_px);
+            }
+        }
+
+        layoutConstraint.selfIdealSize = childSelfIdealSize;
         return layoutConstraint;
     }
 

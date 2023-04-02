@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING = 8.0_vp;
 constexpr uint32_t INDICATOR_HAS_CHILD = 2;
+constexpr int32_t PRESTRAIN_CHILD_COUNT = 2;
 } // namespace
 
 void SwiperLayoutAlgorithm::AddToItemRange(int32_t index)
@@ -100,7 +101,7 @@ void SwiperLayoutAlgorithm::InitInActiveItems(float translateLength)
     int32_t displayCount = 0;
     if (NearZero(currentOffset_)) {
         if (Positive(prevMargin_) && Positive(nextMargin_)) {
-            displayCount = displayCount_ + 2;
+            displayCount = displayCount_ + PRESTRAIN_CHILD_COUNT;
         } else if (NonPositive(prevMargin_) && NonPositive(nextMargin_)) {
             displayCount = displayCount_;
         } else {
@@ -583,7 +584,6 @@ void SwiperLayoutAlgorithm::LayoutItems(
         wrapper->Layout();
         nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(maxChildSize_.Width() + itemSpace, 0)
                                                 : OffsetF(0, maxChildSize_.Height() + itemSpace));
-
         displayIndex++;
         if (displayIndex == displayCount) {
             nextOffset += (axis == Axis::HORIZONTAL ? OffsetF(currentOffset_ == 0 ? rightPadding : 0, 0)
