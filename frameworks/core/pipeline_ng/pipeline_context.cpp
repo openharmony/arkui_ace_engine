@@ -1146,36 +1146,32 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
 }
 
 void PipelineContext::AddVisibleAreaChangeNode(
-    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback)
+    const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback)
 {
     CHECK_NULL_VOID(node);
-    VisibleCallbackInfo info;
-    info.callback = callback;
-    info.visibleRatio = ratio;
-    info.isCurrentVisible = false;
-    auto iter = visibleAreaChangeNodes_.find(node->GetId());
-    if (iter != visibleAreaChangeNodes_.end()) {
-        auto& callbackList = iter->second;
-        callbackList.emplace_back(info);
+    VisibleCallbackInfo addInfo;
+    addInfo.callback = callback;
+    addInfo.isCurrentVisible = false;
+    onVisibleAreaChangeNodeIds_.emplace(node->GetId());
+    if (isUserCallback) {
+        node->AddVisibleAreaUserCallback(ratio, addInfo);
     } else {
-        std::list<VisibleCallbackInfo> callbackList;
-        callbackList.emplace_back(info);
-        visibleAreaChangeNodes_[node->GetId()] = callbackList;
+        node->AddVisibleAreaInnerCallback(ratio, addInfo);
     }
 }
 
 void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId)
 {
-    visibleAreaChangeNodes_.erase(nodeId);
+    onVisibleAreaChangeNodeIds_.erase(nodeId);
 }
 
 void PipelineContext::HandleVisibleAreaChangeEvent()
 {
-    if (visibleAreaChangeNodes_.empty()) {
+    if (onVisibleAreaChangeNodeIds_.empty()) {
         return;
     }
-    for (auto& visibleChangeNode : visibleAreaChangeNodes_) {
-        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(visibleChangeNode.first);
+    for (const auto& visibleChangeNodeId : onVisibleAreaChangeNodeIds_) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(visibleChangeNodeId);
         if (!uiNode) {
             continue;
         }
@@ -1183,7 +1179,7 @@ void PipelineContext::HandleVisibleAreaChangeEvent()
         if (!frameNode) {
             continue;
         }
-        frameNode->TriggerVisibleAreaChangeCallback(visibleChangeNode.second);
+        frameNode->TriggerVisibleAreaChangeCallback();
     }
 }
 
@@ -1394,6 +1390,7 @@ void PipelineContext::FlushWindowStateChangedCallback(bool isShow)
             ++iter;
         }
     }
+    HandleVisibleAreaChangeEvent();
 }
 
 void PipelineContext::AddWindowFocusChangedCallback(int32_t nodeId)

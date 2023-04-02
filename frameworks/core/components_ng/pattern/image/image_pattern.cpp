@@ -117,9 +117,8 @@ void ImagePattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    // reset visibleAreaChangeNode
-    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
-    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback);
+    // add visibleAreaChangeNode(inner callback)
+    pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
 }
 
 void ImagePattern::OnImageLoadSuccess()
@@ -420,7 +419,6 @@ void ImagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID_NOLOG(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveNodesToNotifyMemoryLevel(id);
-    pipeline->RemoveVisibleAreaChangeNode(id);
 }
 
 void ImagePattern::EnableDrag()

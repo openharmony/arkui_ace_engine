@@ -127,7 +127,8 @@ public:
 
     void HandleOnAreaChangeEvent();
 
-    void AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback);
+    void AddVisibleAreaChangeNode(
+        const RefPtr<FrameNode>& node, double ratio, const VisibleRatioCallback& callback, bool isUserCallback = true);
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent();
@@ -148,8 +149,8 @@ public:
 
     void SetAppIcon(const RefPtr<PixelMap>& icon) override;
 
-    void OnSurfaceChanged(
-        int32_t width, int32_t height, WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
+    void OnSurfaceChanged(int32_t width, int32_t height,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED,
         const std::shared_ptr<Rosen::RSTransaction> rsTransaction = nullptr) override;
 
     void OnSurfacePositionChanged(int32_t posX, int32_t posY) override;
@@ -389,7 +390,7 @@ private:
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
-    std::unordered_map<int32_t, std::list<VisibleCallbackInfo>> visibleAreaChangeNodes_;
+    std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;
