@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -141,13 +141,11 @@ void CalendarPaintMethod::DrawCalendar(
     dateTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
     lunarTextStyle.locale_ = Localization::GetInstance()->GetFontLocale();
 
+    // First of all, check whether the day is current month or not, and set text style.
+    SetDayTextStyle(dateTextStyle, lunarTextStyle, day);
+
     auto x = dayOffset.GetX();
     auto y = dayOffset.GetY();
-
-    dateTextStyle.color_ = IsToday(day) ? focusedDayColor_ : IsOffDay(day) ? weekendDayColor_ : dayColor_;
-    lunarTextStyle.color_ =
-        IsToday(day) ? focusedLunarColor_
-                     : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
 
     if (day.focused && day.month.month == currentMonth_.month) {
         if (IsToday(day)) {
@@ -209,6 +207,22 @@ void CalendarPaintMethod::InitTextStyle(rosen::TextStyle& dateTextStyle, rosen::
 
     lunarTextStyle.fontSize_ = lunarDayFontSize_;
     lunarTextStyle.fontWeight_ = static_cast<rosen::FontWeight>(lunarDayFontWeight_);
+}
+
+void CalendarPaintMethod::SetDayTextStyle(
+    rosen::TextStyle& dateTextStyle, rosen::TextStyle& lunarTextStyle, const CalendarDay& day)
+{
+    // Set the noncurrent month style and current month style.
+    if (day.month.month != currentMonth_.month) {
+        dateTextStyle.color_ = nonCurrentMonthDayColor_;
+        lunarTextStyle.color_ = day.markLunarDay ? RSColor(markLunarColor_.GetRed(), markLunarColor_.GetGreen(),
+            markLunarColor_.GetBlue(), WEEKEND_TRANSPARENT) : nonCurrentMonthLunarColor_;
+    } else {
+        dateTextStyle.color_ = IsToday(day) ? focusedDayColor_ : IsOffDay(day) ? weekendDayColor_ : dayColor_;
+        lunarTextStyle.color_ =
+            IsToday(day) ? focusedLunarColor_
+                         : (day.markLunarDay ? markLunarColor_ : (IsOffDay(day) ? weekendLunarColor_ : lunarColor_));
+    }
 }
 
 void CalendarPaintMethod::PaintDay(
@@ -341,8 +355,10 @@ void CalendarPaintMethod::SetCalendarTheme(const RefPtr<CalendarPaintProperty>& 
         paintProperty->GetWorkDayMarkSize().value_or(theme->GetCalendarTheme().workDayMarkSize).ConvertToPx();
     offDayMarkSize_ =
         paintProperty->GetOffDayMarkSize().value_or(theme->GetCalendarTheme().offDayMarkSize).ConvertToPx();
-    focusedAreaRadius_ =
-        paintProperty->GetFocusedAreaRadius().value_or(theme->GetCalendarTheme().focusedAreaRadius).ConvertToPx();
+    focusedAreaRadius_ = paintProperty->GetFocusedAreaRadiusValue({}).ConvertToPx() <= 0
+                             ? theme->GetCalendarTheme().focusedAreaRadius.ConvertToPx()
+                             : paintProperty->GetFocusedAreaRadiusValue({}).ConvertToPx();
+
     weekHeight_ = paintProperty->GetWeekHeightValue({}).ConvertToPx() <= 0
                       ? theme->GetCalendarTheme().weekHeight.ConvertToPx()
                       : paintProperty->GetWeekHeightValue({}).ConvertToPx();
