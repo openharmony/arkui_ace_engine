@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
 #include <optional>
+#include <utility>
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
@@ -48,6 +49,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters)
     // non-animatable property
     blockDiameter_ = AceType::MakeRefPtr<PropertyFloat>(parameters.blockDiameter);
     stepRatio_ = AceType::MakeRefPtr<PropertyFloat>(parameters.stepRatio);
+    isShowStep_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -64,6 +66,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters)
     AttachProperty(boardColor_);
     AttachProperty(blockDiameter_);
     AttachProperty(stepRatio_);
+    AttachProperty(isShowStep_);
 }
 
 void SliderContentModifier::onDraw(DrawingContext& context)
@@ -74,7 +77,6 @@ void SliderContentModifier::onDraw(DrawingContext& context)
     DrawDefaultBlock(context);
     DrawShadow(context);
     DrawHoverOrPress(context);
-    SetAnimated();
 }
 
 void SliderContentModifier::DrawBackground(DrawingContext& context)
@@ -93,12 +95,50 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
 
 void SliderContentModifier::DrawStep(DrawingContext& context)
 {
-    auto& canvas = context.canvas;
-    if (isShowStep_) {
-        canvas.AttachPen(markerPenAndPath.pen);
-        canvas.DrawPath(markerPenAndPath.path);
-        canvas.DetachPen();
+    if (!isShowStep_->Get()) {
+        return;
     }
+    auto& canvas = context.canvas;
+    auto stepSize = stepSize_;
+    auto stepColor = stepColor_;
+    auto backStart = backStart_->Get();
+    auto backEnd = backEnd_->Get();
+    auto stepRatio = stepRatio_->Get();
+    if (NearEqual(stepRatio, .0f)) {
+        return;
+    }
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    brush.SetColor(ToRSColor(stepColor));
+    canvas.AttachBrush(brush);
+    // Distance between slide track and Content boundary
+    auto centerWidth = directionAxis_ == Axis::HORIZONTAL ? context.height : context.width;
+    centerWidth *= HALF;
+    if (directionAxis_ == Axis::HORIZONTAL) {
+        auto stepsLength = (backEnd.GetX() - backStart.GetX()) * stepRatio;
+        float dyOffset = backEnd.GetY();
+        float start = backStart.GetX();
+        float end = backEnd.GetX();
+        float current = start;
+        while (LessOrEqual(current, end)) {
+            float dxOffset = std::clamp(current, start, end);
+            canvas.DrawCircle(RSPoint(dxOffset, dyOffset), stepSize * HALF);
+            current += stepsLength;
+        }
+    } else {
+        auto stepsLength = (backEnd.GetY() - backStart.GetY()) * stepRatio;
+        float dxOffset = backEnd.GetX();
+        float start = backStart.GetY();
+        float end = backEnd.GetY();
+        float current = start;
+        while (LessOrEqual(current, end)) {
+            float dyOffset = std::clamp(current, start, end);
+            canvas.DrawCircle(RSPoint(dxOffset, dyOffset), stepSize * HALF);
+            current += stepsLength;
+        }
+    }
+
+    canvas.DetachBrush();
 }
 
 void SliderContentModifier::DrawSelect(DrawingContext& context)
@@ -159,46 +199,9 @@ void SliderContentModifier::DrawShadow(DrawingContext& context)
     }
 }
 
-void SliderContentModifier::GetMarkerPen(float sliderLength, float borderBlank, const OffsetF& offset,
-    const SizeF& contentSize, const RefPtr<SliderTheme>& theme, const Axis& direction, bool isShowSteps)
-{
-    isShowStep_ = isShowSteps;
-    CHECK_NULL_VOID(isShowStep_);
-    markerPenAndPath.pen.SetAntiAlias(true);
-    markerPenAndPath.pen.SetColor(ToRSColor(theme->GetMarkerColor()));
-    markerPenAndPath.pen.SetWidth(static_cast<float>(theme->GetMarkerSize().ConvertToPx()));
-    markerPenAndPath.pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    // Distance between slide track and Content boundary
-    auto centerWidth = direction == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width();
-    centerWidth *= HALF;
-    auto stepsLength = sliderLength * stepRatio_->Get();
-    if (direction == Axis::HORIZONTAL) {
-        float dyOffset = offset.GetY() + centerWidth;
-        float start = offset.GetX() + borderBlank;
-        float end = start + sliderLength;
-        float current = start;
-        while (LessOrEqual(current, end)) {
-            float dxOffset = std::clamp(current, start, end);
-            markerPenAndPath.path.MoveTo(dxOffset, dyOffset);
-            markerPenAndPath.path.LineTo(dxOffset, dyOffset);
-            current += stepsLength;
-        }
-    } else {
-        float dxOffset = offset.GetX() + centerWidth;
-        float start = offset.GetY() + borderBlank;
-        float end = start + sliderLength;
-        float current = start;
-        while (LessOrEqual(current, end)) {
-            float dyOffset = std::clamp(current, start, end);
-            markerPenAndPath.path.MoveTo(dxOffset, dyOffset);
-            markerPenAndPath.path.LineTo(dxOffset, dyOffset);
-            current += stepsLength;
-        }
-    }
-}
-
 void SliderContentModifier::SetBoardColor()
 {
+    CHECK_NULL_VOID(boardColor_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
@@ -209,12 +212,10 @@ void SliderContentModifier::SetBoardColor()
     auto duration = mousePressedFlag_ ? static_cast<int32_t>(theme->GetPressAnimationDuration())
                                       : static_cast<int32_t>(theme->GetHoverAnimationDuration());
     auto curve = mousePressedFlag_ ? Curves::SHARP : Curves::FRICTION;
-    if (boardColor_) {
-        AnimationOption option = AnimationOption();
-        option.SetDuration(duration);
-        option.SetCurve(curve);
-        AnimationUtils::Animate(option, [&]() { boardColor_->Set(LinearColor(shadowColor)); });
-    }
+    AnimationOption option = AnimationOption();
+    option.SetDuration(duration);
+    option.SetCurve(curve);
+    AnimationUtils::Animate(option, [&]() { boardColor_->Set(LinearColor(shadowColor)); });
 }
 
 void SliderContentModifier::UpdateData(const Parameters& parameters)

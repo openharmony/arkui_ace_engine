@@ -35,6 +35,11 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        auto visibility = GetLayoutProperty<LayoutProperty>()->GetVisibility().value_or(VisibleType::VISIBLE);
+        if (visibility == VisibleType::GONE) {
+            return MakeRefPtr<NodePaintMethod>();
+        }
+
         auto paintParameters = UpdateContentParameters();
         if (!sliderContentModifier_) {
             sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(paintParameters);
@@ -76,7 +81,7 @@ public:
 
 private:
     void OnModifyDone() override;
-    void CancelExceptionValue(float& min, float& max);
+    void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
 
     void CreateParagraphFunc();
@@ -114,6 +119,8 @@ private:
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
 
+    void OpenTranslateAnimation();
+    void CloseTranslateAnimation();
     SliderContentModifier::Parameters UpdateContentParameters();
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);
     void GetBackgroundPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);

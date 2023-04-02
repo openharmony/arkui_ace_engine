@@ -43,9 +43,8 @@ public:
         const SliderContentModifier::Parameters& parameters, float sliderLength, float borderBlank,
         const RefPtr<SliderTipModifier>& sliderTipModifier, RefPtr<NG::Paragraph> paragraph,
         const TipParameters& tipParameters)
-        : sliderContentModifier_(sliderContentModifier), parameters_(parameters), sliderLength_(sliderLength),
-          borderBlank_(borderBlank), sliderTipModifier_(sliderTipModifier), paragraph_(std::move(paragraph)),
-          tipParameters_(tipParameters)
+        : sliderContentModifier_(sliderContentModifier), parameters_(parameters), sliderTipModifier_(sliderTipModifier),
+          paragraph_(std::move(paragraph)), tipParameters_(tipParameters)
     {}
     ~SliderPaintMethod() override = default;
 
@@ -66,6 +65,7 @@ public:
         CHECK_NULL_VOID(sliderTheme);
         sliderContentModifier_->UpdateData(parameters_);
         sliderContentModifier_->JudgeNeedAimate(paintProperty);
+        sliderContentModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
         sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
         sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
         sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);
@@ -75,9 +75,7 @@ public:
         sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
         sliderContentModifier_->SetBlockDiameter(parameters_.blockDiameter);
         sliderContentModifier_->SetStepRatio(parameters_.stepRatio);
-        sliderContentModifier_->GetMarkerPen(sliderLength_, borderBlank_, paintWrapper->GetContentOffset(),
-            paintWrapper->GetContentSize(), sliderTheme, paintProperty->GetDirectionValue(Axis::HORIZONTAL),
-            paintProperty->GetShowStepsValue(false));
+        sliderContentModifier_->SetShowSteps(paintProperty->GetShowStepsValue(false));
         sliderContentModifier_->SetBoardColor();
     }
 
@@ -133,8 +131,6 @@ public:
 private:
     RefPtr<SliderContentModifier> sliderContentModifier_;
     SliderContentModifier::Parameters parameters_;
-    float sliderLength_ = .0f;
-    float borderBlank_ = .0f;
 
     RefPtr<SliderTipModifier> sliderTipModifier_;
     RefPtr<NG::Paragraph> paragraph_;
