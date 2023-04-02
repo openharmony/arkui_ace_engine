@@ -59,25 +59,81 @@ public:
             auto displayCount = property->GetDisplayCount().value_or(1);
             auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
             auto itemSpace = GetItemSpace(property);
+            auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
+            auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
+            auto itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
             auto childSelfIdealSize = idealSize;
+            float childCalcIdealLength = 0.0f;
+
             if (axis == Axis::HORIZONTAL) {
                 if (idealSize.Width()) {
-                    childSelfIdealSize.SetWidth(
-                        (idealSize.Width().value() - itemSpace * (displayCount - 1)) / displayCount);
+                    childCalcIdealLength = (idealSize.Width().value() - itemSpace * itemSpaceCount -
+                                            static_cast<float>(prevMargin + nextMargin)) / displayCount;
+                    if (CheckMarginPropertyExceed(property, childCalcIdealLength)) {
+                        prevMargin = 0.0;
+                        nextMargin = 0.0;
+                        itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
+                        childCalcIdealLength = (idealSize.Width().value() - itemSpace * itemSpaceCount) / displayCount;
+                    }
+                    childSelfIdealSize.SetWidth(childCalcIdealLength);
+                } else {
+                    property->UpdatePrevMargin(0.0_px);
+                    property->UpdateNextMargin(0.0_px);
                 }
             } else if (axis == Axis::VERTICAL) {
                 if (idealSize.Height()) {
-                    childSelfIdealSize.SetHeight(
-                        (idealSize.Height().value() - itemSpace * (displayCount - 1)) / displayCount);
+                    childCalcIdealLength = (idealSize.Height().value() - itemSpace * itemSpaceCount -
+                                            static_cast<float>(prevMargin + nextMargin)) / displayCount;
+                    if (CheckMarginPropertyExceed(property, childCalcIdealLength)) {
+                        prevMargin = 0.0;
+                        nextMargin = 0.0;
+                        itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
+                        childCalcIdealLength = (idealSize.Height().value() -
+                                                itemSpace * itemSpaceCount) / displayCount;
+                    }
+                    childSelfIdealSize.SetHeight(childCalcIdealLength);
+                } else {
+                    property->UpdatePrevMargin(0.0_px);
+                    property->UpdateNextMargin(0.0_px);
                 }
             }
+
             layoutConstraint.selfIdealSize = childSelfIdealSize;
             return layoutConstraint;
         }
 
         return layoutConstraint;
     }
-};
 
+    static int32_t CaculateDisplayItemSpaceCount(
+        const RefPtr<SwiperLayoutProperty>& property, double prevMargin, double nextMargin)
+    {
+        CHECK_NULL_RETURN(property, 0);
+        auto count = property->GetDisplayCountValue(1);
+        count = (Positive(static_cast<double>(count)) ? count : 1);
+        if (Positive(prevMargin) && Positive(nextMargin)) {
+            return count + 1;
+        } else if (NonPositive(prevMargin) && NonPositive(nextMargin)) {
+            return count - 1;
+        } else {
+            return count;
+        }
+    }
+
+    static bool CheckMarginPropertyExceed(
+        const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength)
+    {
+        CHECK_NULL_RETURN(property, false);
+        auto prevMargin = property->GetPrevMarginValue(0.0_px).ConvertToPx();
+        auto nextMargin = property->GetNextMarginValue(0.0_px).ConvertToPx();
+        if (GreatNotEqual(prevMargin, childCalcIdealLength) ||
+            GreatNotEqual(nextMargin, childCalcIdealLength)) {
+            property->UpdatePrevMargin(0.0_px);
+            property->UpdateNextMargin(0.0_px);
+            return true;
+        }
+        return false;
+    }
+};
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_UTILS_H
