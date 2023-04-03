@@ -107,10 +107,12 @@ public:
     virtual void BlendBorderColor(const Color& color) {}
 
     // Paint focus state by component's setting. It will paint along the paintRect
-    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth) {}
+    virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
+        bool isAccessibilityFocus = false)
+    {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth)
+        const Dimension& paintWidth, bool isAccessibilityFocus = false)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
     virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
@@ -231,6 +233,10 @@ public:
     }
 
     virtual void PaintAccessibilityFocus() {};
+
+    virtual void ClearAccessibilityFocus() {};
+
+    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {};
 
     virtual void OnMouseSelectUpdate(bool isSelected, const Color& fillColor, const Color& strokeColor) {}
     virtual void UpdateMouseSelectWithRect(const RectF& rect, const Color& fillColor, const Color& strokeColor) {}
@@ -396,7 +402,6 @@ protected:
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
-    virtual void OnAccessibilityFocusUpdate(bool isAccessibilityFocus) {}
 
 private:
     std::function<void()> requestFrame_;
