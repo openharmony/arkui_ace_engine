@@ -337,7 +337,7 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
         LOGI("Default focus system handled this event");
         return true;
     }
-    LOGI("Use platform to handle this event");
+    LOGD("Use platform to handle this event");
     return false;
 }
 
@@ -370,7 +370,7 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
         LOGI("Default focus system handled this event");
         return true;
     }
-    LOGI("Use platform to handle this event");
+    LOGD("Use platform to handle this event");
     return false;
 }
 
@@ -1041,7 +1041,7 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
 
 void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
-    LOGI("EventManager: The key code is %{public}d, the key action is %{public}d.", event.code, event.action);
+    LOGD("EventManager: The key code is %{public}d, the key action is %{public}d.", event.code, event.action);
     if (event.action != KeyAction::DOWN) {
         return;
     }

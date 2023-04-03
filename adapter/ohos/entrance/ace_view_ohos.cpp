@@ -185,7 +185,7 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);
-        LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
+        LOGD("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
     if (touchPoint.type != TouchType::UNKNOWN) {
@@ -247,7 +247,7 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);
-        LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
+        LOGD("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
 
@@ -263,7 +263,7 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);
-        LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
+        LOGD("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
 
