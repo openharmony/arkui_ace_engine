@@ -56,7 +56,6 @@ void ExclusiveRecognizer::OnAccepted()
 
 void ExclusiveRecognizer::OnRejected()
 {
-    LOGD("exclusive gesture recognizer has been rejected!");
     refereeState_ = RefereeState::FAIL;
     for (const auto& recognizer : recognizers_) {
         if (!recognizer) {
@@ -74,7 +73,6 @@ void ExclusiveRecognizer::OnRejected()
 
 void ExclusiveRecognizer::OnPending()
 {
-    LOGD("exclusive gesture recognizer is pending!");
     refereeState_ = RefereeState::PENDING;
     if (activeRecognizer_) {
         activeRecognizer_->OnPending();
