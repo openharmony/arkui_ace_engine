@@ -30,7 +30,6 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/render/render_context.h"
-#include "adapter/ohos/osal/pixel_map_ohos.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
@@ -142,8 +141,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         SetPixelMap(actuator, info.GetLocalLocation());
     };
     longPressRecognizer_->SetOnActionUpdate(longPressUpdate);
-    longPressRecognizer_->SetGestureHub(gestureEventHub_);
 #endif // ENABLE_DRAG_FRAMEWORK
+    longPressRecognizer_->SetGestureHub(gestureEventHub_);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     if (!SequencedRecognizer_) {
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
@@ -219,7 +218,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator, c
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<PixelMapOhos>(gestureHub->GetPixelMap());
+    RefPtr<PixelMap> pixelMap = gestureHub->GetPixelMap();
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
     auto offsetX = screenLocation.GetX() - width / 2;

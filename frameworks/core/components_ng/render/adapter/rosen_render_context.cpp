@@ -22,6 +22,7 @@
 #include "render_service_base/include/property/rs_properties_def.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
+#include "render_service_client/core/transaction/rs_interfaces.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 #include "render_service_client/core/ui/rs_root_node.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
@@ -66,7 +67,11 @@
 
 namespace OHOS::Ace::NG {
 
+using namespace OHOS::Rosen;
 namespace {
+RefPtr<PixelMap> g_pixelMap {};
+std::mutex g_mutex;
+std::condition_variable thumbnailGet;
 float ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
     if (dimension.Unit() == DimensionUnit::PERCENT) {
@@ -470,6 +475,37 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetAlpha(opacity);
     RequestNextFrame();
+}
+
+class DrawDragThumbnailCallback : public SurfaceCaptureCallback {
+public:
+    void OnSurfaceCapture(std::shared_ptr<Media::PixelMap> pixelMap) override
+    {
+        if (pixelMap == nullptr) {
+            LOGE("%{public}s: failed to get pixelmap, return nullptr", __func__);
+            return;
+        }
+        std::unique_lock<std::mutex> lock(g_mutex);
+#ifdef PIXEL_MAP_SUPPORTED
+        g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+#endif // PIXEL_MAP_SUPPORTED
+        thumbnailGet.notify_all();
+        LOGI("Get pixelmap success");
+    }
+};
+
+RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
+{
+    if (rsNode_ == nullptr) {
+        LOGE("rsNode is nullptr");
+        return nullptr;
+    }
+    std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
+        std::make_shared<DrawDragThumbnailCallback>();
+    RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, 1, 1);
+    std::unique_lock<std::mutex> lock(g_mutex);
+    thumbnailGet.wait(lock);
+    return g_pixelMap;
 }
 
 void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
