@@ -800,6 +800,7 @@ void ViewAbstract::BindPopup(
         // use param to update PopupParm
         if (!isUseCustom) {
             BubbleView::UpdatePopupParam(popupId, param, targetNode);
+            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             LOGI("Update pop node.");
         }
     }

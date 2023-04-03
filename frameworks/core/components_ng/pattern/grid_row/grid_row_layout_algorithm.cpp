@@ -174,7 +174,7 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto maxSize = CreateIdealSize(layoutProperty->GetLayoutConstraint().value_or(LayoutConstraintF()),
         Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
-    CreateChildrenConstraint(maxSize, layoutProperty->GetMarginProperty(), layoutProperty->GetPaddingProperty());
+    CreateChildrenConstraint(maxSize, layoutProperty->GetPaddingProperty());
     auto context = NG::PipelineContext::GetCurrentContext();
     auto sizeType = GridContainerUtils::ProcessGridSizeType(
         layoutProperty->GetBreakPointsValue(), Size(maxSize.Width(), maxSize.Height()));
