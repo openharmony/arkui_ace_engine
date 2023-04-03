@@ -114,8 +114,6 @@ bool SequencedRecognizer::HandleEvent(const TouchEvent& point)
     auto iter = recognizers_.begin();
     std::advance(iter, currentIndex_);
     RefPtr<NGGestureRecognizer> curRecognizer = *iter;
-    LOGD("Dispatch to the %{public}d gesture recognizer, event type is %{public}d",
-        currentIndex_, static_cast<int32_t>(point.type));
     if (!curRecognizer) {
         LOGE("curRecognizer is nullptr");
         GroupAdjudicate(AceType::Claim(this), GestureDisposal::REJECT);
