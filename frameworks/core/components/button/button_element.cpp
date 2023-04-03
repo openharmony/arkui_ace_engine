@@ -158,7 +158,6 @@ void ButtonElement::OnBlur()
 void ButtonElement::OnChange()
 {
     if (button_ && IsCurrentFocus()) {
-        LOGD("Button OnChange: %{private}p", AceType::RawPtr(button_));
         button_->DisplayFocusAnimation();
     }
 }

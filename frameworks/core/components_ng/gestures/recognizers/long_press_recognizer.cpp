@@ -31,7 +31,7 @@ constexpr int32_t MAX_FINGERS = 10;
 
 void LongPressRecognizer::OnAccepted()
 {
-    LOGD("%{public}p long press gesture has been accepted!", this);
+    LOGD("long press gesture has been accepted!");
     refereeState_ = RefereeState::SUCCEED;
     if (onLongPress_ && !touchPoints_.empty()) {
         TouchEvent trackPoint = touchPoints_.begin()->second;
@@ -53,7 +53,7 @@ void LongPressRecognizer::OnAccepted()
 
 void LongPressRecognizer::OnRejected()
 {
-    LOGD("%{public}p long press gesture has been rejected!", this);
+    LOGD("long press gesture has been rejected!");
     refereeState_ = RefereeState::FAIL;
 }
 

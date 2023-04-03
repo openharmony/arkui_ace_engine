@@ -929,7 +929,6 @@ void V8DeclarativeGroupJsBridge::DestroyIsolateNativeEngineMap(v8::Isolate* isol
     std::lock_guard<std::mutex> lock(isolateNativeEngineMapMutex_);
     auto result = isolateNativeEngineMap_.find(isolate);
     if (result != isolateNativeEngineMap_.end()) {
-        LOGD("remove worker isolate, isolate:%{private}p", isolate);
         isolateNativeEngineMap_.erase(isolate);
     }
 }
