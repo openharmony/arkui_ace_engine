@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
+#include <regex>
 #include <utility>
 
+#include "core/components/common/layout/constants.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/base/constants.h"
 
@@ -43,12 +45,47 @@ bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::strin
 
 bool ImageSourceInfo::IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern)
 {
-    return true;
+    std::regex regular(pattern);
+    return std::regex_match(uri, regular);
 }
 
 SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
 {
-    return SrcType::FILE;
+    if (uri.empty()) {
+        return SrcType::UNSUPPORTED;
+    }
+    auto iter = uri.find_first_of(':');
+    if (iter == std::string::npos) {
+        return SrcType::ASSET;
+    }
+    std::string head = uri.substr(0, iter);
+    std::transform(head.begin(), head.end(), head.begin(), [](unsigned char c) { return std::tolower(c); });
+    if (head == "http" || head == "https") {
+        return SrcType::NETWORK;
+    } else if (head == "file") {
+        return SrcType::FILE;
+    } else if (head == "internal") {
+        return SrcType::INTERNAL;
+    } else if (head == "data") {
+        static constexpr char BASE64_PATTERN[] =
+            "^data:image/(jpeg|JPEG|jpg|JPG|png|PNG|ico|ICO|gif|GIF|bmp|BMP|webp|WEBP);base64$";
+        if (IsValidBase64Head(uri, BASE64_PATTERN)) {
+            return SrcType::BASE64;
+        }
+        return SrcType::UNSUPPORTED;
+    } else if (head == "memory") {
+        return SrcType::MEMORY;
+    } else if (head == "resource") {
+        return SrcType::RESOURCE;
+    } else if (head == "dataability" || head == "datashare") {
+        if (IsUriOfDataAbilityEncoded(uri, "^dataability://.*?/media/.*/thumbnail/.*$") ||
+            IsUriOfDataAbilityEncoded(uri, "^datashare://.*?/media/.*/thumbnail/.*$")) {
+            return SrcType::DATA_ABILITY_DECODED;
+        }
+        return SrcType::DATA_ABILITY;
+    } else {
+        return SrcType::UNSUPPORTED;
+    }
 }
 
 ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, std::string moduleName, Dimension width,
@@ -60,7 +97,13 @@ ImageSourceInfo::ImageSourceInfo(std::string imageSrc, std::string bundleName, s
 
 SrcType ImageSourceInfo::ResolveSrcType() const
 {
-    return SrcType::FILE;
+    if (pixmap_) {
+        return SrcType::PIXMAP;
+    }
+    if (!src_.empty()) {
+        return ResolveURIType(src_);
+    }
+    return SrcType::UNSUPPORTED;
 }
 
 void ImageSourceInfo::SetFillColor(const Color& color)
@@ -140,7 +183,7 @@ bool ImageSourceInfo::IsSvg() const
 
 bool ImageSourceInfo::IsPixmap() const
 {
-    return true;
+    return pixmap_ || srcType_ == SrcType::DATA_ABILITY_DECODED;
 }
 
 SrcType ImageSourceInfo::GetSrcType() const
@@ -186,7 +229,7 @@ std::string ImageSourceInfo::GetKey() const
     return std::string("");
 }
 
-bool ImageSourceInfo::IsSupportCache() const
+bool ImageSourceInfo::SupportObjCache() const
 {
     return false;
 }

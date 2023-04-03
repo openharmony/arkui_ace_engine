@@ -30,6 +30,10 @@ ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifie
     : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
+    // pixmap src is ready to draw
+    if (src_.GetSrcType() == SrcType::PIXMAP) {
+        syncLoad_ = true;
+    }
 }
 
 ImageLoadingContext::~ImageLoadingContext()
