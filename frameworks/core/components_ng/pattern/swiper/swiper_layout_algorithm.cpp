@@ -209,20 +209,14 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = SwiperUtils::CreateChildConstraint(swiperLayoutProperty, idealSize);
     auto crossSize = 0.0f;
     auto mainSize = 0.0f;
-
-    auto itemCount = static_cast<int32_t>(itemRange_.size());
-    if (isLoop_ && itemCount < totalCount_) {
-        LoopMeasure(layoutWrapper, layoutConstraint, axis, crossSize, mainSize);
-    } else {
-        for (const auto& index : itemRange_) {
-            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-            if (!wrapper) {
-                break;
-            }
-            wrapper->Measure(layoutConstraint);
-            crossSize = std::max(crossSize, GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
-            mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+    for (const auto& index : itemRange_) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!wrapper) {
+            break;
         }
+        wrapper->Measure(layoutConstraint);
+        crossSize = std::max(crossSize, GetCrossAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
+        mainSize = std::max(mainSize, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis));
     }
 
     maxChildSize_ = axis == Axis::HORIZONTAL ? SizeF(mainSize, crossSize) : SizeF(crossSize, mainSize);
@@ -299,6 +293,10 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         return;
     }
+    
+    if (swiperLayoutProperty->GetCachedCount().value_or(1) == 0) {
+        LayoutOffScreen(layoutWrapper, axis);
+    }
 
     if (isLoop_) {
         LoopLayout(layoutWrapper);
@@ -324,6 +322,25 @@ void SwiperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         layoutWrapper->RemoveChildInRenderTree(index);
+    }
+}
+
+void SwiperLayoutAlgorithm::LayoutOffScreen(LayoutWrapper* layoutWrapper, Axis axis) const
+{
+    std::set<int32_t> outItems;
+    set_difference(preItemRange_.begin(), preItemRange_.end(), itemRange_.begin(), itemRange_.end(),
+        inserter(outItems, outItems.begin()));
+
+    auto offset = (axis == Axis::HORIZONTAL ? OffsetF(-maxChildSize_.Width(), 0) : OffsetF(0, -maxChildSize_.Height()));
+    for (const auto& index : outItems) {
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        if (!wrapper) {
+            continue;
+        }
+        auto geometryNode = wrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        geometryNode->SetMarginFrameOffset(offset);
+        wrapper->Layout();
     }
 }
 
@@ -453,5 +470,4 @@ void SwiperLayoutAlgorithm::LayoutItems(
         }
     }
 }
-
 } // namespace OHOS::Ace::NG
