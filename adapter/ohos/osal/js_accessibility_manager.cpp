@@ -717,14 +717,15 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     nodeInfo.SetItemCounts(accessibilityProperty->GetCollectionItemCounts());
 
     GridInfo gridInfo(accessibilityProperty->GetCollectionInfo().rows,
-        accessibilityProperty->GetCollectionInfo().columns, (nodeInfo.IsPluraLineSupported() ? 0 : 1));
+        accessibilityProperty->GetCollectionInfo().columns, accessibilityProperty->GetCollectionInfo().selectMode);
     nodeInfo.SetGrid(gridInfo);
 
     int32_t row = accessibilityProperty->GetCollectionItemInfo().row;
     int32_t column = accessibilityProperty->GetCollectionItemInfo().column;
     int32_t rowSpan = accessibilityProperty->GetCollectionItemInfo().rowSpan;
     int32_t columnSpan = accessibilityProperty->GetCollectionItemInfo().columnSpan;
-    GridItemInfo gridItemInfo(row, rowSpan, column, columnSpan, false, nodeInfo.IsSelected());
+    bool heading = accessibilityProperty->GetCollectionItemInfo().heading;
+    GridItemInfo gridItemInfo(row, rowSpan, column, columnSpan, heading, nodeInfo.IsSelected());
     nodeInfo.SetGridItem(gridItemInfo);
 
     UpdateSupportAction(node, nodeInfo);
