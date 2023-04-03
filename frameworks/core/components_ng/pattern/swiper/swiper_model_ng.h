@@ -59,6 +59,8 @@ public:
     void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) override;
+    void SetPreviousMargin(const Dimension& prevMargin) override;
+    void SetNextMargin(const Dimension& nextMargin) override;
 };
 
 } // namespace OHOS::Ace::NG
