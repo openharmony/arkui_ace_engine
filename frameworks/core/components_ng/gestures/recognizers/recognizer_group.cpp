@@ -45,6 +45,11 @@ void RecognizerGroup::OnFinishGestureReferee(int32_t touchId)
     MultiFingersRecognizer::OnFinishGestureReferee(touchId);
 }
 
+const std::list<RefPtr<NGGestureRecognizer>>& RecognizerGroup::GetGroupRecognizer()
+{
+    return recognizers_;
+}
+
 void RecognizerGroup::AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers)
 {
     // TODO: add state adjustment.
@@ -81,8 +86,9 @@ RefereeState RecognizerGroup::CheckStates()
     }
     if (count > 0) {
         return RefereeState::PENDING;
+    } else {
+        return RefereeState::READY;
     }
-    return refereeState_;
 }
 
 void RecognizerGroup::ForceReject()

@@ -111,6 +111,41 @@ bool GestureScope::IsPending()
     return iter != recognizers_.end();
 }
 
+bool DectectAllDone(const RefPtr<NGGestureRecognizer> recognizer)
+{
+    RefereeState state = recognizer->GetRefereeState();
+    if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
+        if (state != RefereeState::SUCCEED && state != RefereeState::SUCCEED_BLOCKED && state != RefereeState::FAIL) {
+            return false;
+        }
+    } else {
+        auto group = AceType::DynamicCast<RecognizerGroup>(recognizer);
+        for (auto& item : group->GetGroupRecognizer()) {
+            bool ret = DectectAllDone(item);
+            if (!ret) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool GestureScope::QueryAllDone(size_t touchId)
+{
+    bool ret = true;
+    for (auto item : recognizers_) {
+        auto recognizer = item.Upgrade();
+        if (!recognizer) {
+            continue;
+        }
+        ret = DectectAllDone(recognizer);
+        if (ret == false) {
+            break;
+        }
+    }
+    return ret;
+}
+
 void GestureScope::Close()
 {
     LOGD("force close gesture scope of id %{public}d", static_cast<int32_t>(touchId_));
@@ -153,6 +188,17 @@ void GestureReferee::CleanGestureScope(size_t touchId)
         scope->Close();
         gestureScopes_.erase(iter);
     }
+}
+
+bool GestureReferee::QueryAllDone(size_t touchId)
+{
+    bool ret = false;
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter != gestureScopes_.end()) {
+        const auto& scope = iter->second;
+        ret = scope->QueryAllDone(touchId);
+    }
+    return ret;
 }
 
 void GestureReferee::Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
