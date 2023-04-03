@@ -1318,7 +1318,7 @@ void TextFieldPattern::HandleTouchUp()
         LOGI("TextFieldPattern::HandleTouchUp of mouse");
         isMousePressed_ = false;
     }
-    if (enableTouchAndHoverEffect_) {
+    if (enableTouchAndHoverEffect_ && !HasStateStyle(UI_STATE_PRESSED)) {
         auto renderContext = GetHost()->GetRenderContext();
         if (isOnHover_) {
             AnimatePressAndHover(renderContext, HOVER_ANIMATION_OPACITY);
