@@ -308,7 +308,7 @@ public:
         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> type = jsObj->GetProperty("type");
         if (!type->IsNumber()) {
-            LOGW("type is not number");
+            LOGD("type is not number");
             return false;
         }
 

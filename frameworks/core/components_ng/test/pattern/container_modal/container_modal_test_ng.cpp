@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,8 +22,9 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/test/mock/render/mock_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
@@ -31,6 +32,11 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
+const std::string CONTAINER_MODAL_NODE_TAG = "ContainerModalNode";
+const std::string TITLE_NODE_TAG = "TitleNode";
+const std::string TITLE_LABEL_NODE_TAG = "TitleLabelNode";
+} // namespace
 class ContainerModelTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -273,5 +279,47 @@ HWTEST_F(ContainerModelTestNg, ContainerModalPatternTest009, TestSize.Level1)
     auto containerModalPattern = AceType::MakeRefPtr<ContainerModalPattern>();
     containerModalPattern->ChangeTitleButtonIcon(
         frameNode, InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT, true);
+}
+
+/**
+ * @tc.name: ContainerModalAccessibilityPropertyGetText001
+ * @tc.desc: Test GetText of containerModal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalAccessibilityPropertyGetText001, TestSize.Level1)
+{
+    auto containerModalNode = AceType::MakeRefPtr<FrameNode>(
+        CONTAINER_MODAL_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(containerModalNode, nullptr);
+
+    auto columnNode = AceType::MakeRefPtr<FrameNode>(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto titleNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    ASSERT_NE(titleNode, nullptr);
+
+    auto titleLabelNodeOne = AceType::MakeRefPtr<FrameNode>(
+        TITLE_LABEL_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(titleLabelNodeOne, nullptr);
+
+    auto titleLabelNodeTwo = AceType::MakeRefPtr<FrameNode>(
+        TITLE_LABEL_NODE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(titleLabelNodeTwo, nullptr);
+
+    auto textLayoutProperty = titleLabelNodeTwo->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(CONTAINER_MODAL_NODE_TAG);
+
+    titleNode->AddChild(titleLabelNodeOne);
+    titleNode->AddChild(titleLabelNodeTwo);
+    columnNode->AddChild(titleNode);
+    containerModalNode->AddChild(columnNode);
+
+    ContainerModalAccessibilityProperty containerModalAccessibilityProperty;
+    containerModalAccessibilityProperty.SetHost(containerModalNode);
+
+    EXPECT_EQ(containerModalAccessibilityProperty.GetText(), CONTAINER_MODAL_NODE_TAG);
 }
 } // namespace OHOS::Ace::NG

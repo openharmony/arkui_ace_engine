@@ -156,7 +156,7 @@ private:
     void NotifySurfacePositionChanged(int32_t posX, int32_t posY)
     {
         if (posX_ == posX && posY_ == posY) {
-            LOGI("surface position not changed");
+            LOGD("surface position not changed");
             return;
         }
         if (viewPositionChangeCallback_) {

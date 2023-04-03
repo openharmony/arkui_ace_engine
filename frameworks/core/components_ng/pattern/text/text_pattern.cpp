@@ -22,6 +22,9 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
+#if !defined(ACE_UNITTEST)
+#include "core/common/ace_engine_ext.h"
+#endif
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
@@ -461,6 +464,9 @@ void TextPattern::HandlePanStart(const GestureEvent& info)
             static_cast<int32_t>(contentRect_.Width() + contentRect_.GetX()),
             contentRect_.Height() + contentRect_.GetY());
         if (dragWindow_) {
+#if !defined(ACE_UNITTEST)
+            AceEngineExt::GetInstance().DragStartExt();
+#endif
             dragWindow_->SetOffset(static_cast<int32_t>(host->GetPaintRectOffset().GetX() + rect.Left()),
                 static_cast<int32_t>(host->GetPaintRectOffset().GetY() + rect.Top()));
             // draw select text on drag window

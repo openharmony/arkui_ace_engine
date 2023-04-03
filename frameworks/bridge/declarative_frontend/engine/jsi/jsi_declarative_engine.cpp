@@ -649,7 +649,7 @@ RefPtr<JsAcePage> JsiDeclarativeEngineInstance::GetStagingPage(int32_t instanceI
         return nullptr;
     }
     auto engineInstance = jsiEngine->GetEngineInstance();
-    LOGD("GetStagingPage id:%{public}d instance:%{public}p", instanceId, RawPtr(engineInstance));
+    LOGD("GetStagingPage id:%{public}d", instanceId);
     if (engineInstance == nullptr) {
         LOGE("engineInstance is nullptr");
         return nullptr;
@@ -682,7 +682,7 @@ shared_ptr<JsRuntime> JsiDeclarativeEngineInstance::InnerGetCurrentRuntime()
     auto engine = EngineHelper::GetCurrentEngine();
     auto jsiEngine = AceType::DynamicCast<JsiDeclarativeEngine>(engine);
     if (!jsiEngine) {
-        LOGE("jsiEngine is null");
+        LOGD("jsiEngine is null");
         return nullptr;
     }
 
@@ -828,7 +828,6 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         arkRuntime = std::make_shared<ArkJSRuntime>();
         if (isUnique_ && reinterpret_cast<NativeEngine*>(cardRuntime_) != nullptr) {
             sharedRuntime = reinterpret_cast<NativeEngine*>(cardRuntime_);
-            LOGI("Initialize use thread local rootRuntime:%{public}p.", sharedRuntime);
         }
         auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
         vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
@@ -1928,7 +1927,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleCard(void* runtime)
 void JsiDeclarativeEngineInstance::PreloadAceModuleCard(void* runtime)
 {
     isUnique_ = true;
-    LOGI("PreloadAceModuleCard for ArkTS Card runtime:%{public}p.", runtime);
     if (isModulePreloaded_ && !IsPlugin() && !isUnique_) {
         LOGE("PreloadAceModule already preloaded");
         return;

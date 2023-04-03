@@ -30,26 +30,8 @@ namespace {
 
 void MountNavBar(const RefPtr<NavigationGroupNode>& hostNode)
 {
-    auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_VOID(navBarLayoutProperty);
-    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
-    CHECK_NULL_VOID(eventHub);
-
-    if (navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-        eventHub->FireNavBarStateChangeEvent(false);
-    } else {
-        if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
-            navBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-            eventHub->FireNavBarStateChangeEvent(false);
-        } else {
-            navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-            eventHub->FireNavBarStateChangeEvent(true);
-        }
-    }
     navBarNode->MarkModifyDone();
 }
 
@@ -81,6 +63,26 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
     navigationLayoutProperty->UpdateNavigationMode(navigationLayoutAlgorithm->GetNavigationMode());
+
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_RETURN(navBarNode, false);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_RETURN(navBarLayoutProperty, false);
+    auto eventHub = hostNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    if (navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        eventHub->FireNavBarStateChangeEvent(false);
+    } else {
+        if (navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::SPLIT) {
+            if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
+                navBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+                eventHub->FireNavBarStateChangeEvent(false);
+            } else {
+                navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                eventHub->FireNavBarStateChangeEvent(true);
+            }
+        }
+    }
 
     auto navigationMode = navigationLayoutAlgorithm->GetNavigationMode();
     auto navigationChildrenSize = hostNode->GetChildren().size();

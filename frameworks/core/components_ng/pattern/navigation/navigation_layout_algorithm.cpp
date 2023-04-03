@@ -81,7 +81,8 @@ void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGr
 float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const NavBarPosition& position)
 {
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
+    if (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
+        navigationLayoutProperty->GetNavigationModeValue() == NavigationMode::SPLIT) {
         return 0.0f;
     }
 

@@ -64,7 +64,7 @@
  *
  */
 
-abstract class SubscribableAbstract {
+abstract class SubscribaleAbstract {
 
   // keeps track of all subscribing properties
   private owningProperties_: Set<number>;
@@ -92,12 +92,6 @@ abstract class SubscribableAbstract {
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
       if (owningProperty) {
-        if ('objectPropertyHasChangedPU' in owningProperty) {
-          // PU code path
-          (owningProperty as unknown as ObservedObjectEventsPUReceiver<any>).objectPropertyHasChangedPU(this, propName);
-        }
-
-        // FU code path
         if ('hasChanged' in owningProperty) {
           (owningProperty as ISinglePropertyChangeSubscriber<any>).hasChanged(newValue);
         }
@@ -149,14 +143,3 @@ abstract class SubscribableAbstract {
     this.owningProperties_.delete(subscriberId);
   }
 }
-
-
-// backward compatibility
-// there was a typo in the class name: SubscribaleAbstract instead of SubscribableAbstract
-// missing 'b'
-abstract class SubscribaleAbstract extends SubscribableAbstract {
-  constructor() {
-    super();
-  }
-}
-

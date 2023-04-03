@@ -124,12 +124,14 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
     textValue_ = AceType::MakeRefPtr<PropertyString>("");
+    placeholderValue_ = AceType::MakeRefPtr<PropertyString>("");
     textRectY_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Top().ConvertToPx());
     textRectX_ = AceType::MakeRefPtr<PropertyFloat>(theme->GetPadding().Left().ConvertToPx());
     textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
+    AttachProperty(placeholderValue_);
     AttachProperty(textRectY_);
     AttachProperty(textObscured_);
     AttachProperty(textRectX_);
@@ -219,6 +221,13 @@ void TextFieldContentModifier::SetTextValue(std::string& value)
 {
     if (textValue_->Get() != value) {
         textValue_->Set(value);
+    }
+}
+
+void TextFieldContentModifier::SetPlaceholderValue(std::string&& value)
+{
+    if (placeholderValue_->Get() != value) {
+        placeholderValue_->Set(value);
     }
 }
 

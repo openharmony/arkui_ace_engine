@@ -39,8 +39,8 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 #include "core/pipeline/base/element_register.h"
+#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -360,8 +360,20 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsBindOverlay, bool, PROPERTY_UPDATE_MEASURE);
 #endif // ENABLE_DRAG_FRAMEWORK
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_AND_USING_CALLBACK(Visibility, VisibleType, PROPERTY_UPDATE_MEASURE);
-    void OnVisibilityUpdate(VisibleType visible) const;
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(Visibility, VisibleType);
+
+public:
+    void UpdateVisibility(const VisibleType& value)
+    {
+        if (propVisibility_.has_value()) {
+            if (NearEqual(propVisibility_.value(), value)) {
+                LOGD("the Visibility is same, just ignore");
+                return;
+            }
+        }
+        OnVisibilityUpdate(value);
+    }
+    void OnVisibilityUpdate(VisibleType visible);
 
     void UpdateLayoutConstraint(const RefPtr<LayoutProperty>& layoutProperty)
     {

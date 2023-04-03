@@ -64,6 +64,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto textEditingValue = textFieldPattern->GetTextEditingValue();
     std::string text = textEditingValue.text;
     textFieldContentModifier_->SetTextValue(text);
+    textFieldContentModifier_->SetPlaceholderValue(textFieldPattern->GetPlaceHolder());
     textFieldContentModifier_->SetTextRectY(textFieldPattern->GetTextRect().GetY());
     textFieldContentModifier_->SetTextRectX(textFieldPattern->GetTextRect().GetX());
     textFieldContentModifier_->SetTextAlign(textFieldPattern->GetTextAlign());

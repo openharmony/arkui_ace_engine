@@ -13,28 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_ACCESSIBILITY_PROPERTY_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLL_SCROLL_ACCESSIBILITY_PROPERTY_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_ACCESSIBILITY_PROPERTY_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_ACCESSIBILITY_PROPERTY_H
 
-#include "base/utils/utils.h"
 #include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class ScrollAccessibilityProperty : public AccessibilityProperty {
-    DECLARE_ACE_TYPE(ScrollAccessibilityProperty, AccessibilityProperty);
+class ContainerModalAccessibilityProperty : public AccessibilityProperty {
+    DECLARE_ACE_TYPE(ContainerModalAccessibilityProperty, AccessibilityProperty);
 
 public:
-    ScrollAccessibilityProperty() = default;
+    ContainerModalAccessibilityProperty() = default;
 
-    ~ScrollAccessibilityProperty() override = default;
+    ~ContainerModalAccessibilityProperty() override = default;
 
-    bool IsScrollable() const override;
-
-protected:
-    void SetSpecificSupportAction() override;
+    std::string GetText() const override;
 
 private:
-    ACE_DISALLOW_COPY_AND_MOVE(ScrollAccessibilityProperty);
+    ACE_DISALLOW_COPY_AND_MOVE(ContainerModalAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG
 

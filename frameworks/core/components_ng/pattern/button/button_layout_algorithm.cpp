@@ -122,9 +122,9 @@ std::optional<SizeF> ButtonLayoutAlgorithm::HandleLabelCircleButtonConstraint(La
         auto minLength = std::min(minbuttonLength - left - right, layoutConstraint.maxSize.Height() - top - bottom);
         constraintSize.SetSizeT(SizeF(minLength, minLength));
     }
-    if (buttonLayoutProperty->HasBorderRadius()) {
+    if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
         auto radius = buttonLayoutProperty->GetBorderRadiusValue().ConvertToPx();
-        auto minLength = std::min(radius - left - right, radius - top - bottom);
+        auto minLength = std::min(2 * radius - left - right, 2 * radius - top - bottom);
         constraintSize.SetSizeT(SizeF(minLength, minLength));
     }
     return constraintSize;
@@ -139,9 +139,9 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     if (buttonLayoutProperty->HasLabel() &&
         buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
-        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize);
     }
     if (isNeedToSetDefaultHeight_) {
@@ -164,8 +164,8 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
     Dimension radius;
     if (buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE) == ButtonType::CIRCLE) {
         auto minSize = std::min(frameSize.Height(), frameSize.Width());
-        if (buttonLayoutProperty->HasBorderRadius()) {
-            minSize = buttonLayoutProperty->GetBorderRadiusValue().ConvertToPx();
+        if (buttonLayoutProperty->HasBorderRadius() && layoutConstraint.parentIdealSize.IsNull()) {
+            minSize = buttonLayoutProperty->GetBorderRadiusValue().ConvertToPx() * 2;
         }
         radius.SetValue(minSize / 2.0);
         BorderRadiusProperty borderRadius { radius, radius, radius, radius };
