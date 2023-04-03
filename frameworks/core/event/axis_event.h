@@ -47,6 +47,7 @@ enum class AxisAction : int32_t {
     BEGIN,
     UPDATE,
     END,
+    CANCEL,
 };
 
 struct AxisEvent final {

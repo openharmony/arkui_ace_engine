@@ -201,22 +201,7 @@ public:
     HitTestResult AxisTest(
         const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
 
-    void AnimateHoverEffect(bool isHovered) const
-    {
-        auto renderContext = GetRenderContext();
-        if (!renderContext) {
-            return;
-        }
-        HoverEffectType animationType = HoverEffectType::UNKNOWN;
-        if (eventHub_->GetInputEventHub()) {
-            animationType = eventHub_->GetInputEventHub()->GetHoverEffect();
-        }
-        if (animationType == HoverEffectType::SCALE) {
-            renderContext->AnimateHoverEffectScale(isHovered);
-        } else if (animationType == HoverEffectType::BOARD) {
-            renderContext->AnimateHoverEffectBoard(isHovered);
-        }
-    }
+    void AnimateHoverEffect(bool isHovered) const;
 
     bool IsAtomicNode() const override;
 

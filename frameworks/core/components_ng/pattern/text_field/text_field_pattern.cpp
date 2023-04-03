@@ -1333,7 +1333,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         isMousePressed_ = false;
         return;
     }
-    if (!focusHub->RequestFocusImmediately()) {
+    if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
         LOGE("Request focus failed, cannot open input method");
         StopTwinkling();
         return;
@@ -1519,7 +1519,7 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     isUsingMouse_ = false;
     LOGI("TextField %{public}d handle long press", GetHost()->GetId());
     auto focusHub = GetHost()->GetOrCreateFocusHub();
-    if (!focusHub->RequestFocusImmediately()) {
+    if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
         LOGE("Long press request focus failed");
         StopTwinkling();
         return;
@@ -1905,7 +1905,7 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
         lastTouchOffset_ = info.GetLocalLocation();
         caretUpdateType_ = CaretUpdateType::PRESSED;
         selectionMode_ = SelectionMode::NONE;
-        if (!focusHub->RequestFocusImmediately()) {
+        if (!focusHub->IsFocusOnTouch().value_or(true) || !focusHub->RequestFocusImmediately()) {
             LOGE("Request focus failed, cannot open input method");
             StopTwinkling();
             pipeline->ChangeMouseStyle(frameId, MouseFormat::HAND_GRABBING);

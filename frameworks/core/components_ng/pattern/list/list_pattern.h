@@ -49,7 +49,7 @@ public:
         auto divider = listLayoutProperty->GetDivider().value_or(itemDivider);
         auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
         auto drawVertical = (axis == Axis::HORIZONTAL);
-        auto paint =  MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
+        auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_, itemPosition_);
         paint->SetScrollBar(AceType::WeakClaim(AceType::RawPtr(GetScrollBar())));
         paint->SetTotalItemCount(maxListItemIndex_ + 1);
         auto scrollEffect = GetScrollEdgeEffect();
@@ -63,7 +63,7 @@ public:
     {
         return false;
     }
-    
+
     bool UsResRegion() override
     {
         return false;
@@ -134,8 +134,15 @@ public:
         if (!property) {
             return {};
         }
-        auto isVertical = property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
-        return { isVertical, true, ScopeType::OTHERS };
+        return ScopeFocusAlgorithm(property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL, true,
+            ScopeType::OTHERS,
+            [wp = WeakClaim(this)](
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                auto list = wp.Upgrade();
+                if (list) {
+                    nextFocusNode = list->GetNextFocusNode(step, currFocusNode);
+                }
+            });
     }
 
     const ListLayoutAlgorithm::PositionMap& GetItemPosition() const
@@ -181,6 +188,7 @@ public:
     }
 
     void SetSwiperItem(WeakPtr<ListItemPattern> swiperItem);
+
 private:
     void OnScrollEndCallback() override;
 
@@ -190,7 +198,9 @@ private:
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
-    bool HandleDirectionKey(KeyCode code);
+    bool HandleDirectionKey(const KeyEvent& event);
+    WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
+    WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex);
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
@@ -230,7 +240,6 @@ private:
 
     std::optional<int32_t> jumpIndex_;
     ScrollIndexAlignment scrollIndexAlignment_ = ScrollIndexAlignment::ALIGN_TOP;
-    int32_t scrollIndex_ = 0;
     bool scrollable_ = true;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;

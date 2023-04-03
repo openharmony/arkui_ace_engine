@@ -58,4 +58,9 @@ bool ListPattern::IsAtTop() const
 void ListPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) {}
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
+
+WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

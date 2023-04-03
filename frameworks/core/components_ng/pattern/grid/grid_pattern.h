@@ -156,6 +156,7 @@ private:
     WeakPtr<FocusHub> SearchFocusableChildInCross(int32_t mainIndex, int32_t crossIndex, int32_t maxCrossCount);
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarCrossIndex);
     void ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode);
+    void FlushFocusOnScroll(const GridLayoutInfo& gridLayoutInfo);
     std::pair<FocusStep, FocusStep> GetFocusSteps(
         int32_t curCrossIndex, int32_t curMaxCrossCount, FocusStep step) const;
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
