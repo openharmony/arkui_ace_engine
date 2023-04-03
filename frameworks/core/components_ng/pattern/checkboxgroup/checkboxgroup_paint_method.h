@@ -24,7 +24,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
-constexpr float CHECKBOXGROUP_MARK_STROKEWIDTH_RATIO = 0.2f;
+constexpr float CHECKBOXGROUP_MARK_STROKEWIDTH_LIMIT_RATIO = 0.25f;
 
 class CheckBoxGroupPaintMethod : public NodePaintMethod {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintMethod, NodePaintMethod)
@@ -65,12 +65,16 @@ public:
             if (paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx() >= 0) {
                 strokePaintSize = paintProperty->GetCheckBoxGroupCheckMarkSizeValue().ConvertToPx();
             }
+            if (strokePaintSize > size.Width()) {
+                strokePaintSize = size.Width();
+            }
         }
         checkboxGroupModifier_->SetCheckMarkPaintSize(strokePaintSize);
         if (paintProperty->GetCheckBoxGroupCheckMarkWidth().has_value()) {
             auto strokeWidth = paintProperty->GetCheckBoxGroupCheckMarkWidthValue().ConvertToPx();
-            if (strokeWidth > strokePaintSize * CHECKBOXGROUP_MARK_STROKEWIDTH_RATIO) {
-                strokeWidth = strokePaintSize * CHECKBOXGROUP_MARK_STROKEWIDTH_RATIO;
+            auto strokeLimitByMarkSize = strokePaintSize * CHECKBOXGROUP_MARK_STROKEWIDTH_LIMIT_RATIO;
+            if (strokeWidth > strokeLimitByMarkSize) {
+                strokeWidth = strokeLimitByMarkSize;
             }
             checkboxGroupModifier_->SetCheckStroke(strokeWidth);
         }
