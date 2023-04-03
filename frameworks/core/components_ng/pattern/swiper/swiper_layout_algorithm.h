@@ -100,6 +100,7 @@ private:
     void LoadItemWithDrag(float translateLength);
     void InitInActiveItems(float translateLength);
     int32_t ClampIndex(int32_t index);
+    void LayoutOffScreen(LayoutWrapper* layoutWrapper, Axis axis) const;
     void LoopMeasure(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis,
         float& crossSize, float& mainSize);
     void LoopLayout(LayoutWrapper* layoutWrapper);
