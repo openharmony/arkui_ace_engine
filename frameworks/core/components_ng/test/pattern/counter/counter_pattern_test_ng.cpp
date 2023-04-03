@@ -38,6 +38,7 @@ constexpr Dimension WIDTH = 10.0_vp;
 constexpr Dimension HEIGHT = 10.0_vp;
 const std::string FRAME_ITEM_ETS_TAG = "FrameItem";
 const Color COLOR = Color::BLUE;
+constexpr double DEFAULT_BUTTON_OPACITY = 1.0;
 } // namespace
 
 class CounterPatternTestNg : public testing::Test {
@@ -194,5 +195,71 @@ HWTEST_F(CounterPatternTestNg, CounterPatternTest006, TestSize.Level1)
     EXPECT_EQ(contentChildNode->children_.size(), 1);
     counterNode->DeleteChildFromGroup();
     EXPECT_EQ(contentChildNode->children_.size(), 0);
+}
+
+/**
+ * @tc.name: CounterPatternTest007
+ * @tc.desc: Test counter SetEnableInc function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterPatternTestNg, CounterPatternTest007, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+
+    CounterModelNG counterModelNG;
+    counterModelNG.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    auto addNodeRenderContext = addNode->GetRenderContext();
+    ASSERT_NE(addNodeRenderContext, nullptr);
+    auto eventHub = addNode->GetEventHub<EventHub>();
+    counterModelNG.SetEnableInc(true);
+    EXPECT_EQ(eventHub->IsEnabled(), true);
+    auto opacity = addNodeRenderContext->GetOpacityValue(-1);
+    EXPECT_EQ(opacity, DEFAULT_BUTTON_OPACITY);
+
+    counterModelNG.SetEnableInc(false);
+    EXPECT_EQ(eventHub->IsEnabled(), false);
+    opacity = addNodeRenderContext->GetOpacityValue(-1);
+    EXPECT_EQ(opacity, BUTTON_ALPHA_DISABLED);
+}
+
+/**
+ * @tc.name: CounterPatternTest008
+ * @tc.desc: Test counter SetEnableDec function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterPatternTestNg, CounterPatternTest008, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineBase::GetCurrent()->SetThemeManager(themeManager);
+    auto counterTheme = AceType::MakeRefPtr<CounterTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(counterTheme));
+
+    CounterModelNG counterModelNG;
+    counterModelNG.Create();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = stack->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    auto subNodeRenderContext = subNode->GetRenderContext();
+    ASSERT_NE(subNodeRenderContext, nullptr);
+    auto eventHub = subNode->GetEventHub<EventHub>();
+    counterModelNG.SetEnableDec(true);
+    EXPECT_EQ(eventHub->IsEnabled(), true);
+    auto opacity = subNodeRenderContext->GetOpacityValue(-1);
+    EXPECT_EQ(opacity, DEFAULT_BUTTON_OPACITY);
+
+    counterModelNG.SetEnableDec(false);
+    EXPECT_EQ(eventHub->IsEnabled(), false);
+    opacity = subNodeRenderContext->GetOpacityValue(-1);
+    EXPECT_EQ(opacity, BUTTON_ALPHA_DISABLED);
 }
 } // namespace OHOS::Ace::NG
