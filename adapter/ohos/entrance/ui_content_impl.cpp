@@ -1444,7 +1444,13 @@ void UIContentImpl::DumpInfo(const std::vector<std::string>& params, std::vector
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->DumpInfo(params, info);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [&]() {
+            pipelineContext->DumpInfo(params, info);
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog)
