@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_paint_method.h"
+#include "core/components_ng/pattern/time_picker/timepicker_row_accessibility_property.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -64,6 +65,11 @@ public:
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
         return MakeRefPtr<TimePickerLayoutProperty>();
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<TimePickerRowAccessibilityProperty>();
     }
 
     void OnColumnsBuilding();

@@ -49,6 +49,13 @@ constexpr int32_t START_YEAR = 1980;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 constexpr int32_t CURRENT_DAY = 5;
+
+const int YEARINDEX = 1;
+const int SHOWCOUNT = 5;
+const int MIDDLE_OF_COUNTS = 2;
+const vector<int> DEFAULT_DATE = { 1999, 9, 9 };
+const std::string CONNECTER = "-";
+const std::vector<int> DEFAULT_VALUE = { 1970, 1971, 1972 };
 } // namespace
 
 class DatePickerTestNg : public testing::Test {
@@ -807,5 +814,197 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest004, TestSize.Level1)
     auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->FireChangeEvent(true);
+}
+
+/**
+ * @tc.name: DatePickerAccessibilityPropertyTestNg001
+ * @tc.desc: Test the ItemCounts property of DatePickerColumnPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto options = columnPattern->GetOptions();
+    options[columnNode].clear();
+    for (auto& Value : DEFAULT_VALUE) {
+        options[columnNode].emplace_back(std::to_string(Value));
+    }
+    columnPattern->SetOptions(options);
+
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetCollectionItemCounts(), static_cast<int32_t>(DEFAULT_VALUE.size()));
+}
+
+/**
+ * @tc.name: DatePickerAccessibilityPropertyTestNg002
+ * @tc.desc: Test the IsScrollable property of DatePickerColumnPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg002, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+
+    auto columnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto options = columnPattern->GetOptions();
+    options[columnNode].clear();
+    for (auto& Value : DEFAULT_VALUE) {
+        options[columnNode].emplace_back(std::to_string(Value));
+    }
+    columnPattern->SetOptions(options);
+
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_TRUE(accessibilityProperty->IsScrollable());
+}
+
+/**
+ * @tc.name: DatePickerAccessibilityPropertyTestNg003
+ * @tc.desc: Test the Index properties of DatePickerColumnPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg003, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(columnNode, nullptr);
+
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->SetCurrentIndex(YEARINDEX);
+
+    auto accessibilityProperty = columnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetCurrentIndex(), YEARINDEX);
+
+    columnPattern->SetShowCount(SHOWCOUNT);
+    EXPECT_EQ(accessibilityProperty->GetBeginIndex(), YEARINDEX - SHOWCOUNT / MIDDLE_OF_COUNTS);
+    EXPECT_EQ(accessibilityProperty->GetEndIndex(), YEARINDEX + SHOWCOUNT / MIDDLE_OF_COUNTS);
+}
+
+/**
+ * @tc.name: DatePickerAccessibilityPropertyTestNg004
+ * @tc.desc: Test the Text property of DatePickerColumnPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg004, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto yearColumnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(yearColumnNode, nullptr);
+
+    auto pickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto columnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->SetCurrentIndex(YEARINDEX);
+
+    auto options = columnPattern->GetOptions();
+    options[yearColumnNode].clear();
+    for (auto& Value : DEFAULT_VALUE) {
+        options[yearColumnNode].emplace_back(std::to_string(Value));
+    }
+    columnPattern->SetOptions(options);
+
+    auto accessibilityProperty = yearColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(DEFAULT_VALUE.at(YEARINDEX)));
+}
+
+/**
+ * @tc.name: DatePickerAccessibilityPropertyTestNg005
+ * @tc.desc: Test the SupportAction property of DatePickerPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg005, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto yearColumnNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(yearColumnNode, nullptr);
+
+    auto pickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto columnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->SetCurrentIndex(YEARINDEX);
+
+    auto options = columnPattern->GetOptions();
+    options[yearColumnNode].clear();
+    for (auto& Value : DEFAULT_VALUE) {
+        options[yearColumnNode].emplace_back(std::to_string(Value));
+    }
+    columnPattern->SetOptions(options);
+
+    auto accessibilityProperty = yearColumnNode->GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = accessibilityProperty->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
+}
+
+/**
+ * @tc.name: DatePickerAccessibilityPropertyTestNg006
+ * @tc.desc: Test the Text property of DatePickerPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAccessibilityPropertyTestNg006, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(pickerFrameNode, nullptr);
+
+    auto datePickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    datePickerPattern->SetShowLunar(false);
+
+    PickerDate pickerDate = datePickerPattern->startDateSolar_;
+    auto accessibilityProperty = pickerFrameNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetMonth()) + CONNECTER +
+                                                    std::to_string(pickerDate.GetDay()));
+
+    datePickerPattern->SetShowLunar(true);
+    auto lunarDate = datePickerPattern->SolarToLunar(pickerDate);
+    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(lunarDate.year) + CONNECTER +
+                                                    std::to_string(lunarDate.month) + CONNECTER +
+                                                    std::to_string(lunarDate.day));
 }
 } // namespace OHOS::Ace::NG
