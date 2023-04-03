@@ -78,6 +78,7 @@ void TextFieldLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (textfieldLayoutProperty->GetWidthAutoValue(false)) {
         frameSize.SetWidth(contentWidth + pattern->GetHorizontalPaddingSum());
     }
+    frameSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     frameRect_ =
         RectF(layoutWrapper->GetGeometryNode()->GetFrameOffset(), layoutWrapper->GetGeometryNode()->GetFrameSize());
