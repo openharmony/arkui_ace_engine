@@ -41,11 +41,6 @@ void PluginWindow::SetVsyncCallback(AceVsyncCallback&& callback)
         LOGE("plugin set vsync callback fail due to null context");
         return;
     }
-    auto window = context->GetWindow();
-    if (!window) {
-        LOGE("plugin set vsync callback fail due to null window");
-        return;
-    }
-    window->SetVsyncCallback(std::move(callback));
+    context->SetSubWindowVsyncCallback(std::move(callback), pluginWindowId_);
 }
 } // namespace OHOS::Ace
