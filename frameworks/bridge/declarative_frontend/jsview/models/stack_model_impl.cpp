@@ -21,6 +21,17 @@
 
 namespace OHOS::Ace::Framework {
 
+void StackModelImpl::Create()
+{
+    Alignment alignment = Alignment::CENTER;
+    std::list<RefPtr<Component>> children;
+    RefPtr<StackComponent> component =
+        AceType::MakeRefPtr<StackComponent>(alignment, StackFit::KEEP, Overflow::OBSERVABLE, children);
+    ViewStackProcessor::GetInstance()->ClaimElementId(component);
+    ViewStackProcessor::GetInstance()->Push(component);
+    JSInteractableView::SetFocusNode(true);
+}
+
 void StackModelImpl::Create(Alignment alignment)
 {
     std::list<RefPtr<Component>> children;
@@ -48,6 +59,14 @@ void StackModelImpl::SetOverflow(Overflow overflow)
 }
 
 void StackModelImpl::SetAlignment(Alignment alignment)
+{
+    auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (stack) {
+        stack->SetAlignment(alignment);
+    }
+}
+
+void StackModelImpl::SetAlignmentContent(Alignment alignment)
 {
     auto stack = AceType::DynamicCast<StackComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     if (stack) {
