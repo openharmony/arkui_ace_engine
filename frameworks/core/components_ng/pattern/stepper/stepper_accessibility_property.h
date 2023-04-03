@@ -38,6 +38,9 @@ public:
 
     int32_t GetCollectionItemCounts() const override;
 
+protected:
+    void SetSpecificSupportAction() override;
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(StepperAccessibilityProperty);
 };

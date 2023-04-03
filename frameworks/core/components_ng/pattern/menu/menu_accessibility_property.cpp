@@ -27,8 +27,29 @@ bool MenuAccessibilityProperty::IsScrollable() const
     if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
         auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
         CHECK_NULL_RETURN(scrollPattern, false);
-        return scrollPattern->IsScrollable();
+        if (scrollPattern->IsScrollable() && !NearZero(scrollPattern->GetScrollableDistance())) {
+            return true;
+        }
     }
     return false;
+}
+
+void MenuAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto firstChild = DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
+    if (firstChild && firstChild->GetTag() == V2::SCROLL_ETS_TAG) {
+        auto scrollPattern = firstChild->GetPattern<ScrollPattern>();
+        CHECK_NULL_VOID(scrollPattern);
+        if (scrollPattern->IsScrollable() && !NearZero(scrollPattern->GetScrollableDistance())) {
+            if (!scrollPattern->IsAtTop()) {
+                AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+            }
+            if (!scrollPattern->IsAtBottom()) {
+                AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            }
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
