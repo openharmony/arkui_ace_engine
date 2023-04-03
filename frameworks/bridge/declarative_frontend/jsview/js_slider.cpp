@@ -70,7 +70,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
 double GetStep(double step, double max, double min)
 {
     if (LessOrEqual(step, 0.0) || step > max - min) {
-        step = max - min;
+        step = 1;
     }
     return step;
 }
@@ -178,9 +178,6 @@ void JSSlider::SetThickness(const JSCallbackInfo& info)
     }
     Dimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
-        return;
-    }
-    if (LessNotEqual(value.Value(), 0.0)) {
         return;
     }
     SliderModel::GetInstance()->SetThickness(value);

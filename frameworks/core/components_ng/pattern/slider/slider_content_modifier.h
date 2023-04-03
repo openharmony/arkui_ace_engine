@@ -59,8 +59,6 @@ public:
     void DrawDefaultBlock(DrawingContext& context);
     void DrawHoverOrPress(DrawingContext& context);
     void DrawShadow(DrawingContext& context);
-    void GetMarkerPen(float sliderLength, float borderBlank, const OffsetF& offset, const SizeF& contentSize,
-        const RefPtr<SliderTheme>& theme, const Axis& direction, bool isShowSteps);
 
     void UpdateThemeColor()
     {
@@ -69,6 +67,8 @@ public:
         auto sliderTheme = pipeline->GetTheme<SliderTheme>();
         CHECK_NULL_VOID(sliderTheme);
         blockOuterEdgeColor_ = sliderTheme->GetBlockOuterEdgeColor();
+        stepSize_ = static_cast<float>(sliderTheme->GetMarkerSize().ConvertToPx());
+        stepColor_ = sliderTheme->GetMarkerColor();
     }
 
     void UpdateData(const Parameters& parameters);
@@ -141,6 +141,19 @@ public:
     {
         needAnimate_ = true;
     }
+
+    void SetShowSteps(bool showSteps)
+    {
+        if (isShowStep_) {
+            isShowStep_->Set(showSteps);
+        }
+    }
+
+    void SetDirection(Axis axis)
+    {
+        directionAxis_ = axis;
+    }
+
 private:
     // animatable property
     RefPtr<AnimatablePropertyOffsetF> selectStart_;
@@ -156,20 +169,17 @@ private:
     // non-animatable property
     RefPtr<PropertyFloat> blockDiameter_;
     RefPtr<PropertyFloat> stepRatio_;
-
+    RefPtr<PropertyBool> isShowStep_;
     // others
-    struct MarkerPenAndPath {
-        RSPen pen;
-        RSPath path;
-    } markerPenAndPath;
-
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
     bool reverse_ = false;
-    bool isShowStep_ = false;
-    bool needAnimate_ = true;
+    Axis directionAxis_ = Axis::HORIZONTAL;
+    bool needAnimate_ = false; // Translate Animation on-off
     float hotCircleShadowWidth_ = 0.0f;
     Color blockOuterEdgeColor_;
+    float stepSize_ = 0.0f;
+    Color stepColor_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderContentModifier);
 };
 

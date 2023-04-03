@@ -35,7 +35,8 @@ namespace {
 constexpr float HALF = 0.5;
 constexpr Dimension ARROW_WIDTH = 32.0_vp;
 constexpr Dimension ARROW_HEIGHT = 8.0_vp;
-constexpr float MAX_STEPS = 100.0f;
+constexpr float SLIDER_MIN = .0f;
+constexpr float SLIDER_MAX = 100.0f;
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -58,7 +59,7 @@ void SliderPattern::OnModifyDone()
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
     float step = sliderPaintProperty->GetStep().value_or(1.0f);
-    CancelExceptionValue(min, max);
+    CancelExceptionValue(min, max, step);
     valueRatio_ = (value_ - min) / (max - min);
     stepRatio_ = step / (max - min);
     InitTouchEvent(gestureHub);
@@ -70,16 +71,23 @@ void SliderPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
 }
 
-void SliderPattern::CancelExceptionValue(float& min, float& max)
+void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
 {
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    if (NearEqual(min, max)) {
-        max = min + MAX_STEPS;
+    if (GreatOrEqual(min, max)) {
+        min = SLIDER_MIN;
+        max = SLIDER_MAX;
+        sliderPaintProperty->UpdateMin(min);
         sliderPaintProperty->UpdateMax(max);
+    }
+    if (LessOrEqual(step, 0.0) || step > max - min) {
+        step = 1;
+        sliderPaintProperty->UpdateStep(step);
     }
     if (value_ < min || value_ > max) {
         value_ = std::clamp(value_, min, max);
+        sliderPaintProperty->UpdateValue(value_);
         FireChangeEvent(SliderChangeMode::End);
     }
 }
@@ -119,6 +127,7 @@ bool SliderPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
     hotBlockShadowWidth_ = static_cast<float>(hotBlockShadowWidth.ConvertToPx());
     borderBlank_ = std::max(trackThickness_, blockDiameter_ + hotBlockShadowWidth_ / HALF);
+    // slider track length
     sliderLength_ = length >= borderBlank_ ? length - borderBlank_ : 1;
     borderBlank_ = (length - sliderLength_) * HALF;
 
@@ -150,14 +159,16 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
             bubbleFlag_ = true;
             InitializeBubble();
         }
-        FireChangeEvent(SliderChangeMode::Begin);
         mousePressedFlag_ = true;
+        FireChangeEvent(SliderChangeMode::Begin);
+        OpenTranslateAnimation();
     } else if (touchType == TouchType::UP) {
         hotFlag_ = false;
         if (bubbleFlag_) {
             bubbleFlag_ = false;
         }
         mousePressedFlag_ = false;
+        CloseTranslateAnimation();
     }
     UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -179,6 +190,7 @@ void SliderPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 void SliderPattern::HandleClickEvent()
 {
     FireChangeEvent(SliderChangeMode::Click);
+    FireChangeEvent(SliderChangeMode::End);
 }
 
 void SliderPattern::InitializeBubble()
@@ -340,6 +352,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID_NOLOG(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Moving);
+        pattern->CloseTranslateAnimation();
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& /*info*/) {
         auto pattern = weak.Upgrade();
@@ -360,7 +373,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
 
     PanDirection panDirection;
-    panDirection.type = direction_ == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
+    panDirection.type = PanDirection::ALL;
     float distance = static_cast<float>(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP).ConvertToPx());
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distance);
 }
@@ -551,6 +564,10 @@ void SliderPattern::FireChangeEvent(int32_t mode)
 {
     auto sliderEventHub = GetEventHub<SliderEventHub>();
     CHECK_NULL_VOID(sliderEventHub);
+    if ((mode == SliderChangeMode::Click || mode == SliderChangeMode::Moving) &&
+        NearEqual(value_, sliderEventHub->GetValue())) {
+        return;
+    }
     sliderEventHub->FireChangeEvent(static_cast<float>(value_), mode);
     valueChangeFlag_ = false;
 }
@@ -704,5 +721,17 @@ void SliderPattern::GetCirclePosition(
                 PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderLength_ - sliderSelectLength);
     }
     parameters.circleCenter = center;
+}
+
+void SliderPattern::OpenTranslateAnimation()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetAnimated();
+}
+
+void SliderPattern::CloseTranslateAnimation()
+{
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetNotAnimated();
 }
 } // namespace OHOS::Ace::NG
