@@ -770,6 +770,7 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
     auto selectedTime = paramObj->GetProperty("selected");
     auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
     bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    PickerDate dialogTitleDate = PickerDate::Current();
 
     auto theme = JSAlertDialog::GetTheme<DialogTheme>();
     if (!theme) {
@@ -789,19 +790,42 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
 
     std::map<std::string, PickerTime> timePickerProperty;
     if (selectedTime->IsObject()) {
+        dialogTitleDate = ParseDate(selectedTime);
         timePickerProperty["selected"] = ParseTime(selectedTime);
     }
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
     executor->PostTask(
-        [properties, timePickerProperty, isUseMilitaryTime, dialogEvent, dialogCancelEvent,
+        [properties, timePickerProperty, isUseMilitaryTime, dialogTitleDate, dialogEvent, dialogCancelEvent,
             weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTimeDialog(
-                properties, timePickerProperty, isUseMilitaryTime, dialogEvent, dialogCancelEvent);
+                properties, timePickerProperty, isUseMilitaryTime, dialogTitleDate, dialogEvent, dialogCancelEvent);
         },
         TaskExecutor::TaskType::UI);
+}
+
+PickerDate JSTimePickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
+{
+    auto pickerDate = PickerDate();
+    if (!dateVal->IsObject()) {
+        return pickerDate;
+    }
+    auto dateObj = JSRef<JSObject>::Cast(dateVal);
+    auto yearFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getFullYear"));
+    auto monthFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getMonth"));
+    auto dateFunc = JSRef<JSFunc>::Cast(dateObj->GetProperty("getDate"));
+    JSRef<JSVal> year = yearFunc->Call(dateObj);
+    JSRef<JSVal> month = monthFunc->Call(dateObj);
+    JSRef<JSVal> date = dateFunc->Call(dateObj);
+
+    if (year->IsNumber() && month->IsNumber() && date->IsNumber()) {
+        pickerDate.SetYear(year->ToNumber<int32_t>());
+        pickerDate.SetMonth(month->ToNumber<int32_t>() + 1); // 0-11 means 1 to 12 months
+        pickerDate.SetDay(date->ToNumber<int32_t>());
+    }
+    return pickerDate;
 }
 
 void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj)

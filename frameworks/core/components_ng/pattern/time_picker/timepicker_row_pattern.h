@@ -172,6 +172,16 @@ public:
         return selectedTime_;
     }
 
+    void SetDialogTitleDate(const PickerDate& value)
+    {
+        dialogTitleDate_ = value;
+    }
+
+    const PickerDate& GetDialogTitleDate()
+    {
+        return dialogTitleDate_;
+    }
+
     bool HasAmPmNode() const
     {
         return amPmId_.has_value();
@@ -289,6 +299,7 @@ private:
     // true, use 24 hours style; false, use 12 hours style.
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
     PickerTime selectedTime_ = PickerTime::Current();
+    PickerDate dialogTitleDate_ = PickerDate::Current();
     std::optional<int32_t> amPmId_;
     std::optional<int32_t> hourId_;
     std::optional<int32_t> minuteId_;
