@@ -90,9 +90,9 @@ public:
     static void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle);
-    static void SetSphericalEffect(float radio);
+    static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption& option);
-    static void SetLightUpEffect(float radio);
+    static void SetLightUpEffect(double radio);
     static void SetPadding(const CalcLength& value);
     static void SetPadding(const PaddingProperty& value);
     static void SetMargin(const CalcLength& value);
