@@ -69,7 +69,8 @@ public:
     shared_ptr<JsValue> EvaluateJsCode(const std::string& src) override;
     bool EvaluateJsCode(
         const uint8_t* buffer, int32_t size, const std::string& filePath = "", bool needUpdate = false) override;
-    bool ExecuteJsBin(const std::string& fileName) override;
+    bool ExecuteJsBin(const std::string& fileName,
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     shared_ptr<JsValue> GetGlobal() override;
     void RunGC() override;
     void RunFullGC() override;
@@ -87,7 +88,8 @@ public:
     shared_ptr<JsValue> NewNativePointer(void* ptr) override;
     void ThrowError(const std::string& msg, int32_t code) override;
     void RegisterUncaughtExceptionHandler(UncaughtExceptionCallback callback) override;
-    void HandleUncaughtException() override;
+    void HandleUncaughtException(
+        const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;

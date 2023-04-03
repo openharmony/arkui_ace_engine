@@ -195,6 +195,10 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
 
 void JSLazyForEach::Pop()
 {
+    auto* stack = NG::ViewStackProcessor::GetInstance();
+    if (stack->GetMainFrameNode() && stack->GetMainFrameNode()->GetTag() == V2::TABS_ETS_TAG) {
+        return;
+    }
     ViewStackModel::GetInstance()->PopContainer();
 }
 
