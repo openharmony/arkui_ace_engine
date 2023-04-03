@@ -68,6 +68,7 @@ void SwiperPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->SetClipToBounds(true);
 }
 
 void SwiperPattern::OnIndexChange() const
@@ -259,9 +260,10 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     oldIndex_ = currentIndex_;
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& paddingProperty = layoutProperty->GetPaddingProperty();
     layoutProperty->UpdateIndexWithoutMeasure(currentIndex_);
     maxChildSize_ = swiperLayoutAlgorithm->GetMaxChildSize();
-    return GetEdgeEffect() == EdgeEffect::FADE;
+    return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
 }
 
 void SwiperPattern::CalculateCacheRange()
