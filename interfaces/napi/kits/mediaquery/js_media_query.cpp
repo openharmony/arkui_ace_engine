@@ -110,7 +110,6 @@ public:
                 listener->MediaQueryResult::NapiSerializer(listener->env_, resultArg);
 
                 napi_value result = nullptr;
-                LOGI("NAPI MediaQueryCallback call js");
                 napi_call_function(listener->env_, thisVal, cb, 1, &resultArg, &result);
                 napi_close_handle_scope(listener->env_, scope);
             }

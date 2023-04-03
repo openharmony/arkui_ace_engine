@@ -72,6 +72,9 @@ public:
     void GetExtraInfoFromClipboard(std::string& extraInfo);
     void RestoreClipboardData();
     void DestroyDragWindow();
+#ifdef ENABLE_DRAG_FRAMEWORK
+    RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
+#endif // ENABLE_DRAG_FRAMEWORK
 
     bool CheckDragDropProxy(int64_t id) const;
 
@@ -80,8 +83,6 @@ public:
         return isDragged_;
     }
 
-    RefPtr<FrameNode> FindDragChildNodeByPosition(const RefPtr<UINode> parentNode,
-        float localX, float localY, const std::set<WeakPtr<FrameNode>>& frameNodes);
 private:
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType);
     std::map<int32_t, RefPtr<FrameNode>> FindDragFrameNodeMapByPosition(

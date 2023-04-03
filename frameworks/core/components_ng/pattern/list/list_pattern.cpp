@@ -70,6 +70,7 @@ void ListPattern::OnModifyDone()
     auto defaultDisplayMode = DisplayMode::OFF;
     const static int32_t PLATFORM_VERSION_TEN = 10;
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         defaultDisplayMode = DisplayMode::AUTO;
     }

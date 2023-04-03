@@ -33,7 +33,7 @@ namespace OHOS::Ace::NG {
 RefPtr<LayoutWrapper> LayoutWrapper::GetOrCreateChildByIndex(int32_t index, bool addToRenderTree)
 {
     if ((index >= currentChildCount_) || (index < 0)) {
-        LOGI("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
+        LOGD("index is of out boundary, total count: %{public}d, target index: %{public}d", currentChildCount_, index);
         return nullptr;
     }
     auto iter = childrenMap_.find(index);

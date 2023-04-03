@@ -142,7 +142,7 @@ void DotIndicatorModifier::PaintUnselectedIndicator(
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(unselectedColor_));
+    brush.SetColor(ToRSColor(unselectedColor_->Get()));
     canvas.AttachBrush(brush);
     if (!NearEqual(itemHalfSizes[ITEM_HALF_WIDTH], itemHalfSizes[SELECTED_ITEM_HALF_WIDTH]) ||
         !NearEqual(itemHalfSizes[ITEM_HALF_HEIGHT], itemHalfSizes[SELECTED_ITEM_HALF_HEIGHT])) {
@@ -172,7 +172,7 @@ void DotIndicatorModifier::PaintSelectedIndicator(
 {
     RSBrush brush;
     brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(selectedColor_));
+    brush.SetColor(ToRSColor(selectedColor_->Get()));
     canvas.AttachBrush(brush);
     float rectLeft = (axis_ == Axis::HORIZONTAL ? leftCenter.GetX() :
         leftCenter.GetY()) - itemHalfSizes[SELECTED_ITEM_HALF_WIDTH] * 0.5f;

@@ -173,6 +173,7 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
+    InitClickEvent();
 }
 
 void SearchPattern::InitButtonAndImageClickEvent()
@@ -756,6 +757,36 @@ void SearchPattern::HandleBlurEvent()
     textFieldPattern->HandleBlurEvent();
 }
 
+void SearchPattern::InitClickEvent()
+{
+    if (clickListener_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gesture = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleClickEvent(info);
+    };
+    clickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    gesture->AddClickEvent(clickListener_);
+}
+
+void SearchPattern::HandleClickEvent(GestureEvent& info)
+{
+    LOGI("Search %{public}d on click", GetHost()->GetId());
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->HandleClickEvent(info);
+}
+
 bool SearchPattern::HandleInputChildOnFocus() const
 {
 #if !defined(PREVIEW)
@@ -874,7 +905,7 @@ void SearchPattern::ToJsonValueForCancelButton(std::unique_ptr<JsonValue>& json)
     json->Put("cancelButton", cancelButtonJson);
 }
 
-void SearchPattern::ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json) const
+void SearchPattern::ToJsonValueForSearchButtonOption(std::unique_ptr<JsonValue>& json) const
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -891,7 +922,7 @@ void SearchPattern::ToJsonValueForSearchButton(std::unique_ptr<JsonValue>& json)
     // font color
     auto searchButtonFontColor = searchButtonLayoutProperty->GetFontColor().value_or(Color());
     searchButtonJson->Put("fontColor", searchButtonFontColor.ColorToString().c_str());
-    json->Put("searchButton", searchButtonJson);
+    json->Put("searchButtonOption", searchButtonJson);
 }
 
 void SearchPattern::ToJsonValueForCursor(std::unique_ptr<JsonValue>& json) const
@@ -920,7 +951,7 @@ void SearchPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ToJsonValueForSearchIcon(json);
     ToJsonValueForCancelButton(json);
     ToJsonValueForCursor(json);
-    ToJsonValueForSearchButton(json);
+    ToJsonValueForSearchButtonOption(json);
 }
 
 } // namespace OHOS::Ace::NG

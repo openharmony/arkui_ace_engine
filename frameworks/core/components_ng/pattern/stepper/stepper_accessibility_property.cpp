@@ -23,11 +23,16 @@
 namespace OHOS::Ace::NG {
 int32_t StepperAccessibilityProperty::GetCurrentIndex() const
 {
-    auto frameNode = host_.Upgrade();
+    auto frameNode = DynamicCast<StepperNode>(host_.Upgrade());
     CHECK_NULL_RETURN(frameNode, -1);
     auto stepperPattern = frameNode->GetPattern<StepperPattern>();
     CHECK_NULL_RETURN(stepperPattern, -1);
-    return stepperPattern->GetCurrentIndex();
+    auto swiperNode =
+        DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(frameNode->GetSwiperId())));
+    CHECK_NULL_RETURN(swiperNode, -1);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(swiperPattern, -1);
+    return swiperPattern->TotalCount() < 1 ? -1 : stepperPattern->GetCurrentIndex();
 }
 
 int32_t StepperAccessibilityProperty::GetBeginIndex() const
@@ -39,11 +44,7 @@ int32_t StepperAccessibilityProperty::GetBeginIndex() const
     CHECK_NULL_RETURN(swiperNode, -1);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, -1);
-    int32_t totalCount = swiperPattern->TotalCount();
-    if (totalCount > 0) {
-        return 0;
-    }
-    return -1;
+    return swiperPattern->TotalCount() < 1 ? -1 : 0;
 }
 
 int32_t StepperAccessibilityProperty::GetEndIndex() const
@@ -55,7 +56,7 @@ int32_t StepperAccessibilityProperty::GetEndIndex() const
     CHECK_NULL_RETURN(swiperNode, -1);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, -1);
-    return swiperPattern->TotalCount() - 1;
+    return swiperPattern->TotalCount() < 1 ? -1 : swiperPattern->TotalCount() - 1;
 }
 
 bool StepperAccessibilityProperty::IsScrollable() const
@@ -67,7 +68,10 @@ bool StepperAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(swiperNode, false);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, false);
-    return swiperPattern->TotalCount() > 1;
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, false);
+    bool isLoop = swiperPaintProperty->GetLoop().value_or(true);
+    return (!isLoop && swiperPattern->TotalCount() <= 1) ? false : true;
 }
 
 int32_t StepperAccessibilityProperty::GetCollectionItemCounts() const
@@ -80,5 +84,30 @@ int32_t StepperAccessibilityProperty::GetCollectionItemCounts() const
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, -1);
     return swiperPattern->TotalCount();
+}
+
+void StepperAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto frameNode = DynamicCast<StepperNode>(host_.Upgrade());
+    CHECK_NULL_VOID(frameNode);
+    auto swiperNode =
+        DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(frameNode->GetSwiperId())));
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_VOID(swiperPaintProperty);
+    bool isLoop = swiperPaintProperty->GetLoop().value_or(true);
+    if (IsScrollable()) {
+        if (!isLoop) {
+            if (GetCurrentIndex() > GetBeginIndex()) {
+                AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+            }
+            if (GetCurrentIndex() < GetEndIndex()) {
+                AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            }
+        } else {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -30,7 +30,6 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/render/render_context.h"
-#include "adapter/ohos/osal/pixel_map_ohos.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
@@ -142,8 +141,8 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         SetPixelMap(actuator, info.GetLocalLocation());
     };
     longPressRecognizer_->SetOnActionUpdate(longPressUpdate);
-    longPressRecognizer_->SetGestureHub(gestureEventHub_);
 #endif // ENABLE_DRAG_FRAMEWORK
+    longPressRecognizer_->SetGestureHub(gestureEventHub_);
     std::vector<RefPtr<NGGestureRecognizer>> recognizers { longPressRecognizer_, panRecognizer_ };
     if (!SequencedRecognizer_) {
         SequencedRecognizer_ = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
@@ -219,32 +218,25 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator, c
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pixelMapContext = DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
-    CHECK_NULL_VOID(pixelMapContext);
-    auto pixelMapRSNode = pixelMapContext->GetRSNode();
-    CHECK_NULL_VOID(pixelMapRSNode);
-    auto pixelMapGeometryNode = frameNode->GetGeometryNode();
-
-    RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<PixelMapOhos>(gestureHub->GetPixelMap());
+    RefPtr<PixelMap> pixelMap = gestureHub->GetPixelMap();
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+    auto offsetX = screenLocation.GetX() - width / 2;
+    auto offsetY = screenLocation.GetY() - height / 2;
     // craete ImageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-    auto size = pixelMapGeometryNode->GetFrameSize();
-    auto offsetX = screenLocation.GetX() - size.Width() / 2;
-    auto offsetY = screenLocation.GetY() - size.Height();
-    auto targetSize = CalcSize(NG::CalcLength(size.Width()), NG::CalcLength(size.Height()));
+    auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
     props->UpdateUserDefinedIdealSize(targetSize);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
     imageContext->UpdateOffset(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
-
     // create ColumnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     columnNode->AddChild(imageNode);
-
     // mount to rootNode
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);

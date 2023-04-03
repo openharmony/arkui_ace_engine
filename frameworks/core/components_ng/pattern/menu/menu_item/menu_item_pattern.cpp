@@ -209,7 +209,7 @@ void MenuItemPattern::ShowSubMenu()
 
         auto focusHub = subMenu->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->RequestFocusImmediately();
+        focusHub->RequestFocus();
     }
 }
 

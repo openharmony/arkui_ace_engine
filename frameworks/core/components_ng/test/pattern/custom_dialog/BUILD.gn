@@ -166,10 +166,5 @@ ohos_unittest("custom_dialog_test_ng") {
     "hiviewdfx_hilog_native:libhilog",
   ]
 
-  configs = [
-    "$ace_root:ace_config",
-    "$ace_root:ace_test_config",
-    "$ace_flutter_engine_root:flutter_config",
-    "$ace_flutter_engine_root/skia:skia_config",
-  ]
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }

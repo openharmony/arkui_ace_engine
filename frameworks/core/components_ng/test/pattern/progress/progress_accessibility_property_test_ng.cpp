@@ -126,11 +126,11 @@ HWTEST_F(ProgressAccessibilityPropertyTestNg, ProgressAccessibilityPropertyTestN
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
     RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
-    EXPECT_NE(progressPaintProperty, nullptr);
+    ASSERT_NE(progressPaintProperty, nullptr);
     progressPaintProperty->UpdateMaxValue(MAX_VALUE_OF_PROGRESS);
     progressPaintProperty->UpdateValue(VALUE_OF_PROGRESS);
     auto accessibility = frameNode->GetAccessibilityProperty<ProgressAccessibilityProperty>();
-    EXPECT_NE(accessibility, nullptr);
+    ASSERT_NE(accessibility, nullptr);
     EXPECT_TRUE(accessibility->HasRange());
     EXPECT_EQ(accessibility->GetAccessibilityValue().min, 0);
     EXPECT_EQ(accessibility->GetAccessibilityValue().max, MAX_VALUE_OF_PROGRESS);
@@ -149,10 +149,10 @@ HWTEST_F(ProgressAccessibilityPropertyTestNg, ProgressAccessibilityPropertyTestN
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
     RefPtr<FrameNode> frameNode = CreateProgressParagraph(testProperty);
     auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
-    EXPECT_NE(progressPaintProperty, nullptr);
+    ASSERT_NE(progressPaintProperty, nullptr);
     progressPaintProperty->UpdateValue(VALUE_OF_PROGRESS);
     auto accessibility = frameNode->GetAccessibilityProperty<ProgressAccessibilityProperty>();
-    EXPECT_NE(accessibility, nullptr);
+    ASSERT_NE(accessibility, nullptr);
     EXPECT_EQ(accessibility->GetText(), std::to_string(VALUE_OF_PROGRESS));
 }
 } // namespace OHOS::Ace::NG

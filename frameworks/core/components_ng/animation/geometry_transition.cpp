@@ -109,6 +109,7 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
     }
     if (hasInAnim_) {
         state_ = State::ACTIVE;
+        isInNodeLayoutModified_ = false;
         // set relative high priority for inNode
         inNode->SetLayoutPriority(1);
         inNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -152,6 +153,7 @@ void GeometryTransition::WillLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto hostNode = layoutWrapper->GetHostNode();
     if (IsNodeInAndActive(hostNode)) {
         ModifyLayoutConstraint(layoutWrapper, true);
+        isInNodeLayoutModified_ = true;
     } else if (IsNodeOutAndActive(hostNode)) {
         ModifyLayoutConstraint(layoutWrapper, false);
     }
@@ -166,9 +168,10 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& root, const Weak
     }
     auto node = frameNode.Upgrade();
     CHECK_NULL_VOID(node);
-    if (IsNodeInAndActive(frameNode)) {
+    if (IsNodeInAndActive(frameNode) && isInNodeLayoutModified_) {
         LOGD("GeometryTransition: node%{public}d: in and active", node->GetId());
         state_ = State::IDENTITY;
+        isInNodeLayoutModified_ = false;
         auto geometryNode = node->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         size_ = geometryNode->GetFrameSize();
@@ -180,9 +183,9 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& root, const Weak
         CHECK_NULL_VOID(root);
         // sync geometry of inNode is deferred until when root node's layout is done due to dependency
         root->RegisterFinishCallback([weak = WeakClaim(this)]() {
-            auto node = weak.Upgrade();
-            CHECK_NULL_VOID(node);
-            node->SyncGeometry(true);
+            auto geometryTransition = weak.Upgrade();
+            CHECK_NULL_VOID(geometryTransition);
+            geometryTransition->SyncGeometry(true);
         });
     } else if (IsNodeOutAndActive(frameNode)) {
         LOGD("GeometryTransition: node%{public}d: out and active", node->GetId());
@@ -198,11 +201,11 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     auto [self, target] = GetMatchedPair(isNodeIn);
     CHECK_NULL_VOID(self);
     CHECK_NULL_VOID(target);
-    auto targetGeometryNode = target->GetGeometryNode();
-    CHECK_NULL_VOID(targetGeometryNode);
     // target's geometry is ensured ready to use because layout nodes are sorted to respect dependency,
     // the order is active inNode, normal layout, active outNode.
-    auto size = targetGeometryNode->GetFrameSize();
+    auto targetRenderContext = target->GetRenderContext();
+    CHECK_NULL_VOID(targetRenderContext);
+    auto size = targetRenderContext->GetPaintRectWithTransform().GetSize();
     auto targetSize = CalcSize(NG::CalcLength(size.Width()), NG::CalcLength(size.Height()));
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);

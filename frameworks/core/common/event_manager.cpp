@@ -218,10 +218,18 @@ void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
     }
 }
 
-bool EventManager::DispatchTouchEvent(const TouchEvent& point)
+bool EventManager::DispatchTouchEvent(const TouchEvent& event)
 {
     ContainerScope scope(instanceId_);
-
+    TouchEvent point = event;
+#ifdef ENABLE_DRAG_FRAMEWORK
+    if (point.type == TouchType::PULL_MOVE) {
+        point.type = TouchType::MOVE;
+    }
+    if (point.type == TouchType::PULL_UP) {
+        point.type = TouchType::UP;
+    }
+#endif // ENABLE_DRAG_FRAMEWORK
     ACE_FUNCTION_TRACE();
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
@@ -329,7 +337,7 @@ bool EventManager::DispatchKeyEvent(const KeyEvent& event, const RefPtr<FocusNod
         LOGI("Default focus system handled this event");
         return true;
     }
-    LOGI("Use platform to handle this event");
+    LOGD("Use platform to handle this event");
     return false;
 }
 
@@ -362,7 +370,7 @@ bool EventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<NG::Fr
         LOGI("Default focus system handled this event");
         return true;
     }
-    LOGI("Use platform to handle this event");
+    LOGD("Use platform to handle this event");
     return false;
 }
 
@@ -1033,7 +1041,7 @@ void TriggerKeyboardShortcut(const KeyEvent& event, const std::vector<NG::Keyboa
 
 void EventManager::DispatchKeyboardShortcut(const KeyEvent& event)
 {
-    LOGI("EventManager: The key code is %{public}d, the key action is %{public}d.", event.code, event.action);
+    LOGD("EventManager: The key code is %{public}d, the key action is %{public}d.", event.code, event.action);
     if (event.action != KeyAction::DOWN) {
         return;
     }

@@ -151,24 +151,6 @@ common_sources = [
   "$ace_root/frameworks/core/components_ng/pattern/list/list_position_controller.cpp",
 ]
 
-ohos_unittest("list_pattern_test_ng") {
-  module_out_path = "$test_output_path/list"
-
-  test_sources = [ "list_pattern_test_ng.cpp" ]
-
-  sources = test_sources + common_sources
-
-  deps = [
-    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
-    "$ace_root/test/unittest:ace_unittest_log",
-    "$ace_root/test/unittest:ace_unittest_trace",
-    "$cjson_root:cjson_static",
-    "//third_party/googletest:gmock_main",
-  ]
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
-}
-
 ohos_unittest("list_test_ng") {
   module_out_path = "$test_output_path/list"
 

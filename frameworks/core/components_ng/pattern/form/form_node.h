@@ -40,6 +40,8 @@ public:
     void DispatchPointerEvent(const TouchEvent& point) const;
 
     void OnDetachFromMainTree() override;
+
+    OffsetF GetFormOffset() const;
 };
 
 } // namespace OHOS::Ace::NG

@@ -83,9 +83,14 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
+        auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, nullptr);
+        const auto& paddingProperty = layoutProperty->GetPaddingProperty();
+        bool needClipPadding = paddingProperty != nullptr;
         bool needPaintFade = !IsLoop() && GetEdgeEffect() == EdgeEffect::FADE && IsOutOfBoundary(currentOffset_);
         auto paintMethod = MakeRefPtr<SwiperPaintMethod>(GetDirection(), currentOffset_);
         paintMethod->SetNeedPaintFade(needPaintFade);
+        paintMethod->SetNeedClipPadding(needClipPadding);
         return paintMethod;
     }
 

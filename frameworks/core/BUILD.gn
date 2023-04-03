@@ -394,7 +394,12 @@ template("ace_core_source_set") {
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
       ]
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+
+      if (is_cross_platform_build) {
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+      } else {
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+      }
     }
 
     if (!use_mingw_win && !use_mac && !is_wearable_product &&
@@ -458,7 +463,7 @@ template("ace_core_source_set") {
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      if (defined(config.build_for_ios) && config.build_for_ios) {
+      if (is_cross_platform_build) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
         deps += [ "$ace_napi:ace_container_scope" ]
@@ -742,7 +747,7 @@ template("ace_core_ng_source_set") {
     if (defined(config.build_container_scope_lib) &&
         config.build_container_scope_lib) {
       sources -= [ "common/container_scope.cpp" ]
-      if (defined(config.build_for_ios) && config.build_for_ios) {
+      if (is_cross_platform_build) {
         deps += [ "$ace_napi:ace_container_scope_static" ]
       } else {
         deps += [ "$ace_napi:ace_container_scope" ]
@@ -784,7 +789,11 @@ template("ace_core_ng_source_set") {
         "animation/native_curve_helper.cpp",
         "common/rosen/rosen_convert_helper.cpp",
       ]
-      deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+      if (is_cross_platform_build) {
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client_static" ]
+      } else {
+        deps += [ "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client" ]
+      }
     }
     cflags_cc = []
     cflags_cc += invoker.cflags_cc

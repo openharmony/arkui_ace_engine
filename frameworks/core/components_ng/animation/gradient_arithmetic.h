@@ -33,26 +33,23 @@ public:
         size_t srcColorsLength = srcColors.size();
         size_t destColorsLength = destColors.size();
         if (srcColorsLength >= destColorsLength) {
-            for (size_t i = 0; i < destColorsLength; i++) {
-                LinearColor srcColor(srcColors[i].GetColor().GetValue());
-                LinearColor destColor(destColors[i].GetColor().GetValue());
+            size_t i;
+            for (i = 0; i < destColorsLength; i++) {
                 GradientColor gradientColor;
-                gradientColor.SetColor((srcColor + destColor).ToColor());
+                gradientColor.SetLinearColor(srcColors[i].GetLinearColor() + destColors[i].GetLinearColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
+            }
+
+            for (; i < srcColorsLength; i++) {
+                gradient.AddColor(srcColors[i]);
             }
         } else {
-            size_t i;
-            for (i = 0; i < srcColorsLength; i++) {
-                LinearColor srcColor(srcColors[i].GetColor().GetValue());
-                LinearColor destColor(destColors[i].GetColor().GetValue());
+            for (size_t i = 0; i < srcColorsLength; i++) {
                 GradientColor gradientColor;
-                gradientColor.SetColor((srcColor + destColor).ToColor());
+                gradientColor.SetLinearColor(srcColors[i].GetLinearColor() + destColors[i].GetLinearColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
-            }
-            for (; i < destColorsLength; i++) {
-                gradient.AddColor(destColors[i]);
             }
         }
         return GradientArithmetic(gradient);
@@ -66,29 +63,21 @@ public:
         size_t srcColorsLength = srcColors.size();
         size_t destColorsLength = destColors.size();
         if (srcColorsLength >= destColorsLength) {
-            for (size_t i = 0; i < destColorsLength; i++) {
-                LinearColor srcColor(srcColors[i].GetColor().GetValue());
-                LinearColor destColor(destColors[i].GetColor().GetValue());
+            size_t i;
+            for (i = 0; i < destColorsLength; i++) {
                 GradientColor gradientColor;
-                gradientColor.SetColor((srcColor - destColor).ToColor());
+                gradientColor.SetLinearColor(srcColors[i].GetLinearColor() - destColors[i].GetLinearColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
+            }
+            for (; i < srcColorsLength; i++) {
+                gradient.AddColor(srcColors[i]);
             }
         } else {
             size_t i;
             for (i = 0; i < srcColorsLength; i++) {
-                LinearColor srcColor(srcColors[i].GetColor().GetValue());
-                LinearColor destColor(destColors[i].GetColor().GetValue());
                 GradientColor gradientColor;
-                gradientColor.SetColor((srcColor - destColor).ToColor());
-                gradientColor.SetDimension(destColors[i].GetDimension());
-                gradient.AddColor(gradientColor);
-            }
-            for (; i < destColorsLength; i++) {
-                LinearColor srcColor(Color::TRANSPARENT);
-                LinearColor destColor(destColors[i].GetColor().GetValue());
-                GradientColor gradientColor;
-                gradientColor.SetColor((srcColor - destColor).ToColor());
+                gradientColor.SetLinearColor(srcColors[i].GetLinearColor() - destColors[i].GetLinearColor());
                 gradientColor.SetDimension(destColors[i].GetDimension());
                 gradient.AddColor(gradientColor);
             }
@@ -101,9 +90,8 @@ public:
         Gradient gradient;
         auto srcColors = gradientValue_.GetColors();
         for (size_t i = 0; i < srcColors.size(); i++) {
-            LinearColor srcColor(srcColors[i].GetColor().GetValue());
             GradientColor gradientColor;
-            gradientColor.SetColor((srcColor * scale).ToColor());
+            gradientColor.SetLinearColor(srcColors[i].GetLinearColor() * scale);
             gradientColor.SetDimension(srcColors[i].GetDimension());
             gradient.AddColor(gradientColor);
         }

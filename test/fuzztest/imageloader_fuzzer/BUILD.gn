@@ -80,9 +80,6 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/frameworks/core/common/test/mock/mock_watch_dog.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
 
-    #"theme_constants_test.cpp",
-    "$ace_root/frameworks/core/components/test/unittest/theme/theme_mock.cpp",
-
     # mock
     #"$ace_root/frameworks/base/test/mock/mock_system_properties.cpp",
 

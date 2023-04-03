@@ -97,6 +97,7 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
 
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
+    CHECK_NULL_VOID_NOLOG(view);
     LogPointInfo(pointerEvent);
     if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
         // mouse event
@@ -106,15 +107,18 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
             view->ProcessAxisEvent(pointerEvent);
         } else {
             LOGD("ProcessMouseEvent");
+#ifdef ENABLE_DRAG_FRAMEWORK
+            ProcessDragEvent(pointerEvent);
+#endif // ENABLE_DRAG_FRAMEWORK
             view->ProcessMouseEvent(pointerEvent);
         }
     } else {
         // touch event
         LOGD("ProcessTouchEvent");
-        view->ProcessTouchEvent(pointerEvent);
 #ifdef ENABLE_DRAG_FRAMEWORK
-        view->ProcessDragEvent(pointerEvent);
+        ProcessDragEvent(pointerEvent);
 #endif // ENABLE_DRAG_FRAMEWORK
+        view->ProcessTouchEvent(pointerEvent);
     }
 }
 
@@ -181,7 +185,7 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);
-        LOGI("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
+        LOGD("Mark %{public}d id Touch Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
     if (touchPoint.type != TouchType::UNKNOWN) {
@@ -243,7 +247,7 @@ void AceViewOhos::ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);
-        LOGI("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
+        LOGD("Mark %{public}d id Mouse Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
 
@@ -259,7 +263,7 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
     }
     auto markProcess = [pointerEvent]() {
         CHECK_NULL_VOID_NOLOG(pointerEvent);
-        LOGI("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
+        LOGD("Mark %{public}d id Axis Event Processed", pointerEvent->GetPointerId());
         pointerEvent->MarkProcessed();
     };
 

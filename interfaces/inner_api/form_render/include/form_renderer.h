@@ -48,15 +48,18 @@ public:
     bool IsAllowUpdate();
 
     void OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
     void OnSurfaceChange(float width, float height);
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
+    void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
 private:
     void InitUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void ParseWant(const OHOS::AAFwk::Want& want);
     void SetRenderDelegate(const sptr<IRemoteObject> &renderRemoteObj);
+    void AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
 
     bool allowUpdate_ = true;
     float width_ = 0.0f;

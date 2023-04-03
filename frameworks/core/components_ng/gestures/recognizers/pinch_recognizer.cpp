@@ -69,13 +69,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     lastTouchEvent_ = event;
 
-    if (static_cast<int32_t>(touchPoints_.size()) > fingers_) {
-        LOGW("the finger is larger than the defined fingers");
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
-
-    if (static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
         initialDev_ = ComputeAverageDeviation();
         pinchCenter_ = ComputePinchCenter();
         refereeState_ = RefereeState::DETECTING;

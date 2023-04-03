@@ -371,4 +371,16 @@ HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest007, TestSize.Level1)
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     EXPECT_EQ(layoutProperty->GetFontSizeValue(buttonFontSize).Value(), childDimensionValue);
 }
+
+HWTEST_F(ToggleButtonPatternTestNg, ToggleButtonPatternTest008, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    stack->Push(frameNode);
+    ToggleButtonModelNG::SetBackgroundColor(BACKGROUND_COLOR);
+    auto context = frameNode->GetRenderContext();
+    EXPECT_EQ(context->GetBackgroundColorValue(), BACKGROUND_COLOR);
+}
 } // namespace OHOS::Ace::NG

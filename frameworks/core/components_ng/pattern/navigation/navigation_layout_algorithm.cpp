@@ -81,7 +81,8 @@ void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGr
 float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const NavBarPosition& position)
 {
-    if (navigationLayoutProperty->GetHideNavBar().value_or(false)) {
+    if (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
+        navigationLayoutProperty->GetNavigationModeValue() == NavigationMode::SPLIT) {
         return 0.0f;
     }
 
@@ -141,8 +142,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     auto geometryNode = contentWrapper->GetGeometryNode();
 
     auto contentChildSize = contentNode->GetChildren().size();
-    if (navigationLayoutProperty->GetDestinationChange().value_or(false) ||
-        (contentChildSize != 0 && navigationLayoutProperty->GetNavigationMode() == NavigationMode::STACK)) {
+    if (contentChildSize != 0 && navigationLayoutProperty->GetNavigationMode() == NavigationMode::STACK &&
+        navigationLayoutProperty->GetDestinationChange().value_or(false)) {
         auto contentOffset = OffsetT<float>(0.0f, 0.0f);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();

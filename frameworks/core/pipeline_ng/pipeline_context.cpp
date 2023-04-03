@@ -147,13 +147,22 @@ void PipelineContext::FlushDirtyNodeUpdate()
         FrameReport::GetInstance().BeginFlushBuild();
     }
 
-    decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
-    for (const auto& node : dirtyNodes) {
-        if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
-            auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
-            ACE_SCOPED_TRACE("CustomNodeUpdate %s", customNode->GetJSViewName().c_str());
-            customNode->Update();
+    // SomeTimes, customNode->Update may add some dirty custom nodes to dirtyNodes_,
+    // use maxFlushTimes to avoid dead cycle.
+    int maxFlushTimes = 3;
+    while (!dirtyNodes_.empty() && maxFlushTimes > 0) {
+        decltype(dirtyNodes_) dirtyNodes(std::move(dirtyNodes_));
+        for (const auto& node : dirtyNodes) {
+            if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
+                auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
+                ACE_SCOPED_TRACE("CustomNodeUpdate %s", customNode->GetJSViewName().c_str());
+                customNode->Update();
+            }
         }
+        --maxFlushTimes;
+    }
+    if (!dirtyNodes_.empty()) {
+        LOGW("FlushDirtyNodeUpdate 3 times, still has dirty nodes");
     }
 
     if (FrameReport::GetInstance().GetEnable()) {
@@ -842,11 +851,10 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
 void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
-    LOGI("OnSurfaceDensityChanged density_(%{public}lf)", density_);
-    LOGI("OnSurfaceDensityChanged dipScale_(%{public}lf)", dipScale_);
+    LOGD("density_(%{public}lf), dipScale_(%{public}lf)", density_, dipScale_);
     density_ = density;
     if (!NearZero(viewScale_)) {
-        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
+        LOGD("viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }

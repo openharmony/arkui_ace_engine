@@ -595,14 +595,26 @@ void AceAbility::LoadDocument(const std::string& url, const std::string& compone
 std::string AceAbility::GetJSONTree()
 {
     std::string jsonTreeStr;
-    OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleJSONTreeStr(jsonTreeStr);
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    CHECK_NULL_RETURN(container, "");
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, "");
+    taskExecutor->PostSyncTask([&jsonTreeStr] {
+            OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleJSONTreeStr(jsonTreeStr);
+        }, TaskExecutor::TaskType::UI);
     return jsonTreeStr;
 }
 
 std::string AceAbility::GetDefaultJSONTree()
 {
     std::string defaultJsonTreeStr;
-    OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleDefaultJSONTreeStr(defaultJsonTreeStr);
+    auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
+    CHECK_NULL_RETURN(container, "");
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, "");
+    taskExecutor->PostSyncTask([&defaultJsonTreeStr] {
+            OHOS::Ace::Framework::InspectorClient::GetInstance().AssembleDefaultJSONTreeStr(defaultJsonTreeStr);
+        }, TaskExecutor::TaskType::UI);
     return defaultJsonTreeStr;
 }
 

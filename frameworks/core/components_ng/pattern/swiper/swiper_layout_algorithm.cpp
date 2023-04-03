@@ -58,9 +58,9 @@ void SwiperLayoutAlgorithm::LoadItemWithDrag(float translateLength)
     }
 
     int32_t nextIndex = currentIndex_;
-    auto loadItems = std::abs(static_cast<int32_t>(floorf(currentOffset_ / translateLength)));
+    auto loadItems = static_cast<int32_t>(floorf(fabsf(currentOffset_) / translateLength));
     do {
-        nextIndex = Positive(currentOffset_) ? (nextIndex - 1) : (nextIndex + 1);
+        nextIndex = Positive(currentOffset_) ? (nextIndex - 1) : (nextIndex + displayCount_);
         AddToItemRange(nextIndex);
         loadItems--;
     } while (loadItems >= 0);
@@ -375,6 +375,21 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
     const auto& layoutConstraint = layoutPropertyConstraint->GetLayoutConstraint();
     auto swiperWidth = layoutConstraint->parentIdealSize.Width().value();
     auto swiperHeight = layoutConstraint->parentIdealSize.Height().value();
+    const auto& swiperPaddingProperty = swiperLayoutProperty->GetPaddingProperty();
+    float swiperPaddingLeft = 0.0f;
+    float swiperPaddingRight = 0.0f;
+    float swiperPaddingTop = 0.0f;
+    float swiperPaddingBottom = 0.0f;
+    if (swiperPaddingProperty != nullptr) {
+        swiperPaddingLeft =
+            static_cast<float>(swiperPaddingProperty->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
+        swiperPaddingRight =
+            static_cast<float>(swiperPaddingProperty->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
+        swiperPaddingTop =
+            static_cast<float>(swiperPaddingProperty->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
+        swiperPaddingBottom =
+            static_cast<float>(swiperPaddingProperty->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx());
+    }
     auto left = swiperLayoutProperty->GetLeft();
     auto right = swiperLayoutProperty->GetRight();
     auto top = swiperLayoutProperty->GetTop();
@@ -384,24 +399,26 @@ void SwiperLayoutAlgorithm::PlaceDigitChild(
     Dimension indicatorPositionDefault = 0.0_vp;
     if (left.has_value() && !NearEqual(left->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth, Dimension(left->Value()));
-        position.SetX(leftValue);
+        position.SetX(leftValue + swiperPaddingLeft);
     } else if (right.has_value() && !NearEqual(right->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth, Dimension(right->Value()));
-        position.SetX(swiperWidth - indicatorWidth - rightValue);
+        position.SetX(swiperWidth - indicatorWidth - rightValue - swiperPaddingRight);
     } else {
-        position.SetX(axis == Axis::HORIZONTAL ? (swiperWidth - indicatorWidth) * 0.5 : swiperWidth - indicatorWidth);
+        position.SetX(axis == Axis::HORIZONTAL
+                          ? (swiperWidth - swiperPaddingRight + swiperPaddingLeft - indicatorWidth) * 0.5
+                          : swiperWidth - indicatorWidth - swiperPaddingRight);
     }
     if (top.has_value() && !NearEqual(top->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight, Dimension(top->Value()));
-        position.SetY(topValue);
+        position.SetY(topValue + swiperPaddingTop);
     } else if (bottom.has_value() && !NearEqual(bottom->ConvertToPx(), indicatorPositionDefault.ConvertToPx())) {
         auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight, Dimension(bottom->Value()));
-        position.SetY(swiperHeight - indicatorHeight - bottomValue);
+        position.SetY(swiperHeight - indicatorHeight - bottomValue - swiperPaddingBottom);
     } else {
         if (axis == Axis::HORIZONTAL) {
-            position.SetY(swiperHeight - indicatorHeight);
+            position.SetY(swiperHeight - indicatorHeight - swiperPaddingBottom);
         } else {
-            position.SetY((swiperHeight - indicatorHeight) * 0.5);
+            position.SetY((swiperHeight - swiperPaddingBottom + swiperPaddingTop - indicatorHeight) * 0.5);
         }
     }
     auto currentOffset = OffsetF { static_cast<float>(position.GetX()), static_cast<float>(position.GetY()) };
@@ -464,49 +481,32 @@ void SwiperLayoutAlgorithm::LoopLayout(LayoutWrapper* layoutWrapper)
     std::list<int32_t> preItems;
     std::list<int32_t> nextItems;
     SortItems(preItems, nextItems, displayCount);
-
     LayoutItems(layoutWrapper, preItems, nextItems);
 }
 
 void SwiperLayoutAlgorithm::SortItems(std::list<int32_t>& preItems, std::list<int32_t>& nextItems, int32_t displayCount)
 {
-    if (static_cast<int32_t>(itemRange_.size()) == totalCount_) {
-        auto cacheCount = static_cast<int32_t>(ceilf(static_cast<float>(totalCount_ - displayCount) / 2.0f));
-        auto loopIndex = (currentIndex_ - 1 + totalCount_) % totalCount_;
-        int32_t count = 0;
-        while (loopIndex >= 0 && itemRange_.find(loopIndex) != itemRange_.end() && count < cacheCount) {
-            preItems.emplace_back(loopIndex);
-            loopIndex--;
-            count++;
-        }
+    auto itemCount = static_cast<int32_t>(itemRange_.size());
+    displayCount = std::clamp(displayCount, 0, itemCount);
+    auto cacheCount = static_cast<int32_t>(ceilf(static_cast<float>(itemCount - displayCount) / 2.0f));
+    auto loopIndex = (currentIndex_ - 1 + totalCount_) % totalCount_;
+    int32_t count = 0;
+    while (itemRange_.find(loopIndex) != itemRange_.end() && count < cacheCount) {
+        preItems.emplace_back(loopIndex);
+        loopIndex = (loopIndex - 1 + totalCount_) % totalCount_;
+        count++;
+    }
 
-        loopIndex = currentIndex_;
-        count = 0;
-        while (itemRange_.find(loopIndex) != itemRange_.end() && count < (displayCount + cacheCount)) {
-            nextItems.emplace_back(loopIndex);
-            loopIndex = (loopIndex + 1) % totalCount_;
-            count++;
-        }
+    loopIndex = currentIndex_;
+    count = 0;
+    while (itemRange_.find(loopIndex) != itemRange_.end() && count < (displayCount + cacheCount)) {
+        nextItems.emplace_back(loopIndex);
+        loopIndex = (loopIndex + 1) % totalCount_;
+        count++;
+    }
 
-        if (targetIndex_.has_value()) {
-            nextItems.emplace_back(targetIndex_.value());
-        }
-    } else {
-        auto loopIndex = (currentIndex_ - 1 + totalCount_) % totalCount_;
-        while (loopIndex >= 0 && itemRange_.find(loopIndex) != itemRange_.end()) {
-            preItems.emplace_back(loopIndex);
-            loopIndex--;
-        }
-
-        loopIndex = currentIndex_;
-        while (itemRange_.find(loopIndex) != itemRange_.end()) {
-            nextItems.emplace_back(loopIndex);
-            loopIndex = (loopIndex + 1) % totalCount_;
-        }
-
-        if (targetIndex_.has_value()) {
-            nextItems.emplace_back(targetIndex_.value());
-        }
+    if (targetIndex_.has_value()) {
+        nextItems.emplace_back(targetIndex_.value());
     }
 }
 

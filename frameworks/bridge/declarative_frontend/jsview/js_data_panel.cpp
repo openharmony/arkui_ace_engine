@@ -268,7 +268,7 @@ bool JSDataPanel::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, OHOS::
     size_t colorLength = jsLinearGradient->GetGradient().size();
     for (size_t colorIndex = 0; colorIndex < colorLength; colorIndex++) {
         OHOS::Ace::NG::GradientColor gradientColor;
-        gradientColor.SetColor(jsLinearGradient->GetGradient().at(colorIndex).first);
+        gradientColor.SetLinearColor(LinearColor(jsLinearGradient->GetGradient().at(colorIndex).first));
         gradientColor.SetDimension(jsLinearGradient->GetGradient().at(colorIndex).second);
         gradient.AddColor(gradientColor);
     }
@@ -283,11 +283,11 @@ bool JSDataPanel::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, OHOS::
         return false;
     }
     OHOS::Ace::NG::GradientColor gradientColorStart;
-    gradientColorStart.SetColor(color);
+    gradientColorStart.SetLinearColor(LinearColor(color));
     gradientColorStart.SetDimension(Dimension(0.0));
     gradient.AddColor(gradientColorStart);
     OHOS::Ace::NG::GradientColor gradientColorEnd;
-    gradientColorEnd.SetColor(color);
+    gradientColorEnd.SetLinearColor(LinearColor(color));
     gradientColorEnd.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorEnd);
     return true;
@@ -300,11 +300,11 @@ void JSDataPanel::ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors
     for (const auto& item : themeColors) {
         OHOS::Ace::NG::Gradient gradient;
         OHOS::Ace::NG::GradientColor gradientColorStart;
-        gradientColorStart.SetColor(item.first);
+        gradientColorStart.SetLinearColor(LinearColor(item.first));
         gradientColorStart.SetDimension(Dimension(0.0));
         gradient.AddColor(gradientColorStart);
         OHOS::Ace::NG::GradientColor gradientColorEnd;
-        gradientColorEnd.SetColor(item.second);
+        gradientColorEnd.SetLinearColor(LinearColor(item.second));
         gradientColorEnd.SetDimension(Dimension(1.0));
         gradient.AddColor(gradientColorEnd);
         colors.emplace_back(gradient);

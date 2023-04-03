@@ -46,6 +46,8 @@ public:
 
 private:
     int32_t HandleOnSurfaceCreate(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnSurfaceReuse(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnSurfaceRelease(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnActionEvent(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnError(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnSurfaceChange(MessageParcel &data, MessageParcel &reply);

@@ -17,7 +17,11 @@
 
 #include <array>
 
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#if !defined(ACE_UNITTEST)
+#include "core/common/ace_engine_ext.h"
+#endif
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
@@ -436,6 +440,10 @@ void ImagePattern::EnableDrag()
         auto ctx = ctxWk.Upgrade();
         CHECK_NULL_RETURN(image && ctx, info);
 
+#if !defined(ACE_UNITTEST)
+        AceEngineExt::GetInstance().DragStartExt();
+#endif
+
         info.extraInfo = "image drag";
         info.pixelMap = image->GetPixelMap();
         if (info.pixelMap) {
@@ -493,4 +501,12 @@ void ImagePattern::UpdateFillColorIfForegroundColor()
     }
 }
 
+void ImagePattern::DumpInfo()
+{
+    auto layoutProp = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    if (layoutProp->GetImageSourceInfo().has_value()) {
+        DumpLog::GetInstance().AddDesc(std::string("src: ").append(layoutProp->GetImageSourceInfo()->ToString()));
+    }
+}
 } // namespace OHOS::Ace::NG

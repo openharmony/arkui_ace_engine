@@ -873,7 +873,7 @@ void WebDelegate::ExecuteTypeScript(const std::string& jscode, const std::functi
                         }
                     });
                 }
-                delegate->nweb_->ExecuteJavaScript(jscode, callbackImpl);
+                delegate->nweb_->ExecuteJavaScript(jscode, callbackImpl, false);
             }
         },
         TaskExecutor::TaskType::PLATFORM);

@@ -25,7 +25,15 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+#include "base/geometry/rect.h"
+#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
+#endif // ENABLE_DRAG_FRAMEWORK
+
 namespace OHOS::Ace::NG {
+#ifdef ENABLE_DRAG_FRAMEWORK
+using namespace Msdp::DeviceStatus;
+#endif // ENABLE_DRAG_FRAMEWORK
 namespace {
 int64_t g_proxyId = 0;
 } // namespace
@@ -126,45 +134,6 @@ void DragDropManager::UpdateDragWindowPosition(int32_t globalX, int32_t globalY)
 #endif
 }
 
-RefPtr<FrameNode> DragDropManager::FindDragChildNodeByPosition(const RefPtr<UINode> parentNode,
-    float localX, float localY, const std::set<WeakPtr<FrameNode>>& frameNodes)
-{
-    CHECK_NULL_RETURN(parentNode, nullptr);
-    auto children = parentNode->GetChildren();
-    
-    for (auto index = static_cast<int>(children.size()) - 1; index >= 0; index--) {
-        auto child = parentNode->GetChildAtIndex(index);
-        if (child == nullptr) {
-            continue;
-        }
-        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
-        OffsetF childOffset;
-        if (childFrameNode) {
-            auto childGeometryNode = childFrameNode->GetGeometryNode();
-            CHECK_NULL_RETURN(childGeometryNode, nullptr);
-            childOffset = childGeometryNode->GetFrameOffset();
-        }
-        auto childFindResult = FindDragChildNodeByPosition(
-            child, localX - childOffset.GetX(), localY - childOffset.GetY(), frameNodes);
-        auto weakChildFindResult = AceType::WeakClaim(AceType::RawPtr(childFindResult));
-        if (childFindResult) {
-            return childFindResult;
-        }
-    }
-
-    auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
-    CHECK_NULL_RETURN(parentFrameNode, nullptr);
-    auto weakParentFrameNode = AceType::WeakClaim(AceType::RawPtr(parentFrameNode));
-    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(parentGeometryNode, nullptr);
-    auto parentRect = parentGeometryNode->GetFrameRect();
-    PointF globalPoint = PointF(localX + parentRect.GetX(), localY + parentRect.GetY());
-    if (parentRect.IsInRegion(globalPoint) && frameNodes.find(parentFrameNode) != frameNodes.end()) {
-        return parentFrameNode;
-    }
-    return nullptr;
-}
-
 RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType)
 {
     std::set<WeakPtr<FrameNode>> frameNodes;
@@ -189,19 +158,28 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
         return nullptr;
     }
 
-    RefPtr<UINode> rootNode = nullptr;
+    PointF point(globalX, globalY);
+    std::map<int32_t, RefPtr<FrameNode>> hitFrameNodes;
     for (const auto& weakNode : frameNodes) {
         auto frameNode = weakNode.Upgrade();
         if (!frameNode) {
             continue;
         }
-        rootNode = frameNode;
-        while (rootNode->GetParent()) {
-            rootNode = rootNode->GetParent();
+        auto geometryNode = frameNode->GetGeometryNode();
+        if (!geometryNode) {
+            continue;
         }
-        break;
+        auto globalFrameRect = geometryNode->GetFrameRect();
+        globalFrameRect.SetOffset(frameNode->GetTransformRelativeOffset());
+        if (globalFrameRect.IsInRegion(point)) {
+            hitFrameNodes.insert(std::make_pair(frameNode->GetDepth(), frameNode));
+        }
     }
-    return FindDragChildNodeByPosition(rootNode, globalX, globalY, frameNodes);
+
+    if (hitFrameNodes.empty()) {
+        return nullptr;
+    }
+    return hitFrameNodes.rbegin()->second;
 }
 
 std::map<int32_t, RefPtr<FrameNode>> DragDropManager::FindDragFrameNodeMapByPosition(
@@ -285,12 +263,7 @@ void DragDropManager::OnDragMove(float globalX, float globalY, const std::string
     }
 
     if (preTargetFrameNode_) {
-        auto preGeometryNode = preTargetFrameNode_->GetGeometryNode();
-        CHECK_NULL_VOID(preGeometryNode);
-        auto preRect = preGeometryNode->GetFrameRect();
-        if (!preRect.IsInRegion(PointF(globalX, globalY))) {
-            FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
-        }
+        FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo);
     }
 
     FireOnDragEvent(dragFrameNode, point, DragEventType::ENTER, extraInfo);
@@ -320,7 +293,13 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         event->SetX(pipeline->ConvertPxToVp(Dimension(globalX, DimensionUnit::PX)));
         event->SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
         auto extraParams = eventHub->GetDragExtraParams(extraInfo, Point(globalX, globalY), DragEventType::DROP);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        InteractionManager::GetInstance()->SetDragWindowVisible(false);
+#endif // ENABLE_DRAG_FRAMEWORK
         eventHub->FireOnDrop(event, extraParams);
+#ifdef ENABLE_DRAG_FRAMEWORK
+        InteractionManager::GetInstance()->StopDrag(DragResult::DRAG_SUCCESS, false);
+#endif // ENABLE_DRAG_FRAMEWORK
         break;
     }
 }
@@ -636,4 +615,12 @@ void DragDropManager::DestroyDragWindow()
     currentId_ = -1;
 }
 
+#ifdef ENABLE_DRAG_FRAMEWORK
+RefPtr<DragDropProxy> DragDropManager::CreateFrameworkDragDropProxy()
+{
+    isDragged_ = false;
+    currentId_ = ++g_proxyId;
+    return MakeRefPtr<DragDropProxy>(currentId_);
+}
+#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

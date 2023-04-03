@@ -15,6 +15,7 @@
 
 #include "form_renderer.h"
 
+#include "base/utils/utils.h"
 #include "configuration.h"
 #include "form_constants.h"
 #include "form_renderer_hilog.h"
@@ -134,7 +135,6 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         HILOG_ERROR("uiContent_ is null");
         return;
     }
-
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
 }
@@ -142,6 +142,14 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 void FormRenderer::Destroy()
 {
     HILOG_INFO("Destroy FormRenderer start.");
+    if (formRendererDelegate_ != nullptr) {
+        auto rsSurfaceNode = uiContent_->GetFormRootNode();
+        if (rsSurfaceNode != nullptr) {
+            HILOG_INFO("Form OnSurfaceRelease!");
+            formRendererDelegate_->OnSurfaceRelease(rsSurfaceNode->GetId());
+        }
+    }
+
     if (formRendererDelegate_ != nullptr && formRendererDelegate_->AsObject() != nullptr) {
         formRendererDelegate_->AsObject()->RemoveDeathRecipient(renderDelegateDeathRecipient_);
     }
@@ -183,6 +191,27 @@ void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInf
     formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
 }
 
+void FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    if (!formRendererDispatcherImpl_) {
+        HILOG_ERROR("form renderer dispatcher is null!");
+        return;
+    }
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("form renderer delegate is null!");
+        return;
+    }
+    auto rsSurfaceNode = uiContent_->GetFormRootNode();
+    if (rsSurfaceNode == nullptr) {
+        HILOG_ERROR("form renderer rsSurfaceNode is null!");
+        return;
+    }
+    OHOS::AAFwk::Want newWant;
+    newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
+    HILOG_INFO("Form OnSurfaceReuse.");
+    formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), formJsInfo, newWant);
+}
+
 void FormRenderer::OnActionEvent(const std::string& action)
 {
     if (!formRendererDelegate_) {
@@ -211,21 +240,19 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject> &remoteObj)
         HILOG_ERROR("renderRemoteObj is nullptr.");
         return;
     }
-    if (formRendererDelegate_ == nullptr) {
-        formRendererDelegate_ = renderRemoteObj;
-    }
 
-    if (renderDelegateDeathRecipient_) {
-        return;
+    formRendererDelegate_ = renderRemoteObj;
+
+    if (renderDelegateDeathRecipient_ == nullptr) {
+        renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient([weak = weak_from_this()]() {
+            auto formRender = weak.lock();
+            if (!formRender) {
+                HILOG_ERROR("formRender is nullptr");
+                return;
+            }
+            formRender->ResetRenderDelegate();
+        });
     }
-    renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient([weak = weak_from_this()]() {
-        auto formRender = weak.lock();
-        if (!formRender) {
-            HILOG_ERROR("formRender is nullptr");
-            return;
-        }
-        formRender->ResetRenderDelegate();
-    });
     auto renderDelegate = formRendererDelegate_->AsObject();
     if (renderDelegate == nullptr) {
         HILOG_ERROR("renderDelegate is nullptr, can not get obj from renderRemoteObj.");
@@ -236,6 +263,7 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject> &remoteObj)
 
 void FormRenderer::ResetRenderDelegate()
 {
+    HILOG_INFO("ResetRenderDelegate.");
     formRendererDelegate_ = nullptr;
 }
 
@@ -260,6 +288,37 @@ void FormRenderDelegateRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote
     if (handler_) {
         handler_();
     }
+}
+
+void FormRenderer::AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    if (uiContent_ == nullptr) {
+        HILOG_ERROR("uiContent is null!");
+        return;
+    }
+    ParseWant(want);
+    AttachUIContent(formJsInfo);
+    SetRenderDelegate(proxy_);
+    OnSurfaceReuse(formJsInfo);
+}
+
+void FormRenderer::AttachUIContent(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
+{
+    HILOG_INFO("AttachUIContent width = %{public}f , height = %{public}f.", width_, height_);
+    SetAllowUpdate(allowUpdate_);
+    auto rsSurfaceNode = uiContent_->GetFormRootNode();
+    if (rsSurfaceNode == nullptr) {
+        HILOG_ERROR("rsSurfaceNode is nullptr.");
+        return;
+    }
+    if (!NearEqual(width_, uiContent_->GetFormWidth()) ||
+        !NearEqual(height_, uiContent_->GetFormHeight())) {
+        uiContent_->SetFormWidth(width_);
+        uiContent_->SetFormHeight(height_);
+        uiContent_->OnFormSurfaceChange(width_, height_);
+        rsSurfaceNode->SetBounds(0.0f, 0.0f, width_, height_);
+    }
+    uiContent_->Foreground();
 }
 }  // namespace Ace
 }  // namespace OHOS

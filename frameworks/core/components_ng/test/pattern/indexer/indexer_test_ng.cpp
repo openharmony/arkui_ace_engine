@@ -1714,4 +1714,61 @@ HWTEST_F(IndexerTestNg, IndexerTestNg0012, TestSize.Level1)
     EXPECT_EQ(json->GetString("popupItemFontSize"), Dimension(25.0f).ToString());
     EXPECT_EQ(json->GetString("popupItemFontWeight"), V2::ConvertWrapFontWeightToStirng(FontWeight::BOLD));
 }
+
+/**
+ * @tc.name: IndexerAccessibilityPropertyTestNg001
+ * @tc.desc: Test Index properties of Indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerAccessibilityPropertyTestNg001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<IndexerPattern> indexerPattern = AceType::DynamicCast<IndexerPattern>(frameNode->GetPattern());
+    ASSERT_NE(indexerPattern, nullptr);
+    indexerPattern->selected_ = COMMON_SELECTED_VALUE;
+    auto accessibility = frameNode->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_EQ(accessibility->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibility->GetCurrentIndex(), COMMON_SELECTED_VALUE);
+    EXPECT_EQ(accessibility->GetEndIndex(), CREATE_ARRAY_VALUE.size() - 1);
+}
+
+/**
+ * @tc.name: IndexerAccessibilityPropertyTestNg002
+ * @tc.desc: Test CollectionItemCounts property of Indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerAccessibilityPropertyTestNg002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto accessibility = frameNode->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_EQ(accessibility->GetCollectionItemCounts(), CREATE_ARRAY_VALUE.size());
+}
+
+/**
+ * @tc.name: IndexerAccessibilityPropertyTestNg003
+ * @tc.desc: Test Text property of Indexer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, IndexerAccessibilityPropertyTestNg003, TestSize.Level1)
+{
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateIndexerParagraph(CREATE_ARRAY_VALUE, CREATE_SELECTED_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSelected(COMMON_SELECTED_VALUE);
+    auto pattern = frameNode->GetPattern<IndexerPattern>();
+    pattern->OnModifyDone();
+
+    auto accessibility = frameNode->GetAccessibilityProperty<IndexerAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_EQ(accessibility->GetText(), CREATE_ARRAY_VALUE.at(COMMON_SELECTED_VALUE));
+}
 } // namespace OHOS::Ace::NG

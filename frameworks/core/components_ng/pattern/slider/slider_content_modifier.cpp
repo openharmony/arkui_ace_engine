@@ -389,42 +389,15 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
 
 RSRect SliderContentModifier::GetTrackRect()
 {
-    auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
     auto backStart = backStart_->Get();
     auto backEnd = backEnd_->Get();
     auto trackThickness = trackThickness_->Get();
-    auto trackBorderRadius = trackBorderRadius_->Get();
-    auto blockSize = blockSize_->Get();
-    auto direction = static_cast<Axis>(directionAxis_->Get());
 
     RSRect rect;
-    if (sliderMode == SliderModelNG::SliderMode::OUTSET) {
-        if (direction == Axis::HORIZONTAL) {
-            rect.SetLeft(backStart.GetX() - trackBorderRadius);
-            rect.SetRight(backEnd.GetX() + trackBorderRadius);
-            rect.SetTop(backStart.GetY() - trackThickness * HALF);
-            rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
-        } else {
-            rect.SetLeft(backStart.GetX() - trackThickness * HALF);
-            rect.SetRight(backEnd.GetX() + trackThickness * HALF);
-            rect.SetTop(backStart.GetY() - trackBorderRadius);
-            rect.SetBottom(backEnd.GetY() + trackBorderRadius);
-        }
-    } else {
-        if (direction == Axis::HORIZONTAL) {
-            auto offset = std::max(trackBorderRadius, blockSize.Width() * HALF + hotCircleShadowWidth_);
-            rect.SetLeft(backStart.GetX() - std::min(offset, trackThickness * HALF));
-            rect.SetRight(backEnd.GetX() + std::min(offset, trackThickness * HALF));
-            rect.SetTop(backStart.GetY() - trackThickness * HALF);
-            rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
-        } else {
-            auto offset = std::max(trackBorderRadius, blockSize.Height() * HALF + hotCircleShadowWidth_);
-            rect.SetLeft(backStart.GetX() - trackThickness * HALF);
-            rect.SetRight(backEnd.GetX() + trackThickness * HALF);
-            rect.SetTop(backStart.GetY() - std::min(offset, trackThickness * HALF));
-            rect.SetBottom(backEnd.GetY() + std::min(offset, trackThickness * HALF));
-        }
-    }
+    rect.SetLeft(backStart.GetX() - trackThickness * HALF);
+    rect.SetRight(backEnd.GetX() + trackThickness * HALF);
+    rect.SetTop(backStart.GetY() - trackThickness * HALF);
+    rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
 
     return rect;
 }

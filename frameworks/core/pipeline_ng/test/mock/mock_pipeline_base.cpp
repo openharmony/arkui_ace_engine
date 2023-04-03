@@ -184,6 +184,8 @@ bool PipelineContext::OnBackPressed()
     return false;
 }
 
+void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
+
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
@@ -319,9 +321,12 @@ void PipelineBase::Destroy() {}
 void PipelineBase::AddEtsCardTouchEventCallback(
     int32_t ponitId, EtsCardTouchEventCallback&& callback) {}
 
-double PipelineBase::ConvertPxToVp(const Dimension& /* dimension */) const
+double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 {
-    return 1.0f;
+    if (dimension.Unit() == DimensionUnit::PX) {
+        return dimension.Value() / dipScale_;
+    }
+    return dimension.Value();
 }
 
 void PipelineBase::RequestFrame() {}

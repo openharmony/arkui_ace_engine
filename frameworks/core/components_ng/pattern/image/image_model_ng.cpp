@@ -71,9 +71,9 @@ void ImageModelNG::SetBackBorder()
 
 void ImageModelNG::SetBlur(double blur) {}
 
-void ImageModelNG::SetImageFit(int32_t value)
+void ImageModelNG::SetImageFit(ImageFit value)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, static_cast<ImageFit>(value));
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value);
 }
 
 void ImageModelNG::SetMatchTextDirection(bool value)
@@ -166,13 +166,12 @@ void ImageModelNG::SetDraggable(bool draggable)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetDraggable(draggable);
-
-    if (draggable) {
+    if (draggable && !pattern->IsDraggable()) {
         auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->InitDragDropEvent();
     }
+    pattern->SetDraggable(draggable);
 }
 
 void ImageModelNG::SetOnDragStart(OnDragStartFunc&& onDragStart)

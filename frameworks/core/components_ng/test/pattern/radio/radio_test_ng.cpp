@@ -1098,7 +1098,7 @@ HWTEST_F(RadioTestNg, RadioAccessibilityPropertyTestNg003, TestSize.Level1)
     radioEventHub->SetValue(VALUE);
 
     auto accessibility = frameNode->GetAccessibilityProperty<RadioAccessibilityProperty>();
-    EXPECT_NE(accessibility, nullptr);
+    ASSERT_NE(accessibility, nullptr);
     EXPECT_EQ(accessibility->GetText(), VALUE);
 }
 } // namespace OHOS::Ace::NG

@@ -353,26 +353,26 @@ void ViewFunctions::InitViewFunctions(
 #ifdef UICAST_COMPONENT_SUPPORTED
         JSRef<JSVal> jsCreateChildViewFunc = jsObject->GetProperty("createChildView");
         if (jsCreateChildViewFunc->IsFunction()) {
-            LOGI("UICast createChildView is a function");
+            LOGD("UICast createChildView is a function");
             jsCreateChildViewFunc_ = JSRef<JSFunc>::Cast(jsCreateChildViewFunc);
         } else {
-            LOGI("UICast createChildView is not a function");
+            LOGD("UICast createChildView is not a function");
         }
 
         JSRef<JSVal> jsRouterHandleFunc = jsObject->GetProperty("routerHandle");
         if (jsRouterHandleFunc->IsFunction()) {
-            LOGI("UICast routerHandle is a function");
+            LOGD("UICast routerHandle is a function");
             jsRouterHandleFunc_ = JSRef<JSFunc>::Cast(jsRouterHandleFunc);
         } else {
-            LOGI("UICast routerHandle is not a function");
+            LOGD("UICast routerHandle is not a function");
         }
 
         JSRef<JSVal> jsReplayOnEventFunc = jsObject->GetProperty("replayOnEvent");
         if (jsReplayOnEventFunc->IsFunction()) {
-            LOGI("UICast replayOnEvent is a function");
+            LOGD("UICast replayOnEvent is a function");
             jsReplayOnEventFunc_ = JSRef<JSFunc>::Cast(jsReplayOnEventFunc);
         } else {
-            LOGI("UICast replayOnEvent is not a function");
+            LOGD("UICast replayOnEvent is not a function");
         }
 #endif
 

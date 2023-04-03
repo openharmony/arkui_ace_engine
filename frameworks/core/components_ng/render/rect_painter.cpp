@@ -48,6 +48,17 @@ void RectPainter::DrawRect(RSCanvas& canvas, const RectF& rect, RectPaintPropert
         radiusXY[3].SetX(static_cast<float>(rectPaintProperty.GetBottomLeftRadiusValue().GetX().ConvertToPx()));
         radiusXY[3].SetY(static_cast<float>(rectPaintProperty.GetBottomLeftRadiusValue().GetY().ConvertToPx()));
     }
+    // The radiusWidth and radiusHeight is the same when there is only one of them is specified.
+    for (auto& radius : radiusXY) {
+        if (Negative(radius.GetX()) && NonNegative(radius.GetY())) {
+            radius.SetX(radius.GetY());
+            continue;
+        }
+        if (Negative(radius.GetY()) && NonNegative(radius.GetX())) {
+            radius.SetY(radius.GetX());
+            continue;
+        }
+    }
     canvas.AttachBrush(brush);
     RSRoundRect rSRoundRect(
         RSRRect(rect.GetX(), rect.GetY(), rect.Width() + rect.GetX(), rect.Height() + rect.GetY()), radiusXY);
