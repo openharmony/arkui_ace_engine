@@ -142,6 +142,7 @@ build_component_ng("pattern_ng") {
     "list/list_event_hub.cpp",
     "list/list_item_accessibility_property.cpp",
     "list/list_item_event_hub.cpp",
+    "list/list_item_group_accessibility_property.cpp",
     "list/list_item_group_layout_algorithm.cpp",
     "list/list_item_group_model_ng.cpp",
     "list/list_item_group_paint_method.cpp",

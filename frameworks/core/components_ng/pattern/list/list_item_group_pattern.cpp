@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,6 +51,10 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     axis_ = layoutAlgorithm->GetAxis();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    auto accessibilityProperty = host->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
+    if (accessibilityProperty != nullptr) {
+        accessibilityProperty->SetCollectionItemCounts(layoutAlgorithm->GetTotalItemCount());
+    }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
 }
