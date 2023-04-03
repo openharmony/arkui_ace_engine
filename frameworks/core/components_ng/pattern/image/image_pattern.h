@@ -79,8 +79,13 @@ public:
     {
         draggable_ = draggable;
     }
+    bool IsDraggable() const
+    {
+        return draggable_;
+    }
 
     void BeforeCreatePaintWrapper() override;
+    void DumpInfo() override;
 
 private:
     void OnAttachToFrameNode() override;
