@@ -101,13 +101,23 @@ void SwiperLayoutAlgorithm::InitItemRange(LayoutWrapper* layoutWrapper)
 {
     itemRange_.clear();
 
-    if (currentIndex_ < 0 || currentIndex_ > totalCount_ - 1) {
-        currentIndex_ = 0;
-    }
-
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+
+    // If display mode is AutoLinear, expand all children.
+    if (!SwiperUtils::IsStretch(layoutProperty)) {
+        startIndex_ = 0;
+        endIndex_ = totalCount_ - 1;
+        for (int32_t i = 0; i < totalCount_; i++) {
+            itemRange_.insert(i);
+        }
+        return;
+    }
+
+    if (currentIndex_ < 0 || currentIndex_ > totalCount_ - 1) {
+        currentIndex_ = 0;
+    }
 
     auto axis = layoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
     auto itemSpace = SwiperUtils::GetItemSpace(layoutProperty);
