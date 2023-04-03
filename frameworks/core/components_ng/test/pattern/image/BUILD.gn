@@ -27,8 +27,12 @@ ohos_unittest("image_test_ng") {
     "$ace_root/frameworks/base/geometry/matrix4.cpp",
     "$ace_root/frameworks/base/test/mock/mock_drag_window.cpp",
     "$ace_root/frameworks/core/common/test/mock/mock_clipboard.cpp",
+    "$ace_root/frameworks/core/components_ng/test/event/mock/mock_long_press_event.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_manager.cpp",
     "$ace_root/frameworks/core/components_ng/test/mock/manager/drag_drop/mock_drag_drop_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/manager/select_overlay/mock_select_overlay_proxy.cpp",
+    "$ace_root/frameworks/core/components_ng/test/mock/pattern/select_overlay/mock_select_overlay_property.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
 
     # self
