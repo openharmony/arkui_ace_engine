@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/test/mock/rosen/mock_canvas.h"
 #include "core/components_ng/test/mock/theme/mock_theme_manager.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/pipeline_ng/test/mock/mock_pipeline_base.h"
 #include "core/components/checkable/checkable_component.h"
@@ -1120,5 +1121,72 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPaintMethodTest012, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context {canvas, COMPONENT_WIDTH, COMPONENT_HEIGHT};
     checkBoxGroupModifier_->PaintCheckBox(context, CONTENT_OFFSET, CONTENT_SIZE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupAccessibilityPropertyTestNg001
+ * @tc.desc: Test Text property of CheckBoxGroup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg001, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetGroupName(GROUP_NAME);
+
+    auto accessibility = frameNode->GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_EQ(accessibility->GetText(), GROUP_NAME);
+}
+
+/**
+ * @tc.name: CheckBoxGroupAccessibilityPropertyTestNg002
+ * @tc.desc: Test IsCheckable and IsChecked properties of CheckBoxGroup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg002, TestSize.Level1)
+{
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(std::optional<string>());
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibility = frameNode->GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_TRUE(accessibility->IsCheckable());
+
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+    checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_TRUE(accessibility->IsChecked());
+    checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::PART);
+    EXPECT_FALSE(accessibility->IsChecked());
+    checkBoxPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
+    EXPECT_FALSE(accessibility->IsChecked());
+}
+
+/**
+ * @tc.name: CheckBoxGroupAccessibilityPropertyTestNg003
+ * @tc.desc: Test GetCollectionItemCounts property of CheckBoxGroup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupAccessibilityPropertyTestNg003, TestSize.Level1)
+{
+    auto groupFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CHECKBOXGROUP_ETS_TAG, 1, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
+    EXPECT_NE(groupFrameNode, nullptr);
+    auto eventHub = groupFrameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    eventHub->SetGroupName(GROUP_NAME);
+    groupFrameNode->MarkModifyDone();
+
+    auto accessibility = groupFrameNode->GetAccessibilityProperty<CheckBoxGroupAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    EXPECT_EQ(accessibility->GetCollectionItemCounts(), 0);
 }
 } // namespace OHOS::Ace::NG
