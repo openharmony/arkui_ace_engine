@@ -857,7 +857,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto globalOffset = GetHost()->GetPaintRectOffset() - context->GetRootRect().GetOffset();
-    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY() + frameRect_.Height()), frameRect_.Height());
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     if (caretUpdateType_ != CaretUpdateType::PRESSED) {
         needToRequestKeyboardInner_ = true;
         caretUpdateType_ = CaretUpdateType::EVENT;
@@ -1383,7 +1383,7 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(context);
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     // emulate clicking bottom of the textField
-    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY() + frameRect_.Height()), frameRect_.Height());
+    UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     auto focusHub = host->GetOrCreateFocusHub();
 
     if (IsSearchParentNode()) {
