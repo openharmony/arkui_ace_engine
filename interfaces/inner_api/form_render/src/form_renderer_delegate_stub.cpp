@@ -18,10 +18,17 @@
 
 namespace OHOS {
 namespace Ace {
+static std::mutex g_surfaceNodeMutex_;
+static std::map<uint64_t, std::shared_ptr<Rosen::RSSurfaceNode>> g_surfaceNodeMap_;
+
 FormRendererDelegateStub::FormRendererDelegateStub()
 {
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_CREATE)] =
         &FormRendererDelegateStub::HandleOnSurfaceCreate;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_REUSE)] =
+        &FormRendererDelegateStub::HandleOnSurfaceReuse;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_SURFACE_RELEASE)] =
+        &FormRendererDelegateStub::HandleOnSurfaceRelease;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ACTION_CREATE)] =
         &FormRendererDelegateStub::HandleOnActionEvent;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_ERROR)] =
@@ -60,12 +67,16 @@ int FormRendererDelegateStub::OnRemoteRequest(
 
 int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel &data, MessageParcel &reply)
 {
-    std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
+    auto surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
     if (surfaceNode == nullptr) {
         HILOG_ERROR("surfaceNode is nullptr");
         return ERR_INVALID_VALUE;
     }
-
+    {
+        std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
+        g_surfaceNodeMap_[surfaceNode->GetId()] = surfaceNode;
+    }
+    HILOG_INFO("Stub create surfaceNode:%{public}s", std::to_string(surfaceNode->GetId()).c_str());
     std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
     if (formJsInfo == nullptr) {
         HILOG_ERROR("formJsInfo is nullptr");
@@ -80,6 +91,55 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel &data, Message
 
     int32_t errCode = OnSurfaceCreate(surfaceNode, *formJsInfo, *want);
     reply.WriteInt32(errCode);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnSurfaceReuse(MessageParcel &data, MessageParcel &reply)
+{
+    uint64_t id = UINT64_MAX;
+    data.ReadUint64(id);
+    std::shared_ptr<Rosen::RSSurfaceNode> surfaceNode;
+    {
+        std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
+        surfaceNode = g_surfaceNodeMap_[id];
+    }
+    if (surfaceNode == nullptr) {
+        HILOG_ERROR("surfaceNode:%{public}s is nullptr", std::to_string(id).c_str());
+        return ERR_INVALID_VALUE;
+    }
+
+    HILOG_INFO("Stub reuse surfaceNode:%{public}s", std::to_string(id).c_str());
+    std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
+    if (formJsInfo == nullptr) {
+        HILOG_ERROR("formJsInfo is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        HILOG_ERROR("want is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t errCode = OnSurfaceCreate(surfaceNode, *formJsInfo, *want);
+    reply.WriteInt32(errCode);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnSurfaceRelease(MessageParcel &data, MessageParcel &reply)
+{
+    uint64_t id = UINT64_MAX;
+    data.ReadUint64(id);
+    HILOG_INFO("Stub release surfaceNode:%{public}s start", std::to_string(id).c_str());
+    {
+        std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
+        auto iter = g_surfaceNodeMap_.find(id);
+        if (iter != g_surfaceNodeMap_.end()) {
+            HILOG_INFO("Stub release surfaceNode:%{public}s finish", std::to_string(id).c_str());
+            g_surfaceNodeMap_.erase(iter);
+        }
+    }
+    reply.WriteInt32(ERR_OK);
     return ERR_OK;
 }
 

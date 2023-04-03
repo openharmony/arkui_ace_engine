@@ -16,9 +16,12 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_GROUP_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_FORM_RENDERER_GROUP_H
 
-#include <unordered_map>
 #include <memory>
 #include <string>
+#include <vector>
+
+#include "form_js_info.h"
+#include "want.h"
 
 namespace OHOS {
 namespace AbilityRuntime {
@@ -26,12 +29,7 @@ class Context;
 class Runtime;
 }
 
-namespace AAFwk {
-class Want;
-}
-
 namespace AppExecFwk {
-struct FormJsInfo;
 class Configuration;
 }
 
@@ -46,7 +44,7 @@ class FormRenderer;
  * @class FormRendererGroup
  * FormRendererGroup interface is used to form renderer group.
  * Provider:FormRendererGroup:runtime = 1:1:1
- * FormRendererGroup:FormRenderer = 1:compId
+ * FormRendererGroup:FormRenderer = 1:1
  */
 class ACE_EXPORT FormRendererGroup {
 public:
@@ -62,13 +60,18 @@ public:
     void DeleteForm();
     void DeleteForm(const std::string& compId);
     void ReloadForm();
-    bool IsEmpty();
     void UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
-
 private:
+    struct FormRequest {
+        std::string compId;
+        OHOS::AAFwk::Want want;
+        OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    };
     std::shared_ptr<OHOS::AbilityRuntime::Context> context_;
     std::shared_ptr<OHOS::AbilityRuntime::Runtime> runtime_;
-    std::unordered_map<std::string, std::shared_ptr<FormRenderer>> rendererMap_;
+    std::shared_ptr<FormRenderer> formRenderer_;
+    std::vector<FormRequest> formRequests_;
+    std::string currentCompId_;
 };
 }  // namespace Ace
 }  // namespace OHOS
