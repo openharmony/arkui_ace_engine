@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
-constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
+const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr float SCROLL_MAX_TIME = 300.0f; // Scroll Animate max time 0.3 second
 } // namespace
 
@@ -139,24 +139,48 @@ void GridPattern::InitMouseEvent()
 
 void GridPattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
 {
+    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+        auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+        auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+        if (!selectedZone.IsInRegion(PointF(mouseOffsetX, mouseOffsetY))) {
+            ClearMultiSelect();
+        }
+        return;
+    }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+    if (manager->IsDragged()) {
+        return;
+    }
     auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
     auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
 
-    if (info.GetButton() == MouseButton::LEFT_BUTTON) {
-        if (info.GetAction() == MouseAction::PRESS) {
+    if (info.GetAction() == MouseAction::PRESS) {
+        auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
+        if (!selectedZone.IsInRegion(PointF(mouseOffsetX, mouseOffsetY))) {
             ClearMultiSelect();
             mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-            // do not select when click
-        } else if (info.GetAction() == MouseAction::MOVE) {
+        }
+        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        // do not select when click
+    } else if (info.GetAction() == MouseAction::MOVE) {
+        const static double FRAME_SELECTION_DISTANCE =
+            pipeline->NormalizeToPx(Dimension(DEFAULT_PAN_DISTANCE, DimensionUnit::VP));
+        auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
+        if (Offset(delta.GetX(), delta.GetY()).GetDistance() > FRAME_SELECTION_DISTANCE) {
             mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
             auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
             MultiSelectWithoutKeyboard(selectedZone);
-        } else if (info.GetAction() == MouseAction::RELEASE) {
-            mouseStartOffset_.Reset();
-            mouseEndOffset_.Reset();
-            ClearSelectedZone();
         }
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        mouseStartOffset_.Reset();
+        mouseEndOffset_.Reset();
+        ClearSelectedZone();
     }
 }
 
@@ -167,13 +191,17 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
     std::list<RefPtr<FrameNode>> children;
     host->GenerateOneDepthVisibleFrame(children);
     for (const auto& itemFrameNode : children) {
-        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
-        CHECK_NULL_VOID(itemPattern);
-
-        if (!itemPattern->Selectable()) {
+        auto itemEvent = itemFrameNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(itemEvent);
+        if (!itemEvent->IsEnabled()) {
             continue;
         }
 
+        auto itemPattern = itemFrameNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_VOID(itemPattern);
+        if (!itemPattern->Selectable()) {
+            continue;
+        }
         auto itemGeometry = itemFrameNode->GetGeometryNode();
         CHECK_NULL_VOID(itemGeometry);
         auto context = itemFrameNode->GetRenderContext();

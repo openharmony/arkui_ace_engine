@@ -1842,6 +1842,85 @@ HWTEST_F(GridPatternTestNg, GridSelectTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridSelectTest006
+ * @tc.desc: Test mouse right button click on selected item
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridPatternTestNg, GridSelectTest006, TestSize.Level1)
+{
+    constexpr int32_t itemCount = 8;
+    const Offset LEFT_TOP = Offset(90.f, 50.f);
+    const Offset LEFT_BOTTOM = Offset(90.f, 150.f);
+    const Offset RIGHT_TOP = Offset(270.f, 50.f);
+    const Offset RIGHT_BOTTOM = Offset(270.f, 150.f);
+
+    /**
+     * @tc.steps: step1. Create grid, Set 4 columns and SetMultiSelectable.
+     */
+    GridModelNG gridModel;
+    RefPtr<ScrollControllerBase> positionController = gridModel.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = gridModel.CreateScrollBarProxy();
+    gridModel.Create(positionController, scrollBarProxy);
+    gridModel.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    gridModel.SetMultiSelectable(true);
+    CreateGridItem(itemCount);
+
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. RunMeasureAndLayout and set MouseButton::LEFT_BUTTON.
+     */
+    RunMeasureAndLayout(frameNode);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+
+    /**
+     * @tc.steps: step4. Select (0, 0) - (284, 100) zone.
+     * @tc.expected: The 1st, 2nd, 5th, 6th items are selected.
+     */
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(0.f, 0.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    info.SetAction(MouseAction::MOVE);
+    info.SetLocalLocation(Offset(180.f, 100.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    RefPtr<GridItemPattern> firstItemPattern = GetItemPattern(frameNode, 0);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+    RefPtr<GridItemPattern> secondItemPattern = GetItemPattern(frameNode, 1);
+    EXPECT_TRUE(secondItemPattern->IsSelected());
+    RefPtr<GridItemPattern> fifthItemPattern = GetItemPattern(frameNode, 4);
+    EXPECT_TRUE(fifthItemPattern->IsSelected());
+    RefPtr<GridItemPattern> sixthItemPattern = GetItemPattern(frameNode, 5);
+    EXPECT_TRUE(sixthItemPattern->IsSelected());
+
+    /**
+     * @tc.steps: step5. Right click on (150.f, 50.f), in selected zone.
+     * @tc.expected: The 1st item is still selected.
+     */
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    info.SetLocalLocation(Offset(150.f, 50.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    EXPECT_TRUE(firstItemPattern->IsSelected());
+
+    /**
+     * @tc.steps: step6. Left click on (280.f, 100.f), out of selected zone.
+     * @tc.expected: The 1st item is not selected.
+     */
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetLocalLocation(Offset(280.f, 100.f));
+    pattern->HandleMouseEventWithoutKeyboard(info);
+    EXPECT_FALSE(firstItemPattern->IsSelected());
+}
+
+/**
  * @tc.name: GridDragTest001
  * @tc.desc: Verify drag func
  * @tc.type: FUNC
