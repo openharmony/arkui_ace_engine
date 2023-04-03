@@ -192,26 +192,14 @@ void ImagePattern::OnImageLoadFail()
 void ImagePattern::SetImagePaintConfig(
     const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg)
 {
-    auto renderProps = GetPaintProperty<ImageRenderProperty>();
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(renderProps && layoutProps);
+    CHECK_NULL_VOID(layoutProps);
 
     ImagePaintConfig config {
         .srcRect_ = srcRect,
         .dstRect_ = dstRect,
     };
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
-    if (renderProps->GetNeedBorderRadiusValue(false)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto borderRadius = host->GetRenderContext()->GetBorderRadius();
-        BorderRadiusArray radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(),
-                                           borderRadius->radiusTopLeft->ConvertToPx()),
-            PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
-            PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
-            PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
-        config.borderRadiusXY_ = std::make_shared<BorderRadiusArray>(std::move(radiusXY));
-    }
     config.isSvg_ = isSvg;
 
     canvasImage->SetPaintConfig(config);

@@ -38,6 +38,7 @@ public:
 
 private:
     void UpdatePaintConfig(const RefPtr<ImageRenderProperty>& renderProps, PaintWrapper* paintWrapper);
+    void UpdateBorderRadius(PaintWrapper* paintWrapper);
     RefPtr<CanvasImage> canvasImage_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePaintMethod);
