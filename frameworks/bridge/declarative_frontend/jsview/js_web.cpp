@@ -1535,6 +1535,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("horizontalScrollBarAccess", &JSWeb::HorizontalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("verticalScrollBarAccess", &JSWeb::VerticalScrollBarAccess);
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
+    JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
     JSClass<JSWeb>::Inherit<JSViewAbstract>();
     JSClass<JSWeb>::Bind(globalObj);
@@ -4250,6 +4251,26 @@ void JSWeb::OnAudioStateChanged(const JSCallbackInfo& args)
             func->Execute(*eventInfo);
         };
         NG::WebView::SetAudioStateChangedId(std::move(uiCallback));
+    }
+}
+
+void JSWeb::MediaOptions(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        LOGE("WebMediaOptions Param is invalid, it is not a object");
+        return;
+    }
+    auto paramObject = JSRef<JSObject>::Cast(args[0]);
+    auto resumeIntervalObj = paramObject->GetProperty("resumeInterval");
+    if (resumeIntervalObj->IsNumber()) {
+        int32_t resumeInterval = resumeIntervalObj->ToNumber<int32_t>();
+        NG::WebView::SetAudioResumeInterval(resumeInterval);
+    }
+
+    auto audioExclusiveObj = paramObject->GetProperty("audioExclusive");
+    if (audioExclusiveObj->IsBoolean()) {
+        bool audioExclusive = audioExclusiveObj->ToBoolean();
+        NG::WebView::SetAudioExclusive(audioExclusive);
     }
 }
 
