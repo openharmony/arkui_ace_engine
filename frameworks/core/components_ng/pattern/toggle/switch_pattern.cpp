@@ -483,8 +483,8 @@ bool SwitchPattern::IsOutOfBoundary(double mainOffset) const
 // Set the default hot zone for the component.
 void SwitchPattern::AddHotZoneRect()
 {
-    hotZoneOffset_.SetX(-hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneOffset_.SetY(-hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
+    hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
     hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
     DimensionRect hotZoneRegion;
