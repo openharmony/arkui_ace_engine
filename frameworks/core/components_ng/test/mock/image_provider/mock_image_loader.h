@@ -24,10 +24,10 @@ public:
     MOCK_METHOD(sk_sp<SkData>, LoadImageData,
         (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
     MOCK_METHOD(RefPtr<NG::ImageData>, LoadDecodedImageData,
-        (const ImageSourceInfo& /* imageSourceInfo */, const WeakPtr<PipelineBase>& /* context */), (override));
+        (const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context), (override));
 };
 // unit test globals
-extern std::vector<std::thread> threads;
-extern RefPtr<MockImageLoader> loader;
+extern std::vector<std::thread> g_threads;
+extern RefPtr<MockImageLoader> g_loader;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_IMAGE_PROVIDER_MOCK_IMAGE_LOADER_H
