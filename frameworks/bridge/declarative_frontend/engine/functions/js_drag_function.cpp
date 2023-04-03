@@ -182,7 +182,7 @@ public:
         auto* unifiedData = reinterpret_cast<UDMF::UnifiedDataNapi*>(native);
         CHECK_NULL_VOID(unifiedData);
         CHECK_NULL_VOID(unifiedData->value_);
-        dragEvent_->SetData(unifiedData->value_.get());
+        dragEvent_->SetData(unifiedData->value_);
     }
 
     void GetData(const JSCallbackInfo& args)
@@ -191,7 +191,7 @@ public:
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-        auto* dragData = dragEvent_->GetData();
+        auto dragData = dragEvent_->GetData();
         napi_value dataVal = nullptr;
         CHECK_NULL_VOID(dragData);
         UDMF::UnifiedDataNapi::NewInstance(env, dragData, dataVal);
@@ -207,7 +207,7 @@ public:
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-        auto* summary = dragEvent_->GetSummary();
+        auto summary = dragEvent_->GetSummary();
         CHECK_NULL_VOID(summary);
         napi_value dataVal = nullptr;
         UDMF::SummaryNapi::NewInstance(env, summary, dataVal);
@@ -265,7 +265,7 @@ public:
         auto* unifiedData = reinterpret_cast<UDMF::UnifiedDataNapi*>(native);
         CHECK_NULL_VOID(unifiedData);
         CHECK_NULL_VOID(unifiedData->value_);
-        dragEvent_->SetDragInfo(unifiedData->value_.get());
+        dragEvent_->SetDragInfo(unifiedData->value_);
     }
 
     void GetDragInfo(const JSCallbackInfo& args)
@@ -274,7 +274,7 @@ public:
         CHECK_NULL_VOID(engine);
         NativeEngine* nativeEngine = engine->GetNativeEngine();
         napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-        auto* dragData = dragEvent_->GetDragInfo();
+        auto dragData = dragEvent_->GetDragInfo();
         CHECK_NULL_VOID(dragData);
         napi_value dataVal = nullptr;
         UDMF::UnifiedDataNapi::NewInstance(env, dragData, dataVal);

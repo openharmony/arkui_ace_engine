@@ -357,7 +357,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<PixelMapOhos>(pixelMap_);
     std::string udKey;
-    auto* unifiedData = event->GetData();
+    auto unifiedData = event->GetData();
     if (unifiedData != nullptr) {
         auto udmfClient = UDMF::UdmfClient::GetInstance();
         UDMF::CustomOption udCustomOption;

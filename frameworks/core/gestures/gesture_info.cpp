@@ -18,22 +18,22 @@
 #include "unified_types.h"
 
 namespace OHOS::Ace {
-void DragEvent::SetData(UDMF::UnifiedData* unifiedData)
+void DragEvent::SetData(std::shared_ptr<UDMF::UnifiedData>& unifiedData)
 {
     unifiedData_ = unifiedData;
 }
 
-UDMF::UnifiedData* DragEvent::GetData()
+std::shared_ptr<UDMF::UnifiedData>& DragEvent::GetData()
 {
     return unifiedData_;
 }
 
-void DragEvent::SetSummary(UDMF::Summary* summary)
+void DragEvent::SetSummary(std::shared_ptr<UDMF::Summary>& summary)
 {
     summary_ = summary;
 }
 
-UDMF::Summary* DragEvent::GetSummary()
+std::shared_ptr<UDMF::Summary>& DragEvent::GetSummary()
 {
     return summary_;
 }
@@ -68,12 +68,12 @@ bool DragEvent::IsUseCustomAnimation()
     return useCustomAnimation_;
 }
 
-void DragEvent::SetDragInfo(UDMF::UnifiedData* dragInfo)
+void DragEvent::SetDragInfo(std::shared_ptr<UDMF::UnifiedData>& dragInfo)
 {
     dragInfo_ = dragInfo;
 }
 
-UDMF::UnifiedData* DragEvent::GetDragInfo()
+std::shared_ptr<UDMF::UnifiedData>& DragEvent::GetDragInfo()
 {
     return dragInfo_;
 }

@@ -311,7 +311,8 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         if (ret != 0) {
             LOGE("OnDragEnd UDMF GetData failed: %{public}d", ret);
         }
-        event->SetData(&unifiedData);
+        auto udDataPtr = std::make_shared<UDMF::UnifiedData>(unifiedData);
+        event->SetData(udDataPtr);
 #endif // ENABLE_DRAG_FRAMEWORK
         eventHub->FireOnDrop(event, extraParams);
 #ifdef ENABLE_DRAG_FRAMEWORK

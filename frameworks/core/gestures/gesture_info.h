@@ -308,13 +308,13 @@ public:
     }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-    void SetData(UDMF::UnifiedData* unifiedData);
+    void SetData(std::shared_ptr<UDMF::UnifiedData>& unifiedData);
 
-    UDMF::UnifiedData* GetData();
+    std::shared_ptr<UDMF::UnifiedData>& GetData();
 
-    void SetSummary(UDMF::Summary* summary);
+    void SetSummary(std::shared_ptr<UDMF::Summary>& summary);
 
-    UDMF::Summary* GetSummary();
+    std::shared_ptr<UDMF::Summary>& GetSummary();
 
     void SetResult(DragRet dragRet);
 
@@ -328,9 +328,9 @@ public:
 
     bool IsUseCustomAnimation();
 
-    void SetDragInfo(UDMF::UnifiedData* dragInfo);
+    void SetDragInfo(std::shared_ptr<UDMF::UnifiedData>& dragInfo);
 
-    UDMF::UnifiedData* GetDragInfo();
+    std::shared_ptr<UDMF::UnifiedData>& GetDragInfo();
 
     void SetCopy(bool copy);
 
@@ -344,12 +344,12 @@ private:
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
 #ifdef ENABLE_DRAG_FRAMEWORK
-    UDMF::UnifiedData* unifiedData_;
-    UDMF::Summary* summary_;
+    std::shared_ptr<UDMF::UnifiedData> unifiedData_;
+    std::shared_ptr<UDMF::Summary> summary_;
     DragRet dragRet_;
     Rect previewRect_;
     bool useCustomAnimation_ = false;
-    UDMF::UnifiedData* dragInfo_;
+    std::shared_ptr<UDMF::UnifiedData> dragInfo_;
     bool copy_ = true;
 #endif
 };
