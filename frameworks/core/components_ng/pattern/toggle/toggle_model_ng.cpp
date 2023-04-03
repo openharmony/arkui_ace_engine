@@ -227,7 +227,7 @@ void ToggleModelNG::CreateButton(int32_t nodeId)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::TOGGLE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
     stack->Push(frameNode);
-    NG::ViewAbstract::SetHoverEffect(HoverEffectType::SCALE);
+    NG::ViewAbstract::SetHoverEffectAuto(HoverEffectType::SCALE);
 }
 
 void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index)

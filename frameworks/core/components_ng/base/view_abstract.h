@@ -139,6 +139,7 @@ public:
     static void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc);
     static void SetOnHover(OnHoverEventFunc&& onHoverEventFunc);
     static void SetHoverEffect(HoverEffectType hoverEffect);
+    static void SetHoverEffectAuto(HoverEffectType hoverEffect);
     static void SetEnabled(bool enabled);
     static void SetFocusable(bool focusable);
     static void SetOnFocus(OnFocusFunc&& onFocusCallback);

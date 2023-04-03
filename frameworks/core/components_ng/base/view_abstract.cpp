@@ -455,7 +455,14 @@ void ViewAbstract::SetHoverEffect(HoverEffectType hoverEffect)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetHoverAnimation(hoverEffect);
+    eventHub->SetHoverEffect(hoverEffect);
+}
+
+void ViewAbstract::SetHoverEffectAuto(HoverEffectType hoverEffect)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetHoverEffectAuto(hoverEffect);
 }
 
 void ViewAbstract::SetEnabled(bool enabled)

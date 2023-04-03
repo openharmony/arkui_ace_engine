@@ -233,8 +233,8 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     auto effect = listLayoutProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
-    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() &&
-        scrollState_ != SCROLL_FROM_BAR && scrollState_ != SCROLL_FROM_AXIS;
+    bool canOverScroll = (effect == EdgeEffect::SPRING) && !ScrollableIdle() && scrollState_ != SCROLL_FROM_BAR &&
+                         scrollState_ != SCROLL_FROM_AXIS;
     listLayoutAlgorithm->SetCanOverScroll(canOverScroll);
     if (chainAdapter_) {
         listLayoutAlgorithm->SetChainOffsetCallback([weak = AceType::WeakClaim(this)](int32_t index) {
@@ -449,39 +449,112 @@ bool ListPattern::OnKeyEvent(const KeyEvent& event)
         ScrollPage(true);
         return true;
     }
-    if (event.IsDirectionalKey()) {
-        return HandleDirectionKey(event.code);
-    }
+    return HandleDirectionKey(event);
+}
+
+bool ListPattern::HandleDirectionKey(const KeyEvent& event)
+{
     return false;
 }
 
-bool ListPattern::HandleDirectionKey(KeyCode code)
+WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)
 {
-    if ((GetAxis() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_UP) ||
-        (GetAxis() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_LEFT)) {
-        auto nextIndex = std::clamp(scrollIndex_ - 1, 0, maxListItemIndex_);
-        if (nextIndex == scrollIndex_) {
-            return false;
-        }
-        scrollIndex_ = nextIndex;
-        LOGD("Scroll to next index: %{public}d", scrollIndex_);
-        // Need to update: current selection
-        ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_TOP);
-        return false;
+    auto curFocus = currentFocusNode.Upgrade();
+    CHECK_NULL_RETURN(curFocus, nullptr);
+    auto curFrame = curFocus->GetFrameNode();
+    CHECK_NULL_RETURN(curFrame, nullptr);
+    auto curPattern = curFrame->GetPattern();
+    CHECK_NULL_RETURN(curPattern, nullptr);
+    auto curItemPattern = AceType::DynamicCast<ListItemPattern>(curPattern);
+    CHECK_NULL_RETURN(curItemPattern, nullptr);
+    auto listProperty = GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, nullptr);
+
+    auto isVertical = listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
+    auto curIndex = curItemPattern->GetIndexInList();
+    auto curIndexInGroup = curItemPattern->GetIndexInListItemGroup();
+    if (curIndex < 0 || curIndex > maxListItemIndex_) {
+        LOGE("can't find focused child.");
+        return nullptr;
     }
-    if ((GetAxis() == Axis::VERTICAL && code == KeyCode::KEY_DPAD_DOWN) ||
-        (GetAxis() == Axis::HORIZONTAL && code == KeyCode::KEY_DPAD_RIGHT)) {
-        auto nextIndex = std::clamp(scrollIndex_ + 1, 0, maxListItemIndex_);
-        if (nextIndex == scrollIndex_) {
-            return false;
-        }
-        scrollIndex_ = nextIndex;
-        LOGD("Scroll to previous index: %{public}d", scrollIndex_);
-        // Need to update: current selection
-        ScrollToIndex(scrollIndex_, ScrollIndexAlignment::ALIGN_BUTTON);
-        return false;
+
+    auto moveStep = 0;
+    auto nextIndex = curIndex;
+    if ((isVertical && step == FocusStep::UP_END) || (!isVertical && step == FocusStep::LEFT_END)) {
+        moveStep = 1;
+        nextIndex = 0;
+    } else if ((isVertical && step == FocusStep::DOWN_END) || (!isVertical && step == FocusStep::RIGHT_END)) {
+        moveStep = -1;
+        nextIndex = maxListItemIndex_;
+    } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT)) {
+        moveStep = 1;
+        nextIndex = curIndex + moveStep;
+    } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
+        moveStep = -1;
+        nextIndex = curIndex + moveStep;
     }
-    return false;
+
+    while (nextIndex >= 0 && nextIndex <= maxListItemIndex_) {
+        // Need update here. ListItemGroup.
+        if (nextIndex == curIndex) {
+            return nullptr;
+        }
+
+        if (nextIndex < curIndex && nextIndex < startIndex_) {
+            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_TOP);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline) {
+                pipeline->FlushUITasks();
+            }
+        } else if (nextIndex > curIndex && nextIndex > endIndex_) {
+            ScrollToIndex(nextIndex, ScrollIndexAlignment::ALIGN_BOTTOM);
+            auto pipeline = PipelineContext::GetCurrentContext();
+            if (pipeline) {
+                pipeline->FlushUITasks();
+            }
+        }
+
+        auto nextFocusNode = GetChildFocusNodeByIndex(nextIndex, curIndexInGroup);
+        if (nextFocusNode.Upgrade()) {
+            return nextFocusNode;
+        }
+        nextIndex += moveStep;
+    }
+    return nullptr;
+}
+
+WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex)
+{
+    LOGD("Get target item location is (%{public}d,%{public}d)", tarMainIndex, tarGroupIndex);
+    auto listFrame = GetHost();
+    CHECK_NULL_RETURN(listFrame, nullptr);
+    auto listFocus = listFrame->GetFocusHub();
+    CHECK_NULL_RETURN(listFocus, nullptr);
+    auto childFocusList = listFocus->GetChildren();
+    for (const auto& childFocus : childFocusList) {
+        if (!childFocus->IsFocusable()) {
+            continue;
+        }
+        auto childFrame = childFocus->GetFrameNode();
+        if (!childFrame) {
+            continue;
+        }
+        auto childPattern = childFrame->GetPattern();
+        if (!childPattern) {
+            continue;
+        }
+        auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
+        if (!childItemPattern) {
+            continue;
+        }
+        auto curIndex = childItemPattern->GetIndexInList();
+        auto curIndexInGroup = childItemPattern->GetIndexInListItemGroup();
+        if (curIndex == tarMainIndex && curIndexInGroup == tarGroupIndex) {
+            return AceType::WeakClaim(AceType::RawPtr(childFocus));
+        }
+    }
+    LOGD("The target item at location(%{public}d,%{public}d) can not found.", tarMainIndex, tarGroupIndex);
+    return nullptr;
 }
 
 void ListPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve)
@@ -552,7 +625,7 @@ void ListPattern::ScrollToEdge(ScrollEdgeType scrollEdgeType)
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         ScrollToIndex(0, ScrollIndexAlignment::ALIGN_TOP);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
-        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, ScrollIndexAlignment::ALIGN_BUTTON);
+        ScrollToIndex(ListLayoutAlgorithm::LAST_ITEM, ScrollIndexAlignment::ALIGN_BOTTOM);
     }
 }
 
@@ -574,9 +647,9 @@ void ListPattern::ScrollBy(float offset)
 Offset ListPattern::GetCurrentOffset() const
 {
     if (GetAxis() == Axis::HORIZONTAL) {
-        return {GetTotalOffset(), 0.0};
+        return { GetTotalOffset(), 0.0 };
     }
-    return {0.0, GetTotalOffset()};
+    return { 0.0, GetTotalOffset() };
 }
 
 void ListPattern::UpdateScrollBarOffset()
@@ -633,12 +706,11 @@ void ListPattern::InitChainAnimation(int32_t nodeCount)
     chain_->SetMaxDecoration(chainProperty_.MaxInterval().ConvertToPx());
     for (int32_t index = 0; index < nodeCount; index++) {
         auto node = AceType::MakeRefPtr<BilateralSpringNode>(PipelineBase::GetCurrentContext(), index, 0.0);
-        node->AddUpdateListener(
-            [weak = AceType::WeakClaim(this)](double value, double velocity) {
-                auto list = weak.Upgrade();
-                CHECK_NULL_VOID(list);
-                list->MarkDirtyNodeSelf();
-            });
+        node->AddUpdateListener([weak = AceType::WeakClaim(this)](double value, double velocity) {
+            auto list = weak.Upgrade();
+            CHECK_NULL_VOID(list);
+            list->MarkDirtyNodeSelf();
+        });
         chainAdapter_->AddNode(node);
     }
     chainAdapter_->NotifyControlIndexChange();
@@ -653,7 +725,7 @@ float ListPattern::FlushChainAnimation(float dragOffset)
     bool needSetValue = false;
     auto scrollableEvent = GetScrollableEvent();
     bool overScroll = scrollableEvent && scrollableEvent->GetScrollable() &&
-        scrollableEvent->GetScrollable()->IsSpringMotionRunning();
+                      scrollableEvent->GetScrollable()->IsSpringMotionRunning();
     if (chainOverScroll_ != overScroll) {
         if (overScroll) {
             if (overSpringProperty_ && overSpringProperty_->IsValid()) {
@@ -687,7 +759,7 @@ float ListPattern::FlushChainAnimation(float dragOffset)
 void ListPattern::ProcessDragStart(float startPosition)
 {
     int32_t index = -1;
-    for (auto & pos : itemPosition_) {
+    for (const auto& pos : itemPosition_) {
         if (startPosition <= pos.second.endPos) {
             index = pos.first;
             break;

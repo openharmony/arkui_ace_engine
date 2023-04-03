@@ -208,8 +208,11 @@ void FocusHub::LostSelfFocus()
 void FocusHub::RemoveSelf()
 {
     auto parent = GetParentFocusHub();
-    CHECK_NULL_VOID_NOLOG(parent);
-    parent->RemoveChild(AceType::Claim(this));
+    if (parent) {
+        parent->RemoveChild(AceType::Claim(this));
+    } else {
+        LostFocus(BlurReason::FRAME_DESTROY);
+    }
 }
 
 void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
@@ -226,6 +229,7 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode)
         // Try to goto next focus, otherwise goto previous focus.
         if (!GoToNextFocusLinear(true) && !GoToNextFocusLinear(false)) {
             lastWeakFocusNode_ = nullptr;
+            RemoveSelf();
         }
         focusNode->LostFocus(BlurReason::FRAME_DESTROY);
     } else {
@@ -340,7 +344,8 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
     if (!focusCallbackEvents_) {
         focusCallbackEvents_ = MakeRefPtr<FocusCallbackEvents>();
     }
-    if (focusCallbackEvents_->IsFocusOnTouch() == isFocusOnTouch) {
+    if (focusCallbackEvents_->IsFocusOnTouch().has_value() &&
+        focusCallbackEvents_->IsFocusOnTouch().value() == isFocusOnTouch) {
         return;
     }
     focusCallbackEvents_->SetIsFocusOnTouch(isFocusOnTouch);
@@ -464,16 +469,16 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
     switch (keyEvent.code) {
         case KeyCode::TV_CONTROL_UP:
             LOGI("Node: %{public}s/%{public}d request next focus by Key-'UP'", GetFrameName().c_str(), GetFrameId());
-            return RequestNextFocus(true, true, GetRect());
+            return RequestNextFocus(FocusStep::UP, GetRect());
         case KeyCode::TV_CONTROL_DOWN:
             LOGI("Node: %{public}s/%{public}d request next focus by Key-'DOWN'", GetFrameName().c_str(), GetFrameId());
-            return RequestNextFocus(true, false, GetRect());
+            return RequestNextFocus(FocusStep::DOWN, GetRect());
         case KeyCode::TV_CONTROL_LEFT:
             LOGI("Node: %{public}s/%{public}d request next focus by Key-'LEFT'", GetFrameName().c_str(), GetFrameId());
-            return RequestNextFocus(false, !AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
+            return RequestNextFocus(FocusStep::LEFT, GetRect());
         case KeyCode::TV_CONTROL_RIGHT:
             LOGI("Node: %{public}s/%{public}d request next focus by Key-'RIGHT'", GetFrameName().c_str(), GetFrameId());
-            return RequestNextFocus(false, AceApplicationInfo::GetInstance().IsRightToLeft(), GetRect());
+            return RequestNextFocus(FocusStep::RIGHT, GetRect());
         case KeyCode::KEY_TAB: {
             auto context = NG::PipelineContext::GetCurrentContext();
             bool ret = false;
@@ -481,17 +486,24 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
                 LOGI("Node: %{public}s/%{public}d request next focus by Key-'TAB'", GetFrameName().c_str(),
                     GetFrameId());
                 context->SetIsFocusingByTab(true);
-                ret = RequestNextFocus(false, false, GetRect()) || RequestNextFocus(true, false, GetRect());
+                ret = RequestNextFocus(FocusStep::RIGHT, GetRect()) || RequestNextFocus(FocusStep::DOWN, GetRect());
                 context->SetIsFocusingByTab(false);
             } else if (keyEvent.IsShiftWith(KeyCode::KEY_TAB)) {
                 LOGI("Node: %{public}s/%{public}d request next focus by Key-'SHIFT-TAB'", GetFrameName().c_str(),
                     GetFrameId());
                 context->SetIsFocusingByTab(true);
-                ret = RequestNextFocus(false, true, GetRect()) || RequestNextFocus(true, true, GetRect());
+                ret = RequestNextFocus(FocusStep::LEFT, GetRect()) || RequestNextFocus(FocusStep::UP, GetRect());
                 context->SetIsFocusingByTab(false);
             }
             return ret;
         }
+        case KeyCode::KEY_MOVE_HOME:
+            LOGI("Node: %{public}s/%{public}d request next focus by Key-'HOME'", GetFrameName().c_str(), GetFrameId());
+            return RequestNextFocus(FocusStep::LEFT_END, GetRect()) || RequestNextFocus(FocusStep::UP_END, GetRect());
+        case KeyCode::KEY_MOVE_END:
+            LOGI("Node: %{public}s/%{public}d request next focus by Key-'END'", GetFrameName().c_str(), GetFrameId());
+            return RequestNextFocus(FocusStep::RIGHT_END, GetRect()) ||
+                   RequestNextFocus(FocusStep::DOWN_END, GetRect());
         default:
             return false;
     }
@@ -507,8 +519,13 @@ void FocusHub::RequestFocus() const
     context->AddDirtyFocus(GetFrameNode());
 }
 
-bool FocusHub::RequestNextFocus(bool vertical, bool reverse, const RectF& rect)
+bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
 {
+    bool vertical = IsFocusStepVertical(moveStep);
+    bool reverse = !IsFocusStepForward(moveStep);
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        reverse = !reverse;
+    }
     SetScopeFocusAlgorithm();
     if (!focusAlgorithm_.getNextFocusNode) {
         if (focusAlgorithm_.isVertical != vertical) {
@@ -516,18 +533,8 @@ bool FocusHub::RequestNextFocus(bool vertical, bool reverse, const RectF& rect)
         }
         return GoToNextFocusLinear(reverse, rect);
     }
-    FocusStep step = FocusStep::DOWN;
-    if (vertical && !reverse) {
-        step = FocusStep::DOWN;
-    } else if (vertical && reverse) {
-        step = FocusStep::UP;
-    } else if (!vertical && !reverse) {
-        step = FocusStep::RIGHT;
-    } else {
-        step = FocusStep::LEFT;
-    }
     WeakPtr<FocusHub> nextFocusHubWeak;
-    focusAlgorithm_.getNextFocusNode(step, lastWeakFocusNode_, nextFocusHubWeak);
+    focusAlgorithm_.getNextFocusNode(moveStep, lastWeakFocusNode_, nextFocusHubWeak);
     auto nextFocusHub = nextFocusHubWeak.Upgrade();
     if (!nextFocusHub) {
         LOGE("Can't find next focus hub with focus algorithm.");
@@ -914,7 +921,7 @@ void FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
 
 void FocusHub::ClearFocusState()
 {
-    if (!currentFocus_ && focusStyleType_ != FocusStyleType::NONE) {
+    if (focusStyleType_ != FocusStyleType::NONE) {
         auto frameNode = GetFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto renderContext = frameNode->GetRenderContext();

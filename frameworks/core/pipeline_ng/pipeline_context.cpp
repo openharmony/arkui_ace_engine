@@ -196,8 +196,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
     }
-    HandleVisibleAreaChangeEvent();
     HandleOnAreaChangeEvent();
+    HandleVisibleAreaChangeEvent();
 }
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
@@ -925,6 +925,7 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format)
 
 bool PipelineContext::OnKeyEvent(const KeyEvent& event)
 {
+    eventManager_->SetPressedKeyCodes(event.pressedCodes);
     // Need update while key tab pressed
     if (!isNeedShowFocus_ && event.action == KeyAction::DOWN &&
         (event.IsKey({ KeyCode::KEY_TAB }) || event.IsDirectionalKey())) {
@@ -1029,14 +1030,11 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event)
 {
-    // Need develop here: CTRL+AXIS = Pinch event
-
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
-    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), horizontalAxis: %{public}f, verticalAxis: %{public}f, action: "
-         "%{public}d",
-        scaleEvent.x, scaleEvent.y, scaleEvent.horizontalAxis, scaleEvent.verticalAxis, scaleEvent.action);
-
-    // Need update here: zoom(ctrl+axis) event
+    LOGD("AxisEvent (x,y): (%{public}f,%{public}f), action: %{public}d, horizontalAxis: %{public}f, verticalAxis: "
+         "%{public}f, pinchAxisScale: %{public}f",
+        scaleEvent.x, scaleEvent.y, scaleEvent.action, scaleEvent.horizontalAxis, scaleEvent.verticalAxis,
+        scaleEvent.pinchAxisScale);
 
     if (event.action == AxisAction::BEGIN) {
         TouchRestrict touchRestrict { TouchRestrict::NONE };

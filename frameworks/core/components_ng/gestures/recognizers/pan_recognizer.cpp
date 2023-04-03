@@ -246,8 +246,8 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         return;
     }
     globalPoint_ = Point(event.x, event.y);
-    if ((direction_.type & PanDirection::HORIZONTAL) == 0) {
-        // PanRecognizer Direction: Vertical
+    if (direction_.type == PanDirection::ALL || (direction_.type & PanDirection::HORIZONTAL) == 0) {
+        // PanRecognizer Direction: Vertical or ALL
         delta_ =
             Offset(-event.horizontalAxis * DISTANCE_PER_MOUSE_DEGREE, -event.verticalAxis * DISTANCE_PER_MOUSE_DEGREE);
     } else if ((direction_.type & PanDirection::VERTICAL) == 0) {

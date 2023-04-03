@@ -456,7 +456,7 @@ void JSText::JsFocusable(const JSCallbackInfo& info)
         LOGE("The info is wrong, it is supposed to be an boolean");
         return;
     }
-    JSInteractableView::SetFocusable(info[0]->IsBoolean());
+    JSInteractableView::SetFocusable(info[0]->ToBoolean());
     JSInteractableView::SetFocusNode(false);
 }
 

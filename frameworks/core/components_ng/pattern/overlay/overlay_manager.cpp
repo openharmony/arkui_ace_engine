@@ -141,6 +141,12 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 
             root->RemoveChild(node);
             root->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+            auto pipeline = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->BlurOverlayNode();
         });
     auto ctx = node->GetRenderContext();
     CHECK_NULL_VOID(ctx);
@@ -663,7 +669,6 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     LOGI("OverlayManager::CloseDialog");
     CloseDialogAnimation(dialogNode);
-    BlurOverlayNode();
 }
 
 bool OverlayManager::RemoveOverlay()

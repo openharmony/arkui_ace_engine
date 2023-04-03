@@ -83,7 +83,7 @@ bool KeyEventHandler::HandleKeyEvent(const KeyEvent& keyEvent)
             pattern->InsertValue(appendElement);
         }
     }
-    return true;
+    return false;
 }
 
 void KeyEventHandler::ParseAppendValue(KeyCode keycode, std::string& appendElement)

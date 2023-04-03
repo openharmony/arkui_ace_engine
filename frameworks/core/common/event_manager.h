@@ -144,6 +144,16 @@ public:
         return refereeNG_;
     }
 
+    bool IsKeyInPressed(KeyCode tarCode) const
+    {
+        return std::any_of(pressedKeyCodes_.begin(), pressedKeyCodes_.end(),
+            [tarCode](const KeyCode& code) { return code == tarCode; });
+    }
+    void SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
+    {
+        pressedKeyCodes_ = pressedKeyCodes;
+    }
+
 private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
@@ -163,6 +173,7 @@ private:
     bool inSelectedRect_ = false;
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
+    std::vector<KeyCode> pressedKeyCodes_;
 };
 
 } // namespace OHOS::Ace
