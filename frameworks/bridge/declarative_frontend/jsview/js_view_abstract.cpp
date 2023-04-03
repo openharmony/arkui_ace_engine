@@ -1870,8 +1870,8 @@ void JSViewAbstract::JsSphericalEffect(const JSCallbackInfo& info)
         LOGE("The arg is not a number");
         return;
     }
-    auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0f, 1.0f));
+    auto radio = info[0]->ToNumber<double>();
+    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(radio, 0.0, 1.0));
 }
 
 void JSViewAbstract::JsPixelStretchEffect(const JSCallbackInfo& info)
@@ -1936,8 +1936,8 @@ void JSViewAbstract::JsLightUpEffect(const JSCallbackInfo& info)
         LOGE("The arg is wrong,it is supposed to be a number!");
         return;
     }
-    auto radio = info[0]->ToNumber<float>();
-    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0f, 1.0f));
+    auto radio = info[0]->ToNumber<double>();
+    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(radio, 0.0, 1.0));
 }
 
 void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)

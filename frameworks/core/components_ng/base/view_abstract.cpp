@@ -234,7 +234,7 @@ void ViewAbstract::SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle)
     }
 }
 
-void ViewAbstract::SetSphericalEffect(float radio)
+void ViewAbstract::SetSphericalEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");
@@ -252,7 +252,7 @@ void ViewAbstract::SetPixelStretchEffect(PixStretchEffectOption& option)
     ACE_UPDATE_RENDER_CONTEXT(PixelStretchEffect, option);
 }
 
-void ViewAbstract::SetLightUpEffect(float radio)
+void ViewAbstract::SetLightUpEffect(double radio)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         LOGD("current state is not processed, return");

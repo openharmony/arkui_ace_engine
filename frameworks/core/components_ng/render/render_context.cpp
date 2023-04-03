@@ -73,8 +73,8 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("updateProgress", propProgressMask_.value()->GetValue());
         json->Put("updateColor", propProgressMask_.value()->GetColor().ColorToString().c_str());
     }
-    json->Put("lightUpEffect", propLightUpEffect_.value_or(0.0f));
-    json->Put("sphericalEffect", propSphericalEffect_.value_or(0.0f));
+    json->Put("lightUpEffect", propLightUpEffect_.value_or(0.0));
+    json->Put("sphericalEffect", propSphericalEffect_.value_or(0.0));
     auto pixStretchEffectOption = propPixelStretchEffect_.value_or(PixStretchEffectOption());
     auto pixelJsonValue = JsonUtil::Create(true);
     pixelJsonValue->Put("left", pixStretchEffectOption.left.ToString().c_str());
