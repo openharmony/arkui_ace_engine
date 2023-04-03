@@ -2782,12 +2782,12 @@ void TextFieldPattern::InitSurfacePositionChangedCallback()
 void TextFieldPattern::DeleteBackward(int32_t length)
 {
     LOGI("Handle DeleteBackward %{public}d characters", length);
-    if (textEditingValue_.caretPosition <= 0) {
-        LOGW("Caret position at the beginning , cannot DeleteBackward");
-        return;
-    }
     if (InSelectMode()) {
         Delete(textSelector_.GetStart(), textSelector_.GetEnd());
+        return;
+    }
+    if (textEditingValue_.caretPosition <= 0) {
+        LOGW("Caret position at the beginning , cannot DeleteBackward");
         return;
     }
     auto start = std::max(textEditingValue_.caretPosition - length, 0);
@@ -2811,12 +2811,12 @@ void TextFieldPattern::DeleteBackward(int32_t length)
 void TextFieldPattern::DeleteForward(int32_t length)
 {
     LOGI("Handle DeleteForward %{public}d characters", length);
-    if (textEditingValue_.caretPosition >= static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
-        LOGW("Caret position at the end , cannot DeleteForward");
-        return;
-    }
     if (InSelectMode()) {
         Delete(textSelector_.GetStart(), textSelector_.GetEnd());
+        return;
+    }
+    if (textEditingValue_.caretPosition >= static_cast<int32_t>(textEditingValue_.GetWideText().length())) {
+        LOGW("Caret position at the end , cannot DeleteForward");
         return;
     }
     textEditingValue_.text = textEditingValue_.GetValueBeforePosition(textEditingValue_.caretPosition) +
