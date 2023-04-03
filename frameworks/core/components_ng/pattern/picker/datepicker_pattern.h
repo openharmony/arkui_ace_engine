@@ -25,6 +25,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
 #include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
@@ -69,6 +70,11 @@ public:
         auto paintMethod = MakeRefPtr<DatePickerPaintMethod>();
         paintMethod->SetEnabled(enabled_);
         return paintMethod;
+    }
+
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<DatePickerAccessibilityProperty>();
     }
 
     void SetChangeCallback(ColumnChangeCallback&& value);
