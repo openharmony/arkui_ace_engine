@@ -80,6 +80,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    optionPadding_ = margin_;
 
     auto constraint = props->GetLayoutConstraint();
     auto wrapperIdealSize =
@@ -98,6 +99,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(page);
     pageOffset_ = page->GetOffsetRelativeToWindow();
     topSpace_ -= pageOffset_.GetY();
+    leftSpace_ -= pageOffset_.GetX();
 }
 
 // Called to perform layout render node and child.
@@ -210,6 +212,7 @@ void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, La
     auto maxHorizontalSpace = std::max(leftSpace_, rightSpace_) - 2.0f * padding.Width();
     auto maxGridWidth = static_cast<float>(columnInfo->GetWidth(GetMaxGridCounts(columnInfo)));
     auto maxWidth = std::min(maxHorizontalSpace, maxGridWidth);
+    maxWidth = std::min(constraint.maxSize.Width(), maxWidth);
     constraint.maxSize.SetWidth(maxWidth);
     constraint.percentReference.SetWidth(maxWidth);
 }
@@ -249,30 +252,41 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         return;
     }
     auto maxChildrenWidth = constraint.minSize.Width();
-    for (const auto& option : options) {
-        auto optionWrapper = option->CreateLayoutWrapper();
-        optionWrapper->Measure(constraint);
+    auto optionConstraint = constraint;
+    optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
+    auto optionsLayoutWrapper = GetOptionsLayoutWrappper(layoutWrapper);
+    for (const auto& optionWrapper : optionsLayoutWrapper) {
+        optionWrapper->Measure(optionConstraint);
         auto childSize = optionWrapper->GetGeometryNode()->GetMarginFrameSize();
         maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
     }
-    UpdateOptionConstraint(options, maxChildrenWidth);
-    constraint.minSize.SetWidth(maxChildrenWidth);
+    UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
+    constraint.minSize.SetWidth(maxChildrenWidth + optionPadding_ * 2.0f);
 }
 
-void MenuLayoutAlgorithm::UpdateOptionConstraint(std::vector<RefPtr<FrameNode>>& options, float width)
+std::list<RefPtr<LayoutWrapper>> MenuLayoutAlgorithm::GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper)
+{
+    std::list<RefPtr<LayoutWrapper>> optionsWrapper;
+    auto scrollWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(scrollWrapper, optionsWrapper);
+    auto columnWrapper = scrollWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_RETURN(columnWrapper, optionsWrapper);
+    optionsWrapper = columnWrapper->GetAllChildrenWithBuild();
+    return optionsWrapper;
+}
+
+void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width)
 {
     for (const auto& option : options) {
         auto optionLayoutProps = option->GetLayoutProperty();
         CHECK_NULL_VOID(optionLayoutProps);
-        optionLayoutProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(width), std::nullopt));
+        optionLayoutProps->UpdateCalcMinSize(CalcSize(CalcLength(width), std::nullopt));
     }
 }
 
 void MenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
-    // multiMenu children are menuItem or menuItemGroup, constrain width is minus padding
-    auto minWidth = constraint.minSize.Width() - margin_ * 2.0f;
-    constraint.minSize.SetWidth(minWidth);
+    // multiMenu children are menuItem or menuItemGroup, constrain width is same as the menu
     auto maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper, constraint);
     constraint.minSize.SetWidth(maxChildrenWidth);
 }

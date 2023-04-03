@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/offset_t.h"
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -133,6 +134,17 @@ void SetOptionsAction(const std::shared_ptr<SelectOverlayInfo>& info, const std:
         SetOptionDisable(options[OPTION_INDEX_COPY_ALL]);
     }
 }
+
+OffsetF GetPageOffset()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, OffsetF());
+    auto stageManager = pipeline->GetStageManager();
+    CHECK_NULL_RETURN(stageManager, OffsetF());
+    auto page = stageManager->GetLastPage();
+    CHECK_NULL_RETURN(page, OffsetF());
+    return page->GetOffsetRelativeToWindow();
+}
 } // namespace
 
 SelectOverlayNode::SelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info)
@@ -245,7 +257,7 @@ RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<Select
     CHECK_NULL_RETURN(menu, nullptr);
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
-    props->UpdateMenuOffset(info->rightClickOffset);
+    props->UpdateMenuOffset(info->rightClickOffset + GetPageOffset());
 
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);

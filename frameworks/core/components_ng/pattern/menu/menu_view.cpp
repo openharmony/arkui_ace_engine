@@ -56,7 +56,6 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, Men
 
     auto menuFrameNode = menuNode->GetPattern<MenuPattern>();
     menuNode->MountToParent(wrapperNode);
-    menuNode->MarkModifyDone();
 
     return { wrapperNode, menuNode };
 }
@@ -117,6 +116,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     CHECK_NULL_RETURN(scroll, nullptr);
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
+    menuNode->MarkModifyDone();
     return wrapperNode;
 }
 
@@ -130,6 +130,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
+    menuNode->MarkModifyDone();
 
     if (type == MenuType::SUB_MENU) {
         wrapperNode->RemoveChild(menuNode);
@@ -163,6 +164,7 @@ RefPtr<FrameNode> MenuView::Create(const std::vector<SelectParam>& params, int32
     CHECK_NULL_RETURN(scroll, nullptr);
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
+    menuNode->MarkModifyDone();
 
     menuPattern->SetIsSelectMenu(true);
     return wrapperNode;
