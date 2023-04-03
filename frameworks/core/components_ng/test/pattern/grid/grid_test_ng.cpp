@@ -1379,11 +1379,30 @@ HWTEST_F(GridPatternTestNg, GridAccessibilityTest001, TestSize.Level1)
     EXPECT_TRUE(accessibility->IsScrollable());
     EXPECT_FALSE(accessibility->IsEditable());
     EXPECT_EQ(accessibility->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibility->GetCurrentIndex(), 0);
     EXPECT_EQ(accessibility->GetEndIndex(), itemCount - 1);
     EXPECT_EQ(accessibility->GetCollectionItemCounts(), itemCount);
+
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->multiSelectable_ = true;
     AceCollectionInfo info = accessibility->GetCollectionInfo();
     EXPECT_EQ(info.rows, 2);
     EXPECT_EQ(info.columns, 4);
+    EXPECT_EQ(info.selectMode, 1);
+
+    pattern->gridLayoutInfo_.reachStart_ = false;
+    pattern->gridLayoutInfo_.reachEnd_ = false;
+
+    accessibility->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = accessibility->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 
 /**
@@ -1414,6 +1433,7 @@ HWTEST_F(GridPatternTestNg, GridAccessibilityTest002, TestSize.Level1)
     AceCollectionInfo info = accessibility->GetCollectionInfo();
     EXPECT_EQ(info.rows, 0);
     EXPECT_EQ(info.columns, 0);
+    EXPECT_EQ(info.selectMode, 0);
 }
 
 /**
@@ -1461,6 +1481,17 @@ HWTEST_F(GridPatternTestNg, GridAccessibilityTest003, TestSize.Level1)
     EXPECT_EQ(info.column, 1);
     EXPECT_EQ(info.rowSpan, 1);
     EXPECT_EQ(info.columnSpan, 1);
+    EXPECT_FALSE(info.heading);
+
+    itemAccessibility->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = itemAccessibility->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 
 /**

@@ -55,4 +55,20 @@ int32_t ListAccessibilityProperty::GetCollectionItemCounts() const
     CHECK_NULL_RETURN(listPattern, -1);
     return listPattern->GetMaxListItemIndex() + 1;
 }
+
+void ListAccessibilityProperty::SetSpecificSupportAction()
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    if (IsScrollable()) {
+        if (!(listPattern->IsAtTop())) {
+            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
+        }
+        if (!(listPattern->IsAtBottom())) {
+            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

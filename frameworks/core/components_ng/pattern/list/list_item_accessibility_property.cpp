@@ -32,5 +32,6 @@ bool ListItemAccessibilityProperty::IsSelected() const
 void ListItemAccessibilityProperty::SetSpecificSupportAction()
 {
     AddSupportAction(AceAction::ACTION_SELECT);
+    AddSupportAction(AceAction::ACTION_CLEAR_SELECTION);
 }
 } // namespace OHOS::Ace::NG

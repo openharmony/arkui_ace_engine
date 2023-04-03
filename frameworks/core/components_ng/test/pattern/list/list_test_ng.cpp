@@ -1717,14 +1717,35 @@ HWTEST_F(ListTestNg, ListAccessibilityTest001, TestSize.Level1)
     RunMeasureAndLayout();
 
     /**
-     * @tc.steps: step2. Run accessibility func.
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibility = frameNode->GetAccessibilityProperty<ListAccessibilityProperty>();
+    ASSERT_NE(accessibility, nullptr);
+    RunMeasureAndLayout();
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    pattern->startIndex_ = 1;
+
+    /**
+     * @tc.steps: step3. Run accessibility func.
      * @tc.expected: Verify return value.
      */
-    auto accessibility = frameNode_->GetAccessibilityProperty<ListAccessibilityProperty>();
     EXPECT_TRUE(accessibility->IsScrollable());
-    EXPECT_EQ(accessibility->GetBeginIndex(), 0);
+    EXPECT_EQ(accessibility->GetBeginIndex(), 1);
+    EXPECT_EQ(accessibility->GetCurrentIndex(), 1);
     EXPECT_EQ(accessibility->GetEndIndex(), 7);
     EXPECT_EQ(accessibility->GetCollectionItemCounts(), itemCount);
+    accessibility->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = accessibility->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 
 /**
@@ -1752,6 +1773,16 @@ HWTEST_F(ListTestNg, ListAccessibilityTest002, TestSize.Level1)
     auto itemAccessibility = itemFrameNode->GetAccessibilityProperty<ListItemAccessibilityProperty>();
     ASSERT_NE(itemAccessibility, nullptr);
     EXPECT_FALSE(itemAccessibility->IsSelected());
+
+    itemAccessibility->ResetSupportAction();
+    std::unordered_set<AceAction> supportAceActions = itemAccessibility->GetSupportAction();
+    uint64_t actions = 0, exptectActions = 0;
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
+    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
+    for (auto action : supportAceActions) {
+        actions |= 1UL << static_cast<uint32_t>(action);
+    }
+    EXPECT_EQ(actions, exptectActions);
 }
 
 /**

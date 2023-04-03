@@ -34,11 +34,19 @@ public:
 
     int32_t GetBeginIndex() const override;
 
+    int32_t GetCurrentIndex() const override
+    {
+        return GetBeginIndex();
+    }
+
     int32_t GetEndIndex() const override;
 
     int32_t GetCollectionItemCounts() const override;
 
     AceCollectionInfo GetCollectionInfo() const override;
+
+protected:
+    void SetSpecificSupportAction() override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(GridAccessibilityProperty);
