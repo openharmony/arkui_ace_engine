@@ -15,9 +15,9 @@
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 
-#include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
@@ -25,6 +25,9 @@
 namespace OHOS::Ace::NG {
 
 constexpr int32_t MAX_NAVIGATION_CHILDREN_SIZE = 3;
+constexpr int32_t NAVIMODE_CHANGE_ANIMATION_DURATION = 250;
+constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
+constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
 
 namespace {
 
@@ -53,6 +56,65 @@ void MountNavBar(const RefPtr<NavigationGroupNode>& hostNode)
     navBarNode->MarkModifyDone();
 }
 
+} // namespace
+
+RefPtr<RenderContext> NavigationPattern::GetTitleBarRenderContext()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, nullptr);
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    auto contentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    CHECK_NULL_RETURN(contentNode, nullptr);
+    if (layoutProperty->GetDestinationChange().value_or(false) ||
+        contentNode->FindChildNodeOfClass<NavDestinationGroupNode>()) {
+        auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+        CHECK_NULL_RETURN(navBarNode, nullptr);
+        auto renderContext = navBarNode->GetRenderContext();
+        return renderContext;
+    } else {
+        auto renderContext = contentNode->GetRenderContext();
+        return renderContext;
+    }
+}
+
+void NavigationPattern::DoAnimation()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto currentMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
+
+    auto lastMode = navigationMode_;
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    layoutProperty->UpdateUsrNavigationMode(navigationMode_);
+    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    AnimationOption option = AnimationOption();
+    option.SetDuration(NAVIMODE_CHANGE_ANIMATION_DURATION);
+    option.SetCurve(Curves::FRICTION);
+    option.SetFillMode(FillMode::FORWARDS);
+    AnimationOption optionAlpha = AnimationOption();
+    optionAlpha.SetCurve(Curves::SHARP);
+    optionAlpha.SetFillMode(FillMode::FORWARDS);
+    auto renderContext = GetTitleBarRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    context->OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    layoutProperty->UpdateUsrNavigationMode(currentMode);
+    hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    context->FlushUITasks();
+    if (navigationMode_ != lastMode) {
+        if (currentMode == NavigationMode::STACK || navigationMode_ == NavigationMode::STACK) {
+            optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_DISAPPEAR);
+            renderContext->OpacityAnimation(optionAlpha, 1, 0);
+        } else if (currentMode == NavigationMode::SPLIT || navigationMode_ == NavigationMode::SPLIT) {
+            optionAlpha.SetDuration(OPACITY_ANIMATION_DURATION_APPEAR);
+            renderContext->OpacityAnimation(optionAlpha, 0, 1);
+        }
+    }
+    context->CloseImplicitAnimation();
 }
 
 void NavigationPattern::OnModifyDone()
@@ -64,6 +126,13 @@ void NavigationPattern::OnModifyDone()
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
     navBarNode->MarkModifyDone();
+
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto currentMode = layoutProperty->GetUsrNavigationModeValue(NavigationMode::AUTO);
+    if ((navigationMode_ != NavigationMode::AUTO) && (navigationMode_ != currentMode)) {
+        DoAnimation();
+    }
 }
 
 bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
