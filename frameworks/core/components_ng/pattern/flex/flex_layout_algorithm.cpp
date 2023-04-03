@@ -130,6 +130,15 @@ void UpdateChildLayoutConstrainByFlexBasis(
     }
 }
 
+float GetMainAxisMargin(const RefPtr<LayoutWrapper>& child, FlexDirection direction)
+{
+    float childMainAxisMargin = 0.0f;
+    if (child && child->GetGeometryNode() && child->GetGeometryNode()->GetMargin()) {
+        childMainAxisMargin = GetMainAxisSizeHelper(child->GetGeometryNode()->GetMargin()->Size(), direction);
+    }
+    return childMainAxisMargin;
+}
+
 } // namespace
 
 float FlexLayoutAlgorithm::GetChildMainAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -509,7 +518,9 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(FlexItemProperties& flexItem
                         flexGrow = flexItemProperty->GetFlexGrow().value_or(flexGrow);
                     }
                     flexItemProperties.totalGrow += flexGrow;
-                    flexItemProperties.totalShrink += (flexShrink * GetChildMainAxisSize(childLayoutWrapper));
+                    flexItemProperties.totalShrink +=
+                        (flexShrink * (GetChildMainAxisSize(childLayoutWrapper) -
+                                          GetMainAxisMargin(childLayoutWrapper, direction_)));
                 }
                 secondaryMeasureList_.emplace_back(child);
             }
@@ -591,11 +602,13 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
             needSecondaryLayout = true;
         }
         if (LessOrEqual(totalFlexWeight_, 0.0f) && !isInfiniteLayout_) {
+            float childMainAxisMargin = GetMainAxisMargin(childLayoutWrapper, direction_);
             float itemFlex = getFlex(child.layoutWrapper);
-            float flexSize = (child.layoutWrapper == lastChild) ? (remainSpace - allocatedFlexSpace)
-                             : GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)
-                                 ? spacePerFlex * itemFlex
-                                 : spacePerFlex * itemFlex * GetChildMainAxisSize(child.layoutWrapper);
+            float flexSize =
+                (child.layoutWrapper == lastChild) ? (remainSpace - allocatedFlexSpace)
+                : GreatOrEqual(remainSpace, 0.0f) || GreatNotEqual(maxDisplayPriority_, 1)
+                    ? spacePerFlex * itemFlex
+                    : spacePerFlex * itemFlex * (GetChildMainAxisSize(child.layoutWrapper) - childMainAxisMargin);
             if (!NearZero(flexSize)) {
                 flexSize += GetChildMainAxisSize(childLayoutWrapper);
                 UpdateLayoutConstraintOnMainAxis(child.layoutConstraint, flexSize);
