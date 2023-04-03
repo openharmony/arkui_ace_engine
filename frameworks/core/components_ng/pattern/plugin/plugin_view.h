@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT PluginView {
 public:
     static void Create(const RequestPluginInfo& pluginInfo);
+    static void SetData(const std::string& data);
     static void SetOnComplete(PluginCallback&& OnComplete);
     static void SetOnError(PluginCallback&& OnError);
 };

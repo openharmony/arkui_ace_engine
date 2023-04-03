@@ -285,7 +285,7 @@ void RosenRenderImage::Update(const RefPtr<Component>& component)
     // curImageSrc represents the picture currently shown and imageSrc represents next picture to be shown
     imageLoadingStatus_ = (sourceInfo_ != curSourceInfo_) ? ImageLoadingStatus::UPDATING : imageLoadingStatus_;
     UpdateRenderAltImage(component);
-    if (proceedPreviousLoading_) {
+    if (proceedPreviousLoading_ && imageLoadingStatus_ == ImageLoadingStatus::LOAD_SUCCESS) {
         LOGD("Proceed previous loading, imageSrc is %{private}s, image loading status: %{public}d",
             sourceInfo_.ToString().c_str(), imageLoadingStatus_);
         return;

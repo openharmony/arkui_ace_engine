@@ -50,16 +50,21 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
     return ERR_OK;
 #endif // OS_ACCOUNT_EXISTS
 }
+constexpr char JS_EXT[] = ".js";
+constexpr char ETS_EXT[] = ".ets";
+constexpr size_t SIZE_OF_ETS_EXT = 4;
 } // namespace
 
 PluginPattern::~PluginPattern()
 {
-    auto currentId = pluginSubContainer_->GetInstanceId();
-    PluginManager::GetInstance().RemovePluginSubContainer(currentId);
-    PluginManager::GetInstance().RemovePluginParentContainer(currentId);
     pluginManagerBridge_.Reset();
-    pluginSubContainer_->Destroy();
-    pluginSubContainer_.Reset();
+    if (pluginSubContainer_) {
+        auto currentId = pluginSubContainer_->GetInstanceId();
+        PluginManager::GetInstance().RemovePluginSubContainer(currentId);
+        PluginManager::GetInstance().RemovePluginParentContainer(currentId);
+        pluginSubContainer_->Destroy();
+        pluginSubContainer_.Reset();
+    }
 }
 
 void PluginPattern::OnAttachToFrameNode()
@@ -85,11 +90,12 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     info.width = Dimension(size.Width());
     info.height = Dimension(size.Height());
     layoutProperty->UpdateRequestPluginInfo(info);
-
+    auto data = layoutProperty->GetData().value_or("");
     if (info.bundleName != pluginInfo_.bundleName || info.abilityName != pluginInfo_.abilityName ||
         info.moduleName != pluginInfo_.moduleName || info.pluginName != pluginInfo_.pluginName ||
-        info.dimension != pluginInfo_.dimension) {
+        info.dimension != pluginInfo_.dimension || data_ != data) {
         pluginInfo_ = info;
+        data_ = data;
         LOGI(" pluginInfo_ = info; pluginInfo_.width:: %{public}lf, pluginInfo_.height:: %{public}lf",
             pluginInfo_.width.Value(), pluginInfo_.height.Value());
     } else {
@@ -328,8 +334,13 @@ void PluginPattern::SplitString(const std::string& str, char tag, std::vector<st
 std::string PluginPattern::GetPackagePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
 {
     std::string packagePathStr;
-    size_t pos = info.pluginName.rfind(".js");
-    if (info.pluginName.front() == '/' && pos != std::string::npos) {
+    size_t pos = info.pluginName.rfind(JS_EXT);
+    size_t pos_ets = info.pluginName.rfind(ETS_EXT);
+    if (pos_ets != std::string::npos && info.pluginName.substr(pos_ets) == ETS_EXT) {
+        info.pluginName = info.pluginName.substr(0, info.pluginName.length() - SIZE_OF_ETS_EXT);
+        info.pluginName = info.pluginName + JS_EXT;
+    }
+    if (info.pluginName.front() == '/' && pos != std::string::npos && info.pluginName.substr(pos) == JS_EXT) {
         packagePathStr = GetPackagePathByAbsolutePath(weak, info);
     } else {
         packagePathStr = GetPackagePathByWant(weak, info);
@@ -397,14 +408,20 @@ void PluginPattern::GetModuleNameByWant(const WeakPtr<PluginPattern>& weak, Requ
         return;
     }
     if (strList.size() == 1) {
-        if (info.pluginName.rfind(".js") != std::string::npos) {
+        if (info.pluginName.rfind(JS_EXT) != std::string::npos) {
             info.moduleName = "default";
             info.source = info.pluginName;
         } else {
             info.moduleName = info.pluginName;
         }
     } else {
-        if (strList[0].rfind(".js") != std::string::npos) {
+        auto pos = strList[0].rfind(JS_EXT);
+        size_t pos_ets = info.pluginName.rfind(ETS_EXT);
+        if (pos_ets != std::string::npos && info.pluginName.substr(pos_ets) == ETS_EXT) {
+            info.pluginName = info.pluginName.substr(0, info.pluginName.length() - SIZE_OF_ETS_EXT);
+            info.pluginName = info.pluginName + JS_EXT;
+        }
+        if (pos != std::string::npos && (strList[0].substr(pos) == JS_EXT)) {
             info.source = strList[1];
         }
         info.moduleName = strList[0];

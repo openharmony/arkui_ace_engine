@@ -1266,6 +1266,11 @@ void PluginFrontendDelegate::OnPushPageSuccess(
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
     pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url});
+    if (Container::IsCurrentUseNewPipeline()) {
+        FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
+    } else {
+        page->FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
+    }
     page->FireDeclarativeOnUpdateWithValueParamsCallback(page->GetPluginComponentJsonData());
     if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
         isRouteStackFull_ = true;
@@ -1731,6 +1736,10 @@ void PluginFrontendDelegate::UpdatePlugin(const std::string& content)
 {
     auto pageId = GetRunningPageId();
     auto page = GetPage(pageId);
+    if (Container::IsCurrentUseNewPipeline()) {
+        FireDeclarativeOnUpdateWithValueParamsCallback(content);
+        return;
+    }
     if (page) {
         page->FireDeclarativeOnUpdateWithValueParamsCallback(content);
     }
