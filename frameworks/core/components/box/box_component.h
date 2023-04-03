@@ -291,14 +291,14 @@ public:
         onDragMoveId_ = onDragMoveId;
     }
 
-    const OnNewDragFunc& GetOnDragFinishId() const
+    const OnNewDragFunc& GetOnDragEndId() const
     {
-        return onDragFinishId_;
+        return onDragEndId_;
     }
 
-    void SetOnDragFinishId(const OnNewDragFunc& onDragFinishId)
+    void SetOnDragEndId(const OnNewDragFunc& onDragEndId)
     {
-        onDragFinishId_ = onDragFinishId;
+        onDragEndId_ = onDragEndId;
     }
 
     const OnDropFunc& GetOnDragLeaveId() const
@@ -409,7 +409,7 @@ private:
     OnDropFunc onDragMoveId_;
     OnDropFunc onDragLeaveId_;
     OnDropFunc onDropId_;
-    OnNewDragFunc onDragFinishId_;
+    OnNewDragFunc onDragEndId_;
     bool needMaterial_ = false;
 };
 

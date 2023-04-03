@@ -218,14 +218,14 @@ public:
         onDrop_ = std::move(onDrop);
     }
 
-    void SetOnDragFinish(OnNewDragFunc&& onDragFinish)
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd)
     {
-        onDragFinish_ = std::move(onDragFinish);
+        onDragEnd_ = std::move(onDragEnd);
     }
 
-    const OnNewDragFunc& GetOnDragFinish() const
+    const OnNewDragFunc& GetOnDragEnd() const
     {
-        return onDragFinish_;
+        return onDragEnd_;
     }
 
     void FireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams)
@@ -338,7 +338,7 @@ private:
     OnDragFunc onDragLeave_;
     OnDragFunc onDragMove_;
     OnDragFunc onDrop_;
-    OnNewDragFunc onDragFinish_;
+    OnNewDragFunc onDragEnd_;
 
     bool enabled_ { true };
     std::vector<KeyboardShortcut> keyboardShortcut_;

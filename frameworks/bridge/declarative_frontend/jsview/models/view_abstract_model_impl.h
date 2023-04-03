@@ -139,7 +139,7 @@ public:
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
-    void SetOnDragFinish(OnNewDragFunc&& onDragFinish) override;
+    void SetOnDragEnd(OnNewDragFunc&& onDragEnd) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;

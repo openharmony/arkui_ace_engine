@@ -38,7 +38,7 @@ UDMF::Summary* DragEvent::GetSummary()
     return summary_;
 }
 
-DragRet DragEvent::SetResult(DragRet dragRet)
+void DragEvent::SetResult(DragRet dragRet)
 {
     dragRet_ = dragRet;
 }

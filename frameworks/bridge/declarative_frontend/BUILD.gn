@@ -597,6 +597,7 @@ template("declarative_js_engine_ng") {
     }
 
     # add for cross_platfrom_build temporarily, shall be removed after external_deps is supported
+    external_deps = []
     if (is_cross_platform_build) {
       configs += [ "$ark_ets_path:ark_jsruntime_public_config" ]
       if (defined(config.build_for_ios) && config.build_for_ios) {
@@ -607,9 +608,9 @@ template("declarative_js_engine_ng") {
     } else {
       if (defined(config.build_for_ios) && config.build_for_ios) {
         # static library for ios platform
-        external_deps = [ "ets_runtime:libark_jsruntime_static" ]
+        external_deps += [ "ets_runtime:libark_jsruntime_static" ]
       } else {
-        external_deps = [ "ets_runtime:libark_jsruntime" ]
+        external_deps += [ "ets_runtime:libark_jsruntime" ]
       }
     }
 
@@ -624,7 +625,7 @@ template("declarative_js_engine_ng") {
     ]
 
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
-      external_deps = [
+      external_deps += [
         "udmf:udmf_client",
         "udmf:udmf_data_napi",
       ]

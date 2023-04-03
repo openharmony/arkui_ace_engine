@@ -29,6 +29,9 @@
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
+#include "unified_data.h"
+#include "udmf_client.h"
+#include "unified_types.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 namespace OHOS::Ace::NG {
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -353,6 +356,17 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto dragDropInfo = (eventHub->GetOnDragStart())(event, extraParams);
 #ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<PixelMapOhos>(pixelMap_);
+    std::string udKey;
+    auto* unifiedData = event->GetData();
+    if (unifiedData != nullptr) {
+        auto udmfClient = UDMF::UdmfClient::GetInstance();
+        UDMF::CustomOption udCustomOption;
+        udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
+        int32_t ret = udmfClient.SetData(udCustomOption, *unifiedData, udKey);
+        if (ret != 0) {
+            LOGE("HandleOnDragStart: UDMF Setdata failed:%{public}d", ret);
+        }
+    }
 #endif // ENABLE_DRAG_FRAMEWORK
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -364,9 +378,9 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 #ifdef ENABLE_DRAG_FRAMEWORK
     uint32_t width = pixelMap->GetWidth();
     uint32_t height = pixelMap->GetHeight();
-    DragData dragData {{pixelMap_, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE}, {},
+    DragData dragData { { pixelMap_, width * PIXELMAP_WIDTH_RATE, height * PIXELMAP_HEIGHT_RATE }, {}, udKey,
         static_cast<int32_t>(info.GetSourceDevice()), 1, info.GetPointerId(), info.GetScreenLocation().GetX(),
-        info.GetScreenLocation().GetY(), info.GetDeviceId(), false};
+        info.GetScreenLocation().GetY(), info.GetDeviceId(), false };
     auto callback = [](const DragNotifyMsg& notifyMessage) {};
     int32_t ret = InteractionManager::GetInstance()->StartDrag(dragData, callback);
     InteractionManager::GetInstance()->SetDragWindowVisible(true);

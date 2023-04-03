@@ -119,6 +119,11 @@ template("build_component_ng") {
           "//base/msdp/device_status/interfaces/innerkits/interaction/include",
           "//foundation/graphic/graphic_2d/rosen/modules/",
         ]
+        if (defined(external_deps)) {
+          external_deps += [ "udmf:udmf_client" ]
+        } else {
+          external_deps = [ "udmf:udmf_client" ]
+        }
       }
 
       if (defined(config.model_component_support) &&

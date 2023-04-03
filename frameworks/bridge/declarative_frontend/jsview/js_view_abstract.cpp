@@ -3643,22 +3643,22 @@ void JSViewAbstract::JsOnDragEnter(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(onDragEnter));
 }
 
-void JSViewAbstract::JsOnDragFinish(const JSCallbackInfo& info)
+void JSViewAbstract::JsOnDragEnd(const JSCallbackInfo& info)
 {
     std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::FUNCTION };
-    if (!CheckJSCallbackInfo("JsOnDragFinish", info, checkList)) {
+    if (!CheckJSCallbackInfo("JsOnDragEnd", info, checkList)) {
         return;
     }
-    RefPtr<JsDragFunction> jsOnDragFinishFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    RefPtr<JsDragFunction> jsOnDragEndFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
 
-    auto onDragFinish = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFinishFunc)](
+    auto onDragEnd = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEndFunc)](
                            const RefPtr<OHOS::Ace::DragEvent>& info) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragFinish");
+        ACE_SCORING_EVENT("onDragEnd");
         func->Execute(info);
     };
 
-    ViewAbstractModel::GetInstance()->SetOnDragFinish(std::move(onDragFinish));
+    ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(onDragEnd));
 }
 
 void JSViewAbstract::JsOnDragMove(const JSCallbackInfo& info)
@@ -4612,7 +4612,7 @@ void JSViewAbstract::JSBind()
     JSClass<JSViewAbstract>::StaticMethod("onDragMove", &JSViewAbstract::JsOnDragMove);
     JSClass<JSViewAbstract>::StaticMethod("onDragLeave", &JSViewAbstract::JsOnDragLeave);
     JSClass<JSViewAbstract>::StaticMethod("onDrop", &JSViewAbstract::JsOnDrop);
-    JSClass<JSViewAbstract>::StaticMethod("onDragFinish", &JSViewAbstract::JsOnDragFinish);
+    JSClass<JSViewAbstract>::StaticMethod("onDragEnd", &JSViewAbstract::JsOnDragEnd);
 
     JSClass<JSViewAbstract>::StaticMethod("linearGradient", &JSViewAbstract::JsLinearGradient);
     JSClass<JSViewAbstract>::StaticMethod("sweepGradient", &JSViewAbstract::JsSweepGradient);

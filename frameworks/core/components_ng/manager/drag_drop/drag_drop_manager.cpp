@@ -28,6 +28,9 @@
 #ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
 #include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
+#include "unified_data.h"
+#include "udmf_client.h"
+#include "unified_types.h"
 #endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
@@ -295,6 +298,20 @@ void DragDropManager::OnDragEnd(float globalX, float globalY, const std::string&
         auto extraParams = eventHub->GetDragExtraParams(extraInfo, Point(globalX, globalY), DragEventType::DROP);
 #ifdef ENABLE_DRAG_FRAMEWORK
         InteractionManager::GetInstance()->SetDragWindowVisible(false);
+        std::string udKey;
+        InteractionManager::GetInstance()->GetUdKey(udKey);
+        if (udKey.empty()) {
+            LOGE("OnDragEnd InteractionManager GetUdkey is null");
+        }
+        auto udmfClient = UDMF::UdmfClient::GetInstance();
+        UDMF::UnifiedData unifiedData;
+        UDMF::QueryOption queryOption;
+        queryOption.key = udKey;
+        int ret = udmfClient.GetData(queryOption, unifiedData);
+        if (ret != 0) {
+            LOGE("OnDragEnd UDMF GetData failed: %{public}d", ret);
+        }
+        event->SetData(&unifiedData);
 #endif // ENABLE_DRAG_FRAMEWORK
         eventHub->FireOnDrop(event, extraParams);
 #ifdef ENABLE_DRAG_FRAMEWORK

@@ -700,11 +700,11 @@ void ViewAbstract::SetOnDrop(std::function<void(const RefPtr<OHOS::Ace::DragEven
     AddDragFrameNodeToManager();
 }
 
-void ViewAbstract::SetOnDragFinish(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragFinish)
+void ViewAbstract::SetOnDragEnd(std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDragFinish(std::move(onDragFinish));
+    eventHub->SetOnDragEnd(std::move(onDragEnd));
 
     AddDragFrameNodeToManager();
 }
