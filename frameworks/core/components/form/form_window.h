@@ -35,7 +35,7 @@ public:
             LOGE("form remove vsync callback fail due to null context");
             return;
         }
-        context->RemoveFormVsyncCallback(formWindowId_);
+        context->RemoveSubWindowVsyncCallback(formWindowId_);
     };
 
     void RequestFrame() override;

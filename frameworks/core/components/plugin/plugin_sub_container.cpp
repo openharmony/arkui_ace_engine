@@ -105,7 +105,10 @@ void PluginSubContainer::Initialize()
 void PluginSubContainer::Destroy()
 {
     ContainerScope scope(instanceId_);
-
+    if (frontend_) {
+        frontend_->Destroy();
+        frontend_.Reset();
+    }
     if (!pipelineContext_) {
         LOGE("no context find for inner plugin");
         return;
@@ -193,6 +196,7 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
     auto flutterAssetManager = GetDecompressedAssetManager(hapPath, module);
 
     auto&& window = std::make_unique<PluginWindow>(outSidePipelineContext_);
+    window->SetPluginWindowId(pluginWindowId_);
     pipelineContext_ = AceType::MakeRefPtr<PipelineContext>(std::move(window), taskExecutor_, assetManager_,
         outSidePipelineContext_.Upgrade()->GetPlatformResRegister(), frontend_, instanceId_);
 

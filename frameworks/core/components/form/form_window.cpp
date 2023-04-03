@@ -41,6 +41,6 @@ void FormWindow::SetVsyncCallback(AceVsyncCallback&& callback)
         LOGE("form set vsync callback fail due to null context");
         return;
     }
-    context->SetFormVsyncCallback(std::move(callback), formWindowId_);
+    context->SetSubWindowVsyncCallback(std::move(callback), formWindowId_);
 }
 } // namespace OHOS::Ace
