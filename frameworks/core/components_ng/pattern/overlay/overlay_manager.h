@@ -82,7 +82,7 @@ public:
         bool isLunar, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void ShowTimeDialog(const DialogProperties& dialogProps, std::map<std::string, PickerTime> timePickerProperty,
-        bool isUseMilitaryTime, std::map<std::string, NG::DialogEvent> dialogEvent,
+        bool isUseMilitaryTime, PickerDate dialogTitleDate, std::map<std::string, NG::DialogEvent> dialogEvent,
         std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent);
     void ShowTextDialog(const DialogProperties& dialogProps, uint32_t selected, const Dimension& height,
         const std::vector<std::string>& getRangeVector, std::map<std::string, NG::DialogTextEvent> dialogEvent,

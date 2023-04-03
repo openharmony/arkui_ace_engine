@@ -640,12 +640,12 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
-    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
+    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime, PickerDate dialogTitleDate,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     LOGI("OverlayManager::ShowTimeDialogPicker");
     auto dialogNode = TimePickerDialogView::Show(dialogProps, std::move(timePickerProperty), isUseMilitaryTime,
-        std::move(dialogEvent), std::move(dialogCancelEvent));
+        dialogTitleDate, std::move(dialogEvent), std::move(dialogCancelEvent));
     OpenDialogAnimation(dialogNode);
 }
 

@@ -84,6 +84,7 @@ public:
 private:
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
     static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_DATEPICKER_H

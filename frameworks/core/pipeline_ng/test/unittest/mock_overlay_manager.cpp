@@ -62,7 +62,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps,
 {}
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps,
-    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
+    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime, PickerDate dialogTitleDate,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {}
 

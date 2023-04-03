@@ -33,7 +33,7 @@ const int32_t MARGIN_HALF = 2;
 } // namespace
 
 RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogProperties,
-    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime,
+    std::map<std::string, PickerTime> timePickerProperty, bool isUseMilitaryTime, PickerDate dialogTitleDate,
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -113,6 +113,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     if (timePickerProperty.find("selected") != timePickerProperty.end()) {
         auto selectedTime = timePickerProperty["selected"];
         SetSelectedTime(timePickerRowPattern, selectedTime);
+        SetDialogTitleDate(timePickerRowPattern, dialogTitleDate);
     }
     SetHour24(timePickerRowPattern, isUseMilitaryTime);
     auto changeEvent = dialogEvent["changeId"];
@@ -143,6 +144,12 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     contentRow->MountToParent(contentColumn);
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return dialogNode;
+}
+
+void TimePickerDialogView::SetDialogTitleDate(
+    const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerDate& value)
+{
+    timePickerRowPattern->SetDialogTitleDate(value);
 }
 
 RefPtr<FrameNode> TimePickerDialogView::CreateStackNode()
