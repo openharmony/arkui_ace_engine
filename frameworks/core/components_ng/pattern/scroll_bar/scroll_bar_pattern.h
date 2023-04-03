@@ -64,6 +64,11 @@ public:
         return currentOffset_;
     }
 
+    void SetCurrentPosition(float currentOffset)
+    {
+        currentOffset_ = currentOffset;
+    }
+
     Axis GetAxis() const
     {
         return axis_;
