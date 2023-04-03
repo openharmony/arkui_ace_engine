@@ -13,45 +13,8 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/sdk/sharedlib_config.gni")
 import("//foundation/arkui/ace_engine/interfaces/napi/kits/napi_lib.gni")
-
-config("ace_pc_preview_config") {
-  cflags_cc = [
-    "-std=c++17",
-    "-Wno-c99-designator",
-    "-Wno-unknown-warning-option",
-    "-Wno-thread-safety-attributes",
-  ]
-
-  include_dirs = [
-    "$ace_root",
-    "$ace_root/frameworks",
-    "$flutter_root/engine",
-    "$flutter_root/engine/flutter/shell/platform/common/cpp/public",
-    "$flutter_root/engine/ace_adapter/flutter/shell/platform/glfw/public",
-    "$flutter_root/skia",
-    "$flutter_root/glfw/include",
-  ]
-}
-
-if (use_mac) {
-  platform = "mac"
-} else if (use_linux) {
-  platform = "linux"
-} else {
-  platform = "windows"
-}
-platform_defines = []
-foreach(item, ace_platforms) {
-  if (platform == item.name) {
-    if (defined(item.config)) {
-      platform_config = item.config
-      if (defined(platform_config.defines)) {
-        platform_defines = platform_config.defines
-      }
-    }
-  }
-}
 
 ace_devices = [
   "phone",
@@ -63,223 +26,132 @@ ace_devices = [
 ]
 foreach(device, ace_devices) {
   ohos_executable("ace_${device}_test") {
-    defines = platform_defines
-    defines += [ "USE_GLFW_WINDOW" ]
-    configs = [ ":ace_pc_preview_config" ]
     ohos_test = true
     test_output_dir = "$root_out_dir/common/samples"
+    defines = [ "USE_GLFW_WINDOW" ]
+    cflags_cc = []
+    include_dirs = [
+      "$ace_root",
+      "$ace_root/frameworks",
+      "$flutter_root/engine",
+      "$flutter_root/engine/flutter/shell/platform/common/cpp/public",
+      "$flutter_root/engine/ace_adapter/flutter/shell/platform/glfw/public",
+      "$flutter_root/skia",
+      "$flutter_root/glfw/include",
+    ]
+    deps = [ ":copy_preview_shared_library" ]
     sources = [
       "ace_${device}_test.cpp",
       "key_input_handler.cpp",
       "touch_event_handler_flutter.cpp",
     ]
-    deps = [
-      ":copy_napi_modules_shared_library",
-      ":copy_preview_shared_library",
-      "$ace_napi:ace_napi",
-    ]
-    include_dirs = [ "//third_party/flutter/glfw/include" ]
-    if (defined(platform_config.enable_rosen_backend) &&
-        platform_config.enable_rosen_backend) {
+    config = {
+    }
+    if (defined(current_platform.config)) {
+      config = current_platform.config
+    }
+    if (defined(config.defines)) {
+      defines += config.defines
+    }
+    if (defined(config.cflags_cc)) {
+      cflags_cc += config.cflags_cc
+    }
+    if (defined(config.libace_target)) {
+      deps += [ config.libace_target ]
+    }
+
+    if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources -= [ "touch_event_handler_flutter.cpp" ]
       sources += [ "touch_event_handler_rs.cpp" ]
-      defines += [ "ENABLE_ROSEN_BACKEND" ]
       deps += [ "//foundation/graphic/graphic_2d/rosen/modules/glfw_render_context:libglfw_render_context" ]
     }
-    if (use_mac) {
-      defines += [ "MAC_PLATFORM" ]
-      deps += [ "$ace_root/adapter/preview/build:libace_engine_mac" ]
-    } else if (use_mingw_win) {
-      defines += [ "WINDOWS_PLATFORM" ]
-      deps += [ "$ace_root/adapter/preview/build:libace_engine_windows" ]
+    if (use_mingw_win) {
       libs = [ "pthread" ]
-    } else if (use_linux) {
-      defines += [ "LINUX_PLATFORM" ]
-      deps += [ "$ace_root/adapter/preview/build:libace_engine_linux" ]
     }
   }
-}
-
-# Avoid conditional judgment branches caused by dynamic library suffixes.
-if (use_mac) {
-  dylib_suffix = ".dylib"
-} else if (use_mingw_win) {
-  dylib_suffix = ".dll"
-} else if (use_linux) {
-  dylib_suffix = ".so"
 }
 
 if (is_standard_system) {
   # All dynamic libraries to be copied to the path "/previewer/common/bin/module/",
   # which are called by the napi framework, can be added to this script.
-  ohos_copy("copy_napi_modules_shared_library") {
-    deps = []
-    sources = []
-    foreach(module, common_napi_libs) {
-      out_path = get_label_info("$ace_root/interfaces/napi/kits:${module}",
-                                "root_out_dir")
-      deps += [ "$ace_root/interfaces/napi/kits:${module}" ]
-      sources += [ "${out_path}/arkui/ace_engine/lib${module}${dylib_suffix}" ]
-    }
+  foreach(module, napi_modules) {
+    ohos_copy("copy_napi_${module.prefix}libs") {
+      deps = []
+      sources = []
+      foreach(shard_lib, module.shard_libs) {
+        subsystem_name = shard_lib.subsystem_name
+        part_name = shard_lib.part_name
+        deps += [ shard_lib.label ]
+        out_path = get_label_info(shard_lib.label, "root_out_dir")
+        lib_names = []
+        if (defined(shard_lib.lib_names)) {
+          lib_names += shard_lib.lib_names
+        } else {
+          cur_lib = get_label_info(shard_lib.label, "name")
+          lib_names += [ string_replace(cur_lib, "lib", "", 1) ]
+        }
+        foreach(lib_name, lib_names) {
+          sources += [ "${out_path}/${subsystem_name}/${part_name}/lib${lib_name}${dylib_suffix}" ]
+        }
+      }
 
-    # Set the output directory for all dynamic libraries.
-    outputs = [ root_out_dir + "/common/samples/module/{{source_file_part}}" ]
+      # Set the output directory for all dynamic libraries.
+      if (module.prefix == "") {
+        outputs =
+            [ "${root_out_dir}/common/samples/module/{{source_file_part}}" ]
+      } else {
+        outputs = [ "${root_out_dir}/common/samples/module/${module.prefix}/{{source_file_part}}" ]
+      }
+    }
   }
 
   # All dynamic libraries to be copied to the path "/previewer/common/bin/",
   # which are related to the previewer, can be added to this script.
   ohos_copy("copy_preview_shared_library") {
     deps = []
-    sources = []
-
-    # Add some resources
-    # Add ohos fonts
-    sources += [
-      "//base/global/system_resources/fonts",
-      "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
-    ]
-
-    # Add the dynamic library with the same name on the mac and windows system here.
-    # Add dynamic library "libcurl_shared"
-    curl_path = get_label_info("//third_party/curl:curl_shared", "root_out_dir")
-    deps += [ "//third_party/curl:curl_shared" ]
-    sources += [ curl_path + "/thirdparty/curl/libcurl_shared${dylib_suffix}" ]
-
-    # Add dynamic library "hilog"
-    if (use_mac) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac",
-              "root_out_dir")
-      deps +=
-          [ "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_mac" ]
-      sources +=
-          [ "${hilog_path}/hiviewdfx/hilog_native/libhilog_mac${dylib_suffix}" ]
-    } else if (use_mingw_win) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows",
-              "root_out_dir")
-      deps += [
-        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_windows",
-      ]
-      sources += [
-        "${hilog_path}/hiviewdfx/hilog_native/libhilog_windows${dylib_suffix}",
-      ]
-    } else if (use_linux) {
-      hilog_path = get_label_info(
-              "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
-              "root_out_dir")
-      deps += [
-        "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog_linux",
-      ]
-      sources += [
-        "${hilog_path}/hiviewdfx/hilog_native/libhilog_linux${dylib_suffix}",
-      ]
+    foreach(module, napi_modules) {
+      deps += [ ":copy_napi_${module.prefix}libs" ]
     }
 
-    # Add dynamic library "libsec_shared"
-    sec_path =
-        get_label_info("//third_party/bounds_checking_function:libsec_shared",
-                       "root_out_dir")
-    deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
-    sources +=
-        [ sec_path + "/thirdparty/bounds_checking_function/libsec_shared" +
-          dylib_suffix ]
-
-    # Add napi framework-related dynamic libraries
-    ace_napi_path =
-        get_label_info("//foundation/arkui/napi:ace_napi", "root_out_dir")
-    uv_path = get_label_info("//third_party/libuv:uv", "root_out_dir")
-    icu_path =
-        get_label_info("//third_party/icu/icu4c:shared_icuuc", "root_out_dir")
-    deps += [
-      "$ace_napi:ace_napi",
-      "//third_party/icu/icu4c:shared_icui18n",
-      "//third_party/icu/icu4c:shared_icuuc",
-      "//third_party/libuv:uv",
-    ]
-    sources += [
-      "$ace_napi_path/arkui/napi/libace_napi${dylib_suffix}",
-      "$icu_path/thirdparty/icu/libhmicui18n${dylib_suffix}",
-      "$icu_path/thirdparty/icu/libhmicuuc${dylib_suffix}",
-      "$uv_path/thirdparty/libuv/libuv${dylib_suffix}",
-    ]
-
-    # Add ark engine-related dynamic libraries
-    ark_js_path = get_label_info("//arkcompiler/ets_runtime:libark_jsruntime",
-                                 "root_out_dir")
-    deps += [
-      "$ace_napi:ace_napi_ark",
-      "//arkcompiler/ets_runtime:libark_jsruntime",
-    ]
-    sources += [
-      "$ace_napi_path/arkui/napi/libace_napi_ark${dylib_suffix}",
-      "$ark_js_path/arkcompiler/ets_runtime/libark_jsruntime${dylib_suffix}",
+    sources = [
+      "//base/global/system_resources/fonts",
+      "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
       "//third_party/icu/ohos_icu4j/data/icudt69l.dat",
     ]
 
-    # Add dynamic libraries with different names on mac and windows systems here.
-    if (use_mac) {
-      ace_engine_path =
-          get_label_info("$ace_root/adapter/preview/build::libace_engine_mac",
-                         "root_out_dir") + "/common/common/libace_engine_mac" +
-          dylib_suffix
-      resource_manager_path = get_label_info(
-                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
-                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_mac${dylib_suffix}"
-      deps += [
-        "$ace_root/adapter/preview/build:libace_engine_mac",
-        "//base/global/resource_management/frameworks/resmgr:global_resmgr_mac",
-      ]
-    } else if (use_mingw_win) {
-      ace_engine_path =
-          get_label_info(
-              "$ace_root/adapter/preview/build::libace_engine_windows",
-              "root_out_dir") + "/common/common/libace_engine_windows" +
-          dylib_suffix
-      resource_manager_path = get_label_info(
-                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
-                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_win${dylib_suffix}"
-      deps += [
-        "$ace_root/adapter/preview/build:libace_engine_windows",
-        "//base/global/resource_management/frameworks/resmgr:global_resmgr_win",
-      ]
-    } else if (use_linux) {
-      ace_engine_path =
-          get_label_info("$ace_root/adapter/preview/build::libace_engine_linux",
-                         "root_out_dir") +
-          "/common/common/libace_engine_linux" + dylib_suffix
-      resource_manager_path = get_label_info(
-                                  "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
-                                  "root_out_dir") + "/global/resource_management/libglobal_resmgr_linux${dylib_suffix}"
-      deps += [
-        "$ace_root/adapter/preview/build:libace_engine_linux",
-        "//base/global/resource_management/frameworks/resmgr:global_resmgr_linux",
-      ]
+    foreach(item, common_bin) {
+      subsystem_name = item.subsystem_name
+      part_name = item.part_name
+      deps += [ item.label ]
+      out_path = get_label_info(item.label, "root_out_dir")
+      lib_names = []
+      if (defined(item.lib_names)) {
+        lib_names += item.lib_names
+      } else {
+        lib_names +=
+            [ string_replace(get_label_info(item.label, "name"), "lib", "", 1) ]
+      }
+      foreach(lib_name, lib_names) {
+        sources += [ "${out_path}/${subsystem_name}/${part_name}/lib${lib_name}${dylib_suffix}" ]
+      }
     }
-    sources += [
-      ace_engine_path,
-      resource_manager_path,
-    ]
 
-    # Set the output directory for all dynamic libraries.
-    outputs = [ root_out_dir + "/common/samples/{{source_file_part}}" ]
+    outputs = [ "${root_out_dir}/common/samples/{{source_file_part}}" ]
   }
 } else {
   ohos_copy("copy_resource_dynamic_library") {
     if (use_mac) {
       sources = [
-        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libhmicuuc" +
-            dylib_suffix,
+        "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libhmicuuc${dylib_suffix}",
         "//prebuilts/ace-toolkit/preview/rich/lib/mac/tv/libresourcemanager_mac${dylib_suffix}",
       ]
     } else {
       sources = [
-        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libhmicuuc" +
-            dylib_suffix,
+        "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libhmicuuc${dylib_suffix}",
         "//prebuilts/ace-toolkit/preview/rich/lib/windows/tv/libresourcemanager_win${dylib_suffix}",
       ]
     }
-    outputs = [ root_out_dir + "/common/samples/{{source_file_part}}" ]
+    outputs = [ "${root_out_dir}/common/samples/{{source_file_part}}" ]
   }
 }
 

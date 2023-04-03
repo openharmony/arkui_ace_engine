@@ -31,7 +31,35 @@ web_components_support = false
 preview_support = true
 model_component_support = false
 window_scene_support = false
-defines = []
+build_for_preview = true
+
+# js engine common configs
+js_pa_support = false
+use_build_in_js_engine = true
+
+ark_engine = {
+  engine_name = "ark"
+  engine_path = "jsi"
+  engine_defines = [ "USE_ARK_ENGINE" ]
+}
+js_engines = [ ark_engine ]
+
+platform_deps = [
+  "//foundation/arkui/ace_engine/adapter/preview/entrance:preview_entrance_source",
+  "//foundation/arkui/ace_engine/adapter/preview/external:preview_external_source",
+  "//foundation/arkui/ace_engine/adapter/preview/inspector:preview_inspector_source",
+  "//foundation/arkui/ace_engine/adapter/preview/osal:preview_osal_source",
+]
+
+cflags_cc = [
+  "-std=c++17",
+  "-Wno-thread-safety-attributes",
+  "-Wno-thread-safety-analysis",
+  "-Wno-ignored-attributes",
+  "-Wno-unknown-pragmas",
+]
+
+defines = [ "UNICODE" ]
 
 if (defined(web_components_support) && web_components_support) {
   defines += [ "WEB_SUPPORTED" ]

@@ -20,6 +20,8 @@ template("libace_engine") {
 
   ohos_shared_library(target_name) {
     deps = [ "$ace_root/build:libace_static_$platform" ]
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
   }
 }
 
