@@ -87,7 +87,6 @@ void PluginSubContainer::Initialize()
     RefPtr<Framework::JsEngine> jsEngine;
     if (container->GetSettings().usingSharedRuntime) {
         jsEngine = loader->CreateJsEngineUsingSharedRuntime(instanceId_, container->GetSharedRuntime());
-        LOGI("Create engine using runtime, engine %{public}p", RawPtr(jsEngine));
     } else {
         jsEngine = loader->CreateJsEngine(instanceId_);
     }

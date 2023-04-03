@@ -85,8 +85,6 @@ bool ReplaceFrameNode(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& ne
 
 void SharedOverlayManager::StartSharedTransition(const RefPtr<FrameNode>& pageSrc, const RefPtr<FrameNode>& pageDest)
 {
-    LOGD("start shared transition: src:%{public}p, dest:%{public}p", AceType::RawPtr(pageSrc),
-        AceType::RawPtr(pageDest));
     CHECK_NULL_VOID(pageSrc);
     CHECK_NULL_VOID(pageDest);
     auto patternSrc = pageSrc->GetPattern<PagePattern>();
