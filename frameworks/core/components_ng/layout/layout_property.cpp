@@ -19,6 +19,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/property/calc_length.h"
@@ -463,16 +464,28 @@ RefPtr<FrameNode> LayoutProperty::GetHost() const
     return host_.Upgrade();
 }
 
-void LayoutProperty::OnVisibilityUpdate(VisibleType visible) const
+void LayoutProperty::OnVisibilityUpdate(VisibleType visible)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    // store the previous visibility value.
+    auto preVisible = host->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE);
+    
+    // update visibility value.
+    propVisibility_ = visible;
     host->OnVisibleChange(visible == VisibleType::VISIBLE);
+
     auto parent = host->GetAncestorNodeOfFrame();
-    if (parent) {
+    CHECK_NULL_VOID(parent);
+    // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
+    if (preVisible != VisibleType::GONE && visible != VisibleType::GONE) {
         parent->MarkNeedSyncRenderTree();
-        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        parent->RebuildRenderContextTree();
+        return;
     }
+    UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    parent->MarkNeedSyncRenderTree();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 } // namespace OHOS::Ace::NG
