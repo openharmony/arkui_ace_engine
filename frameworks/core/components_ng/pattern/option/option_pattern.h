@@ -154,6 +154,11 @@ public:
 
 private:
     void OnModifyDone() override;
+    // make render after measure and layout
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        return !(config.skipMeasure && config.skipLayout);
+    }
 
     // register option's callback
     void RegisterOnClick();
