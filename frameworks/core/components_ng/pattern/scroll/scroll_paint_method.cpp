@@ -50,7 +50,7 @@ void ScrollPaintMethod::PaintScrollBar(RSCanvas& canvas, PaintWrapper* paintWrap
 void ScrollPaintMethod::PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const
 {
     auto scrollEdgeEffect = edgeEffect_.Upgrade();
-    CHECK_NULL_VOID(scrollEdgeEffect);
+    CHECK_NULL_VOID_NOLOG(scrollEdgeEffect);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     scrollEdgeEffect->Paint(canvas, frameSize, { 0.0f, 0.0f });
 }

@@ -187,7 +187,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         if (newValue == undefined) {
-            stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            stateMgmtConsole.debug(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
@@ -2162,7 +2162,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
                 }
             }
             else {
-                stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -4124,10 +4124,9 @@ class ViewPU extends NativeViewPartialUpdate {
         // do not process an Element that has been marked to be deleted
         const updateFunc = this.updateFuncByElmtId.get(elmtId);
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
-            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+            stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
         }
         else {
-            
             updateFunc(elmtId, /* isFirstRender */ false);
             // continue in native JSView
             // Finish the Update in JSView::JsFinishUpdateFunc

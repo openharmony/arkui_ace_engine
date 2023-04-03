@@ -2210,7 +2210,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     // Refresh the screen when developers customize the resolution and screen density on the PC preview.
 #if !defined(PREVIEW)
     if (width_ == width && height_ == height && isSurfaceReady_ && !isDensityUpdate_) {
-        LOGI("Surface size is same, no need update");
+        LOGD("Surface size is same, no need update");
         return;
     }
 #endif
@@ -2282,11 +2282,11 @@ void PipelineContext::OnSurfaceDensityChanged(double density)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnSurfaceDensityChanged(%lf)", density);
-    LOGI("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
+    LOGD("density_(%{public}lf) dipScale_(%{public}lf)", density_, dipScale_);
     isDensityUpdate_ = density != density_;
     density_ = density;
     if (!NearZero(viewScale_)) {
-        LOGI("OnSurfaceDensityChanged viewScale_(%{public}lf)", viewScale_);
+        LOGD("viewScale_(%{public}lf)", viewScale_);
         dipScale_ = density_ / viewScale_;
     }
 }
