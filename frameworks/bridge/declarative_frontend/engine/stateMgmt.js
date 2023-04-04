@@ -187,7 +187,7 @@ class LocalStorage extends NativeLocalStorage {
      */
     setOrCreate(propName, newValue) {
         if (newValue == undefined) {
-            stateMgmtConsole.warn(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
+            stateMgmtConsole.debug(`${this.constructor.name}: setOrCreate('${propName}') with newValue == undefined not allowed.`);
             return false;
         }
         var p = this.storage_.get(propName);
@@ -379,7 +379,7 @@ class LocalStorage extends NativeLocalStorage {
             p.aboutToBeDeleted();
         }
         this.storage_.clear();
-        
+
         return true;
     }
     /**
@@ -1514,6 +1514,14 @@ class stateMgmtConsole {
         aceConsole.error(...args);
     }
 }
+class stateMgmtTrace {
+    static scopedTrace(codeBlock, arg1, ...args) {
+        aceTrace.begin(arg1, ...args);
+        let result = codeBlock();
+        aceTrace.end();
+        return result;
+    }
+}
 /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1949,7 +1957,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
                 }
             }
             else {
-                stateMgmtConsole.warn(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
+                stateMgmtConsole.debug(`ObservedPropertyAbstract[${this.id__()}, '${this.info() || "unknown"}']: notifyHasChanged: unknown subscriber ID '${subscribedId}' error!`);
             }
         });
     }
@@ -3696,7 +3704,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // do not process an Element that has been marked to be deleted
         const updateFunc = this.updateFuncByElmtId.get(elmtId);
         if ((updateFunc == undefined) || (typeof updateFunc !== "function")) {
-            stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
+            stateMgmtConsole.debug(`${this.constructor.name}[${this.id__()}]: update function of ElementId ${elmtId} not found, internal error!`);
         }
         else {
             updateFunc(elmtId, /* isFirstRender */ false);
@@ -3768,25 +3776,27 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     // implements IMultiPropertiesChangeSubscriber
     viewPropertyHasChanged(varName, dependentElmtIds) {
-        
-        this.syncInstanceId();
-        if (dependentElmtIds.size && !this.isFirstRender()) {
-            if (!this.dirtDescendantElementIds_.size) {
-                // mark Composedelement dirty when first elmtIds are added
-                // do not need to do this every time
-                this.markNeedUpdate();
+        stateMgmtTrace.scopedTrace(() => {
+            
+            this.syncInstanceId();
+            if (dependentElmtIds.size && !this.isFirstRender()) {
+                if (!this.dirtDescendantElementIds_.size) {
+                    // mark Composedelement dirty when first elmtIds are added
+                    // do not need to do this every time
+                    this.markNeedUpdate();
+                }
+                
+                const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
+                this.dirtDescendantElementIds_ = union;
+                
             }
-            
-            const union = new Set([...this.dirtDescendantElementIds_, ...dependentElmtIds]);
-            this.dirtDescendantElementIds_ = union;
-            
-        }
-        let cb = this.watchedProps.get(varName);
-        if (cb) {
-            
-            cb.call(this, varName);
-        }
-        this.restoreInstanceId();
+            let cb = this.watchedProps.get(varName);
+            if (cb) {
+                
+                cb.call(this, varName);
+            }
+            this.restoreInstanceId();
+        }, "ViewPU.viewPropertyHasChanged", this.constructor.name, varName, dependentElmtIds.size);
     }
     /**
      * Function to be called from the constructor of the sub component
