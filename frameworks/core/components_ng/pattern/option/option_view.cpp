@@ -74,6 +74,8 @@ RefPtr<FrameNode> CreateText(const std::string& value, const RefPtr<FrameNode>& 
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
 
+    textProperty->UpdateMaxLines(1);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textProperty->UpdateFontSize(theme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(theme->GetMenuFontColor());
@@ -132,7 +134,7 @@ RefPtr<FrameNode> OptionView::CreateSelectOption(const std::string& value, const
         margin.right = CalcLength(theme->GetIconContentPadding());
         props->UpdateMargin(margin);
 
-        iconNode->MountToParent(row);
+        iconNode->MountToParent(row, 0);
         iconNode->MarkModifyDone();
     }
 

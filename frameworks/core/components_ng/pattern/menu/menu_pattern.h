@@ -165,6 +165,8 @@ private:
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event) const;
 
+    void DisableTabInMenu();
+
     RefPtr<FrameNode> GetMenuWrapper() const;
 
     RefPtr<ClickEvent> onClick_;

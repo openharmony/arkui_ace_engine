@@ -125,6 +125,10 @@ void MenuItemPattern::ShowSubMenu()
         menuProps->UpdateMenuOffset(offset);
         menuWrapper->MarkDirtyNode();
         RegisterWrapperMouseEvent();
+
+        auto focusHub = subMenu->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocus();
     }
 }
 

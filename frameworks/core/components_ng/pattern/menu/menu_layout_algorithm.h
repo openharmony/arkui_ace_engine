@@ -16,8 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_MENU_LAYOUT_ALGORITHM_H
 
+#include <list>
+
 #include "base/geometry/ng/offset_t.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/layout/layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 class MenuLayoutAlgorithm : public BoxLayoutAlgorithm {
@@ -43,7 +47,7 @@ private:
     void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
-    void UpdateOptionConstraint(std::vector<RefPtr<FrameNode>>& options, float width);
+    void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
     void UpdateConstraintBaseOnMenuItems(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
 
     void LayoutSubMenu(LayoutWrapper* layoutWrapper);
@@ -51,6 +55,9 @@ private:
     float HorizontalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize);
 
     float GetChildrenMaxWidth(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
+
+    // get option LayoutWrapper for measure get max width
+    std::list<RefPtr<LayoutWrapper>> GetOptionsLayoutWrappper(LayoutWrapper* layoutWrapper);
 
     SizeF wrapperSize_;
 
@@ -62,6 +69,7 @@ private:
     float rightSpace_ = 0.0f;
 
     float margin_ = 0.0f;
+    float optionPadding_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuLayoutAlgorithm);
 };

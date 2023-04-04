@@ -73,6 +73,8 @@ void MenuItemView::AddContent(
     contentProperty->UpdateFontWeight(FontWeight::REGULAR);
     contentProperty->UpdateTextColor(theme->GetMenuFontColor());
     contentProperty->UpdateContent(content);
+    contentProperty->UpdateMaxLines(1);
+    contentProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
 
     contentNode->MountToParent(row);
     contentNode->MarkModifyDone();
@@ -101,6 +103,8 @@ void MenuItemView::AddLabelInfo(
         labelProperty->UpdateTextColor(theme->GetSecondaryFontColor());
         labelProperty->UpdateFontWeight(FontWeight::REGULAR);
         labelProperty->UpdateContent(labelStr);
+        labelProperty->UpdateMaxLines(1);
+        labelProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
 
         labelNode->MountToParent(row);
         labelNode->MarkModifyDone();
@@ -117,7 +121,7 @@ void MenuItemView::Create(const MenuItemProperties& menuItemProps)
 {
     LOGI("MenuItemView::Create");
     auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    int32_t nodeId = stack->ClaimNodeId();
     auto menuItem = FrameNode::GetOrCreateFrameNode(
         V2::MENU_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MenuItemPattern>(); });
     CHECK_NULL_VOID(menuItem);
