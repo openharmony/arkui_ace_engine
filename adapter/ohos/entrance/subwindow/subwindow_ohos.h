@@ -72,6 +72,7 @@ public:
         const std::set<std::string>& callbacks) override;
     void ShowActionMenu(const std::string& title,
         const std::vector<ButtonInfo>& button, std::function<void(int32_t, int32_t)>&& callback) override;
+    void CloseDialog(int32_t instanceId) override;
     int32_t GetChildContainerId() const
     {
         return childContainerId_;
@@ -103,6 +104,18 @@ private:
         int32_t& width, int32_t& height, int32_t& posX, int32_t& posY, float& density) const;
     bool InitToastDialogWindow(int32_t width, int32_t height, int32_t posX, int32_t posY, bool isToast = false);
     bool InitToastDialogView(int32_t width, int32_t height, float density);
+    void ShowToastForAbility(const std::string& message, int32_t duration, const std::string& bottom);
+    void ShowToastForService(const std::string& message, int32_t duration, const std::string& bottom);
+    void ShowDialogForAbility(const std::string& title, const std::string& message,
+        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+        const std::set<std::string>& callbacks);
+    void ShowDialogForService(const std::string& title, const std::string& message,
+        const std::vector<ButtonInfo>& buttons, bool autoCancel, std::function<void(int32_t, int32_t)>&& callback,
+        const std::set<std::string>& callbacks);
+    void ShowActionMenuForAbility(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
+    void ShowActionMenuForService(const std::string& title, const std::vector<ButtonInfo>& button,
+        std::function<void(int32_t, int32_t)>&& callback);
 
     static int32_t id_;
     int32_t windowId_ = 0;

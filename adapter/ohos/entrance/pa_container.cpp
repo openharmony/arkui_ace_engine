@@ -25,6 +25,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
@@ -231,6 +232,7 @@ AppExecFwk::FormProviderData PaContainer::GetFormData(int32_t instanceId)
 void PaContainer::DestroyContainer(int32_t instanceId)
 {
     LOGI("DestroyContainer with id %{private}d", instanceId);
+    SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     auto aceContainer = AceType::DynamicCast<PaContainer>(container);
