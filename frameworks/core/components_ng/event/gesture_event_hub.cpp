@@ -338,10 +338,22 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
-
-    if (!eventHub->HasOnDragStart()) {
-        LOGE("HandleOnDragStart: there is no onDragStart function.");
-        return;
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsDraggable()) {
+        if (!eventHub->HasOnDragStart()) {
+            LOGE("Default support for drag and drop, but there is no onDragStart function.");
+            return;
+        }
+    } else {
+        if (frameNode->IsUserSet()) {
+            LOGE("User settings cannot be dragged");
+            return;
+        }
+        if (!eventHub->HasOnDragStart()) {
+            LOGE("The default does not support drag and drop, and there is no onDragStart function.");
+            return;
+        }
     }
 
     auto pipeline = PipelineContext::GetCurrentContext();
