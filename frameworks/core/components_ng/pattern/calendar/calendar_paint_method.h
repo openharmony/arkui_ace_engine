@@ -64,22 +64,28 @@ private:
     std::vector<CalendarDay> calendarDays_;
     CalendarMonth currentMonth_;
     TextDirection textDirection_ = TextDirection::LTR;
-    double dayWidth_ = 0.0;
-    double dayHeight_ = 0.0;
-    double weekHeight_ = 0.0;
-    double colSpace_ = 0.0;
-    double dailyFiveRowSpace_ = 0.0;
     bool showHoliday_ = true;
     bool showLunar_ = false;
     uint32_t startOfWeek_ = 64;
-    double weekFontSize_ = 0.0;
+
+    // Default it exists 5 weeks in a month.
+    int32_t rowCount_ = 5;
+
+    // Day style
+    double dayWidth_ = 0.0;
+    double dayHeight_ = 0.0;
     double dayFontSize_ = 0.0;
+
+    // Week style
+    double weekWidth_ = 0.0;
+    double weekHeight_ = 0.0;
+    double weekFontSize_ = 0.0;
+
     double lunarDayFontSize_ = 0.0;
     double workDayMarkSize_ = 0.0;
     double offDayMarkSize_ = 0.0;
     double focusedAreaRadius_ = 0.0;
     double topPadding_ = 0.0;
-    double weekWidth_ = 0.0;
     double weekAndDayRowSpace_ = 0.0;
     double gregorianCalendarHeight_ = 0.0;
     double workStateWidth_ = 0.0;
@@ -87,6 +93,14 @@ private:
     double workStateVerticalMovingDistance_ = 0.0;
     double touchCircleStrokeWidth_ = 0.0;
     double lunarHeight_ = 0.0;
+
+    // Space for days of calendar, when the days cross 5 weeks, it needs 6 rows.
+    // So use dailyFiveRowSpace_ for 5 rows and dailySixRowSpace_ for 6 rows.
+    // The column is always 7 from Monday to Sunday. So just set colSpace_.
+    double colSpace_ = 0.0;
+    double dailyFiveRowSpace_ = 0.0;
+    double dailySixRowSpace_ = 0.0;
+
     RSColor weekColor_;
     RSColor dayColor_;
     RSColor lunarColor_;
@@ -107,7 +121,6 @@ private:
     FontWeight dayFontWeight_ = FontWeight::W500;
     FontWeight lunarDayFontWeight_ = FontWeight::W500;
     FontWeight workStateFontWeight_ = FontWeight::W400;
-    int32_t rowCount_ = 5;
     SizeF frameSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPaintMethod);
