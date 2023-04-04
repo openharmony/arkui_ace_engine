@@ -687,6 +687,7 @@ void AceContainer::CreateContainer(int32_t instanceId, FrontendType type, bool i
 
 void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void()>& destroyCallback)
 {
+    SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     HdcRegister::Get().StopHdcRegister(instanceId);

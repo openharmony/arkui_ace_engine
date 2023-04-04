@@ -66,6 +66,7 @@ public:
         const std::set<std::string>& callbacks) = 0;
     virtual void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback) = 0;
+    virtual void CloseDialog(int32_t instanceId) = 0;
 
 private:
     int32_t subwindowId_ = 0;
