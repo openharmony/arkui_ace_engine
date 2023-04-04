@@ -16,7 +16,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 
 #include "base/log/ace_trace.h"
-#include "base/log/log_wrapper.h"
 #include "core/common/container.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
@@ -45,15 +44,6 @@ StackModel* StackModel::GetInstance()
 } // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 
-#define SET_ALIGNMENT(info, name)                        \
-    do {                                                 \
-        Alignment alignment = Alignment::TOP_LEFT;       \
-        if (!GetAlignment(info, alignment)) {            \
-            break;                                       \
-        }                                                \
-        StackModel::GetInstance()->Set##name(alignment); \
-    } while (false)
-
 const static std::array<Alignment, 9> ALIGNMENT_ARR { Alignment::TOP_LEFT, Alignment::TOP_CENTER, Alignment::TOP_RIGHT,
     Alignment::CENTER_LEFT, Alignment::CENTER, Alignment::CENTER_RIGHT, Alignment::BOTTOM_LEFT,
     Alignment::BOTTOM_CENTER, Alignment::BOTTOM_RIGHT };
@@ -76,13 +66,9 @@ void JSStack::SetOverflow(int value)
     }
 }
 
-bool GetAlignment(const JSCallbackInfo& info, Alignment& alignment)
+void JSStack::SetAlignment(int value)
 {
-    if (info.Length() != 1 || !info[0]->IsNumber()) {
-        return false;
-    }
-    auto value = info[0]->ToNumber<size_t>();
-    alignment = Alignment::TOP_LEFT;
+    Alignment alignment = Alignment::TOP_LEFT;
 
     switch (value) {
         case 0:
@@ -114,19 +100,10 @@ bool GetAlignment(const JSCallbackInfo& info, Alignment& alignment)
             break;
         default:
             LOGE("Invalid value for alignment");
-            return false;
+            return;
     }
-    return true;
-}
 
-void JSStack::SetAlignment(const JSCallbackInfo& info)
-{
-    SET_ALIGNMENT(info, Alignment);
-}
-
-void JSStack::SetAlignmentContent(const JSCallbackInfo& info)
-{
-    SET_ALIGNMENT(info, AlignmentContent);
+    StackModel::GetInstance()->SetAlignment(alignment);
 }
 
 void JSStack::SetWidth(const JSCallbackInfo& info)
@@ -187,19 +164,9 @@ void JSStack::Create(const JSCallbackInfo& info)
         JSRef<JSVal> stackAlign = obj->GetProperty("alignContent");
         if (stackAlign->IsNumber()) {
             int32_t value = stackAlign->ToNumber<int32_t>();
-            if (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size())) {
-                alignment = ALIGNMENT_ARR[value];
-            } else {
-                StackModel::GetInstance()->Create();
-                return;
-            }
-        } else {
-            StackModel::GetInstance()->Create();
-            return;
+            alignment = (value >= 0 && value < static_cast<int>(ALIGNMENT_ARR.size())) ? ALIGNMENT_ARR[value]
+                                                                                       : Alignment::CENTER;
         }
-    } else {
-        StackModel::GetInstance()->Create();
-        return;
     }
 
     StackModel::GetInstance()->Create(alignment);
@@ -213,8 +180,7 @@ void JSStack::JSBind(BindingTarget globalObj)
     JSClass<JSStack>::StaticMethod("create", &JSStack::Create, opt);
     JSClass<JSStack>::StaticMethod("stackFit", &JSStack::SetStackFit, opt);
     JSClass<JSStack>::StaticMethod("overflow", &JSStack::SetOverflow, opt);
-    JSClass<JSStack>::StaticMethod("align", &JSStack::SetAlignment, opt);
-    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignmentContent, opt);
+    JSClass<JSStack>::StaticMethod("alignContent", &JSStack::SetAlignment, opt);
     JSClass<JSStack>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSStack>::StaticMethod("width", SetWidth);
     JSClass<JSStack>::StaticMethod("height", SetHeight);
