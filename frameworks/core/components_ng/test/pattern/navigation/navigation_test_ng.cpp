@@ -43,12 +43,18 @@ namespace {
 constexpr int32_t TEST_DATA = 10;
 const std::string NAVIGATION_TITLE = "NavigationTestNg";
 const std::string TEST_TAG = "test";
+constexpr Dimension SPLIT_WIDTH = 520.0_vp;
+constexpr Dimension STACK_WIDTH = 510.0_vp;
+constexpr float HEIGHT = 1000.0f;
+constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
+constexpr float DEFAULT_ROOT_WIDTH = 480.f;
 } // namespace
 
 class NavigationTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static void RunMeasureAndLayout(RefPtr<LayoutWrapper>& layoutWrapper, float width = DEFAULT_ROOT_WIDTH);
 };
 
 void NavigationTestNg::SetUpTestSuite()
@@ -59,6 +65,20 @@ void NavigationTestNg::SetUpTestSuite()
 void NavigationTestNg::TearDownTestSuite()
 {
     MockPipelineBase::TearDown();
+}
+
+void NavigationTestNg::RunMeasureAndLayout(RefPtr<LayoutWrapper>& layoutWrapper, float width)
+{
+    layoutWrapper->SetActive();
+    layoutWrapper->SetRootMeasureNode();
+    LayoutConstraintF LayoutConstraint;
+    LayoutConstraint.parentIdealSize = { width, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.percentReference = { width, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.selfIdealSize = { width, DEFAULT_ROOT_HEIGHT };
+    LayoutConstraint.maxSize = { width, DEFAULT_ROOT_HEIGHT };
+    layoutWrapper->Measure(LayoutConstraint);
+    layoutWrapper->Layout();
+    layoutWrapper->MountToHostOnMainThread();
 }
 
 struct TestProperty {
@@ -351,5 +371,335 @@ HWTEST_F(NavigationTestNg, NavigationViewTest003, TestSize.Level1)
     EXPECT_NE(navBarLayoutProperty, nullptr);
     navigationView.SetHideToolBar(false);
     EXPECT_EQ(navBarLayoutProperty->GetHideToolBar().value_or(false), false);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_006
+ * @tc.desc: Test Navigation DoAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_006, TestSize.Level1)
+{
+    NavigationView::Create();
+    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(static_cast<float>(STACK_WIDTH.ConvertToPx()), HEIGHT));
+    geometryNode->SetContentOffset(OffsetF(0, 0));
+
+    // init SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+
+    // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
+    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper1, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    pattern->OnModifyDone();
+    auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper2, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:STACK in SPLIT_WIDTH case after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
+    pattern->OnModifyDone();
+    auto layoutWrapper3 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper3, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper3);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:SPILT in SPLIT_WIDTH case after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
+    pattern->OnModifyDone();
+    auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper4, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_007
+ * @tc.desc: Test Navigation DoAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_007, TestSize.Level1)
+{
+    NavigationView::Create();
+    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(static_cast<float>(STACK_WIDTH.ConvertToPx()), HEIGHT));
+    geometryNode->SetContentOffset(OffsetF(0, 0));
+
+    // init SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
+    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    pattern->OnModifyDone();
+    auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper1, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+
+    // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper2, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:STACK in SPLIT_WIDTH case after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
+    pattern->OnModifyDone();
+    auto layoutWrapper3 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper3, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper3);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:SPILT in SPLIT_WIDTH case after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
+    pattern->OnModifyDone();
+    auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper4, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_008
+ * @tc.desc: Test Navigation DoAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_008, TestSize.Level1)
+{
+    NavigationView::Create();
+    NavigationView::SetUsrNavigationMode(NavigationMode::AUTO);
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(static_cast<float>(STACK_WIDTH.ConvertToPx()), HEIGHT));
+    geometryNode->SetContentOffset(OffsetF(0, 0));
+
+    // init SetUsrNavigationMode:AUTO, expect navigationMode_:STACK after OnModifyDone
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
+    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    pattern->OnModifyDone();
+    auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper1, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+
+    // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper2, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:STACK in SPLIT_WIDTH case after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
+    pattern->OnModifyDone();
+    auto layoutWrapper3 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper3, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper3);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:SPILT in SPLIT_WIDTH case after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
+    pattern->OnModifyDone();
+    auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper4, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+}
+
+/**
+ * @tc.name: NavigationPatternTest_009
+ * @tc.desc: Test Navigation DoAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationPatternTest_009, TestSize.Level1)
+{
+    NavigationView::Create();
+    NavigationView::SetUsrNavigationMode(NavigationMode::AUTO);
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(static_cast<float>(STACK_WIDTH.ConvertToPx()), HEIGHT));
+    geometryNode->SetContentOffset(OffsetF(0, 0));
+
+    // init SetUsrNavigationMode:AUTO, expect navigationMode_:STACK after OnModifyDone
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:STACK, expect navigationMode_:STACK after OnModifyDone
+    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    pattern->OnModifyDone();
+    auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper1, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    pattern->OnModifyDone();
+    auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper2, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:STACK in SPLIT_WIDTH case after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
+    pattern->OnModifyDone();
+    auto layoutWrapper3 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper3, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper3);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:AUTO, expect navigationMode_:SPILT in SPLIT_WIDTH case after OnModifyDone
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::AUTO);
+    pattern->OnModifyDone();
+    auto layoutWrapper4 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper4, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper4, static_cast<float>(SPLIT_WIDTH.ConvertToPx()));
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+}
+
+/**
+ * @tc.name: NavigationLayoutTest_001
+ * @tc.desc: Test Navigation Measure and Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationLayoutTest_001, TestSize.Level1)
+{
+    NavigationView::Create();
+    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    NavigationView::SetNavBarPosition(NavBarPosition::START);
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    SizeF value(static_cast<float>(SPLIT_WIDTH.ConvertToPx()), HEIGHT);
+    navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
+    navigationLayoutProperty->UpdateContentConstraint();
+
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+
+    // SetUsrNavigationMode:STACK, expect navigationMode_:STACK
+    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper1, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::SPLIT);
+    auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper2, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+}
+
+/**
+ * @tc.name: NavigationLayoutTest_002
+ * @tc.desc: Test Navigation Measure and Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationTestNg, NavigationLayoutTest_002, TestSize.Level1)
+{
+    NavigationView::Create();
+    NavigationView::SetUsrNavigationMode(NavigationMode::STACK);
+    NavigationView::SetNavBarPosition(NavBarPosition::START);
+    RefPtr<FrameNode> frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<NavigationLayoutProperty> navigationLayoutProperty =
+        frameNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    SizeF value(static_cast<float>(SPLIT_WIDTH.ConvertToPx()), HEIGHT);
+    navigationLayoutProperty->UpdateMarginSelfIdealSize(value);
+    navigationLayoutProperty->UpdateContentConstraint();
+
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
+
+    // SetUsrNavigationMode:SPLIT, expect navigationMode_:SPLIT
+    NavigationView::SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto layoutWrapper1 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper1, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper1);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::SPLIT);
+
+    // SetUsrNavigationMode:STACK, expect navigationMode_:STACK
+    navigationLayoutProperty->UpdateUsrNavigationMode(NavigationMode::STACK);
+    auto layoutWrapper2 = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper2, nullptr);
+    NavigationTestNg::RunMeasureAndLayout(layoutWrapper2);
+    EXPECT_EQ(pattern->navigationMode_, NavigationMode::STACK);
 }
 } // namespace OHOS::Ace::NG
