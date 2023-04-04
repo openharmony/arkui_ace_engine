@@ -74,6 +74,7 @@ public:
     void DestroyDragWindow();
 #ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<DragDropProxy> CreateFrameworkDragDropProxy();
+    int32_t GetDragData(const std::string& udKey, std::shared_ptr<UDMF::UnifiedData>& unifiedData);
 #endif // ENABLE_DRAG_FRAMEWORK
 
     bool CheckDragDropProxy(int64_t id) const;

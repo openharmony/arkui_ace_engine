@@ -358,15 +358,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     RefPtr<PixelMap> pixelMap = AceType::MakeRefPtr<PixelMapOhos>(pixelMap_);
     std::string udKey;
     auto unifiedData = event->GetData();
-    if (unifiedData != nullptr) {
-        auto udmfClient = UDMF::UdmfClient::GetInstance();
-        UDMF::CustomOption udCustomOption;
-        udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
-        int32_t ret = udmfClient.SetData(udCustomOption, *unifiedData, udKey);
-        if (ret != 0) {
-            LOGE("HandleOnDragStart: UDMF Setdata failed:%{public}d", ret);
-        }
-    }
+    SetDragData(unifiedData, udKey);
 #endif // ENABLE_DRAG_FRAMEWORK
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -561,4 +553,22 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     click(info);
     return true;
 }
+
+#ifdef ENABLE_DRAG_FRAMEWORK
+int32_t GestureEventHub::SetDragData(std::shared_ptr<UDMF::UnifiedData>& unifiedData, std::string& udKey)
+{
+    if (unifiedData == nullptr) {
+        LOGE("HandleOnDragStart: SetDragData unifiedData is null");
+        return -1;
+    }
+    auto udmfClient = UDMF::UdmfClient::GetInstance();
+    UDMF::CustomOption udCustomOption;
+    udCustomOption.intention = UDMF::Intention::UD_INTENTION_DRAG;
+    int32_t ret = udmfClient.SetData(udCustomOption, *unifiedData, udKey);
+    if (ret != 0) {
+        LOGE("HandleOnDragStart: UDMF Setdata failed:%{public}d", ret);
+    }
+    return ret;
+}
+#endif
 } // namespace OHOS::Ace::NG
