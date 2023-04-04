@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_ENGINE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_ACE_ENGINE_H
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
@@ -57,7 +58,7 @@ private:
     mutable std::shared_mutex mutex_;
     std::unordered_map<int32_t, RefPtr<Container>> containerMap_;
     RefPtr<WatchDog> watchDog_;
-
+    static std::atomic<bool> isAlive_;
     ACE_DISALLOW_COPY_AND_MOVE(AceEngine);
 };
 
