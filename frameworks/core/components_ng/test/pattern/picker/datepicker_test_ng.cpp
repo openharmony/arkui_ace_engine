@@ -1164,4 +1164,72 @@ HWTEST_F(DatePickerTestNg, DatePickerPatternTest007, TestSize.Level1)
     propertyChangeFlag = pickerProperty->GetPropertyChangeFlag() | PROPERTY_UPDATE_RENDER;
     EXPECT_EQ(pickerProperty->GetPropertyChangeFlag(), propertyChangeFlag);
 }
+
+/**
+ * @tc.name: DatePickerAlgorithmTest001
+ * @tc.desc: Test Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest001, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto yearId = datePickerPattern->GetYearId();
+    auto yearColumnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, yearId);
+    LayoutWrapper layoutWrapper =
+        LayoutWrapper(yearColumnNode, yearColumnNode->GetGeometryNode(), pickerProperty);
+    RefPtr<LayoutWrapper> subLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+    RefPtr<LayoutWrapper> subTwoLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(nullptr, nullptr, nullptr);
+    EXPECT_NE(subTwoLayoutWrapper, nullptr);
+    layoutWrapper.AppendChild(std::move(subLayoutWrapper));
+    layoutWrapper.AppendChild(std::move(subTwoLayoutWrapper));
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 2);
+    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
+    datePickerColumnLayoutAlgorithm.Measure(&layoutWrapper);
+}
+
+/**
+ * @tc.name: DatePickerAlgorithmTest002
+ * @tc.desc: Test Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestNg, DatePickerAlgorithmTest002, TestSize.Level1)
+{
+    auto theme = MockPipelineBase::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModelNG::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto dataPickerLayoutProperty = AceType::MakeRefPtr<DataPickerLayoutProperty>();
+    ASSERT_NE(dataPickerLayoutProperty, nullptr);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto yearId = datePickerPattern->GetYearId();
+    auto yearColumnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, yearId);
+    ASSERT_NE(yearColumnNode, nullptr);
+    auto subNode = AceType::DynamicCast<FrameNode>(yearColumnNode->GetFirstChild());
+    ASSERT_NE(subNode, nullptr);
+
+    LayoutWrapper layoutWrapper =
+        LayoutWrapper(yearColumnNode, yearColumnNode->GetGeometryNode(), dataPickerLayoutProperty);
+    RefPtr<LayoutWrapper> subLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapper>(subNode, subNode->GetGeometryNode(), nullptr);
+    EXPECT_NE(subLayoutWrapper, nullptr);
+    layoutWrapper.AppendChild(std::move(subLayoutWrapper));
+    EXPECT_EQ(layoutWrapper.GetTotalChildCount(), 1);
+    DatePickerColumnLayoutAlgorithm datePickerColumnLayoutAlgorithm;
+    datePickerColumnLayoutAlgorithm.Layout(&layoutWrapper);
+}
 } // namespace OHOS::Ace::NG
